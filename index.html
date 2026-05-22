@@ -705,7 +705,17 @@ let PRICES={},PRICES_ASOF=null;
 function fmtMoney(v,cur){if(v==null)return '';if(cur==='KRW')return '₩'+Math.round(v).toLocaleString();if(cur==='JPY')return '¥'+Math.round(v).toLocaleString();if(cur==='TWD')return 'NT$'+(+v).toFixed(1);return '$'+(+v).toFixed(2);}
 function priceHTML(c){const q=PRICES[c.id];if(!q||q.price==null)return '';const ch=q.changePct;const col=ch==null?'var(--dim)':ch>=0?'var(--dawn)':'var(--hot)';const sg=ch==null?'':(' '+(ch>=0?'▲':'▼')+Math.abs(ch).toFixed(2)+'%');return `<span style="font-family:var(--mono);font-weight:600;white-space:nowrap;color:${col}">${fmtMoney(q.price,q.currency)}${sg}</span>`;}
 function pricePill(c){const h=priceHTML(c);return h?`<span class="pill">${h}</span>`:'';}
-function updatePxNote(){const el=document.getElementById('pxNote');if(el)el.textContent=PRICES_ASOF?('시세 '+PRICES_ASOF.slice(0,10)):'';}
+function updatePxNote(){
+  const el=document.getElementById('pxNote');if(!el)return;
+  if(!PRICES_ASOF){el.textContent='';return;}
+  const d=new Date(PRICES_ASOF);
+  const k=new Date(d.getTime()+9*3600000); // UTC → KST
+  const mm=String(k.getUTCMonth()+1).padStart(2,'0');
+  const dd=String(k.getUTCDate()).padStart(2,'0');
+  const hh=String(k.getUTCHours()).padStart(2,'0');
+  const mi=String(k.getUTCMinutes()).padStart(2,'0');
+  el.textContent=`시세 ${k.getUTCFullYear()}-${mm}-${dd} ${hh}:${mi} KST`;
+}
 async function loadPrices(){try{const r=await fetch('./prices.json',{cache:'no-store'});if(!r.ok)return;const p=await r.json();PRICES=p.quotes||{};PRICES_ASOF=p.asOf||null;renderAll();updatePxNote();}catch(e){}}
 
 /* ===== TABS ===== */
