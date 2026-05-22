@@ -710,13 +710,12 @@ const scoreCol=s=>s>=8?STAGE_HEX.초입:s>=5?STAGE_HEX.가속:s>=3?STAGE_HEX.성
 
 /* ===== PRICE DISPLAY ===== */
 let PRICES={},PRICES_ASOF=null;
-/* 정보(분석·콘텐츠) 최종 갱신 시점 — 분석 내용을 고칠 때 이 값을 함께 갱신 (KST) */
-const INFO_ASOF='2026-05-22T23:00+09:00';
 function fmtMoney(v,cur){if(v==null)return '';if(cur==='KRW')return '₩'+Math.round(v).toLocaleString();if(cur==='JPY')return '¥'+Math.round(v).toLocaleString();if(cur==='TWD')return 'NT$'+(+v).toFixed(1);return '$'+(+v).toFixed(2);}
 function priceHTML(c){const q=PRICES[c.id];if(!q||q.price==null)return '';const ch=q.changePct;const col=ch==null?'var(--dim)':ch>=0?'var(--dawn)':'var(--hot)';const sg=ch==null?'':(' '+(ch>=0?'▲':'▼')+Math.abs(ch).toFixed(2)+'%');return `<span style="font-family:var(--mono);font-weight:600;white-space:nowrap;color:${col}">${fmtMoney(q.price,q.currency)}${sg}</span>`;}
 function pricePill(c){const h=priceHTML(c);return h?`<span class="pill">${h}</span>`:'';}
 function fmtKST(iso){if(!iso)return '—';const d=new Date(iso);if(isNaN(d))return '—';const k=new Date(d.getTime()+9*3600000);const p=n=>String(n).padStart(2,'0');return `${k.getUTCFullYear()}-${p(k.getUTCMonth()+1)}-${p(k.getUTCDate())} ${p(k.getUTCHours())}:${p(k.getUTCMinutes())} KST`;}
-function updateAsof(){const pe=document.getElementById('pxAsof');if(pe)pe.textContent=fmtKST(PRICES_ASOF);const ie=document.getElementById('infoAsof');if(ie)ie.textContent=fmtKST(INFO_ASOF);}
+function infoAsof(){if(!SIGNAL_LOG||!SIGNAL_LOG.length)return null;let best=null,bestT=0;for(const e of SIGNAL_LOG){const t=new Date(e.at||e.date).getTime();if(t>bestT){bestT=t;best=e;}}return best?(best.at||best.date):null;}
+function updateAsof(){const pe=document.getElementById('pxAsof');if(pe)pe.textContent=fmtKST(PRICES_ASOF);const ie=document.getElementById('infoAsof');if(ie)ie.textContent=fmtKST(infoAsof());}
 async function loadPrices(){try{const r=await fetch('./prices.json',{cache:'no-store'});if(!r.ok)return;const p=await r.json();PRICES=p.quotes||{};PRICES_ASOF=p.asOf||null;renderAll();updateAsof();}catch(e){}}
 
 /* ===== TABS ===== */
@@ -726,7 +725,7 @@ document.getElementById('nav').addEventListener('click',e=>{const b=e.target.clo
 
 /* ===== SIGNAL LOG (실적 콜 등 신규 시그널 → value-chain 반영, 누적 가능) ===== */
 const SIGNAL_LOG=[
- {date:'2026-05-20', source:'NVIDIA Q1 FY27 실적·컨콜',
+ {date:'2026-05-20', at:'2026-05-20T22:00+09:00', source:'NVIDIA Q1 FY27 실적·컨콜',
   srcs:[
    {label:'NVIDIA IR(8-K)', url:'https://www.sec.gov/Archives/edgar/data/0001045810/000104581026000051/q1fy27pr.htm'},
    {label:'컨콜 전사', url:'https://www.fool.com/earnings/call-transcripts/2026/05/20/nvidia-nvda-q1-2027-earnings-transcript/'}
@@ -739,7 +738,7 @@ const SIGNAL_LOG=[
    {tag:'보안',layer:null,col:'#0ca678',html:'Vera Rubin = 업계 최초 <b>end-to-end Confidential Computing</b> 플랫폼. AI 보안이 하드웨어 스택에 내장 → 사용자 AI보안 트랙(현재 0% 보유)과 연결점.'},
    {tag:'L8·전력',layer:'L8',col:'#0ca678',html:'10MW+ 파트너 데이터센터 1년 새 <b>~2배</b> → 전력·발전(L7·L8) 수요 구조 확인. (단 ASIC/LPX는 Jensen이 "niche"로 평가 — 자기이해 감안.)'},
   ]},
- {date:'2026-05-22', source:'주가 현실 점검 — 단계(stage) 재평가',
+ {date:'2026-05-22', at:'2026-05-22T23:00+09:00', source:'주가 현실 점검 — 단계(stage) 재평가',
   srcs:[{label:'Google·Investing 시세'},{label:'KB·하나증권 리포트'}],
   items:[
    {tag:'과열 강등',layer:'L4',col:'#e03131',html:'<b>삼성전기·SanDisk·블룸에너지</b>는 1년 ~10x↑ 급등(목표가·밸류 극단·내부자 매도) → <b>초입에서 과열로</b> 강등. 이미 크게 오른 종목은 초입이 아님.'},
