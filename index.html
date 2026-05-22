@@ -272,6 +272,8 @@ table.tk th.c{text-align:center}
 .rcand-panel{background:linear-gradient(155deg,var(--panel),var(--ink2));border:1px solid var(--line);border-radius:18px;padding:20px 18px;margin-bottom:18px}
 .rcand-panel .ph{font-family:var(--serif);font-size:18px;font-weight:700}
 .rcand-panel .psub{font-family:var(--mono);font-size:13px;color:var(--faint);margin-bottom:14px}
+.rcand-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-bottom:12px}
+.rcand-row .rcand{margin-bottom:0}
 .rcand{display:grid;grid-template-columns:22px 1fr;gap:9px;padding:10px 11px;border:1px solid var(--line);border-left-width:3px;border-radius:11px;background:var(--panel);margin-bottom:8px;transition:.18s}
 .rcand:hover{border-color:var(--line2);transform:translateY(-1px)}
 .rcand .num{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--faint)}
@@ -311,6 +313,7 @@ table.tk th.c{text-align:center}
   <aside class="rcand-panel">
       <div class="ph">새로운 강물 후보</div>
       <div class="psub">마스터 1 + 독립 강물 5 · 서로 비종속(MECE)</div>
+      <div class="rcand-row">
       <div class="rcand active"><div class="num">1</div><div><div class="riv">학습<span class="ar">→</span>추론<span class="tier" style="background:rgba(70,230,168,.16);color:var(--dawn)">현재</span></div><div class="axis">워크로드 · A의 사슬 소유</div></div></div>
       <div class="rcand" style="border-left-color:#0ca678"><div class="num">2</div><div><div class="riv">데이터<span class="ar">→</span>RL·합성<span class="tier" style="background:rgba(12,166,120,.16);color:#0ca678">A</span></div><div class="axis">모델 연료 · 입력</div></div></div>
       <div class="rcand" style="border-left-color:var(--mature)"><div class="num">3</div><div><div class="riv">디지털<span class="ar">→</span>피지컬<span class="tier" style="background:rgba(184,134,11,.2);color:var(--mature)">C</span></div><div class="axis">적용 영역 · 출력</div></div></div>
@@ -318,6 +321,7 @@ table.tk th.c{text-align:center}
       <div class="rcand" style="border-left-color:var(--accel)"><div class="num">5</div><div><div class="riv">스케일<span class="ar">→</span>효율<span class="tier" style="background:rgba(28,126,214,.16);color:var(--accel)">B</span></div><div class="axis">지능 단가 · Jevons</div></div></div>
       <div class="rcand" style="border-left-color:var(--accel)"><div class="num">6</div><div><div class="riv">자유배포<span class="ar">→</span>거버넌스<span class="tier" style="background:rgba(28,126,214,.16);color:var(--accel)">B</span></div><div class="axis">규율·신뢰 · 수출통제</div></div></div>
       <div class="rcand" style="border-left-color:var(--faint);border-left-style:dashed;background:transparent;opacity:.78"><div class="num">△</div><div><div class="riv" style="color:var(--dim)">중앙<span class="ar" style="color:var(--faint)">→</span>엣지·분산<span class="tier" style="background:rgba(150,161,176,.14);color:var(--faint)">경계</span></div><div class="axis">부분 종속 · A 물량 연동</div></div></div>
+      </div>
       <div class="psub" style="margin:12px 0 0;line-height:1.6">A 비합의 · B 반비합의 · C 합의화 중 · △ 경계. 1~6은 서로 <b style="color:var(--dawn)">비종속(독립 forcing function)</b>.</div>
     </aside>
     <div class="thread-card">
