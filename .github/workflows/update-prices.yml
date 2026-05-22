@@ -1,0 +1,37 @@
+name: Update stock prices
+
+on:
+  schedule:
+    - cron: '0 22 * * *'   # daily 22:00 UTC (= 07:00 KST), after the US close
+  workflow_dispatch: {}      # allow manual run from the Actions tab
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-prices
+  cancel-in-progress: false
+
+jobs:
+  prices:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: claude/wizardly-rubin-SubA1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Fetch latest prices
+        run: node scripts/fetch-prices.mjs
+      - name: Commit prices.json if changed
+        run: |
+          if [ -n "$(git status --porcelain prices.json)" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add prices.json
+            git commit -m "chore: update stock prices"
+            git push origin HEAD:claude/wizardly-rubin-SubA1
+          else
+            echo "No price change."
+          fi

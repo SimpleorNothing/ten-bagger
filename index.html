@@ -9,10 +9,11 @@
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,500&family=JetBrains+Mono:wght@400;500;700;800&display=swap" rel="stylesheet">
 <style>
 :root{
-  --ink:#070b10; --ink2:#0c1219; --panel:#0f1721; --panel2:#131e2a;
-  --line:#1e2b39; --line2:#2a3c4e; --txt:#dfe9f2; --dim:#7d93a6; --faint:#4a5e70;
-  --dawn:#46e6a8; --accel:#3fa9ff; --mature:#f2b53b; --hot:#ff5d5d; --nascent:#9b7bff;
-  --glow:0 0 0 1px rgba(70,230,168,.4),0 0 22px -4px rgba(70,230,168,.55);
+  --ink:#ffffff; --ink2:#f4f7fa; --panel:#fbfdff; --panel2:#eef3f8;
+  --line:#e3eaf1; --line2:#c9d6e1; --txt:#10202c; --dim:#5c6f7e; --faint:#94a5b4;
+  --dawn:#0ca678; --accel:#1c7ed6; --mature:#b8860b; --hot:#e03131; --nascent:#7048e8;
+  --onacc:#ffffff;
+  --glow:0 0 0 1px rgba(12,166,120,.4),0 8px 20px -8px rgba(12,166,120,.45);
   --serif:"Fraunces",Georgia,serif; --mono:"JetBrains Mono",monospace; --sans:"Pretendard",system-ui,sans-serif;
 }
 *{box-sizing:border-box;margin:0;padding:0}
@@ -22,18 +23,18 @@ body{font-family:var(--sans);background:var(--ink);color:var(--txt);-webkit-font
 body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:.035;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
 .wrap{max-width:1340px;margin:0 auto;padding:0 22px}
-header{position:sticky;top:0;z-index:50;backdrop-filter:blur(12px);background:linear-gradient(180deg,rgba(7,11,16,.92),rgba(7,11,16,.7));border-bottom:1px solid var(--line)}
+header{position:sticky;top:0;z-index:50;backdrop-filter:blur(12px);background:linear-gradient(180deg,rgba(255,255,255,.92),rgba(255,255,255,.68));border-bottom:1px solid var(--line)}
 .bar{display:flex;align-items:center;gap:16px;padding:13px 0;flex-wrap:wrap}
 .brand{display:flex;align-items:baseline;gap:10px;white-space:nowrap}
-.mark{font-family:var(--serif);font-weight:900;font-size:24px;letter-spacing:-.02em;background:linear-gradient(100deg,#fff,var(--dawn));-webkit-background-clip:text;background-clip:text;color:transparent}
+.mark{font-family:var(--serif);font-weight:900;font-size:24px;letter-spacing:-.02em;background:linear-gradient(100deg,#10202c,var(--dawn));-webkit-background-clip:text;background-clip:text;color:transparent}
 .mark .jp{font-style:italic;font-weight:500}
 .tag{font-family:var(--mono);font-size:10px;color:var(--faint);letter-spacing:.16em;text-transform:uppercase}
 nav{display:flex;gap:3px;margin-left:auto;flex-wrap:wrap}
 .tab{font-size:12.5px;font-weight:600;color:var(--dim);background:transparent;border:1px solid transparent;padding:8px 11px;border-radius:9px;cursor:pointer;transition:.18s;display:flex;gap:7px;align-items:center}
 .tab .n{font-family:var(--mono);font-size:9.5px;color:var(--faint)}
-.tab:hover{color:var(--txt);background:var(--panel)}
-.tab.on{color:var(--ink);background:var(--dawn);box-shadow:var(--glow)}
-.tab.on .n{color:rgba(7,11,16,.55)}
+.tab:hover{color:var(--txt);background:var(--panel2)}
+.tab.on{color:var(--onacc);background:var(--dawn);box-shadow:var(--glow)}
+.tab.on .n{color:rgba(255,255,255,.7)}
 .iobtn{font-family:var(--mono);font-size:11px;color:var(--dim);background:var(--panel);border:1px solid var(--line);padding:8px 10px;border-radius:8px;cursor:pointer;transition:.15s}
 .iobtn:hover{border-color:var(--dawn);color:var(--dawn)}
 main{padding:28px 0 90px}
@@ -51,6 +52,104 @@ main{padding:28px 0 90px}
 .dot{width:9px;height:9px;border-radius:50%}
 .s-태동{background:var(--nascent)}.s-초입{background:var(--dawn)}.s-가속{background:var(--accel)}.s-성숙{background:var(--mature)}.s-과열{background:var(--hot)}
 
+/* ===== SYNC MODAL ===== */
+.sync-bg{position:fixed;inset:0;background:rgba(3,6,9,.45);backdrop-filter:blur(3px);opacity:0;pointer-events:none;transition:.2s;z-index:85}
+.sync-bg.on{opacity:1;pointer-events:auto}
+.sync-modal{position:fixed;top:50%;left:50%;transform:translate(-50%,-46%) scale(.98);width:min(440px,92vw);background:var(--ink2);border:1px solid var(--line2);border-radius:16px;padding:24px;z-index:86;opacity:0;pointer-events:none;transition:.22s;max-height:88vh;overflow-y:auto;box-shadow:0 24px 60px -20px rgba(0,0,0,.35)}
+.sync-modal.on{opacity:1;pointer-events:auto;transform:translate(-50%,-50%) scale(1)}
+.sync-modal h3{font-family:var(--serif);font-size:20px;font-weight:600;margin-bottom:4px}
+.sync-modal .sub{font-size:12.5px;color:var(--dim);margin-bottom:16px;line-height:1.5}
+.sm-steps{margin:0 0 14px 18px;font-size:12.5px;color:var(--dim);line-height:1.6}
+.sm-steps li{margin-bottom:5px}.sm-steps b{color:var(--txt)}
+.sm-input{width:100%;font-family:var(--mono);font-size:12px;background:var(--panel);border:1px solid var(--line2);color:var(--txt);padding:10px 12px;border-radius:9px;margin-bottom:10px}
+.sm-btn{font-family:var(--sans);font-size:13px;font-weight:600;background:var(--dawn);color:var(--onacc);border:none;padding:9px 16px;border-radius:9px;cursor:pointer}
+.sm-btn.danger{background:transparent;color:var(--hot);border:1px solid var(--hot)}
+.sm-warn{font-size:11px;color:var(--faint);margin-top:12px;line-height:1.5}.sm-warn b{color:var(--dim)}
+.sm-note{font-size:12px;color:var(--dim);margin-top:8px;line-height:1.5}.sm-note b{color:var(--txt)}
+.sm-ok{color:var(--dawn);font-weight:600;font-size:13px}
+.sm-err{color:var(--hot);font-size:13px}
+.sm-meta{font-family:var(--mono);font-size:11px;color:var(--faint);margin-top:4px}
+.sm-close{position:absolute;top:14px;right:14px;background:var(--panel);border:1px solid var(--line);color:var(--dim);width:30px;height:30px;border-radius:8px;cursor:pointer}
+
+/* ===== SIGNAL LOG ===== */
+.siglog{background:linear-gradient(120deg,rgba(28,126,214,.06),var(--ink2));border:1px solid var(--line);border-left:4px solid var(--accel);border-radius:14px;padding:15px 18px;margin-bottom:18px}
+.siglog .sh{display:flex;align-items:center;gap:9px;margin-bottom:10px;flex-wrap:wrap}
+.siglog .sh .ttl{font-family:var(--serif);font-size:17px;font-weight:600}
+.siglog .sh .meta{font-family:var(--mono);font-size:10px;color:var(--faint)}
+.siglog .sh .live{font-family:var(--mono);font-size:9px;font-weight:700;color:var(--onacc);background:var(--hot);padding:2px 7px;border-radius:20px}
+.sigitem{display:grid;grid-template-columns:78px 1fr;gap:11px;padding:9px 0;border-top:1px solid var(--line);align-items:start}
+.sigtag{font-family:var(--mono);font-size:9.5px;font-weight:700;padding:3px 6px;border-radius:7px;text-align:center}
+.sigtag.jump{cursor:pointer;text-decoration:underline dotted;text-underline-offset:2px}
+.sigtxt{font-size:12.5px;color:var(--txt);line-height:1.55}
+.sigtxt b{color:var(--accel)}
+.sigentry{margin-top:6px}
+.sigentry+.sigentry{margin-top:14px;padding-top:12px;border-top:2px solid var(--line2)}
+.sigentry .eh{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:2px}
+.sigentry .edate{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--txt)}
+.sigentry .esrc{font-size:12.5px;font-weight:700}
+.srctxt{font-family:var(--mono);font-size:10px;color:var(--faint)}
+
+/* ===== THREAD (river) ===== */
+.thread-card{background:linear-gradient(155deg,var(--panel),var(--ink2));border:1px solid var(--line);border-radius:18px;padding:28px 26px 18px;position:relative;overflow:hidden}
+.thread-svg{width:100%;height:auto;display:block}
+.river-node{cursor:pointer}.rn-box{transition:.2s}.river-node:hover .rn-box{filter:brightness(1.25)}
+.tnote{margin-top:14px;color:var(--dim);font-size:13px;line-height:1.6}
+.front-pill{display:inline-flex;gap:7px;align-items:center;font-family:var(--mono);font-size:11px;color:var(--dawn);border:1px solid rgba(70,230,168,.35);border-radius:30px;padding:4px 11px;background:rgba(70,230,168,.06)}
+.front-pill::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--dawn);box-shadow:0 0 10px var(--dawn);animation:pulse 1.6s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.detail-strip{margin-top:18px;display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));gap:10px}
+.dstrip{background:var(--panel);border:1px solid var(--line);border-left-width:3px;border-radius:11px;padding:12px 13px;cursor:pointer;transition:.2s}
+.dstrip:hover{transform:translateY(-2px);border-color:var(--line2)}
+.dstrip h4{font-size:12.5px;font-weight:700;display:flex;justify-content:space-between;align-items:center;gap:6px}
+.dstrip .badge{font-family:var(--mono);font-size:9px;padding:2px 6px;border-radius:20px;font-weight:700;white-space:nowrap}
+.dstrip p{font-size:11px;color:var(--dim);margin-top:6px;font-family:var(--mono);line-height:1.5}
+
+/* ===== CASCADE (derivative chain) ===== */
+.casc-pick{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.cpick{font-family:var(--sans);font-size:13px;font-weight:600;color:var(--dim);background:var(--panel);border:1px solid var(--line);padding:9px 13px;border-radius:10px;cursor:pointer;transition:.15s;display:flex;gap:8px;align-items:center}
+.cpick .lb{font-family:var(--mono);font-size:9px;padding:2px 6px;border-radius:20px;background:var(--ink2);color:var(--faint)}
+.cpick:hover{color:var(--txt);border-color:var(--line2)}
+.cpick.on{color:var(--onacc);background:var(--dawn);border-color:var(--dawn);box-shadow:var(--glow)}
+.cpick.on .lb{background:rgba(255,255,255,.25);color:rgba(255,255,255,.9)}
+.sbadge{font-family:var(--mono);font-size:9px;font-weight:700;padding:2px 8px;border-radius:20px;display:inline-block}
+.casc-trigger{background:linear-gradient(100deg,rgba(70,230,168,.08),var(--ink2));border:1px solid var(--line);border-left:4px solid var(--dawn);border-radius:12px;padding:14px 18px;margin-bottom:18px;font-size:13.5px;line-height:1.6}
+.casc-trigger b{color:var(--dawn);font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;display:block;margin-bottom:4px}
+.casc-flow{display:grid;grid-template-columns:300px 1fr;gap:26px;align-items:start}
+@media(max-width:820px){.casc-flow{grid-template-columns:1fr;gap:14px}}
+.casc-driver{position:sticky;top:84px;background:linear-gradient(160deg,var(--panel2),var(--ink2));border:1px solid var(--line2);border-radius:14px;padding:18px}
+.casc-driver .dl{font-family:var(--mono);font-size:9.5px;color:var(--faint);letter-spacing:.1em;text-transform:uppercase}
+.casc-driver .dn{font-family:var(--serif);font-size:22px;font-weight:600;margin:4px 0 8px;line-height:1.1}
+.casc-driver .role{font-size:12px;color:var(--dim);line-height:1.55;border-top:1px solid var(--line);padding-top:10px;margin-top:10px}
+.casc-driver .role b{color:var(--txt)}
+.casc-driver .arrowdown{text-align:center;color:var(--dawn);font-family:var(--mono);font-size:10.5px;margin-top:13px}
+.casc-nodes{position:relative;padding-left:28px}
+.casc-nodes::before{content:"";position:absolute;left:0;top:14px;bottom:34px;width:2px;background:linear-gradient(180deg,var(--dawn),var(--line))}
+.cnode{position:relative;background:var(--panel);border:1px solid var(--line);border-left-width:3px;border-radius:12px;padding:13px 15px;margin-bottom:12px;cursor:pointer;transition:.18s;animation:nodein .45s both}
+.cnode:hover{transform:translateX(3px);border-color:var(--line2);background:var(--panel2)}
+.cnode::before{content:"";position:absolute;left:-28px;top:23px;width:28px;height:2px;background:var(--line2)}
+.cnode .jdot{position:absolute;left:-33px;top:19px;width:10px;height:10px;border-radius:50%;border:2px solid var(--ink)}
+@keyframes nodein{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:none}}
+.cnode .top{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.cnode .nm{font-size:14.5px;font-weight:700}
+.cnode .why{font-size:12px;color:var(--dim);margin-top:6px}
+.cnode .mult{font-family:var(--mono);font-size:11.5px;color:var(--dawn);margin-top:7px;background:rgba(70,230,168,.07);border-radius:6px;padding:5px 9px}
+.cnode .cos{font-family:var(--mono);font-size:10.5px;color:var(--faint);margin-top:8px}
+.cnode .go{margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--accel)}
+
+/* ===== STACK (merged: header + candidate chips) ===== */
+.lcard{background:linear-gradient(100deg,var(--panel),var(--ink2));border:1px solid var(--line);border-left-width:4px;border-radius:13px;margin-bottom:10px;transition:.18s;position:relative;overflow:hidden}
+.lcard:hover{border-color:var(--line2)}
+.lhead{display:grid;grid-template-columns:54px 1fr 156px;align-items:center;gap:14px;padding:13px 16px;cursor:pointer}
+.lhead .lid{font-family:var(--serif);font-size:24px;font-weight:900}
+.lmid .lname{font-size:15px;font-weight:700}
+.lmid .lex{font-family:var(--mono);font-size:10px;color:var(--faint);margin-top:2px}
+.lmid .lflow{font-size:11.5px;color:var(--dim);margin-top:5px;display:flex;align-items:center;gap:5px}
+.caret{font-family:var(--mono);font-size:11px;color:var(--faint);transition:.2s}
+.lcard.collapsed .caret{transform:rotate(-90deg)}
+.lhead .lright{text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:2px}
+.lbody{display:flex;flex-wrap:wrap;gap:7px;padding:2px 16px 14px 70px}
+.lcard.collapsed .lbody{display:none}
+
 /* ===== STACK ===== */
 .stack-wrap{display:grid;grid-template-columns:1fr 300px;gap:18px}
 @media(max-width:980px){.stack-wrap{grid-template-columns:1fr}}
@@ -65,7 +164,7 @@ main{padding:28px 0 90px}
 .lheld{margin-top:7px;height:7px;border-radius:5px;background:var(--panel2);overflow:hidden;position:relative}
 .lheld i{position:absolute;left:0;top:0;bottom:0;border-radius:5px}
 .lheldtxt{font-family:var(--mono);font-size:9.5px;color:var(--dim);margin-top:3px}
-.front-tag{position:absolute;right:-9px;top:50%;transform:translateY(-50%);font-family:var(--mono);font-size:9px;color:var(--ink);background:var(--dawn);padding:2px 7px;border-radius:20px;font-weight:700;box-shadow:0 0 12px -2px var(--dawn);white-space:nowrap}
+.front-tag{position:absolute;right:-9px;top:50%;transform:translateY(-50%);font-family:var(--mono);font-size:9px;color:var(--onacc);background:var(--dawn);padding:2px 7px;border-radius:20px;font-weight:700;box-shadow:0 0 12px -2px var(--dawn);white-space:nowrap}
 .sidecard{background:linear-gradient(160deg,var(--panel),var(--ink2));border:1px solid var(--line);border-radius:14px;padding:18px;align-self:start;position:sticky;top:84px}
 .sidecard h4{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);margin-bottom:12px}
 .flowline{display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:11px;color:var(--dim);margin-bottom:9px;line-height:1.4}
@@ -96,7 +195,7 @@ main{padding:28px 0 90px}
 .dr-name{font-family:var(--serif);font-size:26px;font-weight:600;letter-spacing:-.02em}
 .dr-meta{display:flex;gap:7px;flex-wrap:wrap;margin:11px 0 16px}
 .pill{font-family:var(--mono);font-size:10px;padding:4px 9px;border-radius:20px;border:1px solid var(--line);color:var(--dim)}
-.pill.stage{font-weight:700;color:var(--ink)} .pill.held{color:var(--mature);border-color:var(--mature)}
+.pill.stage{font-weight:700;color:var(--onacc)} .pill.held{color:var(--mature);border-color:var(--mature)}
 .dr-sec{margin-top:18px}
 .dr-sec h5{font-family:var(--mono);font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);margin-bottom:9px;display:flex;align-items:center;gap:8px}
 .dr-sec h5::after{content:"";flex:1;height:1px;background:var(--line)}
@@ -115,7 +214,7 @@ main{padding:28px 0 90px}
 .stext{flex:1;font-size:12px;color:var(--dim)}.stext b{color:var(--txt);display:block;font-size:12px}
 .sscore{display:flex;gap:4px;flex-shrink:0}
 .sbtn{width:20px;height:20px;border-radius:6px;border:1px solid var(--line);background:var(--panel);cursor:pointer;font-family:var(--mono);font-size:10px;color:var(--faint)}
-.sbtn.on{background:var(--dawn);border-color:var(--dawn);color:var(--ink);font-weight:700}
+.sbtn.on{background:var(--dawn);border-color:var(--dawn);color:var(--onacc);font-weight:700}
 .kill{list-style:none;counter-reset:k}
 .kill li{position:relative;padding:8px 0 8px 26px;font-size:12.5px;color:var(--dim);border-bottom:1px solid var(--line)}.kill li:last-child{border:0}
 .kill li::before{counter-increment:k;content:counter(k);position:absolute;left:0;top:7px;width:18px;height:18px;border-radius:5px;background:rgba(255,93,93,.12);color:var(--hot);font-family:var(--mono);font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center}
@@ -137,7 +236,7 @@ main{padding:28px 0 90px}
 .pbar-row{display:grid;grid-template-columns:160px 1fr 92px;gap:14px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
 .pbar-lab{font-size:13px;font-weight:600}.pbar-lab .sub{font-family:var(--mono);font-size:9.5px;color:var(--faint);display:block;font-weight:400}
 .pbar-track{height:22px;background:var(--panel);border-radius:6px;overflow:hidden;position:relative}
-.pbar-fill{height:100%;border-radius:6px;display:flex;align-items:center;padding-left:9px;font-family:var(--mono);font-size:10px;font-weight:700;color:var(--ink);transition:width .8s cubic-bezier(.2,.8,.2,1)}
+.pbar-fill{height:100%;border-radius:6px;display:flex;align-items:center;padding-left:9px;font-family:var(--mono);font-size:10px;font-weight:700;color:var(--onacc);transition:width .8s cubic-bezier(.2,.8,.2,1)}
 .pbar-amt{font-family:var(--mono);font-size:12px;text-align:right;color:var(--dim)}
 .pclass{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}
 .pclass .pc{flex:1;min-width:200px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:15px}
@@ -169,26 +268,49 @@ table.tk th.c{text-align:center}
 </head>
 <body>
 <header><div class="wrap bar">
-  <div class="brand"><span class="mark">初入 <span class="jp">Observatory</span></span><span class="tag">8-layer · v2</span></div>
+  <div class="brand"><span class="mark">初入 <span class="jp">Observatory</span></span><span class="tag">8-layer · v2</span><span class="tag" id="pxNote" style="margin-left:6px"></span></div>
   <nav id="nav">
-    <button class="tab on" data-v="stack"><span class="n">01</span>8레이어 스택</button>
-    <button class="tab" data-v="explorer"><span class="n">02</span>탐색기</button>
+    <button class="tab on" data-v="thread"><span class="n">00</span>관통 흐름</button>
+    <button class="tab" data-v="cascade"><span class="n">01</span>파생 체인</button>
+    <button class="tab" data-v="stack"><span class="n">02</span>8레이어 통합</button>
     <button class="tab" data-v="map"><span class="n">03</span>초입 지도</button>
     <button class="tab" data-v="port"><span class="n">04</span>포트폴리오 X-레이</button>
     <button class="tab" data-v="tracker"><span class="n">05</span>추적기</button>
   </nav>
-  <button class="iobtn" id="exportBtn">↓ JSON</button>
-  <button class="iobtn" id="importBtn">↑ 불러오기</button>
-  <input type="file" id="importFile" accept="application/json" hidden>
+  <span class="iobtn" id="saveState" onclick="openSync()" title="GitHub 동기화 설정" style="cursor:pointer">☁ 자동 저장</span>
 </div></header>
 
 <main class="wrap">
 
-<!-- 01 STACK -->
-<section class="view on" id="v-stack">
+<!-- 00 THREAD -->
+<section class="view on" id="v-thread">
+  <div class="vhead"><div class="vkick">The Thread · 병목을 관통하는 한 줄기</div>
+    <h1 class="vtitle">병목은 <em>이동</em>한다 — 그 앞단에 알파가 있다</h1>
+    <p class="vsub">학습→추론 전환은 단발 이벤트가 아니라 <b>capex 병목이 컴퓨트에서 메모리·광·전력으로 흘러가는 강물</b>입니다. 강물의 머리는 8레이어 위를 이동하며, 마디를 누르면 해당 레이어 후보로 이동합니다. 목표는 <b>다음 마디(초입)</b>를 미리 점하는 것.</p></div>
+  <div class="siglog" id="signalLog"></div>
+  <div class="thread-card">
+    <span class="front-pill">현재 전선(front): L4 패키징 backend · L8 grid 전력</span>
+    <svg class="thread-svg" id="threadSvg" viewBox="0 0 1240 270" preserveAspectRatio="xMidYMid meet"></svg>
+    <div class="tnote">컴퓨트·메모리(<b>L1–L3</b>)는 이미 가격에 반영(성숙). 강물의 머리는 <b style="color:var(--dawn)">L4 패키징 · L6 광 · L8 발전</b>을 지나 <b style="color:var(--nascent)">피지컬 AI</b>로 향하는 중.</div>
+    <div class="detail-strip" id="threadDetail"></div>
+  </div>
+</section>
+
+<!-- 01 CASCADE -->
+<section class="view" id="v-cascade">
+  <div class="vhead"><div class="vkick">Derivative Cascade · 파생 가치사슬</div>
+    <h1 class="vtitle">하나가 <em>×10</em> 되면 — 무엇이 함께 폭증하나</h1>
+    <p class="vsub">거시 트리거가 한 드라이버를 ×10으로 키울 때, <b>같은 배수로 함께 커져야 하지만 아직 덜 오른 파생 부품</b>이 다음 알파입니다. 드라이버를 바꾸면 그 가치사슬이 펼쳐집니다 — CPU는 예시, 나머지 레이어도 동일. 파생 노드를 누르면 §2-C 분해로 들어갑니다.</p></div>
+  <div class="casc-pick" id="cascPick"></div>
+  <div id="cascView"></div>
+</section>
+
+<!-- 02 STACK -->
+<section class="view" id="v-stack">
   <div class="vhead"><div class="vkick">The Stack · 8레이어 AI 인프라 척추</div>
     <h1 class="vtitle">capex 병목은 스택을 <em>타고 흐른다</em></h1>
-    <p class="vsub">가이드 §2-C의 8레이어를 기본 프레임으로. 수요는 L1(모델)에서 발생해 L2→L3→L4→L6, 그리고 L7·L8(전력)로 내려가며 <b>어느 층에서 막히는지(병목)</b>가 다음 수혜층을 결정합니다. 우측 막대는 <b>당신이 그 층에 실제로 깔아둔 자본</b>. 층을 누르면 탐색기로 이동.</p></div>
+    <p class="vsub">가이드 §2-C의 8레이어를 기본 프레임으로 — <b>스택(층별 상태·보유)과 탐색기(후보·§2-C 분해)를 한 화면에 통합</b>했습니다. 우측 막대는 그 층에 실제로 깔아둔 자본. 각 층 <b>헤더를 누르면 후보가 접히고</b>, <b>후보 칩을 누르면</b> §2-C 분해가 열립니다.</p></div>
+  <div class="legend" id="legendStack"></div>
   <div class="stack-wrap">
     <div id="stackList"></div>
     <div class="sidecard">
@@ -197,18 +319,9 @@ table.tk th.c{text-align:center}
       <div class="flowline"><b>L2 GPU/ASIC</b><span class="ar">→</span>L3 HBM <span class="ar">+</span>L4 CoWoS <span class="ar">+</span>L6 광</div>
       <div class="flowline"><b>L2·3·4</b><span class="ar">→</span>L7 전력·냉각 폭증</div>
       <div class="flowline"><b>L7</b><span class="ar">→</span>L8 발전·그리드 제약</div>
-      <p>현재 시장 합의: 병목이 <b style="color:var(--mature)">L3 메모리·L7 전력</b>에 도달(선반영). Alpha 가설의 다음 전선은 <b style="color:var(--dawn)">L4 패키징 backend · L6 광(CPO) · L8 grid 전력</b>. 5종목(SNDK·MRVL·ALAB·LITE·QCOM)은 전부 한 층에서 수요폭발+공급병목이 동시에 터진 케이스.</p>
+      <p>현재 시장 합의: 병목이 <b style="color:var(--mature)">L3 메모리·L7 전력</b>에 도달(선반영). Alpha 가설의 다음 전선은 <b style="color:var(--dawn)">L4 패키징 backend · L6 광(CPO) · L8 grid 전력</b>. 5종목(SNDK·MRVL·ALAB·LITE·QCOM)은 전부 한 층에서 수요폭발+공급병목이 동시에 터진 케이스.<br><br><b style="color:var(--accel)">NVDA Q1 FY27(5/20):</b> CFO가 공급 제약을 "모든 시스템 부품의 양산"이라 명시 → 다음 병목=components 확인. 네트워킹 +199%로 L6 가속, Vera($20B)로 CPU가 1차 매출축 합류, ACIE/Edge 세그먼트 신설로 수요 광역화.</p>
     </div>
   </div>
-</section>
-
-<!-- 02 EXPLORER -->
-<section class="view" id="v-explorer">
-  <div class="vhead"><div class="vkick">Explorer · §2-C 산출물</div>
-    <h1 class="vtitle">레이어별 후보 — 누르면 <em>입체</em> 분해</h1>
-    <p class="vsub">칩을 누르면 §2-C 산출물(주 레이어·인접 의존도 상/하류·경쟁 포지션·capex 민감도·포트폴리오 중복도) + 초입 5신호 점검 + 폐기 트리거가 펼쳐집니다. ★ = 현재 보유 종목.</p></div>
-  <div class="legend" id="legendEx"></div>
-  <div id="exList"></div>
 </section>
 
 <!-- 03 MAP -->
@@ -251,21 +364,94 @@ table.tk th.c{text-align:center}
 <div class="drawer-bg" id="drawerBg"></div>
 <aside class="drawer" id="drawer"></aside>
 <div class="tip" id="tip"></div>
+<div class="sync-bg" id="syncModalBg" onclick="closeSync()"></div>
+<div class="sync-modal" id="syncModal">
+  <button class="sm-close" onclick="closeSync()">✕</button>
+  <h3>GitHub 동기화</h3>
+  <p class="sub">점수·점검일을 당신의 <b>비공개 GitHub Gist</b>에 저장 → 집·회사·모바일 어디서나 같은 토큰만 넣으면 이어집니다.</p>
+  <div id="syncBody"></div>
+</div>
 
 <script>
-const STAGE_HEX={태동:'#9b7bff',초입:'#46e6a8',가속:'#3fa9ff',성숙:'#f2b53b',과열:'#ff5d5d'};
+const STAGE_HEX={태동:'#7048e8',초입:'#0ca678',가속:'#1c7ed6',성숙:'#b8860b',과열:'#e03131'};
 /* ===== 8 LAYERS (가이드 §2-C) ===== */
 const LAYERS=[
- {id:'L1',name:'AI Software / Model',en:'MSFT·GOOGL·META·PLTR',stage:'성숙',color:'#f2b53b',flow:'수요 발원지'},
- {id:'L2',name:'AI Accelerator (GPU/ASIC)',en:'NVDA·AVGO·MRVL·AMD',stage:'성숙',color:'#f2b53b',flow:'L3·L4·L6를 끌어당김'},
- {id:'L3',name:'Memory (HBM/DRAM/NAND)',en:'MU·삼성·SK하이닉스',stage:'성숙',color:'#f2b53b',flow:'슈퍼사이클 확인=선반영'},
- {id:'L4',name:'Foundry / Packaging',en:'TSM·ASML·삼성파운드리',stage:'초입',color:'#46e6a8',flow:'CoWoS·backend가 다음 깔때기'},
- {id:'L5',name:'Server / Storage',en:'DELL·SMCI·HPE',stage:'가속',color:'#3fa9ff',flow:'조립·통합'},
- {id:'L6',name:'Optical Networking',en:'AVGO·MRVL·LITE·Coherent',stage:'가속',color:'#3fa9ff',flow:'CPO·scale-up이 미반영 잔량'},
- {id:'L7',name:'Power / Cooling / DC REIT',en:'VRT·ETN·EQIX·DLR',stage:'가속',color:'#3fa9ff',flow:'in-rack 병목=합의 도달'},
- {id:'L8',name:'Energy / Power Generation',en:'CEG·VST·BE·SMR',stage:'초입',color:'#46e6a8',flow:'grid·발전이 진짜 다음 병목'},
+ {id:'L1',name:'AI Software / Model',en:'MSFT·GOOGL·META·PLTR',stage:'성숙',color:'#b8860b',flow:'수요 발원지'},
+ {id:'L2',name:'AI Accelerator (GPU/ASIC)',en:'NVDA·AVGO·MRVL·AMD',stage:'성숙',color:'#b8860b',flow:'L3·L4·L6를 끌어당김'},
+ {id:'L3',name:'Memory (HBM/DRAM/NAND)',en:'MU·삼성·SK하이닉스',stage:'성숙',color:'#b8860b',flow:'슈퍼사이클 확인=선반영'},
+ {id:'L4',name:'Foundry / Packaging',en:'TSM·ASML·삼성파운드리',stage:'초입',color:'#0ca678',flow:'CoWoS·backend가 다음 깔때기'},
+ {id:'L5',name:'Server / Storage',en:'DELL·SMCI·HPE',stage:'가속',color:'#1c7ed6',flow:'조립·통합'},
+ {id:'L6',name:'Optical Networking',en:'AVGO·MRVL·LITE·Coherent',stage:'가속',color:'#1c7ed6',flow:'CPO·scale-up이 미반영 잔량'},
+ {id:'L7',name:'Power / Cooling / DC REIT',en:'VRT·ETN·EQIX·DLR',stage:'가속',color:'#1c7ed6',flow:'in-rack 병목=합의 도달'},
+ {id:'L8',name:'Energy / Power Generation',en:'CEG·VST·BE·SMR',stage:'초입',color:'#0ca678',flow:'grid·발전이 진짜 다음 병목'},
 ];
 const LMAP=Object.fromEntries(LAYERS.map(l=>[l.id,l]));
+/* river thread = capex 병목 이동 순서 (좌:성숙 → 우:초입), 8레이어에 매핑 */
+const THREAD=[
+ {layer:'L1',label:'모델',sub:'MSFT·GOOGL·PLTR',stage:'성숙',pos:.90},
+ {layer:'L2',label:'가속기',sub:'GPU·ASIC',stage:'성숙',pos:.80},
+ {layer:'L3',label:'메모리',sub:'HBM·MRDIMM',stage:'성숙',pos:.70},
+ {layer:'L7',label:'전력·냉각',sub:'in-rack',stage:'가속',pos:.50},
+ {layer:'L6',label:'광 연결',sub:'800G·CPO',stage:'가속',pos:.44},
+ {layer:'L4',label:'패키징',sub:'CoWoS·backend',stage:'초입',pos:.30},
+ {layer:'L8',label:'발전·grid',sub:'온사이트·SMR',stage:'초입',pos:.24},
+ {layer:'기타',label:'피지컬 AI',sub:'로보틱스·엣지',stage:'태동',pos:.12},
+];
+/* 파생 캐스케이드: 드라이버 ×10 → 함께 폭증하는 파생 가치사슬. cand=탐색기 후보 id */
+const CASCADES=[
+ {key:'cpu',driver:'호스트 CPU',layer:'L2',stage:'성숙',
+  trigger:'Agentic AI → 지속적 에이전트 워크로드 → 서버 CPU 코어수·수요 폭증. 인퍼런스 비중↑로 CPU:GPU 비율이 균형으로 회귀. ★ NVDA Q1 FY27(5/20): Vera 단독 CPU $20B 가시성·$200B TAM — 1차주가 CPU를 공식 매출축으로 인정.',
+  primary:{label:'1차주 (선반영 · 가이던스 포화)',ex:'Arm · AMD EPYC Venice(256코어) · Intel Clearwater Forest(288 E코어) · NVIDIA Vera(신규) · 하이퍼스케일러 커스텀'},
+  nodes:[
+   {n:'메모리 인터페이스칩',why:'12채널 DDR5 + MRDIMM 전환',mult:'RCD 1개 → MRCD 1 + MDB 10 (모듈당 칩 ×수배)',cos:'Rambus · Montage · Renesas',stage:'초입',cand:'rmbs'},
+   {n:'FC-BGA 고사양 기판',why:'코어수↑ = 다이면적↑ = 기판 층수·면적↑',mult:'면적·층수↑ · 다운사이클로 덜오름',cos:'삼성전기 · 대덕전자 · Ibiden',stage:'초입',cand:'sem'},
+   {n:'CPU 전력 전달(VPD)',why:'300W+ TDP · 1000A "라스트 인치"',mult:'전류밀도↑ · PDN 저항↓',cos:'Vicor · MPS',stage:'가속',cand:'vicr'},
+   {n:'테스트·번인 소켓',why:'코어수↑ = 테스트 시간·소켓 소모↑',mult:'소켓·번인 ASP↑',cos:'ISC · Leeno · FormFactor',stage:'가속',cand:null},
+   {n:'CXL 메모리 풀링',why:'메모리 용량·대역폭 확장',mult:'침투 초기(서버 1%)',cos:'Astera · Montage',stage:'가속',cand:'alab'},
+  ]},
+ {key:'gpu',driver:'AI 가속기(GPU/ASIC)',layer:'L2',stage:'성숙',
+  trigger:'학습·추론 가속기 출하 폭증 → 동반 부품 동시 병목. ★ NVDA Q1 FY27(5/20): Vera Rubin 풀사이클 공급 제약 — CFO "제약은 수요가 아니라 모든 시스템 부품의 양산 타임라인". 다음 병목=components 직접 확인.',
+  primary:{label:'1차주 (선반영)',ex:'NVDA(Blackwell/Vera Rubin) · AVGO · AMD · 커스텀 ASIC(MRVL · Alchip)'},
+  nodes:[
+   {n:'HBM',why:'가속기당 HBM 스택 수·단수↑',mult:'HBM3E → HBM4 용량·단수↑',cos:'SK하이닉스 · 삼성 · 마이크론',stage:'성숙',cand:'mu'},
+   {n:'어드밴스드 패키징(CoWoS)',why:'대형 다이 + HBM 통합',mult:'CoWoS 캐파 = 진짜 supply 병목',cos:'TSMC · Ibiden · ASE',stage:'초입',cand:'ibi'},
+   {n:'광 인터커넥트',why:'GPU-GPU scale-up 대역폭',mult:'800G → 1.6T → CPO 전환',cos:'Lumentum · Coherent · MRVL',stage:'가속',cand:'lite'},
+   {n:'전력·냉각',why:'랙 100kW+ 발열·전력밀도',mult:'액체냉각 표준화',cos:'Vertiv · Vicor',stage:'가속',cand:'vrt'},
+  ]},
+ {key:'memory',driver:'메모리(HBM/DRAM)',layer:'L3',stage:'성숙',
+  trigger:'AI 메모리 슈퍼사이클(BofA: 2026 DRAM +51%) → DRAM 재배치(HBM) → 후공정·인터페이스 동반 폭증.',
+  primary:{label:'1차주 (확인된 사실 · 선반영)',ex:'마이크론(+102%) · 삼성(+53%) · SK하이닉스'},
+  nodes:[
+   {n:'메모리 인터페이스칩',why:'서버 DDR5·MRDIMM 콘텐츠 증가',mult:'MRCD + MDB ×수배',cos:'Rambus · Montage · Renesas',stage:'초입',cand:'rmbs'},
+   {n:'HBM 후공정·TSV·본딩',why:'스택 단수↑ = TSV·하이브리드 본딩↑',mult:'본딩 장비·소재 콘텐츠↑',cos:'후공정 장비(KODEX) · 한미반도체',stage:'가속',cand:'kodexeq'},
+   {n:'메모리 테스트',why:'고단 HBM·MRDIMM 검사 난도↑',mult:'번인·모듈 테스터↑',cos:'ISC · Teradyne',stage:'가속',cand:null},
+  ]},
+ {key:'optical',driver:'광 연결(Optical)',layer:'L6',stage:'가속',
+  trigger:'AI 인터커넥트 요구가 pluggable 한계 초과 → CPO·scale-up 광 전환. ★ NVDA Q1 FY27(5/20): 데이터센터 네트워킹 $14.8B·+199% YoY(컴퓨트 +92%보다 빠름) — "networking이 컴퓨트보다 늦게 반영(γ)" 가설 강력 확인.',
+  primary:{label:'1차주',ex:'AVGO · MRVL · Lumentum · Coherent'},
+  nodes:[
+   {n:'EML / 외장 레이저(ELS)',why:'CPO는 외장 레이저 광원 필요',mult:'레이저 채널 수↑',cos:'Coherent · Lumentum',stage:'가속',cand:'cohr'},
+   {n:'광 DSP · 리타이머',why:'고속 신호 정합·등화',mult:'채널·속도↑ 콘텐츠↑',cos:'MRVL · Astera',stage:'가속',cand:'mrvl'},
+   {n:'광 커넥터 · 도파로',why:'CPO 패키지 광 결합',mult:'미반영 잔량 · 검증 필요',cos:'(리서치 영역)',stage:'초입',cand:null},
+  ]},
+ {key:'power',driver:'전력·냉각(in-rack)',layer:'L7',stage:'가속',
+  trigger:'랙 전력밀도 폭증(GB200 NVL72 ~120kW) → in-rack 병목이 grid로 확산. 2026 capex 제약 = 칩 아닌 전력.',
+  primary:{label:'1차주 (합의 도달 · richly valued)',ex:'Vertiv(백로그 +109%) · Eaton'},
+  nodes:[
+   {n:'발전 · 온사이트(BYOP)',why:'그리드 부족 → 자가발전(Bring Your Own Power)',mult:'온사이트 발전 수요 점화',cos:'Bloom · 가스터빈',stage:'초입',cand:'be'},
+   {n:'변압기 · 송전 인터커넥트',why:'HV 변압기 리드타임 3~5년',mult:'grid 병목 = 다음 전선',cos:'(리서치 영역)',stage:'초입',cand:null},
+   {n:'액체냉각',why:'50kW+ 랙 표준화',mult:'D2C → immersion 단계',cos:'Vertiv · SMCI',stage:'가속',cand:'vrt'},
+   {n:'전력 반도체(VPD)',why:'고전류 변환 효율 "라스트 인치"',mult:'전류밀도↑',cos:'Vicor · MPS',stage:'가속',cand:'vicr'},
+  ]},
+ {key:'grid',driver:'발전·그리드(L8)',layer:'L8',stage:'초입',
+  trigger:'전력 발표분 따라잡힌 뒤(2027~29) 진짜 다음 병목 = 발전·부지 4박자(급수+송전+zoning+수용성) 희소성(α).',
+  primary:{label:'다음 전선 (초입~태동)',ex:'Constellation · Vistra · Bloom · SMR plays'},
+  nodes:[
+   {n:'원전 · SMR',why:'24/7 무탄소 기저전력',mult:'데이터센터 PPA · SMR 2028+',cos:'CEG · VST · Oklo',stage:'가속',cand:'ceg'},
+   {n:'연료전지 · 온사이트',why:'오프그리드 캠퍼스(Meta Columbus)',mult:'BYOP 모델 확산',cos:'Bloom',stage:'초입',cand:'be'},
+   {n:'부지 4박자 희소성(α)',why:'급수권+인접송전+zoning+수용성 동시 충족',mult:'전력 단일변수 아님',cos:'(Sharpe 가설 · 리서치 영역)',stage:'태동',cand:null},
+  ]},
+];
 const SIGNALS=[
  ['S1','병목 역추적','상류 레이어 병목이 이 층으로 흘러올 구조 (AVGO·NVDA 콜 단서)'],
  ['S2','Beat&Raise 첫 분기','컨센 20%+ 상회 + 다음 분기 가이던스 상향 (첫 분기=초입)'],
@@ -415,19 +601,234 @@ const C=[
 /* ===== STATE / STORE ===== */
 let STATE=C.map(c=>({...c,lastChecked:null}));
 const KEY='tenbagger_obs_8L_v2';
-function loadStore(){try{const raw=localStorage.getItem(KEY);if(raw){const s=JSON.parse(raw);s.forEach(x=>{const t=STATE.find(y=>y.id===x.id);if(t){t.S={...t.S,...x.S};if(x.lastChecked)t.lastChecked=x.lastChecked;}});flag('💾 자동저장 활성 (이 브라우저).');return;}}catch(e){}flag('💾 자동저장 활성 (이 브라우저) · 백업은 [↓ JSON].');}
-function saveStore(){try{localStorage.setItem(KEY,JSON.stringify(STATE.map(c=>({id:c.id,S:c.S,lastChecked:c.lastChecked}))));}catch(e){}}
-function flag(m){document.getElementById('storeFoot').innerHTML='<b>저장</b> · '+m+'<br>데이터는 코드 상단 <b>C</b>(후보)·<b>HOLDINGS</b>(보유)·<b>LAYERS</b>(8레이어)에서 직접 편집. 모든 후보엔 <b>폐기 트리거 3개</b> 필수.';}
+const GH_KEY='tenbagger_gh_cfg_v1';
+const GIST_FILE='tenbagger-observatory-8L.json';
+let GH={token:'',gistId:''}; let _saveTimer=null;
+
+/* 로컬 캐시 (localStorage) — 호스팅 환경용. Gist 동기화 코드는 아래 그대로 유지. */
+async function lsGet(k){try{const v=localStorage.getItem(k);return v?JSON.parse(v):null;}catch(e){}return null;}
+async function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true;}catch(e){}return false;}
+function applySaved(arr){if(!Array.isArray(arr))return;arr.forEach(x=>{const t=STATE.find(y=>y.id===x.id);if(t){if(x.S)t.S={...t.S,...x.S};if(x.lastChecked)t.lastChecked=x.lastChecked;}});}
+function dumpState(){return STATE.map(c=>({id:c.id,S:c.S,lastChecked:c.lastChecked}));}
+
+/* GitHub Gist API */
+function ghFetch(url,opts={}){return fetch(url,{...opts,headers:{'Authorization':'Bearer '+GH.token,'Accept':'application/vnd.github+json',...(opts.headers||{})}});}
+async function ghFindOrCreateGist(){
+ if(GH.gistId)return GH.gistId;
+ const r=await ghFetch('https://api.github.com/gists?per_page=100');
+ if(!r.ok)throw new Error('Gist 목록 실패('+r.status+')');
+ const found=(await r.json()).find(g=>g.files&&g.files[GIST_FILE]);
+ if(found){GH.gistId=found.id;return found.id;}
+ const cr=await ghFetch('https://api.github.com/gists',{method:'POST',body:JSON.stringify({description:'初入 Observatory — tenbagger tracker data',public:false,files:{[GIST_FILE]:{content:JSON.stringify({savedAt:new Date().toISOString(),data:dumpState()},null,2)}}})});
+ if(!cr.ok)throw new Error('Gist 생성 실패('+cr.status+')');
+ GH.gistId=(await cr.json()).id;return GH.gistId;
+}
+async function ghLoad(){
+ const id=await ghFindOrCreateGist();
+ const r=await ghFetch('https://api.github.com/gists/'+id);
+ if(!r.ok)throw new Error('Gist 읽기 실패('+r.status+')');
+ const f=(await r.json()).files?.[GIST_FILE];
+ if(f&&f.content){const j=JSON.parse(f.content);applySaved(j.data||j);return j.savedAt||null;}
+ return null;
+}
+async function ghSave(){
+ const id=await ghFindOrCreateGist();
+ const r=await ghFetch('https://api.github.com/gists/'+id,{method:'PATCH',body:JSON.stringify({files:{[GIST_FILE]:{content:JSON.stringify({savedAt:new Date().toISOString(),data:dumpState()},null,2)}}})});
+ if(!r.ok)throw new Error('Gist 저장 실패('+r.status+')');
+}
+
+/* 상태 배지 */
+function setBadge(text,kind){const b=document.getElementById('saveState');if(!b)return;b.textContent=text;
+ b.style.color=kind==='ok'?'var(--dawn)':kind==='err'?'var(--hot)':'';
+ b.style.borderColor=kind==='ok'?'var(--dawn)':kind==='err'?'var(--hot)':'';}
+function footNote(){document.getElementById('storeFoot').innerHTML='<b>저장</b> · 점수·점검일은 변경 즉시 자동 저장. 헤더의 <b>동기화 배지</b>를 눌러 <b>GitHub 동기화</b>를 켜면 집·회사·모바일 어디서나 같은 토큰으로 이어집니다.<br>데이터는 코드 상단 <b>C</b>·<b>HOLDINGS</b>·<b>LAYERS</b>에서 직접 편집. 신규 시그널은 <b>SIGNAL_LOG</b>에 출처·날짜와 함께 기록.';}
+
+/* 로드/저장 오케스트레이션 */
+async function loadStore(){
+ const local=await lsGet(KEY); if(local)applySaved(local);
+ const cfg=await lsGet(GH_KEY); if(cfg&&cfg.token){GH.token=cfg.token;GH.gistId=cfg.gistId||'';}
+ footNote();
+ if(GH.token){
+   try{const at=await ghLoad(); await lsSet(KEY,dumpState());
+     setBadge('☁ GitHub 동기화됨'+(at?' · '+at.slice(0,10):''),'ok'); renderAll();
+   }catch(e){setBadge('⚠ 동기화 오류','err');}
+ }else{ setBadge('☁ 이 기기 저장',''); }
+}
+async function saveStore(){
+ await lsSet(KEY,dumpState());
+ if(GH.token){
+   setBadge('⏳ 동기화 중…','');
+   clearTimeout(_saveTimer);
+   _saveTimer=setTimeout(async()=>{try{await ghSave();setBadge('✓ GitHub 저장됨','ok');
+     clearTimeout(window._svT);window._svT=setTimeout(()=>setBadge('☁ GitHub 동기화됨','ok'),1500);
+   }catch(e){setBadge('⚠ 동기화 실패','err');}},700);
+ }else{ setBadge('✓ 저장됨','ok'); clearTimeout(window._svT);window._svT=setTimeout(()=>setBadge('☁ 이 기기 저장',''),1400); }
+}
+
+/* 동기화 설정 모달 */
+function openSync(){document.getElementById('syncModalBg').classList.add('on');document.getElementById('syncModal').classList.add('on');renderSyncModal();}
+function closeSync(){document.getElementById('syncModalBg').classList.remove('on');document.getElementById('syncModal').classList.remove('on');}
+function renderSyncModal(){
+ document.getElementById('syncBody').innerHTML = GH.token ? `
+   <p class="sm-ok">☁ 연결됨 — 점수·점검일이 당신의 비공개 GitHub Gist에 저장됩니다.</p>
+   ${GH.gistId?`<p class="sm-meta">Gist: ${GH.gistId}</p>`:''}
+   <p class="sm-note">회사·모바일에서 이 사이트를 열고 <b>같은 토큰</b>을 입력하면 자동으로 같은 Gist를 찾아 이어집니다.</p>
+   <button class="sm-btn danger" onclick="disconnectSync()">연결 해제</button>` : `
+   <ol class="sm-steps">
+     <li>GitHub → Settings → Developer settings → <b>Personal access tokens</b> 에서 토큰 생성, <b>gist</b> 권한만 체크.</li>
+     <li>아래에 붙여넣고 [연결].</li>
+     <li>다른 기기에서도 같은 토큰만 넣으면 같은 Gist를 자동으로 찾아 동기화.</li>
+   </ol>
+   <input id="ghToken" class="sm-input" type="password" placeholder="ghp_… 또는 github_pat_…" autocomplete="off">
+   <button class="sm-btn" onclick="connectSync()">연결 · 테스트</button>
+   <p class="sm-warn">⚠ 토큰은 <b>이 기기의 앱 저장소에만</b> 보관됩니다. HTML 파일·Gist 본문에는 들어가지 않습니다. 반드시 최소 권한(gist)만 부여하세요.</p>`;
+}
+async function connectSync(){
+ const t=(document.getElementById('ghToken')||{}).value; if(!t||!t.trim())return;
+ GH.token=t.trim();GH.gistId='';
+ document.getElementById('syncBody').innerHTML='<p class="sm-note">연결 중… GitHub Gist 확인/생성</p>';
+ try{
+   await ghFindOrCreateGist(); const at=await ghLoad();
+   await lsSet(GH_KEY,{token:GH.token,gistId:GH.gistId}); await lsSet(KEY,dumpState());
+   renderAll(); setBadge('☁ GitHub 동기화됨'+(at?' · '+at.slice(0,10):''),'ok'); renderSyncModal();
+ }catch(e){ GH.token='';
+   document.getElementById('syncBody').innerHTML='<p class="sm-err">연결 실패: '+(e.message||e)+'</p><p class="sm-note">이 미리보기(샌드박스)가 외부 연결을 막을 수 있습니다. HTML 파일을 GitHub Pages 등에 올려 직접 열면 해결됩니다.</p><button class="sm-btn" onclick="renderSyncModal()">다시 시도</button>';
+ }
+}
+async function disconnectSync(){GH={token:'',gistId:''};await lsSet(GH_KEY,{token:'',gistId:''});setBadge('☁ 이 기기 저장','');renderSyncModal();}
 const score=c=>['s1','s2','s3','s4','s5'].reduce((s,k)=>s+(c.S[k]||0),0);
 const scoreCol=s=>s>=8?STAGE_HEX.초입:s>=5?STAGE_HEX.가속:s>=3?STAGE_HEX.성숙:STAGE_HEX.태동;
+
+/* ===== PRICES (매일 prices.json — GitHub Actions 크론이 갱신) ===== */
+let PRICES={},PRICES_ASOF=null;
+function fmtMoney(v,cur){if(v==null)return '';if(cur==='KRW')return '₩'+Math.round(v).toLocaleString();if(cur==='JPY')return '¥'+Math.round(v).toLocaleString();if(cur==='TWD')return 'NT$'+(+v).toFixed(1);return '$'+(+v).toFixed(2);}
+function priceHTML(c){const q=PRICES[c.id];if(!q||q.price==null)return '';const ch=q.changePct;const col=ch==null?'var(--dim)':ch>=0?'var(--dawn)':'var(--hot)';const sg=ch==null?'':(' '+(ch>=0?'▲':'▼')+Math.abs(ch).toFixed(2)+'%');return `<span style="font-family:var(--mono);font-weight:600;white-space:nowrap;color:${col}">${fmtMoney(q.price,q.currency)}${sg}</span>`;}
+function pricePill(c){const h=priceHTML(c);return h?`<span class="pill">${h}</span>`:'';}
+function updatePxNote(){const el=document.getElementById('pxNote');if(el)el.textContent=PRICES_ASOF?('시세 '+PRICES_ASOF.slice(0,10)):'';}
+async function loadPrices(){try{const r=await fetch('./prices.json',{cache:'no-store'});if(!r.ok)return;const p=await r.json();PRICES=p.quotes||{};PRICES_ASOF=p.asOf||null;renderAll();updatePxNote();}catch(e){}}
 
 /* ===== TABS ===== */
 document.getElementById('nav').addEventListener('click',e=>{const b=e.target.closest('.tab');if(!b)return;
  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));document.querySelectorAll('.view').forEach(v=>v.classList.remove('on'));
  b.classList.add('on');document.getElementById('v-'+b.dataset.v).classList.add('on');if(b.dataset.v==='map')drawSCurve();});
 
+/* ===== SIGNAL LOG (실적 콜 등 신규 시그널 → value-chain 반영, 누적 가능) ===== */
+const SIGNAL_LOG=[
+ {date:'2026-05-20', source:'NVIDIA Q1 FY27 실적·컨콜',
+  srcs:[
+   {label:'NVIDIA IR(8-K)', url:'https://www.sec.gov/Archives/edgar/data/0001045810/000104581026000051/q1fy27pr.htm'},
+   {label:'컨콜 전사', url:'https://www.fool.com/earnings/call-transcripts/2026/05/20/nvidia-nvda-q1-2027-earnings-transcript/'}
+  ],
+  items:[
+   {tag:'L2·CPU',layer:'L2',col:'#b8860b',html:'<b>Vera 단독 CPU ~$20B 가시성 · $200B TAM</b> 신규 진입. "GPU 옆 CPU"가 1차주 차원에서 공식 매출축으로 — Agentic AI=CPU 수요 직접 확인. → 호스트 CPU 파생체인(메모리 인터페이스·FC-BGA·전력) 보강.'},
+   {tag:'L6·연결',layer:'L6',col:'#1c7ed6',html:'데이터센터 <b>네트워킹 $14.8B · +199% YoY</b> (컴퓨트 +92%보다 빠름). "networking이 컴퓨트보다 늦게 반영(γ)" 가설 강력 확인. → L6 광 비중 상향 검토.'},
+   {tag:'전 레이어',layer:null,col:'#7048e8',html:'공급 제약 = "수요가 아니라 <b>모든 시스템 부품의 양산 타임라인</b>"(CFO Colette Kress). Vera Rubin 풀사이클 공급 제약 → 다음 병목 = demand 아닌 components(HBM·CoWoS·전력) thesis 직접 확인.'},
+   {tag:'수요·L1',layer:'L1',col:'#b8860b',html:'세그먼트 재편: DC를 <b>Hyperscale $38B(~50%) / ACIE $37B(+31% QoQ, AI클라우드 3배·소버린 +80%) + Edge</b> 3분할. 수요 기반 광역화=단일 하이퍼스케일러 리스크↓, Edge=피지컬 AI 시그널.'},
+   {tag:'보안',layer:null,col:'#0ca678',html:'Vera Rubin = 업계 최초 <b>end-to-end Confidential Computing</b> 플랫폼. AI 보안이 하드웨어 스택에 내장 → 사용자 AI보안 트랙(현재 0% 보유)과 연결점.'},
+   {tag:'L8·전력',layer:'L8',col:'#0ca678',html:'10MW+ 파트너 데이터센터 1년 새 <b>~2배</b> → 전력·발전(L7·L8) 수요 구조 확인. (단 ASIC/LPX는 Jensen이 "niche"로 평가 — 자기이해 감안.)'},
+  ]},
+ /* ▼ 신규 시그널은 여기에 같은 형식으로 추가 (date·source·srcs[{label,url}] 출처 필수) */
+];
+function renderSignalLog(){
+ const el=document.getElementById('signalLog');if(!el)return;
+ el.innerHTML=`<div class="sh"><span class="live">LOG</span><span class="ttl">시그널 로그</span><span class="meta">신규 시그널 → value-chain 반영 · 출처 표기</span></div>`
+  +SIGNAL_LOG.map(en=>`<div class="sigentry">
+     <div class="eh"><span class="edate">${en.date}</span><span class="esrc">${en.source}</span>
+       ${en.srcs&&en.srcs.length?`<span class="srctxt">출처: ${en.srcs.map(s=>s.label).join(' · ')}</span>`:''}</div>
+     ${en.items.map(it=>`<div class="sigitem">
+        <span class="sigtag ${it.layer?'jump':''}" ${it.layer?`data-l="${it.layer}"`:''} style="background:${it.col}22;color:${it.col}">${it.tag}</span>
+        <div class="sigtxt">${it.html}${it.src?` <span class="srctxt">— ${it.src}</span>`:''}</div></div>`).join('')}
+   </div>`).join('');
+ el.querySelectorAll('.sigtag.jump').forEach(t=>t.addEventListener('click',()=>{
+   document.querySelector('.tab[data-v="stack"]').click();const c=document.getElementById('lay-'+t.dataset.l);
+   if(c){c.classList.remove('collapsed');c.scrollIntoView({behavior:'smooth',block:'center'});}}));
+}
+
+/* ===== 00 THREAD (river) ===== */
+function renderThread(){
+ const svg=document.getElementById('threadSvg');if(!svg)return;
+ const W=1240,H=270,padX=72,top=48,bot=204,n=THREAD.length,gap=(W-padX*2)/(n-1);
+ const pts=THREAD.map((d,i)=>({x:padX+gap*i,y:top+(bot-top)*(1-d.pos)}));
+ let path=`M ${pts[0].x} ${pts[0].y}`;
+ for(let i=1;i<pts.length;i++){const p0=pts[i-1],p1=pts[i],cx=(p0.x+p1.x)/2;path+=` C ${cx} ${p0.y}, ${cx} ${p1.y}, ${p1.x} ${p1.y}`;}
+ let s=`<defs><linearGradient id="river" x1="0" y1="0" x2="1" y2="0">
+   <stop offset="0" stop-color="#b8860b"/><stop offset=".4" stop-color="#1c7ed6"/><stop offset=".72" stop-color="#0ca678"/><stop offset="1" stop-color="#7048e8"/></linearGradient></defs>`;
+ s+=`<line x1="${padX}" y1="${bot+16}" x2="${W-padX}" y2="${bot+16}" stroke="var(--line)" stroke-dasharray="2 5"/>`;
+ s+=`<text x="${padX}" y="${bot+36}" fill="var(--mature)" font-family="var(--mono)" font-size="10">← 성숙 / 선반영</text>`;
+ s+=`<text x="${W-padX}" y="${bot+36}" fill="var(--dawn)" font-family="var(--mono)" font-size="10" text-anchor="end">초입 / 미반영 →</text>`;
+ s+=`<path d="${path}" fill="none" stroke="url(#river)" stroke-width="3" opacity=".55"/>`;
+ THREAD.forEach((d,i)=>{const p=pts[i],col=STAGE_HEX[d.stage];
+  s+=`<g class="river-node" data-l="${d.layer}">
+   <line x1="${p.x}" y1="${p.y}" x2="${p.x}" y2="${bot+10}" stroke="var(--line)" stroke-width="1"/>
+   <circle class="rn-box" cx="${p.x}" cy="${p.y}" r="11" fill="${col}" opacity=".95"/>
+   <circle cx="${p.x}" cy="${p.y}" r="11" fill="none" stroke="${col}" stroke-width="1" opacity=".4"><animate attributeName="r" values="11;19;11" dur="2.4s" repeatCount="indefinite"/><animate attributeName="opacity" values=".4;0;.4" dur="2.4s" repeatCount="indefinite"/></circle>
+   <text x="${p.x}" y="${p.y-30}" text-anchor="middle" fill="${col}" font-family="var(--mono)" font-size="9.5" font-weight="700">${d.layer}</text>
+   <text x="${p.x}" y="${p.y-15}" text-anchor="middle" fill="var(--txt)" font-family="var(--serif)" font-size="16" font-weight="600">${d.label}</text>
+   <text x="${p.x}" y="${bot+28}" text-anchor="middle" fill="var(--dim)" font-family="var(--mono)" font-size="9">${d.sub}</text></g>`;});
+ svg.innerHTML=s;
+ document.getElementById('threadDetail').innerHTML=THREAD.map(d=>{const col=STAGE_HEX[d.stage];
+  const cands=STATE.filter(c=>c.layer===d.layer);
+  return `<div class="dstrip" data-l="${d.layer}" style="border-left-color:${col}">
+   <h4>${d.layer} ${d.label}<span class="badge" style="background:${col}22;color:${col}">${d.stage}</span></h4>
+   <p>${d.sub}<br>후보 ${cands.length}: ${cands.slice(0,3).map(c=>c.name).join(', ')||'—'}</p></div>`;}).join('');
+ const jump=l=>{document.querySelector('.tab[data-v="stack"]').click();const t=document.getElementById('lay-'+l);if(t){t.classList.remove('collapsed');t.scrollIntoView({behavior:'smooth',block:'center'});}};
+ svg.querySelectorAll('.river-node').forEach(g=>g.addEventListener('click',()=>jump(g.dataset.l)));
+ document.querySelectorAll('.dstrip').forEach(g=>g.addEventListener('click',()=>jump(g.dataset.l)));
+}
+
+/* ===== 01 CASCADE ===== */
+let cascSel='cpu';
+function renderCascade(){
+ const picks=document.getElementById('cascPick');if(!picks)return;
+ picks.innerHTML=CASCADES.map(c=>`<button class="cpick ${c.key===cascSel?'on':''}" data-k="${c.key}">${c.driver}<span class="lb">${c.layer}</span></button>`).join('');
+ picks.querySelectorAll('.cpick').forEach(b=>b.addEventListener('click',()=>{cascSel=b.dataset.k;renderCascade();}));
+ const c=CASCADES.find(x=>x.key===cascSel),dcol=STAGE_HEX[c.stage];
+ document.getElementById('cascView').innerHTML=`
+  <div class="casc-trigger"><b>거시 트리거 (L1)</b>${c.trigger}</div>
+  <div class="casc-flow">
+    <div class="casc-driver">
+      <div class="dl">1차 드라이버 · ${c.layer}</div><div class="dn">${c.driver}</div>
+      <span class="sbadge" style="background:${dcol}22;color:${dcol}">${c.stage}</span>
+      <div class="role"><b>${c.primary.label}</b><br>${c.primary.ex}</div>
+      <div class="arrowdown">▼ 파생 가치사슬 (다음 병목 후보)</div>
+    </div>
+    <div class="casc-nodes">${c.nodes.map((nd,i)=>{const col=STAGE_HEX[nd.stage];
+      return `<div class="cnode" data-cand="${nd.cand||''}" style="border-left-color:${col};animation-delay:${i*70}ms">
+        <span class="jdot" style="background:${col}"></span>
+        <div class="top"><span class="nm">${nd.n}</span><span class="sbadge" style="background:${col}22;color:${col}">${nd.stage}</span>${nd.cand?'<span class="go">분해 보기 →</span>':'<span class="go" style="color:var(--faint)">리서치 영역</span>'}</div>
+        <div class="why">${nd.why}</div>
+        <div class="mult">콘텐츠 배수 · ${nd.mult}</div>
+        <div class="cos">대표: ${nd.cos}</div></div>`;}).join('')}</div>
+  </div>`;
+ document.querySelectorAll('#cascView .cnode').forEach(el=>el.addEventListener('click',()=>{const id=el.dataset.cand;if(id)openDrawer(id);}));
+}
+
 /* ===== 01 STACK ===== */
 function renderStack(){
+ const front=['L4','L8'];
+ document.getElementById('stackList').innerHTML=LAYERS.map(l=>{
+  const w=heldWeight(l.id),cands=STATE.filter(c=>c.layer===l.id);
+  const isFront=front.includes(l.id);
+  const chips=cands.length?cands.map(c=>{const col=STAGE_HEX[c.stage];
+    return `<div class="chip" data-id="${c.id}" style="border-left-color:${col}"><span class="sd" style="background:${col}"></span><span class="nm">${c.name}</span><span class="tk">${c.ticker}</span>${c.held?'<span class="heldstar">★</span>':''} ${priceHTML(c)}</div>`;}).join(''):'<span class="emptyc">— 리서치 영역 (후보 추가) —</span>';
+  return `<div class="lcard" id="lay-${l.id}" style="border-left-color:${l.color}">
+   <div class="lhead" data-l="${l.id}">
+     <div class="lid" style="color:${l.color}">${l.id}</div>
+     <div class="lmid"><div class="lname">${l.name}</div><div class="lex">${l.en}</div>
+       <div class="lflow">→ ${l.flow} · 후보 ${cands.length}<span class="caret">▾</span></div></div>
+     <div class="lright">
+       ${isFront?'<span class="lstage" style="background:var(--dawn);color:var(--onacc)">◂ 다음 전선</span>':''}
+       <span class="lstage" style="background:${l.color}22;color:${l.color}">${l.stage}</span>
+       <div class="lheld" style="width:120px"><i style="width:${Math.min(w*2.4,100)}%;background:${w>=12?'var(--mature)':w>=4?'var(--accel)':'var(--dawn)'}"></i></div>
+       <div class="lheldtxt">보유 ${w?w.toFixed(1)+'%':'0%'}</div>
+     </div>
+   </div>
+   <div class="lbody">${chips}</div></div>`;
+ }).join('');
+ document.querySelectorAll('#stackList .lhead').forEach(h=>h.addEventListener('click',()=>h.parentElement.classList.toggle('collapsed')));
+ document.querySelectorAll('#stackList .chip').forEach(ch=>ch.addEventListener('click',e=>{e.stopPropagation();openDrawer(ch.dataset.id);}));
+}
+function renderStack_old_unused(){
  const front=['L4','L8'];
  document.getElementById('stackList').innerHTML=LAYERS.map(l=>{
   const w=heldWeight(l.id),cands=STATE.filter(c=>c.layer===l.id).length;
@@ -450,7 +851,7 @@ function renderStack(){
 
 /* ===== 02 EXPLORER ===== */
 function renderLegends(){const h=Object.keys(STAGE_HEX).map(s=>`<span class="lg"><span class="dot s-${s}"></span>${s}</span>`).join('')+'<span class="lg" style="color:var(--mature)">★ 보유</span>';
- document.getElementById('legendEx').innerHTML=h;document.getElementById('legendMap').innerHTML=h;}
+ const ls=document.getElementById('legendStack');if(ls)ls.innerHTML=h;document.getElementById('legendMap').innerHTML=h;}
 function renderExplorer(){
  const order=['L1','L2','L3','L4','L5','L6','L7','L8','기타'];
  document.getElementById('exList').innerHTML=order.map(lid=>{
@@ -479,7 +880,7 @@ function openDrawer(id){
   <div class="dr-meta"><span class="pill">${c.mkt} · ${c.ticker}</span>
     <span class="pill stage" style="background:${col}">${c.stage}</span>
     <span class="pill">초입점수 <b style="color:${scoreCol(sc)}">${sc}/10</b></span>
-    ${c.held?`<span class="pill held">★ ${c.heldNote||'보유'}</span>`:''}</div>
+    ${c.held?`<span class="pill held">★ ${c.heldNote||'보유'}</span>`:''}${pricePill(c)}</div>
   <div class="dr-sec"><h5>세부 밸류체인</h5><div class="subchain">${parts.map((p,i)=>`${i?'<span class="ar">→</span>':''}<span>${p}</span>`).join('')}</div></div>
   <div class="dr-sec"><h5>가설 (Alpha)</h5><p>${c.thesis}</p></div>
   <div class="dr-sec"><h5>§2-C 산출물</h5>
@@ -517,8 +918,8 @@ function recompute(){renderTracker();if(document.getElementById('v-map').classLi
 function drawSCurve(){
  const svg=document.getElementById('scurve'),W=1180,H=470,padL=58,padR=40,padT=30,padB=64;
  const x0=padL,x1=W-padR,y0=H-padB,y1=padT,sx=t=>x0+(x1-x0)*t,Sc=t=>1/(1+Math.exp(-(t-.5)*11)),sy=v=>y0-(y0-y1)*v;
- let s=`<defs><linearGradient id="db" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#46e6a8" stop-opacity=".22"/><stop offset="1" stop-color="#46e6a8" stop-opacity="0"/></linearGradient>
-  <linearGradient id="cg" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#9b7bff"/><stop offset=".28" stop-color="#46e6a8"/><stop offset=".6" stop-color="#3fa9ff"/><stop offset="1" stop-color="#ff5d5d"/></linearGradient></defs>`;
+ let s=`<defs><linearGradient id="db" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0ca678" stop-opacity=".22"/><stop offset="1" stop-color="#0ca678" stop-opacity="0"/></linearGradient>
+  <linearGradient id="cg" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#7048e8"/><stop offset=".28" stop-color="#0ca678"/><stop offset=".6" stop-color="#1c7ed6"/><stop offset="1" stop-color="#e03131"/></linearGradient></defs>`;
  s+=`<rect x="${sx(.15)}" y="${y1}" width="${sx(.38)-sx(.15)}" height="${y0-y1}" fill="url(#db)"/>`;
  s+=`<text x="${sx(.265)}" y="${y1+16}" text-anchor="middle" fill="var(--dawn)" font-family="var(--mono)" font-size="11" font-weight="700" letter-spacing="2">여명 · 초입 ZONE</text>`;
  s+=`<line x1="${x0}" y1="${y0}" x2="${x1}" y2="${y0}" stroke="var(--line2)"/><line x1="${x0}" y1="${y0}" x2="${x0}" y2="${y1}" stroke="var(--line2)"/>`;
@@ -554,8 +955,8 @@ function renderPortfolio(){
   당신이 직접 "다음 병목"으로 지목한 <span class="grn">L4 패키징(2.5%) · L8 grid 발전(2.6%)</span>은 합쳐 ${next.toFixed(0)}%로 얇고, <b>AI 보안 트랙은 0%</b>(8레이어 하드웨어 스택 밖). <br>→ Alpha 관찰: 알파라고 본 곳에 자본이 안 가 있음. 의도된 대기인지, thesis-book 불일치인지는 당신의 판단 영역.</p>`;
  document.getElementById('portBars').innerHTML=order.map(lid=>{
   const d=byL[lid];if(!d)return '';
-  const L=LMAP[lid]||{id:lid,name:lid==='현금'?'현금':'기타(8레이어 외)',color:lid==='현금'?'#4a5e70':'#9b7bff'};
-  const isCurrent=['L3','L6','L7','L2'].includes(lid),col=lid==='현금'?'#4a5e70':isCurrent?'var(--mature)':lid==='기타'?'#9b7bff':'var(--dawn)';
+  const L=LMAP[lid]||{id:lid,name:lid==='현금'?'현금':'기타(8레이어 외)',color:lid==='현금'?'#64748b':'#7048e8'};
+  const isCurrent=['L3','L6','L7','L2'].includes(lid),col=lid==='현금'?'#64748b':isCurrent?'var(--mature)':lid==='기타'?'#7048e8':'var(--dawn)';
   return `<div class="pbar-row"><div class="pbar-lab">${L.id} ${L.name.split('(')[0].split('/')[0].trim()}<span class="sub">${d.labels.join(' · ').slice(0,46)}</span></div>
     <div class="pbar-track"><div class="pbar-fill" style="width:${Math.min(d.w*2.6,100)}%;background:${col}">${d.w.toFixed(1)}%</div></div>
     <div class="pbar-amt">${d.amt}M</div></div>`;
@@ -572,10 +973,10 @@ function renderTracker(){
  const sv=document.getElementById('sortSel').value,fv=document.getElementById('filterSel').value;
  let rows=[...STATE];if(fv!=='all')rows=rows.filter(c=>c.stage===fv);
  rows.sort((a,b)=>sv==='score'?score(b)-score(a):sv==='maturity'?a.mat-b.mat:(a.layer+a.name).localeCompare(b.layer+b.name,'ko'));
- document.getElementById('tkBody').innerHTML=rows.map(c=>{const col=STAGE_HEX[c.stage],sc=score(c),L=LMAP[c.layer]||{color:'#9b7bff'};
+ document.getElementById('tkBody').innerHTML=rows.map(c=>{const col=STAGE_HEX[c.stage],sc=score(c),L=LMAP[c.layer]||{color:'#7048e8'};
   const cell=k=>{const v=c.S[k]||0;return `<td class="c"><div class="lbar"><div class="lcell" data-id="${c.id}" data-s="${k}" data-v="${v}" title="클릭=+1"></div></div></td>`;};
   return `<tr class="trow" style="border-left-color:${col}">
-   <td><div class="t-nm">${c.name} <span class="t-tk">${c.ticker}</span>${c.held?' <span style="color:var(--mature)">★</span>':''}</div><div class="t-sub" style="color:${L.color}">${c.layer}${c.layer2?'/'+c.layer2:''} · ${c.sub.split('→')[0].trim()}</div></td>
+   <td><div class="t-nm">${c.name} <span class="t-tk">${c.ticker}</span>${c.held?' <span style="color:var(--mature)">★</span>':''} ${priceHTML(c)}</div><div class="t-sub" style="color:${L.color}">${c.layer}${c.layer2?'/'+c.layer2:''} · ${c.sub.split('→')[0].trim()}</div></td>
    ${cell('s1')}${cell('s2')}${cell('s3')}${cell('s4')}${cell('s5')}
    <td class="c"><span class="score-badge" style="background:${scoreCol(sc)}22;color:${scoreCol(sc)}">${sc}</span></td>
    <td class="c"><span class="t-stage" style="background:${col}22;color:${col}">${c.stage}</span></td>
@@ -588,14 +989,9 @@ function renderTracker(){
 document.getElementById('sortSel').addEventListener('change',renderTracker);
 document.getElementById('filterSel').addEventListener('change',renderTracker);
 
-/* ===== EXPORT / IMPORT ===== */
-document.getElementById('exportBtn').addEventListener('click',()=>{const b=new Blob([JSON.stringify(STATE,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='observatory-8L-'+new Date().toISOString().slice(0,10)+'.json';a.click();});
-document.getElementById('importBtn').addEventListener('click',()=>document.getElementById('importFile').click());
-document.getElementById('importFile').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const data=JSON.parse(r.result);if(Array.isArray(data)){data.forEach(s=>{const t=STATE.find(x=>x.id===s.id);if(t)Object.assign(t,s);else STATE.push({lastChecked:null,...s});});renderAll();saveStore();alert('불러오기 완료');}}catch(err){alert('파싱 실패: '+err.message);}};r.readAsText(f);});
-
 /* ===== INIT ===== */
-function renderAll(){renderStack();renderExplorer();renderPortfolio();renderTracker();}
-renderLegends();loadStore();renderAll();
+function renderAll(){renderSignalLog();renderThread();renderCascade();renderStack();renderPortfolio();renderTracker();}
+renderLegends();loadStore().then(renderAll);renderAll();loadPrices();
 </script>
 </body>
 </html>
