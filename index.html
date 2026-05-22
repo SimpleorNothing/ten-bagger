@@ -941,7 +941,7 @@ function openDrawer(id){
 function closeDrawer(){document.getElementById('drawer').classList.remove('on');document.getElementById('drawerBg').classList.remove('on');}
 document.getElementById('drawerBg').addEventListener('click',closeDrawer);window.closeDrawer=closeDrawer;
 function setS(id,s,n){const c=STATE.find(x=>x.id===id);if(c){c.S[s]=n;recompute();saveStore();}}
-function markChecked(id){const c=STATE.find(x=>x.id===id);if(c){c.lastChecked=new Date().toISOString().slice(0,10);saveStore();openDrawer(id);renderTracker();}}
+function markChecked(id){const c=STATE.find(x=>x.id===id);if(c){c.lastChecked=new Date(Date.now()+9*3600000).toISOString().slice(0,10);saveStore();openDrawer(id);renderTracker();}}
 window.markChecked=markChecked;
 function recompute(){renderTracker();if(document.getElementById('v-map').classList.contains('on'))drawSCurve();}
 
