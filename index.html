@@ -283,6 +283,13 @@ table.tk th.c{text-align:center}
 .rcand .tier{font-family:var(--mono);font-size:13px;font-weight:700;padding:1px 6px;border-radius:20px;margin-left:5px;white-space:nowrap}
 .rcand.active{border-left-color:var(--dawn);background:rgba(70,230,168,.06)}
 .rcand.active .num{color:var(--dawn)}
+.rcand-merged{grid-column:1/-1;align-items:start;background:rgba(150,161,176,.04)}
+.rcand-merged .num{color:var(--faint)}
+.rcand-merged .mhead{font-family:var(--mono);font-size:13px;color:var(--faint);margin-bottom:6px}
+.m-line{display:flex;align-items:center;gap:8px;padding:5px 0;border-top:1px solid var(--line)}
+.m-line:first-of-type{border-top:0;padding-top:0}
+.m-line .riv{font-size:14px}
+.m-line .m-axis{font-family:var(--mono);font-size:12px;color:var(--dim);margin-left:auto;text-align:right}
 </style>
 </head>
 <body>
@@ -312,17 +319,19 @@ table.tk th.c{text-align:center}
     <p class="vsub">학습→추론 전환은 단발 이벤트가 아니라 <b>capex 병목이 컴퓨트에서 메모리·광·전력으로 흘러가는 강물</b>입니다. 강물의 머리는 8레이어 위를 이동하며, 마디를 누르면 해당 레이어 후보로 이동합니다. 목표는 <b>다음 마디(초입)</b>를 미리 점하는 것.</p></div>
   <aside class="rcand-panel">
       <div class="ph">새로운 강물 후보</div>
-      <div class="psub">마스터 1 + 독립 강물 5 · 서로 비종속(MECE)</div>
+      <div class="psub">독립 강물 4 (1·2·4·5) + 나머지 묶음 (3·6·△) · 서로 비종속(MECE)</div>
       <div class="rcand-row">
       <div class="rcand active"><div class="num">1</div><div><div class="riv">학습<span class="ar">→</span>추론<span class="tier" style="background:rgba(70,230,168,.16);color:var(--dawn)">현재</span></div><div class="axis">워크로드 · A의 사슬 소유</div></div></div>
       <div class="rcand" style="border-left-color:#0ca678"><div class="num">2</div><div><div class="riv">데이터<span class="ar">→</span>RL·합성<span class="tier" style="background:rgba(12,166,120,.16);color:#0ca678">A</span></div><div class="axis">모델 연료 · 입력</div></div></div>
-      <div class="rcand" style="border-left-color:var(--mature)"><div class="num">3</div><div><div class="riv">디지털<span class="ar">→</span>피지컬<span class="tier" style="background:rgba(184,134,11,.2);color:var(--mature)">C</span></div><div class="axis">적용 영역 · 출력</div></div></div>
       <div class="rcand" style="border-left-color:var(--accel)"><div class="num">4</div><div><div class="riv">임대<span class="ar">→</span>주권·뉴클라우드<span class="tier" style="background:rgba(28,126,214,.16);color:var(--accel)">B</span></div><div class="axis">소유·자본 · 누가</div></div></div>
       <div class="rcand" style="border-left-color:var(--accel)"><div class="num">5</div><div><div class="riv">스케일<span class="ar">→</span>효율<span class="tier" style="background:rgba(28,126,214,.16);color:var(--accel)">B</span></div><div class="axis">지능 단가 · Jevons</div></div></div>
-      <div class="rcand" style="border-left-color:var(--accel)"><div class="num">6</div><div><div class="riv">자유배포<span class="ar">→</span>거버넌스<span class="tier" style="background:rgba(28,126,214,.16);color:var(--accel)">B</span></div><div class="axis">규율·신뢰 · 수출통제</div></div></div>
-      <div class="rcand" style="border-left-color:var(--faint);border-left-style:dashed;background:transparent;opacity:.78"><div class="num">△</div><div><div class="riv" style="color:var(--dim)">중앙<span class="ar" style="color:var(--faint)">→</span>엣지·분산<span class="tier" style="background:rgba(150,161,176,.14);color:var(--faint)">경계</span></div><div class="axis">부분 종속 · A 물량 연동</div></div></div>
+      <div class="rcand rcand-merged"><div class="num">+</div><div><div class="mhead">나머지 묶음 · 보조·경계군 (3 · 6 · △)</div>
+        <div class="m-line"><div class="riv">디지털<span class="ar">→</span>피지컬<span class="tier" style="background:rgba(184,134,11,.2);color:var(--mature)">C</span></div><span class="m-axis">적용 영역 · 출력</span></div>
+        <div class="m-line"><div class="riv">자유배포<span class="ar">→</span>거버넌스<span class="tier" style="background:rgba(28,126,214,.16);color:var(--accel)">B</span></div><span class="m-axis">규율·신뢰 · 수출통제</span></div>
+        <div class="m-line"><div class="riv" style="color:var(--dim)">중앙<span class="ar" style="color:var(--faint)">→</span>엣지·분산<span class="tier" style="background:rgba(150,161,176,.14);color:var(--faint)">경계</span></div><span class="m-axis">부분 종속 · A 물량 연동</span></div>
+      </div></div>
       </div>
-      <div class="psub" style="margin:12px 0 0;line-height:1.6">A 비합의 · B 반비합의 · C 합의화 중 · △ 경계. 1~6은 서로 <b style="color:var(--dawn)">비종속(독립 forcing function)</b>.</div>
+      <div class="psub" style="margin:12px 0 0;line-height:1.6">A 비합의 · B 반비합의 · C 합의화 중 · △ 경계. <b style="color:var(--dawn)">1·2·4·5</b>는 서로 비종속(독립 forcing function), <b>3·6·△</b>는 보조·경계로 한 묶음.</div>
     </aside>
     <div class="thread-card">
       <span class="front-pill">현재 전선(front): L4 패키징 backend · L8 grid 전력</span>
