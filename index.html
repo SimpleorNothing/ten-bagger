@@ -945,11 +945,31 @@ function drawSCurve(){
  s+=`<text x="${(x0+x1)/2}" y="${H-12}" text-anchor="middle" fill="var(--faint)" font-family="var(--mono)" font-size="10">테마 성숙도 / 가격 반영도 →</text>`;
  let cp=`M ${sx(0)} ${sy(Sc(0))}`;for(let t=0;t<=1.001;t+=.02)cp+=` L ${sx(t)} ${sy(Sc(t))}`;
  s+=`<path d="${cp}" fill="none" stroke="url(#cg)" stroke-width="2.5" opacity=".5"/>`;
- STATE.forEach(c=>{const t=c.mat,cx=sx(t),cy=sy(Sc(t))-(c.conv-.6)*40,col=STAGE_HEX[c.stage],sc=score(c),r=6+sc*.7;
+ // ── label placement: font-size 11, push-apart to prevent overlap ──
+ const FS=11,TH=FS+4;
+ // estimate rendered width: Korean chars are ~full-width, ASCII ~0.62em
+ const lw=txt=>{let w=0;for(const ch of txt){const c=ch.charCodeAt(0);w+=(c>=0xAC00&&c<=0xD7A3||c>=0x1100&&c<=0x11FF||c>=0x3130&&c<=0x318F)?FS*1.1:FS*0.62;}return w;};
+ // pass 1: compute dot + initial label positions
+ const pts=STATE.map(c=>{const t=c.mat,cx=sx(t),cy=sy(Sc(t))-(c.conv-.6)*40,sc=score(c),r=6+sc*.7;
+  return {c,cx,cy,r,col:STAGE_HEX[c.stage],lx:cx,ly:cy-r-10,lw:lw(c.name+' '+c.layer)};});
+ // pass 2: iterative vertical push-apart for x-overlapping labels
+ for(let k=0;k<30;k++)for(let i=0;i<pts.length;i++)for(let j=i+1;j<pts.length;j++){
+  const a=pts[i],b=pts[j];
+  if(Math.abs(a.lx-b.lx)>(a.lw+b.lw)/2+6)continue; // no x-overlap → skip
+  const gap=Math.abs(a.ly-b.ly),need=TH+3;
+  if(gap<need){const push=(need-gap)/2+.5;a.ly<=b.ly?(a.ly-=push,b.ly+=push):(a.ly+=push,b.ly-=push);}
+ }
+ // pass 3: clamp + render
+ pts.forEach(d=>{
+  const {c,cx,cy,r,col,lx}=d;let ly=d.ly;
+  if(ly<y1+TH)ly=cy+r+TH+3; // flipped below if pushed above chart top
+  ly=Math.max(y1+TH,Math.min(y0-6,ly));
+  const initLy=cy-r-10,displaced=Math.abs(ly-initLy)>TH*2,abv=ly<cy;
   const glow=c.stage==='초입'?`<circle cx="${cx}" cy="${cy}" r="${r+7}" fill="${col}" opacity=".14"/>`:'';
   const held=c.held?`<circle cx="${cx}" cy="${cy}" r="${r+4}" fill="none" stroke="var(--mature)" stroke-width="1.5" stroke-dasharray="2 2"/>`:'';
-  s+=`<g class="s-dot" data-id="${c.id}">${glow}${held}<circle cx="${cx}" cy="${cy}" r="${r}" fill="${col}" stroke="var(--ink)" stroke-width="1.5"/>
-   <text x="${cx}" y="${cy-r-6}" text-anchor="middle" fill="var(--txt)" font-family="var(--mono)" font-size="9" font-weight="600">${c.name} <tspan fill="${col}">${c.layer}</tspan></text></g>`;});
+  const ldr=displaced?`<line x1="${lx}" y1="${abv?ly+3:ly-TH+1}" x2="${cx}" y2="${abv?cy-r-1:cy+r+1}" stroke="${col}" stroke-width=".8" opacity=".4" stroke-dasharray="2 3"/>`:'';
+  s+=`<g class="s-dot" data-id="${c.id}">${glow}${held}${ldr}<circle cx="${cx}" cy="${cy}" r="${r}" fill="${col}" stroke="var(--ink)" stroke-width="1.5"/>
+   <text x="${lx}" y="${ly}" text-anchor="middle" fill="var(--txt)" font-family="var(--mono)" font-size="${FS}" font-weight="600">${c.name} <tspan fill="${col}">${c.layer}</tspan></text></g>`;});
  svg.innerHTML=s;
  const tip=document.getElementById('tip');
  svg.querySelectorAll('.s-dot').forEach(g=>{const c=STATE.find(x=>x.id===g.dataset.id);
