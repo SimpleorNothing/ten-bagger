@@ -1,0 +1,25 @@
+name: Deploy to Cloudflare Workers
+
+on:
+  push:
+    branches: [claude/wizardly-rubin-SubA1]
+    paths-ignore:
+      - 'prices.json'        # 시세 크론 커밋은 별도 배포 불필요 (assets은 별도 관리)
+  workflow_dispatch: {}      # Cloudflare dashboard 또는 Actions 탭에서 수동 실행 가능
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    name: wrangler deploy
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: claude/wizardly-rubin-SubA1
+
+      - uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
