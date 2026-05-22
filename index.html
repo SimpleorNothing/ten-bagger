@@ -76,7 +76,7 @@ main{padding:28px 0 90px;position:relative}
 .sm-close{position:absolute;top:14px;right:14px;background:var(--panel);border:1px solid var(--line);color:var(--dim);width:30px;height:30px;border-radius:8px;cursor:pointer}
 
 /* ===== SIGNAL LOG ===== */
-.siglog{background:linear-gradient(120deg,rgba(28,126,214,.06),var(--ink2));border:1px solid var(--line);border-left:4px solid var(--accel);border-radius:14px;padding:15px 18px;margin-bottom:18px}
+.siglog{background:linear-gradient(120deg,rgba(28,126,214,.06),var(--ink2));border:1px solid var(--line);border-left:4px solid var(--accel);border-radius:14px;padding:15px 18px;margin-top:18px}
 .siglog .sh{display:flex;align-items:center;gap:9px;margin-bottom:10px;flex-wrap:wrap}
 .siglog .sh .ttl{font-family:var(--serif);font-size:20px;font-weight:700}
 .siglog .sh .meta{font-family:var(--mono);font-size:13px;color:var(--faint)}
@@ -295,13 +295,13 @@ table.tk th.c{text-align:center}
   <div class="vhead"><div class="vkick">The Thread · 병목을 관통하는 한 줄기</div>
     <h1 class="vtitle">병목은 <em>이동</em>한다 — 그 앞단에 알파가 있다</h1>
     <p class="vsub">학습→추론 전환은 단발 이벤트가 아니라 <b>capex 병목이 컴퓨트에서 메모리·광·전력으로 흘러가는 강물</b>입니다. 강물의 머리는 8레이어 위를 이동하며, 마디를 누르면 해당 레이어 후보로 이동합니다. 목표는 <b>다음 마디(초입)</b>를 미리 점하는 것.</p></div>
-  <div class="siglog" id="signalLog"></div>
   <div class="thread-card">
     <span class="front-pill">현재 전선(front): L4 패키징 backend · L8 grid 전력</span>
     <svg class="thread-svg" id="threadSvg" viewBox="0 0 1240 270" preserveAspectRatio="xMidYMid meet"></svg>
     <div class="tnote">컴퓨트·메모리(<b>L1–L3</b>)는 이미 가격에 반영(성숙). 강물의 머리는 <b style="color:var(--dawn)">L4 패키징 · L6 광 · L8 발전</b>을 지나 <b style="color:var(--nascent)">피지컬 AI</b>로 향하는 중.</div>
     <div class="detail-strip" id="threadDetail"></div>
   </div>
+  <div class="siglog" id="signalLog"></div>
 </section>
 
 <!-- 01 CASCADE -->
@@ -763,7 +763,7 @@ const SIGNAL_LOG=[
 function renderSignalLog(){
  const el=document.getElementById('signalLog');if(!el)return;
  el.innerHTML=`<div class="sh"><span class="live">LOG</span><span class="ttl">시그널 로그</span><span class="meta">신규 시그널 → value-chain 반영 · 출처 표기</span></div>`
-  +SIGNAL_LOG.map(en=>`<div class="sigentry">
+  +SIGNAL_LOG.slice().reverse().map(en=>`<div class="sigentry">
      <div class="eh"><span class="edate">${en.date}</span><span class="esrc">${en.source}</span>
        ${en.srcs&&en.srcs.length?`<span class="srctxt">출처: ${en.srcs.map(s=>s.label).join(' · ')}</span>`:''}</div>
      ${en.items.map(it=>`<div class="sigitem">
