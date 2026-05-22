@@ -268,10 +268,8 @@ table.tk th.c{text-align:center}
 .t-date{font-family:var(--mono);font-size:13px;color:var(--faint)}
 .foot{margin-top:38px;padding-top:16px;border-top:1px solid var(--line);font-family:var(--mono);font-size:13px;color:var(--faint);line-height:1.7}.foot b{color:var(--dim)}
 @media(max-width:760px){.vtitle{font-size:20px}.layer{grid-template-columns:40px 1fr;gap:10px}.layer .lright{display:none}.exrow{grid-template-columns:96px 1fr}.pbar-row{grid-template-columns:110px 1fr}.asof{position:static;text-align:left;margin:0 0 16px}.asof-row{justify-content:flex-start}.asof-k{text-align:left}}
-/* ===== THREAD: 2-column (candidate rivers | river graph) ===== */
-.thread-layout{display:grid;grid-template-columns:minmax(290px,360px) 1fr;gap:20px;align-items:start}
-@media(max-width:860px){.thread-layout{grid-template-columns:1fr}}
-.rcand-panel{background:linear-gradient(155deg,var(--panel),var(--ink2));border:1px solid var(--line);border-radius:18px;padding:20px 18px}
+/* ===== THREAD: stacked sections (candidates / graph / signal log) ===== */
+.rcand-panel{background:linear-gradient(155deg,var(--panel),var(--ink2));border:1px solid var(--line);border-radius:18px;padding:20px 18px;margin-bottom:18px}
 .rcand-panel .ph{font-family:var(--serif);font-size:18px;font-weight:700}
 .rcand-panel .psub{font-family:var(--mono);font-size:13px;color:var(--faint);margin-bottom:14px}
 .rcand{display:grid;grid-template-columns:22px 1fr;gap:9px;padding:10px 11px;border:1px solid var(--line);border-left-width:3px;border-radius:11px;background:var(--panel);margin-bottom:8px;transition:.18s}
@@ -310,9 +308,7 @@ table.tk th.c{text-align:center}
   <div class="vhead"><div class="vkick">The Thread · 병목을 관통하는 한 줄기</div>
     <h1 class="vtitle">병목은 <em>이동</em>한다 — 그 앞단에 알파가 있다</h1>
     <p class="vsub">학습→추론 전환은 단발 이벤트가 아니라 <b>capex 병목이 컴퓨트에서 메모리·광·전력으로 흘러가는 강물</b>입니다. 강물의 머리는 8레이어 위를 이동하며, 마디를 누르면 해당 레이어 후보로 이동합니다. 목표는 <b>다음 마디(초입)</b>를 미리 점하는 것.</p></div>
-  <div class="siglog" id="signalLog"></div>
-  <div class="thread-layout">
-    <aside class="rcand-panel">
+  <aside class="rcand-panel">
       <div class="ph">새로운 강물 후보</div>
       <div class="psub">마스터 1 + 독립 강물 5 · 서로 비종속(MECE)</div>
       <div class="rcand active"><div class="num">1</div><div><div class="riv">학습<span class="ar">→</span>추론<span class="tier" style="background:rgba(70,230,168,.16);color:var(--dawn)">현재</span></div><div class="axis">워크로드 · A의 사슬 소유</div></div></div>
@@ -330,7 +326,7 @@ table.tk th.c{text-align:center}
       <div class="tnote">컴퓨트·메모리(<b>L1–L3</b>)는 이미 가격에 반영(성숙). 강물의 머리는 <b style="color:var(--dawn)">L4 패키징 · L6 광 · L8 발전</b>을 지나 <b style="color:var(--nascent)">피지컬 AI</b>로 향하는 중.</div>
       <div class="detail-strip" id="threadDetail"></div>
     </div>
-  </div>
+  <div class="siglog" id="signalLog"></div>
 </section>
 
 <!-- 01 CASCADE -->
