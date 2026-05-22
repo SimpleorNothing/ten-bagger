@@ -50,7 +50,7 @@ async function yahoo(sym) {
   const meta = j?.chart?.result?.[0]?.meta;
   if (!meta || meta.regularMarketPrice == null) throw new Error('yahoo no data');
   const price = meta.regularMarketPrice;
-  const prev = meta.chartPreviousClose ?? meta.previousClose ?? null;
+  const prev = meta.previousClose ?? meta.chartPreviousClose ?? null;
   return { price, changePct: prev ? +(((price - prev) / prev) * 100).toFixed(2) : null, currency: meta.currency || 'USD' };
 }
 
@@ -61,11 +61,11 @@ async function naver(code) {
   const r = await fetch(u, { headers: UA });
   if (!r.ok) throw new Error('naver HTTP ' + r.status);
   const txt = await r.text();
-  const arr = JSON.parse(txt.replace(/'/g, '"')); // first row is the header
-  const rows = arr.slice(1).filter((x) => Array.isArray(x) && x.length >= 2 && x[1] != null);
+  const arr = JSON.parse(txt.replace(/'/g, '"')); // header: [날짜,시가,고가,저가,종가,거래량]
+  const rows = arr.slice(1).filter((x) => Array.isArray(x) && x.length >= 5 && x[4] != null);
   if (!rows.length) throw new Error('naver empty');
-  const price = Number(rows[rows.length - 1][1]);
-  const prev = rows.length > 1 ? Number(rows[rows.length - 2][1]) : null;
+  const price = Number(rows[rows.length - 1][4]); // [4] = 종가(close), not [1] 시가(open)
+  const prev = rows.length > 1 ? Number(rows[rows.length - 2][4]) : null;
   return { price, changePct: prev ? +(((price - prev) / prev) * 100).toFixed(2) : null, currency: 'KRW' };
 }
 
