@@ -40,8 +40,8 @@ nav{display:flex;gap:3px;margin-left:auto;flex-wrap:wrap}
 main{padding:28px 0 90px;position:relative}
 .asof{position:absolute;top:6px;right:22px;z-index:2;font-family:var(--mono);text-align:right;line-height:1.55}
 .asof-row{display:flex;gap:8px;justify-content:flex-end;align-items:baseline}
-.asof-k{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--dawn);min-width:30px;text-align:right}
-.asof-v{font-size:12px;color:var(--dim);font-variant-numeric:tabular-nums;white-space:nowrap}
+.asof-k{font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--dawn);min-width:30px;text-align:right}
+.asof-v{font-size:13px;color:var(--dim);font-variant-numeric:tabular-nums;white-space:nowrap}
 .view{display:none;animation:rise .5s cubic-bezier(.2,.7,.2,1)}
 .view.on{display:block}
 @keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
@@ -785,17 +785,17 @@ function renderThread(){
  let s=`<defs><linearGradient id="river" x1="0" y1="0" x2="1" y2="0">
    <stop offset="0" stop-color="#b8860b"/><stop offset=".4" stop-color="#1c7ed6"/><stop offset=".72" stop-color="#0ca678"/><stop offset="1" stop-color="#7048e8"/></linearGradient></defs>`;
  s+=`<line x1="${padX}" y1="${bot+16}" x2="${W-padX}" y2="${bot+16}" stroke="var(--line)" stroke-dasharray="2 5"/>`;
- s+=`<text x="${padX}" y="${bot+36}" fill="var(--mature)" font-family="var(--mono)" font-size="10">← 성숙 / 선반영</text>`;
- s+=`<text x="${W-padX}" y="${bot+36}" fill="var(--dawn)" font-family="var(--mono)" font-size="10" text-anchor="end">초입 / 미반영 →</text>`;
+ s+=`<text x="${padX}" y="${bot+50}" fill="var(--mature)" font-family="var(--mono)" font-size="13">← 성숙 / 선반영</text>`;
+ s+=`<text x="${W-padX}" y="${bot+50}" fill="var(--dawn)" font-family="var(--mono)" font-size="13" text-anchor="end">초입 / 미반영 →</text>`;
  s+=`<path d="${path}" fill="none" stroke="url(#river)" stroke-width="3" opacity=".55"/>`;
  THREAD.forEach((d,i)=>{const p=pts[i],col=STAGE_HEX[d.stage];
   s+=`<g class="river-node" data-l="${d.layer}">
    <line x1="${p.x}" y1="${p.y}" x2="${p.x}" y2="${bot+10}" stroke="var(--line)" stroke-width="1"/>
    <circle class="rn-box" cx="${p.x}" cy="${p.y}" r="11" fill="${col}" opacity=".95"/>
    <circle cx="${p.x}" cy="${p.y}" r="11" fill="none" stroke="${col}" stroke-width="1" opacity=".4"><animate attributeName="r" values="11;19;11" dur="2.4s" repeatCount="indefinite"/><animate attributeName="opacity" values=".4;0;.4" dur="2.4s" repeatCount="indefinite"/></circle>
-   <text x="${p.x}" y="${p.y-30}" text-anchor="middle" fill="${col}" font-family="var(--mono)" font-size="9.5" font-weight="700">${d.layer}</text>
-   <text x="${p.x}" y="${p.y-15}" text-anchor="middle" fill="var(--txt)" font-family="var(--serif)" font-size="16" font-weight="600">${d.label}</text>
-   <text x="${p.x}" y="${bot+28}" text-anchor="middle" fill="var(--dim)" font-family="var(--mono)" font-size="9">${d.sub}</text></g>`;});
+   <text x="${p.x}" y="${p.y-32}" text-anchor="middle" fill="${col}" font-family="var(--mono)" font-size="13" font-weight="700">${d.layer}</text>
+   <text x="${p.x}" y="${p.y-15}" text-anchor="middle" fill="var(--txt)" font-family="var(--serif)" font-size="15" font-weight="600">${d.label}</text>
+   <text x="${p.x}" y="${bot+28}" text-anchor="middle" fill="var(--dim)" font-family="var(--mono)" font-size="13">${d.sub}</text></g>`;});
  svg.innerHTML=s;
  document.getElementById('threadDetail').innerHTML=THREAD.map(d=>{const col=STAGE_HEX[d.stage];
   const cands=STATE.filter(c=>c.layer===d.layer);
@@ -952,14 +952,14 @@ function drawSCurve(){
  let s=`<defs><linearGradient id="db" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0ca678" stop-opacity=".22"/><stop offset="1" stop-color="#0ca678" stop-opacity="0"/></linearGradient>
   <linearGradient id="cg" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#7048e8"/><stop offset=".28" stop-color="#0ca678"/><stop offset=".6" stop-color="#1c7ed6"/><stop offset="1" stop-color="#e03131"/></linearGradient></defs>`;
  s+=`<rect x="${sx(.15)}" y="${y1}" width="${sx(.38)-sx(.15)}" height="${y0-y1}" fill="url(#db)"/>`;
- s+=`<text x="${sx(.265)}" y="${y1+16}" text-anchor="middle" fill="var(--dawn)" font-family="var(--mono)" font-size="11" font-weight="700" letter-spacing="2">여명 · 초입 ZONE</text>`;
+ s+=`<text x="${sx(.265)}" y="${y1+16}" text-anchor="middle" fill="var(--dawn)" font-family="var(--mono)" font-size="13" font-weight="700" letter-spacing="2">여명 · 초입 ZONE</text>`;
  s+=`<line x1="${x0}" y1="${y0}" x2="${x1}" y2="${y0}" stroke="var(--line2)"/><line x1="${x0}" y1="${y0}" x2="${x0}" y2="${y1}" stroke="var(--line2)"/>`;
- [['태동',0],['초입',.26],['가속',.5],['성숙',.74],['과열',.95]].forEach(([l,t])=>{s+=`<text x="${sx(t)}" y="${y0+22}" text-anchor="middle" fill="var(--dim)" font-family="var(--mono)" font-size="10">${l}</text>`;});
- s+=`<text x="${(x0+x1)/2}" y="${H-12}" text-anchor="middle" fill="var(--faint)" font-family="var(--mono)" font-size="10">테마 성숙도 / 가격 반영도 →</text>`;
+ [['태동',0],['초입',.26],['가속',.5],['성숙',.74],['과열',.95]].forEach(([l,t])=>{s+=`<text x="${sx(t)}" y="${y0+22}" text-anchor="middle" fill="var(--dim)" font-family="var(--mono)" font-size="13">${l}</text>`;});
+ s+=`<text x="${(x0+x1)/2}" y="${H-12}" text-anchor="middle" fill="var(--faint)" font-family="var(--mono)" font-size="13">테마 성숙도 / 가격 반영도 →</text>`;
  let cp=`M ${sx(0)} ${sy(Sc(0))}`;for(let t=0;t<=1.001;t+=.02)cp+=` L ${sx(t)} ${sy(Sc(t))}`;
  s+=`<path d="${cp}" fill="none" stroke="url(#cg)" stroke-width="2.5" opacity=".5"/>`;
  // ── label placement: font-size 11, push-apart to prevent overlap ──
- const FS=11,TH=FS+4;
+ const FS=13,TH=FS+4;
  // estimate rendered width: Korean chars are ~full-width, ASCII ~0.62em
  const lw=txt=>{let w=0;for(const ch of txt){const c=ch.charCodeAt(0);w+=(c>=0xAC00&&c<=0xD7A3||c>=0x1100&&c<=0x11FF||c>=0x3130&&c<=0x318F)?FS*1.1:FS*0.62;}return w;};
  // pass 1: compute dot + initial label positions
