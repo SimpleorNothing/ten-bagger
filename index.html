@@ -276,6 +276,7 @@ table.tk th.c{text-align:center}
 .rcand-row .rcand{margin-bottom:0}
 .rcand{display:grid;grid-template-columns:22px 1fr;gap:9px;padding:10px 11px;border:1px solid var(--line);border-left-width:3px;border-radius:11px;background:var(--panel);margin-bottom:8px;transition:.18s}
 .rcand:hover{border-color:var(--line2);transform:translateY(-1px)}
+.rcand[data-r]{cursor:pointer}
 .rcand .num{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--faint)}
 .rcand .riv{font-size:15px;font-weight:700;color:var(--txt);line-height:1.35}
 .rcand .riv .ar{color:var(--dawn);margin:0 4px}
@@ -319,10 +320,10 @@ table.tk th.c{text-align:center}
       <div class="ph">새로운 강물 후보</div>
       <div class="psub">독립 강물 4 (1~4) + 후보군 1 (5) · 서로 비종속(MECE)</div>
       <div class="rcand-row">
-      <div class="rcand active"><div class="num">1</div><div><div class="riv">학습<span class="ar">→</span>추론<span class="tier" style="background:rgba(70,230,168,.16);color:var(--dawn)">현재</span></div><div class="axis">워크로드 · A의 사슬 소유</div></div></div>
-      <div class="rcand" style="border-left-color:#0ca678"><div class="num">2</div><div><div class="riv">데이터<span class="ar">→</span>RL·합성<span class="tier" style="background:rgba(12,166,120,.16);color:#0ca678">A</span></div><div class="axis">모델 연료 · 입력</div></div></div>
-      <div class="rcand" style="border-left-color:var(--accel)"><div class="num">3</div><div><div class="riv">임대<span class="ar">→</span>주권·뉴클라우드<span class="tier" style="background:rgba(28,126,214,.16);color:var(--accel)">B</span></div><div class="axis">소유·자본 · 누가</div></div></div>
-      <div class="rcand" style="border-left-color:var(--accel)"><div class="num">4</div><div><div class="riv">스케일<span class="ar">→</span>효율<span class="tier" style="background:rgba(28,126,214,.16);color:var(--accel)">B</span></div><div class="axis">지능 단가 · Jevons</div></div></div>
+      <div class="rcand active" data-r="0"><div class="num">1</div><div><div class="riv">학습<span class="ar">→</span>추론<span class="tier" style="background:rgba(70,230,168,.16);color:var(--dawn)">현재</span></div><div class="axis">워크로드 · A의 사슬 소유</div></div></div>
+      <div class="rcand" data-r="1" style="border-left-color:#0ca678"><div class="num">2</div><div><div class="riv">데이터<span class="ar">→</span>RL·합성<span class="tier" style="background:rgba(12,166,120,.16);color:#0ca678">A</span></div><div class="axis">모델 연료 · 입력</div></div></div>
+      <div class="rcand" data-r="2" style="border-left-color:var(--accel)"><div class="num">3</div><div><div class="riv">임대<span class="ar">→</span>주권·뉴클라우드<span class="tier" style="background:rgba(28,126,214,.16);color:var(--accel)">B</span></div><div class="axis">소유·자본 · 누가</div></div></div>
+      <div class="rcand" data-r="3" style="border-left-color:var(--accel)"><div class="num">4</div><div><div class="riv">스케일<span class="ar">→</span>효율<span class="tier" style="background:rgba(28,126,214,.16);color:var(--accel)">B</span></div><div class="axis">지능 단가 · Jevons</div></div></div>
       <div class="rcand rcand-merged" style="border-left-color:var(--faint)"><div class="num">5</div><div><div class="riv" style="color:var(--faint);margin-bottom:5px">후보군</div>
         <div class="m-line"><span class="riv">디지털<span class="ar">→</span>피지컬<span class="tier" style="background:rgba(184,134,11,.2);color:var(--mature)">C</span></span></div>
         <div class="m-line"><span class="riv">자유배포<span class="ar">→</span>거버넌스<span class="tier" style="background:rgba(28,126,214,.16);color:var(--accel)">B</span></span></div>
@@ -332,9 +333,9 @@ table.tk th.c{text-align:center}
       <div class="psub" style="margin:12px 0 0;line-height:1.6">A 비합의 · B 반비합의 · C 합의화 중 · 경계=부분 종속. <b style="color:var(--dawn)">1~4</b>는 서로 비종속(독립 forcing function), <b>5</b>는 후보군(보조·경계)으로 묶음.</div>
     </aside>
     <div class="thread-card">
-      <span class="front-pill">현재 전선(front): L4 패키징 backend · L8 grid 전력</span>
+      <span class="front-pill" id="threadFront">현재 전선(front): L4 패키징 backend · L8 grid 전력</span>
       <svg class="thread-svg" id="threadSvg" viewBox="0 0 1240 270" preserveAspectRatio="xMidYMid meet"></svg>
-      <div class="tnote">컴퓨트·메모리(<b>L1–L3</b>)는 이미 가격에 반영(성숙). 강물의 머리는 <b style="color:var(--dawn)">L4 패키징 · L6 광 · L8 발전</b>을 지나 <b style="color:var(--nascent)">피지컬 AI</b>로 향하는 중.</div>
+      <div class="tnote" id="threadNote">컴퓨트·메모리(<b>L1–L3</b>)는 이미 가격에 반영(성숙). 강물의 머리는 <b style="color:var(--dawn)">L4 패키징 · L6 광 · L8 발전</b>을 지나 <b style="color:var(--nascent)">피지컬 AI</b>로 향하는 중.</div>
       <div class="detail-strip" id="threadDetail"></div>
     </div>
   <div class="siglog" id="signalLog"></div>
@@ -440,6 +441,47 @@ const THREAD=[
  {layer:'L4',label:'패키징',sub:'CoWoS·backend',stage:'초입',pos:.30},
  {layer:'L8',label:'발전·grid',sub:'온사이트·SMR',stage:'초입',pos:.24},
  {layer:'기타',label:'피지컬 AI',sub:'로보틱스·엣지',stage:'태동',pos:.12},
+];
+/* ===== 강물 후보 (rivers) — 1=현재(레이어 기반), 2~4=독립 forcing function =====
+   각 강물: front(현재 전선)·note(요약) + flow/value-chain.
+   1번은 8레이어 stack에 매핑(THREAD)되어 후보를 STATE에서 라이브로 끌어옴.
+   2~4번은 자체 nodes[](좌:성숙→우:초입, pos↓)로 흐름·가치사슬을 직접 보유.
+   nodes 편집으로 가설 갱신 — code(상단 라벨)·label·sub(그래프), why·plays(가치사슬). */
+const RIVERS=[
+ {n:1,title:'학습→추론',layerBased:true,
+  front:'현재 전선(front): L4 패키징 backend · L8 grid 전력',
+  note:'컴퓨트·메모리(<b>L1–L3</b>)는 이미 가격에 반영(성숙). 강물의 머리는 <b style="color:var(--dawn)">L4 패키징 · L6 광 · L8 발전</b>을 지나 <b style="color:var(--nascent)">피지컬 AI</b>로 향하는 중.'},
+ {n:2,title:'데이터→RL·합성',
+  front:'현재 전선(front): RL 환경·검증기 · 합성 데이터',
+  note:'공개 웹 데이터(피크 데이터)·휴먼 라벨링은 이미 반영(성숙). 강물의 머리는 <b style="color:var(--dawn)">RL 환경·합성 데이터</b>를 지나 <b style="color:var(--nascent)">독점 데이터 해자</b>로 향하는 중.',
+  nodes:[
+   {code:'웹',label:'공개 웹 데이터',sub:'크롤·코퍼스',stage:'성숙',pos:.88,why:'사전학습 토큰 고갈 — 공개 웹은 소진(피크 데이터)',plays:'Common Crawl·공개 코퍼스 (상품화·무알파)'},
+   {code:'라벨',label:'휴먼 라벨·RLHF',sub:'선호·instruct',stage:'가속',pos:.66,why:'instruct·선호 데이터 = 1차 데이터 공장',plays:'Scale AI · Surge AI · Turing'},
+   {code:'전문',label:'전문가 데이터',sub:'PhD·코드·도메인',stage:'가속',pos:.5,why:'프론티어는 희소 전문 데이터로 이동 (수학·코드·의료)',plays:'Mercor · Surge · 도메인 전문가 마켓'},
+   {code:'RL',label:'RL 환경·검증기',sub:'에이전트 환경',stage:'초입',pos:.32,why:'에이전트 RL의 다음 병목 = 검증가능 환경·리워드',plays:'환경·verifier 스타트업 (Prime Intellect 등·비상장)'},
+   {code:'합성',label:'합성 데이터',sub:'모델→데이터',stage:'초입',pos:.22,why:'모델이 데이터를 생성 — 자기개선 루프, 검증이 관건',plays:'프론티어랩 내재화 · 합성데이터 툴링'},
+   {code:'독점',label:'독점·라이선스',sub:'비공개 코퍼스',stage:'태동',pos:.12,why:'독점 데이터 해자 — 출판·금융·헬스 라이선싱',plays:'콘텐츠 보유사 (Reddit·뉴스·출판 라이선싱)'},
+  ]},
+ {n:3,title:'임대→주권·뉴클라우드',
+  front:'현재 전선(front): 주권 AI · GPU 파이낸싱',
+  note:'하이퍼스케일러 임대(AWS·Azure·GCP)는 기본값으로 선반영. 강물의 머리는 <b style="color:var(--dawn)">뉴클라우드·주권 AI</b>를 지나 <b style="color:var(--nascent)">GPU 담보 파이낸싱</b>으로 — 컴퓨트의 소유·자본이 다음 축.',
+  nodes:[
+   {code:'HS',label:'하이퍼스케일러 임대',sub:'AWS·Azure·GCP',stage:'성숙',pos:.88,why:'클라우드 임대 = 기본값, 선반영',plays:'MSFT · AMZN · GOOGL (1차·컨센서스)'},
+   {code:'네오',label:'뉴클라우드',sub:'GPU 전용 클라우드',stage:'가속',pos:.62,why:'GPU 순수 노출 — 하이퍼스케일러 캐파 부족분 흡수',plays:'CoreWeave · Nebius · Crusoe · Lambda'},
+   {code:'주권',label:'주권 AI',sub:'국가·소버린',stage:'초입',pos:.42,why:'국가별 자국 컴퓨트 구축 — NVDA가 지목한 신수요축',plays:'G42 · 중동·유럽 소버린 · 통신사 AI클라우드'},
+   {code:'자본',label:'GPU 파이낸싱',sub:'SPV·GPU 담보',stage:'초입',pos:.28,why:'빌드아웃 = 자본 게임 — GPU 담보대출·SPV·프라이빗 크레딧',plays:'구조화 크레딧 · GPU 담보 SPV (비상장)'},
+   {code:'중립',label:'중립 코로케이션',sub:'뉴트럴 호스트',stage:'초입',pos:.18,why:'뉴클라우드도 부지·전력은 코로케이션에 의존',plays:'DLR · EQIX · 뉴트럴 호스트'},
+  ]},
+ {n:4,title:'스케일→효율',
+  front:'현재 전선(front): 추론 전용 실리콘 · 엣지 추론',
+  note:'파라미터 스케일링·추론 최적화는 진행 중. 강물의 머리는 <b style="color:var(--dawn)">추론 전용 실리콘·엣지</b>로 — 지능 단가↓가 <b style="color:var(--nascent)">Jevons 수요폭증</b>으로 환류(→ 강물 1).',
+  nodes:[
+   {code:'스케일',label:'프론티어 스케일링',sub:'더 큰 모델',stage:'성숙',pos:.86,why:'파라미터·컴퓨트 스케일링 = 합의, 선반영',plays:'NVDA · 프론티어 랩 (1차)'},
+   {code:'최적',label:'추론 최적화',sub:'양자화·디코딩',stage:'가속',pos:.62,why:'같은 칩에서 토큰당 비용↓ (speculative decoding·양자화·KV캐시)',plays:'추론 서빙·컴파일러 (vLLM 생태계·비상장)'},
+   {code:'전용칩',label:'추론 전용 실리콘',sub:'LPU·웨이퍼스케일',stage:'초입',pos:.42,why:'추론 단가의 다음 곡선 = 전용 가속기 (토큰/와트)',plays:'Groq · Cerebras · SambaNova · 커스텀 ASIC'},
+   {code:'엣지',label:'엣지·온디바이스',sub:'폰·PC·글래스',stage:'초입',pos:.28,why:'추론이 단말로 — 단가↓·지연↓, mix shift',plays:'QCOM · AAPL · 온디바이스 NPU'},
+   {code:'수요',label:'Jevons 수요폭증',sub:'토큰 소비↑',stage:'가속',pos:.18,why:'단가↓ → 총 토큰 소비 폭증 → 컴퓨트 수요 환류(역설)',plays:'전 스택 되먹임 — 강물 1로 회귀'},
+  ]},
 ];
 /* 파생 캐스케이드: 드라이버 ×10 → 함께 폭증하는 파생 가치사슬. cand=탐색기 후보 id */
 const CASCADES=[
@@ -812,10 +854,13 @@ function renderSignalLog(){
 }
 
 /* ===== 00 THREAD (river) ===== */
+let activeRiver=0;
 function renderThread(){
  const svg=document.getElementById('threadSvg');if(!svg)return;
- const W=1240,H=270,padX=72,top=48,bot=204,n=THREAD.length,gap=(W-padX*2)/(n-1);
- const pts=THREAD.map((d,i)=>({x:padX+gap*i,y:top+(bot-top)*(1-d.pos)}));
+ const R=RIVERS[activeRiver]||RIVERS[0];
+ const flow=R.layerBased?THREAD:R.nodes;
+ const W=1240,H=270,padX=72,top=48,bot=204,n=flow.length,gap=(W-padX*2)/(n-1);
+ const pts=flow.map((d,i)=>({x:padX+gap*i,y:top+(bot-top)*(1-d.pos)}));
  let path=`M ${pts[0].x} ${pts[0].y}`;
  for(let i=1;i<pts.length;i++){const p0=pts[i-1],p1=pts[i],cx=(p0.x+p1.x)/2;path+=` C ${cx} ${p0.y}, ${cx} ${p1.y}, ${p1.x} ${p1.y}`;}
  let s=`<defs><linearGradient id="river" x1="0" y1="0" x2="1" y2="0">
@@ -824,24 +869,40 @@ function renderThread(){
  s+=`<text x="${padX}" y="${bot+50}" fill="var(--mature)" font-family="var(--mono)" font-size="13">← 성숙 / 선반영</text>`;
  s+=`<text x="${W-padX}" y="${bot+50}" fill="var(--dawn)" font-family="var(--mono)" font-size="13" text-anchor="end">초입 / 미반영 →</text>`;
  s+=`<path d="${path}" fill="none" stroke="url(#river)" stroke-width="3" opacity=".55"/>`;
- THREAD.forEach((d,i)=>{const p=pts[i],col=STAGE_HEX[d.stage];
-  s+=`<g class="river-node" data-l="${d.layer}">
+ flow.forEach((d,i)=>{const p=pts[i],col=STAGE_HEX[d.stage],cap=d.layer||d.code||'';
+  s+=`<g class="river-node"${R.layerBased?` data-l="${d.layer}"`:' style="cursor:default"'}>
    <line x1="${p.x}" y1="${p.y}" x2="${p.x}" y2="${bot+10}" stroke="var(--line)" stroke-width="1"/>
    <circle class="rn-box" cx="${p.x}" cy="${p.y}" r="11" fill="${col}" opacity=".95"/>
    <circle cx="${p.x}" cy="${p.y}" r="11" fill="none" stroke="${col}" stroke-width="1" opacity=".4"><animate attributeName="r" values="11;19;11" dur="2.4s" repeatCount="indefinite"/><animate attributeName="opacity" values=".4;0;.4" dur="2.4s" repeatCount="indefinite"/></circle>
-   <text x="${p.x}" y="${p.y-32}" text-anchor="middle" fill="${col}" font-family="var(--mono)" font-size="13" font-weight="700">${d.layer}</text>
+   <text x="${p.x}" y="${p.y-32}" text-anchor="middle" fill="${col}" font-family="var(--mono)" font-size="13" font-weight="700">${cap}</text>
    <text x="${p.x}" y="${p.y-15}" text-anchor="middle" fill="var(--txt)" font-family="var(--serif)" font-size="15" font-weight="600">${d.label}</text>
    <text x="${p.x}" y="${bot+28}" text-anchor="middle" fill="var(--dim)" font-family="var(--mono)" font-size="13">${d.sub}</text></g>`;});
  svg.innerHTML=s;
- document.getElementById('threadDetail').innerHTML=THREAD.map(d=>{const col=STAGE_HEX[d.stage];
-  const cands=STATE.filter(c=>c.layer===d.layer);
-  return `<div class="dstrip" data-l="${d.layer}" style="border-left-color:${col}">
-   <h4>${d.layer} ${d.label}<span class="badge" style="background:${col}22;color:${col}">${d.stage}</span></h4>
-   <p>${d.sub}<br>후보 ${cands.length}: ${cands.slice(0,3).map(c=>c.name).join(', ')||'—'}</p></div>`;}).join('');
- const jump=l=>{document.querySelector('.tab[data-v="stack"]').click();const t=document.getElementById('lay-'+l);if(t){t.classList.remove('collapsed');t.scrollIntoView({behavior:'smooth',block:'center'});}};
- svg.querySelectorAll('.river-node').forEach(g=>g.addEventListener('click',()=>jump(g.dataset.l)));
- document.querySelectorAll('.dstrip').forEach(g=>g.addEventListener('click',()=>jump(g.dataset.l)));
+ const front=document.getElementById('threadFront');if(front)front.textContent=R.front;
+ const note=document.getElementById('threadNote');if(note)note.innerHTML=R.note;
+ if(R.layerBased){
+  document.getElementById('threadDetail').innerHTML=THREAD.map(d=>{const col=STAGE_HEX[d.stage];
+   const cands=STATE.filter(c=>c.layer===d.layer);
+   return `<div class="dstrip" data-l="${d.layer}" style="border-left-color:${col}">
+    <h4>${d.layer} ${d.label}<span class="badge" style="background:${col}22;color:${col}">${d.stage}</span></h4>
+    <p>${d.sub}<br>후보 ${cands.length}: ${cands.slice(0,3).map(c=>c.name).join(', ')||'—'}</p></div>`;}).join('');
+  const jump=l=>{document.querySelector('.tab[data-v="stack"]').click();const t=document.getElementById('lay-'+l);if(t){t.classList.remove('collapsed');t.scrollIntoView({behavior:'smooth',block:'center'});}};
+  svg.querySelectorAll('.river-node').forEach(g=>g.addEventListener('click',()=>jump(g.dataset.l)));
+  document.querySelectorAll('.dstrip').forEach(g=>g.addEventListener('click',()=>jump(g.dataset.l)));
+ }else{
+  document.getElementById('threadDetail').innerHTML=R.nodes.map(d=>{const col=STAGE_HEX[d.stage];
+   return `<div class="dstrip" style="border-left-color:${col};cursor:default">
+    <h4>${d.code} ${d.label}<span class="badge" style="background:${col}22;color:${col}">${d.stage}</span></h4>
+    <p>${d.why}<br>후보: ${d.plays}</p></div>`;}).join('');
+ }
 }
+/* 강물 후보 1~4 카드 클릭 → 해당 강물 흐름·가치사슬로 전환 */
+document.querySelectorAll('.rcand[data-r]').forEach(card=>card.addEventListener('click',()=>{
+ activeRiver=+card.dataset.r;
+ document.querySelectorAll('.rcand[data-r]').forEach(c=>c.classList.toggle('active',c===card));
+ renderThread();
+ document.getElementById('threadSvg').scrollIntoView({behavior:'smooth',block:'nearest'});
+}));
 
 /* ===== 01 CASCADE ===== */
 let cascSel='cpu';
