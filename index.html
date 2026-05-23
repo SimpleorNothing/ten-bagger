@@ -228,6 +228,12 @@ main{padding:28px 0 90px;position:relative}
 /* map */
 .map-card{background:linear-gradient(165deg,var(--panel),var(--ink2));border:1px solid var(--line);border-radius:18px;padding:22px;position:relative}
 #scurve{width:100%;height:auto;display:block;overflow:visible}
+.river-map{margin-top:18px}
+.rm-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+.rm-n{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--faint)}
+.rm-title{font-family:var(--serif);font-size:18px;font-weight:700;color:var(--txt)}
+.scurve-r{width:100%;height:auto;display:block;overflow:visible}
+.rv-dot{cursor:default}
 .tip{position:fixed;pointer-events:none;z-index:90;background:var(--ink);border:1px solid var(--line2);border-radius:10px;padding:9px 12px;font-size:13px;opacity:0;transition:.12s;max-width:240px;box-shadow:0 12px 30px -8px rgba(0,0,0,.6)}
 .tip.on{opacity:1}.tip .tn{font-weight:700;font-size:15px}.tip .tt{font-family:var(--mono);font-size:13px;color:var(--dim);margin:2px 0 6px}.tip .tx{color:var(--dim);font-size:13px;line-height:1.5}
 .s-dot{cursor:pointer;transition:.2s}.s-dot:hover{filter:brightness(1.3)}
@@ -376,6 +382,9 @@ table.tk th.c{text-align:center}
     <p class="vsub">가로축=테마 성숙도(좌:태동→우:과열). 여명 밴드(초입)에 든 종목이 빛납니다. 점을 누르면 상세. ★ 보유 종목은 테두리로 표시.</p></div>
   <div class="legend" id="legendMap"></div>
   <div class="map-card"><svg id="scurve" viewBox="0 0 1180 470" preserveAspectRatio="xMidYMid meet"></svg></div>
+  <div class="vkick" style="margin:34px 0 4px">강물 2~4 · 독립 forcing function</div>
+  <p class="vsub" style="margin:0 0 4px">강물 1(위)은 종목으로 투영. 강물 2~4는 각 가치사슬 마디를 같은 S-커브에 얹어, 어느 마디가 <em>여명(초입)</em>에 있는지 봅니다. 점에 올리면 근거·후보.</p>
+  <div id="mapRivers"></div>
 </section>
 
 <!-- 04 PORTFOLIO -->
@@ -799,7 +808,7 @@ async function loadPrices(){try{const r=await fetch('./prices.json',{cache:'no-s
 /* ===== TABS ===== */
 document.getElementById('nav').addEventListener('click',e=>{const b=e.target.closest('.tab');if(!b)return;
  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));document.querySelectorAll('.view').forEach(v=>v.classList.remove('on'));
- b.classList.add('on');document.getElementById('v-'+b.dataset.v).classList.add('on');if(b.dataset.v==='map')drawSCurve();});
+ b.classList.add('on');document.getElementById('v-'+b.dataset.v).classList.add('on');if(b.dataset.v==='map'){drawSCurve();drawRiverCurves();}});
 
 /* ===== SIGNAL LOG (실적 콜 등 신규 시그널 → value-chain 반영, 누적 가능) ===== */
 const SIGNAL_LOG=[
@@ -1043,18 +1052,54 @@ window.markChecked=markChecked;
 function recompute(){renderTracker();if(document.getElementById('v-map').classList.contains('on'))drawSCurve();}
 
 /* ===== 03 S-CURVE ===== */
-function drawSCurve(){
- const svg=document.getElementById('scurve'),W=1180,H=470,padL=58,padR=40,padT=30,padB=64;
- const x0=padL,x1=W-padR,y0=H-padB,y1=padT,sx=t=>x0+(x1-x0)*t,Sc=t=>1/(1+Math.exp(-(t-.5)*11)),sy=v=>y0-(y0-y1)*v;
- let s=`<defs><linearGradient id="db" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0ca678" stop-opacity=".22"/><stop offset="1" stop-color="#0ca678" stop-opacity="0"/></linearGradient>
-  <linearGradient id="cg" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#7048e8"/><stop offset=".28" stop-color="#0ca678"/><stop offset=".6" stop-color="#1c7ed6"/><stop offset="1" stop-color="#e03131"/></linearGradient></defs>`;
- s+=`<rect x="${sx(.15)}" y="${y1}" width="${sx(.38)-sx(.15)}" height="${y0-y1}" fill="url(#db)"/>`;
+function scurveBase(W,H,sfx){
+ sfx=sfx||'';
+ const padL=58,padR=40,padT=30,padB=64,x0=padL,x1=W-padR,y0=H-padB,y1=padT;
+ const sx=t=>x0+(x1-x0)*t,Sc=t=>1/(1+Math.exp(-(t-.5)*11)),sy=v=>y0-(y0-y1)*v;
+ let s=`<defs><linearGradient id="db${sfx}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0ca678" stop-opacity=".22"/><stop offset="1" stop-color="#0ca678" stop-opacity="0"/></linearGradient>
+  <linearGradient id="cg${sfx}" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#7048e8"/><stop offset=".28" stop-color="#0ca678"/><stop offset=".6" stop-color="#1c7ed6"/><stop offset="1" stop-color="#e03131"/></linearGradient></defs>`;
+ s+=`<rect x="${sx(.15)}" y="${y1}" width="${sx(.38)-sx(.15)}" height="${y0-y1}" fill="url(#db${sfx})"/>`;
  s+=`<text x="${sx(.265)}" y="${y1+16}" text-anchor="middle" fill="var(--dawn)" font-family="var(--mono)" font-size="13" font-weight="700" letter-spacing="2">여명 · 초입 ZONE</text>`;
  s+=`<line x1="${x0}" y1="${y0}" x2="${x1}" y2="${y0}" stroke="var(--line2)"/><line x1="${x0}" y1="${y0}" x2="${x0}" y2="${y1}" stroke="var(--line2)"/>`;
  [['태동',0],['초입',.26],['가속',.5],['성숙',.74],['과열',.95]].forEach(([l,t])=>{s+=`<text x="${sx(t)}" y="${y0+22}" text-anchor="middle" fill="var(--dim)" font-family="var(--mono)" font-size="13">${l}</text>`;});
  s+=`<text x="${(x0+x1)/2}" y="${H-12}" text-anchor="middle" fill="var(--faint)" font-family="var(--mono)" font-size="13">테마 성숙도 / 가격 반영도 →</text>`;
  let cp=`M ${sx(0)} ${sy(Sc(0))}`;for(let t=0;t<=1.001;t+=.02)cp+=` L ${sx(t)} ${sy(Sc(t))}`;
- s+=`<path d="${cp}" fill="none" stroke="url(#cg)" stroke-width="2.5" opacity=".5"/>`;
+ s+=`<path d="${cp}" fill="none" stroke="url(#cg${sfx})" stroke-width="2.5" opacity=".5"/>`;
+ return {s,sx,sy,Sc,x0,x1,y0,y1};
+}
+/* 강물 2~4 (forcing function) — 각 가치사슬 마디를 pos(성숙도)로 같은 S-커브에 투영 */
+function drawRiverCurves(){
+ const host=document.getElementById('mapRivers');if(!host)return;
+ const tip=document.getElementById('tip'),FS=13,TH=FS+4,r=9;
+ const lw=txt=>{let w=0;for(const ch of txt){const c=ch.charCodeAt(0);w+=(c>=0xAC00&&c<=0xD7A3||c>=0x1100&&c<=0x11FF||c>=0x3130&&c<=0x318F)?FS*1.1:FS*0.62;}return w;};
+ host.innerHTML=RIVERS.filter(R=>!R.layerBased).map(R=>{
+  const W=1180,H=300,b=scurveBase(W,H,'-r'+R.n),{sx,sy,Sc,y0,y1}=b;let s=b.s;
+  const pts=R.nodes.map(d=>{const cx=sx(d.pos),cy=sy(Sc(d.pos));return{d,cx,cy,col:STAGE_HEX[d.stage],lx:cx,ly:cy-r-10,lw:lw(d.label+' '+d.code)};});
+  for(let k=0;k<30;k++)for(let i=0;i<pts.length;i++)for(let j=i+1;j<pts.length;j++){
+   const a=pts[i],b2=pts[j];if(Math.abs(a.lx-b2.lx)>(a.lw+b2.lw)/2+6)continue;
+   const gap=Math.abs(a.ly-b2.ly),need=TH+3;
+   if(gap<need){const push=(need-gap)/2+.5;a.ly<=b2.ly?(a.ly-=push,b2.ly+=push):(a.ly+=push,b2.ly-=push);}
+  }
+  pts.forEach((p,i)=>{const {d,cx,cy,col,lx}=p;let ly=p.ly;
+   if(ly<y1+TH)ly=cy+r+TH+3;ly=Math.max(y1+TH,Math.min(y0-6,ly));
+   const displaced=Math.abs(ly-(cy-r-10))>TH*2,abv=ly<cy;
+   const glow=d.stage==='초입'?`<circle cx="${cx}" cy="${cy}" r="${r+7}" fill="${col}" opacity=".14"/>`:'';
+   const ldr=displaced?`<line x1="${lx}" y1="${abv?ly+3:ly-TH+1}" x2="${cx}" y2="${abv?cy-r-1:cy+r+1}" stroke="${col}" stroke-width=".8" opacity=".4" stroke-dasharray="2 3"/>`:'';
+   s+=`<g class="s-dot rv-dot" data-r="${R.n}" data-i="${i}">${glow}${ldr}<circle cx="${cx}" cy="${cy}" r="${r}" fill="${col}" stroke="var(--ink)" stroke-width="1.5"/>
+    <text x="${lx}" y="${ly}" text-anchor="middle" fill="var(--txt)" font-family="var(--mono)" font-size="${FS}" font-weight="600">${d.label} <tspan fill="${col}">${d.code}</tspan></text></g>`;});
+  return `<div class="map-card river-map"><div class="rm-head"><span class="rm-n">강물 ${R.n}</span><span class="rm-title">${R.title}</span><span class="front-pill">${R.front}</span></div>
+   <svg class="scurve-r" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">${s}</svg>
+   <div class="tnote">${R.note}</div></div>`;
+ }).join('');
+ host.querySelectorAll('.rv-dot').forEach(g=>{const R=RIVERS.find(x=>x.n==+g.dataset.r),nd=R.nodes[+g.dataset.i],col=STAGE_HEX[nd.stage];
+  g.addEventListener('mousemove',e=>{tip.classList.add('on');
+   tip.innerHTML=`<div class="tn">${nd.label} <span style="color:${col}">●</span></div><div class="tt">${nd.code} · ${nd.stage} · 성숙도 ${Math.round(nd.pos*100)}</div><div class="tx">${nd.why}<br><b style="color:var(--dawn)">후보:</b> ${nd.plays}</div>`;
+   tip.style.left=Math.min(e.clientX+14,innerWidth-256)+'px';tip.style.top=(e.clientY+14)+'px';});
+  g.addEventListener('mouseleave',()=>tip.classList.remove('on'));});
+}
+function drawSCurve(){
+ const svg=document.getElementById('scurve'),W=1180,H=470;
+ const {s:base,sx,sy,Sc,y0,y1}=scurveBase(W,H);let s=base;
  // ── label placement: font-size 11, push-apart to prevent overlap ──
  const FS=13,TH=FS+4;
  // estimate rendered width: Korean chars are ~full-width, ASCII ~0.62em
