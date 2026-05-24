@@ -520,6 +520,7 @@ table.tk th.c{text-align:center}
       <button class="tbtn on" id="heldBtn">보유 표시</button>
       <button class="tbtn on" id="candBtn">후보 표시</button>
       <button class="tbtn on" id="lblBtn">라벨 표시</button>
+      <button class="tbtn on" id="emBtn">실적 화살표</button>
     </div>
     <div class="legend" id="legend"></div>
   </div>
@@ -1352,7 +1353,7 @@ const D=[
 const CASH={NASDAQ:[-0.3,-2.5],KOSPI:[-0.5,-4]};
 const BNOTE={NASDAQ:'기준선=나스닥(QQQ). 각 종목의 raw 초과수익.',KOSPI:'기준선=코스피. 나스닥 대비 전 종목 동일하게 평행이동 → 순위·간격 불변, 원점만 이동.'};
 
-let bench='NASDAQ',mode='stage',showLabels=true,selected=null,showCand=true,showHeld=true;
+let bench='NASDAQ',mode='stage',showLabels=true,selected=null,showCand=true,showHeld=true,showEM=true;
 // raw 알파: 벤치마크 변경 = 전 종목 동일 상수 Δ 평행이동(순위·간격 불변).
 // Δ = (코스피 수익률 − 나스닥 수익률) = 현금알파의 차이(현금선과 일치). y1은 근사 상수.
 const DELTA=[+(CASH.NASDAQ[0]-CASH.KOSPI[0]).toFixed(2),+(CASH.NASDAQ[1]-CASH.KOSPI[1]).toFixed(2),3.5];
@@ -1417,7 +1418,7 @@ function draw(){
    if(!d.cand&&!showHeld)return;
    const a=av(d),x=px(a[1]),y=py(a[0]),r=d.cand?7.5:7+Math.sqrt(d.w)*3.4;
    const col=colorOf(d);
-   if(emBars.has(d.t))drawEM(d,x,y,r);
+   if(showEM&&emBars.has(d.t))drawEM(d,x,y,r);
    const c=el('circle',{cx:x,cy:y,r,fill:col+(d.cand?'12':'2e'),stroke:col,'stroke-width':d.cand?1.6:2,class:'bub','data-i':i});
    if(d.cand)c.setAttribute('stroke-dasharray','3 3');svg.appendChild(c);
    if(d.flag||EM[d.t]){const f=el('text',{x:x+r-2,y:y-r+4,'font-size':12,'text-anchor':'middle'});f.textContent='⚡';f.style.pointerEvents='none';svg.appendChild(f);}
@@ -1553,6 +1554,7 @@ document.getElementById('heldBtn').addEventListener('click',function(){showHeld=
 document.getElementById('candBtn').addEventListener('click',function(){showCand=!showCand;this.classList.toggle('on',showCand);this.textContent=showCand?'후보 표시':'후보 끄기';
  if(!showCand&&selected!=null&&D[selected].cand){selected=null;hideTip();}draw();renderWatch();});
 document.getElementById('lblBtn').addEventListener('click',function(){showLabels=!showLabels;this.classList.toggle('on',showLabels);this.textContent=showLabels?'라벨 표시':'라벨 끄기';applyLabels();});
+document.getElementById('emBtn').addEventListener('click',function(){showEM=!showEM;this.classList.toggle('on',showEM);this.textContent=showEM?'실적 화살표':'화살표 끄기';draw();});
 document.addEventListener('click',e=>{if(!e.target.closest('.bub')&&!e.target.closest('.cashdot')&&!e.target.closest('.seg')&&!e.target.closest('.wl-item')&&!e.target.closest('.tbtn')){selected=null;hideTip();unhighlight();markWatch();}},true);
 
 // alpha.json(자동 알파)·earnings.json(실적 expected move)를 함께 로드. 없으면 하드코딩 폴백.
