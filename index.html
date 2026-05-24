@@ -313,19 +313,19 @@ table.tk th.c{text-align:center}
 #v-alpha h1{font-size:30px;font-weight:800;letter-spacing:-.5px;margin:4px 0 8px;color:var(--a-txt)}
 #v-alpha .sub{font-size:15px;font-weight:400;color:var(--a-dim);max-width:760px;line-height:1.6}
 #v-alpha .sub b{color:var(--a-txt);font-weight:700}
-#v-alpha .benchrow{display:flex;align-items:center;gap:10px;margin:16px 0 2px;flex-wrap:wrap}
-#v-alpha .benchrow .lab{font-size:13px;color:var(--a-dim)}
-#v-alpha .seg{display:inline-flex;background:var(--a-surface);border:1.5px solid var(--a-line);border-radius:10px;padding:3px}
-#v-alpha .seg button{font-size:14px;font-weight:700;color:var(--a-dim);background:transparent;border:0;padding:7px 16px;border-radius:7px;cursor:pointer;transition:.15s}
+#v-alpha .benchrow{display:flex;align-items:center;gap:6px;margin:14px 0 2px;flex-wrap:wrap}
+#v-alpha .benchrow .lab{font-size:11px;color:var(--a-dim)}
+#v-alpha .seg{display:inline-flex;background:var(--a-surface);border:1.5px solid var(--a-line);border-radius:9px;padding:2px}
+#v-alpha .seg button{font-size:11.5px;font-weight:700;color:var(--a-dim);background:transparent;border:0;padding:5px 10px;border-radius:7px;cursor:pointer;transition:.15s}
 #v-alpha .seg button.on{background:var(--a-brand);color:#fff}
-#v-alpha .toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0;align-items:center}
-#v-alpha .toolbtns{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-#v-alpha .tbtn{font-size:13px;font-weight:600;color:var(--a-dim);background:#fff;border:1.5px solid var(--a-line);padding:7px 12px;border-radius:8px;cursor:pointer;transition:.15s;white-space:nowrap}
+#v-alpha .toolbar{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0;align-items:center}
+#v-alpha .toolbtns{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+#v-alpha .tbtn{font-size:11.5px;font-weight:600;color:var(--a-dim);background:#fff;border:1.5px solid var(--a-line);padding:5px 9px;border-radius:7px;cursor:pointer;transition:.15s;white-space:nowrap}
 #v-alpha .tbtn:hover{border-color:var(--a-brand)}
 #v-alpha .tbtn.on{color:var(--a-brand);border-color:var(--a-brand);background:rgba(18,87,214,.06)}
-#v-alpha .legend{display:flex;gap:6px 14px;flex-wrap:wrap;font-size:13px;color:var(--a-dim);margin-left:auto}
-#v-alpha .lg{display:inline-flex;align-items:center;gap:6px}
-#v-alpha .dot{width:11px;height:11px;border-radius:50%}
+#v-alpha .legend{display:flex;gap:3px 9px;flex-wrap:wrap;font-size:11px;color:var(--a-dim);margin-left:auto}
+#v-alpha .lg{display:inline-flex;align-items:center;gap:5px}
+#v-alpha .dot{width:9px;height:9px;border-radius:50%}
 #v-alpha .card{background:var(--a-surface);border:1.5px solid var(--a-line);border-radius:14px;padding:18px;position:relative;overflow:hidden;transition:.15s}
 #v-alpha .card:hover{border-color:var(--a-brand);box-shadow:0 4px 18px rgba(18,87,214,.10)}
 #v-alpha #plot{width:100%;height:auto;display:block;overflow:visible;touch-action:manipulation}
@@ -1574,7 +1574,7 @@ function renderLegend(){
  let items;
  if(mode==='stage'){items=[['가속',STAGE['가속']],['성숙',STAGE['성숙']],['과열',STAGE['과열']],['방어',STAGE['방어']]];}
  else{const seen=new Set();items=[];D.forEach(d=>{const k=layerKey(d);if(LAYER_HEX[k]&&!seen.has(k)){seen.add(k);items.push([k,LAYER_HEX[k]]);}});items.sort((a,b)=>a[0].localeCompare(b[0]));}
- document.getElementById('legend').innerHTML=items.map(([t,c])=>`<span class="lg"><span class="dot" style="background:${c}"></span>${t}</span>`).join('')+'<span class="lg" style="color:var(--a-faint)">● 크기=비중</span><span class="lg" style="color:var(--a-faint)">◌ 점선=미보유 후보</span><span class="lg" style="color:#f59f00">⚡ 실적(클수록·붉을수록 변동↑)</span>';
+ document.getElementById('legend').innerHTML=items.map(([t,c])=>`<span class="lg"><span class="dot" style="background:${c}"></span>${t}</span>`).join('')+'<span class="lg" style="color:var(--a-faint)">●크기=비중</span><span class="lg" style="color:var(--a-faint)">◌미보유</span><span class="lg" style="color:#f59f00">⚡실적크기</span>';
 }
 document.getElementById('benchSeg').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
  document.querySelectorAll('#benchSeg button').forEach(x=>x.classList.remove('on'));b.classList.add('on');
