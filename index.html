@@ -504,7 +504,7 @@ table.tk th.c{text-align:center}
 <section class="view" id="v-alpha">
   <div class="kick">初入 Observatory · Alpha Map</div>
   <h1>보유종목 4사분면 — 벤치마크 대비 알파</h1>
-  <p class="sub"><b>원점(0,0) = 선택한 벤치마크.</b> X=3개월 / Y=다음주 <b>초과수익(알파, %p) 추정</b>. 회색 점선=현금(절대 0%) 궤적. <b>벤치마크를 바꾸면 모든 종목이 같은 양만큼 평행이동</b>할 뿐 종목 간 상대 순위·간격은 그대로입니다(raw 알파). 코스피가 더 뜨거웠던 만큼 코스피 기준에선 전체가 아래로 이동합니다. 버블=비중, 색=단계. <b>점선 버블·하단 "미보유 후보"</b>는 보유하지 않은 관찰 대상(비중 없음·알파는 컨빅션 추정).</p>
+  <p class="sub"><b>원점(0,0) = 선택한 벤치마크.</b> X=3개월 / Y=다음주 <b>초과수익(알파, %p) 추정</b>. 회색 점=현금(절대 0%) 고정점. <b>벤치마크를 바꾸면 모든 종목이 같은 양만큼 평행이동</b>할 뿐 종목 간 상대 순위·간격은 그대로입니다(raw 알파). 코스피가 더 뜨거웠던 만큼 코스피 기준에선 전체가 아래로 이동합니다. 버블=비중, 색=단계. <b>점선 버블·하단 "미보유 후보"</b>는 보유하지 않은 관찰 대상(비중 없음·알파는 컨빅션 추정).</p>
 
   <div class="benchrow">
     <span class="lab">벤치마크</span>
@@ -1431,15 +1431,10 @@ function draw(){
  applyLabels();applySel();
 }
 function drawCash(){
- // X=3개월(m3) / Y=다음주(wk). base=[wk, m3]. 궤적은 m3 기준으로 그리고 wk=base_wk+Δm3/slope.
- const base=CASH[bench],bxWk=base[0],byM3=base[1],slope=5;
- let loM3=Math.max(byM3-4,X0+0.3),hiM3=Math.min(byM3+4,X1-0.5);
- const loWk=bxWk+(loM3-byM3)/slope,hiWk=bxWk+(hiM3-byM3)/slope;
- svg.appendChild(el('line',{x1:px(loM3),y1:py(loWk),x2:px(hiM3),y2:py(hiWk),stroke:'#94a5b4','stroke-width':1.4,'stroke-dasharray':'3 4',opacity:.45}));
- const lo=el('text',{x:px(loM3),y:py(loWk)+13,'text-anchor':'middle','font-size':9.5,fill:'#aab8c4','font-family':"Pretendard,system-ui,sans-serif",opacity:.8});lo.textContent=(bench==='NASDAQ'?'나스닥':'코스피')+'↑';svg.appendChild(lo);
- const hi=el('text',{x:px(hiM3)+22,y:py(hiWk)+3,'text-anchor':'middle','font-size':9.5,fill:'#aab8c4','font-family':"Pretendard,system-ui,sans-serif",opacity:.8});hi.textContent=(bench==='NASDAQ'?'나스닥':'코스피')+'↓';svg.appendChild(hi);
- const cx=px(byM3),cy=py(bxWk);
- const c=el('circle',{cx,cy,r:9,fill:'rgba(148,165,180,.10)',stroke:'#94a5b4','stroke-width':1.6,'stroke-dasharray':'3 3',class:'cashdot',style:'cursor:pointer'});svg.appendChild(c);
+ // 현금 알파 = −(벤치마크 수익률) → X·Y 각각 값 하나인 고정점(궤적 아님). X=3개월, Y=다음주.
+ const base=CASH[bench],cashWk=base[0],cashM3=base[1];
+ const cx=px(cashM3),cy=py(cashWk);
+ const c=el('circle',{cx,cy,r:9,fill:'rgba(148,165,180,.12)',stroke:'#94a5b4','stroke-width':1.6,'stroke-dasharray':'3 3',class:'cashdot',style:'cursor:pointer'});svg.appendChild(c);
  const t=el('text',{x:cx,y:cy+22,'text-anchor':'middle',class:'bublab',fill:'#5c6f7e','font-size':10.5,opacity:.78});t.textContent='현금 0%';svg.appendChild(t);
  c.addEventListener('mouseenter',showCash);c.addEventListener('mousemove',moveTip);c.addEventListener('mouseleave',hideTip);
  c.addEventListener('click',e=>{selected=null;unhighlight();markWatch();showCash();moveTip(e);});
@@ -1461,7 +1456,7 @@ function showTip(d){
 function showCash(){
  const bn=bench==='NASDAQ'?'나스닥':'코스피';
  tip.innerHTML=`<div><span class="tn">현금 (절대 0%)</span></div>
-   <div class="note">현금 알파 = −(${bn} 수익률). ${bn}이 <b style="color:#ff7676">오르면</b> 현금은 좌하, <b style="color:#46e6a8">빠지면</b> 우상으로 이동 — 점선이 그 궤적입니다.<br><br><b>읽는 법:</b> 점선보다 위·오른쪽이어야 "현금보다" 나은 절대수익. ${bn} 약세 시나리오(점선 위쪽)에선 ① 고베타주도 현금 밑으로 내려갈 수 있음. 현 위치는 "${bn} 완만 상승" 가정의 스냅샷.</div>`;
+   <div class="note">현금 알파 = −(${bn} 수익률) → <b>고정점 하나</b>입니다. 이 점보다 <b>위·오른쪽</b>이면 현금보다 나은 절대수익(${bn} 완만 상승 가정 하).<br><br>${bn} 경로가 흔들리면 원점(기준선)이 종목들 사이에서 재배치되는 것이지, 이 점만 따로 궤적을 그리며 움직이지 않습니다.</div>`;
  tip.classList.add('on');
 }
 function moveTip(e){const pad=14,tw=tip.offsetWidth,th=tip.offsetHeight;let x=e.clientX+pad,y=e.clientY+pad;
