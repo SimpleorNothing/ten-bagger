@@ -1363,22 +1363,41 @@ function quad(d){const a=av(d),r=a[0]>=0,u=a[1]>=0;return u?(r?'①':'②'):(r?'
 
 const svg=document.getElementById('plot'),NS='http://www.w3.org/2000/svg';
 const W=860,H=600,PL=58,PR=28,PT=30,PB=52;
-const X0=-10,X1=10,Y0=-4,Y1=3; // X=3개월(넓음) / Y=다음주(좁음)
+// 축 범위는 draw()에서 데이터에 맞춰 동적 산출 → 0(벤치마크) 교차점이 가운데 고정되지 않음
+let X0=-10,X1=10,Y0=-4,Y1=3,xticks=[],yticks=[]; // X=3개월 / Y=다음주
 const px=v=>PL+(v-X0)/(X1-X0)*(W-PL-PR);
 const py=v=>H-PB-(v-Y0)/(Y1-Y0)*(H-PT-PB);
 function el(tag,a){const e=document.createElementNS(NS,tag);for(const k in a)e.setAttribute(k,a[k]);return e;}
-const fmt=v=>(v>0?'+':'')+v;
+const fmt=v=>(v>0?'+':'')+(+v.toFixed(1)===Math.round(v)?Math.round(v):+v.toFixed(1));
+function niceAxis(min,max,target){
+ const span=Math.max(max-min,1e-6),raw=span/target,mag=Math.pow(10,Math.floor(Math.log10(raw))),n=raw/mag;
+ const step=(n<1.5?1:n<3?2:n<7?5:10)*mag;
+ const lo=Math.floor(min/step)*step,hi=Math.ceil(max/step)*step,ticks=[];
+ for(let v=lo;v<=hi+1e-9;v+=step)ticks.push(+v.toFixed(6));
+ return {lo,hi,ticks};
+}
+function computeRanges(){
+ const xs=[0],ys=[0];
+ D.forEach(d=>{ if(d.cand&&!showCand)return; if(!d.cand&&!showHeld)return; const a=av(d); xs.push(a[1]); ys.push(a[0]); });
+ const cb=CASH[bench]; xs.push(cb[1]); ys.push(cb[0]);
+ const padX=Math.max(0.6,(Math.max(...xs)-Math.min(...xs))*0.1);
+ const padY=Math.max(0.4,(Math.max(...ys)-Math.min(...ys))*0.12);
+ const ax=niceAxis(Math.min(...xs)-padX,Math.max(...xs)+padX,7);
+ const ay=niceAxis(Math.min(...ys)-padY,Math.max(...ys)+padY,6);
+ X0=ax.lo;X1=ax.hi;xticks=ax.ticks; Y0=ay.lo;Y1=ay.hi;yticks=ay.ticks;
+}
 
 function draw(){
  svg.innerHTML='';
+ computeRanges();
  const qx=px(0),qy=py(0);
  const tints=[[qx,PT,W-PR-qx,qy-PT,'rgba(12,166,120,.06)'],[PL,PT,qx-PL,qy-PT,'rgba(184,134,11,.05)'],
    [qx,qy,W-PR-qx,H-PB-qy,'rgba(28,126,214,.05)'],[PL,qy,qx-PL,H-PB-qy,'rgba(224,49,49,.05)']];
  tints.forEach(([x,y,w,h,fill])=>svg.appendChild(el('rect',{x,y,width:w,height:h,fill,rx:4})));
- for(let v=-4;v<=3;v+=1){const y=py(v);svg.appendChild(el('line',{x1:PL,y1:y,x2:W-PR,y2:y,class:'gridline'}));
-   const tl=el('text',{x:PL-8,y:y+4,'text-anchor':'end',class:'axlab'});tl.textContent=fmt(v);svg.appendChild(tl);}
- for(let v=-9;v<=9;v+=3){const x=px(v);svg.appendChild(el('line',{x1:x,y1:PT,x2:x,y2:H-PB,class:'gridline'}));
-   const tl=el('text',{x,y:H-PB+16,'text-anchor':'middle',class:'axlab'});tl.textContent=fmt(v);svg.appendChild(tl);}
+ yticks.forEach(v=>{const y=py(v);svg.appendChild(el('line',{x1:PL,y1:y,x2:W-PR,y2:y,class:'gridline'}));
+   const tl=el('text',{x:PL-8,y:y+4,'text-anchor':'end',class:'axlab'});tl.textContent=fmt(v);svg.appendChild(tl);});
+ xticks.forEach(v=>{const x=px(v);svg.appendChild(el('line',{x1:x,y1:PT,x2:x,y2:H-PB,class:'gridline'}));
+   const tl=el('text',{x,y:H-PB+16,'text-anchor':'middle',class:'axlab'});tl.textContent=fmt(v);svg.appendChild(tl);});
  svg.appendChild(el('line',{x1:qx,y1:PT,x2:qx,y2:H-PB,class:'zeroline'}));
  svg.appendChild(el('line',{x1:PL,y1:qy,x2:W-PR,y2:qy,class:'zeroline'}));
  const bg=el('rect',{x:qx+5,y:qy-19,width:128,height:16,rx:7,fill:'#1257d6'});svg.appendChild(bg);
