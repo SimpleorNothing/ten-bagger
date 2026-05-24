@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>初入 OBSERVATORY · 8-Layer · 텐베거 관측소</title>
+<title>초입 관측소 · 8-Layer · 텐베거</title>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <style>
@@ -303,7 +303,7 @@ table.tk th.c{text-align:center}
 </head>
 <body>
 <header><div class="wrap bar">
-  <div class="brand"><span class="mark">初入 <span class="jp">Observatory</span></span></div>
+  <div class="brand"><span class="mark">초입 <span class="jp">관측소</span></span></div>
   <nav id="nav">
     <button class="tab on" data-v="thread"><span class="n">00</span>관통 흐름</button>
     <button class="tab" data-v="cascade"><span class="n">01</span>파생 체인</button>
@@ -384,7 +384,7 @@ table.tk th.c{text-align:center}
     <h1 class="vtitle">지금 <em>여명</em> 구간에 선 후보는?</h1>
     <p class="vsub">가로축=테마 성숙도(좌:태동→우:과열). 여명 밴드(초입)에 든 종목이 빛납니다. 점을 누르면 상세. ★ 보유 종목은 테두리로 표시.</p></div>
   <div class="legend" id="legendMap"></div>
-  <div class="map-card"><svg id="scurve" viewBox="0 0 1180 470" preserveAspectRatio="xMidYMid meet"></svg></div>
+  <div class="map-card"><svg id="scurve" viewBox="0 0 1180 620" preserveAspectRatio="xMidYMid meet"></svg></div>
   <div class="vkick" style="margin:34px 0 4px">강물 2~4 · 독립 forcing function</div>
   <p class="vsub" style="margin:0 0 4px">강물 1(위)은 종목으로 투영. 강물 2~4는 각 가치사슬 마디를 같은 S-커브에 얹어, 어느 마디가 <em>여명(초입)</em>에 있는지 봅니다. 점에 올리면 근거·후보.</p>
   <div id="mapRivers"></div>
@@ -1055,9 +1055,9 @@ window.markChecked=markChecked;
 function recompute(){renderTracker();if(document.getElementById('v-map').classList.contains('on'))drawSCurve();}
 
 /* ===== 03 S-CURVE ===== */
-function scurveBase(W,H,sfx){
+function scurveBase(W,H,sfx,padTop){
  sfx=sfx||'';
- const padL=58,padR=40,padT=30,padB=64,x0=padL,x1=W-padR,y0=H-padB,y1=padT;
+ const padL=58,padR=40,padT=padTop||30,padB=64,x0=padL,x1=W-padR,y0=H-padB,y1=padT;
  const sx=t=>x0+(x1-x0)*t,Sc=t=>1/(1+Math.exp(-(t-.5)*11)),sy=v=>y0-(y0-y1)*v;
  let s=`<defs><linearGradient id="db${sfx}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0ca678" stop-opacity=".22"/><stop offset="1" stop-color="#0ca678" stop-opacity="0"/></linearGradient>
   <linearGradient id="cg${sfx}" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#7048e8"/><stop offset=".28" stop-color="#0ca678"/><stop offset=".6" stop-color="#1c7ed6"/><stop offset="1" stop-color="#e03131"/></linearGradient></defs>`;
@@ -1101,8 +1101,8 @@ function drawRiverCurves(){
   g.addEventListener('mouseleave',()=>tip.classList.remove('on'));});
 }
 function drawSCurve(){
- const svg=document.getElementById('scurve'),W=1180,H=470;
- const {s:base,sx,sy,Sc,y0,y1}=scurveBase(W,H);let s=base;
+ const svg=document.getElementById('scurve'),W=1180,H=620;svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+ const {s:base,sx,sy,Sc,y0,y1}=scurveBase(W,H,'',90);let s=base;
  // ── label placement: font-size 11, push-apart to prevent overlap ──
  const FS=15,TH=FS+4;
  // estimate rendered width: Korean chars are ~full-width, ASCII ~0.62em
@@ -1111,7 +1111,7 @@ function drawSCurve(){
  const pts=STATE.map(c=>{const t=c.mat,cx=sx(t),cy=sy(Sc(t))-(c.conv-.6)*40,sc=score(c),r=6+sc*.7;
   return {c,cx,cy,r,col:STAGE_HEX[c.stage],lx:cx,ly:cy-r-10,lw:lw(c.name+' '+c.layer)};});
  // pass 2: iterative vertical push-apart for x-overlapping labels
- for(let k=0;k<30;k++)for(let i=0;i<pts.length;i++)for(let j=i+1;j<pts.length;j++){
+ for(let k=0;k<120;k++)for(let i=0;i<pts.length;i++)for(let j=i+1;j<pts.length;j++){
   const a=pts[i],b=pts[j];
   if(Math.abs(a.lx-b.lx)>(a.lw+b.lw)/2+6)continue; // no x-overlap → skip
   const gap=Math.abs(a.ly-b.ly),need=TH+3;
