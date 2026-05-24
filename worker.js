@@ -1,6 +1,110 @@
-// Minimal pass-through — serves static assets from the assets directory
+// Password gate. Runs before static assets (assets.run_worker_first=true),
+// so it protects index.html AND the .json data files.
+// Password lives in the SITE_PASSWORD secret; a long-lived cookie remembers the device.
+
+const COOKIE = "tb_auth";
+const MAX_AGE = 60 * 60 * 24 * 365; // 1 year — once entered, this device stays unlocked
+
+async function token(password) {
+  const data = new TextEncoder().encode(`ten-bagger:auth:v1:${password}`);
+  const digest = await crypto.subtle.digest("SHA-256", data);
+  return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+// Constant-time compare of two equal-length hex tokens.
+function safeEqual(a, b) {
+  if (typeof a !== "string" || typeof b !== "string" || a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return diff === 0;
+}
+
+function readCookie(header, name) {
+  if (!header) return null;
+  for (const part of header.split(";")) {
+    const eq = part.indexOf("=");
+    if (eq !== -1 && part.slice(0, eq).trim() === name) return part.slice(eq + 1).trim();
+  }
+  return null;
+}
+
+const htmlHeaders = { "content-type": "text/html; charset=utf-8", "cache-control": "no-store" };
+
+function page(body) {
+  return `<!DOCTYPE html><html lang="ko"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>알파맵 · 잠금</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+:root{--txt:#16242d;--dim:#5c6f7e;--line:#d3d9df;--panel:#fff;--bg:#f3f5f7;--err:#e03131}
+*{box-sizing:border-box;margin:0;padding:0}html,body{height:100%}
+body{font-family:'Pretendard Variable',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--txt);display:flex;align-items:center;justify-content:center;padding:24px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:34px 30px;max-width:360px;width:100%;box-shadow:0 10px 40px rgba(22,36,45,.08)}
+.mark{font-weight:800;font-size:26px;letter-spacing:-.02em}
+.tag{font-size:12px;color:var(--dim);letter-spacing:.16em;text-transform:uppercase;margin-top:4px}
+form{margin-top:24px;display:flex;flex-direction:column;gap:12px}
+label{font-size:13px;color:var(--dim)}
+input[type=password]{font:inherit;font-size:16px;padding:12px 14px;border:1px solid var(--line);border-radius:10px;width:100%;outline:none}
+input[type=password]:focus{border-color:var(--txt)}
+button{font:inherit;font-weight:700;font-size:15px;padding:12px;border:none;border-radius:10px;background:var(--txt);color:#fff;cursor:pointer}
+button:hover{opacity:.9}
+.err{font-size:13px;color:var(--err)}
+.hint{font-size:12px;color:var(--dim);margin-top:14px;line-height:1.5}
+</style></head><body><div class="card">${body}</div></body></html>`;
+}
+
+function loginPage(error) {
+  return page(`<div class="mark">알파맵</div>
+<div class="tag">Observatory · Locked</div>
+<form method="POST" action="/__auth">
+<label for="pw">비밀번호</label>
+<input id="pw" name="password" type="password" autofocus autocomplete="current-password" required>
+${error ? '<div class="err">비밀번호가 올바르지 않습니다.</div>' : ""}
+<button type="submit">들어가기</button>
+</form>
+<div class="hint">한 번 입력하면 이 기기에서는 다음부터 자동으로 열립니다.</div>`);
+}
+
+const setupPage = page(`<div class="mark">알파맵</div>
+<div class="tag">Setup needed</div>
+<div class="hint" style="margin-top:18px">관리자: <code>SITE_PASSWORD</code> 시크릿이 설정되지 않았습니다.<br>
+<code>wrangler secret put SITE_PASSWORD</code> 로 비밀번호를 설정하세요.</div>`);
+
 export default {
   async fetch(request, env) {
-    return env.ASSETS.fetch(request);
+    const password = env.SITE_PASSWORD;
+
+    // Fail closed: never serve the dashboard or data if no password is configured.
+    if (!password) {
+      return new Response(setupPage, { status: 503, headers: htmlHeaders });
+    }
+
+    const expected = await token(password);
+    const url = new URL(request.url);
+
+    // Login submission.
+    if (request.method === "POST" && url.pathname === "/__auth") {
+      const form = await request.formData();
+      const supplied = await token(String(form.get("password") ?? ""));
+      if (safeEqual(supplied, expected)) {
+        return new Response(null, {
+          status: 303,
+          headers: {
+            location: "/",
+            "set-cookie": `${COOKIE}=${expected}; Path=/; Max-Age=${MAX_AGE}; HttpOnly; Secure; SameSite=Lax`,
+          },
+        });
+      }
+      return new Response(loginPage(true), { status: 401, headers: htmlHeaders });
+    }
+
+    // Already authenticated on this device → serve the requested asset.
+    if (safeEqual(readCookie(request.headers.get("Cookie"), COOKIE), expected)) {
+      return env.ASSETS.fetch(request);
+    }
+
+    // Anything else (page or .json) gets the login screen, never the data.
+    return new Response(loginPage(false), { status: 401, headers: htmlHeaders });
   },
 };

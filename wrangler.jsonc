@@ -4,6 +4,8 @@
   "main": "worker.js",
   "assets": {
     "directory": ".",
-    "binding": "ASSETS"
+    "binding": "ASSETS",
+    // Run worker.js before serving any asset so the password gate also covers the .json data files.
+    "run_worker_first": true
   }
 }
