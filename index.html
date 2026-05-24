@@ -504,7 +504,7 @@ table.tk th.c{text-align:center}
 <section class="view" id="v-alpha">
   <div class="kick">初入 Observatory · Alpha Map</div>
   <h1>보유종목 4사분면 — 벤치마크 대비 알파</h1>
-  <p class="sub"><b>원점(0,0) = 선택한 벤치마크.</b> X=3개월 / Y=다음주 <b>초과수익(알파, %p) 추정</b>. 회색 점선=현금(절대 0%) 궤적. <b>벤치마크를 코스피로 바꾸면 한국 종목(삼성·소부장 등)의 알파가 줄어듭니다</b> — 코스피가 나스닥보다 뜨거웠고, 삼성은 사실상 코스피 자신이기 때문. 버블=비중, 색=단계. <b>점선 버블·하단 "미보유 후보"</b>는 보유하지 않은 관찰 대상(비중 없음·알파는 컨빅션 추정).</p>
+  <p class="sub"><b>원점(0,0) = 선택한 벤치마크.</b> X=3개월 / Y=다음주 <b>초과수익(알파, %p) 추정</b>. 회색 점선=현금(절대 0%) 궤적. <b>벤치마크를 바꾸면 모든 종목이 같은 양만큼 평행이동</b>할 뿐 종목 간 상대 순위·간격은 그대로입니다(raw 알파). 코스피가 더 뜨거웠던 만큼 코스피 기준에선 전체가 아래로 이동합니다. 버블=비중, 색=단계. <b>점선 버블·하단 "미보유 후보"</b>는 보유하지 않은 관찰 대상(비중 없음·알파는 컨빅션 추정).</p>
 
   <div class="benchrow">
     <span class="lab">벤치마크</span>
@@ -1355,10 +1355,13 @@ const D=[
  {n:'퀄컴',t:'QCOM',mkt:'US',layer:'L2',cand:true,aN:[0.5,1,1],aK:[0.3,-0.5,-3],stage:'성숙',note:'엣지 추론·온디바이스 AI. 고유 알파 작음(성숙·합의).'},
 ];
 const CASH={NASDAQ:[-0.3,-2.5],KOSPI:[-0.5,-4]};
-const BNOTE={NASDAQ:'미국 자산 기준선. 한국 종목은 KRW·KOSPI 요인 포함.',KOSPI:'코스피가 메모리 슈퍼사이클로 뜨거워 "바"가 더 높음 → 알파 전반 축소.'};
+const BNOTE={NASDAQ:'기준선=나스닥(QQQ). 각 종목의 raw 초과수익.',KOSPI:'기준선=코스피. 나스닥 대비 전 종목 동일하게 평행이동 → 순위·간격 불변, 원점만 이동.'};
 
 let bench='NASDAQ',mode='stage',showLabels=true,selected=null,showCand=true,showHeld=true;
-const av=d=>bench==='NASDAQ'?d.aN:d.aK;
+// raw 알파: 벤치마크 변경 = 전 종목 동일 상수 Δ 평행이동(순위·간격 불변).
+// Δ = (코스피 수익률 − 나스닥 수익률) = 현금알파의 차이(현금선과 일치). y1은 근사 상수.
+const DELTA=[+(CASH.NASDAQ[0]-CASH.KOSPI[0]).toFixed(2),+(CASH.NASDAQ[1]-CASH.KOSPI[1]).toFixed(2),3.5];
+const av=d=>bench==='NASDAQ'?d.aN:[+(d.aN[0]-DELTA[0]).toFixed(2),+(d.aN[1]-DELTA[1]).toFixed(2),+(d.aN[2]-DELTA[2]).toFixed(2)];
 function quad(d){const a=av(d),r=a[0]>=0,u=a[1]>=0;return u?(r?'①':'②'):(r?'④':'③');}
 
 const svg=document.getElementById('plot'),NS='http://www.w3.org/2000/svg';

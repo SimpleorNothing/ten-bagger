@@ -149,6 +149,16 @@ async function main() {
     try { benchH[k] = await history(sym); } catch (e) { console.warn(`bench ${sym} failed:`, e.message); }
     await sleep(300);
   }
+  if (!benchH.NASDAQ) throw new Error('NASDAQ benchmark (QQQ) history required');
+
+  // raw 알파: 벤치마크 변경은 전 종목 동일 Δ 평행이동(순위 불변).
+  // Δ = 코스피200 수익률 − 나스닥 수익률 (호라이즌별). aK = aN − Δ.
+  let DELTA = null;
+  if (benchH.KOSPI) {
+    const dl = (n) => { const a = ret(benchH.KOSPI, n), b = ret(benchH.NASDAQ, n); return a == null || b == null ? 0 : round5((a - b) * 100); };
+    DELTA = [dl(5), dl(63), dl(252)];
+    console.log('Δ (KOSPI − NASDAQ):', JSON.stringify(DELTA));
+  }
 
   const quotes = {};
   for (const d of targets) {
@@ -165,25 +175,27 @@ async function main() {
     const catScore = s('s2') + s('s3'); // 0..4
     const catalyst = { wk: 0, m3: catScore * 0.4 };
 
-    const out = {};
-    for (const [k, hb] of Object.entries(benchH)) {
-      const key = k === 'NASDAQ' ? 'aN' : 'aK';
-      out[key] = estimate({
-        frame,
-        betaB: beta(ha, hb),
-        rsW: rs(ha, hb, 5), rsM: rs(ha, hb, 63), rsY: rs(ha, hb, 252),
-        catalyst,
-      });
-    }
-    quotes[d.t] = out;
-    console.log(`${d.t.padEnd(8)} aN=${JSON.stringify(out.aN)} aK=${JSON.stringify(out.aK)}`);
+    const nb = benchH.NASDAQ;
+    const aN = estimate({
+      frame,
+      betaB: beta(ha, nb),
+      rsW: rs(ha, nb, 5), rsM: rs(ha, nb, 63), rsY: rs(ha, nb, 252),
+      catalyst,
+    });
+    // aK = aN − Δ (전 종목 동일 평행이동 → 순위 보존)
+    const aK = DELTA
+      ? [round5(clampX(aN[0] - DELTA[0])), round5(clampY(aN[1] - DELTA[1])), round5(clampY(aN[2] - DELTA[2]))]
+      : aN;
+    quotes[d.t] = { aN, aK };
+    console.log(`${d.t.padEnd(8)} aN=${JSON.stringify(aN)} aK=${JSON.stringify(aK)}`);
     await sleep(250);
   }
 
   const payload = {
     asOf: new Date().toISOString(),
-    method: 'heuristic v1: β + relative-strength momentum + stage runway − valuation ceiling + catalyst (no mean-reversion). Coarse (0.5%p); trust sign/bucket.',
+    method: 'raw alpha (no mean-reversion): aN = β + relative-strength momentum + stage runway − valuation ceiling + catalyst. aK = aN − Δ where Δ = (KOSPI200 − QQQ) return per horizon → benchmark toggle is a uniform shift (ranking preserved). Coarse 0.5%p.',
     benchmarks: { aN: 'QQQ', aK: '^KS200' },
+    delta: DELTA,
     quotes,
   };
   fs.writeFileSync(OUT, JSON.stringify(payload, null, 2));
