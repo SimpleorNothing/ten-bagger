@@ -1419,13 +1419,12 @@ function draw(){
    const col=colorOf(d);
    const c=el('circle',{cx:x,cy:y,r,fill:col+(d.cand?'12':'2e'),stroke:col,'stroke-width':d.cand?1.6:2,class:'bub','data-i':i});
    if(d.cand)c.setAttribute('stroke-dasharray','3 3');svg.appendChild(c);
-   // 실적 ⚡: expected move 크기를 글자 크기·색으로 인코딩. 다음주(wk) 실적은 수치 라벨도.
+   // 실적: expected move 크기를 SVG 번개 path의 색·크기로 인코딩. 다음주(wk) 실적은 수치 라벨도.
    const em=EM[d.t];
    if(showEM&&(em||d.flag)){
-     const pct=em?em.pct:0,sz=em?Math.min(19,11+pct*0.45):12;
-     const ec=!em?'#f59f00':(pct>13?'#e03131':pct>8?'#e8590c':'#f59f00');
-     const f=el('text',{x:x+r-1,y:y-r+sz*0.4,'font-size':sz,'text-anchor':'middle',fill:ec});f.textContent='⚡︎';f.style.pointerEvents='none';svg.appendChild(f);
-     if(em&&em.axis==='wk'){const t2=el('text',{x:x+r+5,y:y-r+3,fill:ec,'font-size':10.5,'font-weight':800});t2.textContent=`±${em.pct}%`;t2.style.pointerEvents='none';svg.appendChild(t2);}
+     const pct=em?em.pct:0;
+     drawBolt(x+r,y-r,pct);
+     if(em&&em.axis==='wk'){const t2=el('text',{x:x+r+8,y:y-r+3,fill:emColor(pct),'font-size':10.5,'font-weight':800});t2.textContent=`±${em.pct}%`;t2.style.pointerEvents='none';svg.appendChild(t2);}
    }
    const t=el('text',{x,y:y+r+13,'text-anchor':'middle',class:'bublab','data-li':i});t.textContent=d.n.length>10?d.n.slice(0,9)+'…':d.n;svg.appendChild(t);
    c.addEventListener('mouseenter',()=>{showTip(d);highlight(i);});
@@ -1434,6 +1433,18 @@ function draw(){
    c.addEventListener('click',e=>{selected=i;showTip(d);highlight(i);moveTip(e);markWatch();});
  });
  applyLabels();applySel();
+}
+// 강도 → 색 / 크기 (이모지 아님, SVG path라 색·크기 100% 적용)
+function emColor(pct){ return pct>13?'#e03131':pct>8?'#f76707':'#f59f00'; } // 빨강/주황/amber
+function emScale(pct){ return Math.max(.8, Math.min(2.0, pct/9)); }          // 0.8~2.0배
+function drawBolt(x,y,pct){
+  const p=el('path',{
+    d:'M1.5,-7 L-4,1.5 L-0.5,1.5 L-2.5,7 L4,-1.5 L0.5,-1.5 Z',
+    fill:emColor(pct), stroke:'#fff','stroke-width':.7,
+    transform:`translate(${x},${y}) scale(${emScale(pct)})`,
+    style:'pointer-events:none'
+  });
+  svg.appendChild(p);
 }
 function drawCash(){
  // 현금 알파 = −(벤치마크 수익률) → X·Y 각각 값 하나인 고정점(궤적 아님). X=3개월, Y=다음주.
