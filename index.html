@@ -325,7 +325,8 @@ table.tk th.c{text-align:center}
 #v-alpha .seg button{font-family:var(--a-mono);font-size:13px;font-weight:700;color:var(--a-dim);background:transparent;border:0;padding:7px 16px;border-radius:8px;cursor:pointer;transition:.15s}
 #v-alpha .seg button.on{background:#fff;color:var(--a-txt);box-shadow:0 2px 7px -2px rgba(0,0,0,.2)}
 #v-alpha .toolbar{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0 10px;align-items:center}
-#v-alpha .tbtn{font-family:var(--a-mono);font-size:12.5px;font-weight:600;color:var(--a-dim);background:var(--a-panel);border:1px solid var(--a-line);padding:7px 12px;border-radius:9px;cursor:pointer;transition:.15s}
+#v-alpha .toolbtns{display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+#v-alpha .tbtn{font-family:var(--a-mono);font-size:12.5px;font-weight:600;color:var(--a-dim);background:var(--a-panel);border:1px solid var(--a-line);padding:7px 12px;border-radius:9px;cursor:pointer;transition:.15s;white-space:nowrap}
 #v-alpha .tbtn.on{background:var(--a-txt);color:#fff;border-color:var(--a-txt)}
 #v-alpha .tbtn:hover{border-color:var(--a-line2)}
 #v-alpha .legend{display:flex;gap:5px 14px;flex-wrap:wrap;font-family:var(--a-mono);font-size:12px;color:var(--a-dim);margin-left:auto}
@@ -381,7 +382,9 @@ table.tk th.c{text-align:center}
 #v-alpha .wl-w{font-family:var(--a-mono);font-size:11.5px;color:var(--a-dim);text-align:right}
 #v-alpha .wl-a{font-family:var(--a-mono);font-size:11.5px;font-weight:700;text-align:right;color:var(--a-faint)}
 #v-alpha .wl-a.pos{color:#0ca678}#v-alpha .wl-a.neg{color:#e03131}
-@media(max-width:640px){#v-alpha h1{font-size:20px}#v-alpha .legend{margin-left:0;width:100%}#v-alpha .qkey{grid-template-columns:1fr}#v-alpha .wl-grid{grid-template-columns:1fr}#v-alpha .bublab{font-size:13px}}
+@media(max-width:640px){#v-alpha h1{font-size:20px}#v-alpha .legend{margin-left:0;width:100%}#v-alpha .qkey{grid-template-columns:1fr}#v-alpha .wl-grid{grid-template-columns:1fr}#v-alpha .bublab{font-size:13px}
+#v-alpha .toolbtns{flex:1 1 100%;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:2px}
+#v-alpha .toolbtns .tbtn{flex:0 0 auto;font-size:12px;padding:6px 10px}}
 </style>
 </head>
 <body>
@@ -517,10 +520,12 @@ table.tk th.c{text-align:center}
   </div>
 
   <div class="toolbar">
-    <button class="tbtn on" data-mode="stage">색: 단계별</button>
-    <button class="tbtn" data-mode="quad">색: 사분면별</button>
-    <button class="tbtn" id="lblBtn">라벨 끄기</button>
-    <button class="tbtn on" id="candBtn">후보 표시</button>
+    <div class="toolbtns">
+      <button class="tbtn on" data-mode="stage">색: 단계별</button>
+      <button class="tbtn" data-mode="quad">색: 사분면별</button>
+      <button class="tbtn" id="lblBtn">라벨 끄기</button>
+      <button class="tbtn on" id="candBtn">후보 표시</button>
+    </div>
     <div class="legend" id="legend"></div>
   </div>
 
