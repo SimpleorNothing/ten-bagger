@@ -360,7 +360,24 @@ table.tk th.c{text-align:center}
 #v-alpha .qk{border:1px solid var(--a-line);border-radius:11px;padding:9px 11px;background:var(--a-panel)}
 #v-alpha .qk .h{font-family:var(--a-mono);font-size:12px;font-weight:800}
 #v-alpha .qk .d{font-size:12px;color:var(--a-dim);margin-top:2px}
-@media(max-width:640px){#v-alpha h1{font-size:20px}#v-alpha .legend{margin-left:0;width:100%}#v-alpha .qkey{grid-template-columns:1fr}#v-alpha .bublab{font-size:13px}}
+#v-alpha .wl{margin-top:14px}
+#v-alpha .wl-head{display:flex;align-items:baseline;gap:10px;margin:0 2px 8px}
+#v-alpha .wl-t{font-family:var(--a-mono);font-size:13px;font-weight:800;color:var(--a-txt)}
+#v-alpha .wl-s{font-family:var(--a-mono);font-size:11.5px;color:var(--a-faint)}
+#v-alpha .wl-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+#v-alpha .wl-item{display:grid;grid-template-columns:13px 1fr 22px 44px 40px 40px;align-items:center;gap:8px;
+  text-align:left;background:var(--a-panel);border:1px solid var(--a-line);border-left-width:3px;border-radius:10px;
+  padding:8px 10px;cursor:pointer;font-family:var(--a-serif);transition:.13s}
+#v-alpha .wl-item:hover{border-color:var(--a-line2);transform:translateY(-1px)}
+#v-alpha .wl-item.active{border-color:var(--a-txt);background:var(--a-panel2);box-shadow:0 2px 9px -3px rgba(0,0,0,.25)}
+#v-alpha .wl-dot{width:11px;height:11px;border-radius:50%}
+#v-alpha .wl-name{font-size:13px;font-weight:700;color:var(--a-txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#v-alpha .wl-tk{font-family:var(--a-mono);font-size:10.5px;color:var(--a-faint);margin-left:5px;font-weight:500}
+#v-alpha .wl-q{font-family:var(--a-mono);font-size:13px;font-weight:800;text-align:center}
+#v-alpha .wl-w{font-family:var(--a-mono);font-size:11.5px;color:var(--a-dim);text-align:right}
+#v-alpha .wl-a{font-family:var(--a-mono);font-size:11.5px;font-weight:700;text-align:right;color:var(--a-faint)}
+#v-alpha .wl-a.pos{color:#0ca678}#v-alpha .wl-a.neg{color:#e03131}
+@media(max-width:640px){#v-alpha h1{font-size:20px}#v-alpha .legend{margin-left:0;width:100%}#v-alpha .qkey{grid-template-columns:1fr}#v-alpha .wl-grid{grid-template-columns:1fr}#v-alpha .bublab{font-size:13px}}
 </style>
 </head>
 <body>
@@ -505,6 +522,8 @@ table.tk th.c{text-align:center}
   <div class="card">
     <svg id="plot" viewBox="0 0 860 600" preserveAspectRatio="xMidYMid meet"></svg>
   </div>
+
+  <div class="wl" id="watch"></div>
 
   <div class="qkey">
     <div class="qk"><div class="h" style="color:var(--a-dawn)">① 알파 (우상)</div><div class="d">단기·중기 모두 벤치마크 아웃퍼폼. 능동 보유가 정당화되는 칸.</div></div>
@@ -1317,7 +1336,7 @@ const D=[
 const CASH={NASDAQ:[-0.3,-2.5],KOSPI:[-0.5,-4]};
 const BNOTE={NASDAQ:'미국 자산 기준선. 한국 종목은 KRW·KOSPI 요인 포함.',KOSPI:'코스피가 메모리 슈퍼사이클로 뜨거워 "바"가 더 높음 → 알파 전반 축소.'};
 
-let bench='NASDAQ',mode='stage',showLabels=true;
+let bench='NASDAQ',mode='stage',showLabels=true,selected=null;
 const av=d=>bench==='NASDAQ'?d.aN:d.aK;
 function quad(d){const a=av(d),r=a[0]>=0,u=a[1]>=0;return u?(r?'①':'②'):(r?'④':'③');}
 
@@ -1360,10 +1379,10 @@ function draw(){
    const t=el('text',{x,y:y+r+13,'text-anchor':'middle',class:'bublab','data-li':i});t.textContent=d.n.length>10?d.n.slice(0,9)+'…':d.n;svg.appendChild(t);
    c.addEventListener('mouseenter',()=>{showTip(d);highlight(i);});
    c.addEventListener('mousemove',moveTip);
-   c.addEventListener('mouseleave',()=>{hideTip();unhighlight();});
-   c.addEventListener('click',e=>{showTip(d);highlight(i);moveTip(e);});
+   c.addEventListener('mouseleave',()=>{hideTip();applySel();});
+   c.addEventListener('click',e=>{selected=i;showTip(d);highlight(i);moveTip(e);markWatch();});
  });
- applyLabels();
+ applyLabels();applySel();
 }
 function drawCash(){
  const base=CASH[bench],bx=base[0],by=base[1],slope=5;
@@ -1376,7 +1395,7 @@ function drawCash(){
  const c=el('circle',{cx,cy,r:9,fill:'rgba(148,165,180,.10)',stroke:'#94a5b4','stroke-width':1.6,'stroke-dasharray':'3 3',class:'cashdot',style:'cursor:pointer'});svg.appendChild(c);
  const t=el('text',{x:cx,y:cy+22,'text-anchor':'middle',class:'bublab',fill:'#5c6f7e','font-size':10.5,opacity:.78});t.textContent='현금 0%';svg.appendChild(t);
  c.addEventListener('mouseenter',showCash);c.addEventListener('mousemove',moveTip);c.addEventListener('mouseleave',hideTip);
- c.addEventListener('click',e=>{showCash();moveTip(e);});
+ c.addEventListener('click',e=>{selected=null;unhighlight();markWatch();showCash();moveTip(e);});
 }
 const tip=document.getElementById('alphaTip');
 const cls=v=>v>0?'pos':v<0?'neg':'';
@@ -1401,10 +1420,38 @@ function showCash(){
 function moveTip(e){const pad=14,tw=tip.offsetWidth,th=tip.offsetHeight;let x=e.clientX+pad,y=e.clientY+pad;
  if(x+tw>innerWidth-8)x=e.clientX-tw-pad;if(y+th>innerHeight-8)y=e.clientY-th-pad;tip.style.left=x+'px';tip.style.top=y+'px';}
 function hideTip(){tip.classList.remove('on');}
-function highlight(i){svg.classList.add('dim');svg.querySelector(`[data-i="${i}"]`).classList.add('hot-sel');
+function highlight(i){svg.querySelectorAll('.hot-sel').forEach(e=>e.classList.remove('hot-sel'));
+ svg.classList.add('dim');const c=svg.querySelector(`.bub[data-i="${i}"]`);if(c)c.classList.add('hot-sel');
  const l=svg.querySelector(`[data-li="${i}"]`);if(l)l.classList.add('hot-sel');}
 function unhighlight(){svg.classList.remove('dim');svg.querySelectorAll('.hot-sel').forEach(e=>e.classList.remove('hot-sel'));}
+function applySel(){if(selected==null)unhighlight();else highlight(selected);}
 function applyLabels(){svg.querySelectorAll('.bublab').forEach(l=>l.style.display=showLabels?'':'none');}
+function positionTip(x,y){const tw=tip.offsetWidth,th=tip.offsetHeight;if(x+tw>innerWidth-8)x=innerWidth-tw-8;if(x<8)x=8;
+ if(y+th>innerHeight-8)y=innerHeight-th-8;if(y<8)y=8;tip.style.left=x+'px';tip.style.top=y+'px';}
+function markWatch(){document.querySelectorAll('#watch .wl-item').forEach(b=>b.classList.toggle('active',+b.dataset.i===selected));}
+function selectIdx(i){
+ if(selected===i){selected=null;hideTip();applySel();markWatch();return;}
+ selected=i;const d=D[i];highlight(i);showTip(d);
+ const c=svg.querySelector(`.bub[data-i="${i}"]`);
+ if(c){const r=c.getBoundingClientRect();positionTip(r.right+12,r.top-6);}
+ markWatch();document.querySelector('#v-alpha .card').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function renderWatch(){
+ const box=document.getElementById('watch'),bn=bench==='NASDAQ'?'나스닥':'코스피';
+ box.innerHTML=`<div class="wl-head"><span class="wl-t">워치리스트</span><span class="wl-s">행 선택 → 그래프 매핑 · 사분면/비중/주·3M vs ${bn}</span></div>`+
+  '<div class="wl-grid">'+D.map((d,i)=>{
+   const a=av(d),col=mode==='stage'?STAGE[d.stage]:QUAD[quad(d)],q=quad(d);
+   return `<button class="wl-item" data-i="${i}" style="border-left-color:${col}">
+     <span class="wl-dot" style="background:${col}"></span>
+     <span class="wl-name">${d.n}<span class="wl-tk">${d.t}</span></span>
+     <span class="wl-q" style="color:${QUAD[q]}">${q}</span>
+     <span class="wl-w">${d.w}%</span>
+     <span class="wl-a ${cls(a[0])}">${fmt(a[0])}</span>
+     <span class="wl-a ${cls(a[1])}">${fmt(a[1])}</span>
+   </button>`;}).join('')+'</div>';
+ box.querySelectorAll('.wl-item').forEach(b=>b.addEventListener('click',()=>selectIdx(+b.dataset.i)));
+ markWatch();
+}
 
 function renderLegend(){
  const items=mode==='stage'?[['가속',STAGE['가속']],['성숙',STAGE['성숙']],['과열',STAGE['과열']],['방어',STAGE['방어']]]
@@ -1413,14 +1460,14 @@ function renderLegend(){
 }
 document.getElementById('benchSeg').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
  document.querySelectorAll('#benchSeg button').forEach(x=>x.classList.remove('on'));b.classList.add('on');
- bench=b.dataset.b;document.getElementById('benchNote').textContent=BNOTE[bench];hideTip();draw();});
+ bench=b.dataset.b;document.getElementById('benchNote').textContent=BNOTE[bench];hideTip();draw();renderWatch();});
 document.querySelectorAll('#v-alpha .tbtn[data-mode]').forEach(b=>b.addEventListener('click',()=>{
- document.querySelectorAll('#v-alpha .tbtn[data-mode]').forEach(x=>x.classList.remove('on'));b.classList.add('on');mode=b.dataset.mode;renderLegend();draw();}));
+ document.querySelectorAll('#v-alpha .tbtn[data-mode]').forEach(x=>x.classList.remove('on'));b.classList.add('on');mode=b.dataset.mode;renderLegend();draw();renderWatch();}));
 document.getElementById('lblBtn').addEventListener('click',function(){showLabels=!showLabels;this.textContent=showLabels?'라벨 끄기':'라벨 켜기';applyLabels();});
-document.addEventListener('click',e=>{if(!e.target.closest('.bub')&&!e.target.closest('.cashdot')&&!e.target.closest('.seg')){hideTip();unhighlight();}},true);
+document.addEventListener('click',e=>{if(!e.target.closest('.bub')&&!e.target.closest('.cashdot')&&!e.target.closest('.seg')&&!e.target.closest('.wl-item')){selected=null;hideTip();unhighlight();markWatch();}},true);
 
 document.getElementById('benchNote').textContent=BNOTE[bench];
-renderLegend();draw();
+renderLegend();draw();renderWatch();
 })();
 </script>
 </body>
