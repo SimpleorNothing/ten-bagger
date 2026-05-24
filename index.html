@@ -1426,8 +1426,8 @@ function draw(){
    const tl=el('text',{x,y:H-PB+16,'text-anchor':'middle',class:'axlab'});tl.textContent=fmt(v);svg.appendChild(tl);});
  svg.appendChild(el('line',{x1:qx,y1:PT,x2:qx,y2:H-PB,class:'zeroline'}));
  svg.appendChild(el('line',{x1:PL,y1:qy,x2:W-PR,y2:qy,class:'zeroline'}));
- const bg=el('rect',{x:qx+5,y:qy-19,width:128,height:16,rx:7,fill:'#1257d6'});svg.appendChild(bg);
- const bt=el('text',{x:qx+9,y:qy-7,class:'benchtag',fill:'#fff'});bt.textContent='● '+(bench==='NASDAQ'?'NASDAQ':'KOSPI')+' (벤치마크)';svg.appendChild(bt);
+ const bg=el('rect',{x:PL+6,y:PT+4,width:128,height:16,rx:7,fill:'#1257d6'});svg.appendChild(bg);
+ const bt=el('text',{x:PL+10,y:PT+16,class:'benchtag',fill:'#fff'});bt.textContent='● '+(bench==='NASDAQ'?'NASDAQ':'KOSPI')+' (벤치마크)';svg.appendChild(bt);
  drawCash();
  const ql=[['①','알파',W-PR-10,PT+22,'end',QUAD['①']],['④','단기만',PL+10,PT+22,'start',QUAD['④']],
    ['②','중기 알파',W-PR-10,H-PB-12,'end',QUAD['②']],['③','벤치마크 이하',PL+10,H-PB-12,'start',QUAD['③']]];
@@ -1457,7 +1457,7 @@ function draw(){
    c.addEventListener('mouseleave',()=>{hideTip();applySel();});
    c.addEventListener('click',e=>{selected=i;showTip(d);highlight(i);moveTip(e);markWatch();});
  });
- applyLabels();applySel();
+ declutterLabels();applyLabels();applySel();
 }
 // 강도 → 색 / 크기 (이모지 아님, SVG path라 색·크기 100% 적용)
 function emColor(pct){ return pct>13?'#e03131':pct>8?'#f76707':'#f59f00'; } // 빨강/주황/amber
@@ -1510,6 +1510,19 @@ function highlight(i){svg.querySelectorAll('.hot-sel').forEach(e=>e.classList.re
 function unhighlight(){svg.classList.remove('dim');svg.querySelectorAll('.hot-sel').forEach(e=>e.classList.remove('hot-sel'));}
 function applySel(){if(selected==null)unhighlight();else highlight(selected);}
 function applyLabels(){svg.querySelectorAll('.bublab').forEach(l=>l.style.display=showLabels?'':'none');}
+// 종목이 몰려 라벨이 겹치면 아래로 밀어 분산(그리디). 가로로 겹치고 세로로 가까운 라벨만 이동.
+function declutterLabels(){
+ const LH=12,labels=[...svg.querySelectorAll('.bublab')].map(t=>({t,x:+t.getAttribute('x'),y:+t.getAttribute('y'),y0:+t.getAttribute('y'),w:(t.textContent||'').length*8+6}));
+ labels.sort((a,b)=>a.y-b.y||a.x-b.x);
+ const placed=[];
+ for(const L of labels){
+   let g=0;
+   while(g++<14 && placed.some(P=>Math.abs(P.x-L.x)<(P.w+L.w)/2 && Math.abs(P.y-L.y)<LH)) L.y+=LH;
+   if(L.y!==L.y0){L.t.setAttribute('y',L.y);
+     if(L.y-L.y0>3){const ln=el('line',{x1:L.x,y1:L.y0-9,x2:L.x,y2:L.y-9,stroke:'var(--a-faint)','stroke-width':.6,opacity:.4});ln.style.pointerEvents='none';svg.insertBefore(ln,svg.firstChild);}}
+   placed.push(L);
+ }
+}
 function positionTip(x,y){const tw=tip.offsetWidth,th=tip.offsetHeight;if(x+tw>innerWidth-8)x=innerWidth-tw-8;if(x<8)x=8;
  if(y+th>innerHeight-8)y=innerHeight-th-8;if(y<8)y=8;tip.style.left=x+'px';tip.style.top=y+'px';}
 function markWatch(){document.querySelectorAll('#watch .wl-item').forEach(b=>b.classList.toggle('active',+b.dataset.i===selected));}

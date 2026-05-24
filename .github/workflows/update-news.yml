@@ -2,8 +2,9 @@ name: Update news feed
 
 on:
   schedule:
-    - cron: '0 23 * * *'   # daily 23:00 UTC (= 08:00 KST)
-  workflow_dispatch: {}      # allow manual run from the Actions tab
+    - cron: '50 21 * * *'   # 06:50 KST · 미국장 마감 후
+    - cron: '50 9 * * *'    # 18:50 KST · 한국장 마감 후
+  workflow_dispatch: {}      # 수동 실행도 가능 (첫 실행 권장)
 
 permissions:
   contents: write
@@ -22,7 +23,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - name: Fetch latest news headlines
+      - name: Fetch latest news
         run: node scripts/fetch-news.mjs
       - name: Commit news.json if changed
         run: |
