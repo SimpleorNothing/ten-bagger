@@ -520,7 +520,7 @@ table.tk th.c{text-align:center}
       <button class="tbtn on" id="heldBtn">보유 표시</button>
       <button class="tbtn on" id="candBtn">후보 표시</button>
       <button class="tbtn on" id="lblBtn">라벨 표시</button>
-      <button class="tbtn on" id="emBtn">실적 화살표</button>
+      <button class="tbtn on" id="emBtn">실적 표시</button>
     </div>
     <div class="legend" id="legend"></div>
   </div>
@@ -1412,16 +1412,21 @@ function draw(){
  const xt=el('text',{x:(PL+W-PR)/2,y:H-8,'text-anchor':'middle',class:'axtitle'});xt.textContent=`3개월 ${bench==='NASDAQ'?'나스닥':'코스피'} 대비 알파 (%p) →`;svg.appendChild(xt);
  const yt=el('text',{x:16,y:(PT+H-PB)/2,'text-anchor':'middle',class:'axtitle',transform:`rotate(-90 16 ${(PT+H-PB)/2})`});yt.textContent=`다음주 ${bench==='NASDAQ'?'나스닥':'코스피'} 대비 알파 (%p) →`;svg.appendChild(yt);
 
- const emBars=emBarSet();
  D.forEach((d,i)=>{
    if(d.cand&&!showCand)return;
    if(!d.cand&&!showHeld)return;
    const a=av(d),x=px(a[1]),y=py(a[0]),r=d.cand?7.5:7+Math.sqrt(d.w)*3.4;
    const col=colorOf(d);
-   if(showEM&&emBars.has(d.t))drawEM(d,x,y,r);
    const c=el('circle',{cx:x,cy:y,r,fill:col+(d.cand?'12':'2e'),stroke:col,'stroke-width':d.cand?1.6:2,class:'bub','data-i':i});
    if(d.cand)c.setAttribute('stroke-dasharray','3 3');svg.appendChild(c);
-   if(d.flag||EM[d.t]){const f=el('text',{x:x+r-2,y:y-r+4,'font-size':12,'text-anchor':'middle'});f.textContent='⚡';f.style.pointerEvents='none';svg.appendChild(f);}
+   // 실적 ⚡: expected move 크기를 글자 크기·색으로 인코딩. 다음주(wk) 실적은 수치 라벨도.
+   const em=EM[d.t];
+   if(showEM&&(em||d.flag)){
+     const pct=em?em.pct:0,sz=em?Math.min(19,11+pct*0.45):12;
+     const ec=!em?'#f59f00':(pct>13?'#e03131':pct>8?'#e8590c':'#f59f00');
+     const f=el('text',{x:x+r-1,y:y-r+sz*0.4,'font-size':sz,'text-anchor':'middle',fill:ec});f.textContent='⚡︎';f.style.pointerEvents='none';svg.appendChild(f);
+     if(em&&em.axis==='wk'){const t2=el('text',{x:x+r+5,y:y-r+3,fill:ec,'font-size':10.5,'font-weight':800});t2.textContent=`±${em.pct}%`;t2.style.pointerEvents='none';svg.appendChild(t2);}
+   }
    const t=el('text',{x,y:y+r+13,'text-anchor':'middle',class:'bublab','data-li':i});t.textContent=d.n.length>10?d.n.slice(0,9)+'…':d.n;svg.appendChild(t);
    c.addEventListener('mouseenter',()=>{showTip(d);highlight(i);});
    c.addEventListener('mousemove',moveTip);
@@ -1429,38 +1434,6 @@ function draw(){
    c.addEventListener('click',e=>{selected=i;showTip(d);highlight(i);moveTip(e);markWatch();});
  });
  applyLabels();applySel();
-}
-const emCap=(v,lo,hi)=>Math.max(lo,Math.min(hi,v));
-// 실적 expected move 막대(amber). 불확실성 크기(±%p)를 막대로. 벤치마크 무관(길이 고정).
-// basis: event-iv=실선(실측) / hist=점선(추정). off=세로 픽셀 오프셋(겹침 분리).
-function drawEM(d,x,y,r){
- const em=EM[d.t];if(!em)return;
- const col='#f59f00',aw=4,dash=em.basis==='hist'?'5 3':null,op=em.basis==='hist'?.7:.9,off=em.off||0;
- const arrow=(ax,ay,dir,horiz)=>{
-   const p=horiz?`${ax},${ay} ${ax-dir*aw*1.6},${ay-aw} ${ax-dir*aw*1.6},${ay+aw}`
-                :`${ax},${ay} ${ax-aw},${ay-dir*aw*1.6} ${ax+aw},${ay-dir*aw*1.6}`;
-   svg.appendChild(el('polygon',{points:p,fill:col,opacity:op}));
- };
- const lineAttr=a=>{if(dash)a['stroke-dasharray']=dash;return a;};
- if(em.axis==='wk'){ // 세로 막대 (Y=다음주)
-   const half=em.pct*(H-PT-PB)/(Y1-Y0),xx=x+off;
-   const yTop=emCap(y-half,PT+2,H-PB-2),yBot=emCap(y+half,PT+2,H-PB-2);
-   svg.appendChild(el('line',lineAttr({x1:xx,y1:yTop,x2:xx,y2:yBot,stroke:col,'stroke-width':2.4,'stroke-linecap':'round',opacity:op})));
-   arrow(xx,yTop,-1,false);arrow(xx,yBot,1,false);
-   const t=el('text',{x:xx+r+6,y:yTop+11,fill:col,'font-size':10,'font-weight':800});t.textContent=`실적 ±${em.pct}%`;t.style.pointerEvents='none';svg.appendChild(t);
- }else{ // 가로 막대 (X=3개월)
-   const half=em.pct*(W-PL-PR)/(X1-X0),yy=y+off;
-   const xL=emCap(x-half,PL+2,W-PR-2),xR=emCap(x+half,PL+2,W-PR-2);
-   svg.appendChild(el('line',lineAttr({x1:xL,y1:yy,x2:xR,y2:yy,stroke:col,'stroke-width':2.4,'stroke-linecap':'round',opacity:op})));
-   arrow(xL,yy,-1,true);arrow(xR,yy,1,true);
-   const t=el('text',{x:(xL+xR)/2,y:yy-7,'text-anchor':'middle',fill:col,'font-size':10,'font-weight':800});t.textContent=`실적 ±${em.pct}%`;t.style.pointerEvents='none';svg.appendChild(t);
- }
-}
-// 축별 '가장 임박한 실적' 1개만 막대 — 나머지는 ⚡배지+툴팁
-function emBarSet(){
- const best={};
- for(const t in EM){const e=EM[t];if(!best[e.axis]||e.date<best[e.axis].date)best[e.axis]={t,date:e.date};}
- return new Set(Object.values(best).map(o=>o.t));
 }
 function drawCash(){
  // 현금 알파 = −(벤치마크 수익률) → X·Y 각각 값 하나인 고정점(궤적 아님). X=3개월, Y=다음주.
@@ -1543,7 +1516,7 @@ function renderLegend(){
  let items;
  if(mode==='stage'){items=[['가속',STAGE['가속']],['성숙',STAGE['성숙']],['과열',STAGE['과열']],['방어',STAGE['방어']]];}
  else{const seen=new Set();items=[];D.forEach(d=>{const k=layerKey(d);if(LAYER_HEX[k]&&!seen.has(k)){seen.add(k);items.push([k,LAYER_HEX[k]]);}});items.sort((a,b)=>a[0].localeCompare(b[0]));}
- document.getElementById('legend').innerHTML=items.map(([t,c])=>`<span class="lg"><span class="dot" style="background:${c}"></span>${t}</span>`).join('')+'<span class="lg" style="color:var(--a-faint)">● 크기=비중</span><span class="lg" style="color:var(--a-faint)">◌ 점선=미보유 후보</span><span class="lg" style="color:#f59f00">↕ 실적 expected move</span>';
+ document.getElementById('legend').innerHTML=items.map(([t,c])=>`<span class="lg"><span class="dot" style="background:${c}"></span>${t}</span>`).join('')+'<span class="lg" style="color:var(--a-faint)">● 크기=비중</span><span class="lg" style="color:var(--a-faint)">◌ 점선=미보유 후보</span><span class="lg" style="color:#f59f00">⚡ 실적(클수록·붉을수록 변동↑)</span>';
 }
 document.getElementById('benchSeg').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
  document.querySelectorAll('#benchSeg button').forEach(x=>x.classList.remove('on'));b.classList.add('on');
@@ -1554,7 +1527,7 @@ document.getElementById('heldBtn').addEventListener('click',function(){showHeld=
 document.getElementById('candBtn').addEventListener('click',function(){showCand=!showCand;this.classList.toggle('on',showCand);this.textContent=showCand?'후보 표시':'후보 끄기';
  if(!showCand&&selected!=null&&D[selected].cand){selected=null;hideTip();}draw();renderWatch();});
 document.getElementById('lblBtn').addEventListener('click',function(){showLabels=!showLabels;this.classList.toggle('on',showLabels);this.textContent=showLabels?'라벨 표시':'라벨 끄기';applyLabels();});
-document.getElementById('emBtn').addEventListener('click',function(){showEM=!showEM;this.classList.toggle('on',showEM);this.textContent=showEM?'실적 화살표':'화살표 끄기';draw();});
+document.getElementById('emBtn').addEventListener('click',function(){showEM=!showEM;this.classList.toggle('on',showEM);this.textContent=showEM?'실적 표시':'실적 끄기';draw();});
 document.addEventListener('click',e=>{if(!e.target.closest('.bub')&&!e.target.closest('.cashdot')&&!e.target.closest('.seg')&&!e.target.closest('.wl-item')&&!e.target.closest('.tbtn')){selected=null;hideTip();unhighlight();markWatch();}},true);
 
 // alpha.json(자동 알파)·earnings.json(실적 expected move)를 함께 로드. 없으면 하드코딩 폴백.
