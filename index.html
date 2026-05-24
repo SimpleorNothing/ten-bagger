@@ -6,6 +6,9 @@
 <title>초입 관측소 · 8-Layer · 텐베거</title>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&display=swap" rel="stylesheet">
 <style>
 :root{
   --ink:#ffffff; --ink2:#fafbfc; --panel:#ffffff; --panel2:#f3f5f7;
@@ -301,6 +304,64 @@ table.tk th.c{text-align:center}
 /* match reference page: drop kicker/label uppercase + letter-spacing so small text reads like the left site at the same size */
 .tag,.vkick,.asof-k,.sidecard h4,.dr-sec h5,.cbox .k,table.tk th,.casc-trigger b,.casc-driver .dl{text-transform:none;letter-spacing:normal}
 </style>
+<style id="alpha-style">
+/* ===== 05 ALPHA MAP — fully scoped under #v-alpha (self-contained colours/fonts) ===== */
+#v-alpha{
+  --a-ink:#fff;--a-panel:#fbfdff;--a-panel2:#eef3f8;--a-line:#e3eaf1;--a-line2:#c9d6e1;
+  --a-txt:#10202c;--a-dim:#5c6f7e;--a-faint:#94a5b4;
+  --a-dawn:#0ca678;--a-accel:#1c7ed6;--a-mature:#b8860b;--a-hot:#e03131;
+  --a-serif:"Pretendard",system-ui,sans-serif;--a-mono:"JetBrains Mono",monospace;
+  font-family:var(--a-serif);color:var(--a-txt);
+  background-image:radial-gradient(1100px 500px at 82% -8%,rgba(63,169,255,.07),transparent 60%),radial-gradient(900px 480px at 6% 108%,rgba(70,230,168,.08),transparent 55%);
+  border-radius:18px;padding:4px}
+#v-alpha .kick{font-family:var(--a-mono);font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--a-faint)}
+#v-alpha h1{font-size:25px;font-weight:800;letter-spacing:-.02em;margin:4px 0 6px;
+  background:linear-gradient(100deg,#10202c,var(--a-dawn));-webkit-background-clip:text;background-clip:text;color:transparent}
+#v-alpha .sub{font-size:14px;color:var(--a-dim);max-width:710px}
+#v-alpha .sub b{color:var(--a-txt)}
+#v-alpha .benchrow{display:flex;align-items:center;gap:8px;margin:14px 0 2px;flex-wrap:wrap}
+#v-alpha .benchrow .lab{font-family:var(--a-mono);font-size:12px;color:var(--a-faint);letter-spacing:.05em}
+#v-alpha .seg{display:inline-flex;background:var(--a-panel2);border:1px solid var(--a-line);border-radius:11px;padding:3px}
+#v-alpha .seg button{font-family:var(--a-mono);font-size:13px;font-weight:700;color:var(--a-dim);background:transparent;border:0;padding:7px 16px;border-radius:8px;cursor:pointer;transition:.15s}
+#v-alpha .seg button.on{background:#fff;color:var(--a-txt);box-shadow:0 2px 7px -2px rgba(0,0,0,.2)}
+#v-alpha .toolbar{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0 10px;align-items:center}
+#v-alpha .tbtn{font-family:var(--a-mono);font-size:12.5px;font-weight:600;color:var(--a-dim);background:var(--a-panel);border:1px solid var(--a-line);padding:7px 12px;border-radius:9px;cursor:pointer;transition:.15s}
+#v-alpha .tbtn.on{background:var(--a-txt);color:#fff;border-color:var(--a-txt)}
+#v-alpha .tbtn:hover{border-color:var(--a-line2)}
+#v-alpha .legend{display:flex;gap:5px 14px;flex-wrap:wrap;font-family:var(--a-mono);font-size:12px;color:var(--a-dim);margin-left:auto}
+#v-alpha .lg{display:inline-flex;align-items:center;gap:6px}
+#v-alpha .dot{width:11px;height:11px;border-radius:50%}
+#v-alpha .card{background:linear-gradient(165deg,var(--a-panel),var(--a-panel2));border:1px solid var(--a-line);border-radius:18px;padding:14px;position:relative;overflow:hidden}
+#v-alpha #plot{width:100%;height:auto;display:block;overflow:visible;touch-action:manipulation}
+#v-alpha .qlabel{font-family:var(--a-mono);font-weight:800;pointer-events:none}
+#v-alpha .qsub{font-family:var(--a-serif);font-weight:600;pointer-events:none}
+#v-alpha .gridline{stroke:var(--a-line);stroke-width:1}
+#v-alpha .zeroline{stroke:var(--a-txt);stroke-width:1.8}
+#v-alpha .axlab{font-family:var(--a-mono);font-size:11px;fill:var(--a-faint)}
+#v-alpha .axtitle{font-family:var(--a-mono);font-size:12.5px;font-weight:700;fill:var(--a-dim)}
+#v-alpha .benchtag{font-family:var(--a-mono);font-size:10.5px;font-weight:700}
+#v-alpha .bub{cursor:pointer;transition:opacity .2s,stroke-width .15s,cx .35s,cy .35s}
+#v-alpha .bub:hover{stroke-width:3}
+#v-alpha .bublab{font-family:var(--a-serif);font-size:11.5px;font-weight:700;fill:var(--a-txt);pointer-events:none;paint-order:stroke;stroke:#fff;stroke-width:3px;transition:x .35s,y .35s}
+#v-alpha .dim .bub{opacity:.22}#v-alpha .dim .bublab{opacity:.18}
+#v-alpha .bub.hot-sel,#v-alpha .bublab.hot-sel{opacity:1 !important}
+#v-alpha .atip{position:fixed;z-index:60;pointer-events:none;background:#0d1b25;color:#eef3f8;border:1px solid #24414f;border-radius:11px;
+  padding:11px 13px;max-width:268px;font-size:12.5px;box-shadow:0 14px 34px -10px rgba(0,0,0,.5);opacity:0;transition:opacity .12s;line-height:1.5}
+#v-alpha .atip.on{opacity:1}
+#v-alpha .atip .tn{font-weight:800;font-size:14px}#v-alpha .atip .tk{font-family:var(--a-mono);font-size:11px;color:#7fd9b8;margin-left:5px}
+#v-alpha .atip .row{display:flex;justify-content:space-between;gap:14px;font-family:var(--a-mono);font-size:11.5px;margin-top:3px}
+#v-alpha .atip .row span{color:#9bb0bd}#v-alpha .atip .row b{color:#fff}
+#v-alpha .atip .pos{color:#46e6a8 !important}#v-alpha .atip .neg{color:#ff7676 !important}
+#v-alpha .atip .note{margin-top:7px;padding-top:7px;border-top:1px solid #24414f;color:#c3d2dc;font-size:11.5px}
+#v-alpha .atip .stagepill{display:inline-block;font-family:var(--a-mono);font-size:10.5px;font-weight:700;padding:2px 7px;border-radius:20px;margin-top:6px}
+#v-alpha .foot{margin-top:16px;font-family:var(--a-mono);font-size:11.5px;color:var(--a-faint);line-height:1.7;border-top:0;padding-top:0}
+#v-alpha .foot b{color:var(--a-dim)}
+#v-alpha .qkey{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
+#v-alpha .qk{border:1px solid var(--a-line);border-radius:11px;padding:9px 11px;background:var(--a-panel)}
+#v-alpha .qk .h{font-family:var(--a-mono);font-size:12px;font-weight:800}
+#v-alpha .qk .d{font-size:12px;color:var(--a-dim);margin-top:2px}
+@media(max-width:640px){#v-alpha h1{font-size:20px}#v-alpha .legend{margin-left:0;width:100%}#v-alpha .qkey{grid-template-columns:1fr}#v-alpha .bublab{font-size:13px}}
+</style>
 </head>
 <body>
 <header><div class="wrap bar">
@@ -311,6 +372,7 @@ table.tk th.c{text-align:center}
     <button class="tab" data-v="stack"><span class="n">02</span>8레이어 통합</button>
     <button class="tab" data-v="map"><span class="n">03</span>초입 지도</button>
     <button class="tab" data-v="port"><span class="n">04</span>포트폴리오 X-레이</button>
+    <button class="tab" data-v="alpha"><span class="n">05</span>알파 맵</button>
   </nav>
 </div></header>
 
@@ -416,6 +478,47 @@ table.tk th.c{text-align:center}
     <th class="c">점수</th><th class="c">단계</th><th class="c">점검일</th><th></th></tr></thead>
     <tbody id="tkBody"></tbody></table>
   <div class="foot" id="storeFoot"></div>
+</section>
+
+<!-- 05 ALPHA MAP -->
+<section class="view" id="v-alpha">
+  <div class="kick">初入 Observatory · Alpha Map</div>
+  <h1>보유종목 4사분면 — 벤치마크 대비 알파</h1>
+  <p class="sub"><b>원점(0,0) = 선택한 벤치마크.</b> X=다음주 / Y=3개월 <b>초과수익(알파, %p) 추정</b>. 회색 점선=현금(절대 0%) 궤적. <b>벤치마크를 코스피로 바꾸면 한국 종목(삼성·소부장 등)의 알파가 줄어듭니다</b> — 코스피가 나스닥보다 뜨거웠고, 삼성은 사실상 코스피 자신이기 때문. 버블=비중, 색=단계.</p>
+
+  <div class="benchrow">
+    <span class="lab">벤치마크</span>
+    <div class="seg" id="benchSeg">
+      <button data-b="NASDAQ" class="on">나스닥 (QQQ)</button>
+      <button data-b="KOSPI">코스피 (KOSPI200)</button>
+    </div>
+    <span class="lab" id="benchNote"></span>
+  </div>
+
+  <div class="toolbar">
+    <button class="tbtn on" data-mode="stage">색: 단계별</button>
+    <button class="tbtn" data-mode="quad">색: 사분면별</button>
+    <button class="tbtn" id="lblBtn">라벨 끄기</button>
+    <div class="legend" id="legend"></div>
+  </div>
+
+  <div class="card">
+    <svg id="plot" viewBox="0 0 860 600" preserveAspectRatio="xMidYMid meet"></svg>
+  </div>
+
+  <div class="qkey">
+    <div class="qk"><div class="h" style="color:var(--a-dawn)">① 알파 (우상)</div><div class="d">단기·중기 모두 벤치마크 아웃퍼폼. 능동 보유가 정당화되는 칸.</div></div>
+    <div class="qk"><div class="h" style="color:var(--a-accel)">② 중기 알파 (좌상)</div><div class="d">단기는 지수 이하지만 3개월 아웃퍼폼. 소부장 L4가 대표(1Y runway).</div></div>
+    <div class="qk"><div class="h" style="color:var(--a-mature)">④ 단기만 (우하)</div><div class="d">단기 아웃퍼폼·중기 이하. BE류.</div></div>
+    <div class="qk"><div class="h" style="color:var(--a-hot)">③ 벤치마크 이하 (좌하)</div><div class="d">능동 보유 이유가 약한 칸. 점선(현금)보다 아래면 현금만도 못함.</div></div>
+  </div>
+
+  <div class="foot">
+    <b>알파 도출:</b> 베타(고변동 AI주)×모멘텀/카탈리스트 + runway − 지수 기대. 평균회귀(많이올라서↓/떨어져서↑) 미사용. MRVL 5/27·MU 6월말 실적, 삼성 HBM4 6월 공급 반영. 모두 <b>추정치</b>.<br>
+    <b>이중 벤치마크 주의:</b> 코스피 기준은 (지수 스프레드)+(자기 시장 조정)을 반영한 추정. 채권혼합의 음(−)알파는 설계상 정상(방어자산). 의사결정 지원용, 매매 권유 아님 · 기준일 2026-05-24 KST.
+  </div>
+
+  <div class="atip" id="alphaTip"></div>
 </section>
 </main>
 
@@ -1189,6 +1292,136 @@ document.getElementById('filterSel').addEventListener('change',renderTracker);
 /* ===== INIT ===== */
 function renderAll(){renderSignalLog();renderThread();renderCascade();renderStack();renderPortfolio();renderTracker();}
 renderLegends();loadStore().then(renderAll);renderAll();updateAsof();loadPrices();
+</script>
+<script>
+/* ===== 05 ALPHA MAP — isolated IIFE (no globals leak) ===== */
+(function(){
+const STAGE={'가속':'#1c7ed6','성숙':'#b8860b','과열':'#e03131','방어':'#64748b','태동':'#7048e8','초입':'#0ca678'};
+const QUAD={'①':'#0ca678','②':'#1c7ed6','③':'#e03131','④':'#b8860b'};
+const D=[
+ {n:'마벨',t:'MRVL',mkt:'US',layer:'L2/L6',w:6.1,aN:[1.5,7,9],aK:[1.3,5.5,5],stage:'가속',flag:'⚡5/27 실적',note:'NVLink Fusion·NVDA $2B 고유엣지. 보유 중 알파 최상. 다음주는 실적이라 ±분산 큼.'},
+ {n:'삼성전자',t:'005930',mkt:'KR',layer:'L3',w:3.4,aN:[1.5,4,7],aK:[0.6,1.5,2.5],stage:'성숙',note:'나스닥 대비 알파의 상당분은 "코스피>나스닥"+"삼성=코스피". 코스피 기준 고유 알파는 HBM4 점유율 회복분 정도로 축소.'},
+ {n:'마이크론',t:'MU',mkt:'US',layer:'L3',w:10.1,aN:[0.5,5,3],aK:[0.3,3.5,-1],stage:'성숙',note:'6월말 실적·HBM 2026+ 타이트. 코스피(메모리 슈퍼사이클로 뜨거움) 기준 1Y는 지수 이하로.'},
+ {n:'PLUS 글로벌HBM',t:'ETF',mkt:'US',layer:'L3',w:14.1,aN:[1,3,2],aK:[0.8,1.5,-2],stage:'성숙',note:'HBM 바스켓. 고유 알파 작음(테마 동행).'},
+ {n:'KODEX 미AI반도체TOP3',t:'ETF',mkt:'US',layer:'L2',w:2.8,aN:[0.5,2,4],aK:[0.3,0.5,0],stage:'가속',note:'≈QQQ AI 코어 — 나스닥 기준 알파 미미, 코스피 기준 거의 0.'},
+ {n:'KODEX AI반도체핵심장비',t:'소부장 L4',mkt:'KR',layer:'L4',w:2.4,aN:[-0.5,1,8],aK:[-0.7,-0.5,4],stage:'가속',note:'다음 병목(패키징) runway. 코스피 기준에선 바가 높아 1Y +4로 축소되나 여전히 양(+).'},
+ {n:'루멘텀',t:'LITE',mkt:'US',layer:'L6',w:7.6,aN:[0.5,2,1],aK:[0.3,0.5,-3],stage:'성숙',note:'광 콘텐츠(800G→1.6T→CPO) 증가 추세+모멘텀 양호.'},
+ {n:'KODEX 미AI광통신',t:'ETF',mkt:'US',layer:'L6',w:5.1,aN:[0,1,1],aK:[-0.2,-0.5,-3],stage:'가속',note:'광 테마 프록시. 고유 알파 미미.'},
+ {n:'테슬라',t:'TSLA',mkt:'US',layer:'기타',w:6.9,aN:[0,0,3],aK:[-0.2,-1.5,-1],stage:'가속',note:'8레이어 밖. 순수 베타에 가까움. 로보틱스 옵션만 소폭.'},
+ {n:'버티브',t:'VRT',mkt:'US',layer:'L7',w:4.2,aN:[-1.5,1,3],aK:[-1.7,-0.5,-1],stage:'성숙',note:'단기 음(−)은 현재 추세가 실제 약세라서(모멘텀, 회귀 아님). 백로그+109%·B2B 2.9x로 이익추세 양(+).'},
+ {n:'SOL 미AI전력',t:'ETF',mkt:'US',layer:'L7',w:5.0,aN:[0,0,0],aK:[-0.2,-1.5,-4],stage:'가속',note:'전력 capex 확장 동행. 고유 알파 없음 → 베타 수렴.'},
+ {n:'KODEX AI전력핵심설비',t:'한국 ETF',mkt:'KR',layer:'L7/L8',w:8.5,aN:[0,0,1],aK:[-0.2,-1,-2],stage:'과열',vol:true,note:'전력 capex 확장 지속. 공급과잉은 실(實)리스크로 별도 관찰. 고변동.'},
+ {n:'블룸에너지',t:'BE',mkt:'US',layer:'L8',w:2.8,aN:[1,1,2],aK:[0.8,-0.5,-2],stage:'과열',vol:true,note:'BYOP 온사이트 발전 수요 전방 증가. 단 고변동·내부자 매도 리스크.'},
+ {n:'채권혼합(2종)',t:'방어',mkt:'KR',layer:'방어',w:13.1,aN:[-2,-4.5,-6],aK:[-2.2,-6,-9],stage:'방어',note:'음(−)알파는 설계상 정상 — 방어자산. 지수 추월이 목적 아님. 변동성 헤지.'},
+];
+const CASH={NASDAQ:[-0.3,-2.5],KOSPI:[-0.5,-4]};
+const BNOTE={NASDAQ:'미국 자산 기준선. 한국 종목은 KRW·KOSPI 요인 포함.',KOSPI:'코스피가 메모리 슈퍼사이클로 뜨거워 "바"가 더 높음 → 알파 전반 축소.'};
+
+let bench='NASDAQ',mode='stage',showLabels=true;
+const av=d=>bench==='NASDAQ'?d.aN:d.aK;
+function quad(d){const a=av(d),r=a[0]>=0,u=a[1]>=0;return u?(r?'①':'②'):(r?'④':'③');}
+
+const svg=document.getElementById('plot'),NS='http://www.w3.org/2000/svg';
+const W=860,H=600,PL=58,PR=28,PT=30,PB=52;
+const X0=-4,X1=3,Y0=-10,Y1=10;
+const px=v=>PL+(v-X0)/(X1-X0)*(W-PL-PR);
+const py=v=>H-PB-(v-Y0)/(Y1-Y0)*(H-PT-PB);
+function el(tag,a){const e=document.createElementNS(NS,tag);for(const k in a)e.setAttribute(k,a[k]);return e;}
+const fmt=v=>(v>0?'+':'')+v;
+
+function draw(){
+ svg.innerHTML='';
+ const qx=px(0),qy=py(0);
+ const tints=[[qx,PT,W-PR-qx,qy-PT,'rgba(12,166,120,.06)'],[PL,PT,qx-PL,qy-PT,'rgba(28,126,214,.05)'],
+   [qx,qy,W-PR-qx,H-PB-qy,'rgba(184,134,11,.05)'],[PL,qy,qx-PL,H-PB-qy,'rgba(224,49,49,.05)']];
+ tints.forEach(([x,y,w,h,fill])=>svg.appendChild(el('rect',{x,y,width:w,height:h,fill,rx:4})));
+ for(let v=-9;v<=9;v+=3){const y=py(v);svg.appendChild(el('line',{x1:PL,y1:y,x2:W-PR,y2:y,class:'gridline'}));
+   const tl=el('text',{x:PL-8,y:y+4,'text-anchor':'end',class:'axlab'});tl.textContent=fmt(v);svg.appendChild(tl);}
+ for(let v=-4;v<=3;v+=1){const x=px(v);svg.appendChild(el('line',{x1:x,y1:PT,x2:x,y2:H-PB,class:'gridline'}));
+   const tl=el('text',{x,y:H-PB+16,'text-anchor':'middle',class:'axlab'});tl.textContent=fmt(v);svg.appendChild(tl);}
+ svg.appendChild(el('line',{x1:qx,y1:PT,x2:qx,y2:H-PB,class:'zeroline'}));
+ svg.appendChild(el('line',{x1:PL,y1:qy,x2:W-PR,y2:qy,class:'zeroline'}));
+ const bg=el('rect',{x:qx+5,y:qy-19,width:128,height:16,rx:4,fill:'#10202c'});svg.appendChild(bg);
+ const bt=el('text',{x:qx+9,y:qy-7,class:'benchtag',fill:'#fff'});bt.textContent='● '+(bench==='NASDAQ'?'NASDAQ':'KOSPI')+' (벤치마크)';svg.appendChild(bt);
+ drawCash();
+ const ql=[['①','알파',W-PR-10,PT+22,'end',QUAD['①']],['②','중기 알파',PL+10,PT+22,'start',QUAD['②']],
+   ['④','단기만',W-PR-10,H-PB-12,'end',QUAD['④']],['③','벤치마크 이하',PL+10,H-PB-12,'start',QUAD['③']]];
+ ql.forEach(([num,txt,x,y,anc,col])=>{
+   const a=el('text',{x,y,'text-anchor':anc,class:'qlabel',fill:col,'font-size':19,opacity:.55});a.textContent=num;svg.appendChild(a);
+   const b=el('text',{x,y:y+16,'text-anchor':anc,class:'qsub',fill:col,'font-size':12,opacity:.6});b.textContent=txt;svg.appendChild(b);});
+ const xt=el('text',{x:(PL+W-PR)/2,y:H-8,'text-anchor':'middle',class:'axtitle'});xt.textContent=`다음주 ${bench==='NASDAQ'?'나스닥':'코스피'} 대비 알파 (%p) →`;svg.appendChild(xt);
+ const yt=el('text',{x:16,y:(PT+H-PB)/2,'text-anchor':'middle',class:'axtitle',transform:`rotate(-90 16 ${(PT+H-PB)/2})`});yt.textContent=`3개월 ${bench==='NASDAQ'?'나스닥':'코스피'} 대비 알파 (%p) →`;svg.appendChild(yt);
+
+ D.forEach((d,i)=>{
+   const a=av(d),x=px(a[0]),y=py(a[1]),r=7+Math.sqrt(d.w)*3.4;
+   const col=mode==='stage'?STAGE[d.stage]:QUAD[quad(d)];
+   const c=el('circle',{cx:x,cy:y,r,fill:col+'2e',stroke:col,'stroke-width':2,class:'bub','data-i':i});svg.appendChild(c);
+   if(d.flag){const f=el('text',{x:x+r-2,y:y-r+4,'font-size':12,'text-anchor':'middle'});f.textContent='⚡';f.style.pointerEvents='none';svg.appendChild(f);}
+   const t=el('text',{x,y:y+r+13,'text-anchor':'middle',class:'bublab','data-li':i});t.textContent=d.n.length>10?d.n.slice(0,9)+'…':d.n;svg.appendChild(t);
+   c.addEventListener('mouseenter',()=>{showTip(d);highlight(i);});
+   c.addEventListener('mousemove',moveTip);
+   c.addEventListener('mouseleave',()=>{hideTip();unhighlight();});
+   c.addEventListener('click',e=>{showTip(d);highlight(i);moveTip(e);});
+ });
+ applyLabels();
+}
+function drawCash(){
+ const base=CASH[bench],bx=base[0],by=base[1],slope=5;
+ let loM3=Math.max(by-4,Y0+0.3),hiM3=Math.min(by+4,Y1-0.5);
+ const loWk=bx+(loM3-by)/slope,hiWk=bx+(hiM3-by)/slope;
+ svg.appendChild(el('line',{x1:px(loWk),y1:py(loM3),x2:px(hiWk),y2:py(hiM3),stroke:'#94a5b4','stroke-width':1.4,'stroke-dasharray':'3 4',opacity:.45}));
+ const lo=el('text',{x:px(loWk),y:py(loM3)+13,'text-anchor':'middle','font-size':9.5,fill:'#aab8c4','font-family':'JetBrains Mono,monospace',opacity:.8});lo.textContent=(bench==='NASDAQ'?'나스닥':'코스피')+'↑';svg.appendChild(lo);
+ const hi=el('text',{x:px(hiWk)+22,y:py(hiM3)+3,'text-anchor':'middle','font-size':9.5,fill:'#aab8c4','font-family':'JetBrains Mono,monospace',opacity:.8});hi.textContent=(bench==='NASDAQ'?'나스닥':'코스피')+'↓';svg.appendChild(hi);
+ const cx=px(bx),cy=py(by);
+ const c=el('circle',{cx,cy,r:9,fill:'rgba(148,165,180,.10)',stroke:'#94a5b4','stroke-width':1.6,'stroke-dasharray':'3 3',class:'cashdot',style:'cursor:pointer'});svg.appendChild(c);
+ const t=el('text',{x:cx,y:cy+22,'text-anchor':'middle',class:'bublab',fill:'#5c6f7e','font-size':10.5,opacity:.78});t.textContent='현금 0%';svg.appendChild(t);
+ c.addEventListener('mouseenter',showCash);c.addEventListener('mousemove',moveTip);c.addEventListener('mouseleave',hideTip);
+ c.addEventListener('click',e=>{showCash();moveTip(e);});
+}
+const tip=document.getElementById('alphaTip');
+const cls=v=>v>0?'pos':v<0?'neg':'';
+function showTip(d){
+ const a=av(d),q=quad(d),col=STAGE[d.stage],bn=bench==='NASDAQ'?'나스닥':'코스피';
+ tip.innerHTML=`<div><span class="tn">${d.n}</span><span class="tk">${d.t}</span></div>
+   <div class="row"><span>레이어 / 비중</span><b>${d.layer} · ${d.w}%</b></div>
+   <div class="row"><span>다음주 vs ${bn}</span><b class="${cls(a[0])}">${fmt(a[0])}%p</b></div>
+   <div class="row"><span>3개월 vs ${bn}</span><b class="${cls(a[1])}">${fmt(a[1])}%p</b></div>
+   <div class="row"><span>1년 vs ${bn}</span><b class="${cls(a[2])}">${fmt(a[2])}%p</b></div>
+   <div class="row"><span>사분면</span><b>${q} ${({'①':'알파','②':'중기 알파','③':'벤치마크 이하','④':'단기만'})[q]}</b></div>
+   <span class="stagepill" style="background:${col}22;color:${col}">${d.stage} · ${d.mkt}${d.flag?' · '+d.flag:''}</span>
+   <div class="note">${d.note}</div>`;
+ tip.classList.add('on');
+}
+function showCash(){
+ const bn=bench==='NASDAQ'?'나스닥':'코스피';
+ tip.innerHTML=`<div><span class="tn">현금 (절대 0%)</span></div>
+   <div class="note">현금 알파 = −(${bn} 수익률). ${bn}이 <b style="color:#ff7676">오르면</b> 현금은 좌하, <b style="color:#46e6a8">빠지면</b> 우상으로 이동 — 점선이 그 궤적입니다.<br><br><b>읽는 법:</b> 점선보다 위·오른쪽이어야 "현금보다" 나은 절대수익. ${bn} 약세 시나리오(점선 위쪽)에선 ① 고베타주도 현금 밑으로 내려갈 수 있음. 현 위치는 "${bn} 완만 상승" 가정의 스냅샷.</div>`;
+ tip.classList.add('on');
+}
+function moveTip(e){const pad=14,tw=tip.offsetWidth,th=tip.offsetHeight;let x=e.clientX+pad,y=e.clientY+pad;
+ if(x+tw>innerWidth-8)x=e.clientX-tw-pad;if(y+th>innerHeight-8)y=e.clientY-th-pad;tip.style.left=x+'px';tip.style.top=y+'px';}
+function hideTip(){tip.classList.remove('on');}
+function highlight(i){svg.classList.add('dim');svg.querySelector(`[data-i="${i}"]`).classList.add('hot-sel');
+ const l=svg.querySelector(`[data-li="${i}"]`);if(l)l.classList.add('hot-sel');}
+function unhighlight(){svg.classList.remove('dim');svg.querySelectorAll('.hot-sel').forEach(e=>e.classList.remove('hot-sel'));}
+function applyLabels(){svg.querySelectorAll('.bublab').forEach(l=>l.style.display=showLabels?'':'none');}
+
+function renderLegend(){
+ const items=mode==='stage'?[['가속',STAGE['가속']],['성숙',STAGE['성숙']],['과열',STAGE['과열']],['방어',STAGE['방어']]]
+   :[['① 알파',QUAD['①']],['② 중기',QUAD['②']],['③ 지수이하',QUAD['③']],['④ 단기만',QUAD['④']]];
+ document.getElementById('legend').innerHTML=items.map(([t,c])=>`<span class="lg"><span class="dot" style="background:${c}"></span>${t}</span>`).join('')+'<span class="lg" style="color:var(--a-faint)">● 크기=비중</span>';
+}
+document.getElementById('benchSeg').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
+ document.querySelectorAll('#benchSeg button').forEach(x=>x.classList.remove('on'));b.classList.add('on');
+ bench=b.dataset.b;document.getElementById('benchNote').textContent=BNOTE[bench];hideTip();draw();});
+document.querySelectorAll('#v-alpha .tbtn[data-mode]').forEach(b=>b.addEventListener('click',()=>{
+ document.querySelectorAll('#v-alpha .tbtn[data-mode]').forEach(x=>x.classList.remove('on'));b.classList.add('on');mode=b.dataset.mode;renderLegend();draw();}));
+document.getElementById('lblBtn').addEventListener('click',function(){showLabels=!showLabels;this.textContent=showLabels?'라벨 끄기':'라벨 켜기';applyLabels();});
+document.addEventListener('click',e=>{if(!e.target.closest('.bub')&&!e.target.closest('.cashdot')&&!e.target.closest('.seg')){hideTip();unhighlight();}},true);
+
+document.getElementById('benchNote').textContent=BNOTE[bench];
+renderLegend();draw();
+})();
 </script>
 </body>
 </html>
