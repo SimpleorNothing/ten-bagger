@@ -508,7 +508,7 @@ table.tk th.c{text-align:center}
 <section class="view" id="v-alpha">
   <div class="kick">初入 Observatory · Alpha Map</div>
   <h1>보유종목 4사분면 — 벤치마크 대비 알파</h1>
-  <p class="sub"><b>원점(0,0) = 선택한 벤치마크.</b> X=다음주 / Y=3개월 <b>초과수익(알파, %p) 추정</b>. 회색 점선=현금(절대 0%) 궤적. <b>벤치마크를 코스피로 바꾸면 한국 종목(삼성·소부장 등)의 알파가 줄어듭니다</b> — 코스피가 나스닥보다 뜨거웠고, 삼성은 사실상 코스피 자신이기 때문. 버블=비중, 색=단계. <b>점선 버블·하단 "미보유 후보"</b>는 보유하지 않은 관찰 대상(비중 없음·알파는 컨빅션 추정).</p>
+  <p class="sub"><b>원점(0,0) = 선택한 벤치마크.</b> X=3개월 / Y=다음주 <b>초과수익(알파, %p) 추정</b>. 회색 점선=현금(절대 0%) 궤적. <b>벤치마크를 코스피로 바꾸면 한국 종목(삼성·소부장 등)의 알파가 줄어듭니다</b> — 코스피가 나스닥보다 뜨거웠고, 삼성은 사실상 코스피 자신이기 때문. 버블=비중, 색=단계. <b>점선 버블·하단 "미보유 후보"</b>는 보유하지 않은 관찰 대상(비중 없음·알파는 컨빅션 추정).</p>
 
   <div class="benchrow">
     <span class="lab">벤치마크</span>
@@ -536,8 +536,8 @@ table.tk th.c{text-align:center}
 
   <div class="qkey">
     <div class="qk"><div class="h" style="color:var(--a-dawn)">① 알파 (우상)</div><div class="d">단기·중기 모두 벤치마크 아웃퍼폼. 능동 보유가 정당화되는 칸.</div></div>
-    <div class="qk"><div class="h" style="color:var(--a-accel)">② 중기 알파 (좌상)</div><div class="d">단기는 지수 이하지만 3개월 아웃퍼폼. 소부장 L4가 대표(1Y runway).</div></div>
-    <div class="qk"><div class="h" style="color:var(--a-mature)">④ 단기만 (우하)</div><div class="d">단기 아웃퍼폼·중기 이하. BE류.</div></div>
+    <div class="qk"><div class="h" style="color:var(--a-accel)">② 중기 알파 (우하)</div><div class="d">단기는 지수 이하지만 3개월 아웃퍼폼. 소부장 L4가 대표(1Y runway).</div></div>
+    <div class="qk"><div class="h" style="color:var(--a-mature)">④ 단기만 (좌상)</div><div class="d">단기 아웃퍼폼·중기 이하. BE류.</div></div>
     <div class="qk"><div class="h" style="color:var(--a-hot)">③ 벤치마크 이하 (좌하)</div><div class="d">능동 보유 이유가 약한 칸. 점선(현금)보다 아래면 현금만도 못함.</div></div>
   </div>
 
@@ -1362,7 +1362,7 @@ function quad(d){const a=av(d),r=a[0]>=0,u=a[1]>=0;return u?(r?'①':'②'):(r?'
 
 const svg=document.getElementById('plot'),NS='http://www.w3.org/2000/svg';
 const W=860,H=600,PL=58,PR=28,PT=30,PB=52;
-const X0=-4,X1=3,Y0=-10,Y1=10;
+const X0=-10,X1=10,Y0=-4,Y1=3; // X=3개월(넓음) / Y=다음주(좁음)
 const px=v=>PL+(v-X0)/(X1-X0)*(W-PL-PR);
 const py=v=>H-PB-(v-Y0)/(Y1-Y0)*(H-PT-PB);
 function el(tag,a){const e=document.createElementNS(NS,tag);for(const k in a)e.setAttribute(k,a[k]);return e;}
@@ -1371,29 +1371,29 @@ const fmt=v=>(v>0?'+':'')+v;
 function draw(){
  svg.innerHTML='';
  const qx=px(0),qy=py(0);
- const tints=[[qx,PT,W-PR-qx,qy-PT,'rgba(12,166,120,.06)'],[PL,PT,qx-PL,qy-PT,'rgba(28,126,214,.05)'],
-   [qx,qy,W-PR-qx,H-PB-qy,'rgba(184,134,11,.05)'],[PL,qy,qx-PL,H-PB-qy,'rgba(224,49,49,.05)']];
+ const tints=[[qx,PT,W-PR-qx,qy-PT,'rgba(12,166,120,.06)'],[PL,PT,qx-PL,qy-PT,'rgba(184,134,11,.05)'],
+   [qx,qy,W-PR-qx,H-PB-qy,'rgba(28,126,214,.05)'],[PL,qy,qx-PL,H-PB-qy,'rgba(224,49,49,.05)']];
  tints.forEach(([x,y,w,h,fill])=>svg.appendChild(el('rect',{x,y,width:w,height:h,fill,rx:4})));
- for(let v=-9;v<=9;v+=3){const y=py(v);svg.appendChild(el('line',{x1:PL,y1:y,x2:W-PR,y2:y,class:'gridline'}));
+ for(let v=-4;v<=3;v+=1){const y=py(v);svg.appendChild(el('line',{x1:PL,y1:y,x2:W-PR,y2:y,class:'gridline'}));
    const tl=el('text',{x:PL-8,y:y+4,'text-anchor':'end',class:'axlab'});tl.textContent=fmt(v);svg.appendChild(tl);}
- for(let v=-4;v<=3;v+=1){const x=px(v);svg.appendChild(el('line',{x1:x,y1:PT,x2:x,y2:H-PB,class:'gridline'}));
+ for(let v=-9;v<=9;v+=3){const x=px(v);svg.appendChild(el('line',{x1:x,y1:PT,x2:x,y2:H-PB,class:'gridline'}));
    const tl=el('text',{x,y:H-PB+16,'text-anchor':'middle',class:'axlab'});tl.textContent=fmt(v);svg.appendChild(tl);}
  svg.appendChild(el('line',{x1:qx,y1:PT,x2:qx,y2:H-PB,class:'zeroline'}));
  svg.appendChild(el('line',{x1:PL,y1:qy,x2:W-PR,y2:qy,class:'zeroline'}));
  const bg=el('rect',{x:qx+5,y:qy-19,width:128,height:16,rx:4,fill:'#10202c'});svg.appendChild(bg);
  const bt=el('text',{x:qx+9,y:qy-7,class:'benchtag',fill:'#fff'});bt.textContent='● '+(bench==='NASDAQ'?'NASDAQ':'KOSPI')+' (벤치마크)';svg.appendChild(bt);
  drawCash();
- const ql=[['①','알파',W-PR-10,PT+22,'end',QUAD['①']],['②','중기 알파',PL+10,PT+22,'start',QUAD['②']],
-   ['④','단기만',W-PR-10,H-PB-12,'end',QUAD['④']],['③','벤치마크 이하',PL+10,H-PB-12,'start',QUAD['③']]];
+ const ql=[['①','알파',W-PR-10,PT+22,'end',QUAD['①']],['④','단기만',PL+10,PT+22,'start',QUAD['④']],
+   ['②','중기 알파',W-PR-10,H-PB-12,'end',QUAD['②']],['③','벤치마크 이하',PL+10,H-PB-12,'start',QUAD['③']]];
  ql.forEach(([num,txt,x,y,anc,col])=>{
    const a=el('text',{x,y,'text-anchor':anc,class:'qlabel',fill:col,'font-size':19,opacity:.55});a.textContent=num;svg.appendChild(a);
    const b=el('text',{x,y:y+16,'text-anchor':anc,class:'qsub',fill:col,'font-size':12,opacity:.6});b.textContent=txt;svg.appendChild(b);});
- const xt=el('text',{x:(PL+W-PR)/2,y:H-8,'text-anchor':'middle',class:'axtitle'});xt.textContent=`다음주 ${bench==='NASDAQ'?'나스닥':'코스피'} 대비 알파 (%p) →`;svg.appendChild(xt);
- const yt=el('text',{x:16,y:(PT+H-PB)/2,'text-anchor':'middle',class:'axtitle',transform:`rotate(-90 16 ${(PT+H-PB)/2})`});yt.textContent=`3개월 ${bench==='NASDAQ'?'나스닥':'코스피'} 대비 알파 (%p) →`;svg.appendChild(yt);
+ const xt=el('text',{x:(PL+W-PR)/2,y:H-8,'text-anchor':'middle',class:'axtitle'});xt.textContent=`3개월 ${bench==='NASDAQ'?'나스닥':'코스피'} 대비 알파 (%p) →`;svg.appendChild(xt);
+ const yt=el('text',{x:16,y:(PT+H-PB)/2,'text-anchor':'middle',class:'axtitle',transform:`rotate(-90 16 ${(PT+H-PB)/2})`});yt.textContent=`다음주 ${bench==='NASDAQ'?'나스닥':'코스피'} 대비 알파 (%p) →`;svg.appendChild(yt);
 
  D.forEach((d,i)=>{
    if(d.cand&&!showCand)return;
-   const a=av(d),x=px(a[0]),y=py(a[1]),r=d.cand?7.5:7+Math.sqrt(d.w)*3.4;
+   const a=av(d),x=px(a[1]),y=py(a[0]),r=d.cand?7.5:7+Math.sqrt(d.w)*3.4;
    const col=mode==='stage'?STAGE[d.stage]:QUAD[quad(d)];
    const c=el('circle',{cx:x,cy:y,r,fill:col+(d.cand?'12':'2e'),stroke:col,'stroke-width':d.cand?1.6:2,class:'bub','data-i':i});
    if(d.cand)c.setAttribute('stroke-dasharray','3 3');svg.appendChild(c);
@@ -1407,13 +1407,14 @@ function draw(){
  applyLabels();applySel();
 }
 function drawCash(){
- const base=CASH[bench],bx=base[0],by=base[1],slope=5;
- let loM3=Math.max(by-4,Y0+0.3),hiM3=Math.min(by+4,Y1-0.5);
- const loWk=bx+(loM3-by)/slope,hiWk=bx+(hiM3-by)/slope;
- svg.appendChild(el('line',{x1:px(loWk),y1:py(loM3),x2:px(hiWk),y2:py(hiM3),stroke:'#94a5b4','stroke-width':1.4,'stroke-dasharray':'3 4',opacity:.45}));
- const lo=el('text',{x:px(loWk),y:py(loM3)+13,'text-anchor':'middle','font-size':9.5,fill:'#aab8c4','font-family':'JetBrains Mono,monospace',opacity:.8});lo.textContent=(bench==='NASDAQ'?'나스닥':'코스피')+'↑';svg.appendChild(lo);
- const hi=el('text',{x:px(hiWk)+22,y:py(hiM3)+3,'text-anchor':'middle','font-size':9.5,fill:'#aab8c4','font-family':'JetBrains Mono,monospace',opacity:.8});hi.textContent=(bench==='NASDAQ'?'나스닥':'코스피')+'↓';svg.appendChild(hi);
- const cx=px(bx),cy=py(by);
+ // X=3개월(m3) / Y=다음주(wk). base=[wk, m3]. 궤적은 m3 기준으로 그리고 wk=base_wk+Δm3/slope.
+ const base=CASH[bench],bxWk=base[0],byM3=base[1],slope=5;
+ let loM3=Math.max(byM3-4,X0+0.3),hiM3=Math.min(byM3+4,X1-0.5);
+ const loWk=bxWk+(loM3-byM3)/slope,hiWk=bxWk+(hiM3-byM3)/slope;
+ svg.appendChild(el('line',{x1:px(loM3),y1:py(loWk),x2:px(hiM3),y2:py(hiWk),stroke:'#94a5b4','stroke-width':1.4,'stroke-dasharray':'3 4',opacity:.45}));
+ const lo=el('text',{x:px(loM3),y:py(loWk)+13,'text-anchor':'middle','font-size':9.5,fill:'#aab8c4','font-family':'JetBrains Mono,monospace',opacity:.8});lo.textContent=(bench==='NASDAQ'?'나스닥':'코스피')+'↑';svg.appendChild(lo);
+ const hi=el('text',{x:px(hiM3)+22,y:py(hiWk)+3,'text-anchor':'middle','font-size':9.5,fill:'#aab8c4','font-family':'JetBrains Mono,monospace',opacity:.8});hi.textContent=(bench==='NASDAQ'?'나스닥':'코스피')+'↓';svg.appendChild(hi);
+ const cx=px(byM3),cy=py(bxWk);
  const c=el('circle',{cx,cy,r:9,fill:'rgba(148,165,180,.10)',stroke:'#94a5b4','stroke-width':1.6,'stroke-dasharray':'3 3',class:'cashdot',style:'cursor:pointer'});svg.appendChild(c);
  const t=el('text',{x:cx,y:cy+22,'text-anchor':'middle',class:'bublab',fill:'#5c6f7e','font-size':10.5,opacity:.78});t.textContent='현금 0%';svg.appendChild(t);
  c.addEventListener('mouseenter',showCash);c.addEventListener('mousemove',moveTip);c.addEventListener('mouseleave',hideTip);
