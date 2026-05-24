@@ -1102,7 +1102,7 @@ function drawRiverCurves(){
 }
 function drawSCurve(){
  const svg=document.getElementById('scurve'),W=1180,H=620;svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
- const {s:base,sx,sy,Sc,y0,y1}=scurveBase(W,H,'',90);let s=base;
+ const {s:base,sx,sy,Sc,y0,y1}=scurveBase(W,H,'',160);let s=base;
  // ── label placement: font-size 11, push-apart to prevent overlap ──
  const FS=15,TH=FS+4;
  // estimate rendered width: Korean chars are ~full-width, ASCII ~0.62em
@@ -1120,8 +1120,8 @@ function drawSCurve(){
  // pass 3: clamp + render
  pts.forEach(d=>{
   const {c,cx,cy,r,col,lx}=d;let ly=d.ly;
-  if(ly<y1+TH)ly=cy+r+TH+3; // flipped below if pushed above chart top
-  ly=Math.max(y1+TH,Math.min(y0-6,ly));
+  if(ly<TH+2)ly=cy+r+TH+3; // relocate only if above the SVG top, not the curve top — lets labels use the top margin
+  ly=Math.max(TH+2,Math.min(y0-6,ly));
   const initLy=cy-r-10,displaced=Math.abs(ly-initLy)>TH*2,abv=ly<cy;
   const glow=c.stage==='초입'?`<circle cx="${cx}" cy="${cy}" r="${r+7}" fill="${col}" opacity=".14"/>`:'';
   const held=c.held?`<circle cx="${cx}" cy="${cy}" r="${r+4}" fill="none" stroke="var(--mature)" stroke-width="1.5" stroke-dasharray="2 2"/>`:'';
