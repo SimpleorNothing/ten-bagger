@@ -1411,15 +1411,16 @@ function draw(){
  const xt=el('text',{x:(PL+W-PR)/2,y:H-8,'text-anchor':'middle',class:'axtitle'});xt.textContent=`3개월 ${bench==='NASDAQ'?'나스닥':'코스피'} 대비 알파 (%p) →`;svg.appendChild(xt);
  const yt=el('text',{x:16,y:(PT+H-PB)/2,'text-anchor':'middle',class:'axtitle',transform:`rotate(-90 16 ${(PT+H-PB)/2})`});yt.textContent=`다음주 ${bench==='NASDAQ'?'나스닥':'코스피'} 대비 알파 (%p) →`;svg.appendChild(yt);
 
+ const emBars=emBarSet();
  D.forEach((d,i)=>{
    if(d.cand&&!showCand)return;
    if(!d.cand&&!showHeld)return;
    const a=av(d),x=px(a[1]),y=py(a[0]),r=d.cand?7.5:7+Math.sqrt(d.w)*3.4;
    const col=colorOf(d);
-   if(EM[d.t])drawEM(d,x,y,r);
+   if(emBars.has(d.t))drawEM(d,x,y,r);
    const c=el('circle',{cx:x,cy:y,r,fill:col+(d.cand?'12':'2e'),stroke:col,'stroke-width':d.cand?1.6:2,class:'bub','data-i':i});
    if(d.cand)c.setAttribute('stroke-dasharray','3 3');svg.appendChild(c);
-   if(d.flag){const f=el('text',{x:x+r-2,y:y-r+4,'font-size':12,'text-anchor':'middle'});f.textContent='⚡';f.style.pointerEvents='none';svg.appendChild(f);}
+   if(d.flag||EM[d.t]){const f=el('text',{x:x+r-2,y:y-r+4,'font-size':12,'text-anchor':'middle'});f.textContent='⚡';f.style.pointerEvents='none';svg.appendChild(f);}
    const t=el('text',{x,y:y+r+13,'text-anchor':'middle',class:'bublab','data-li':i});t.textContent=d.n.length>10?d.n.slice(0,9)+'…':d.n;svg.appendChild(t);
    c.addEventListener('mouseenter',()=>{showTip(d);highlight(i);});
    c.addEventListener('mousemove',moveTip);
@@ -1429,28 +1430,36 @@ function draw(){
  applyLabels();applySel();
 }
 const emCap=(v,lo,hi)=>Math.max(lo,Math.min(hi,v));
-// 실적 expected move 막대(amber). 불확실성 크기(±%p)를 점이 아니라 막대로. 벤치마크 무관(길이 고정).
+// 실적 expected move 막대(amber). 불확실성 크기(±%p)를 막대로. 벤치마크 무관(길이 고정).
+// basis: event-iv=실선(실측) / hist=점선(추정). off=세로 픽셀 오프셋(겹침 분리).
 function drawEM(d,x,y,r){
  const em=EM[d.t];if(!em)return;
- const col='#f59f00',aw=4; // amber, 화살촉 크기
- const arrow=(ax,ay,dir,horiz)=>{ // dir: -1/+1
+ const col='#f59f00',aw=4,dash=em.basis==='hist'?'5 3':null,op=em.basis==='hist'?.7:.9,off=em.off||0;
+ const arrow=(ax,ay,dir,horiz)=>{
    const p=horiz?`${ax},${ay} ${ax-dir*aw*1.6},${ay-aw} ${ax-dir*aw*1.6},${ay+aw}`
                 :`${ax},${ay} ${ax-aw},${ay-dir*aw*1.6} ${ax+aw},${ay-dir*aw*1.6}`;
-   svg.appendChild(el('polygon',{points:p,fill:col}));
+   svg.appendChild(el('polygon',{points:p,fill:col,opacity:op}));
  };
+ const lineAttr=a=>{if(dash)a['stroke-dasharray']=dash;return a;};
  if(em.axis==='wk'){ // 세로 막대 (Y=다음주)
-   const half=em.pct*(H-PT-PB)/(Y1-Y0);
+   const half=em.pct*(H-PT-PB)/(Y1-Y0),xx=x+off;
    const yTop=emCap(y-half,PT+2,H-PB-2),yBot=emCap(y+half,PT+2,H-PB-2);
-   svg.appendChild(el('line',{x1:x,y1:yTop,x2:x,y2:yBot,stroke:col,'stroke-width':2.4,'stroke-linecap':'round',opacity:.85}));
-   arrow(x,yTop,-1,false);arrow(x,yBot,1,false);
-   const t=el('text',{x:x+r+6,y:yTop+11,fill:col,'font-size':10,'font-weight':800});t.textContent=`실적 ±${em.pct}%`;t.style.pointerEvents='none';svg.appendChild(t);
+   svg.appendChild(el('line',lineAttr({x1:xx,y1:yTop,x2:xx,y2:yBot,stroke:col,'stroke-width':2.4,'stroke-linecap':'round',opacity:op})));
+   arrow(xx,yTop,-1,false);arrow(xx,yBot,1,false);
+   const t=el('text',{x:xx+r+6,y:yTop+11,fill:col,'font-size':10,'font-weight':800});t.textContent=`실적 ±${em.pct}%`;t.style.pointerEvents='none';svg.appendChild(t);
  }else{ // 가로 막대 (X=3개월)
-   const half=em.pct*(W-PL-PR)/(X1-X0);
+   const half=em.pct*(W-PL-PR)/(X1-X0),yy=y+off;
    const xL=emCap(x-half,PL+2,W-PR-2),xR=emCap(x+half,PL+2,W-PR-2);
-   svg.appendChild(el('line',{x1:xL,y1:y,x2:xR,y2:y,stroke:col,'stroke-width':2.4,'stroke-linecap':'round',opacity:.85}));
-   arrow(xL,y,-1,true);arrow(xR,y,1,true);
-   const t=el('text',{x:(xL+xR)/2,y:y-r-7,'text-anchor':'middle',fill:col,'font-size':10,'font-weight':800});t.textContent=`실적 ±${em.pct}%`;t.style.pointerEvents='none';svg.appendChild(t);
+   svg.appendChild(el('line',lineAttr({x1:xL,y1:yy,x2:xR,y2:yy,stroke:col,'stroke-width':2.4,'stroke-linecap':'round',opacity:op})));
+   arrow(xL,yy,-1,true);arrow(xR,yy,1,true);
+   const t=el('text',{x:(xL+xR)/2,y:yy-7,'text-anchor':'middle',fill:col,'font-size':10,'font-weight':800});t.textContent=`실적 ±${em.pct}%`;t.style.pointerEvents='none';svg.appendChild(t);
  }
+}
+// 축별 '가장 임박한 실적' 1개만 막대 — 나머지는 ⚡배지+툴팁
+function emBarSet(){
+ const best={};
+ for(const t in EM){const e=EM[t];if(!best[e.axis]||e.date<best[e.axis].date)best[e.axis]={t,date:e.date};}
+ return new Set(Object.values(best).map(o=>o.t));
 }
 function drawCash(){
  // 현금 알파 = −(벤치마크 수익률) → X·Y 각각 값 하나인 고정점(궤적 아님). X=3개월, Y=다음주.
@@ -1471,6 +1480,7 @@ function showTip(d){
    <div class="row"><span>3개월 vs ${bn}</span><b class="${cls(a[1])}">${fmt(a[1])}%p</b></div>
    <div class="row"><span>1년 vs ${bn}</span><b class="${cls(a[2])}">${fmt(a[2])}%p</b></div>
    <div class="row"><span>사분면</span><b>${q} ${({'①':'알파','②':'중기 알파','③':'벤치마크 이하','④':'단기만'})[q]}</b></div>
+   ${EM[d.t]?`<div class="row"><span>실적 ${EM[d.t].basis==='event-iv'?'(IV·실측)':'(추정)'}</span><b style="color:#f59f00">${EM[d.t].date} · ±${EM[d.t].pct}%</b></div>`:''}
    <span class="stagepill" style="background:${col}22;color:${col}">${d.stage} · ${d.mkt}${d.cand?' · 미보유':''}${d.flag?' · '+d.flag:''}</span>
    <div class="note">${d.note}</div>`;
  tip.classList.add('on');
