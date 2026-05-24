@@ -1500,7 +1500,11 @@ document.getElementById('candBtn').addEventListener('click',function(){showCand=
 document.addEventListener('click',e=>{if(!e.target.closest('.bub')&&!e.target.closest('.cashdot')&&!e.target.closest('.seg')&&!e.target.closest('.wl-item')){selected=null;hideTip();unhighlight();markWatch();}},true);
 
 document.getElementById('benchNote').textContent=BNOTE[bench];
-renderLegend();draw();renderWatch();
+// 자동 산출치(alpha.json)가 있으면 티커 기준으로 aN/aK를 덮어씀. 없으면 하드코딩 폴백 사용.
+function paint(){renderLegend();draw();renderWatch();}
+fetch('alpha.json',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{
+ const q=j&&j.quotes;if(q)D.forEach(d=>{const a=q[d.t];if(a){if(Array.isArray(a.aN))d.aN=a.aN;if(Array.isArray(a.aK))d.aK=a.aK;}});
+}).catch(()=>{}).finally(paint);
 })();
 </script>
 </body>

@@ -1,0 +1,42 @@
+name: Compute alpha map
+
+# Manual-only for now: run it once from the Actions tab, review the alpha.json
+# diff (and the live chart), then add a `schedule:` block when you're happy.
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: compute-alpha
+  cancel-in-progress: false
+
+jobs:
+  alpha:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: claude/wizardly-rubin-SubA1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Compute alpha estimates
+        run: node scripts/compute-alpha.mjs
+        env:
+          # Optional: lets the script add the tracker's 초입 5신호 into the estimate.
+          # Add these in repo Settings → Secrets and variables → Actions.
+          GH_GIST_TOKEN: ${{ secrets.GH_GIST_TOKEN }}
+          GIST_ID: ${{ secrets.GIST_ID }}
+      - name: Commit alpha.json if changed
+        run: |
+          if [ -n "$(git status --porcelain alpha.json)" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add alpha.json
+            git commit -m "chore: recompute alpha map estimates"
+            git push origin HEAD:claude/wizardly-rubin-SubA1
+          else
+            echo "No alpha change."
+          fi
