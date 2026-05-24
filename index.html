@@ -1541,12 +1541,16 @@ document.getElementById('lblBtn').addEventListener('click',function(){showLabels
 document.getElementById('emBtn').addEventListener('click',function(){showEM=!showEM;this.classList.toggle('on',showEM);this.textContent=showEM?'실적 표시':'실적 끄기';draw();});
 document.addEventListener('click',e=>{if(!e.target.closest('.bub')&&!e.target.closest('.cashdot')&&!e.target.closest('.seg')&&!e.target.closest('.wl-item')&&!e.target.closest('.tbtn')){selected=null;hideTip();unhighlight();markWatch();}},true);
 
-// alpha.json(자동 알파)·earnings.json(실적 expected move)를 함께 로드. 없으면 하드코딩 폴백.
+// 3층 병합: 자동(alpha.json) → 실적(earnings.json) → 판단(judgment.json, 마지막에 덮어씀). 없으면 폴백.
 function paint(){renderLegend();draw();renderWatch();}
 const getJSON=u=>fetch(u,{cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null);
-Promise.all([getJSON('alpha.json'),getJSON('earnings.json')]).then(([aj,ej])=>{
- const q=aj&&aj.quotes;if(q)D.forEach(d=>{const a=q[d.t];if(a){if(Array.isArray(a.aN))d.aN=a.aN;if(Array.isArray(a.aK))d.aK=a.aK;}});
- if(ej&&ej.moves)EM=ej.moves;
+Promise.all([getJSON('alpha.json'),getJSON('earnings.json'),getJSON('judgment.json')]).then(([j,e,g])=>{
+ // 1) 자동(alpha.json) — 모멘텀 휴리스틱
+ const q=j&&j.quotes;if(q)D.forEach(d=>{const a=q[d.t];if(a){if(Array.isArray(a.aN))d.aN=a.aN;if(Array.isArray(a.aK))d.aK=a.aK;}});
+ // 2) 실적 IV (earnings.json)
+ if(e&&e.moves)EM=e.moves;
+ // 3) 판단(judgment.json) — 자동 위에 마지막으로 덮어씀, null은 자동 유지
+ const ov=g&&g.overrides;if(ov)D.forEach(d=>{const o=ov[d.t];if(o&&Array.isArray(o.aN))o.aN.forEach((v,k)=>{if(v!=null)d.aN[k]=v;});});
 }).finally(paint);
 })();
 </script>
