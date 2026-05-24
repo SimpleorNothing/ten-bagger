@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>初入 OBSERVATORY · 8-Layer · 텐베거 관측소</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <style>
 :root{
   --ink:#ffffff; --ink2:#fafbfc; --panel:#ffffff; --panel2:#f3f5f7;
@@ -14,13 +16,13 @@
   /* functional market-stage hues (kept for stage indicators only) */
   --st-nascent:#7048e8; --st-dawn:#0ca678; --st-accel:#1c7ed6; --st-mature:#b8860b; --st-hot:#e03131;
   --glow:none;
-  --serif:'Pretendard',system-ui,-apple-system,'Segoe UI',Roboto,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;
+  --serif:'Pretendard Variable','Pretendard',system-ui,-apple-system,'Segoe UI',Roboto,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;
   --mono:var(--serif); --sans:var(--serif);
 }
 *{box-sizing:border-box;margin:0;padding:0}
 em{font-style:normal}
 html,body{height:100%}
-body{font-family:var(--sans);background:var(--ink);color:var(--txt);-webkit-font-smoothing:antialiased;line-height:1.6}
+body{font-family:var(--sans);font-size:16px;background:var(--ink);color:var(--txt);-webkit-font-smoothing:antialiased;line-height:1.6}
 .wrap{max-width:1340px;margin:0 auto;padding:0 22px}
 header{position:sticky;top:0;z-index:50;backdrop-filter:blur(12px);background:linear-gradient(180deg,rgba(255,255,255,.92),rgba(255,255,255,.68));border-bottom:1px solid var(--line)}
 .bar{display:flex;align-items:center;gap:16px;padding:13px 0;flex-wrap:wrap}
@@ -106,7 +108,7 @@ main{padding:36px 0 90px;position:relative}
 .dstrip:hover{transform:translateY(-2px);border-color:var(--line2)}
 .dstrip h4{font-size:15px;font-weight:700;display:flex;justify-content:space-between;align-items:center;gap:6px}
 .dstrip .badge{font-family:var(--mono);font-size:13px;padding:2px 6px;border-radius:20px;font-weight:700;white-space:nowrap}
-.dstrip p{font-size:13px;color:var(--dim);margin-top:6px;font-family:var(--mono);line-height:1.5}
+.dstrip p{font-size:14px;color:var(--dim);margin-top:6px;font-family:var(--mono);line-height:1.5}
 
 /* ===== CASCADE (derivative chain) ===== */
 .casc-pick{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
@@ -173,7 +175,7 @@ main{padding:36px 0 90px;position:relative}
 .sidecard h4{font-family:var(--mono);font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);margin-bottom:12px}
 .flowline{display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:13px;color:var(--dim);margin-bottom:9px;line-height:1.4}
 .flowline b{color:var(--txt)} .flowline .ar{color:var(--dawn)}
-.sidecard p{font-size:13px;color:var(--dim);margin-top:12px;border-top:1px solid var(--line);padding-top:12px;line-height:1.6}
+.sidecard p{font-size:14px;color:var(--dim);margin-top:12px;border-top:1px solid var(--line);padding-top:12px;line-height:1.6}
 
 /* ===== EXPLORER ===== */
 .exrow{display:grid;grid-template-columns:130px 1fr;gap:12px;margin-bottom:10px;align-items:stretch}
@@ -215,7 +217,7 @@ main{padding:36px 0 90px;position:relative}
 .lab.bull{color:var(--dawn)}.lab.base{color:var(--dim)}.lab.bear{color:var(--hot)}
 .srow{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid var(--line)}.srow:last-child{border:0}
 .skey{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--dawn);width:22px;flex-shrink:0;padding-top:2px}
-.stext{flex:1;font-size:13px;color:var(--dim)}.stext b{color:var(--txt);display:block;font-size:13px}
+.stext{flex:1;font-size:14px;color:var(--dim)}.stext b{color:var(--txt);display:block;font-size:14px}
 .sscore{display:flex;gap:4px;flex-shrink:0}
 .sbtn{width:20px;height:20px;border-radius:6px;border:1px solid var(--line);background:var(--panel);cursor:pointer;font-family:var(--mono);font-size:13px;color:var(--faint)}
 .sbtn.on{background:var(--dawn);border-color:var(--dawn);color:var(--onacc);font-weight:700}
@@ -235,7 +237,7 @@ main{padding:36px 0 90px;position:relative}
 .scurve-r{width:100%;height:auto;display:block;overflow:visible}
 .rv-dot{cursor:default}
 .tip{position:fixed;pointer-events:none;z-index:90;background:var(--ink);border:1px solid var(--line2);border-radius:10px;padding:9px 12px;font-size:13px;opacity:0;transition:.12s;max-width:240px;box-shadow:0 12px 30px -8px rgba(0,0,0,.6)}
-.tip.on{opacity:1}.tip .tn{font-weight:700;font-size:15px}.tip .tt{font-family:var(--mono);font-size:13px;color:var(--dim);margin:2px 0 6px}.tip .tx{color:var(--dim);font-size:13px;line-height:1.5}
+.tip.on{opacity:1}.tip .tn{font-weight:700;font-size:15px}.tip .tt{font-family:var(--mono);font-size:13px;color:var(--dim);margin:2px 0 6px}.tip .tx{color:var(--dim);font-size:14px;line-height:1.5}
 .s-dot{cursor:pointer;transition:.2s}.s-dot:hover{filter:brightness(1.3)}
 
 /* portfolio */
