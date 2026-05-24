@@ -28,7 +28,8 @@ const clampY = (v) => Math.max(-10, Math.min(10, v));
 const round5 = (v) => Math.round(v * 2) / 2;
 
 // ② stage → structural runway score (higher = more headroom left).
-const STAGE_RUNWAY = { 태동: 2.2, 초입: 2.0, 가속: 1.0, 성숙: 0.0, 과열: -0.3, 방어: -1.0 };
+// 성숙/과열도 0이 아닌 잔여 runway를 줘서 1년 분포가 납작해지지 않게 함.
+const STAGE_RUNWAY = { 태동: 2.0, 초입: 2.0, 가속: 1.2, 성숙: 0.4, 과열: 0.0, 방어: -1.0 };
 
 // Non-ticker placeholders used in the D array (ETF baskets, defensive, etc.).
 const NOT_A_TICKER = new Set(['ETF', '방어', '기타', '소부장 L4', '한국 ETF']);
@@ -120,24 +121,22 @@ function build() {
 }
 
 // Map the five inputs → [wk, m3, y1] alpha (%p) for one benchmark.
+// 모멘텀은 tanh로 포화시켜 큰 상대강도가 차트 천장(±10)을 뚫지 않게 하고,
+// 1년은 runway + 밸류천장(낮은 maturity = 리레이팅 여력)이 지배하게 한다.
 function estimate({ frame, betaB, rsW, rsM, rsY, catalyst }) {
-  const runway = STAGE_RUNWAY[frame.stage] ?? 0;
-  const conv = frame.conv ?? 0.6;                 // magnitude scaler
-  const valHead = Math.max(0, 0.85 - (frame.mat ?? 0.6)) * 6; // low maturity → rerating headroom (never forces negative)
-  const m = (x, f) => (x == null ? 0 : x * f);    // momentum persists forward at a decayed fraction
+  const runway = STAGE_RUNWAY[frame.stage] ?? 0.4;
+  const conv = frame.conv ?? 0.6;
+  const convF = 0.7 + conv * 0.5;                          // ~1.0..1.2 엣지 스케일러
+  const valHead = Math.max(0, 0.8 - (frame.mat ?? 0.6));   // 0..0.8 리레이팅 여력 (음수 강제 없음)
+  const mom = (rs, A, s) => (rs == null ? 0 : A * Math.tanh(rs / s)); // 포화 모멘텀
 
-  // ④ momentum dominates short horizon; ② runway/⑤ value dominate long.
-  let wk = m(rsW, 0.18) + catalyst.wk;
-  let m3 = m(rsM, 0.20) + catalyst.m3 + runway * 0.9 + valHead * 0.25;
-  let y1 = runway * 2.4 + valHead * 0.9 + m(rsY, 0.05);
+  // 고베타는 단기 강세 테이프를 약간 증폭(짧은 호라이즌에만 의미).
+  const tape = 0.9 + Math.min(1.6, Math.max(0.5, betaB)) * 0.1;
+  const wk = (mom(rsW, 1.6, 8) + catalyst.wk) * tape;                 // ④모멘텀 + ③임박
+  const m3 = (mom(rsM, 3.5, 22) + catalyst.m3) * tape + runway * 1.2 * convF + valHead * 1.2; // ③+②+⑤
+  const y1 = (runway * 2.0 + valHead * 12) * convF + mom(rsY, 1.0, 40);                       // ②runway + ⑤밸류
 
-  // Conviction scales the active (non-momentum) edge.
-  m3 = m(rsM, 0.20) + (m3 - m(rsM, 0.20)) * (0.6 + conv * 0.6);
-  y1 = y1 * (0.6 + conv * 0.6);
-
-  // High-beta names amplify on a rising tape; we keep this modest & symmetric.
-  const amp = 0.8 + Math.min(1.6, Math.max(0.4, betaB)) * 0.2;
-  return [round5(clampX(wk * amp)), round5(clampY(m3 * amp)), round5(clampY(y1 * amp))];
+  return [round5(clampX(wk)), round5(clampY(m3)), round5(clampY(y1))];
 }
 
 async function main() {
