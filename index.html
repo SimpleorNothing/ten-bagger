@@ -521,9 +521,10 @@ table.tk th.c{text-align:center}
 
   <div class="toolbar">
     <div class="toolbtns">
-      <button class="tbtn on" data-mode="stage">색: 단계별</button>
-      <button class="tbtn" id="lblBtn">라벨 끄기</button>
+      <button class="tbtn on" id="colorBtn">초입 단계별</button>
+      <button class="tbtn on" id="heldBtn">보유 표시</button>
       <button class="tbtn on" id="candBtn">후보 표시</button>
+      <button class="tbtn on" id="lblBtn">라벨 표시</button>
     </div>
     <div class="legend" id="legend"></div>
   </div>
@@ -1326,6 +1327,10 @@ renderLegends();loadStore().then(renderAll);renderAll();updateAsof();loadPrices(
 (function(){
 const STAGE={'가속':'#1c7ed6','성숙':'#b8860b','과열':'#e03131','방어':'#64748b','태동':'#7048e8','초입':'#0ca678'};
 const QUAD={'①':'#0ca678','②':'#1c7ed6','③':'#e03131','④':'#b8860b'};
+// Lv8 레이어별 색 (다층 표기는 첫 L토큰 사용; 비레이어는 회색)
+const LAYER_HEX={L1:'#b8860b',L2:'#1c7ed6',L3:'#0ca678',L4:'#7048e8',L5:'#e8590c',L6:'#0c8599',L7:'#e03131',L8:'#5f3dc4'};
+const layerKey=d=>'L'+((String(d.layer).match(/L(\d)/)||[])[1]);
+const colorOf=d=>mode==='stage'?STAGE[d.stage]:(LAYER_HEX[layerKey(d)]||'#94a5b4');
 const D=[
  {n:'마벨',t:'MRVL',mkt:'US',layer:'L2/L6',w:6.1,aN:[1.5,7,9],aK:[1.3,5.5,5],stage:'가속',flag:'⚡5/27 실적',note:'NVLink Fusion·NVDA $2B 고유엣지. 보유 중 알파 최상. 다음주는 실적이라 ±분산 큼.'},
  {n:'삼성전자',t:'005930',mkt:'KR',layer:'L3',w:3.4,aN:[1.5,4,7],aK:[0.6,1.5,2.5],stage:'성숙',note:'나스닥 대비 알파의 상당분은 "코스피>나스닥"+"삼성=코스피". 코스피 기준 고유 알파는 HBM4 점유율 회복분 정도로 축소.'},
@@ -1356,7 +1361,7 @@ const D=[
 const CASH={NASDAQ:[-0.3,-2.5],KOSPI:[-0.5,-4]};
 const BNOTE={NASDAQ:'미국 자산 기준선. 한국 종목은 KRW·KOSPI 요인 포함.',KOSPI:'코스피가 메모리 슈퍼사이클로 뜨거워 "바"가 더 높음 → 알파 전반 축소.'};
 
-let bench='NASDAQ',mode='stage',showLabels=true,selected=null,showCand=true;
+let bench='NASDAQ',mode='stage',showLabels=true,selected=null,showCand=true,showHeld=true;
 const av=d=>bench==='NASDAQ'?d.aN:d.aK;
 function quad(d){const a=av(d),r=a[0]>=0,u=a[1]>=0;return u?(r?'①':'②'):(r?'④':'③');}
 
@@ -1393,8 +1398,9 @@ function draw(){
 
  D.forEach((d,i)=>{
    if(d.cand&&!showCand)return;
+   if(!d.cand&&!showHeld)return;
    const a=av(d),x=px(a[1]),y=py(a[0]),r=d.cand?7.5:7+Math.sqrt(d.w)*3.4;
-   const col=mode==='stage'?STAGE[d.stage]:QUAD[quad(d)];
+   const col=colorOf(d);
    const c=el('circle',{cx:x,cy:y,r,fill:col+(d.cand?'12':'2e'),stroke:col,'stroke-width':d.cand?1.6:2,class:'bub','data-i':i});
    if(d.cand)c.setAttribute('stroke-dasharray','3 3');svg.appendChild(c);
    if(d.flag){const f=el('text',{x:x+r-2,y:y-r+4,'font-size':12,'text-anchor':'middle'});f.textContent='⚡';f.style.pointerEvents='none';svg.appendChild(f);}
@@ -1462,7 +1468,7 @@ function selectIdx(i){
 function renderWatch(){
  const box=document.getElementById('watch'),bn=bench==='NASDAQ'?'나스닥':'코스피';
  const row=(d,i)=>{
-   const a=av(d),col=mode==='stage'?STAGE[d.stage]:QUAD[quad(d)],q=quad(d);
+   const a=av(d),col=colorOf(d),q=quad(d);
    return `<button class="wl-item${d.cand?' cand':''}" data-i="${i}" style="border-left-color:${col}">
      <span class="wl-dot" style="background:${d.cand?'transparent':col};border:2px solid ${col}"></span>
      <span class="wl-name">${d.n}<span class="wl-tk">${d.t}</span></span>
@@ -1474,8 +1480,10 @@ function renderWatch(){
  const held=D.map((d,i)=>({d,i})).filter(o=>!o.d.cand);
  const cand=D.map((d,i)=>({d,i})).filter(o=>o.d.cand);
  let html=`<div class="wl-head"><span class="wl-t">워치리스트</span><span class="wl-s">행 선택 → 그래프 매핑 · 사분면/비중/주·3M vs ${bn}</span></div>`;
- html+=`<div class="wl-subh">보유종목 <span>${held.length}</span></div>`;
- html+='<div class="wl-grid">'+held.map(o=>row(o.d,o.i)).join('')+'</div>';
+ if(showHeld){
+   html+=`<div class="wl-subh">보유종목 <span>${held.length}</span></div>`;
+   html+='<div class="wl-grid">'+held.map(o=>row(o.d,o.i)).join('')+'</div>';
+ }
  if(showCand){
    html+=`<div class="wl-subh">미보유 후보 <span>${cand.length}</span> · 비중 없음·알파 추정</div>`;
    html+='<div class="wl-grid">'+cand.map(o=>row(o.d,o.i)).join('')+'</div>';
@@ -1486,19 +1494,21 @@ function renderWatch(){
 }
 
 function renderLegend(){
- const items=mode==='stage'?[['가속',STAGE['가속']],['성숙',STAGE['성숙']],['과열',STAGE['과열']],['방어',STAGE['방어']]]
-   :[['① 알파',QUAD['①']],['② 중기',QUAD['②']],['③ 지수이하',QUAD['③']],['④ 단기만',QUAD['④']]];
+ let items;
+ if(mode==='stage'){items=[['가속',STAGE['가속']],['성숙',STAGE['성숙']],['과열',STAGE['과열']],['방어',STAGE['방어']]];}
+ else{const seen=new Set();items=[];D.forEach(d=>{const k=layerKey(d);if(LAYER_HEX[k]&&!seen.has(k)){seen.add(k);items.push([k,LAYER_HEX[k]]);}});items.sort((a,b)=>a[0].localeCompare(b[0]));}
  document.getElementById('legend').innerHTML=items.map(([t,c])=>`<span class="lg"><span class="dot" style="background:${c}"></span>${t}</span>`).join('')+'<span class="lg" style="color:var(--a-faint)">● 크기=비중</span><span class="lg" style="color:var(--a-faint)">◌ 점선=미보유 후보</span>';
 }
 document.getElementById('benchSeg').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
  document.querySelectorAll('#benchSeg button').forEach(x=>x.classList.remove('on'));b.classList.add('on');
  bench=b.dataset.b;document.getElementById('benchNote').textContent=BNOTE[bench];hideTip();draw();renderWatch();});
-document.querySelectorAll('#v-alpha .tbtn[data-mode]').forEach(b=>b.addEventListener('click',()=>{
- document.querySelectorAll('#v-alpha .tbtn[data-mode]').forEach(x=>x.classList.remove('on'));b.classList.add('on');mode=b.dataset.mode;renderLegend();draw();renderWatch();}));
-document.getElementById('lblBtn').addEventListener('click',function(){showLabels=!showLabels;this.textContent=showLabels?'라벨 끄기':'라벨 켜기';applyLabels();});
-document.getElementById('candBtn').addEventListener('click',function(){showCand=!showCand;this.classList.toggle('on',showCand);this.textContent=showCand?'후보 표시':'후보 숨김';
+document.getElementById('colorBtn').addEventListener('click',function(){mode=mode==='stage'?'layer':'stage';this.textContent=mode==='stage'?'초입 단계별':'Lv8 단계별';renderLegend();draw();renderWatch();});
+document.getElementById('heldBtn').addEventListener('click',function(){showHeld=!showHeld;this.classList.toggle('on',showHeld);this.textContent=showHeld?'보유 표시':'보유 끄기';
+ if(!showHeld&&selected!=null&&!D[selected].cand){selected=null;hideTip();}draw();renderWatch();});
+document.getElementById('candBtn').addEventListener('click',function(){showCand=!showCand;this.classList.toggle('on',showCand);this.textContent=showCand?'후보 표시':'후보 끄기';
  if(!showCand&&selected!=null&&D[selected].cand){selected=null;hideTip();}draw();renderWatch();});
-document.addEventListener('click',e=>{if(!e.target.closest('.bub')&&!e.target.closest('.cashdot')&&!e.target.closest('.seg')&&!e.target.closest('.wl-item')){selected=null;hideTip();unhighlight();markWatch();}},true);
+document.getElementById('lblBtn').addEventListener('click',function(){showLabels=!showLabels;this.classList.toggle('on',showLabels);this.textContent=showLabels?'라벨 표시':'라벨 끄기';applyLabels();});
+document.addEventListener('click',e=>{if(!e.target.closest('.bub')&&!e.target.closest('.cashdot')&&!e.target.closest('.seg')&&!e.target.closest('.wl-item')&&!e.target.closest('.tbtn')){selected=null;hideTip();unhighlight();markWatch();}},true);
 
 document.getElementById('benchNote').textContent=BNOTE[bench];
 // 자동 산출치(alpha.json)가 있으면 티커 기준으로 aN/aK를 덮어씀. 없으면 하드코딩 폴백 사용.
