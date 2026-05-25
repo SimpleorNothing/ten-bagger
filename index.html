@@ -353,6 +353,8 @@ table.tk th.c{text-align:center}
 #v-alpha .foot{margin-top:18px;font-size:13px;color:var(--a-dim);line-height:1.7;border-top:0;padding-top:0}
 #v-alpha .foot b{color:var(--a-txt)}
 #v-alpha .qkey{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
+#v-alpha .qk-ex{color:var(--a-txt);font-weight:600}
+#v-alpha .qk-ex:empty{display:none}
 #v-alpha .a-sep{height:0;border:0;border-top:1px solid var(--a-line);margin:34px 0}
 #v-alpha .qk{border:1.5px solid var(--a-line);border-radius:14px;padding:14px;background:var(--a-surface);transition:.15s}
 #v-alpha .qk:hover{border-color:var(--a-brand);box-shadow:0 4px 18px rgba(18,87,214,.10)}
@@ -614,10 +616,10 @@ table.tk th.c{text-align:center}
   </div>
 
   <div class="qkey">
-    <div class="qk"><div class="h" style="color:var(--a-dawn)">① 알파 (우상)</div><div class="d">단기·중기 모두 벤치마크 아웃퍼폼. 능동 보유가 정당화되는 칸.</div></div>
-    <div class="qk"><div class="h" style="color:var(--a-accel)">② 중기 알파 (우하)</div><div class="d">단기는 지수 이하지만 3개월 아웃퍼폼. 소부장 L4가 대표(1Y runway).</div></div>
-    <div class="qk"><div class="h" style="color:var(--a-mature)">④ 단기만 (좌상)</div><div class="d">단기 아웃퍼폼·중기 이하. BE류.</div></div>
-    <div class="qk"><div class="h" style="color:var(--a-hot)">③ 벤치마크 이하 (좌하)</div><div class="d">능동 보유 이유가 약한 칸. 점선(현금)보다 아래면 현금만도 못함.</div></div>
+    <div class="qk" data-q="①"><div class="h" style="color:var(--a-dawn)">① 알파 (우상)</div><div class="d">단기·중기 모두 벤치마크 아웃퍼폼. 능동 보유가 정당화되는 칸.<span class="qk-ex"></span></div></div>
+    <div class="qk" data-q="②"><div class="h" style="color:var(--a-accel)">② 중기 알파 (우하)</div><div class="d">단기는 지수 이하지만 3개월 아웃퍼폼(1Y runway 중심).<span class="qk-ex"></span></div></div>
+    <div class="qk" data-q="④"><div class="h" style="color:var(--a-mature)">④ 단기만 (좌상)</div><div class="d">단기 아웃퍼폼·중기 이하.<span class="qk-ex"></span></div></div>
+    <div class="qk" data-q="③"><div class="h" style="color:var(--a-hot)">③ 벤치마크 이하 (좌하)</div><div class="d">능동 보유 이유가 약한 칸. 점선(현금)보다 아래면 현금만도 못함.<span class="qk-ex"></span></div></div>
   </div>
 
   <div class="foot">
@@ -1869,6 +1871,17 @@ function draw(){
    c.addEventListener('click',e=>{selected=i;showTip(d);highlight(i);moveTip(e);markWatch();});
  });
  declutterLabels();applyLabels();applySel();
+ updateQuadExamples();
+}
+// 4분면 설명의 예시 종목을 현재 그래프(벤치마크 반영)와 동일한 quad()로 산출 → 항상 연동.
+function updateQuadExamples(){
+ const buckets={'①':[],'②':[],'③':[],'④':[]};
+ D.forEach(d=>{ if(d.cand)return; buckets[quad(d)].push(d); });
+ document.querySelectorAll('#v-alpha .qk').forEach(qk=>{
+   const q=qk.dataset.q,ex=qk.querySelector('.qk-ex'); if(!ex)return;
+   const names=buckets[q].sort((a,b)=>b.w-a.w).slice(0,3).map(d=>d.n);
+   ex.textContent=names.length?' 예: '+names.join('·')+'.':'';
+ });
 }
 // 강도 → 색 / 크기 (이모지 아님, SVG path라 색·크기 100% 적용)
 function emColor(pct){ return pct>13?'#e03131':pct>8?'#f76707':'#f59f00'; } // 빨강/주황/amber
