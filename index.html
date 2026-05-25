@@ -478,6 +478,22 @@ table.tk th.c{text-align:center}
 #mxRoot .mx-foot b{color:var(--mx-dim)}#mxRoot .mx-foot .mx-est{color:var(--mx-nascent)}
 #mxRoot .mx-disc{margin-top:12px;font-family:var(--mx-mono);font-size:10.5px;color:var(--mx-faint)}
 @media(max-width:760px){#mxRoot h1{font-size:21px}#mxRoot td.mx-coCell,#mxRoot th.mx-coCell{left:48px;width:150px}#mxRoot th.mx-lyr,#mxRoot td.mx-lyr{width:48px}}
+/* ===== PRINT / 출력 ===== */
+.printbar{display:flex;justify-content:center;margin:44px 0 10px;position:relative}
+.print-btn{cursor:pointer;font-family:var(--mono);font-size:13px;color:var(--dim);background:var(--panel2);border:1px solid var(--line2);border-radius:10px;padding:9px 18px;transition:.15s}
+.print-btn:hover{color:var(--txt);border-color:var(--dim)}
+.print-menu{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);display:flex;flex-direction:column;gap:3px;background:var(--panel);border:1px solid var(--line2);border-radius:12px;padding:6px;box-shadow:0 10px 30px rgba(0,0,0,.18);z-index:60;min-width:190px}
+.print-menu[hidden]{display:none}
+.print-menu button{cursor:pointer;font:500 13px var(--sans);text-align:left;color:var(--txt);background:transparent;border:0;border-radius:8px;padding:9px 12px}
+.print-menu button:hover{background:var(--panel2)}
+@media print{
+  header,#tip,#drawer,#drawerBg,#syncModal,#syncModalBg,#saveState,.printbar,.asof{display:none!important}
+  .view{display:none!important;animation:none!important}
+  body:not(.print-all) .view.on{display:block!important}
+  main.wrap{display:flex;flex-direction:column;max-width:none;margin:0;padding:0}
+  body.print-all .pview{display:block!important;break-before:page}
+  body{background:#fff}
+}
 </style>
 </head>
 <body>
@@ -1785,6 +1801,27 @@ document.getElementById('filterSel').addEventListener('change',renderTracker);
 /* ===== INIT ===== */
 function renderAll(){renderSignalLog();renderThread();renderCascade();renderStack();renderPortfolio();renderTracker();}
 renderLegends();loadStore().then(renderAll);renderAll();updateAsof();loadPrices();
+
+/* ===== 출력(인쇄/PDF) — 페이지별 버튼: 이 페이지만 / 전체 ===== */
+(function initPrint(){
+ const order=['alpha','thread','cascade','stack','map','port'];
+ order.forEach((v,i)=>{const el=document.getElementById('v-'+v);if(!el)return;
+  el.classList.add('pview');el.style.order=i;
+  const bar=document.createElement('div');bar.className='printbar';
+  bar.innerHTML=`<div class="print-menu" hidden><button type="button" data-pm="one">이 페이지만 출력</button><button type="button" data-pm="all">전체 페이지 출력 (00~05)</button></div><button type="button" class="print-btn">인쇄 / PDF로 저장</button>`;
+  el.appendChild(bar);});
+ const closeAll=()=>document.querySelectorAll('.print-menu').forEach(m=>m.hidden=true);
+ document.querySelectorAll('.printbar').forEach(bar=>{
+  const btn=bar.querySelector('.print-btn'),menu=bar.querySelector('.print-menu');
+  btn.addEventListener('click',e=>{e.stopPropagation();const open=menu.hidden;closeAll();menu.hidden=!open;});
+  menu.querySelectorAll('button').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();closeAll();runPrint(b.dataset.pm);}));});
+ document.addEventListener('click',closeAll);
+ function runPrint(mode){
+  if(mode==='all'){try{drawSCurve();drawRiverCurves();}catch(e){}document.body.classList.add('print-all');}
+  else document.body.classList.remove('print-all');
+  setTimeout(()=>window.print(),40);}
+ window.addEventListener('afterprint',()=>document.body.classList.remove('print-all'));
+})();
 </script>
 <script>
 /* ===== 05 ALPHA MAP — isolated IIFE (no globals leak) ===== */
