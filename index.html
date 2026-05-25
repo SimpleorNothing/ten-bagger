@@ -528,7 +528,7 @@ table.tk th.c{text-align:center}
 <section class="view" id="v-cascade">
   <div class="vhead"><div class="vkick">Derivative Cascade · 파생 가치사슬</div>
     <h1 class="vtitle">하나가 <em>×10</em> 되면 — 무엇이 함께 폭증하나</h1>
-    <p class="vsub">거시 트리거가 한 드라이버를 ×10으로 키울 때, <b>같은 배수로 함께 커져야 하지만 아직 덜 오른 파생 부품</b>이 다음 알파입니다. 드라이버를 바꾸면 그 가치사슬이 펼쳐집니다 — CPU는 예시, 나머지 레이어도 동일. 파생 노드를 누르면 §2-C 분해로 들어갑니다.</p></div>
+    <p class="vsub">거시 트리거가 한 드라이버를 ×10으로 키울 때, <b>같은 배수로 함께 커져야 하지만 아직 덜 오른 파생 부품</b>이 다음 알파입니다. 드라이버를 바꾸면 그 가치사슬이 펼쳐집니다 — CPU는 예시, 나머지 레이어도 동일. 파생 노드를 누르면 §2-C 분해로 들어갑니다. <b style="color:var(--dawn)">분류 규칙</b> — 노드는 수요 트리거가 아니라 자산의 물리적 위치(전기 계량기 기준)로 한 레이어에만 귀속하며, 레이어 간 인과는 화살표로만 표기합니다.</p></div>
   <div class="casc-pick" id="cascPick"></div>
   <div id="cascView"></div>
 </section>
@@ -1047,7 +1047,10 @@ const RIVERS=[
    {code:'수요',label:'Jevons 수요폭증',sub:'토큰 소비↑',stage:'가속',pos:.18,why:'단가↓ → 총 토큰 소비 폭증 → 컴퓨트 수요 환류(역설)',plays:'전 스택 되먹임 — 강물 1로 회귀'},
   ]},
 ];
-/* 파생 캐스케이드: 드라이버 ×10 → 함께 폭증하는 파생 가치사슬. cand=탐색기 후보 id */
+/* 파생 캐스케이드: 드라이버 ×10 → 함께 폭증하는 파생 가치사슬. cand=탐색기 후보 id
+   [MECE 분류 규칙] 노드는 '수요 트리거가 어디서 왔나'가 아니라 '자산의 물리적 위치(전기 계량기 기준)'로 단 하나의 레이어에만 귀속한다.
+   레이어 간 인과(트리거)는 노드 중복이 아니라 trigger 문구의 화살표(→ ▶)로만 표기한다.
+   예: 온사이트 발전(Bloom)은 '생산' 자산이므로 L8 단독 귀속. L7은 trigger 화살표로만 L8을 가리킨다. */
 const CASCADES=[
  {key:'cpu',driver:'호스트 CPU',layer:'L2',stage:'성숙',
   trigger:'Agentic AI → 지속적 에이전트 워크로드 → 서버 CPU 코어수·수요 폭증. 인퍼런스 비중↑로 CPU:GPU 비율이 균형으로 회귀. ★ NVDA Q1 FY27(5/20): Vera 단독 CPU $20B 가시성·$200B TAM — 1차주가 CPU를 공식 매출축으로 인정.',
@@ -1085,10 +1088,9 @@ const CASCADES=[
    {n:'광 커넥터 · 도파로',why:'CPO 패키지 광 결합',mult:'미반영 잔량 · 검증 필요',cos:'(리서치 영역)',stage:'초입',cand:null},
   ]},
  {key:'power',driver:'전력·냉각(in-rack)',layer:'L7',stage:'가속',
-  trigger:'랙 전력밀도 폭증(GB200 NVL72 ~120kW) → in-rack 병목이 grid로 확산. 2026 capex 제약 = 칩 아닌 전력.',
+  trigger:'랙 전력밀도 폭증(GB200 NVL72 ~120kW) → in-rack 병목이 grid로 확산. 2026 capex 제약 = 칩 아닌 전력. → 그리드 부족은 L8 온사이트 발전(BYOP)을 견인 ▶ L8 캐스케이드 참조.',
   primary:{label:'1차주 (합의 도달 · richly valued)',ex:'Vertiv(백로그 +109%) · Eaton'},
   nodes:[
-   {n:'발전 · 온사이트(BYOP)',why:'그리드 부족 → 자가발전(Bring Your Own Power)',mult:'온사이트 발전 수요 점화',cos:'Bloom · 가스터빈',stage:'초입',cand:'be'},
    {n:'변압기 · 송전 인터커넥트',why:'HV 변압기 리드타임 3~5년',mult:'grid 병목 = 다음 전선',cos:'(리서치 영역)',stage:'초입',cand:null},
    {n:'액체냉각',why:'50kW+ 랙 표준화',mult:'D2C → immersion 단계',cos:'Vertiv · SMCI',stage:'가속',cand:'vrt'},
    {n:'전력 반도체(VPD)',why:'고전류 변환 효율 "라스트 인치"',mult:'전류밀도↑',cos:'Vicor · MPS',stage:'가속',cand:'vicr'},
