@@ -54,6 +54,7 @@ main{padding:36px 0 90px;position:relative}
 .vsub{color:var(--dim);font-size:15px;max-width:820px;margin-top:9px}
 .legend{display:flex;gap:14px;flex-wrap:wrap;margin:16px 0 24px;font-family:var(--mono);font-size:13px}
 .lg{display:flex;align-items:center;gap:6px;color:var(--dim)}
+.lg-f{cursor:pointer;user-select:none;transition:opacity .15s}.lg-f:hover{opacity:.8}.lg-f.off{opacity:.32}
 .dot{width:9px;height:9px;border-radius:50%}
 .s-태동{background:var(--st-nascent)}.s-초입{background:var(--st-dawn)}.s-가속{background:var(--st-accel)}.s-성숙{background:var(--st-mature)}.s-과열{background:var(--st-hot)}
 
@@ -981,6 +982,7 @@ const STAGE_HEX={태동:'#7048e8',초입:'#0ca678',가속:'#1c7ed6',성숙:'#b88
 /* 초입 지도: 단계(태동~과열)는 x축 위치로 읽고, 점 색은 L1~L8 레이어로 구분 */
 const MAP_LAYER_HEX={L1:'#7048e8',L2:'#4263eb',L3:'#1c7ed6',L4:'#0ca678',L5:'#f59f00',L6:'#ae3ec9',L7:'#1098ad',L8:'#f76707','기타':'#868e96'};
 const layerCol=l=>MAP_LAYER_HEX[l]||MAP_LAYER_HEX['기타'];
+const mapFilter=new Set(); // 비면 전체 표시, 채워지면 해당 레이어만
 /* ===== 8 LAYERS (가이드 §2-C) ===== */
 const LAYERS=[
  {id:'L1',name:'AI Software / Model',en:'MSFT·GOOGL·META·PLTR',stage:'성숙',color:'#b8860b',flow:'수요 발원지'},
@@ -1557,8 +1559,10 @@ function renderStack_old_unused(){
 /* ===== 02 EXPLORER ===== */
 function renderLegends(){const h=Object.keys(STAGE_HEX).map(s=>`<span class="lg"><span class="dot s-${s}"></span>${s}</span>`).join('')+'<span class="lg" style="color:var(--mature)">★ 보유</span>';
  const ls=document.getElementById('legendStack');if(ls)ls.innerHTML=h;
- const lm=Object.entries(MAP_LAYER_HEX).map(([id,c])=>`<span class="lg"><span class="dot" style="background:${c}"></span>${id}</span>`).join('')+'<span class="lg" style="color:var(--mature)">★ 보유</span>';
- document.getElementById('legendMap').innerHTML=lm;}
+ const af=mapFilter.size>0;
+ const lm=Object.entries(MAP_LAYER_HEX).map(([id,c])=>`<span class="lg lg-f${af&&!mapFilter.has(id)?' off':''}" data-l="${id}"><span class="dot" style="background:${c}"></span>${id}</span>`).join('')+'<span class="lg" style="color:var(--mature)">★ 보유</span>';
+ const lmEl=document.getElementById('legendMap');lmEl.innerHTML=lm;
+ lmEl.querySelectorAll('.lg-f').forEach(el=>el.addEventListener('click',()=>{const l=el.dataset.l;mapFilter.has(l)?mapFilter.delete(l):mapFilter.add(l);renderLegends();drawSCurve();}));}
 function renderExplorer(){
  const order=['L1','L2','L3','L4','L5','L6','L7','L8','기타'];
  document.getElementById('exList').innerHTML=order.map(lid=>{
@@ -1675,7 +1679,7 @@ function drawSCurve(){
  // estimate rendered width: Korean chars are ~full-width, ASCII ~0.62em
  const lw=txt=>{let w=0;for(const ch of txt){const c=ch.charCodeAt(0);w+=(c>=0xAC00&&c<=0xD7A3||c>=0x1100&&c<=0x11FF||c>=0x3130&&c<=0x318F)?FS*1.1:FS*0.62;}return w;};
  // pass 1: compute dot + initial label positions
- const pts=STATE.map(c=>{const t=c.mat,cx=sx(t),cy=sy(Sc(t))-(c.conv-.6)*40,sc=score(c),r=6+sc*.7;
+ const pts=STATE.filter(c=>!mapFilter.size||mapFilter.has(c.layer)).map(c=>{const t=c.mat,cx=sx(t),cy=sy(Sc(t))-(c.conv-.6)*40,sc=score(c),r=6+sc*.7;
   return {c,cx,cy,r,col:layerCol(c.layer),lx:cx,ly:cy-r-10,lw:lw(c.name+' '+c.layer)};});
  // pass 2: iterative vertical push-apart for x-overlapping labels
  for(let k=0;k<120;k++)for(let i=0;i<pts.length;i++)for(let j=i+1;j<pts.length;j++){
