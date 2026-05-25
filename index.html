@@ -512,7 +512,6 @@ table.tk th.c{text-align:center}
       <div class="psub" style="margin:12px 0 0;line-height:1.6">A 비합의 · B 반비합의 · C 합의화 중 · 경계=부분 종속. <b style="color:var(--dawn)">1~4</b>는 서로 비종속(독립 forcing function), <b>5</b>는 후보군(보조·경계)으로 묶음.</div>
     </aside>
     <div class="thread-card">
-      <span class="front-pill" id="threadFront">현재 전선(front): L4 패키징 backend · L8 grid 전력</span>
       <svg class="thread-svg" id="threadSvg" viewBox="0 0 1240 270" preserveAspectRatio="xMidYMid meet"></svg>
       <div class="tnote" id="threadNote">컴퓨트·메모리(<b>L1–L3</b>)는 이미 가격에 반영(성숙). 강물의 머리는 <b style="color:var(--dawn)">L4 패키징 · L6 광 · L8 발전</b>을 지나 <b style="color:var(--nascent)">피지컬 AI</b>로 향하는 중.</div>
       <div class="detail-strip" id="threadDetail"></div>
@@ -1445,7 +1444,6 @@ function renderThread(){
    <text x="${p.x}" y="${bot+28}" text-anchor="middle" fill="var(--dim)" font-family="var(--mono)" font-size="13">${d.sub}</text></g>`;});
  s+=fFlag;
  svg.innerHTML=s;
- const front=document.getElementById('threadFront');if(front)front.textContent=R.front;
  const note=document.getElementById('threadNote');if(note)note.innerHTML=R.note;
  if(R.layerBased){
   document.getElementById('threadDetail').innerHTML=THREAD.map(d=>{const col=STAGE_HEX[d.stage];
