@@ -1910,8 +1910,6 @@ function draw(){
    const tl=el('text',{x,y:H-PB+16,'text-anchor':'middle',class:'axlab'});tl.textContent=fmt(v);svg.appendChild(tl);});
  svg.appendChild(el('line',{x1:qx,y1:PT,x2:qx,y2:H-PB,class:'zeroline'}));
  svg.appendChild(el('line',{x1:PL,y1:qy,x2:W-PR,y2:qy,class:'zeroline'}));
- const bg=el('rect',{x:PL+6,y:PT+4,width:128,height:16,rx:7,fill:'#1257d6'});svg.appendChild(bg);
- const bt=el('text',{x:PL+10,y:PT+16,class:'benchtag',fill:'#fff'});bt.textContent='● '+(bench==='NASDAQ'?'NASDAQ':'KOSPI')+' (벤치마크)';svg.appendChild(bt);
  drawCash();
  const ql=[['①','알파',W-PR-10,PT+22,'end',QUAD['①']],['④','단기만',PL+10,PT+22,'start',QUAD['④']],
    ['②','중기 알파',W-PR-10,H-PB-12,'end',QUAD['②']],['③','벤치마크 이하',PL+10,H-PB-12,'start',QUAD['③']]];
