@@ -403,6 +403,72 @@ table.tk th.c{text-align:center}
 #v-alpha .eops-tlr b{color:var(--a-brand);font-weight:800;min-width:42px}
 #v-alpha .eops-tlr .nm{font-weight:700;color:var(--a-txt)}
 #v-alpha .eops-tlr .mt{color:var(--a-faint);font-size:11px;width:100%}
+/* ===== 8레이어 × 5단계 전환흐름 매트릭스 — fully scoped under #mxRoot ===== */
+#mxRoot{
+ --mx-mature:#b8860b;--mx-accel:#1c7ed6;--mx-dawn:#0ca678;--mx-hot:#e03131;--mx-nascent:#7048e8;
+ --mx-nowc:#0ca678;--mx-futc:#1c7ed6;
+ --mx-panel:#ffffff;--mx-panel2:#f4f6f9;--mx-line:#e4e8ef;--mx-line2:#d3dae3;
+ --mx-ink:#1a2230;--mx-dim:#54606f;--mx-faint:#8b95a3;--mx-mono:var(--serif);
+ margin-top:40px;border-top:1px solid var(--mx-line);padding-top:30px;
+ color:var(--mx-ink);font-family:var(--serif);font-size:13px;line-height:1.5}
+#mxRoot *{box-sizing:border-box}
+#mxRoot .mx-header{margin-bottom:6px}
+#mxRoot .mx-kick{font-family:var(--mx-mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--mx-dawn);margin-bottom:8px}
+#mxRoot h1{font-weight:700;font-size:24px;letter-spacing:-.01em;margin:0 0 6px;line-height:1.18;color:var(--mx-ink)}
+#mxRoot h1 em{font-style:normal;color:var(--mx-dawn)}
+#mxRoot .mx-sub{color:var(--mx-dim);font-size:13px;max-width:920px}
+#mxRoot .mx-sub b{color:var(--mx-ink);font-weight:600}
+#mxRoot .mx-controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:18px 0 6px}
+#mxRoot .mx-cgrp{display:flex;gap:6px;align-items:center;background:var(--mx-panel);border:1px solid var(--mx-line);border-radius:10px;padding:5px 8px}
+#mxRoot .mx-clbl{font-family:var(--mx-mono);font-size:10px;letter-spacing:.12em;color:var(--mx-faint);text-transform:uppercase;margin-right:2px}
+#mxRoot .mx-chip,#mxRoot .mx-tg{font-family:var(--mx-mono);font-size:12px;color:var(--mx-dim);background:transparent;border:1px solid var(--mx-line2);border-radius:7px;padding:4px 9px;cursor:pointer;transition:.13s}
+#mxRoot .mx-chip{border-color:color-mix(in srgb,var(--lc) 45%,var(--mx-line2))}
+#mxRoot .mx-chip:hover,#mxRoot .mx-tg:hover{color:var(--mx-ink);border-color:var(--mx-line2)}
+#mxRoot .mx-chip.mx-on{color:#0b0f14;background:var(--lc);border-color:var(--lc);font-weight:700}
+#mxRoot .mx-tg.mx-on{color:#0b0f14;background:var(--mx-dawn);border-color:var(--mx-dawn);font-weight:700}
+#mxRoot .mx-tableScroll{margin-top:14px;border:1px solid var(--mx-line);border-radius:14px;overflow:auto;max-height:78vh;background:var(--mx-panel);box-shadow:0 18px 44px -28px rgba(40,60,90,.28)}
+#mxRoot table{border-collapse:separate;border-spacing:0;width:100%;min-width:1180px}
+#mxRoot thead th{position:sticky;top:0;z-index:6;background:#eef2f7;border-bottom:1px solid var(--mx-line2);padding:11px 12px;text-align:left;vertical-align:bottom}
+#mxRoot th.mx-ch .mx-chn{font-weight:700;font-size:12.5px;color:var(--mx-ink)}
+#mxRoot th.mx-ch .mx-chs{font-family:var(--mx-mono);font-size:10px;color:var(--mx-faint);margin-top:3px;letter-spacing:.02em}
+#mxRoot th.mx-ch .mx-est{color:var(--mx-nascent);font-family:var(--mx-mono);font-size:10px}
+#mxRoot th.mx-lyr,#mxRoot th.mx-coCell,#mxRoot th.mx-div{font-family:var(--mx-mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--mx-faint)}
+#mxRoot th.mx-lyr{position:sticky;left:0;z-index:8;width:60px}
+#mxRoot th.mx-coCell{position:sticky;left:60px;z-index:8}
+#mxRoot th.mx-stg{text-align:center}
+#mxRoot td{border-bottom:1px solid var(--mx-line);padding:9px 12px;vertical-align:top}
+#mxRoot tbody.mx-co-grp{transition:opacity .2s}
+#mxRoot tbody.mx-co-grp:hover td{background:rgba(77,171,247,.04)}
+#mxRoot td.mx-lyr{position:sticky;left:0;z-index:4;width:60px;text-align:center;vertical-align:middle;color:#fff;font-weight:700}
+#mxRoot td.mx-lyr .mx-lid{font-family:var(--mx-mono);font-size:14px;display:block}
+#mxRoot td.mx-lyr .mx-lkr{font-size:9px;opacity:.82;font-weight:600;display:block;margin-top:2px}
+#mxRoot td.mx-coCell{position:sticky;left:60px;z-index:4;width:188px;background:var(--mx-panel);vertical-align:middle}
+#mxRoot tbody.mx-co-grp:hover td.mx-coCell{background:#eef3f9}
+#mxRoot .mx-co{font-weight:700;font-size:14px}
+#mxRoot .mx-tk{font-family:var(--mx-mono);font-size:11px;color:var(--mx-faint);margin-left:5px}
+#mxRoot .mx-star{color:var(--mx-mature)}
+#mxRoot .mx-meta{display:flex;gap:6px;align-items:center;margin-top:5px}
+#mxRoot .mx-quad{font-family:var(--mx-mono);font-size:10px;font-weight:700;width:17px;height:17px;line-height:17px;text-align:center;border-radius:5px;color:#0b0f14}
+#mxRoot .mx-q1{background:var(--mx-dawn)}#mxRoot .mx-q2{background:var(--mx-accel)}#mxRoot .mx-q3{background:var(--mx-faint)}#mxRoot .mx-q4{background:var(--mx-mature)}
+#mxRoot .mx-wt{font-family:var(--mx-mono);font-size:11px}#mxRoot .mx-wt.mx-held{color:var(--mx-mature);font-weight:700}#mxRoot .mx-wt.mx-cand{color:var(--mx-faint)}
+#mxRoot .mx-note{font-size:10.5px;color:var(--mx-faint);margin-top:5px;line-height:1.35}
+#mxRoot td.mx-div{width:62px;vertical-align:middle;text-align:center;font-family:var(--mx-mono);font-size:11px;font-weight:700;border-right:1px solid var(--mx-line)}
+#mxRoot td.mx-div.mx-now span{color:var(--mx-nowc)}#mxRoot td.mx-div.mx-fut span{color:var(--mx-futc)}
+#mxRoot td.mx-div.mx-now{box-shadow:inset 3px 0 var(--mx-nowc)}#mxRoot td.mx-div.mx-fut{box-shadow:inset 3px 0 var(--mx-futc)}
+#mxRoot td.mx-cell{font-size:12px;width:19%}
+#mxRoot td.mx-cell.mx-now{color:var(--mx-ink)}
+#mxRoot td.mx-cell.mx-fut{color:var(--mx-dim);background:rgba(77,171,247,.035)}
+#mxRoot tr.mx-r-fut td{border-bottom:1px solid var(--mx-line2)}
+#mxRoot td.mx-stg{width:58px;text-align:center;vertical-align:middle}
+#mxRoot .mx-badge{font-family:var(--mx-mono);font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;color:var(--sc);border:1px solid color-mix(in srgb,var(--sc) 55%,transparent);background:color-mix(in srgb,var(--sc) 12%,transparent);white-space:nowrap}
+#mxRoot .mx-legend{display:flex;flex-wrap:wrap;gap:18px;margin:16px 0 4px;font-family:var(--mx-mono);font-size:11px;color:var(--mx-faint)}
+#mxRoot .mx-legend b{color:var(--mx-dim);font-weight:400}
+#mxRoot .mx-lg{display:inline-flex;align-items:center;gap:5px}
+#mxRoot .mx-dot{width:9px;height:9px;border-radius:3px;display:inline-block}
+#mxRoot .mx-foot{margin-top:22px;padding:16px 18px;border:1px solid var(--mx-line);border-radius:12px;background:var(--mx-panel);color:var(--mx-faint);font-size:11.5px;line-height:1.75}
+#mxRoot .mx-foot b{color:var(--mx-dim)}#mxRoot .mx-foot .mx-est{color:var(--mx-nascent)}
+#mxRoot .mx-disc{margin-top:12px;font-family:var(--mx-mono);font-size:10.5px;color:var(--mx-faint)}
+@media(max-width:760px){#mxRoot h1{font-size:21px}#mxRoot td.mx-coCell,#mxRoot th.mx-coCell{left:48px;width:150px}#mxRoot th.mx-lyr,#mxRoot td.mx-lyr{width:48px}}
 </style>
 </head>
 <body>
@@ -563,6 +629,330 @@ table.tk th.c{text-align:center}
     <b>이중 벤치마크 주의:</b> 코스피 기준은 (지수 스프레드)+(자기 시장 조정)을 반영한 추정. 채권혼합의 음(−)알파는 설계상 정상(방어자산). 의사결정 지원용, 매매 권유 아님 · 기준일 2026-05-24 KST.
   </div>
 
+<div id="mxRoot">
+<div class="mx-header">
+ <div class="mx-kick">初入 Observatory · 8-Layer × Transition Flows</div>
+ <h1>8레이어 × <em>5단계 전환흐름</em> 매트릭스</h1>
+ <p class="mx-sub">워치리스트 <b>24종목</b>(보유 ★ 14 + 미보유 후보 10)을 8레이어로 배열하고, 5단계 전환흐름에 대해 <b>현황(지금 하는 것)</b>과 <b>향후 전략(아직 안 하지만 할 것)</b>으로 나눠 매핑. 기간: 2025.1.1 이후 · 프레임: simpleornothing.com §2-C + 가이드 v0.2.</p>
+ <div class="mx-controls">
+  <div class="mx-cgrp"><span class="mx-clbl">보유</span>
+   <button class="mx-tg mx-hf mx-on" data-h="all">전체</button>
+   <button class="mx-tg mx-hf" data-h="1">보유 ★</button>
+   <button class="mx-tg mx-hf" data-h="0">미보유</button></div>
+  <div class="mx-cgrp"><span class="mx-clbl">Layer</span>
+   <button class="mx-chip mx-on" data-f="all" style="--lc:var(--dim)">전체</button>
+   <button class='mx-chip' data-f='L2' style='--lc:#b8860b'>L2</button><button class='mx-chip' data-f='L3' style='--lc:#b8860b'>L3</button><button class='mx-chip' data-f='L4' style='--lc:#0ca678'>L4</button><button class='mx-chip' data-f='L5' style='--lc:#1c7ed6'>L5</button><button class='mx-chip' data-f='L6' style='--lc:#1c7ed6'>L6</button><button class='mx-chip' data-f='L7' style='--lc:#1c7ed6'>L7</button><button class='mx-chip' data-f='L8' style='--lc:#0ca678'>L8</button><button class='mx-chip' data-f='기타' style='--lc:#7048e8'>기타</button><button class='mx-chip' data-f='방어' style='--lc:#6b7480'>방어</button></div>
+ </div>
+ <div class="mx-legend">
+  <span class="mx-lg"><b>구분</b> <span class="mx-dot" style="background:var(--nowc)"></span>현황 <span class="mx-dot" style="background:var(--futc)"></span>향후</span>
+  <span class="mx-lg"><b>단계</b> <span class="mx-dot" style="background:var(--mature)"></span>성숙 <span class="mx-dot" style="background:var(--accel)"></span>가속 <span class="mx-dot" style="background:var(--dawn)"></span>초입 <span class="mx-dot" style="background:var(--hot)"></span>과열 <span class="mx-dot" style="background:var(--nascent)"></span>태동</span>
+  <span class="mx-lg"><b>사분면</b> <span class="mx-quad mx-q1">1</span>알파 <span class="mx-quad mx-q2">2</span>중기알파 <span class="mx-quad mx-q3">3</span>벤치↓ <span class="mx-quad mx-q4">4</span>단기만</span>
+ </div>
+</div>
+
+<div class="mx-tableScroll"><table>
+<thead><tr><th class='mx-lyr'>Layer</th><th class='mx-coCell'>업체</th><th class='mx-div'>구분</th><th class='mx-ch'><div class='mx-chn'>① 학습→추론</div><div class='mx-chs'>워크로드·A의 사슬·소유</div></th><th class='mx-ch'><div class='mx-chn'>② 데이터→RL·합성</div><div class='mx-chs'>모델 연료·입력</div></th><th class='mx-ch'><div class='mx-chn'>③ 임대→주권·뉴클라우드</div><div class='mx-chs'>소유·자본·누가</div></th><th class='mx-ch'><div class='mx-chn'>④ 스케일→효율</div><div class='mx-chs'>지능 단가·Jevons</div></th><th class='mx-ch'><div class='mx-chn'>⑤ <span class='mx-est'>[추정]</span> 디지털→피지컬 AI</div><div class='mx-chs'>로보틱스·엣지</div></th><th class='mx-stg'>단계</th></tr></thead>
+<tbody class="mx-co-grp" data-layer="L2" data-held="1">
+<tr class="mx-r-now">
+ <td class="mx-lyr" rowspan="2" style="background:#b8860b"><span class="mx-lid">L2</span><span class="mx-lkr">연산·가속기</span></td>
+ <td class="mx-coCell" rowspan="2"><div class='mx-co'>마벨 <span class='mx-star'>★</span><span class='mx-tk'>MRVL</span></div><div class='mx-meta'><span class='mx-quad mx-q1'>1</span><span class='mx-wt mx-held'>6.1%</span></div><div class='mx-note'>L2/L6 · L4(TSMC) 종속</div></td>
+ <td class="mx-div mx-now"><span>현황</span></td>
+ <td class='mx-cell mx-now'>커스텀 ASIC+광 DSP로 추론 인프라 동행</td><td class='mx-cell mx-now'>인에이블러(데이터무브먼트)</td><td class='mx-cell mx-now'>하이퍼스케일러 커스텀 실리콘 파트너</td><td class='mx-cell mx-now'>5/27 실적이 방향 분기점</td><td class='mx-cell mx-now'>차량·엣지 커넥티비티 일부</td>
+ <td class="mx-stg" rowspan="2"><span class="mx-badge" style="--sc:#b8860b">성숙</span></td>
+</tr>
+<tr class="mx-r-fut">
+ <td class="mx-div mx-fut"><span>향후 전략</span></td>
+ <td class='mx-cell mx-fut'>XPU·인터커넥트 콘텐츠 확대</td><td class='mx-cell mx-fut'>메모리·광 콘텐츠 증대</td><td class='mx-cell mx-fut'>소버린 빌드 칩 공급 확대</td><td class='mx-cell mx-fut'>단가효율형 커스텀으로 점유 확대</td><td class='mx-cell mx-fut'>엣지 확장</td>
+</tr>
+</tbody><tbody class="mx-co-grp" data-layer="L2" data-held="1">
+<tr class="mx-r-now">
+ <td class="mx-lyr" rowspan="2" style="background:#b8860b"><span class="mx-lid">L2</span><span class="mx-lkr">연산·가속기</span></td>
+ <td class="mx-coCell" rowspan="2"><div class='mx-co'>KODEX 미AI반도체TOP3 <span class='mx-star'>★</span><span class='mx-tk'>ETF</span></div><div class='mx-meta'><span class='mx-quad mx-q1'>1</span><span class='mx-wt mx-held'>2.8%</span></div><div class='mx-note'>L2 연산칩 통로(바스켓)</div></td>
+ <td class="mx-div mx-now"><span>현황</span></td>
+ <td class='mx-cell mx-now'>미국 AI반도체 TOP3+ 바스켓 보유</td><td class='mx-cell mx-now'>인에이블러</td><td class='mx-cell mx-now'>간접</td><td class='mx-cell mx-now'>가속기 단가효율 테마 통로</td><td class='mx-cell mx-now'>노출 낮음</td>
+ <td class="mx-stg" rowspan="2"><span class="mx-badge" style="--sc:#b8860b">성숙</span></td>
+</tr>
+<tr class="mx-r-fut">
+ <td class="mx-div mx-fut"><span>향후 전략</span></td>
+ <td class='mx-cell mx-fut'>추론 칩 사이클 동행</td><td class='mx-cell mx-fut'>—</td><td class='mx-cell mx-fut'>—</td><td class='mx-cell mx-fut'>—</td><td class='mx-cell mx-fut'>—</td>
+</tr>
+</tbody><tbody class="mx-co-grp" data-layer="L2" data-held="0">
+<tr class="mx-r-now">
+ <td class="mx-lyr" rowspan="2" style="background:#b8860b"><span class="mx-lid">L2</span><span class="mx-lkr">연산·가속기</span></td>
+ <td class="mx-coCell" rowspan="2"><div class='mx-co'>아스테라랩스 <span class='mx-tk'>ALAB</span></div><div class='mx-meta'><span class='mx-quad mx-q1'>1</span><span class='mx-wt mx-cand'>미보유</span></div><div class='mx-note'>L2 커넥티비티·CXL · 미보유 후보</div></td>
+ <td class="mx-div mx-now"><span>현황</span></td>
+ <td class='mx-cell mx-now'>리타이머·CXL로 추론 클러스터 데이터무브먼트 공급</td><td class='mx-cell mx-now'>인에이블러</td><td class='mx-cell mx-now'>하이퍼스케일러 커넥티비티 공급</td><td class='mx-cell mx-now'>CXL 메모리 풀링 침투 초기(서버 1%)</td><td class='mx-cell mx-now'>노출 낮음</td>
+ <td class="mx-stg" rowspan="2"><span class="mx-badge" style="--sc:#1c7ed6">가속</span></td>
+</tr>
+<tr class="mx-r-fut">
+ <td class="mx-div mx-fut"><span>향후 전략</span></td>
+ <td class='mx-cell mx-fut'>scale-up 패브릭 확장</td><td class='mx-cell mx-fut'>—</td><td class='mx-cell mx-fut'>소버린 빌드 수혜</td><td class='mx-cell mx-fut'>메모리 풀링 효율 레버리지</td><td class='mx-cell mx-fut'>—</td>
+</tr>
+</tbody><tbody class="mx-co-grp" data-layer="L2" data-held="0">
+<tr class="mx-r-now">
+ <td class="mx-lyr" rowspan="2" style="background:#b8860b"><span class="mx-lid">L2</span><span class="mx-lkr">연산·가속기</span></td>
+ <td class="mx-coCell" rowspan="2"><div class='mx-co'>AMD <span class='mx-tk'>AMD</span></div><div class='mx-meta'><span class='mx-quad mx-q1'>1</span><span class='mx-wt mx-cand'>미보유</span></div><div class='mx-note'>L2 · 미보유 후보</div></td>
+ <td class="mx-div mx-now"><span>현황</span></td>
+ <td class='mx-cell mx-now'>MI300/MI350 추론 점유 확대</td><td class='mx-cell mx-now'>인에이블러</td><td class='mx-cell mx-now'>뉴클라우드·소버린 2nd 소스</td><td class='mx-cell mx-now'>단가경쟁 포지션</td><td class='mx-cell mx-now'>임베디드(Xilinx)·엣지</td>
+ <td class="mx-stg" rowspan="2"><span class="mx-badge" style="--sc:#1c7ed6">가속</span></td>
+</tr>
+<tr class="mx-r-fut">
+ <td class="mx-div mx-fut"><span>향후 전략</span></td>
+ <td class='mx-cell mx-fut'>차세대로 추론 가성비 제고</td><td class='mx-cell mx-fut'>ROCm 개방으로 RL·합성 흡수</td><td class='mx-cell mx-fut'>공급 다변화 수주 확대</td><td class='mx-cell mx-fut'>토큰당 비용 우위 마케팅</td><td class='mx-cell mx-fut'>피지컬 엣지 추론칩</td>
+</tr>
+</tbody><tbody class="mx-co-grp" data-layer="L2" data-held="0">
+<tr class="mx-r-now">
+ <td class="mx-lyr" rowspan="2" style="background:#b8860b"><span class="mx-lid">L2</span><span class="mx-lkr">연산·가속기</span></td>
+ <td class="mx-coCell" rowspan="2"><div class='mx-co'>퀄컴 <span class='mx-tk'>QCOM</span></div><div class='mx-meta'><span class='mx-quad mx-q1'>1</span><span class='mx-wt mx-cand'>미보유</span></div><div class='mx-note'>L2 경계(엣지/오토) · 미보유 후보</div></td>
+ <td class="mx-div mx-now"><span>현황</span></td>
+ <td class='mx-cell mx-now'>온디바이스 추론(폰·PC) 선두</td><td class='mx-cell mx-now'>인에이블러</td><td class='mx-cell mx-now'>DC 진입 타진</td><td class='mx-cell mx-now'>전력효율 강점</td><td class='mx-cell mx-now'>자동차·IoT mix shift 진행</td>
+ <td class="mx-stg" rowspan="2"><span class="mx-badge" style="--sc:#1c7ed6">가속</span></td>
+</tr>
+<tr class="mx-r-fut">
+ <td class="mx-div mx-fut"><span>향후 전략</span></td>
+ <td class='mx-cell mx-fut'>엣지 추론으로 클라우드 부담 분산</td><td class='mx-cell mx-fut'>온디바이스 개인화 모델</td><td class='mx-cell mx-fut'>소버린 엣지 추론 진입</td><td class='mx-cell mx-fut'>mW당 추론 차별화</td><td class='mx-cell mx-fut'>오토·로봇 엣지 SoC 확대</td>
+</tr>
+</tbody><tbody class="mx-co-grp" data-layer="L3" data-held="1">
+<tr class="mx-r-now">
+ <td class="mx-lyr" rowspan="2" style="background:#b8860b"><span class="mx-lid">L3</span><span class="mx-lkr">메모리·HBM</span></td>
+ <td class="mx-coCell" rowspan="2"><div class='mx-co'>마이크론 <span class='mx-star'>★</span><span class='mx-tk'>MU</span></div><div class='mx-meta'><span class='mx-quad mx-q1'>1</span><span class='mx-wt mx-held'>10.1%</span></div><div class='mx-note'>L3 1차주 · L2 종속</div></td>
+ <td class="mx-div mx-now"><span>현황</span></td>
+ <td class='mx-cell mx-now'>HBM3E 풀가동, 추론용 대용량 메모리 공급</td><td class='mx-cell mx-now'>인에이블러(데이터 저장)</td><td class='mx-cell mx-now'>전 클라우드 형태에 공급</td><td class='mx-cell mx-now'>메모리 슈퍼사이클(DRAM &#x27;26 +51% 전망)</td><td class='mx-cell mx-now'>차량·엣지 메모리 일부</td>
+ <td class="mx-stg" rowspan="2"><span class="mx-badge" style="--sc:#b8860b">성숙</span></td>
+</tr>
+<tr class="mx-r-fut">
+ <td class="mx-div mx-fut"><span>향후 전략</span></td>
+ <td class='mx-cell mx-fut'>HBM4로 추론 병목 흡수</td><td class='mx-cell mx-fut'>합성데이터 학습=메모리 집약 수혜</td><td class='mx-cell mx-fut'>소버린 capex 직접 수혜</td><td class='mx-cell mx-fut'>사이클 후반 ASP·믹스 관리</td><td class='mx-cell mx-fut'>온디바이스 메모리 확대</td>
+</tr>
+</tbody><tbody class="mx-co-grp" data-layer="L3" data-held="1">
+<tr class="mx-r-now">
+ <td class="mx-lyr" rowspan="2" style="background:#b8860b"><span class="mx-lid">L3</span><span class="mx-lkr">메모리·HBM</span></td>
+ <td class="mx-coCell" rowspan="2"><div class='mx-co'>PLUS 글로벌HBM <span class='mx-star'>★</span><span class='mx-tk'>ETF</span></div><div class='mx-meta'><span class='mx-quad mx-q1'>1</span><span class='mx-wt mx-held'>14.1%</span></div><div class='mx-note'>L3 HBM 통로(최대 단일 비중)</div></td>
+ <td class="mx-div mx-now"><span>현황</span></td>
+ <td class='mx-cell mx-now'>HBM 밸류체인 바스켓 보유</td><td class='mx-cell mx-now'>인에이블러</td><td class='mx-cell mx-now'>간접</td><td class='mx-cell mx-now'>메모리 슈퍼사이클 핵심 통로</td><td class='mx-cell mx-now'>노출 낮음</td>
+ <td class="mx-stg" rowspan="2"><span class="mx-badge" style="--sc:#b8860b">성숙</span></td>
+</tr>
+<tr class="mx-r-fut">
+ <td class="mx-div mx-fut"><span>향후 전략</span></td>
+ <td class='mx-cell mx-fut'>HBM4 사이클 동행</td><td class='mx-cell mx-fut'>—</td><td class='mx-cell mx-fut'>—</td><td class='mx-cell mx-fut'>사이클 후반 관리</td><td class='mx-cell mx-fut'>—</td>
+</tr>
+</tbody><tbody class="mx-co-grp" data-layer="L3" data-held="1">
+<tr class="mx-r-now">
+ <td class="mx-lyr" rowspan="2" style="background:#b8860b"><span class="mx-lid">L3</span><span class="mx-lkr">메모리·HBM</span></td>
+ <td class="mx-coCell" rowspan="2"><div class='mx-co'>삼성전자 <span class='mx-star'>★</span><span class='mx-tk'>005930</span></div><div class='mx-meta'><span class='mx-quad mx-q1'>1</span><span class='mx-wt mx-held'>3.4%</span></div><div class='mx-note'>L3(+L4 파운드리)</div></td>
+ <td class="mx-div mx-now"><span>현황</span></td>
+ <td class='mx-cell mx-now'>HBM 추격 + 범용 DRAM 회복</td><td class='mx-cell mx-now'>인에이블러</td><td class='mx-cell mx-now'>메모리+파운드리 겸영</td><td class='mx-cell mx-now'>메모리 사이클 회복 국면</td><td class='mx-cell mx-now'>가전·모바일 엣지</td>
+ <td class="mx-stg" rowspan="2"><span class="mx-badge" style="--sc:#b8860b">성숙</span></td>
+</tr>
+<tr class="mx-r-fut">
+ <td class="mx-div mx-fut"><span>향후 전략</span></td>
+ <td class='mx-cell mx-fut'>HBM4 점유 회복</td><td class='mx-cell mx-fut'>고대역 메모리로 RL/합성 수혜</td><td class='mx-cell mx-fut'>종합 소버린 공급자</td><td class='mx-cell mx-fut'>원가·수율로 효율 경쟁</td><td class='mx-cell mx-fut'>온디바이스 AI 메모리</td>
+</tr>
+</tbody><tbody class="mx-co-grp" data-layer="L3" data-held="0">
+<tr class="mx-r-now">
+ <td class="mx-lyr" rowspan="2" style="background:#b8860b"><span class="mx-lid">L3</span><span class="mx-lkr">메모리·HBM</span></td>
+ <td class="mx-coCell" rowspan="2"><div class='mx-co'>샌디스크 <span class='mx-tk'>SNDK</span></div><div class='mx-meta'><span class='mx-quad mx-q1'>1</span><span class='mx-wt mx-cand'>미보유</span></div><div class='mx-note'>L3(NAND) · 미보유(추격 부담)</div></td>
+ <td class="mx-div mx-now"><span>현황</span></td>
+ <td class='mx-cell mx-now'>엔터프라이즈 SSD가 AI 스토리지로</td><td class='mx-cell mx-now'>대용량 데이터 보관</td><td class='mx-cell mx-now'>클라우드 스토리지 공급</td><td class='mx-cell mx-now'>NAND 사이클 반등(주가 과열)</td><td class='mx-cell mx-now'>노출 낮음</td>
+ <td class="mx-stg" rowspan="2"><span class="mx-badge" style="--sc:#e03131">과열</span></td>
+</tr>
+<tr class="mx-r-fut">
+ <td class="mx-div mx-fut"><span>향후 전략</span></td>
+ <td class='mx-cell mx-fut'>추론 데이터레이크 스토리지</td><td class='mx-cell mx-fut'>합성데이터 적재</td><td class='mx-cell mx-fut'>소버린 데이터 적재</td><td class='mx-cell mx-fut'>AI 스토리지 믹스로 ASP</td><td class='mx-cell mx-fut'>엣지 스토리지</td>
+</tr>
+</tbody><tbody class="mx-co-grp" data-layer="L3" data-held="0">
+<tr class="mx-r-now">
+ <td class="mx-lyr" rowspan="2" style="background:#b8860b"><span class="mx-lid">L3</span><span class="mx-lkr">메모리·HBM</span></td>
+ <td class="mx-coCell" rowspan="2"><div class='mx-co'>램버스 <span class='mx-tk'>RMBS</span></div><div class='mx-meta'><span class='mx-quad mx-q1'>1</span><span class='mx-wt mx-cand'>미보유</span></div><div class='mx-note'>L3 파생(인터페이스) · 초입 후보</div></td>
+ <td class="mx-div mx-now"><span>현황</span></td>
+ <td class='mx-cell mx-now'>MRDIMM 인터페이스칩 공급</td><td class='mx-cell mx-now'>인에이블러</td><td class='mx-cell mx-now'>서버 전반 공급</td><td class='mx-cell mx-now'>모듈당 칩수 ×수배(초입)</td><td class='mx-cell mx-now'>노출 낮음</td>
+ <td class="mx-stg" rowspan="2"><span class="mx-badge" style="--sc:#1c7ed6">가속</span></td>
+</tr>
+<tr class="mx-r-fut">
+ <td class="mx-div mx-fut"><span>향후 전략</span></td>
+ <td class='mx-cell mx-fut'>콘텐츠 수배 증가</td><td class='mx-cell mx-fut'>고속 메모리 IP 로열티</td><td class='mx-cell mx-fut'>표준 침투 확대</td><td class='mx-cell mx-fut'>MRDIMM 채택률이 레버리지</td><td class='mx-cell mx-fut'>—</td>
+</tr>
+</tbody><tbody class="mx-co-grp" data-layer="L4" data-held="1">
+<tr class="mx-r-now">
+ <td class="mx-lyr" rowspan="2" style="background:#0ca678"><span class="mx-lid">L4</span><span class="mx-lkr">소부장·패키징</span></td>
+ <td class="mx-coCell" rowspan="2"><div class='mx-co'>KODEX AI반도체핵심장비 <span class='mx-star'>★</span><span class='mx-tk'>ETF</span></div><div class='mx-meta'><span class='mx-quad mx-q2'>2</span><span class='mx-wt mx-held'>2.4%</span></div><div class='mx-note'>L4 소부장 통로(비중 얇음)</div></td>
+ <td class="mx-div mx-now"><span>현황</span></td>
+ <td class='mx-cell mx-now'>후공정·검사·증착 장비 바스켓 보유</td><td class='mx-cell mx-now'>인에이블러</td><td class='mx-cell mx-now'>간접</td><td class='mx-cell mx-now'>패키징 capex가 효율 율속</td><td class='mx-cell mx-now'>노출 낮음</td>
+ <td class="mx-stg" rowspan="2"><span class="mx-badge" style="--sc:#1c7ed6">가속</span></td>
+</tr>
+<tr class="mx-r-fut">
+ <td class="mx-div mx-fut"><span>향후 전략</span></td>
+ <td class='mx-cell mx-fut'>어드밴스드 패키징 capex 통로</td><td class='mx-cell mx-fut'>—</td><td class='mx-cell mx-fut'>—</td><td class='mx-cell mx-fut'>장비 사이클 수혜</td><td class='mx-cell mx-fut'>—</td>
+</tr>
+</tbody><tbody class="mx-co-grp" data-layer="L5" data-held="0">
+<tr class="mx-r-now">
+ <td class="mx-lyr" rowspan="2" style="background:#1c7ed6"><span class="mx-lid">L5</span><span class="mx-lkr">서버·조립</span></td>
+ <td class="mx-coCell" rowspan="2"><div class='mx-co'>슈퍼마이크로 <span class='mx-tk'>SMCI</span></div><div class='mx-meta'><span class='mx-quad mx-q1'>1</span><span class='mx-wt mx-cand'>미보유</span></div><div class='mx-note'>L5 조립층 · 미보유(디레이팅)</div></td>
+ <td class="mx-div mx-now"><span>현황</span></td>
+ <td class='mx-cell mx-now'>액체냉각 AI랙 통합</td><td class='mx-cell mx-now'>인에이블러</td><td class='mx-cell mx-now'>뉴클라우드 빌드 공급</td><td class='mx-cell mx-now'>마진압박+회계리스크로 소외</td><td class='mx-cell mx-now'>노출 낮음</td>
+ <td class="mx-stg" rowspan="2"><span class="mx-badge" style="--sc:#1c7ed6">가속</span></td>
+</tr>
+<tr class="mx-r-fut">
+ <td class="mx-div mx-fut"><span>향후 전략</span></td>
+ <td class='mx-cell mx-fut'>랙스케일 표준화</td><td class='mx-cell mx-fut'>—</td><td class='mx-cell mx-fut'>—</td><td class='mx-cell mx-fut'>신뢰 회복이 관건</td><td class='mx-cell mx-fut'>—</td>
+</tr>
+</tbody><tbody class="mx-co-grp" data-layer="L6" data-held="1">
+<tr class="mx-r-now">
+ <td class="mx-lyr" rowspan="2" style="background:#1c7ed6"><span class="mx-lid">L6</span><span class="mx-lkr">광 연결</span></td>
+ <td class="mx-coCell" rowspan="2"><div class='mx-co'>루멘텀 <span class='mx-star'>★</span><span class='mx-tk'>LITE</span></div><div class='mx-meta'><span class='mx-quad mx-q2'>2</span><span class='mx-wt mx-held'>7.6%</span></div><div class='mx-note'>L6 · ATH권(추격 부담)</div></td>
+ <td class="mx-div mx-now"><span>현황</span></td>
+ <td class='mx-cell mx-now'>800G 광모듈로 scale-up 대역폭 공급</td><td class='mx-cell mx-now'>인에이블러</td><td class='mx-cell mx-now'>전 클라우드 광 공급</td><td class='mx-cell mx-now'>γ가설(네트워킹 후반영) 확인</td><td class='mx-cell mx-now'>노출 낮음</td>
+ <td class="mx-stg" rowspan="2"><span class="mx-badge" style="--sc:#b8860b">성숙</span></td>
+</tr>
+<tr class="mx-r-fut">
+ <td class="mx-div mx-fut"><span>향후 전략</span></td>
+ <td class='mx-cell mx-fut'>1.6T·CPO 전환 수혜</td><td class='mx-cell mx-fut'>—</td><td class='mx-cell mx-fut'>소버린 빌드 수혜</td><td class='mx-cell mx-fut'>CPO 다음 사이클 잔량</td><td class='mx-cell mx-fut'>차량 라이다 일부</td>
+</tr>
+</tbody><tbody class="mx-co-grp" data-layer="L6" data-held="1">
+<tr class="mx-r-now">
+ <td class="mx-lyr" rowspan="2" style="background:#1c7ed6"><span class="mx-lid">L6</span><span class="mx-lkr">광 연결</span></td>
+ <td class="mx-coCell" rowspan="2"><div class='mx-co'>KODEX 미AI광통신 <span class='mx-star'>★</span><span class='mx-tk'>ETF</span></div><div class='mx-meta'><span class='mx-quad mx-q1'>1</span><span class='mx-wt mx-held'>5.1%</span></div><div class='mx-note'>L6 통로(연결 바스켓)</div></td>
+ <td class="mx-div mx-now"><span>현황</span></td>
+ <td class='mx-cell mx-now'>광모듈·부품 바스켓 보유</td><td class='mx-cell mx-now'>인에이블러</td><td class='mx-cell mx-now'>간접</td><td class='mx-cell mx-now'>네트워킹 후반영 수혜</td><td class='mx-cell mx-now'>노출 낮음</td>
+ <td class="mx-stg" rowspan="2"><span class="mx-badge" style="--sc:#1c7ed6">가속</span></td>
+</tr>
+<tr class="mx-r-fut">
+ <td class="mx-div mx-fut"><span>향후 전략</span></td>
+ <td class='mx-cell mx-fut'>광 capex 동행</td><td class='mx-cell mx-fut'>—</td><td class='mx-cell mx-fut'>—</td><td class='mx-cell mx-fut'>구성종목 CPO 노출 확인 필요</td><td class='mx-cell mx-fut'>—</td>
+</tr>
+</tbody><tbody class="mx-co-grp" data-layer="L6" data-held="0">
+<tr class="mx-r-now">
+ <td class="mx-lyr" rowspan="2" style="background:#1c7ed6"><span class="mx-lid">L6</span><span class="mx-lkr">광 연결</span></td>
+ <td class="mx-coCell" rowspan="2"><div class='mx-co'>코히어런트 <span class='mx-tk'>COHR</span></div><div class='mx-meta'><span class='mx-quad mx-q2'>2</span><span class='mx-wt mx-cand'>미보유</span></div><div class='mx-note'>L6 · 미보유(다음 CPO 사이클 관전)</div></td>
+ <td class="mx-div mx-now"><span>현황</span></td>
+ <td class='mx-cell mx-now'>EML·레이저=CPO 광원 공급</td><td class='mx-cell mx-now'>인에이블러</td><td class='mx-cell mx-now'>광부품 공급</td><td class='mx-cell mx-now'>광 대역폭 효율</td><td class='mx-cell mx-now'>산업 레이저</td>
+ <td class="mx-stg" rowspan="2"><span class="mx-badge" style="--sc:#b8860b">성숙</span></td>
+</tr>
+<tr class="mx-r-fut">
+ <td class="mx-div mx-fut"><span>향후 전략</span></td>
+ <td class='mx-cell mx-fut'>ELS(외장레이저) 수혜</td><td class='mx-cell mx-fut'>—</td><td class='mx-cell mx-fut'>—</td><td class='mx-cell mx-fut'>CPO 신뢰성이 관건</td><td class='mx-cell mx-fut'>—</td>
+</tr>
+</tbody><tbody class="mx-co-grp" data-layer="L7" data-held="1">
+<tr class="mx-r-now">
+ <td class="mx-lyr" rowspan="2" style="background:#1c7ed6"><span class="mx-lid">L7</span><span class="mx-lkr">전력·냉각</span></td>
+ <td class="mx-coCell" rowspan="2"><div class='mx-co'>버티브 <span class='mx-star'>★</span><span class='mx-tk'>VRT</span></div><div class='mx-meta'><span class='mx-quad mx-q2'>2</span><span class='mx-wt mx-held'>4.2%</span></div><div class='mx-note'>L7 1차주 · 밸류 부담</div></td>
+ <td class="mx-div mx-now"><span>현황</span></td>
+ <td class='mx-cell mx-now'>in-rack 전력·냉각, 추론랙(120kW급) 발열 대응</td><td class='mx-cell mx-now'>인에이블러</td><td class='mx-cell mx-now'>전 DC 빌드 공급</td><td class='mx-cell mx-now'>백로그 +109%지만 ATH권(합의 도달)</td><td class='mx-cell mx-now'>노출 낮음</td>
+ <td class="mx-stg" rowspan="2"><span class="mx-badge" style="--sc:#b8860b">성숙</span></td>
+</tr>
+<tr class="mx-r-fut">
+ <td class="mx-div mx-fut"><span>향후 전략</span></td>
+ <td class='mx-cell mx-fut'>액체냉각 표준화</td><td class='mx-cell mx-fut'>—</td><td class='mx-cell mx-fut'>소버린·뉴클라우드 capex 수혜</td><td class='mx-cell mx-fut'>가이던스 비트 둔화 주시</td><td class='mx-cell mx-fut'>엣지 전력</td>
+</tr>
+</tbody><tbody class="mx-co-grp" data-layer="L7" data-held="1">
+<tr class="mx-r-now">
+ <td class="mx-lyr" rowspan="2" style="background:#1c7ed6"><span class="mx-lid">L7</span><span class="mx-lkr">전력·냉각</span></td>
+ <td class="mx-coCell" rowspan="2"><div class='mx-co'>SOL 미AI전력 <span class='mx-star'>★</span><span class='mx-tk'>ETF</span></div><div class='mx-meta'><span class='mx-quad mx-q1'>1</span><span class='mx-wt mx-held'>5.0%</span></div><div class='mx-note'>L7 전력 통로(미국)</div></td>
+ <td class="mx-div mx-now"><span>현황</span></td>
+ <td class='mx-cell mx-now'>미국 AI 전력 인프라 바스켓 보유</td><td class='mx-cell mx-now'>인에이블러</td><td class='mx-cell mx-now'>소버린 전력 통로</td><td class='mx-cell mx-now'>전력=2026 율속 통로</td><td class='mx-cell mx-now'>노출 낮음</td>
+ <td class="mx-stg" rowspan="2"><span class="mx-badge" style="--sc:#1c7ed6">가속</span></td>
+</tr>
+<tr class="mx-r-fut">
+ <td class="mx-div mx-fut"><span>향후 전략</span></td>
+ <td class='mx-cell mx-fut'>전력 capex 동행</td><td class='mx-cell mx-fut'>—</td><td class='mx-cell mx-fut'>—</td><td class='mx-cell mx-fut'>grid 확산 수혜</td><td class='mx-cell mx-fut'>—</td>
+</tr>
+</tbody><tbody class="mx-co-grp" data-layer="L7" data-held="1">
+<tr class="mx-r-now">
+ <td class="mx-lyr" rowspan="2" style="background:#1c7ed6"><span class="mx-lid">L7</span><span class="mx-lkr">전력·냉각</span></td>
+ <td class="mx-coCell" rowspan="2"><div class='mx-co'>KODEX AI전력핵심설비 <span class='mx-star'>★</span><span class='mx-tk'>ETF</span></div><div class='mx-meta'><span class='mx-quad mx-q2'>2</span><span class='mx-wt mx-held'>8.5%</span></div><div class='mx-note'>L7 전력설비 통로(한국)</div></td>
+ <td class="mx-div mx-now"><span>현황</span></td>
+ <td class='mx-cell mx-now'>전력 핵심설비(변압기·기기) 바스켓 보유</td><td class='mx-cell mx-now'>인에이블러</td><td class='mx-cell mx-now'>소버린 전력 capex 통로</td><td class='mx-cell mx-now'>전력 병목 율속 통로</td><td class='mx-cell mx-now'>노출 낮음</td>
+ <td class="mx-stg" rowspan="2"><span class="mx-badge" style="--sc:#1c7ed6">가속</span></td>
+</tr>
+<tr class="mx-r-fut">
+ <td class="mx-div mx-fut"><span>향후 전략</span></td>
+ <td class='mx-cell mx-fut'>grid 증설 동행</td><td class='mx-cell mx-fut'>—</td><td class='mx-cell mx-fut'>—</td><td class='mx-cell mx-fut'>grid 확산 수혜</td><td class='mx-cell mx-fut'>—</td>
+</tr>
+</tbody><tbody class="mx-co-grp" data-layer="L7" data-held="0">
+<tr class="mx-r-now">
+ <td class="mx-lyr" rowspan="2" style="background:#1c7ed6"><span class="mx-lid">L7</span><span class="mx-lkr">전력·냉각</span></td>
+ <td class="mx-coCell" rowspan="2"><div class='mx-co'>바이코어 <span class='mx-tk'>VICR</span></div><div class='mx-meta'><span class='mx-quad mx-q2'>2</span><span class='mx-wt mx-cand'>미보유</span></div><div class='mx-note'>L7 파생 · 단일팹 병목</div></td>
+ <td class="mx-div mx-now"><span>현황</span></td>
+ <td class='mx-cell mx-now'>VPD &#x27;라스트 인치&#x27; 고전류 전력전달</td><td class='mx-cell mx-now'>인에이블러</td><td class='mx-cell mx-now'>간접</td><td class='mx-cell mx-now'>전류밀도 효율 니치</td><td class='mx-cell mx-now'>노출 낮음</td>
+ <td class="mx-stg" rowspan="2"><span class="mx-badge" style="--sc:#1c7ed6">가속</span></td>
+</tr>
+<tr class="mx-r-fut">
+ <td class="mx-div mx-fut"><span>향후 전략</span></td>
+ <td class='mx-cell mx-fut'>2세대 VPD 램프</td><td class='mx-cell mx-fut'>—</td><td class='mx-cell mx-fut'>—</td><td class='mx-cell mx-fut'>IP 로열티 확대</td><td class='mx-cell mx-fut'>—</td>
+</tr>
+</tbody><tbody class="mx-co-grp" data-layer="L8" data-held="1">
+<tr class="mx-r-now">
+ <td class="mx-lyr" rowspan="2" style="background:#0ca678"><span class="mx-lid">L8</span><span class="mx-lkr">발전</span></td>
+ <td class="mx-coCell" rowspan="2"><div class='mx-co'>블룸에너지 <span class='mx-star'>★</span><span class='mx-tk'>BE</span></div><div class='mx-meta'><span class='mx-quad mx-q2'>2</span><span class='mx-wt mx-held'>2.8%</span></div><div class='mx-note'>L8 · 밸류 극단(주의)</div></td>
+ <td class="mx-div mx-now"><span>현황</span></td>
+ <td class='mx-cell mx-now'>연료전지 온사이트 발전(BYOP)으로 오프그리드 DC</td><td class='mx-cell mx-now'>인에이블러</td><td class='mx-cell mx-now'>&#x27;자가발전 소유&#x27;=임대→소유 축의 전력판</td><td class='mx-cell mx-now'>1년 폭등·80x PBR(과열)</td><td class='mx-cell mx-now'>없음</td>
+ <td class="mx-stg" rowspan="2"><span class="mx-badge" style="--sc:#e03131">과열</span></td>
+</tr>
+<tr class="mx-r-fut">
+ <td class="mx-div mx-fut"><span>향후 전략</span></td>
+ <td class='mx-cell mx-fut'>온사이트 채택 확대</td><td class='mx-cell mx-fut'>—</td><td class='mx-cell mx-fut'>BYOP 모델 확산</td><td class='mx-cell mx-fut'>그리드 해소 시 둔화 리스크</td><td class='mx-cell mx-fut'>—</td>
+</tr>
+</tbody><tbody class="mx-co-grp" data-layer="L8" data-held="0">
+<tr class="mx-r-now">
+ <td class="mx-lyr" rowspan="2" style="background:#0ca678"><span class="mx-lid">L8</span><span class="mx-lkr">발전</span></td>
+ <td class="mx-coCell" rowspan="2"><div class='mx-co'>컨스텔레이션 <span class='mx-tk'>CEG</span></div><div class='mx-meta'><span class='mx-quad mx-q4'>4</span><span class='mx-wt mx-cand'>미보유</span></div><div class='mx-note'>L8 1차주 · 52주 저점권(재진입 관찰)</div></td>
+ <td class="mx-div mx-now"><span>현황</span></td>
+ <td class='mx-cell mx-now'>원전 PPA로 DC 24/7 전력 공급</td><td class='mx-cell mx-now'>인에이블러</td><td class='mx-cell mx-now'>&#x27;전력 소유&#x27;의 공급원</td><td class='mx-cell mx-now'>무탄소 기저전력 효율</td><td class='mx-cell mx-now'>없음</td>
+ <td class="mx-stg" rowspan="2"><span class="mx-badge" style="--sc:#1c7ed6">가속</span></td>
+</tr>
+<tr class="mx-r-fut">
+ <td class="mx-div mx-fut"><span>향후 전략</span></td>
+ <td class='mx-cell mx-fut'>데이터센터 PPA 확대</td><td class='mx-cell mx-fut'>—</td><td class='mx-cell mx-fut'>부지 4박자 희소성(α) 확보</td><td class='mx-cell mx-fut'>PPA 단가 협상력</td><td class='mx-cell mx-fut'>—</td>
+</tr>
+</tbody><tbody class="mx-co-grp" data-layer="L8" data-held="0">
+<tr class="mx-r-now">
+ <td class="mx-lyr" rowspan="2" style="background:#0ca678"><span class="mx-lid">L8</span><span class="mx-lkr">발전</span></td>
+ <td class="mx-coCell" rowspan="2"><div class='mx-co'>오클로 <span class='mx-tk'>OKLO</span></div><div class='mx-meta'><span class='mx-quad mx-q1'>1</span><span class='mx-wt mx-cand'>미보유</span></div><div class='mx-note'>L8 다음 옵션(SMR) · 고변동</div></td>
+ <td class="mx-div mx-now"><span>현황</span></td>
+ <td class='mx-cell mx-now'>소형모듈원전 개발(미상용)</td><td class='mx-cell mx-now'>인에이블러</td><td class='mx-cell mx-now'>차세대 전력 소유 옵션</td><td class='mx-cell mx-now'>미상용(태동)</td><td class='mx-cell mx-now'>없음</td>
+ <td class="mx-stg" rowspan="2"><span class="mx-badge" style="--sc:#7048e8">태동</span></td>
+</tr>
+<tr class="mx-r-fut">
+ <td class="mx-div mx-fut"><span>향후 전략</span></td>
+ <td class='mx-cell mx-fut'>2028+ DC SMR 발주</td><td class='mx-cell mx-fut'>—</td><td class='mx-cell mx-fut'>—</td><td class='mx-cell mx-fut'>인허가가 관건</td><td class='mx-cell mx-fut'>—</td>
+</tr>
+</tbody><tbody class="mx-co-grp" data-layer="기타" data-held="1">
+<tr class="mx-r-now">
+ <td class="mx-lyr" rowspan="2" style="background:#7048e8"><span class="mx-lid">기타</span><span class="mx-lkr">피지컬 AI</span></td>
+ <td class="mx-coCell" rowspan="2"><div class='mx-co'>테슬라 <span class='mx-star'>★</span><span class='mx-tk'>TSLA</span></div><div class='mx-meta'><span class='mx-quad mx-q4'>4</span><span class='mx-wt mx-held'>6.9%</span></div><div class='mx-note'>8레이어 밖 · 피지컬 AI 베팅</div></td>
+ <td class="mx-div mx-now"><span>현황</span></td>
+ <td class='mx-cell mx-now'>FSD 추론을 차량 엣지서 자체칩으로</td><td class='mx-cell mx-now'>실세계 주행 데이터 수집</td><td class='mx-cell mx-now'>Dojo 자체 컴퓨트 구축 중</td><td class='mx-cell mx-now'>차량당 추론 효율</td><td class='mx-cell mx-now'>FSD 운행 + Optimus 개발</td>
+ <td class="mx-stg" rowspan="2"><span class="mx-badge" style="--sc:#1c7ed6">가속</span></td>
+</tr>
+<tr class="mx-r-fut">
+ <td class="mx-div mx-fut"><span>향후 전략</span></td>
+ <td class='mx-cell mx-fut'>Dojo/AI5로 추론 수직통합</td><td class='mx-cell mx-fut'>RL·시뮬로 FSD 학습 고도화</td><td class='mx-cell mx-fut'>컴퓨트 자급 달성</td><td class='mx-cell mx-fut'>단가↓로 자율 대중화</td><td class='mx-cell mx-fut'>휴머노이드 양산(옵션가치)</td>
+</tr>
+</tbody><tbody class="mx-co-grp" data-layer="방어" data-held="1">
+<tr class="mx-r-now">
+ <td class="mx-lyr" rowspan="2" style="background:#6b7480"><span class="mx-lid">방어</span><span class="mx-lkr">방어자산</span></td>
+ <td class="mx-coCell" rowspan="2"><div class='mx-co'>채권혼합(2종) <span class='mx-star'>★</span><span class='mx-tk'>방어</span></div><div class='mx-meta'><span class='mx-quad mx-q3'>3</span><span class='mx-wt mx-held'>13.1%</span></div><div class='mx-note'>방어자산 · 전환흐름 무관</div></td>
+ <td class="mx-div mx-now"><span>현황</span></td>
+ <td class='mx-cell mx-now'>AI 전환흐름과 직접 무관(방어자산)</td><td class='mx-cell mx-now'>—</td><td class='mx-cell mx-now'>—</td><td class='mx-cell mx-now'>—</td><td class='mx-cell mx-now'>—</td>
+ <td class="mx-stg" rowspan="2"><span class="mx-badge" style="--sc:#6b7480">-</span></td>
+</tr>
+<tr class="mx-r-fut">
+ <td class="mx-div mx-fut"><span>향후 전략</span></td>
+ <td class='mx-cell mx-fut'>시장 변동성 헤지·드라이파우더</td><td class='mx-cell mx-fut'>—</td><td class='mx-cell mx-fut'>—</td><td class='mx-cell mx-fut'>—</td><td class='mx-cell mx-fut'>—</td>
+</tr>
+</tbody>
+</table></div>
+
+<div class="mx-foot">
+ <b>전환흐름 정의</b> — <b>①학습→추론</b>: 워크로드가 학습에서 추론·에이전트('A의 사슬')로, 인프라 소유 경쟁. ·
+ <b>②데이터→RL·합성</b>: 사전학습 데이터 고갈→강화학습·합성데이터가 '모델 연료'. ·
+ <b>③임대→주권·뉴클라우드</b>: 클라우드 임대에서 자체소유·소버린 AI·뉴클라우드로(누가 자본 대고 소유하나). ·
+ <b>④스케일→효율</b>: 무지성 스케일링에서 추론 단가↓ 효율 경쟁(Jevons=효율↑→총수요↑). ·
+ <b class="mx-est">⑤[추정] 디지털→피지컬 AI</b>: 디지털 모델에서 로보틱스·자율·엣지 실세계로 — 첨부 이미지 5번째 칸이 잘려 프레임 논리(피지컬 AI=다음 전선)로 추정.
+ <div class="mx-disc">※ 현황=현재 하는 것 / 향후 전략=아직 안 하지만 할 것. 빠르게 바뀌는 개별 제품·실적 수치는 별도 검증 권장. 본 자료는 의사결정 지원용이며 매수·매도 권유가 아님. 데이터 기준일 2026-05-25.</div>
+</div>
+</div>
+
   <div class="atip" id="alphaTip"></div>
 </section>
 </main>
@@ -609,10 +999,10 @@ const THREAD=[
    2~4번은 자체 nodes[](좌:성숙→우:초입, pos↓)로 흐름·가치사슬을 직접 보유.
    nodes 편집으로 가설 갱신 — code(상단 라벨)·label·sub(그래프), why·plays(가치사슬). */
 const RIVERS=[
- {n:1,title:'학습→추론',layerBased:true,
+ {n:1,title:'학습→추론',layerBased:true,frontCodes:['L4','L8'],
   front:'현재 전선(front): L4 패키징 backend · L8 grid 전력',
   note:'컴퓨트·메모리(<b>L1–L3</b>)는 이미 가격에 반영(성숙). 강물의 머리는 <b style="color:var(--dawn)">L4 패키징 · L6 광 · L8 발전</b>을 지나 <b style="color:var(--nascent)">피지컬 AI</b>로 향하는 중.'},
- {n:2,title:'데이터→RL·합성',
+ {n:2,title:'데이터→RL·합성',frontCodes:['RL','합성'],
   front:'현재 전선(front): RL 환경·검증기 · 합성 데이터',
   note:'공개 웹 데이터(피크 데이터)·휴먼 라벨링은 이미 반영(성숙). 강물의 머리는 <b style="color:var(--dawn)">RL 환경·합성 데이터</b>를 지나 <b style="color:var(--nascent)">독점 데이터 해자</b>로 향하는 중.',
   nodes:[
@@ -623,7 +1013,7 @@ const RIVERS=[
    {code:'합성',label:'합성 데이터',sub:'모델→데이터',stage:'초입',pos:.22,why:'모델이 데이터를 생성 — 자기개선 루프, 검증이 관건',plays:'프론티어랩 내재화 · 합성데이터 툴링'},
    {code:'독점',label:'독점·라이선스',sub:'비공개 코퍼스',stage:'태동',pos:.12,why:'독점 데이터 해자 — 출판·금융·헬스 라이선싱',plays:'콘텐츠 보유사 (Reddit·뉴스·출판 라이선싱)'},
   ]},
- {n:3,title:'임대→주권·뉴클라우드',
+ {n:3,title:'임대→주권·뉴클라우드',frontCodes:['주권','자본'],
   front:'현재 전선(front): 주권 AI · GPU 파이낸싱',
   note:'하이퍼스케일러 임대(AWS·Azure·GCP)는 기본값으로 선반영. 강물의 머리는 <b style="color:var(--dawn)">뉴클라우드·주권 AI</b>를 지나 <b style="color:var(--nascent)">GPU 담보 파이낸싱</b>으로 — 컴퓨트의 소유·자본이 다음 축.',
   nodes:[
@@ -633,7 +1023,7 @@ const RIVERS=[
    {code:'자본',label:'GPU 파이낸싱',sub:'SPV·GPU 담보',stage:'초입',pos:.28,why:'빌드아웃 = 자본 게임 — GPU 담보대출·SPV·프라이빗 크레딧',plays:'구조화 크레딧 · GPU 담보 SPV (비상장)'},
    {code:'중립',label:'중립 코로케이션',sub:'뉴트럴 호스트',stage:'초입',pos:.18,why:'뉴클라우드도 부지·전력은 코로케이션에 의존',plays:'DLR · EQIX · 뉴트럴 호스트'},
   ]},
- {n:4,title:'스케일→효율',
+ {n:4,title:'스케일→효율',frontCodes:['전용칩','엣지'],
   front:'현재 전선(front): 추론 전용 실리콘 · 엣지 추론',
   note:'파라미터 스케일링·추론 최적화는 진행 중. 강물의 머리는 <b style="color:var(--dawn)">추론 전용 실리콘·엣지</b>로 — 지능 단가↓가 <b style="color:var(--nascent)">Jevons 수요폭증</b>으로 환류(→ 강물 1).',
   nodes:[
@@ -1022,6 +1412,20 @@ function renderThread(){
  const flow=R.layerBased?THREAD:R.nodes;
  const W=1240,H=270,padX=72,top=48,bot=204,n=flow.length,gap=(W-padX*2)/(n-1);
  const pts=flow.map((d,i)=>({x:padX+gap*i,y:top+(bot-top)*(1-d.pos)}));
+ // 현재 전선(front): 강물의 머리를 곡선 위에 직접 표시
+ const fkey=d=>R.layerBased?d.layer:d.code;
+ const fIdx=flow.map((d,i)=>(R.frontCodes||[]).includes(fkey(d))?i:-1).filter(i=>i>=0);
+ let fBand='',fFlag='';
+ if(fIdx.length){
+  const fxs=fIdx.map(i=>pts[i].x),fys=fIdx.map(i=>pts[i].y);
+  const minX=Math.min(...fxs),maxX=Math.max(...fxs),midx=(minX+maxX)/2,tgtY=fys.reduce((a,b)=>a+b,0)/fys.length;
+  fBand=`<rect x="${minX-26}" y="${top-2}" width="${maxX-minX+52}" height="${bot+10-(top-2)}" fill="var(--dawn)" opacity=".07" rx="11"/>`;
+  fFlag=`<line x1="${midx}" y1="28" x2="${midx}" y2="${tgtY-13}" stroke="var(--dawn)" stroke-width="1.2" stroke-dasharray="3 3" opacity=".7"/>
+   <path d="M ${midx-4} ${tgtY-17} L ${midx} ${tgtY-11} L ${midx+4} ${tgtY-17} Z" fill="var(--dawn)"/>
+   <g><rect x="${midx-52}" y="8" width="104" height="20" rx="10" fill="var(--dawn)"/>
+    <circle cx="${midx-34}" cy="18" r="3.2" fill="var(--onacc)"><animate attributeName="opacity" values="1;.25;1" dur="1.6s" repeatCount="indefinite"/></circle>
+    <text x="${midx+6}" y="22.5" text-anchor="middle" fill="var(--onacc)" font-family="var(--mono)" font-size="12.5" font-weight="700">현재 전선</text></g>`;
+ }
  let path=`M ${pts[0].x} ${pts[0].y}`;
  for(let i=1;i<pts.length;i++){const p0=pts[i-1],p1=pts[i],cx=(p0.x+p1.x)/2;path+=` C ${cx} ${p0.y}, ${cx} ${p1.y}, ${p1.x} ${p1.y}`;}
  let s=`<defs><linearGradient id="river" x1="0" y1="0" x2="1" y2="0">
@@ -1029,6 +1433,7 @@ function renderThread(){
  s+=`<line x1="${padX}" y1="${bot+16}" x2="${W-padX}" y2="${bot+16}" stroke="var(--line)" stroke-dasharray="2 5"/>`;
  s+=`<text x="${padX}" y="${bot+50}" fill="var(--mature)" font-family="var(--mono)" font-size="13">← 성숙 / 선반영</text>`;
  s+=`<text x="${W-padX}" y="${bot+50}" fill="var(--dawn)" font-family="var(--mono)" font-size="13" text-anchor="end">초입 / 미반영 →</text>`;
+ s+=fBand;
  s+=`<path d="${path}" fill="none" stroke="url(#river)" stroke-width="3" opacity=".55"/>`;
  flow.forEach((d,i)=>{const p=pts[i],col=STAGE_HEX[d.stage],cap=d.layer||d.code||'';
   s+=`<g class="river-node"${R.layerBased?` data-l="${d.layer}"`:' style="cursor:default"'}>
@@ -1038,6 +1443,7 @@ function renderThread(){
    <text x="${p.x}" y="${p.y-32}" text-anchor="middle" fill="${col}" font-family="var(--mono)" font-size="13" font-weight="700">${cap}</text>
    <text x="${p.x}" y="${p.y-15}" text-anchor="middle" fill="var(--txt)" font-family="var(--serif)" font-size="15" font-weight="600">${d.label}</text>
    <text x="${p.x}" y="${bot+28}" text-anchor="middle" fill="var(--dim)" font-family="var(--mono)" font-size="13">${d.sub}</text></g>`;});
+ s+=fFlag;
  svg.innerHTML=s;
  const front=document.getElementById('threadFront');if(front)front.textContent=R.front;
  const note=document.getElementById('threadNote');if(note)note.innerHTML=R.note;
@@ -1614,5 +2020,22 @@ Promise.all([getJSON('alpha.json'),getJSON('earnings.json'),getJSON('judgment.js
 }).finally(paint);
 })();
 </script>
+<script>
+/* 전환흐름 매트릭스 필터 (scoped to #mxRoot) */
+(function(){
+ const root=document.getElementById('mxRoot');if(!root)return;
+ const grps=[...root.querySelectorAll('.mx-co-grp')];
+ let fL='all',fH='all';
+ const apply=()=>grps.forEach(g=>{
+  const okL=fL==='all'||g.dataset.layer===fL;
+  const okH=fH==='all'||g.dataset.held===fH;
+  g.style.display=(okL&&okH)?'':'none';});
+ root.querySelectorAll('.mx-chip').forEach(b=>b.onclick=()=>{
+  root.querySelectorAll('.mx-chip').forEach(x=>x.classList.remove('mx-on'));b.classList.add('mx-on');fL=b.dataset.f;apply();});
+ root.querySelectorAll('.mx-hf').forEach(b=>b.onclick=()=>{
+  root.querySelectorAll('.mx-hf').forEach(x=>x.classList.remove('mx-on'));b.classList.add('mx-on');fH=b.dataset.h;apply();});
+})();
+</script>
+
 </body>
 </html>
