@@ -978,6 +978,9 @@ table.tk th.c{text-align:center}
 
 <script>
 const STAGE_HEX={태동:'#7048e8',초입:'#0ca678',가속:'#1c7ed6',성숙:'#b8860b',과열:'#e03131'};
+/* 초입 지도: 단계(태동~과열)는 x축 위치로 읽고, 점 색은 L1~L8 레이어로 구분 */
+const LAYER_HEX={L1:'#7048e8',L2:'#4263eb',L3:'#1c7ed6',L4:'#0ca678',L5:'#f59f00',L6:'#ae3ec9',L7:'#1098ad',L8:'#f76707','기타':'#868e96'};
+const layerCol=l=>LAYER_HEX[l]||LAYER_HEX['기타'];
 /* ===== 8 LAYERS (가이드 §2-C) ===== */
 const LAYERS=[
  {id:'L1',name:'AI Software / Model',en:'MSFT·GOOGL·META·PLTR',stage:'성숙',color:'#b8860b',flow:'수요 발원지'},
@@ -1553,7 +1556,9 @@ function renderStack_old_unused(){
 
 /* ===== 02 EXPLORER ===== */
 function renderLegends(){const h=Object.keys(STAGE_HEX).map(s=>`<span class="lg"><span class="dot s-${s}"></span>${s}</span>`).join('')+'<span class="lg" style="color:var(--mature)">★ 보유</span>';
- const ls=document.getElementById('legendStack');if(ls)ls.innerHTML=h;document.getElementById('legendMap').innerHTML=h;}
+ const ls=document.getElementById('legendStack');if(ls)ls.innerHTML=h;
+ const lm=Object.entries(LAYER_HEX).map(([id,c])=>`<span class="lg"><span class="dot" style="background:${c}"></span>${id}</span>`).join('')+'<span class="lg" style="color:var(--mature)">★ 보유</span>';
+ document.getElementById('legendMap').innerHTML=lm;}
 function renderExplorer(){
  const order=['L1','L2','L3','L4','L5','L6','L7','L8','기타'];
  document.getElementById('exList').innerHTML=order.map(lid=>{
@@ -1671,7 +1676,7 @@ function drawSCurve(){
  const lw=txt=>{let w=0;for(const ch of txt){const c=ch.charCodeAt(0);w+=(c>=0xAC00&&c<=0xD7A3||c>=0x1100&&c<=0x11FF||c>=0x3130&&c<=0x318F)?FS*1.1:FS*0.62;}return w;};
  // pass 1: compute dot + initial label positions
  const pts=STATE.map(c=>{const t=c.mat,cx=sx(t),cy=sy(Sc(t))-(c.conv-.6)*40,sc=score(c),r=6+sc*.7;
-  return {c,cx,cy,r,col:STAGE_HEX[c.stage],lx:cx,ly:cy-r-10,lw:lw(c.name+' '+c.layer)};});
+  return {c,cx,cy,r,col:layerCol(c.layer),lx:cx,ly:cy-r-10,lw:lw(c.name+' '+c.layer)};});
  // pass 2: iterative vertical push-apart for x-overlapping labels
  for(let k=0;k<120;k++)for(let i=0;i<pts.length;i++)for(let j=i+1;j<pts.length;j++){
   const a=pts[i],b=pts[j];
@@ -1694,7 +1699,7 @@ function drawSCurve(){
  const tip=document.getElementById('tip');
  svg.querySelectorAll('.s-dot').forEach(g=>{const c=STATE.find(x=>x.id===g.dataset.id);
   g.addEventListener('mousemove',e=>{tip.classList.add('on');
-   tip.innerHTML=`<div class="tn">${c.name} <span style="color:${STAGE_HEX[c.stage]}">●</span> ${c.held?'<span style="color:var(--mature)">★</span>':''}</div><div class="tt">${c.layer} · ${c.mkt}·${c.ticker} · 점수 ${score(c)}/10</div><div class="tx">${c.sub.split('→')[0]}…</div>`;
+   tip.innerHTML=`<div class="tn">${c.name} <span style="color:${layerCol(c.layer)}">●</span> ${c.held?'<span style="color:var(--mature)">★</span>':''}</div><div class="tt">${c.layer} · ${c.stage} · ${c.mkt}·${c.ticker} · 점수 ${score(c)}/10</div><div class="tx">${c.sub.split('→')[0]}…</div>`;
    tip.style.left=Math.min(e.clientX+14,innerWidth-256)+'px';tip.style.top=(e.clientY+14)+'px';});
   g.addEventListener('mouseleave',()=>tip.classList.remove('on'));
   g.addEventListener('click',()=>{tip.classList.remove('on');openDrawer(c.id);});});
