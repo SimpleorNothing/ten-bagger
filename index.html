@@ -1044,10 +1044,10 @@ const RIVERS=[
   note:'공개 웹 데이터(피크 데이터)·휴먼 라벨링은 이미 반영(성숙). 강물의 머리는 <b style="color:var(--dawn)">RL 환경·합성 데이터</b>를 지나 <b style="color:var(--nascent)">독점 데이터 해자</b>로 향하는 중.',
   nodes:[
    {code:'웹',label:'공개 웹 데이터',sub:'크롤·코퍼스',stage:'성숙',pos:.88,why:'사전학습 토큰 고갈 — 공개 웹은 소진(피크 데이터)',plays:'Common Crawl·공개 코퍼스 (상품화·무알파)'},
-   {code:'라벨',label:'휴먼 라벨·RLHF',sub:'선호·instruct',stage:'가속',pos:.66,why:'instruct·선호 데이터 = 1차 데이터 공장',plays:'Scale AI · Surge AI · Turing'},
+   {code:'라벨',label:'휴먼 라벨·RLHF',sub:'선호·instruct',stage:'성숙',pos:.66,why:'instruct·선호 데이터는 상품화 — 휴먼 라벨 1차 공장은 성숙·차별화 약화',plays:'Surge AI · Mercor · Turing (Scale AI는 Meta 종속으로 중립화)'},
    {code:'전문',label:'전문가 데이터',sub:'PhD·코드·도메인',stage:'가속',pos:.5,why:'프론티어는 희소 전문 데이터로 이동 (수학·코드·의료)',plays:'Mercor · Surge · 도메인 전문가 마켓'},
-   {code:'RL',label:'RL 환경·검증기',sub:'에이전트 환경',stage:'초입',pos:.32,why:'에이전트 RL의 다음 병목 = 검증가능 환경·리워드',plays:'환경·verifier 스타트업 (Prime Intellect 등·비상장)'},
-   {code:'합성',label:'합성 데이터',sub:'모델→데이터',stage:'초입',pos:.22,why:'모델이 데이터를 생성 — 자기개선 루프, 검증이 관건',plays:'프론티어랩 내재화 · 합성데이터 툴링'},
+   {code:'RL',label:'RL 환경·검증기',sub:'에이전트 환경',stage:'초입',pos:.32,why:'에이전트 RL의 다음 병목 = 검증가능 환경·리워드 (현재 전선)',plays:'환경·verifier 스타트업 (Prime Intellect · Mechanize 등·비상장)'},
+   {code:'합성',label:'합성 데이터',sub:'모델→데이터',stage:'가속',pos:.22,why:'모델이 데이터를 생성 — RL 환경과 결합한 자기개선 루프 본격화, 검증이 관건',plays:'프론티어랩 내재화 · 합성데이터 툴링'},
    {code:'독점',label:'독점·라이선스',sub:'비공개 코퍼스',stage:'태동',pos:.12,why:'독점 데이터 해자 — 출판·금융·헬스 라이선싱',plays:'콘텐츠 보유사 (Reddit·뉴스·출판 라이선싱)'},
   ]},
  {n:3,title:'임대→주권·뉴클라우드',frontCodes:['주권','자본'],
@@ -1055,9 +1055,9 @@ const RIVERS=[
   note:'하이퍼스케일러 임대(AWS·Azure·GCP)는 기본값으로 선반영. 강물의 머리는 <b style="color:var(--dawn)">뉴클라우드·주권 AI</b>를 지나 <b style="color:var(--nascent)">GPU 담보 파이낸싱</b>으로 — 컴퓨트의 소유·자본이 다음 축.',
   nodes:[
    {code:'HS',label:'하이퍼스케일러 임대',sub:'AWS·Azure·GCP',stage:'성숙',pos:.88,why:'클라우드 임대 = 기본값, 선반영',plays:'MSFT · AMZN · GOOGL (1차·컨센서스)'},
-   {code:'네오',label:'뉴클라우드',sub:'GPU 전용 클라우드',stage:'가속',pos:.62,why:'GPU 순수 노출 — 하이퍼스케일러 캐파 부족분 흡수',plays:'CoreWeave · Nebius · Crusoe · Lambda'},
-   {code:'주권',label:'주권 AI',sub:'국가·소버린',stage:'초입',pos:.42,why:'국가별 자국 컴퓨트 구축 — NVDA가 지목한 신수요축',plays:'G42 · 중동·유럽 소버린 · 통신사 AI클라우드'},
-   {code:'자본',label:'GPU 파이낸싱',sub:'SPV·GPU 담보',stage:'초입',pos:.28,why:'빌드아웃 = 자본 게임 — GPU 담보대출·SPV·프라이빗 크레딧',plays:'구조화 크레딧 · GPU 담보 SPV (비상장)'},
+   {code:'네오',label:'뉴클라우드',sub:'GPU 전용 클라우드',stage:'가속',pos:.62,why:'GPU 순수 노출 — 하이퍼스케일러 캐파 부족분 흡수. 자가 기가클러스터의 임대 전환도 가세',plays:'CoreWeave · Nebius · Crusoe · Lambda · xAI Colossus(SPCX·앤쓰로픽 임대)'},
+   {code:'주권',label:'주권 AI',sub:'국가·소버린',stage:'초입',pos:.42,why:'국가별 자국 컴퓨트 구축 — NVDA가 지목한 신수요축(ACIE 소버린 +80%)',plays:'G42 · Humain(사우디) · Stargate UAE · 통신사 AI클라우드'},
+   {code:'자본',label:'GPU 파이낸싱',sub:'SPV·GPU 담보',stage:'초입',pos:.28,why:'빌드아웃 = 자본 게임 — GPU 담보대출·SPV·프라이빗 크레딧',plays:'프라이빗 크레딧(Blackstone 등) · CoreWeave형 GPU 담보 채권 · SPV'},
    {code:'중립',label:'중립 코로케이션',sub:'뉴트럴 호스트',stage:'초입',pos:.18,why:'뉴클라우드도 부지·전력은 코로케이션에 의존',plays:'DLR · EQIX · 뉴트럴 호스트'},
   ]},
  {n:4,title:'스케일→효율',frontCodes:['전용칩','엣지'],
@@ -1066,8 +1066,8 @@ const RIVERS=[
   nodes:[
    {code:'스케일',label:'프론티어 스케일링',sub:'더 큰 모델',stage:'성숙',pos:.86,why:'파라미터·컴퓨트 스케일링 = 합의, 선반영',plays:'NVDA · 프론티어 랩 (1차)'},
    {code:'최적',label:'추론 최적화',sub:'양자화·디코딩',stage:'가속',pos:.62,why:'같은 칩에서 토큰당 비용↓ (speculative decoding·양자화·KV캐시)',plays:'추론 서빙·컴파일러 (vLLM 생태계·비상장)'},
-   {code:'전용칩',label:'추론 전용 실리콘',sub:'LPU·웨이퍼스케일',stage:'초입',pos:.42,why:'추론 단가의 다음 곡선 = 전용 가속기 (토큰/와트)',plays:'Groq · Cerebras · SambaNova · 커스텀 ASIC'},
-   {code:'엣지',label:'엣지·온디바이스',sub:'폰·PC·글래스',stage:'초입',pos:.28,why:'추론이 단말로 — 단가↓·지연↓, mix shift',plays:'QCOM · AAPL · 온디바이스 NPU'},
+   {code:'전용칩',label:'추론 전용 실리콘',sub:'LPU·웨이퍼스케일',stage:'초입',pos:.42,why:'추론 단가의 다음 곡선 = 전용 가속기 (토큰/와트). 단 NVDA가 Groq LPU 라이선스+acquihire로 SRAM 추론 위협 내재화',plays:'Cerebras(CBRS·상장) · SambaNova · 커스텀 ASIC (Groq는 NVDA 내재화)'},
+   {code:'엣지',label:'엣지·온디바이스',sub:'폰·PC·글래스',stage:'초입',pos:.28,why:'추론이 단말로 — 단가↓·지연↓, mix shift (삼성 글래스 올가을·Gemini Omni 온디바이스)',plays:'QCOM · AAPL · 삼성 글래스 · 온디바이스 NPU'},
    {code:'수요',label:'Jevons 수요폭증',sub:'토큰 소비↑',stage:'가속',pos:.18,why:'단가↓ → 총 토큰 소비 폭증 → 컴퓨트 수요 환류(역설)',plays:'전 스택 되먹임 — 강물 1로 회귀'},
   ]},
 ];
@@ -1088,10 +1088,10 @@ const CASCADES=[
   ]},
  {key:'gpu',driver:'AI 가속기(GPU/ASIC)',layer:'L2',stage:'성숙',
   trigger:'학습·추론 가속기 출하 폭증 → 동반 부품 동시 병목. ★ NVDA Q1 FY27(5/20): Vera Rubin 풀사이클 공급 제약 — CFO "제약은 수요가 아니라 모든 시스템 부품의 양산 타임라인". 다음 병목=components 직접 확인. ★ NVDA, Groq LPU $20B 라이선스+acquihire(\'25.12)로 SRAM 추론 위협 내재화 → 훈련·추론·스토리지 풀스택 장악(FTC·상원 심사 오버행).',
-  primary:{label:'1차주 (선반영)',ex:'NVDA(Blackwell/Vera Rubin) · AVGO · AMD · 커스텀 ASIC(MRVL · Alchip)'},
+  primary:{label:'1차주 (선반영)',ex:'NVDA(Blackwell/Vera Rubin) · AVGO · AMD · 커스텀 ASIC(MRVL)'},
   nodes:[
    {n:'HBM',why:'가속기당 HBM 스택 수·단수↑',mult:'HBM3E → HBM4 용량·단수↑',cos:'SK하이닉스 · 삼성 · 마이크론',stage:'성숙',cand:'mu'},
-   {n:'어드밴스드 패키징(CoWoS)',why:'대형 다이 + HBM 통합',mult:'CoWoS 캐파 = 진짜 supply 병목',cos:'TSMC · Ibiden · ASE',stage:'초입',cand:'ibi'},
+   {n:'어드밴스드 패키징(CoWoS)',why:'대형 다이 + HBM 통합',mult:'CoWoS 캐파 = 진짜 supply 병목',cos:'TSMC · Ibiden · ASE',stage:'초입',cand:null},
    {n:'광 인터커넥트',why:'GPU-GPU scale-up 대역폭',mult:'800G → 1.6T → CPO 전환',cos:'Lumentum · Coherent · MRVL',stage:'가속',cand:'lite'},
    {n:'전력·냉각',why:'랙 100kW+ 발열·전력밀도',mult:'액체냉각 표준화',cos:'Vertiv · Vicor',stage:'가속',cand:'vrt'},
   ]},
@@ -1139,7 +1139,7 @@ const SIGNALS=[
 const WATCH=[
  {id:'anthropic',name:'Anthropic',layer:'L1',status:'비상장·IPO추진',note:"Claude. '26.10 IPO 목표(슬립가능)·Series G $380B→$50B 라운드 $850~900B. SpaceX Colossus 임차 $1.25B/월(~2029).",src:'Bloomberg·SpaceX S-1'},
  {id:'openai',name:'OpenAI',layer:'L1',status:'비상장·S-1제출',note:"ChatGPT. '26.5.22 컨피덴셜 S-1, Q4 상장 목표. CoreWeave $11.9B·Stargate(SoftBank·Oracle).",src:'보도'},
- {id:'xai',name:'xAI / SpaceX',layer:'L1',status:'비상장·S-1제출',note:'Grok+SpaceX 합병·연내 상장(합산 >$1T). Colossus 1(22만+GPU·300MW)를 앤쓰로픽에 임대·궤도DC 추진. 인프라(L5·L7·L8)까지 겸영.',src:'SpaceX S-1'},
+ {id:'xai',name:'xAI / SpaceX',layer:'L1',status:'IPO확정·6/12 NASDAQ(SPCX)',note:'Grok+SpaceX 합병. NASDAQ 상장 확정 — 티커 SPCX·상장일 6/12(로드쇼 6/4·공모가 6/11). 상장 후 밸류 $1.75~2T(글로벌 시총 최상위권)·5:1 액면분할·머스크 의결권 85.1% 유지. Colossus 1(22만+GPU·300MW)를 앤쓰로픽에 임대·궤도DC 추진. 인프라(L5·L7·L8)까지 겸영. (상장 후 매수가능 → 후보 승격 검토)',src:'SpaceX S-1·SEC'},
  {id:'lambda',name:'Lambda',layer:'L5',status:'비상장·IPO추진',note:'GPU 클라우드 ~$5.9~7.5B, H2 2026 IPO 거론. CoreWeave 대안.',src:'보도'},
  {id:'photonics',name:'실리콘포토닉스·CPO (Ayar·Lightmatter 등)',layer:'L6',status:'비상장·태동',note:'CPO 전환기 비상장군 — 리서치 영역, 수치 미검증.',src:'(검증 필요)'},
  {id:'fusion',name:'핵융합·첨단원전 (Helion·TerraPower·X-energy 등)',layer:'L8',status:'비상장·태동',note:'L8 진짜 다음 병목 후보 — 리서치 영역, 수치 미검증.',src:'(검증 필요)'},
@@ -1184,10 +1184,6 @@ const C=[
   sub:'EPYC 서버 CPU → Venice 256코어 → Instinct',compete:'서버 CPU 점유 확대 1차주',up:{l:'L4',d:'강'},down:{l:'L7',d:'중'},
   capex:{bull:'서버 CPU·가속기 동반',base:'EPYC 점유 확대',bear:'2nm 캐파·가속기 경쟁'},
   thesis:'1차주·컨센서스. 추격은 베타. 참조.',kill:['CPU 점유 정체','2nm 제약','가속기 열위'],S:{s1:2,s2:1,s3:2,s4:1,s5:2}},
- {id:'alch',name:'Alchip',ticker:'3661',mkt:'TWSE',layer:'L2',stage:'가속',mat:.64,conv:.7,
-  sub:'ASIC 설계서비스 → Trainium3 → 2nm',compete:'CSP 커스텀 ASIC 디자인하우스',up:{l:'L4',d:'강'},down:{l:'L7',d:'약'},
-  capex:{bull:'CSP 커스텀 물량 급증',base:'순차 tape-out',bear:'핵심고객 둔화·경쟁'},
-  thesis:'가속기향(CPU 아님). 이미 큰 상승.',kill:['핵심고객 물량 둔화','2nm 지연','GUC/MTK 잠식'],S:{s1:2,s2:1,s3:1,s4:1,s5:1}},
  {id:'cbrs',name:'Cerebras',ticker:'CBRS',mkt:'NASDAQ',layer:'L2',stage:'과열',mat:.92,conv:.6,
   sub:'웨이퍼스케일 엔진(WSE) → SRAM 추론 → HBM 우회',compete:'NVDA 추론 대항마·니치',up:{l:'L4 TSMC',d:'강'},down:{l:'L1',d:'강'},
   capex:{bull:'추론 비중↑·OpenAI $20B 약정 램프',base:'고객 다변화',bear:'단일고객 의존·수율·고밸류 디레이팅'},
@@ -1222,11 +1218,6 @@ const C=[
   capex:{bull:'FC-BGA 비중 확대',base:'기판 회복',bear:'서버 수주 부재'},
   thesis:'FC-BGA 서버 침투 스토리. 단 최근 6개월 +200%·52주 저점比 ~9x로 평균 목표가 상회 → 초입 아님(성숙). 가격이 수주를 선반영.',
   kill:['FC-BGA 비중 정체','서버 신규고객 부재','패키지 기판 약세'],S:{s1:1,s2:1,s3:0,s4:1,s5:1}},
- {id:'ibi',name:'Ibiden',ticker:'4062',mkt:'TSE',layer:'L4',stage:'가속',mat:.42,conv:.7,
-  sub:'ABF 기판 1위 → 대면적 패키지 → 가속기·CPU 동시',compete:'ABF 과점 1위',up:{l:'—',d:'—'},down:{l:'L2',d:'강'},
-  capex:{bull:'CoWoS/대형패키지 동행',base:'가동률 회복',bear:'고객 내재화'},
-  thesis:'GPU·CPU 양쪽 패키지 대형화 수혜. β: backend 공유 병목 핵심.',
-  kill:['ABF 가동률 둔화','대형고객 내재화','패키지 단순화'],S:{s1:2,s2:1,s3:1,s4:1,s5:1}},
  {id:'kodexeq',name:'KODEX AI반도체핵심장비',ticker:'471990',mkt:'KOSPI',layer:'L4',stage:'가속',mat:.5,conv:.55,held:true,heldNote:'보유(소부장 2.5%)',
   sub:'후공정·검사·증착 장비 바스켓',compete:'장비 ETF',up:{l:'—',d:'—'},down:{l:'L2/L3',d:'강'},
   capex:{bull:'어드밴스드 패키징 capex↑',base:'장비 사이클',bear:'capex 축소'},
@@ -1284,11 +1275,6 @@ const C=[
   capex:{bull:'로보틱스·FSD 옵션 가치',base:'EV+에너지',bear:'EV 경쟁·밸류 변동'},
   thesis:'8레이어 하드웨어 스택 밖. 피지컬 AI(로보틱스) 옵션. 별도 트랙으로 관리.',
   kill:['Optimus 상용 후퇴','FSD 규제','EV 마진 압박'],S:{s1:1,s2:1,s3:1,s4:1,s5:1}},
- {id:'harm',name:'Harmonic Drive',ticker:'6324',mkt:'TSE',layer:'기타',stage:'태동',mat:.16,conv:.55,
-  sub:'정밀 감속기 → 휴머노이드 관절 → 액추에이터',compete:'정밀 감속기 강자',up:{l:'—',d:'—'},down:{l:'—',d:'—'},
-  capex:{bull:'휴머노이드 양산',base:'산업로봇 회복',bear:'양산 후퇴'},
-  thesis:'피지컬 AI 다음 흐름. 휴머노이드 1대당 관절 다수=비선형 수요. 태동·검증 필요.',
-  kill:['휴머노이드 양산 후퇴','저가 감속기 대체','수주 가시성 부재'],S:{s1:1,s2:0,s3:0,s4:0,s5:1}},
 ];
 
 /* ===== STATE / STORE ===== */
@@ -1442,6 +1428,12 @@ const SIGNAL_LOG=[
    {tag:'기타·엣지',layer:null,col:'#7048e8',html:'삼성 Intelligent Eyewear 글래스 올가을 출시 + Gemini Omni 온디바이스 흐름 = <b>온디바이스 추론 칩 수요</b>. 프레임 안 <b>QCOM mix shift(S4) 가설</b>을 직접 보강하는 외부 증거. 채점 아닌 <b>관찰 로그</b>로 기록.'},
    {tag:'AI 보안',layer:null,col:'#0ca678',html:'SynthID·C2PA Content Credentials를 검색·크롬으로 확대 — 비디오 생성 폭증의 필연적 짝. 프레임이 이미 <b>"AI 보안 트랙 0%"</b> 빈칸으로 표시한 부분, I/O가 이 트랙 수요를 키우는 거시 트리거. <b>별도 thesis 진입 검토</b> 트리거로 기록.'},
    {tag:'상대가치',layer:null,col:'#b8860b',html:'자본 규율 렌즈: I/O는 "수요가 진짜다"는 확인하지만 <b>어느 층이 싼지는 말 안 함.</b> 수요 확정은 광역(L1→전 스택)인데 바스켓은 이미 오른 <b>L3 메모리(35.7%)·L7 전력(18.3%)</b>에 쏠림, 다음 전선 <b>L4(2.5%)·L8(2.6%)</b>은 얇음. 실질 함의: 비싼 쪽 → 공포에 눌린 다음 병목으로 <b>비중 이전 근거 +1</b> (종목 추가매수 아님).'},
+  ]},
+ {date:'2026-05-25', at:'2026-05-25T22:00+09:00', source:'SpaceX(xAI 합병) NASDAQ IPO 일정 확정 — SPCX',
+  srcs:[{label:'SpaceX S-1(SEC)'},{label:'보도'}],
+  items:[
+   {tag:'L1·인프라',layer:'L1',col:'#1c7ed6',html:'<b>SpaceX(xAI 합병체) NASDAQ 상장 확정 — 티커 SPCX·상장일 6/12</b> (S-1 공개 5/20·로드쇼 6/4·공모가 6/11). 상장 후 밸류 <b>$1.75~2T</b> 추산(글로벌 시총 최상위권 즉시 진입)·5:1 액면분할·머스크 의결권 <b>85.1%</b> 유지. 워치(xAI/SpaceX)는 "비상장→IPO확정"으로 갱신 — <b>상장 후 후보(C) 승격 검토</b> 트리거.'},
+   {tag:'L5·L7·L8',layer:null,col:'#7048e8',html:'합병체는 Colossus 1(22만+GPU·300MW)를 앤쓰로픽에 임대($1.25B/월~2029)하고 궤도DC를 추진 — <b>뉴클라우드·주권 인프라(강물3)와 전력·발전(L7·L8) 수요</b>를 한 종목이 겸영. 매수가능 후 강물3 "임대→주권·뉴클라우드" 가치사슬에서 직접 노출 경로로 재평가.'},
   ]},
  /* ▼ 신규 시그널은 여기에 같은 형식으로 추가 (date·source·srcs[{label,url}] 출처 필수) */
 ];
