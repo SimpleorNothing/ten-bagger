@@ -486,12 +486,15 @@ table.tk th.c{text-align:center}
 .print-menu[hidden]{display:none}
 .print-menu button{cursor:pointer;font:500 13px var(--sans);text-align:left;color:var(--txt);background:transparent;border:0;border-radius:8px;padding:9px 12px}
 .print-menu button:hover{background:var(--panel2)}
+.pagenum{display:none}
 @media print{
   header,#tip,#drawer,#drawerBg,#syncModal,#syncModalBg,#saveState,.printbar,.asof{display:none!important}
   .view{display:none!important;animation:none!important}
   body:not(.print-all) .view.on{display:block!important}
   main.wrap{display:flex;flex-direction:column;max-width:none;margin:0;padding:0}
-  body.print-all .pview{display:block!important;break-before:page}
+  body.print-all .pview{display:block!important;break-before:page;position:relative}
+  body.print-one .view.on{position:relative}
+  body.print-all .pview>.pagenum,body.print-one .view.on>.pagenum{display:block;text-align:right;margin-top:18px;padding-top:8px;border-top:1px solid #ddd;font:600 11px var(--mono);color:#555}
   body{background:#fff}
 }
 </style>
@@ -1808,7 +1811,8 @@ renderLegends();loadStore().then(renderAll);renderAll();updateAsof();loadPrices(
   el.classList.add('pview');el.style.order=i;
   const bar=document.createElement('div');bar.className='printbar';
   bar.innerHTML=`<div class="print-menu" hidden><button type="button" data-pm="one">이 페이지만 출력</button><button type="button" data-pm="all">전체 페이지 출력 (00~05)</button></div><button type="button" class="print-btn">인쇄 / PDF로 저장</button>`;
-  el.appendChild(bar);});
+  el.appendChild(bar);
+  const pn=document.createElement('div');pn.className='pagenum';el.appendChild(pn);});
  const closeAll=()=>document.querySelectorAll('.print-menu').forEach(m=>m.hidden=true);
  document.querySelectorAll('.printbar').forEach(bar=>{
   const btn=bar.querySelector('.print-btn'),menu=bar.querySelector('.print-menu');
@@ -1816,10 +1820,18 @@ renderLegends();loadStore().then(renderAll);renderAll();updateAsof();loadPrices(
   menu.querySelectorAll('button').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();closeAll();runPrint(b.dataset.pm);}));});
  document.addEventListener('click',closeAll);
  function runPrint(mode){
-  if(mode==='all'){try{drawSCurve();drawRiverCurves();}catch(e){}document.body.classList.add('print-all');}
-  else document.body.classList.remove('print-all');
+  document.body.classList.remove('print-all','print-one');
+  const N=order.length;
+  if(mode==='all'){
+   try{drawSCurve();drawRiverCurves();}catch(e){}
+   order.forEach((v,i)=>{const f=document.getElementById('v-'+v).querySelector('.pagenum');if(f)f.textContent=`${i+1} / ${N}`;});
+   document.body.classList.add('print-all');
+  }else{
+   const f=document.querySelector('.view.on .pagenum');if(f)f.textContent='1 / 1';
+   document.body.classList.add('print-one');
+  }
   setTimeout(()=>window.print(),40);}
- window.addEventListener('afterprint',()=>document.body.classList.remove('print-all'));
+ window.addEventListener('afterprint',()=>document.body.classList.remove('print-all','print-one'));
 })();
 </script>
 <script>
