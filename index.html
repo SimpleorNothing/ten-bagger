@@ -55,6 +55,7 @@ main{padding:36px 0 90px;position:relative}
 .legend{display:flex;gap:14px;flex-wrap:wrap;margin:16px 0 24px;font-family:var(--mono);font-size:13px}
 .lg{display:flex;align-items:center;gap:6px;color:var(--dim)}
 .lg-f{cursor:pointer;user-select:none;transition:opacity .15s}.lg-f:hover{opacity:.8}.lg-f.off{opacity:.32}
+.lg-all{cursor:pointer;font-family:var(--mono);font-size:12px;color:var(--dim);background:transparent;border:1px solid var(--line2);border-radius:6px;padding:2px 9px;transition:.15s}.lg-all:hover{color:var(--txt);border-color:var(--dim)}
 .dot{width:9px;height:9px;border-radius:50%}
 .s-태동{background:var(--st-nascent)}.s-초입{background:var(--st-dawn)}.s-가속{background:var(--st-accel)}.s-성숙{background:var(--st-mature)}.s-과열{background:var(--st-hot)}
 
@@ -1561,10 +1562,11 @@ function renderStack_old_unused(){
 /* ===== 02 EXPLORER ===== */
 function renderLegends(){const h=Object.keys(STAGE_HEX).map(s=>`<span class="lg"><span class="dot s-${s}"></span>${s}</span>`).join('')+'<span class="lg" style="color:var(--mature)">★ 보유</span>';
  const ls=document.getElementById('legendStack');if(ls)ls.innerHTML=h;
- const af=mapFilter.size>0;
- const lm=Object.entries(MAP_LAYER_HEX).map(([id,c])=>`<span class="lg lg-f${af&&!mapFilter.has(id)?' off':''}" data-l="${id}"><span class="dot" style="background:${c}"></span>${id}</span>`).join('')+'<span class="lg" style="color:var(--mature)">★ 보유</span>';
+ const af=mapFilter.size>0,allKeys=Object.keys(MAP_LAYER_HEX),allOn=mapFilter.size===allKeys.length;
+ const lm=Object.entries(MAP_LAYER_HEX).map(([id,c])=>`<span class="lg lg-f${af&&!mapFilter.has(id)?' off':''}" data-l="${id}"><span class="dot" style="background:${c}"></span>${id}</span>`).join('')+'<span class="lg" style="color:var(--mature)">★ 보유</span>'+`<button type="button" class="lg-all">${allOn?'전체 해제':'전체 선택'}</button>`;
  const lmEl=document.getElementById('legendMap');lmEl.innerHTML=lm;
- lmEl.querySelectorAll('.lg-f').forEach(el=>el.addEventListener('click',()=>{const l=el.dataset.l;mapFilter.has(l)?mapFilter.delete(l):mapFilter.add(l);renderLegends();drawSCurve();}));}
+ lmEl.querySelectorAll('.lg-f').forEach(el=>el.addEventListener('click',()=>{const l=el.dataset.l;mapFilter.has(l)?mapFilter.delete(l):mapFilter.add(l);renderLegends();drawSCurve();}));
+ lmEl.querySelector('.lg-all').addEventListener('click',()=>{if(mapFilter.size===allKeys.length)mapFilter.clear();else allKeys.forEach(k=>mapFilter.add(k));renderLegends();drawSCurve();});}
 function renderExplorer(){
  const order=['L1','L2','L3','L4','L5','L6','L7','L8','기타'];
  document.getElementById('exList').innerHTML=order.map(lid=>{
