@@ -609,10 +609,10 @@ const THREAD=[
    2~4번은 자체 nodes[](좌:성숙→우:초입, pos↓)로 흐름·가치사슬을 직접 보유.
    nodes 편집으로 가설 갱신 — code(상단 라벨)·label·sub(그래프), why·plays(가치사슬). */
 const RIVERS=[
- {n:1,title:'학습→추론',layerBased:true,
+ {n:1,title:'학습→추론',layerBased:true,frontCodes:['L4','L8'],
   front:'현재 전선(front): L4 패키징 backend · L8 grid 전력',
   note:'컴퓨트·메모리(<b>L1–L3</b>)는 이미 가격에 반영(성숙). 강물의 머리는 <b style="color:var(--dawn)">L4 패키징 · L6 광 · L8 발전</b>을 지나 <b style="color:var(--nascent)">피지컬 AI</b>로 향하는 중.'},
- {n:2,title:'데이터→RL·합성',
+ {n:2,title:'데이터→RL·합성',frontCodes:['RL','합성'],
   front:'현재 전선(front): RL 환경·검증기 · 합성 데이터',
   note:'공개 웹 데이터(피크 데이터)·휴먼 라벨링은 이미 반영(성숙). 강물의 머리는 <b style="color:var(--dawn)">RL 환경·합성 데이터</b>를 지나 <b style="color:var(--nascent)">독점 데이터 해자</b>로 향하는 중.',
   nodes:[
@@ -623,7 +623,7 @@ const RIVERS=[
    {code:'합성',label:'합성 데이터',sub:'모델→데이터',stage:'초입',pos:.22,why:'모델이 데이터를 생성 — 자기개선 루프, 검증이 관건',plays:'프론티어랩 내재화 · 합성데이터 툴링'},
    {code:'독점',label:'독점·라이선스',sub:'비공개 코퍼스',stage:'태동',pos:.12,why:'독점 데이터 해자 — 출판·금융·헬스 라이선싱',plays:'콘텐츠 보유사 (Reddit·뉴스·출판 라이선싱)'},
   ]},
- {n:3,title:'임대→주권·뉴클라우드',
+ {n:3,title:'임대→주권·뉴클라우드',frontCodes:['주권','자본'],
   front:'현재 전선(front): 주권 AI · GPU 파이낸싱',
   note:'하이퍼스케일러 임대(AWS·Azure·GCP)는 기본값으로 선반영. 강물의 머리는 <b style="color:var(--dawn)">뉴클라우드·주권 AI</b>를 지나 <b style="color:var(--nascent)">GPU 담보 파이낸싱</b>으로 — 컴퓨트의 소유·자본이 다음 축.',
   nodes:[
@@ -633,7 +633,7 @@ const RIVERS=[
    {code:'자본',label:'GPU 파이낸싱',sub:'SPV·GPU 담보',stage:'초입',pos:.28,why:'빌드아웃 = 자본 게임 — GPU 담보대출·SPV·프라이빗 크레딧',plays:'구조화 크레딧 · GPU 담보 SPV (비상장)'},
    {code:'중립',label:'중립 코로케이션',sub:'뉴트럴 호스트',stage:'초입',pos:.18,why:'뉴클라우드도 부지·전력은 코로케이션에 의존',plays:'DLR · EQIX · 뉴트럴 호스트'},
   ]},
- {n:4,title:'스케일→효율',
+ {n:4,title:'스케일→효율',frontCodes:['전용칩','엣지'],
   front:'현재 전선(front): 추론 전용 실리콘 · 엣지 추론',
   note:'파라미터 스케일링·추론 최적화는 진행 중. 강물의 머리는 <b style="color:var(--dawn)">추론 전용 실리콘·엣지</b>로 — 지능 단가↓가 <b style="color:var(--nascent)">Jevons 수요폭증</b>으로 환류(→ 강물 1).',
   nodes:[
@@ -1022,6 +1022,20 @@ function renderThread(){
  const flow=R.layerBased?THREAD:R.nodes;
  const W=1240,H=270,padX=72,top=48,bot=204,n=flow.length,gap=(W-padX*2)/(n-1);
  const pts=flow.map((d,i)=>({x:padX+gap*i,y:top+(bot-top)*(1-d.pos)}));
+ // 현재 전선(front): 강물의 머리를 곡선 위에 직접 표시
+ const fkey=d=>R.layerBased?d.layer:d.code;
+ const fIdx=flow.map((d,i)=>(R.frontCodes||[]).includes(fkey(d))?i:-1).filter(i=>i>=0);
+ let fBand='',fFlag='';
+ if(fIdx.length){
+  const fxs=fIdx.map(i=>pts[i].x),fys=fIdx.map(i=>pts[i].y);
+  const minX=Math.min(...fxs),maxX=Math.max(...fxs),midx=(minX+maxX)/2,tgtY=fys.reduce((a,b)=>a+b,0)/fys.length;
+  fBand=`<rect x="${minX-26}" y="${top-2}" width="${maxX-minX+52}" height="${bot+10-(top-2)}" fill="var(--dawn)" opacity=".07" rx="11"/>`;
+  fFlag=`<line x1="${midx}" y1="28" x2="${midx}" y2="${tgtY-13}" stroke="var(--dawn)" stroke-width="1.2" stroke-dasharray="3 3" opacity=".7"/>
+   <path d="M ${midx-4} ${tgtY-17} L ${midx} ${tgtY-11} L ${midx+4} ${tgtY-17} Z" fill="var(--dawn)"/>
+   <g><rect x="${midx-52}" y="8" width="104" height="20" rx="10" fill="var(--dawn)"/>
+    <circle cx="${midx-34}" cy="18" r="3.2" fill="var(--onacc)"><animate attributeName="opacity" values="1;.25;1" dur="1.6s" repeatCount="indefinite"/></circle>
+    <text x="${midx+6}" y="22.5" text-anchor="middle" fill="var(--onacc)" font-family="var(--mono)" font-size="12.5" font-weight="700">현재 전선</text></g>`;
+ }
  let path=`M ${pts[0].x} ${pts[0].y}`;
  for(let i=1;i<pts.length;i++){const p0=pts[i-1],p1=pts[i],cx=(p0.x+p1.x)/2;path+=` C ${cx} ${p0.y}, ${cx} ${p1.y}, ${p1.x} ${p1.y}`;}
  let s=`<defs><linearGradient id="river" x1="0" y1="0" x2="1" y2="0">
@@ -1029,6 +1043,7 @@ function renderThread(){
  s+=`<line x1="${padX}" y1="${bot+16}" x2="${W-padX}" y2="${bot+16}" stroke="var(--line)" stroke-dasharray="2 5"/>`;
  s+=`<text x="${padX}" y="${bot+50}" fill="var(--mature)" font-family="var(--mono)" font-size="13">← 성숙 / 선반영</text>`;
  s+=`<text x="${W-padX}" y="${bot+50}" fill="var(--dawn)" font-family="var(--mono)" font-size="13" text-anchor="end">초입 / 미반영 →</text>`;
+ s+=fBand;
  s+=`<path d="${path}" fill="none" stroke="url(#river)" stroke-width="3" opacity=".55"/>`;
  flow.forEach((d,i)=>{const p=pts[i],col=STAGE_HEX[d.stage],cap=d.layer||d.code||'';
   s+=`<g class="river-node"${R.layerBased?` data-l="${d.layer}"`:' style="cursor:default"'}>
@@ -1038,6 +1053,7 @@ function renderThread(){
    <text x="${p.x}" y="${p.y-32}" text-anchor="middle" fill="${col}" font-family="var(--mono)" font-size="13" font-weight="700">${cap}</text>
    <text x="${p.x}" y="${p.y-15}" text-anchor="middle" fill="var(--txt)" font-family="var(--serif)" font-size="15" font-weight="600">${d.label}</text>
    <text x="${p.x}" y="${bot+28}" text-anchor="middle" fill="var(--dim)" font-family="var(--mono)" font-size="13">${d.sub}</text></g>`;});
+ s+=fFlag;
  svg.innerHTML=s;
  const front=document.getElementById('threadFront');if(front)front.textContent=R.front;
  const note=document.getElementById('threadNote');if(note)note.innerHTML=R.note;
