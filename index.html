@@ -979,8 +979,8 @@ table.tk th.c{text-align:center}
 <script>
 const STAGE_HEX={태동:'#7048e8',초입:'#0ca678',가속:'#1c7ed6',성숙:'#b8860b',과열:'#e03131'};
 /* 초입 지도: 단계(태동~과열)는 x축 위치로 읽고, 점 색은 L1~L8 레이어로 구분 */
-const LAYER_HEX={L1:'#7048e8',L2:'#4263eb',L3:'#1c7ed6',L4:'#0ca678',L5:'#f59f00',L6:'#ae3ec9',L7:'#1098ad',L8:'#f76707','기타':'#868e96'};
-const layerCol=l=>LAYER_HEX[l]||LAYER_HEX['기타'];
+const MAP_LAYER_HEX={L1:'#7048e8',L2:'#4263eb',L3:'#1c7ed6',L4:'#0ca678',L5:'#f59f00',L6:'#ae3ec9',L7:'#1098ad',L8:'#f76707','기타':'#868e96'};
+const layerCol=l=>MAP_LAYER_HEX[l]||MAP_LAYER_HEX['기타'];
 /* ===== 8 LAYERS (가이드 §2-C) ===== */
 const LAYERS=[
  {id:'L1',name:'AI Software / Model',en:'MSFT·GOOGL·META·PLTR',stage:'성숙',color:'#b8860b',flow:'수요 발원지'},
@@ -1557,7 +1557,7 @@ function renderStack_old_unused(){
 /* ===== 02 EXPLORER ===== */
 function renderLegends(){const h=Object.keys(STAGE_HEX).map(s=>`<span class="lg"><span class="dot s-${s}"></span>${s}</span>`).join('')+'<span class="lg" style="color:var(--mature)">★ 보유</span>';
  const ls=document.getElementById('legendStack');if(ls)ls.innerHTML=h;
- const lm=Object.entries(LAYER_HEX).map(([id,c])=>`<span class="lg"><span class="dot" style="background:${c}"></span>${id}</span>`).join('')+'<span class="lg" style="color:var(--mature)">★ 보유</span>';
+ const lm=Object.entries(MAP_LAYER_HEX).map(([id,c])=>`<span class="lg"><span class="dot" style="background:${c}"></span>${id}</span>`).join('')+'<span class="lg" style="color:var(--mature)">★ 보유</span>';
  document.getElementById('legendMap').innerHTML=lm;}
 function renderExplorer(){
  const order=['L1','L2','L3','L4','L5','L6','L7','L8','기타'];
