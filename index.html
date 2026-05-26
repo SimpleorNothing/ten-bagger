@@ -347,6 +347,8 @@ table.tk th.c{text-align:center}
 #v-alpha .bublab{font-size:11.5px;font-weight:700;fill:var(--a-txt);pointer-events:none;paint-order:stroke;stroke:#fff;stroke-width:3px;transition:x .35s,y .35s}
 #v-alpha .dim .bub{opacity:.22}#v-alpha .dim .bublab{opacity:.18}
 #v-alpha .bub.hot-sel,#v-alpha .bublab.hot-sel{opacity:1 !important}
+#v-alpha .em-pulse{fill:none;stroke:var(--a-hot);stroke-width:2.4;transform-box:fill-box;transform-origin:center;animation:emPulse 1.15s ease-out infinite;pointer-events:none}
+@keyframes emPulse{0%{transform:scale(.55);opacity:.9}70%{transform:scale(1.9);opacity:0}100%{transform:scale(1.9);opacity:0}}
 #v-alpha .atip{position:fixed;z-index:60;pointer-events:none;background:#fff;color:var(--a-txt);border:1.5px solid var(--a-line);border-radius:14px;
   padding:13px 15px;max-width:280px;font-size:13px;box-shadow:0 12px 30px rgba(18,87,214,.15);opacity:0;transition:opacity .12s;line-height:1.55}
 #v-alpha .atip.on{opacity:1}
@@ -1936,6 +1938,10 @@ function draw(){
    const col=colorOf(d);
    const c=el('circle',{cx:x,cy:y,r,fill:col+(d.cand?'12':'2e'),stroke:col,'stroke-width':d.cand?1.6:2,class:'bub','data-i':i});
    if(d.cand)c.setAttribute('stroke-dasharray','3 3');svg.appendChild(c);
+   // 실적 임박(D-3~D-Day): 점 둘레에 펄스 링 = 블링킹. EM date 기준 0~3일.
+   const emI=EM[d.t];
+   if(showEM&&emI&&emI.date){const di=Math.ceil((new Date(emI.date+'T00:00:00')-Date.now())/864e5);
+     if(di>=0&&di<=3){const ring=el('circle',{cx:x,cy:y,r:r+2,class:'em-pulse'});svg.insertBefore(ring,c);}}
    // 실적: expected move 크기를 SVG 번개 path의 색·크기로 인코딩. 다음주(wk) 실적은 수치 라벨도.
    const em=EM[d.t];
    if(showEM&&(em||d.flag)){
