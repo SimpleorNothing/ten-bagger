@@ -544,8 +544,6 @@ table.tk th.c{text-align:center}
       <div class="tnote" id="threadNote">컴퓨트·메모리(<b>L1–L3</b>)는 이미 가격에 반영(성숙). 강물의 머리는 <b style="color:var(--dawn)">L4 패키징 · L6 광 · L8 발전</b>을 지나 <b style="color:var(--nascent)">피지컬 AI</b>로 향하는 중.</div>
       <div class="detail-strip" id="threadDetail"></div>
     </div>
-  <hr class="thread-sep">
-  <div class="siglog" id="signalLog"></div>
 </section>
 
 <!-- 01 CASCADE -->
@@ -574,95 +572,7 @@ table.tk th.c{text-align:center}
       <p>현재 시장 합의: 병목이 <b style="color:var(--mature)">L3 메모리·L7 전력</b>에 도달(선반영). Alpha 가설의 다음 전선은 <b style="color:var(--dawn)">L4 패키징 backend · L6 광(CPO) · L8 grid 전력</b>. 5종목(SNDK·MRVL·ALAB·LITE·QCOM)은 전부 한 층에서 수요폭발+공급병목이 동시에 터진 케이스.<br><br><b style="color:var(--accel)">NVDA Q1 FY27(5/20):</b> CFO가 공급 제약을 "모든 시스템 부품의 양산"이라 명시 → 다음 병목=components 확인. 네트워킹 +199%로 L6 가속, Vera($20B)로 CPU가 1차 매출축 합류, ACIE/Edge 세그먼트 신설로 수요 광역화.</p>
     </div>
   </div>
-</section>
-
-<!-- 03 MAP -->
-<section class="view" id="v-map">
-  <div class="vhead"><div class="vkick">Dawn Map · 주가 사이클 S-커브</div>
-    <h1 class="vtitle">지금 <em>여명</em> 구간에 선 후보는?</h1>
-    <p class="vsub">가로축=테마 성숙도(좌:태동→우:과열). 여명 밴드(초입)에 든 종목이 빛납니다. 점을 누르면 상세. ★ 보유 종목은 테두리로 표시.</p></div>
-  <div class="legend" id="legendMap"></div>
-  <div class="map-card"><svg id="scurve" viewBox="0 0 1180 620" preserveAspectRatio="xMidYMid meet"></svg></div>
-  <div class="vkick" style="margin:34px 0 4px">강물 2~4 · 독립 forcing function</div>
-  <p class="vsub" style="margin:0 0 4px">강물 1(위)은 종목으로 투영. 강물 2~4는 각 가치사슬 마디를 같은 S-커브에 얹어, 어느 마디가 <em>여명(초입)</em>에 있는지 봅니다. 점에 올리면 근거·후보.</p>
-  <div id="mapRivers"></div>
-</section>
-
-<!-- 04 PORTFOLIO -->
-<section class="view" id="v-port">
-  <div class="vhead"><div class="vkick">Portfolio X-ray · thesis vs book</div>
-    <h1 class="vtitle">자본은 <em>현재 병목</em>에 80% — 다음 병목엔?</h1>
-    <p class="vsub">5/16 자산현황(총 898M) 기준, 보유를 8레이어에 투영. 핵심 질문: 당신이 "다음 병목"이라 지목한 곳에 자본이 가 있는가.</p></div>
-  <div class="xray-hero" id="xrayHero"></div>
-  <div id="portBars"></div>
-  <div class="pclass" id="portClass"></div>
-</section>
-
-<!-- 05 TRACKER -->
-<section class="view" id="v-tracker">
-  <div class="vhead"><div class="vkick">Tracker · 초입 5신호</div>
-    <h1 class="vtitle">분기마다 <em>5신호</em>를 채점</h1>
-    <p class="vsub">병목 역추적 · Beat&Raise 첫 분기 · backlog visibility · mix shift 공식발표 · 차트 베이스 돌파 — 각 0/1/2점. 합산이 초입 확신도. 셀 클릭으로 채점, 자동 저장.</p></div>
-  <div class="tk-tools">
-    <select class="sel" id="sortSel"><option value="score">정렬: 초입점수↓</option><option value="maturity">정렬: 성숙도↑(덜오른순)</option><option value="layer">정렬: 레이어</option></select>
-    <select class="sel" id="filterSel"><option value="all">전체 단계</option><option value="태동">태동</option><option value="초입">초입</option><option value="가속">가속</option><option value="성숙">성숙</option></select>
-    <span class="tk-count" id="tkCount"></span>
-  </div>
-  <table class="tk"><thead><tr><th>후보 / 레이어</th>
-    <th class="c">S1 병목</th><th class="c">S2 B&R</th><th class="c">S3 가시성</th><th class="c">S4 mix</th><th class="c">S5 차트</th>
-    <th class="c">점수</th><th class="c">단계</th><th class="c">점검일</th><th></th></tr></thead>
-    <tbody id="tkBody"></tbody></table>
-  <div class="foot" id="storeFoot"></div>
-</section>
-
-<!-- 05 ALPHA MAP -->
-<section class="view on" id="v-alpha">
-  <div class="kick">初入 Observatory · Alpha Map</div>
-  <h1>보유종목 4사분면 — 벤치마크 대비 알파</h1>
-
-  <div class="card">
-    <svg id="plot" viewBox="0 0 860 470" preserveAspectRatio="xMidYMid meet"></svg>
-  </div>
-
-  <div class="benchrow toolbar">
-    <span class="lab">벤치마크</span>
-    <div class="seg" id="benchSeg">
-      <button data-b="NASDAQ" class="on">나스닥 (QQQ)</button>
-      <button data-b="KOSPI">코스피 (KOSPI200)</button>
-    </div>
-    <div class="toolbtns">
-      <button class="tbtn on" id="colorBtn">초입 단계별</button>
-      <button class="tbtn on" id="heldBtn">보유 표시</button>
-      <button class="tbtn on" id="candBtn">후보 표시</button>
-      <button class="tbtn on" id="lblBtn">라벨 표시</button>
-      <button class="tbtn on" id="emBtn">실적 표시</button>
-    </div>
-    <div class="legend" id="legend"></div>
-  </div>
-
-  <div class="qkey">
-    <div class="qk" data-q="①"><div class="h" style="color:var(--a-dawn)">① 알파 (우상)</div><div class="d">단기·중기 모두 벤치마크 아웃퍼폼. 능동 보유가 정당화되는 칸.<span class="qk-ex"></span></div></div>
-    <div class="qk" data-q="②"><div class="h" style="color:var(--a-accel)">② 중기 알파 (우하)</div><div class="d">단기는 지수 이하지만 3개월 아웃퍼폼(1Y runway 중심).<span class="qk-ex"></span></div></div>
-    <div class="qk" data-q="④"><div class="h" style="color:var(--a-mature)">④ 단기만 (좌상)</div><div class="d">단기 아웃퍼폼·중기 이하.<span class="qk-ex"></span></div></div>
-    <div class="qk" data-q="③"><div class="h" style="color:var(--a-hot)">③ 벤치마크 이하 (좌하)</div><div class="d">능동 보유 이유가 약한 칸. 점선(현금)보다 아래면 현금만도 못함.<span class="qk-ex"></span></div></div>
-  </div>
-
-  <div class="foot">
-    <b>알파 도출:</b> 베타(고변동 AI주)×모멘텀/카탈리스트 + runway − 지수 기대. 평균회귀(많이올라서↓/떨어져서↑) 미사용. MRVL 5/27·MU 6월말 실적, 삼성 HBM4 6월 공급 반영. 모두 <b>추정치</b>.<br>
-    <b>이중 벤치마크 주의:</b> 코스피 기준은 (지수 스프레드)+(자기 시장 조정)을 반영한 추정. 채권혼합의 음(−)알파는 설계상 정상(방어자산). 의사결정 지원용, 매매 권유 아님 · 기준일 2026-05-24 KST.
-  </div>
-
-  <hr class="a-sep">
-
-  <div class="eops" id="earnOps"></div>
-
-  <hr class="a-sep">
-
-  <div class="wl" id="watch"></div>
-
-  <hr class="a-sep">
-
-<div id="mxRoot">
+<div id="mxRoot" style="margin-top:42px;border-top:1px solid var(--line);padding-top:34px">
 <div class="mx-header">
  <div class="mx-kick">初入 Observatory · 8-Layer × Transition Flows</div>
  <h1>8레이어 × <em>5단계 전환흐름</em> 매트릭스</h1>
@@ -985,6 +895,95 @@ table.tk th.c{text-align:center}
  <div class="mx-disc">※ 현황=현재 하는 것 / 향후 전략=아직 안 하지만 할 것. 빠르게 바뀌는 개별 제품·실적 수치는 별도 검증 권장. 본 자료는 의사결정 지원용이며 매수·매도 권유가 아님. 데이터 기준일 2026-05-25.</div>
 </div>
 </div>
+
+</section>
+
+<!-- 03 MAP -->
+<section class="view" id="v-map">
+  <div class="vhead"><div class="vkick">Dawn Map · 주가 사이클 S-커브</div>
+    <h1 class="vtitle">지금 <em>여명</em> 구간에 선 후보는?</h1>
+    <p class="vsub">가로축=테마 성숙도(좌:태동→우:과열). 여명 밴드(초입)에 든 종목이 빛납니다. 점을 누르면 상세. ★ 보유 종목은 테두리로 표시.</p></div>
+  <div class="legend" id="legendMap"></div>
+  <div class="map-card"><svg id="scurve" viewBox="0 0 1180 620" preserveAspectRatio="xMidYMid meet"></svg></div>
+  <div class="vkick" style="margin:34px 0 4px">강물 2~4 · 독립 forcing function</div>
+  <p class="vsub" style="margin:0 0 4px">강물 1(위)은 종목으로 투영. 강물 2~4는 각 가치사슬 마디를 같은 S-커브에 얹어, 어느 마디가 <em>여명(초입)</em>에 있는지 봅니다. 점에 올리면 근거·후보.</p>
+  <div id="mapRivers"></div>
+</section>
+
+<!-- 04 PORTFOLIO -->
+<section class="view" id="v-port">
+  <div class="vhead"><div class="vkick">Portfolio X-ray · thesis vs book</div>
+    <h1 class="vtitle">자본은 <em>현재 병목</em>에 80% — 다음 병목엔?</h1>
+    <p class="vsub">5/16 자산현황(총 898M) 기준, 보유를 8레이어에 투영. 핵심 질문: 당신이 "다음 병목"이라 지목한 곳에 자본이 가 있는가.</p></div>
+  <div class="xray-hero" id="xrayHero"></div>
+  <div id="portBars"></div>
+  <div class="pclass" id="portClass"></div>
+</section>
+
+<!-- 05 TRACKER -->
+<section class="view" id="v-tracker">
+  <div class="vhead"><div class="vkick">Tracker · 초입 5신호</div>
+    <h1 class="vtitle">분기마다 <em>5신호</em>를 채점</h1>
+    <p class="vsub">병목 역추적 · Beat&Raise 첫 분기 · backlog visibility · mix shift 공식발표 · 차트 베이스 돌파 — 각 0/1/2점. 합산이 초입 확신도. 셀 클릭으로 채점, 자동 저장.</p></div>
+  <div class="tk-tools">
+    <select class="sel" id="sortSel"><option value="score">정렬: 초입점수↓</option><option value="maturity">정렬: 성숙도↑(덜오른순)</option><option value="layer">정렬: 레이어</option></select>
+    <select class="sel" id="filterSel"><option value="all">전체 단계</option><option value="태동">태동</option><option value="초입">초입</option><option value="가속">가속</option><option value="성숙">성숙</option></select>
+    <span class="tk-count" id="tkCount"></span>
+  </div>
+  <table class="tk"><thead><tr><th>후보 / 레이어</th>
+    <th class="c">S1 병목</th><th class="c">S2 B&R</th><th class="c">S3 가시성</th><th class="c">S4 mix</th><th class="c">S5 차트</th>
+    <th class="c">점수</th><th class="c">단계</th><th class="c">점검일</th><th></th></tr></thead>
+    <tbody id="tkBody"></tbody></table>
+  <div class="foot" id="storeFoot"></div>
+</section>
+
+<!-- 05 ALPHA MAP -->
+<section class="view on" id="v-alpha">
+  <div class="kick">初入 Observatory · Alpha Map</div>
+  <h1>보유종목 4사분면 — 벤치마크 대비 알파</h1>
+
+  <div class="card">
+    <svg id="plot" viewBox="0 0 860 470" preserveAspectRatio="xMidYMid meet"></svg>
+  </div>
+
+  <div class="benchrow toolbar">
+    <span class="lab">벤치마크</span>
+    <div class="seg" id="benchSeg">
+      <button data-b="NASDAQ" class="on">나스닥 (QQQ)</button>
+      <button data-b="KOSPI">코스피 (KOSPI200)</button>
+    </div>
+    <div class="toolbtns">
+      <button class="tbtn on" id="colorBtn">초입 단계별</button>
+      <button class="tbtn on" id="heldBtn">보유 표시</button>
+      <button class="tbtn on" id="candBtn">후보 표시</button>
+      <button class="tbtn on" id="lblBtn">라벨 표시</button>
+      <button class="tbtn on" id="emBtn">실적 표시</button>
+    </div>
+    <div class="legend" id="legend"></div>
+  </div>
+
+  <div class="qkey">
+    <div class="qk" data-q="①"><div class="h" style="color:var(--a-dawn)">① 알파 (우상)</div><div class="d">단기·중기 모두 벤치마크 아웃퍼폼. 능동 보유가 정당화되는 칸.<span class="qk-ex"></span></div></div>
+    <div class="qk" data-q="②"><div class="h" style="color:var(--a-accel)">② 중기 알파 (우하)</div><div class="d">단기는 지수 이하지만 3개월 아웃퍼폼(1Y runway 중심).<span class="qk-ex"></span></div></div>
+    <div class="qk" data-q="④"><div class="h" style="color:var(--a-mature)">④ 단기만 (좌상)</div><div class="d">단기 아웃퍼폼·중기 이하.<span class="qk-ex"></span></div></div>
+    <div class="qk" data-q="③"><div class="h" style="color:var(--a-hot)">③ 벤치마크 이하 (좌하)</div><div class="d">능동 보유 이유가 약한 칸. 점선(현금)보다 아래면 현금만도 못함.<span class="qk-ex"></span></div></div>
+  </div>
+
+  <div class="foot">
+    <b>알파 도출:</b> 베타(고변동 AI주)×모멘텀/카탈리스트 + runway − 지수 기대. 평균회귀(많이올라서↓/떨어져서↑) 미사용. MRVL 5/27·MU 6월말 실적, 삼성 HBM4 6월 공급 반영. 모두 <b>추정치</b>.<br>
+    <b>이중 벤치마크 주의:</b> 코스피 기준은 (지수 스프레드)+(자기 시장 조정)을 반영한 추정. 채권혼합의 음(−)알파는 설계상 정상(방어자산). 의사결정 지원용, 매매 권유 아님 · 기준일 2026-05-24 KST.
+  </div>
+
+  <hr class="a-sep">
+
+  <div class="eops" id="earnOps"></div>
+
+  <hr class="a-sep">
+
+  <div class="wl" id="watch"></div>
+
+  <hr class="a-sep">
+  <div class="siglog" id="signalLog"></div>
 
   <div class="atip" id="alphaTip"></div>
 </section>
