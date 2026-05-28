@@ -1146,6 +1146,16 @@ const CASCADES=[
    {n:'연료전지 · 온사이트',why:'오프그리드 캠퍼스(Meta Columbus)',mult:'BYOP 모델 확산',cos:'Bloom',stage:'초입',cand:'be'},
    {n:'부지 4박자 희소성(α)',why:'급수권+인접송전+zoning+수용성 동시 충족',mult:'전력 단일변수 아님',cos:'(Sharpe 가설 · 리서치 영역)',stage:'태동',cand:null},
   ]},
+ /* 피지컬 AI (THREAD 꼬리) */
+ {key:'physical',driver:'피지컬 AI(휴머노이드·산업로봇)',layer:'기타',stage:'태동',
+  trigger:'추론이 디지털→물리로 이행. 단 양산 전이라 상향할 EPS 부재 → 한국 부품 소형주 1년 +300~780%는 순수 내러티브(추격 경고). ⚑',
+  primary:{label:'실펀더멘털 프록시(EPS 상향 동반)',ex:'테라다인(반도체테스트+UR) · 화낙 · 테슬라(Optimus 옵션)'},
+  nodes:[
+   {n:'로봇두뇌 NPU·온디바이스 AI',why:'추론 엣지 이행 = river① 꼬리',mult:'엣지 추론 콘텐츠↑',cos:'오픈엣지·텔레칩스·QCOM',stage:'태동',cand:'qcom'},
+   {n:'센서·비전(3D 광학)',why:'로봇 눈·신경',mult:'⚑LG이노텍 +622% 선반영',cos:'LG이노텍·고영',stage:'태동',cand:null},
+   {n:'감속기·액추에이터',why:'제조원가 30~50%·관절 구동',mult:'⚑테마 급등·양산 전',cos:'에스피지·삼현·Harmonic Drive(6324)',stage:'태동',cand:'harm'},
+   {n:'물리AI 학습데이터(모방학습)',why:'river②의 피지컬 버전',mult:'UR×Scale AI AI Trainer',cos:'테라다인·(Scale 비상장)',stage:'태동',cand:'ter'},
+  ]},
 ];
 const SIGNALS=[
  ['S1','병목 역추적','상류 레이어 병목이 이 층으로 흘러올 구조 (AVGO·NVDA 콜 단서)'],
@@ -1294,6 +1304,13 @@ const C=[
   capex:{bull:'로보틱스·FSD 옵션 가치',base:'EV+에너지',bear:'EV 경쟁·밸류 변동'},
   thesis:'8레이어 하드웨어 스택 밖. 피지컬 AI(로보틱스) 옵션. 별도 트랙으로 관리.',
   kill:['Optimus 상용 후퇴','FSD 규제','EV 마진 압박'],S:{s1:1,s2:1,s3:1,s4:1,s5:1}},
+ /* 신규 후보 — 실펀더멘털만 */
+ {id:'ter',name:'테라다인',ticker:'TER',mkt:'NASDAQ',layer:'기타',stage:'가속',mat:.7,conv:.6,
+  sub:'반도체 테스트(79%) → 광/포토닉스 테스트 → 로보틱스(UR·MiR 10%)',compete:'반도체 테스트 + 피지컬AI 옵션',
+  up:{l:'L4',d:'중'},down:{l:'L2',d:'강'},
+  capex:{bull:'AI 테스트 복잡도↑·로보틱스 옵션·포토닉스 테스트(L6)',base:'테스트 사이클',bear:'YTD +106%·테스트 시클리컬·로보틱스 비중 작음'},
+  thesis:'기사 휴머노이드 묶음 중 유일하게 EPS 상향 동반(2026E +58%). 본질은 반도체 테스트(실펀더멘털)+로보틱스/포토닉스 옵션. 단 이미 급등·초입 아님 → 워치',
+  kill:['테스트 capex 둔화','로보틱스 성장 정체','고밸류 디레이팅'],S:{s1:2,s2:1,s3:1,s4:1,s5:1}},
 ];
 
 /* ===== STATE / STORE ===== */
