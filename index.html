@@ -286,7 +286,7 @@ table.tk th.c{text-align:center}
 .rcand-panel{background:linear-gradient(155deg,var(--panel),var(--ink2));border:1px solid var(--line);border-radius:18px;padding:20px 18px;margin-bottom:18px}
 .rcand-panel .ph{font-family:var(--serif);font-size:17px;font-weight:700}
 .rcand-panel .psub{font-family:var(--mono);font-size:13px;color:var(--faint);margin-bottom:14px}
-.rcand-row{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-bottom:12px}
+.rcand-row{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;margin-bottom:12px}
 .rcand-row .rcand{margin-bottom:0}
 .rcand{display:grid;grid-template-columns:22px 1fr;gap:9px;padding:10px 11px;border:1px solid var(--line);border-left-width:3px;border-radius:11px;background:var(--panel);margin-bottom:8px;transition:.18s}
 .rcand:hover{border-color:var(--line2);transform:translateY(-1px)}
@@ -535,22 +535,22 @@ table.tk th.c{text-align:center}
 <section class="view" id="v-thread">
   <div class="vhead">
     <h1 class="vtitle">병목은 <em>이동</em>한다 — 그 앞단에 알파가 있다</h1>
-    <p class="vsub">학습→추론 전환은 단발 이벤트가 아니라 <b>capex 병목이 컴퓨트에서 메모리·광·전력으로 흘러가는 강물</b>입니다.</p></div>
+    <p class="vsub">학습→추론 전환은 단발 이벤트가 아니라 <b>여러 독립 forcing function(강물)</b>이 동시에 흐르는 구조입니다. 강물 후보를 누르면 그 강물의 S-커브(성숙→초입)가 펼쳐집니다.</p></div>
   <aside class="rcand-panel">
       <div class="ph">새로운 강물 후보</div>
-      <div class="psub">독립 강물 4 (1~4) + 후보군 1 (5) · 서로 비종속(MECE)</div>
+      <div class="psub">독립 강물 5 (1~5) + 후보군 1 (6) · 서로 비종속(MECE)</div>
       <div class="rcand-row">
-      <div class="rcand active" data-r="0"><div class="num">1</div><div><div class="riv">학습<span class="ar">→</span>추론<span class="tier" style="background:var(--panel2);color:var(--dim)">현재</span></div><div class="axis">워크로드 · A의 사슬 소유</div></div></div>
-      <div class="rcand" data-r="1" style="border-left-color:var(--line2)"><div class="num">2</div><div><div class="riv">데이터<span class="ar">→</span>RL·합성<span class="tier" style="background:var(--panel2);color:var(--dim)">A</span></div><div class="axis">모델 연료 · 입력</div></div></div>
-      <div class="rcand" data-r="2" style="border-left-color:var(--line2)"><div class="num">3</div><div><div class="riv">임대<span class="ar">→</span>주권·뉴클라우드<span class="tier" style="background:var(--panel2);color:var(--dim)">B</span></div><div class="axis">소유·자본 · 누가</div></div></div>
-      <div class="rcand" data-r="3" style="border-left-color:var(--line2)"><div class="num">4</div><div><div class="riv">스케일<span class="ar">→</span>효율<span class="tier" style="background:var(--panel2);color:var(--dim)">B</span></div><div class="axis">지능 단가 · Jevons</div></div></div>
-      <div class="rcand rcand-merged" style="border-left-color:var(--faint)"><div class="num">5</div><div><div class="riv" style="color:var(--faint);margin-bottom:5px">후보군</div>
-        <div class="m-line"><span class="riv">디지털<span class="ar">→</span>피지컬<span class="tier" style="background:var(--panel2);color:var(--dim)">C</span></span></div>
-        <div class="m-line"><span class="riv">자유배포<span class="ar">→</span>거버넌스<span class="tier" style="background:var(--panel2);color:var(--dim)">B</span></span></div>
-        <div class="m-line"><span class="riv" style="color:var(--dim)">중앙<span class="ar" style="color:var(--faint)">→</span>엣지·분산<span class="tier" style="background:rgba(150,161,176,.14);color:var(--faint)">경계</span></span></div>
+      <div class="rcand active" data-r="0"><div class="num">1</div><div><div class="riv">학습<span class="ar">→</span>추론<span class="tier" style="background:#0ca67822;color:#0ca678">현재</span></div><div class="axis">워크로드 · A의 사슬 소유</div></div></div>
+      <div class="rcand" data-r="1" style="border-left-color:var(--line2)"><div class="num">2</div><div><div class="riv">데이터<span class="ar">→</span>RL·합성<span class="tier" style="background:#1c7ed622;color:#1c7ed6">A</span></div><div class="axis">모델 연료 · 입력</div></div></div>
+      <div class="rcand" data-r="2" style="border-left-color:var(--line2)"><div class="num">3</div><div><div class="riv">임대<span class="ar">→</span>주권·뉴클라우드<span class="tier" style="background:#b8860b22;color:#b8860b">B</span></div><div class="axis">소유·자본 · 누가</div></div></div>
+      <div class="rcand" data-r="3" style="border-left-color:var(--line2)"><div class="num">4</div><div><div class="riv">스케일<span class="ar">→</span>효율<span class="tier" style="background:#b8860b22;color:#b8860b">B</span></div><div class="axis">지능 단가 · Jevons</div></div></div>
+      <div class="rcand" data-r="4" style="border-left-color:var(--line2)"><div class="num">5</div><div><div class="riv">디지털<span class="ar">→</span>피지컬<span class="tier" style="background:#7048e822;color:#7048e8">C</span></div><div class="axis">로봇 · 액추에이터</div></div></div>
+      <div class="rcand rcand-merged" data-r="5" style="border-left-color:var(--faint);border-style:dashed"><div class="num">6</div><div><div class="riv" style="margin-bottom:5px">후보군<span class="tier" style="background:#868e9622;color:#868e96">경계</span></div>
+        <div class="m-line"><span class="riv">자유배포<span class="ar">→</span>거버넌스<span class="tier" style="background:#b8860b22;color:#b8860b">B</span></span></div>
+        <div class="m-line"><span class="riv" style="color:var(--dim)">중앙<span class="ar" style="color:var(--faint)">→</span>엣지·분산<span class="tier" style="background:#868e9622;color:#868e96">경계</span></span></div>
       </div></div>
       </div>
-      <div class="psub" style="margin:12px 0 0;line-height:1.6">A 비합의 · B 반비합의 · C 합의화 중 · 경계=부분 종속. <b style="color:var(--dawn)">1~4</b>는 서로 비종속(독립 forcing function), <b>5</b>는 후보군(보조·경계)으로 묶음.</div>
+      <div class="psub" style="margin:12px 0 0;line-height:1.6">A 비합의 · B 반비합의 · C 합의화 중 · 경계=부분 종속. <b style="color:var(--dawn)">1~5</b>는 서로 비종속(독립 forcing function), <b>6</b>은 후보군(보조·경계)으로 묶음.</div>
     </aside>
     <div class="thread-card">
       <svg class="thread-svg" id="threadSvg" viewBox="0 0 1240 270" preserveAspectRatio="xMidYMid meet"></svg>
@@ -1088,6 +1088,23 @@ const RIVERS=[
    {code:'전용칩',label:'추론 전용 실리콘',sub:'LPU·웨이퍼스케일',stage:'초입',pos:.42,why:'추론 단가의 다음 곡선 = 전용 가속기 (토큰/와트). 단 NVDA가 Groq LPU 라이선스+acquihire로 SRAM 추론 위협 내재화',plays:'Cerebras(CBRS·상장) · SambaNova · 커스텀 ASIC (Groq는 NVDA 내재화)'},
    {code:'엣지',label:'엣지·온디바이스',sub:'폰·PC·글래스',stage:'초입',pos:.28,why:'추론이 단말로 — 단가↓·지연↓, mix shift (삼성 글래스 올가을·Gemini Omni 온디바이스)',plays:'QCOM · AAPL · 삼성 글래스 · 온디바이스 NPU'},
    {code:'수요',label:'Jevons 수요폭증',sub:'토큰 소비↑',stage:'가속',pos:.18,why:'단가↓ → 총 토큰 소비 폭증 → 컴퓨트 수요 환류(역설)',plays:'전 스택 되먹임 — 강물 1로 회귀'},
+  ]},
+ {n:5,title:'디지털→피지컬',consensus:'C',frontCodes:['액추'],
+  front:'현재 전선(front): 휴머노이드 액추에이터',
+  note:'산업용 로봇·자율주행은 진행 중. 강물의 머리는 <b style="color:var(--dawn)">휴머노이드 액추에이터·엣지 추론</b>을 지나 <b style="color:var(--nascent)">휴머노이드 양산 통합</b>으로 — 피지컬 AI가 부품 수요로 환산되는 축.',
+  nodes:[
+   {code:'산업',label:'산업용 로봇·자동화',sub:'팩토리 오토메이션',stage:'성숙',pos:.88,why:'기존 산업 로봇 — 성숙 시장, AI는 점진 침투',plays:'FANUC · ABB 등 (성숙·선반영)'},
+   {code:'FSD',label:'자율주행·FSD',sub:'비전 실세계추론',stage:'가속',pos:.66,why:'비전 기반 실세계 추론 — 데이터 플라이휠이 해자',plays:'Tesla FSD (TSLA) · 자율주행 스택'},
+   {code:'엣지',label:'엣지 추론 실리콘',sub:'온디바이스 두뇌',stage:'가속',pos:.5,why:'피지컬 AI의 두뇌 = 온디바이스 추론 칩(저지연·저전력)',plays:'QCOM · 온디바이스 NPU'},
+   {code:'액추',label:'휴머노이드 액추에이터',sub:'관절·정밀감속기',stage:'초입',pos:.34,why:'1대당 관절 다수 = 비선형 부품 수요(현재 전선) — 감속기·모터·센서',plays:'Harmonic Drive · 정밀 감속기·액추에이터 (대부분 미상장)'},
+   {code:'통합',label:'휴머노이드 통합',sub:'양산 전',stage:'태동',pos:.14,why:'Optimus·Figure 등 — 통합·양산은 아직 전(前)단계',plays:'TSLA Optimus · Figure · 1X (미상장 다수)'},
+  ]},
+ {n:6,title:'후보군',consensus:'경계',kind:'cand',frontCodes:[],
+  front:'보조·경계 — 종목 미매핑(관찰만)',
+  note:'독립 강물(1~5)과 달리 <b>부분 종속·경계</b> 영역. 종목 매핑이 약해 <b>관찰 로그</b>로만 추적: 오픈웨이트 거버넌스 · 중앙↔엣지 분산.',
+  nodes:[
+   {code:'거버넌스',label:'자유배포→거버넌스',sub:'규제·라이선스',stage:'태동',pos:.6,why:'오픈웨이트 자유배포 → 규제·라이선스·거버넌스 (B 반비합의)',plays:'(리서치 영역 · 미매핑)'},
+   {code:'분산',label:'중앙→엣지·분산',sub:'추론 위치 이동',stage:'태동',pos:.32,why:'중앙 클라우드 추론 → 엣지·온디바이스·분산 (경계, L7/L8 부분종속)',plays:'(리서치 영역 · 미매핑)'},
   ]},
 ];
 /* 파생 캐스케이드: 드라이버 ×10 → 함께 폭증하는 파생 가치사슬. cand=탐색기 후보 id
