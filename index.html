@@ -330,6 +330,15 @@ table.tk th.c{text-align:center}
 #v-alpha .tbtn:hover{border-color:var(--a-brand)}
 #v-alpha .tbtn.on{color:var(--a-brand);border-color:var(--a-brand);background:rgba(18,87,214,.06)}
 #v-alpha .legend{display:flex;gap:3px 9px;flex-wrap:wrap;font-size:11px;color:var(--a-dim);margin-left:auto}
+#v-alpha .snaprow{display:flex;justify-content:flex-end;align-items:center;gap:6px;margin:8px 2px 0}
+#v-alpha .snapsel{display:flex;align-items:center;gap:6px}
+#v-alpha .snapsel .lab{font-size:11px;color:var(--a-dim)}
+#v-alpha .snapsel select{font-family:var(--mono);font-size:11.5px;font-weight:700;color:var(--a-brand);background:#fff;border:1.5px solid var(--a-line);border-radius:7px;padding:5px 9px;cursor:pointer;transition:.15s}
+#v-alpha .snapsel select:hover{border-color:var(--a-brand)}
+#v-alpha .snapsel.hist select{color:#b8860b;border-color:#b8860b;background:rgba(184,134,11,.06)}
+#v-alpha .snap-reason{margin:8px 2px 0;padding:10px 12px;border-left:3px solid #b8860b;background:rgba(184,134,11,.06);border-radius:0 8px 8px 0;font-size:12px;line-height:1.55;color:var(--a-dim)}
+#v-alpha .snap-reason b{color:var(--a-fg,#2c2c2c);font-size:12px}
+#v-alpha .snap-reason[hidden]{display:none}
 #v-alpha .lg{display:inline-flex;align-items:center;gap:5px}
 #v-alpha .dot{width:9px;height:9px;border-radius:50%}
 #v-alpha .card{background:var(--a-surface);border:1.5px solid var(--a-line);border-radius:14px;padding:18px;position:relative;overflow:hidden;transition:.15s}
@@ -947,6 +956,14 @@ table.tk th.c{text-align:center}
   <div class="card">
     <svg id="plot" viewBox="0 0 860 470" preserveAspectRatio="xMidYMid meet"></svg>
   </div>
+
+  <div class="snaprow">
+    <div class="snapsel" id="snapSel">
+      <span class="lab">시점</span>
+      <select id="snapPick"></select>
+    </div>
+  </div>
+  <div class="snap-reason" id="snapReason" hidden></div>
 
   <div class="benchrow toolbar">
     <span class="lab">벤치마크</span>
@@ -1887,6 +1904,8 @@ const CASH={NASDAQ:[-0.3,-2.5],KOSPI:[-0.5,-4]};
 const BNOTE={NASDAQ:'기준선=나스닥(QQQ). 각 종목의 raw 초과수익.',KOSPI:'기준선=코스피. 나스닥 대비 전 종목 동일하게 평행이동 → 순위·간격 불변, 원점만 이동.'};
 
 let bench='NASDAQ',mode='stage',showLabels=true,selected=null,showCand=true,showHeld=true,showEM=true;
+// 4사분면 시점 스냅샷: snapIdx<0 = 현재(라이브), 그 외 = SNAPS[snapIdx] 과거 배치 재현.
+let SNAPS=[],snapIdx=-1;
 // raw 알파: 벤치마크 변경 = 전 종목 동일 상수 Δ 평행이동(순위·간격 불변).
 // Δ = (코스피 수익률 − 나스닥 수익률) = 현금알파의 차이(현금선과 일치). y1은 근사 상수.
 const DELTA=[+(CASH.NASDAQ[0]-CASH.KOSPI[0]).toFixed(2),+(CASH.NASDAQ[1]-CASH.KOSPI[1]).toFixed(2),3.5];
@@ -1953,11 +1972,11 @@ function draw(){
    if(d.cand)c.setAttribute('stroke-dasharray','3 3');svg.appendChild(c);
    // 실적 임박(D-3~D-Day): 점 둘레에 펄스 링 = 블링킹. EM date 기준 0~3일.
    const emI=EM[d.t];
-   if(showEM&&emI&&emI.date){const di=Math.ceil((new Date(emI.date+'T00:00:00')-Date.now())/864e5);
+   if(showEM&&snapIdx<0&&emI&&emI.date){const di=Math.ceil((new Date(emI.date+'T00:00:00')-Date.now())/864e5);
      if(di>=0&&di<=3){const ring=el('circle',{cx:x,cy:y,r:r+2,class:'em-pulse'});svg.insertBefore(ring,c);}}
    // 실적: expected move 크기를 SVG 번개 path의 색·크기로 인코딩. 다음주(wk) 실적은 수치 라벨도.
    const em=EM[d.t];
-   if(showEM&&(em||d.flag)){
+   if(showEM&&snapIdx<0&&(em||d.flag)){
      const pct=em?em.pct:0;
      drawBolt(x+r,y-r,pct);
      if(em&&em.axis==='wk'){const t2=el('text',{x:x+r+8,y:y-r+3,fill:emColor(pct),'font-size':10.5,'font-weight':800});t2.textContent=`±${em.pct}%`;t2.style.pointerEvents='none';svg.appendChild(t2);}
@@ -2121,18 +2140,50 @@ document.getElementById('candBtn').addEventListener('click',function(){showCand=
  if(!showCand&&selected!=null&&D[selected].cand){selected=null;hideTip();}draw();renderWatch();});
 document.getElementById('lblBtn').addEventListener('click',function(){showLabels=!showLabels;this.classList.toggle('on',showLabels);this.textContent=showLabels?'라벨 표시':'라벨 끄기';applyLabels();});
 document.getElementById('emBtn').addEventListener('click',function(){showEM=!showEM;this.classList.toggle('on',showEM);this.textContent=showEM?'실적 표시':'실적 끄기';draw();});
+
+// ===== 4사분면 시점 스냅샷 =====
+// 라이브 머지값을 d._aN/_aK/_stage로 보존 → 과거 스냅샷 본 뒤 '현재'로 복원 가능.
+function captureLive(){D.forEach(d=>{d._aN=d.aN.slice();d._aK=d.aK.slice();d._stage=d.stage;});}
+function applySnap(){
+ const sel=document.getElementById('snapSel'),r=document.getElementById('snapReason');
+ if(snapIdx<0){
+   D.forEach(d=>{if(d._aN){d.aN=d._aN.slice();d.aK=d._aK.slice();d.stage=d._stage;}});
+   if(sel)sel.classList.remove('hist'); if(r){r.hidden=true;r.innerHTML='';}
+ }else{
+   const s=SNAPS[snapIdx];
+   D.forEach(d=>{const p=s&&s.pos&&s.pos[d.n];
+     if(p){d.aN=(p.aN||d._aN).slice();d.aK=(p.aK||d._aK).slice();if(p.stage)d.stage=p.stage;}
+     else if(d._aN){d.aN=d._aN.slice();d.aK=d._aK.slice();d.stage=d._stage;}});
+   if(sel)sel.classList.add('hist');
+   if(r){r.hidden=false;r.innerHTML=`<b>${(s.label||s.asOf)} · 갱신 사유</b><br>${s.reason||'(사유 미기재)'}`;}
+ }
+ selected=null;hideTip();draw();renderWatch();
+}
+function initSnapSel(){
+ const sel=document.getElementById('snapPick');if(!sel)return;
+ let html='<option value="-1">현재 (라이브)</option>';
+ for(let i=SNAPS.length-1;i>=0;i--){const s=SNAPS[i];html+=`<option value="${i}">${s.label||s.asOf}</option>`;}
+ sel.innerHTML=html;sel.value='-1';snapIdx=-1;
+ sel.addEventListener('change',()=>{snapIdx=+sel.value;applySnap();});
+}
+// 콘솔에서 호출 → 현재 라이브 배치를 스냅샷 형식 JSON으로 출력(snapshots.json에 붙여넣기용).
+window.dumpSnap=function(){const pos={};D.forEach(d=>{pos[d.n]={aN:(d._aN||d.aN),aK:(d._aK||d.aK),stage:(d._stage||d.stage)};});
+ const o={asOf:new Date().toISOString().slice(0,10),label:'',reason:'',pos};const t=JSON.stringify(o,null,1);console.log(t);return t;};
+
 document.addEventListener('click',e=>{if(!e.target.closest('.bub')&&!e.target.closest('.cashdot')&&!e.target.closest('.seg')&&!e.target.closest('.wl-item')&&!e.target.closest('.tbtn')){selected=null;hideTip();unhighlight();markWatch();}},true);
 
 // 3층 병합: 자동(alpha.json) → 실적(earnings.json) → 판단(judgment.json, 마지막에 덮어씀). 없으면 폴백.
 function paint(){renderLegend();draw();renderWatch();renderEarnOps();}
 const getJSON=u=>fetch(u,{cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null);
-Promise.all([getJSON('alpha.json'),getJSON('earnings.json'),getJSON('judgment.json')]).then(([j,e,g])=>{
+Promise.all([getJSON('alpha.json'),getJSON('earnings.json'),getJSON('judgment.json'),getJSON('snapshots.json')]).then(([j,e,g,sn])=>{
  // 1) 자동(alpha.json) — 모멘텀 휴리스틱
  const q=j&&j.quotes;if(q)D.forEach(d=>{const a=q[d.t];if(a){if(Array.isArray(a.aN))d.aN=a.aN;if(Array.isArray(a.aK))d.aK=a.aK;}});
  // 2) 실적 IV (earnings.json)
  if(e&&e.moves)EM=e.moves; if(e&&Array.isArray(e.playbook))EPLAY=e.playbook;
  // 3) 판단(judgment.json) — 자동 위에 마지막으로 덮어씀, null은 자동 유지
  const ov=g&&g.overrides;if(ov)D.forEach(d=>{const o=ov[d.t];if(o&&Array.isArray(o.aN))o.aN.forEach((v,k)=>{if(v!=null)d.aN[k]=v;});});
+ // 4) 시점 스냅샷(snapshots.json) — 라이브 머지 후 현재 배치를 보존하고 셀렉터 구성.
+ captureLive();SNAPS=(sn&&Array.isArray(sn.snapshots))?sn.snapshots:[];initSnapSel();
 }).finally(paint);
 })();
 </script>
