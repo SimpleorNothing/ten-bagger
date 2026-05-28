@@ -330,8 +330,7 @@ table.tk th.c{text-align:center}
 #v-alpha .tbtn:hover{border-color:var(--a-brand)}
 #v-alpha .tbtn.on{color:var(--a-brand);border-color:var(--a-brand);background:rgba(18,87,214,.06)}
 #v-alpha .legend{display:flex;gap:3px 9px;flex-wrap:wrap;font-size:11px;color:var(--a-dim);margin-left:auto}
-#v-alpha .snaprow{display:flex;justify-content:flex-end;align-items:center;gap:6px;margin:8px 2px 0}
-#v-alpha .snapsel{display:flex;align-items:center;gap:6px}
+#v-alpha .snapsel{display:flex;align-items:center;gap:6px;margin-left:14px}
 #v-alpha .snapsel .lab{font-size:11px;color:var(--a-dim)}
 #v-alpha .snapsel select{font-family:var(--mono);font-size:11.5px;font-weight:700;color:var(--a-brand);background:#fff;border:1.5px solid var(--a-line);border-radius:7px;padding:5px 9px;cursor:pointer;transition:.15s}
 #v-alpha .snapsel select:hover{border-color:var(--a-brand)}
@@ -957,14 +956,6 @@ table.tk th.c{text-align:center}
     <svg id="plot" viewBox="0 0 860 470" preserveAspectRatio="xMidYMid meet"></svg>
   </div>
 
-  <div class="snaprow">
-    <div class="snapsel" id="snapSel">
-      <span class="lab">시점</span>
-      <select id="snapPick"></select>
-    </div>
-  </div>
-  <div class="snap-reason" id="snapReason" hidden></div>
-
   <div class="benchrow toolbar">
     <span class="lab">벤치마크</span>
     <div class="seg" id="benchSeg">
@@ -979,7 +970,12 @@ table.tk th.c{text-align:center}
       <button class="tbtn on" id="emBtn">실적 표시</button>
     </div>
     <div class="legend" id="legend"></div>
+    <div class="snapsel" id="snapSel">
+      <span class="lab">시점</span>
+      <select id="snapPick"></select>
+    </div>
   </div>
+  <div class="snap-reason" id="snapReason" hidden></div>
 
   <div class="qkey">
     <div class="qk" data-q="①"><div class="h" style="color:var(--a-dawn)">① 알파 (우상)</div><div class="d">단기·중기 모두 벤치마크 아웃퍼폼. 능동 보유가 정당화되는 칸.<span class="qk-ex"></span></div></div>
