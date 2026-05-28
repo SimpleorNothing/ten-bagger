@@ -330,11 +330,14 @@ table.tk th.c{text-align:center}
 #v-alpha .tbtn:hover{border-color:var(--a-brand)}
 #v-alpha .tbtn.on{color:var(--a-brand);border-color:var(--a-brand);background:rgba(18,87,214,.06)}
 #v-alpha .legend{display:flex;gap:3px 9px;flex-wrap:wrap;font-size:11px;color:var(--a-dim);margin-left:auto}
-#v-alpha .snapsel{display:flex;align-items:center;gap:6px;margin-left:14px}
+#v-alpha .snapsel{display:flex;align-items:center;gap:4px;margin-left:14px}
 #v-alpha .snapsel .lab{font-size:11px;color:var(--a-dim)}
-#v-alpha .snapsel select{font-family:var(--mono);font-size:11.5px;font-weight:700;color:var(--a-brand);background:#fff;border:1.5px solid var(--a-line);border-radius:7px;padding:5px 9px;cursor:pointer;transition:.15s}
-#v-alpha .snapsel select:hover{border-color:var(--a-brand)}
-#v-alpha .snapsel.hist select{color:#b8860b;border-color:#b8860b;background:rgba(184,134,11,.06)}
+#v-alpha .snapnav{font-family:var(--mono);font-size:15px;font-weight:700;line-height:1;color:var(--a-brand);background:#fff;border:1.5px solid var(--a-line);border-radius:7px;width:26px;height:26px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.15s;padding:0}
+#v-alpha .snapnav:hover:not(:disabled){border-color:var(--a-brand);background:rgba(28,126,214,.06)}
+#v-alpha .snapnav:disabled{opacity:.3;cursor:default}
+#v-alpha .snapcur{font-family:var(--mono);font-size:11.5px;font-weight:700;color:var(--a-brand);min-width:108px;text-align:center;padding:0 4px}
+#v-alpha .snapsel.hist .snapcur{color:#b8860b}
+#v-alpha .snapsel.hist .snapnav{color:#b8860b;border-color:#b8860b;background:rgba(184,134,11,.06)}
 #v-alpha .snap-reason{margin:8px 2px 0;padding:10px 12px;border-left:3px solid #b8860b;background:rgba(184,134,11,.06);border-radius:0 8px 8px 0;font-size:12px;line-height:1.55;color:var(--a-dim)}
 #v-alpha .snap-reason b{color:var(--a-fg,#2c2c2c);font-size:12px}
 #v-alpha .snap-reason[hidden]{display:none}
@@ -972,7 +975,9 @@ table.tk th.c{text-align:center}
     <div class="legend" id="legend"></div>
     <div class="snapsel" id="snapSel">
       <span class="lab">시점</span>
-      <select id="snapPick"></select>
+      <button type="button" class="snapnav" id="snapPrev" aria-label="이전 시점(←)" title="이전 시점 (← 키)">‹</button>
+      <span class="snapcur" id="snapCur" aria-live="polite">현재 (라이브)</span>
+      <button type="button" class="snapnav" id="snapNext" aria-label="다음 시점(→)" title="다음 시점 (→ 키)">›</button>
     </div>
   </div>
   <div class="snap-reason" id="snapReason" hidden></div>
@@ -2161,15 +2166,40 @@ function applySnap(){
    if(sel)sel.classList.add('hist');
    if(r){r.hidden=false;r.innerHTML=`<b>${(s.label||s.asOf)} · 갱신 사유</b><br>${s.reason||'(사유 미기재)'}`;}
  }
- selected=null;hideTip();draw();renderWatch();
+ selected=null;hideTip();draw();renderWatch();renderSnapNav();
+}
+// 시점 = SNAPS[0](가장 과거) … SNAPS[n-1](최근) → 현재(라이브). view: 0..n, n=라이브.
+function renderSnapNav(){
+ const cur=document.getElementById('snapCur'),prev=document.getElementById('snapPrev'),next=document.getElementById('snapNext');
+ if(!cur)return;
+ const n=SNAPS.length,v=snapIdx<0?n:snapIdx;
+ cur.textContent=snapIdx<0?'현재 (라이브)':((SNAPS[snapIdx].label||SNAPS[snapIdx].asOf)+(n>0?` (${v+1}/${n})`:''));
+ if(prev)prev.disabled=(v<=0);
+ if(next)next.disabled=(v>=n);
+}
+function stepSnap(dir){
+ const n=SNAPS.length;let v=(snapIdx<0?n:snapIdx)+dir;
+ if(v<0)v=0;if(v>n)v=n;
+ const ni=(v>=n)?-1:v;
+ if(ni===snapIdx)return;
+ snapIdx=ni;applySnap();
 }
 function initSnapSel(){
- const sel=document.getElementById('snapPick');if(!sel)return;
- let html='<option value="-1">현재 (라이브)</option>';
- for(let i=SNAPS.length-1;i>=0;i--){const s=SNAPS[i];html+=`<option value="${i}">${s.label||s.asOf}</option>`;}
- sel.innerHTML=html;sel.value='-1';snapIdx=-1;
- sel.addEventListener('change',()=>{snapIdx=+sel.value;applySnap();});
+ snapIdx=-1;
+ const prev=document.getElementById('snapPrev'),next=document.getElementById('snapNext');
+ if(prev)prev.addEventListener('click',()=>stepSnap(-1));
+ if(next)next.addEventListener('click',()=>stepSnap(1));
+ renderSnapNav();
 }
+// 키보드 ←/→ : 알파맵이 보일 때만, 입력 포커스 아닐 때.
+document.addEventListener('keydown',e=>{
+ if(e.key!=='ArrowLeft'&&e.key!=='ArrowRight')return;
+ if(e.metaKey||e.ctrlKey||e.altKey)return;
+ const av=document.getElementById('v-alpha');if(!av||!av.classList.contains('on'))return;
+ const t=document.activeElement&&document.activeElement.tagName;
+ if(t==='INPUT'||t==='TEXTAREA'||t==='SELECT')return;
+ e.preventDefault();stepSnap(e.key==='ArrowLeft'?-1:1);
+});
 // 콘솔에서 호출 → 현재 라이브 배치를 스냅샷 형식 JSON으로 출력(snapshots.json에 붙여넣기용).
 window.dumpSnap=function(){const pos={};D.forEach(d=>{pos[d.n]={aN:(d._aN||d.aN),aK:(d._aK||d.aK),stage:(d._stage||d.stage)};});
  const o={asOf:new Date().toISOString().slice(0,10),label:'',reason:'',pos};const t=JSON.stringify(o,null,1);console.log(t);return t;};
