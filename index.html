@@ -450,28 +450,7 @@ table.tk th.c{text-align:center}
 #v-alpha .qk:hover{border-color:var(--a-brand);box-shadow:0 4px 18px rgba(18,87,214,.10)}
 #v-alpha .qk .h{font-size:15px;font-weight:800}
 #v-alpha .qk .d{font-size:13px;color:var(--a-dim);margin-top:3px;line-height:1.55}
-#v-alpha .wl{margin-top:18px}
-#v-alpha .wl-head{display:flex;align-items:baseline;gap:10px;margin:0 2px 10px}
-#v-alpha .wl-t{font-size:17px;font-weight:800;color:var(--a-txt)}
-#v-alpha .wl-s{font-size:13px;color:var(--a-faint)}
-#v-alpha .wl-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
-#v-alpha .wl-subh{font-size:13px;font-weight:700;color:var(--a-dim);margin:14px 2px 8px;display:flex;align-items:center;gap:6px}
-#v-alpha .wl-subh span{font-weight:700;color:var(--a-faint);background:var(--a-surface2);border:1.5px solid var(--a-line);border-radius:20px;padding:0 8px}
-#v-alpha .wl-item{display:grid;grid-template-columns:13px 1fr 22px 44px 40px 40px;align-items:center;gap:8px;
-  text-align:left;background:#fff;border:1.5px solid var(--a-line);border-left-width:3px;border-radius:12px;
-  padding:10px 12px;cursor:pointer;transition:.15s}
-#v-alpha .wl-item:hover{border-color:var(--a-brand);transform:translateY(-1px);box-shadow:0 4px 18px rgba(18,87,214,.10)}
-#v-alpha .wl-item.active{border-color:var(--a-brand);background:rgba(18,87,214,.06)}
-#v-alpha .wl-item.cand{border-style:dashed;background:transparent}
-#v-alpha .wl-item.cand .wl-name{font-weight:600}
-#v-alpha .wl-dot{width:11px;height:11px;border-radius:50%}
-#v-alpha .wl-name{font-size:13px;font-weight:700;color:var(--a-txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#v-alpha .wl-tk{font-size:11px;color:var(--a-faint);margin-left:5px;font-weight:500}
-#v-alpha .wl-q{font-size:13px;font-weight:800;text-align:center}
-#v-alpha .wl-w{font-size:12px;color:var(--a-dim);text-align:right}
-#v-alpha .wl-a{font-size:12px;font-weight:700;text-align:right;color:var(--a-faint)}
-#v-alpha .wl-a.pos{color:#0ca678}#v-alpha .wl-a.neg{color:#e03131}
-@media(max-width:640px){#v-alpha h1{font-size:24px}#v-alpha .legend{margin-left:0;width:100%}#v-alpha .qkey{grid-template-columns:1fr}#v-alpha .wl-grid{grid-template-columns:1fr}#v-alpha .bublab{font-size:13px}
+@media(max-width:640px){#v-alpha h1{font-size:24px}#v-alpha .legend{margin-left:0;width:100%}#v-alpha .qkey{grid-template-columns:1fr}#v-alpha .bublab{font-size:13px}
 #v-alpha .toolbtns{flex:1 1 100%;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:2px}
 #v-alpha .toolbtns .tbtn{flex:0 0 auto;font-size:12px;padding:6px 10px}}
 #v-alpha .eops{margin-top:18px;border:1.5px solid var(--a-line);border-radius:14px;background:var(--a-surface);padding:16px 18px}
@@ -1285,10 +1264,6 @@ table.tk th.c{text-align:center}
   <hr class="a-sep">
 
   <div class="eops" id="earnOps"></div>
-
-  <hr class="a-sep">
-
-  <div class="wl" id="watch"></div>
 
   <hr class="a-sep">
   <div class="siglog" id="signalLog"></div>
@@ -2329,7 +2304,7 @@ function draw(){
    c.addEventListener('mouseenter',()=>{showTip(d);highlight(i);});
    c.addEventListener('mousemove',moveTip);
    c.addEventListener('mouseleave',()=>{hideTip();applySel();});
-   c.addEventListener('click',e=>{selected=i;showTip(d);highlight(i);moveTip(e);markWatch();});
+   c.addEventListener('click',e=>{selected=i;showTip(d);highlight(i);moveTip(e);});
  });
  declutterLabels();applyLabels();applySel();
  updateQuadExamples();
@@ -2363,7 +2338,7 @@ function drawCash(){
  const c=el('circle',{cx,cy,r:9,fill:'rgba(148,165,180,.12)',stroke:'#94a5b4','stroke-width':1.6,'stroke-dasharray':'3 3',class:'cashdot',style:'cursor:pointer'});svg.appendChild(c);
  const t=el('text',{x:cx,y:cy+22,'text-anchor':'middle',class:'bublab',fill:'#5c6f7e','font-size':10.5,opacity:.78});t.textContent='현금 0%';svg.appendChild(t);
  c.addEventListener('mouseenter',showCash);c.addEventListener('mousemove',moveTip);c.addEventListener('mouseleave',hideTip);
- c.addEventListener('click',e=>{selected=null;unhighlight();markWatch();showCash();moveTip(e);});
+ c.addEventListener('click',e=>{selected=null;unhighlight();showCash();moveTip(e);});
 }
 const tip=document.getElementById('alphaTip');
 const cls=v=>v>0?'pos':v<0?'neg':'';
@@ -2410,41 +2385,6 @@ function declutterLabels(){
 }
 function positionTip(x,y){const tw=tip.offsetWidth,th=tip.offsetHeight;if(x+tw>innerWidth-8)x=innerWidth-tw-8;if(x<8)x=8;
  if(y+th>innerHeight-8)y=innerHeight-th-8;if(y<8)y=8;tip.style.left=x+'px';tip.style.top=y+'px';}
-function markWatch(){document.querySelectorAll('#watch .wl-item').forEach(b=>b.classList.toggle('active',+b.dataset.i===selected));}
-function selectIdx(i){
- if(selected===i){selected=null;hideTip();applySel();markWatch();return;}
- selected=i;const d=D[i];highlight(i);showTip(d);
- const c=svg.querySelector(`.bub[data-i="${i}"]`);
- if(c){const r=c.getBoundingClientRect();positionTip(r.right+12,r.top-6);}
- markWatch();document.querySelector('#v-alpha .card').scrollIntoView({behavior:'smooth',block:'nearest'});
-}
-function renderWatch(){
- const box=document.getElementById('watch'),bn=bench==='NASDAQ'?'나스닥':'코스피';
- const row=(d,i)=>{
-   const a=av(d),col=colorOf(d),q=quad(d);
-   return `<button class="wl-item${d.cand?' cand':''}" data-i="${i}" style="border-left-color:${col}">
-     <span class="wl-dot" style="background:${d.cand?'transparent':col};border:2px solid ${col}"></span>
-     <span class="wl-name">${d.n}<span class="wl-tk">${d.t}</span></span>
-     <span class="wl-q" style="color:${QUAD[q]}">${q}</span>
-     <span class="wl-w">${d.cand?'—':d.w+'%'}</span>
-     <span class="wl-a ${cls(a[0])}">${fmt(a[0])}</span>
-     <span class="wl-a ${cls(a[1])}">${fmt(a[1])}</span>
-   </button>`;};
- const held=D.map((d,i)=>({d,i})).filter(o=>!o.d.cand);
- const cand=D.map((d,i)=>({d,i})).filter(o=>o.d.cand);
- let html=`<div class="wl-head"><span class="wl-t">워치리스트</span><span class="wl-s">행 선택 → 그래프 매핑 · 사분면/비중/주·3M vs ${bn}</span></div>`;
- if(showHeld){
-   html+=`<div class="wl-subh">보유종목 <span>${held.length}</span></div>`;
-   html+='<div class="wl-grid">'+held.map(o=>row(o.d,o.i)).join('')+'</div>';
- }
- if(showCand){
-   html+=`<div class="wl-subh">미보유 후보 <span>${cand.length}</span> · 비중 없음·알파 추정</div>`;
-   html+='<div class="wl-grid">'+cand.map(o=>row(o.d,o.i)).join('')+'</div>';
- }
- box.innerHTML=html;
- box.querySelectorAll('.wl-item').forEach(b=>b.addEventListener('click',()=>selectIdx(+b.dataset.i)));
- markWatch();
-}
 function renderEarnOps(){
  const host=document.getElementById('earnOps'); if(!host) return;
  const today=new Date(Date.now()+9*3600000); today.setUTCHours(0,0,0,0);
@@ -2476,12 +2416,12 @@ function renderLegend(){
 }
 document.getElementById('benchSeg').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
  document.querySelectorAll('#benchSeg button').forEach(x=>x.classList.remove('on'));b.classList.add('on');
- bench=b.dataset.b;hideTip();draw();renderWatch();});
-document.getElementById('colorBtn').addEventListener('click',function(){mode=mode==='stage'?'layer':'stage';this.textContent=mode==='stage'?'초입 단계별':'Lv8 단계별';renderLegend();draw();renderWatch();});
+ bench=b.dataset.b;hideTip();draw();});
+document.getElementById('colorBtn').addEventListener('click',function(){mode=mode==='stage'?'layer':'stage';this.textContent=mode==='stage'?'초입 단계별':'Lv8 단계별';renderLegend();draw();});
 document.getElementById('heldBtn').addEventListener('click',function(){showHeld=!showHeld;this.classList.toggle('on',showHeld);this.textContent=showHeld?'보유 표시':'보유 끄기';
- if(!showHeld&&selected!=null&&!D[selected].cand){selected=null;hideTip();}draw();renderWatch();});
+ if(!showHeld&&selected!=null&&!D[selected].cand){selected=null;hideTip();}draw();});
 document.getElementById('candBtn').addEventListener('click',function(){showCand=!showCand;this.classList.toggle('on',showCand);this.textContent=showCand?'후보 표시':'후보 끄기';
- if(!showCand&&selected!=null&&D[selected].cand){selected=null;hideTip();}draw();renderWatch();});
+ if(!showCand&&selected!=null&&D[selected].cand){selected=null;hideTip();}draw();});
 document.getElementById('lblBtn').addEventListener('click',function(){showLabels=!showLabels;this.classList.toggle('on',showLabels);this.textContent=showLabels?'라벨 표시':'라벨 끄기';applyLabels();});
 document.getElementById('emBtn').addEventListener('click',function(){showEM=!showEM;this.classList.toggle('on',showEM);this.textContent=showEM?'실적 표시':'실적 끄기';draw();});
 
@@ -2501,7 +2441,7 @@ function applySnap(){
    if(sel)sel.classList.add('hist');
    if(r){r.hidden=false;r.innerHTML=`<b>${(s.label||s.asOf)} · 갱신 사유</b><br>${s.reason||'(사유 미기재)'}`;}
  }
- selected=null;hideTip();draw();renderWatch();renderSnapNav();
+ selected=null;hideTip();draw();renderSnapNav();
 }
 // 시점 = SNAPS[0](가장 과거) … SNAPS[n-1](최근) → 현재(라이브). view: 0..n, n=라이브.
 function renderSnapNav(){
@@ -2539,10 +2479,10 @@ document.addEventListener('keydown',e=>{
 window.dumpSnap=function(){const pos={};D.forEach(d=>{pos[d.n]={aN:(d._aN||d.aN),aK:(d._aK||d.aK),stage:(d._stage||d.stage)};});
  const o={asOf:new Date().toISOString().slice(0,10),label:'',reason:'',pos};const t=JSON.stringify(o,null,1);console.log(t);return t;};
 
-document.addEventListener('click',e=>{if(!e.target.closest('.bub')&&!e.target.closest('.cashdot')&&!e.target.closest('.seg')&&!e.target.closest('.wl-item')&&!e.target.closest('.tbtn')){selected=null;hideTip();unhighlight();markWatch();}},true);
+document.addEventListener('click',e=>{if(!e.target.closest('.bub')&&!e.target.closest('.cashdot')&&!e.target.closest('.seg')&&!e.target.closest('.tbtn')){selected=null;hideTip();unhighlight();}},true);
 
 // 3층 병합: 자동(alpha.json) → 실적(earnings.json) → 판단(judgment.json, 마지막에 덮어씀). 없으면 폴백.
-function paint(){renderLegend();draw();renderWatch();renderEarnOps();}
+function paint(){renderLegend();draw();renderEarnOps();}
 const getJSON=u=>fetch(u,{cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null);
 Promise.all([getJSON('alpha.json'),getJSON('earnings.json'),getJSON('judgment.json'),getJSON('snapshots.json'),getJSON('holdings.json'),getJSON('signal_log.json')]).then(([j,e,g,sn,hh,sl])=>{
  // 5) 외부화 데이터 — 비중은 holdings.json이 있으면 교체, 시그널 로그는 signal_log.json 신규분을 인라인 히스토리 뒤에 누적
