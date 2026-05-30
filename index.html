@@ -1484,6 +1484,8 @@ let HOLDINGS=[
  {layer:'기타',label:'지수·채권혼합 (코스피50·채권혼합)',amt:46,w:4.7},
  {layer:'현금',label:'현금',amt:88,w:9.1},
 ];
+/* 원본 총자산(M). 레이어 amt는 개별 반올림이라 합산 시 누적오차(971) — 표시 총액은 원본 총계 기준. holdings.json.total로 갱신. */
+let HOLD_TOTAL=970;
 /* ===== TARGETS — 적정 비중 밴드(프레임 도출, 2026-05-30) =====
    lo~hi = 밴드, dir = 회전방향(trim/add/hold), gate = AND 선결조건.
    강등규칙: 'add/trim'은 가격이 아니라 단계·γ·게이트로 정당화. 매매권유 아님. */
@@ -2142,7 +2144,7 @@ function renderPortfolio(){
  const next=(byL.L4?.w||0)+(byL.L8?.w||0);
  const cash=byL.현금?.w||0,etc=byL.기타?.w||0;
  const wL=l=>(byL[l]?.w||0).toFixed(1);
- const tot=HOLDINGS.reduce((s,h)=>s+(h.amt||0),0);
+ const tot=HOLD_TOTAL||HOLDINGS.reduce((s,h)=>s+(h.amt||0),0);
  const sub=document.getElementById('portSub');if(sub)sub.innerHTML=`자산현황(총 ${tot}M) 기준 보유를 8레이어에 투영. 핵심 질문: 당신이 "다음 병목"이라 지목한 곳에 자본이 가 있는가.`;
  const tgtOverlay=lid=>{const t=TMAP[lid];if(!t)return '';
   const sc=v=>Math.min(v*2.6,100);
@@ -2542,6 +2544,7 @@ const getJSON=u=>fetch(u,{cache:'no-store'}).then(r=>r.ok?r.json():null).catch((
 Promise.all([getJSON('alpha.json'),getJSON('earnings.json'),getJSON('judgment.json'),getJSON('snapshots.json'),getJSON('holdings.json'),getJSON('signal_log.json')]).then(([j,e,g,sn,hh,sl])=>{
  // 5) 외부화 데이터 — 비중은 holdings.json이 있으면 교체, 시그널 로그는 signal_log.json 신규분을 인라인 히스토리 뒤에 누적
  if(hh&&Array.isArray(hh.holdings))HOLDINGS=hh.holdings;
+ if(hh&&Number.isFinite(hh.total))HOLD_TOTAL=hh.total;
  if(sl&&Array.isArray(sl.log)&&sl.log.length)SIGNAL_LOG=SIGNAL_LOG.concat(sl.log);
  // 1) 자동(alpha.json) — 모멘텀 휴리스틱
  const q=j&&j.quotes;if(q)D.forEach(d=>{const a=q[d.t];if(a){if(Array.isArray(a.aN))d.aN=a.aN;if(Array.isArray(a.aK))d.aK=a.aK;}});
