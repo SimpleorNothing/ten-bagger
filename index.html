@@ -647,9 +647,225 @@ table.tk th.c{text-align:center}
       <div class="tnote" id="threadNote">컴퓨트·메모리(<b>L1–L3</b>)는 이미 가격에 반영(성숙). 강물의 머리는 <b style="color:var(--dawn)">L4 패키징 · L6 광 · L8 발전</b>을 지나 <b style="color:var(--nascent)">피지컬 AI</b>로 향하는 중.</div>
       <div class="detail-strip" id="threadDetail"></div>
     </div>
-  </div><!-- /sub-flow -->
-<!-- sub: 파생 체인 -->
-  <div class="subview" id="sub-casc">
+</section>
+
+<!-- 01 MACRO -->
+<section class="view" id="v-macro">
+  <div class="vhead">
+    <div class="vkick">Macro Beta · 충격 매매 룰북</div>
+    <h1 class="vtitle">매크로는 <em>타이밍</em>, 펀더멘털은 선택</h1>
+    <p class="vsub">개별 종목은 매크로에 끌려가지만, 매크로 충격은 <b>반복되는 패턴</b>이다. 공포가 3중 점등하면 분할 매수, 과열엔 <b>전량매도 대신 부분 트림</b>. 2025.1~2026.5 한·미 전수조사 기반.</p>
+  </div>
+
+  <div class="mc-sec">핵심 명제</div>
+  <div class="mc-cards">
+    <div class="mc-card"><h4>매크로 급락 = 매수 기회</h4><p>표본 내 모든 매크로 급락이 D+60 내 회복/신고가. 단 <b>정책 반전 여지</b> 확인 필수.</p></div>
+    <div class="mc-card"><h4>과열 = 부분 트림</h4><p>강세장에선 RSI70+/Greed가 추세지속 신호로 더 자주 작동. <b>전량매도 금지, 20~30% 트림.</b></p></div>
+    <div class="mc-card"><h4>종목은 매크로 종속</h4><p>충격 시 상관 ≈1로 무차별 매도. 매크로=타이밍, 펀더멘털=선택으로 분리.</p></div>
+    <div class="mc-card"><h4>패턴화는 가능</h4><p>저점·고점 예측 불가. 대신 <b>3중 점등 시그널</b>로 정량화.</p></div>
+  </div>
+  <p class="vsub" style="margin-top:4px">매크로 충격은 노이즈가 아니라 거래 가능한 신호. 단 "펀더멘털 레짐 전환"이면 이 룰북은 폐기.</p>
+
+  <div class="mc-sec">3중 점등 매수 시그널 (신호등) · <span style="color:var(--faint)">현재값 signals.json 연동</span></div>
+  <details class="sig-edit">
+    <summary>✎ 신호값 갱신 (signals.json)</summary>
+    <div class="sig-form">
+      <input id="sgVix"  type="number" step="0.1" min="0"   max="150" placeholder="VIX 종가">
+      <input id="sgFG"   type="number" step="1"   min="0"   max="100" placeholder="F&G 0–100">
+      <input id="sgSP"   type="number" step="0.1" min="-30" max="30"  placeholder="S&P 일간 %">
+      <label><input id="sgSide" type="checkbox"> KOSPI 사이드카</label>
+      <button id="sgSubmit">갱신 · 커밋</button>
+      <span id="sgMsg" class="sig-msg">빈칸은 자동으로 null(폴백).</span>
+    </div>
+  </details>
+  <table class="mc">
+    <thead><tr><th>신호</th><th class="c">현재값</th><th class="c">매수 점등</th><th class="c">매도(과열) 점등</th><th class="c">상태</th></tr></thead>
+    <tbody>
+      <tr><td>VIX 종가</td><td class="c" id="sigVix">--</td><td class="c">≥ 40</td><td class="c">≤ 14</td><td class="c"><span class="lamp" id="lampVix">⚪</span></td></tr>
+      <tr><td>CNN Fear &amp; Greed</td><td class="c" id="sigFG">--</td><td class="c">≤ 15</td><td class="c">≥ 80</td><td class="c"><span class="lamp" id="lampFG">⚪</span></td></tr>
+      <tr><td>KOSPI 사이드카 / S&amp;P 일간</td><td class="c" id="sigSide">--</td><td class="c">발동 / −5%</td><td class="c">매수 사이드카 연발</td><td class="c"><span class="lamp" id="lampSide">⚪</span></td></tr>
+    </tbody>
+  </table>
+  <div class="verdict" id="sigVerdict">신호 데이터 없음(signals.json 미입력) — 대기</div>
+  <p class="vsub">판정: 매수 3개 중 <b>≥2 → 분할매수 / 1 → 1/3 정찰 / 0 → 대기.</b> 매도는 대칭이되 결과는 <b>부분 트림만</b>. 검증: <span class="mbadge" style="background:#0ca67822;color:#0ca678">2025.4.7~8 관세 3/3 → D+20 +15%</span> <span class="mbadge" style="background:#0ca67822;color:#0ca678">2026.3.3~4 중동 3/3 → D+20 +10~15%</span></p>
+
+  <div class="mc-sec">보유·후보 종목 매크로 베타 &amp; 회복탄력성 <span style="color:var(--faint)">(★=보유)</span></div>
+  <table class="mc">
+    <thead><tr><th>#</th><th>종목</th><th>티커</th><th>레이어</th><th>보유</th><th class="c">단계</th><th class="c">매크로 베타</th><th>25.4→26.5</th><th>현재 판단</th><th>충격 시 액션</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>블룸에너지</td><td>BE</td><td>L8</td><td>★2.5%</td><td class="c"><span class="mbadge" style="background:#e0313122;color:#e03131">과열</span></td><td class="c">2.0~2.5</td><td>+1,820%</td><td>y1 4 수주실재·추격금지</td><td><b>충격=첫 눌림 기회</b>. 증액 1순위</td></tr>
+      <tr><td>2</td><td>루멘텀</td><td>LITE</td><td>L6</td><td>★(L6 11%)</td><td class="c"><span class="mbadge" style="background:#b8860b22;color:#b8860b">성숙</span></td><td class="c">1.8~2.2</td><td>+1,000%+</td><td>wk −1 트림앰버</td><td>충격 <i>전</i> 트림, 후 과매도 재매수</td></tr>
+      <tr><td>3</td><td>마이크론</td><td>MU</td><td>L3</td><td>★(L3 39.6%)</td><td class="c"><span class="mbadge" style="background:#b8860b22;color:#b8860b">성숙</span></td><td class="c">1.8~2.0</td><td>+660%</td><td>y1 3·6/24 게이트</td><td>분할매수, <b>6/24 실적 게이트</b></td></tr>
+      <tr><td>4</td><td>삼성전자</td><td>005930</td><td>L3</td><td>★(L3)</td><td class="c"><span class="mbadge" style="background:#b8860b22;color:#b8860b">성숙</span></td><td class="c">1.2~1.5</td><td>+125%(연)</td><td>y1 7 HBM4 미반영</td><td>충격 시 매수(상대 저평가)</td></tr>
+      <tr><td>5</td><td>마벨</td><td>MRVL</td><td>L2/L6</td><td>★(L2 8.8%)</td><td class="c"><span class="mbadge" style="background:#1c7ed622;color:#1c7ed6">가속</span></td><td class="c">2.0~2.2</td><td>+220%</td><td>wk −0.5·ASIC 런웨이</td><td>충격 시 <b>5분할</b>(회복 느림)</td></tr>
+      <tr><td>6</td><td>램버스</td><td>RMBS</td><td>L3 IF</td><td>probe ~1%</td><td class="c"><span class="mbadge" style="background:#1c7ed622;color:#1c7ed6">가속</span></td><td class="c">1.5~1.8</td><td>+200~300%</td><td>Q2 7/27 게이트</td><td>충격+$140 눌림+Q2 확인 후</td></tr>
+      <tr><td>7</td><td>테슬라</td><td>TSLA</td><td>기타</td><td>★6.1%</td><td class="c"><span class="mbadge" style="background:#1c7ed622;color:#1c7ed6">가속</span></td><td class="c">1.5~3.0</td><td>미회복</td><td>정치베타</td><td><b>매크로 신호로 매매 금지·별도</b></td></tr>
+      <tr><td>—</td><td>소부장(후보)</td><td>KODEX AI반도체핵심장비</td><td>L4</td><td>★2.3%</td><td class="c"><span class="mbadge" style="background:#1c7ed622;color:#1c7ed6">가속</span></td><td class="c">—</td><td>YTD −58%</td><td><b>회전 1순위 관찰</b></td><td>충격 시 증액 최우선 후보</td></tr>
+      <tr><td>—</td><td>grid 발전(미보유)</td><td>CEG·OKLO 등</td><td>L8</td><td>0%</td><td class="c">—</td><td class="c">—</td><td>—</td><td>다음 병목</td><td>충격 시 신규 진입 관찰</td></tr>
+    </tbody>
+  </table>
+  <div class="foot">L8 전력·L6 광 = 매크로 급락 시 회복탄력 1·2위. 단 LITE·BE는 지금 트림 앰버/추격금지 상태 → "충격 후 재매수"가 정석.<br>Tesla는 AI 인프라가 아닌 정치/거버넌스 베타 — 매크로 룰북 적용 제외.<br>다음 병목 L4(2.3%)·L8(2.5%)은 얇음 → 매크로 충격이 곧 회전(rotation) 기회.</div>
+
+  <div class="mc-sec">이벤트 유형 분류 (매수기회 vs 함정)</div>
+  <table class="mc">
+    <thead><tr><th>유형</th><th>25~26 사례</th><th class="c">판정</th><th>회복</th><th>대응</th></tr></thead>
+    <tbody>
+      <tr><td>지정학(일시 공습)</td><td>25.6 이란</td><td class="c" style="color:#0ca678">🟢 매수</td><td>V자 D+10</td><td>강한 매수</td></tr>
+      <tr><td>지정학(장기·유가)</td><td>26.3 호르무즈</td><td class="c" style="color:#0ca678">🟢 매수</td><td>U자 D+30~60</td><td>단계 매수·한국비중 축소</td></tr>
+      <tr><td>AI 효율 충격</td><td>25.1 DeepSeek</td><td class="c" style="color:#0ca678">🟢 매수</td><td>V자 1~4주</td><td>강한 매수(Jevons)</td></tr>
+      <tr><td>AI 수요 의문</td><td>25.11 버블설</td><td class="c" style="color:#b8860b">🟡 혼합</td><td>1~2주</td><td>부분 트림 후 재매수 대기</td></tr>
+      <tr><td>관세(정책)</td><td>25.4 Liberation Day</td><td class="c" style="color:#0ca678">🟢 매수</td><td>V자 즉시</td><td><b>정책 반전 확인 후</b> 진입</td></tr>
+      <tr><td>연준 비둘기</td><td>25.8 잭슨홀</td><td class="c" style="color:#0ca678">🟢 매수</td><td>추세강화</td><td>매수/보유</td></tr>
+      <tr><td>연준 매파 동결</td><td>25.7.31</td><td class="c" style="color:var(--dim)">⚪ 중립</td><td>단기변동</td><td>신호 약함, 패스</td></tr>
+      <tr><td>정치-거버넌스(종목)</td><td>TSLA-Musk</td><td class="c" style="color:#b8860b">🟡 함정</td><td>불확실</td><td>개별 분석</td></tr>
+      <tr><td>펀더멘털 레짐 전환</td><td>(표본 외)</td><td class="c" style="color:#e03131">🔴 함정</td><td>W자 분기~년</td><td><b>룰북 폐기</b></td></tr>
+    </tbody>
+  </table>
+
+  <div class="mc-sec">매수 / 매도 분할 규칙</div>
+  <div class="mc-2col">
+    <div class="col buy"><h4 style="color:#0ca678">매수 (분할 진입)</h4>
+      <ul>
+        <li>정찰 33%: 블록 신호등 ≥2 점등 즉시</li>
+        <li>추가 33%: D+1~2 추가 하락 시</li>
+        <li>마무리 34%: D+5~10 정책 반전/안정화 헤드라인 후</li>
+        <li>진입 우선순위: 충격 후 → L4 소부장(회전) · MU/005930(메모리) · MRVL(5분할) · LITE/BE(눌림 확인 후)</li>
+      </ul>
+    </div>
+    <div class="col sell"><h4 style="color:var(--hot)">매도 / 트림 (현재 judgment 직결)</h4>
+      <ul>
+        <li>신고가+RSI70+Greed&gt;80: <b>20% 트림</b> ← 현재 <b>LITE(wk−1 앰버)·한국전력ETF(wk−0.75)</b> 해당</li>
+        <li>+ 펀더멘털 위축(capex 가이던스 컷): <b>최대 50%</b></li>
+        <li>+ 레짐 전환 매크로: <b>최대 80%</b></li>
+        <li><b>절대 100% 매도 금지.</b> BE는 <i>추격금지·첫 눌림 대기</i>(매도 아님).</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="mc-sec">X-레이 갭 연계 (충격 = 회전 기회)</div>
+  <table class="mc">
+    <thead><tr><th>영역</th><th class="c">현재 비중</th><th>충격 시 역할</th></tr></thead>
+    <tbody>
+      <tr><td>현재 병목(선반영) L2·3·6·7</td><td class="c">≈ 75%</td><td>방어 / 트림 영역</td></tr>
+      <tr><td>다음 병목 L4·L8</td><td class="c">≈ 4.8%</td><td>증액 1순위 영역(얇음)</td></tr>
+      <tr><td>현금</td><td class="c">9%</td><td>충격 대비 실탄. 권고 레인지 향후 점검</td></tr>
+    </tbody>
+  </table>
+  <p class="vsub">매크로 급락은 비싼 선반영 층(L3·L7)을 트림해 얇은 다음 병목(L4·L8)으로 옮기는, 에크먼식 상대가치 회전을 강제 실행할 기회.</p>
+
+  <div class="mc-sec">6단계 체크리스트 + 현재 권고</div>
+  <ol class="mc-steps">
+    <li>충격 유형 분류(이벤트 표) → "레짐 전환"이면 룰북 폐기</li>
+    <li>신호 점검(3중 신호등) → 총점</li>
+    <li>매수 분할(좌)</li>
+    <li>매도 분할(우)</li>
+    <li>종목 베타 조정(베타&gt;2.0 BE·LITE·MRVL=5분할 / 1.2~1.8=3분할 / TSLA 별도)</li>
+    <li><b>현재 권고(2026-05-28)</b>: S&amp;P 사상최고 + KOSPI 미회복 → 신호 부재 구간. 현금 9% 유지, 과열 트림 모드(LITE·한국전력ETF 앰버), BE 첫 눌림 대기. MU 6/24 실적이 메모리 게이트. 다음 3중 점등 대비.</li>
+  </ol>
+  <div class="foot">Caveat: 17개월·강세장 표본. 2008/2020형 레짐 전환 미포함 — 그 경우 룰북 무효. D+N 수익률은 표본 N≤3로 신뢰구간 넓음.<br>출처: Bloomberg·CNBC·Reuters·CNN(F&amp;G)·Korea Herald/Times·Yahoo Finance·RBC WM·Macroption(VIX)·Bloom DEF 14A(SEC)·TrendForce/Counterpoint·MoneyToday. 표본 2025.1.1~2026.5.28.</div>
+</section>
+
+<!-- 02 CALENDAR -->
+<section class="view" id="v-cal">
+  <div class="vhead">
+    <div class="vkick">Calendar · 투자 일정 관제</div>
+    <h1 class="vtitle">타이밍을 <em>지도</em>로 — 거시·실적·이벤트 한 화면</h1>
+    <p class="vsub">매크로 매매가 "충격이 오면 무엇을 할지"라면, 투자 캘린더는 "그 충격이 언제 올지"를 고정한다. 통화정책·물가·내 자산 실적·메가 이벤트·지정학 워치를 하나의 D-카운트다운으로 묶어, 다가오는 게이트를 놓치지 않는다. <b>확정 일정은 굵게, 추정(IR 미확정·기관 미확정)은 점선 태그로 표기.</b></p>
+  </div>
+
+  <div class="cal-sec">임박 이벤트 <span class="sub">· 기준일 2026-05-30</span></div>
+  <div class="cal-now">
+    <div class="now-card" style="--c:var(--cat-infl)"><div class="dn">D-11</div><div class="when">2026-06-10 (수)</div><div class="lbl">美 CPI · 5월분</div><div class="meta">08:30 ET · 4월 +3.8% YoY (여전히 높음)</div></div>
+    <div class="now-card" style="--c:var(--cat-event)"><div class="dn">D-13</div><div class="when">~2026-06-12 (금)</div><div class="lbl">SpaceX(SPCX) 거래 개시</div><div class="meta">나스닥 · $1.75~2T · 메모리 직격 선반영 시작</div></div>
+    <div class="now-card" style="--c:var(--cat-macro)"><div class="dn">D-17</div><div class="when">2026-06-16~17</div><div class="lbl">FOMC (점도표*)</div><div class="meta">현 3.50~3.75% 동결 유지 중</div></div>
+    <div class="now-card" style="--c:var(--cat-earn)"><div class="dn">D-25</div><div class="when">~2026-06-24 (AMC)</div><div class="lbl">마이크론 <span style="font-family:var(--mono);color:var(--faint);font-weight:600">MU</span></div><div class="meta">메모리 강등 게이트 · IR 확정 전 추정</div></div>
+  </div>
+
+  <div class="cal-legend">
+    <span class="lg"><span class="dot" style="background:var(--cat-macro)"></span>거시(Fed·금통위)</span>
+    <span class="lg"><span class="dot" style="background:var(--cat-infl)"></span>물가(CPI·PCE)</span>
+    <span class="lg"><span class="dot" style="background:var(--cat-earn)"></span>실적(보유·후보)</span>
+    <span class="lg"><span class="dot" style="background:var(--cat-event)"></span>투자 이벤트</span>
+    <span class="lg"><span class="dot" style="background:var(--cat-pol)"></span>정치</span>
+    <span class="lg"><span class="dot" style="background:var(--cat-watch)"></span>글로벌 워치</span>
+  </div>
+
+  <div class="cal-sec">아젠다 타임라인 <span class="sub">· 2026 6월 → 12월</span></div>
+
+  <div class="cal-month">6월 <span class="mo-sub">— SpaceX·CPI·FOMC·MU가 한 달에 몰린 고밀도 구간</span></div>
+  <div class="cal-row"><div class="date-chip">06.04~08</div><div class="cat-dot" style="background:var(--cat-event)"></div><div class="cal-body"><div class="ti">SpaceX 로드쇼 시작</div><div class="mt">가격밴드 $1.75T~$2T 확정 구간. 조달 $40~80B · 사상 최대 IPO.</div></div></div>
+  <div class="cal-row key"><div class="date-chip">06.10</div><div class="cat-dot" style="background:var(--cat-infl)"></div><div class="cal-body"><div class="ti">美 CPI (5월분) <span class="mbadge" style="background:#7048e822;color:#7048e8">확정</span></div><div class="mt">08:30 ET. 4월 헤드라인 +3.8% YoY로 재상승 — 유가·중동이 인플레 변수.</div></div></div>
+  <div class="cal-row key"><div class="date-chip">~06.12</div><div class="cat-dot" style="background:var(--cat-event)"></div><div class="cal-body"><div class="ti">SpaceX(SPCX) 나스닥 거래 개시 <span class="mbadge" style="background:#e8590c22;color:#e8590c">메가 IPO</span></div><div class="mt">차익거래가 7월 지수편입을 선반영 시작 → MU·MRVL·TSLA에 메커니컬 역풍 빌드업.</div></div></div>
+  <div class="cal-row key"><div class="date-chip">06.16~17</div><div class="cat-dot" style="background:var(--cat-macro)"></div><div class="cal-body"><div class="ti">FOMC <span class="mbadge" style="background:#1c7ed622;color:#1c7ed6">점도표·SEP</span></div><div class="mt">현 3.50~3.75% 동결 유지 중. 연내 인하 경로(점도표)가 핵심.</div></div></div>
+  <div class="cal-row key"><div class="date-chip">~06.24</div><div class="cat-dot" style="background:var(--cat-earn)"></div><div class="cal-body"><div class="ti">마이크론 <span class="tk">MU · AMC</span> <span class="tag-est">IR 확정 전 추정</span></div><div class="mt">메모리(L3 ~40%) 성숙 강등 게이트. y1 3 · 7월 지수드래그보다 <b>선행·우선</b> 이벤트.</div></div></div>
+  <div class="cal-row"><div class="date-chip">06월말</div><div class="cat-dot" style="background:var(--cat-infl)"></div><div class="cal-body"><div class="ti">美 PCE (5월분) <span class="tag-est">BEA 확정</span></div><div class="mt">Fed 선호 지표. CPI와 함께 6/16 FOMC 직후 인플레 재확인.</div></div></div>
+
+  <div class="cal-month">7월 <span class="mo-sub">— 실적 러시 + SPCX 지수편입 + 이란 시한이 겹치는 최대 분기점</span></div>
+  <div class="cal-row key"><div class="date-chip">~07.03</div><div class="cat-dot" style="background:var(--cat-watch)"></div><div class="cal-body"><div class="ti">이란 60일 휴전 프레임워크 만료 시한 <span class="mbadge" style="background:#e0313122;color:#e03131">지정학</span></div><div class="mt">5/24 합의 기준 ~60일. 최종딜 전환 실패 시 호르무즈·유가 재점화 → L7 한국전력 4중 역풍 재점등.</div></div></div>
+  <div class="cal-row"><div class="date-chip">07월 중</div><div class="cat-dot" style="background:var(--cat-macro)"></div><div class="cal-body"><div class="ti">한국 금통위 (통화정책방향) <span class="tag-est">BOK 정확일 확정</span></div><div class="mt">금리 결정월(현 2.50% 동결 기조). KRW·가계부채·유가가 변수.</div></div></div>
+  <div class="cal-row"><div class="date-chip">~07.14</div><div class="cat-dot" style="background:var(--cat-infl)"></div><div class="cal-body"><div class="ti">美 CPI (6월분) <span class="tag-est">BLS 확정</span></div></div></div>
+  <div class="cal-row key"><div class="date-chip">07월 초·중</div><div class="cat-dot" style="background:var(--cat-event)"></div><div class="cal-body"><div class="ti">SPCX 나스닥100 fast-entry 편입 <span class="mbadge" style="background:#e8590c22;color:#e8590c">강제매수/매도</span></div><div class="mt">거래 +15거래일. 패시브가 SPCX 강제매수 → 기존 구성종목(<b>MU·MRVL·TSLA</b>) 강제매도. 3x 배수로 종목당 압력 일부 완화.</div></div></div>
+  <div class="cal-row"><div class="date-chip">07.22</div><div class="cat-dot" style="background:var(--cat-earn)"></div><div class="cal-body"><div class="ti">테슬라 <span class="tk">TSLA</span> <span class="tag-est">추정</span></div><div class="mt">정치/거버넌스 베타 · 매크로 룰북 적용 제외(별도 관리).</div></div></div>
+  <div class="cal-row"><div class="date-chip">07.27</div><div class="cat-dot" style="background:var(--cat-earn)"></div><div class="cal-body"><div class="ti">램버스 <span class="tk">RMBS · Q2</span> <span class="tag-est">추정</span></div><div class="mt">제품매출/가이던스 게이트. 2분기 연속 QoQ 감소 시 kill 트리거.</div></div></div>
+  <div class="cal-row key"><div class="date-chip">07.28~29</div><div class="cat-dot" style="background:var(--cat-macro)"></div><div class="cal-body"><div class="ti">FOMC</div></div></div>
+  <div class="cal-row"><div class="date-chip">07.29</div><div class="cat-dot" style="background:var(--cat-earn)"></div><div class="cal-body"><div class="ti">버티브 <span class="tk">VRT</span> <span class="tag-est">추정</span></div></div></div>
+  <div class="cal-row"><div class="date-chip">07.31</div><div class="cat-dot" style="background:var(--cat-earn)"></div><div class="cal-body"><div class="ti">삼성전자 <span class="tk">005930</span> <span class="tag-est">추정</span></div><div class="mt">HBM4 점유율 회복 비대칭 상방 미반영(y1 7).</div></div></div>
+
+  <div class="cal-month">8월</div>
+  <div class="cal-row"><div class="date-chip">~08.05</div><div class="cat-dot" style="background:var(--cat-earn)"></div><div class="cal-body"><div class="ti">블룸에너지 <span class="tk">BE</span> <span class="tag-est">추정</span></div><div class="mt">L8 발전 · 과열·추격금지·첫 눌림 대기.</div></div></div>
+  <div class="cal-row"><div class="date-chip">08월 중</div><div class="cat-dot" style="background:var(--cat-macro)"></div><div class="cal-body"><div class="ti">한국 금통위 (통화정책방향) <span class="tag-est">BOK 확정</span></div></div></div>
+  <div class="cal-row"><div class="date-chip">~08.12</div><div class="cat-dot" style="background:var(--cat-earn)"></div><div class="cal-body"><div class="ti">루멘텀 <span class="tk">LITE</span> <span class="tag-est">추정</span></div><div class="mt">L6 광 · 트림 앰버(임원 내부자 매도).</div></div></div>
+
+  <div class="cal-month">9월</div>
+  <div class="cal-row key"><div class="date-chip">09.15~16</div><div class="cat-dot" style="background:var(--cat-macro)"></div><div class="cal-body"><div class="ti">FOMC <span class="mbadge" style="background:#1c7ed622;color:#1c7ed6">점도표·SEP</span></div></div></div>
+
+  <div class="cal-month">10월</div>
+  <div class="cal-row"><div class="date-chip">10월 중</div><div class="cat-dot" style="background:var(--cat-macro)"></div><div class="cal-body"><div class="ti">한국 금통위 (통화정책방향) <span class="tag-est">BOK 확정</span></div></div></div>
+  <div class="cal-row key"><div class="date-chip">10.27~28</div><div class="cat-dot" style="background:var(--cat-macro)"></div><div class="cal-body"><div class="ti">FOMC</div></div></div>
+
+  <div class="cal-month">11월 <span class="mo-sub">— 정책 베타 분기점</span></div>
+  <div class="cal-row key"><div class="date-chip">11.03</div><div class="cat-dot" style="background:var(--cat-pol)"></div><div class="cal-body"><div class="ti">美 중간선거 <span class="mbadge" style="background:#b8860b22;color:#b8860b">정치</span></div><div class="mt">하원 전체·상원 1/3·주지사. 분점정부 시 재정·관세·에너지 정책 경로 변동 → AI 인프라 정책 베타.</div></div></div>
+  <div class="cal-row"><div class="date-chip">11월 중</div><div class="cat-dot" style="background:var(--cat-macro)"></div><div class="cal-body"><div class="ti">한국 금통위 (연내 마지막 통방) <span class="tag-est">BOK 확정</span></div></div></div>
+
+  <div class="cal-month">12월</div>
+  <div class="cal-row key"><div class="date-chip">12.08~09</div><div class="cat-dot" style="background:var(--cat-macro)"></div><div class="cal-body"><div class="ti">FOMC <span class="mbadge" style="background:#1c7ed622;color:#1c7ed6">점도표·SEP</span></div></div></div>
+  <div class="cal-row"><div class="date-chip">수시</div><div class="cat-dot" style="background:var(--cat-event)"></div><div class="cal-body"><div class="ti">OpenAI · Anthropic IPO 관측 <span class="tag-est">시점 미정</span></div><div class="mt">6~10월 구간 가능성. 추가 메가IPO = 또 한 번의 유동성/지수 편입 이벤트(같은 메커니즘).</div></div></div>
+
+  <div class="cal-sec">글로벌 워치리스트 <span class="sub">· 날짜 아닌 상태(status) + 유효기간(shelf-life)</span></div>
+  <div class="watch-grid">
+    <div class="watch-card" style="--c:var(--cat-watch)">
+      <h4>이란 협상 / 휴전 <span class="st" style="background:#b8860b">잠정 낙관</span></h4>
+      <p>현재(5/24): <b>60일 휴전 연장 프레임워크</b> + 호르무즈 제거·재개통 협의. 유가↓·증시↑로 반응했으나 Trump "완전 타결 아님". 4/8 휴전은 "life support"였던 이력.</p>
+      <p><b>트리거 ▸</b> 최종딜 전환 → 유가 추가 하락(L7 한국전력 역풍 완화). <b>결렬·재점화</b> → 호르무즈·유가 스파이크 → 매크로 룰북 '지정학 장기·유가' 🟢 단계매수 + 한국비중 축소.</p>
+      <div class="shelf"><div class="shelf-lab"><span>유효기간 (≈60일 프레임)</span><span>~7월 말 만료</span></div><div class="shelf-bar"><div class="shelf-fill" style="width:18%;background:var(--cat-watch)"></div></div></div>
+    </div>
+    <div class="watch-card" style="--c:var(--cat-event)">
+      <h4>SpaceX 지수 편입 <span class="st" style="background:#e8590c">진행</span></h4>
+      <p>6월 거래 개시 → <b>7월 초·중 나스닥100 편입(거래 +15일)</b>. S&amp;P500은 이익·유통비율 미달로 임박 아님(규칙 개정 검토 중). 메모리/MU·MRVL 직격.</p>
+      <p><b>트리거 ▸</b> 편입일 강제매도 클라이맥스(단발·되돌림 빈번). S&amp;P 개정 헤드라인 시 2차 이벤트로 승격.</p>
+      <div class="shelf"><div class="shelf-lab"><span>선반영 윈도</span><span>~7월 편입일</span></div><div class="shelf-bar"><div class="shelf-fill" style="width:30%;background:var(--cat-event)"></div></div></div>
+    </div>
+    <div class="watch-card" style="--c:var(--cat-macro)">
+      <h4>Fed 피벗 경로 <span class="st" style="background:#1c7ed6">동결 지속</span></h4>
+      <p>3.50~3.75% 유지. 컨센은 연내 1~2회 인하 후행. 6/16·9/15·12/8 <b>점도표</b>가 경로 재설정 분기점.</p>
+      <p><b>트리거 ▸</b> 비둘기 점도표 = AI 인프라 추세강화 / 매파 = 듀레이션·성장주 역풍.</p>
+      <div class="shelf"><div class="shelf-lab"><span>다음 점도표</span><span>6/16~17</span></div><div class="shelf-bar"><div class="shelf-fill" style="width:72%;background:var(--cat-macro)"></div></div></div>
+    </div>
+    <div class="watch-card" style="--c:var(--cat-pol)">
+      <h4>美 데이터 공백 / 셧다운 <span class="st" style="background:#5c6f7e">상시 관찰</span></h4>
+      <p>연방예산 공백 시 일부 경제지표 릴리스 지연 전례(센서스 등). 지표 공백 = Fed·시장의 가시성 저하 리스크.</p>
+      <p><b>트리거 ▸</b> 11/3 중간선거 전후 예산 대치 → CPI/고용 등 핵심 지표 발표 지연 여부 모니터.</p>
+    </div>
+  </div>
+
+  <div class="foot">
+    <b>표기:</b> 굵은 행(key)=확정·고임팩트 게이트. 점선 태그=IR/기관 미확정 추정(경과 시 갱신). 카테고리 색은 사이트 stage hue set 재사용.<br>
+    <b>출처:</b> Federal Reserve(FOMC) · BLS/BEA(CPI·PCE) · 한국은행(금통위) · CNBC/Reuters/WaPo(SpaceX·이란) · Congress.gov/House of Commons Library(이란) · earnings.json. 기준일 2026-05-30.
+  </div>
+</section>
+
+<!-- 01 CASCADE -->
+<section class="view" id="v-cascade">
   <div class="vhead"><div class="vkick">Derivative Cascade · 파생 가치사슬</div>
     <h1 class="vtitle">하나가 <em>×10</em> 되면 — 무엇이 함께 폭증하나</h1>
     <p class="vsub">거시 트리거가 한 드라이버를 ×10으로 키울 때, <b>같은 배수로 함께 커져야 하지만 아직 덜 오른 파생 부품</b>이 다음 알파입니다. 드라이버를 바꾸면 그 가치사슬이 펼쳐집니다 — CPU는 예시, 나머지 레이어도 동일. 파생 노드를 누르면 §2-C 분해로 들어갑니다. <b style="color:var(--dawn)">분류 규칙</b> — 노드는 수요 트리거가 아니라 자산의 물리적 위치(전기 계량기 기준)로 한 레이어에만 귀속하며, 레이어 간 인과는 화살표로만 표기합니다.</p></div>
@@ -1498,16 +1714,18 @@ function watchChips(lid){const ws=WATCH.filter(w=>w.layer===lid);if(!ws.length)r
 
 /* ===== HOLDINGS (5/30 동기, 테마버킷→레이어 · 실잔고 일치) ===== */
 let HOLDINGS=[
- {layer:'L2',label:'연산칩 (마벨·KODEX 미국AI반도체TOP3+)',amt:86,w:8.9},
+ {layer:'L2',label:'연산칩 (마벨·KODEX 미국AI반도체TOP3+)',amt:86,w:8.8},
  {layer:'L3',label:'메모리 (마이크론·삼성전자·HBM ETF)',amt:384,w:39.6},
  {layer:'L4',label:'소부장 (KODEX AI반도체핵심장비)',amt:22,w:2.3},
- {layer:'L6',label:'연결 (루멘텀·KODEX 미국AI광통신네트워크)',amt:110,w:11.3},
+ {layer:'L6',label:'연결 (루멘텀·KODEX 미국AI광통신네트워크)',amt:109,w:11.3},
  {layer:'L7',label:'전력·냉각 (버티브·KODEX AI전력·SOL 미국AI전력)',amt:151,w:15.6},
  {layer:'L8',label:'발전 (블룸에너지)',amt:25,w:2.5},
  {layer:'기타',label:'테슬라',amt:59,w:6.1},
  {layer:'기타',label:'지수·채권혼합 (코스피50·채권혼합)',amt:46,w:4.7},
  {layer:'현금',label:'현금',amt:88,w:9.1},
 ];
+/* 원본 총자산(M). 레이어 amt는 개별 반올림이라 합산 시 누적오차(971) — 표시 총액은 원본 총계 기준. holdings.json.total로 갱신. */
+let HOLD_TOTAL=970;
 /* ===== TARGETS — 적정 비중 밴드(프레임 도출, 2026-05-30) =====
    lo~hi = 밴드, dir = 회전방향(trim/add/hold), gate = AND 선결조건.
    강등규칙: 'add/trim'은 가격이 아니라 단계·γ·게이트로 정당화. 매매권유 아님. */
@@ -1582,10 +1800,10 @@ const C=[
   capex:{bull:'FC-BGA 비중 확대',base:'기판 회복',bear:'서버 수주 부재'},
   thesis:'FC-BGA 서버 침투 스토리. 단 최근 6개월 +200%·52주 저점比 ~9x로 평균 목표가 상회 → 초입 아님(성숙). 가격이 수주를 선반영.',
   kill:['FC-BGA 비중 정체','서버 신규고객 부재','패키지 기판 약세'],S:{s1:1,s2:1,s3:0,s4:1,s5:1}},
- {id:'kodexeq',name:'KODEX AI반도체핵심장비',ticker:'471990',mkt:'KOSPI',layer:'L4',stage:'가속',mat:.5,conv:.55,held:true,heldNote:'보유(소부장 2.5%)',
+ {id:'kodexeq',name:'KODEX AI반도체핵심장비',ticker:'471990',mkt:'KOSPI',layer:'L4',stage:'가속',mat:.5,conv:.55,held:true,heldNote:'보유(소부장 2.3%)',
   sub:'후공정·검사·증착 장비 바스켓',compete:'장비 ETF',up:{l:'—',d:'—'},down:{l:'L2/L3',d:'강'},
   capex:{bull:'어드밴스드 패키징 capex↑',base:'장비 사이클',bear:'capex 축소'},
-  thesis:'다음 병목(패키징) 노출 통로지만 비중 2.4%로 얇음. 후공정 실제 구성비 검증 필요.',
+  thesis:'다음 병목(패키징) 노출 통로지만 비중 2.3%로 얇음. 후공정 실제 구성비 검증 필요.',
   kill:['패키징 capex 둔화','ETF 구성 전공정 편중','국내 장비주 약세'],S:{s1:2,s2:1,s3:1,s4:0,s5:1}},
  {id:'smci',name:'Supermicro',ticker:'SMCI',mkt:'NASDAQ',layer:'L5',stage:'가속',mat:.42,conv:.55,
   sub:'AI 서버 → 액체냉각 랙 → 시스템 통합',compete:'AI 서버 ODM 상위',up:{l:'L2',d:'강'},down:{l:'L7',d:'강'},
@@ -2159,7 +2377,7 @@ function renderPortfolio(){
  const next=(byL.L4?.w||0)+(byL.L8?.w||0);
  const cash=byL.현금?.w||0,etc=byL.기타?.w||0;
  const wL=l=>(byL[l]?.w||0).toFixed(1);
- const tot=HOLDINGS.reduce((s,h)=>s+(h.amt||0),0);
+ const tot=HOLD_TOTAL||HOLDINGS.reduce((s,h)=>s+(h.amt||0),0);
  const sub=document.getElementById('portSub');if(sub)sub.innerHTML=`자산현황(총 ${tot}M) 기준 보유를 8레이어에 투영. 핵심 질문: 당신이 "다음 병목"이라 지목한 곳에 자본이 가 있는가.`;
  const tgtOverlay=lid=>{const t=TMAP[lid];if(!t)return '';
   const sc=v=>Math.min(v*2.6,100);
@@ -2559,6 +2777,7 @@ const getJSON=u=>fetch(u,{cache:'no-store'}).then(r=>r.ok?r.json():null).catch((
 Promise.all([getJSON('alpha.json'),getJSON('earnings.json'),getJSON('judgment.json'),getJSON('snapshots.json'),getJSON('holdings.json'),getJSON('signal_log.json')]).then(([j,e,g,sn,hh,sl])=>{
  // 5) 외부화 데이터 — 비중은 holdings.json이 있으면 교체, 시그널 로그는 signal_log.json 신규분을 인라인 히스토리 뒤에 누적
  if(hh&&Array.isArray(hh.holdings))HOLDINGS=hh.holdings;
+ if(hh&&Number.isFinite(hh.total))HOLD_TOTAL=hh.total;
  if(sl&&Array.isArray(sl.log)&&sl.log.length)SIGNAL_LOG=SIGNAL_LOG.concat(sl.log);
  // 1) 자동(alpha.json) — 모멘텀 휴리스틱
  const q=j&&j.quotes;if(q)D.forEach(d=>{const a=q[d.t];if(a){if(Array.isArray(a.aN))d.aN=a.aN;if(Array.isArray(a.aK))d.aK=a.aK;}});
