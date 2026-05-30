@@ -71,6 +71,76 @@ const setupPage = page(`<div class="mark">알파맵</div>
 <div class="hint" style="margin-top:18px">관리자: <code>SITE_PASSWORD</code> 시크릿이 설정되지 않았습니다.<br>
 <code>wrangler secret put SITE_PASSWORD</code> 로 비밀번호를 설정하세요.</div>`);
 
+// signals.json 갱신 — GitHub Contents API 프록시
+async function handleSignalsUpdate(request, env) {
+  const OWNER  = "SimpleorNothing";
+  const REPO   = "ten-bagger";
+  const BRANCH = "claude/wizardly-rubin-SubA1";
+  const PATH   = "signals.json";
+  const API    = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${PATH}`;
+  const gh = {
+    Authorization: `Bearer ${env.GITHUB_TOKEN}`,
+    "User-Agent": "alphamap-worker",
+    Accept: "application/vnd.github+json",
+  };
+
+  if (!env.GITHUB_TOKEN) {
+    return new Response(JSON.stringify({ error: "GITHUB_TOKEN not configured" }),
+      { status: 503, headers: { "content-type": "application/json" } });
+  }
+
+  let body;
+  try { body = await request.json(); }
+  catch { return new Response(JSON.stringify({ error: "invalid json" }),
+    { status: 400, headers: { "content-type": "application/json" } }); }
+
+  // 형변환 + 범위 검증 (잘못된 값이 신호등을 오염시키지 않게)
+  const num = (v, lo, hi) => {
+    if (v === null || v === undefined || v === "") return null;
+    const n = Number(v);
+    return Number.isFinite(n) && n >= lo && n <= hi ? n : null;
+  };
+  const payload = {
+    asOf: new Date().toISOString().slice(0, 10),
+    source: "수동(사이트 폼)",
+    vix:        num(body.vix, 0, 150),
+    fearGreed:  num(body.fearGreed, 0, 100),
+    sidecarKR:  body.sidecarKR === true,
+    spDailyPct: num(body.spDailyPct, -30, 30),
+    note: "VIX 종가·CNN F&G·한국 사이드카·S&P 일간. null이면 페이지 '--' 폴백. 충격 시 1회 갱신.",
+  };
+
+  // 1) 기존 파일 sha 조회 (없으면 최초 생성)
+  let sha = null;
+  const cur = await fetch(`${API}?ref=${encodeURIComponent(BRANCH)}`, { headers: gh });
+  if (cur.ok) {
+    const j = await cur.json();
+    sha = j.sha;
+  } else if (cur.status !== 404) {
+    return new Response(JSON.stringify({ error: "github get failed", status: cur.status }),
+      { status: 502, headers: { "content-type": "application/json" } });
+  }
+
+  // 2) PUT
+  const content = btoa(unescape(encodeURIComponent(JSON.stringify(payload, null, 2) + "\n")));
+  const putBody = {
+    message: `signals: vix=${payload.vix ?? "-"} fg=${payload.fearGreed ?? "-"} side=${payload.sidecarKR ? "ON" : "off"} (web form)`,
+    branch: BRANCH,
+    content,
+    ...(sha ? { sha } : {}),
+  };
+  const put = await fetch(API, { method: "PUT", headers: gh, body: JSON.stringify(putBody) });
+  if (!put.ok) {
+    const t = await put.text();
+    return new Response(JSON.stringify({ error: "github put failed", status: put.status, detail: t.slice(0, 400) }),
+      { status: 502, headers: { "content-type": "application/json" } });
+  }
+
+  // 3) 사이트는 1~2분 후 deploy.yml 완료 시 자동 갱신. 즉시 미리보기용 payload echo.
+  return new Response(JSON.stringify({ ok: true, payload }),
+    { status: 200, headers: { "content-type": "application/json" } });
+}
+
 export default {
   async fetch(request, env) {
     const password = env.SITE_PASSWORD;
@@ -99,8 +169,12 @@ export default {
       return new Response(loginPage(true), { status: 401, headers: htmlHeaders });
     }
 
-    // Already authenticated on this device → serve the requested asset.
+    // Already authenticated on this device.
     if (safeEqual(readCookie(request.headers.get("Cookie"), COOKIE), expected)) {
+      // signals 갱신 엔드포인트 (인증된 디바이스만 도달)
+      if (request.method === "POST" && url.pathname === "/api/signals") {
+        return handleSignalsUpdate(request, env);
+      }
       return env.ASSETS.fetch(request);
     }
 

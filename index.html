@@ -286,7 +286,7 @@ table.tk th.c{text-align:center}
 .rcand-panel{background:linear-gradient(155deg,var(--panel),var(--ink2));border:1px solid var(--line);border-radius:18px;padding:20px 18px;margin-bottom:18px}
 .rcand-panel .ph{font-family:var(--serif);font-size:17px;font-weight:700}
 .rcand-panel .psub{font-family:var(--mono);font-size:13px;color:var(--faint);margin-bottom:14px}
-.rcand-row{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-bottom:12px}
+.rcand-row{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;margin-bottom:12px}
 .rcand-row .rcand{margin-bottom:0}
 .rcand{display:grid;grid-template-columns:22px 1fr;gap:9px;padding:10px 11px;border:1px solid var(--line);border-left-width:3px;border-radius:11px;background:var(--panel);margin-bottom:8px;transition:.18s}
 .rcand:hover{border-color:var(--line2);transform:translateY(-1px)}
@@ -306,6 +306,40 @@ table.tk th.c{text-align:center}
 @media(max-width:760px){.rcand-row{display:flex;grid-template-columns:none;overflow-x:auto;-webkit-overflow-scrolling:touch;scroll-snap-type:x mandatory;gap:10px;padding-bottom:6px;margin:0 -18px 12px;padding-left:18px;padding-right:18px}.rcand-row .rcand{flex:0 0 78%;max-width:280px;scroll-snap-align:start}}
 /* match reference page: drop kicker/label uppercase + letter-spacing so small text reads like the left site at the same size */
 .tag,.vkick,.asof-k,.sidecard h4,.dr-sec h5,.cbox .k,table.tk th,.casc-trigger b,.casc-driver .dl{text-transform:none;letter-spacing:normal}
+/* ===== 01 MACRO (v-macro) ===== */
+#v-macro .mc-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0}
+#v-macro .mc-card{border:1px solid var(--line);border-left:3px solid var(--dawn);border-radius:11px;padding:12px 13px;background:var(--panel)}
+#v-macro .mc-card h4{margin:0 0 5px;font-size:15px;color:var(--txt)}
+#v-macro .mc-card p{margin:0;font-size:13px;color:var(--dim);line-height:1.5}
+#v-macro .mc-sec{margin:24px 0 6px;font-family:var(--mono);font-size:13px;color:var(--dawn);font-weight:700}
+#v-macro table.mc{width:100%;border-collapse:collapse;font-size:13px;margin:6px 0}
+#v-macro table.mc th,#v-macro table.mc td{padding:7px 9px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+#v-macro table.mc th{font-family:var(--mono);font-size:12px;color:var(--faint);font-weight:600}
+#v-macro table.mc td.c,#v-macro table.mc th.c{text-align:center;white-space:nowrap}
+#v-macro .lamp{font-size:15px}
+#v-macro .mbadge{font-family:var(--mono);font-size:11.5px;font-weight:700;padding:1px 7px;border-radius:20px;white-space:nowrap}
+#v-macro .mc-2col{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:8px 0}
+#v-macro .mc-2col .col{border:1px solid var(--line);border-radius:11px;padding:12px 14px;background:var(--panel)}
+#v-macro .mc-2col .col.sell{border-left:3px solid var(--hot)}
+#v-macro .mc-2col .col.buy{border-left:3px solid var(--nascent,#0ca678)}
+#v-macro .mc-2col h4{margin:0 0 8px;font-size:14px}
+#v-macro .mc-2col ul{margin:0;padding-left:18px;font-size:13px;color:var(--dim);line-height:1.65}
+#v-macro .verdict{font-family:var(--mono);font-size:13px;padding:10px 12px;border-radius:9px;background:var(--panel2);margin:10px 0;line-height:1.6;border-left:3px solid var(--dawn)}
+#v-macro ol.mc-steps{margin:6px 0;padding-left:20px;font-size:13.5px;color:var(--dim);line-height:1.75}
+.sig-edit{margin:10px 0 6px;border:1px solid var(--line);border-radius:8px;background:var(--panel2);padding:6px 12px}
+.sig-edit summary{font-family:var(--mono);font-size:13px;color:var(--dim);cursor:pointer;padding:4px 0;list-style:none}
+.sig-edit summary::-webkit-details-marker{display:none}
+.sig-edit[open] summary{color:var(--txt);padding-bottom:8px;border-bottom:1px dashed var(--line)}
+.sig-form{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;padding:10px 0 6px;align-items:center}
+.sig-form input[type=number]{font-family:var(--mono);font-size:13px;padding:7px 9px;border:1px solid var(--line);border-radius:6px;background:var(--panel);color:var(--txt);min-width:0}
+.sig-form input[type=number]:focus{outline:none;border-color:var(--dawn)}
+.sig-form label{font-family:var(--mono);font-size:13px;color:var(--dim);display:flex;gap:6px;align-items:center}
+.sig-form button{font-family:var(--mono);font-size:13px;padding:7px 14px;background:var(--dawn);color:var(--onacc);border:0;border-radius:6px;cursor:pointer}
+.sig-form button:disabled{opacity:.5;cursor:not-allowed}
+.sig-form .sig-msg{font-family:var(--mono);font-size:12px;color:var(--dim);grid-column:1/-1;margin-top:2px}
+.sig-form .sig-msg.ok{color:#0ca678}
+.sig-form .sig-msg.err{color:#e03131}
+@media(max-width:760px){#v-macro .mc-cards{grid-template-columns:1fr 1fr}#v-macro .mc-2col{grid-template-columns:1fr}#v-macro table.mc{display:block;overflow-x:auto;white-space:nowrap}}
 </style>
 <style id="alpha-style">
 /* ===== 05 ALPHA MAP — fully scoped under #v-alpha (self-contained colours/fonts) ===== */
@@ -330,6 +364,17 @@ table.tk th.c{text-align:center}
 #v-alpha .tbtn:hover{border-color:var(--a-brand)}
 #v-alpha .tbtn.on{color:var(--a-brand);border-color:var(--a-brand);background:rgba(18,87,214,.06)}
 #v-alpha .legend{display:flex;gap:3px 9px;flex-wrap:wrap;font-size:11px;color:var(--a-dim);margin-left:auto}
+#v-alpha .snapsel{display:flex;align-items:center;gap:4px;margin-right:14px}
+#v-alpha .snapsel .lab{font-size:11px;color:var(--a-dim)}
+#v-alpha .snapnav{font-family:var(--mono);font-size:15px;font-weight:700;line-height:1;color:var(--a-brand);background:#fff;border:1.5px solid var(--a-line);border-radius:7px;width:26px;height:26px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.15s;padding:0}
+#v-alpha .snapnav:hover:not(:disabled){border-color:var(--a-brand);background:rgba(28,126,214,.06)}
+#v-alpha .snapnav:disabled{opacity:.3;cursor:default}
+#v-alpha .snapcur{font-family:var(--mono);font-size:11.5px;font-weight:700;color:var(--a-brand);min-width:108px;text-align:center;padding:0 4px}
+#v-alpha .snapsel.hist .snapcur{color:#b8860b}
+#v-alpha .snapsel.hist .snapnav{color:#b8860b;border-color:#b8860b;background:rgba(184,134,11,.06)}
+#v-alpha .snap-reason{margin:8px 2px 0;padding:10px 12px;border-left:3px solid #b8860b;background:rgba(184,134,11,.06);border-radius:0 8px 8px 0;font-size:12px;line-height:1.55;color:var(--a-dim)}
+#v-alpha .snap-reason b{color:var(--a-fg,#2c2c2c);font-size:12px}
+#v-alpha .snap-reason[hidden]{display:none}
 #v-alpha .lg{display:inline-flex;align-items:center;gap:5px}
 #v-alpha .dot{width:9px;height:9px;border-radius:50%}
 #v-alpha .card{background:var(--a-surface);border:1.5px solid var(--a-line);border-radius:14px;padding:18px;position:relative;overflow:hidden;transition:.15s}
@@ -506,11 +551,12 @@ table.tk th.c{text-align:center}
   <div class="brand"><span class="mark">알파맵</span></div>
   <nav id="nav">
     <button class="tab on" data-v="alpha"><span class="n">00</span>알파 맵</button>
-    <button class="tab" data-v="thread"><span class="n">01</span>관통 흐름</button>
-    <button class="tab" data-v="cascade"><span class="n">02</span>파생 체인</button>
-    <button class="tab" data-v="stack"><span class="n">03</span>8레이어 통합</button>
-    <button class="tab" data-v="map"><span class="n">04</span>초입 지도</button>
-    <button class="tab" data-v="port"><span class="n">05</span>포트폴리오 X-레이</button>
+    <button class="tab" data-v="macro"><span class="n">01</span>매크로 매매</button>
+    <button class="tab" data-v="thread"><span class="n">02</span>관통 흐름</button>
+    <button class="tab" data-v="cascade"><span class="n">03</span>파생 체인</button>
+    <button class="tab" data-v="stack"><span class="n">04</span>8레이어 통합</button>
+    <button class="tab" data-v="map"><span class="n">05</span>초입 지도</button>
+    <button class="tab" data-v="port"><span class="n">06</span>포트폴리오 X-레이</button>
   </nav>
 </div></header>
 
@@ -524,28 +570,144 @@ table.tk th.c{text-align:center}
 <section class="view" id="v-thread">
   <div class="vhead">
     <h1 class="vtitle">병목은 <em>이동</em>한다 — 그 앞단에 알파가 있다</h1>
-    <p class="vsub">학습→추론 전환은 단발 이벤트가 아니라 <b>capex 병목이 컴퓨트에서 메모리·광·전력으로 흘러가는 강물</b>입니다.</p></div>
+    <p class="vsub">학습→추론 전환은 단발 이벤트가 아니라 <b>여러 독립 forcing function(강물)</b>이 동시에 흐르는 구조입니다. 강물 후보를 누르면 그 강물의 S-커브(성숙→초입)가 펼쳐집니다.</p></div>
   <aside class="rcand-panel">
       <div class="ph">새로운 강물 후보</div>
-      <div class="psub">독립 강물 4 (1~4) + 후보군 1 (5) · 서로 비종속(MECE)</div>
+      <div class="psub">독립 강물 5 (1~5) + 후보군 1 (6) · 서로 비종속(MECE)</div>
       <div class="rcand-row">
-      <div class="rcand active" data-r="0"><div class="num">1</div><div><div class="riv">학습<span class="ar">→</span>추론<span class="tier" style="background:var(--panel2);color:var(--dim)">현재</span></div><div class="axis">워크로드 · A의 사슬 소유</div></div></div>
-      <div class="rcand" data-r="1" style="border-left-color:var(--line2)"><div class="num">2</div><div><div class="riv">데이터<span class="ar">→</span>RL·합성<span class="tier" style="background:var(--panel2);color:var(--dim)">A</span></div><div class="axis">모델 연료 · 입력</div></div></div>
-      <div class="rcand" data-r="2" style="border-left-color:var(--line2)"><div class="num">3</div><div><div class="riv">임대<span class="ar">→</span>주권·뉴클라우드<span class="tier" style="background:var(--panel2);color:var(--dim)">B</span></div><div class="axis">소유·자본 · 누가</div></div></div>
-      <div class="rcand" data-r="3" style="border-left-color:var(--line2)"><div class="num">4</div><div><div class="riv">스케일<span class="ar">→</span>효율<span class="tier" style="background:var(--panel2);color:var(--dim)">B</span></div><div class="axis">지능 단가 · Jevons</div></div></div>
-      <div class="rcand rcand-merged" style="border-left-color:var(--faint)"><div class="num">5</div><div><div class="riv" style="color:var(--faint);margin-bottom:5px">후보군</div>
-        <div class="m-line"><span class="riv">디지털<span class="ar">→</span>피지컬<span class="tier" style="background:var(--panel2);color:var(--dim)">C</span></span></div>
-        <div class="m-line"><span class="riv">자유배포<span class="ar">→</span>거버넌스<span class="tier" style="background:var(--panel2);color:var(--dim)">B</span></span></div>
-        <div class="m-line"><span class="riv" style="color:var(--dim)">중앙<span class="ar" style="color:var(--faint)">→</span>엣지·분산<span class="tier" style="background:rgba(150,161,176,.14);color:var(--faint)">경계</span></span></div>
+      <div class="rcand active" data-r="0"><div class="num">1</div><div><div class="riv">학습<span class="ar">→</span>추론<span class="tier" style="background:#0ca67822;color:#0ca678">현재</span></div><div class="axis">워크로드 · A의 사슬 소유</div></div></div>
+      <div class="rcand" data-r="1" style="border-left-color:var(--line2)"><div class="num">2</div><div><div class="riv">데이터<span class="ar">→</span>RL·합성<span class="tier" style="background:#1c7ed622;color:#1c7ed6">A</span></div><div class="axis">모델 연료 · 입력</div></div></div>
+      <div class="rcand" data-r="2" style="border-left-color:var(--line2)"><div class="num">3</div><div><div class="riv">임대<span class="ar">→</span>주권·뉴클라우드<span class="tier" style="background:#b8860b22;color:#b8860b">B</span></div><div class="axis">소유·자본 · 누가</div></div></div>
+      <div class="rcand" data-r="3" style="border-left-color:var(--line2)"><div class="num">4</div><div><div class="riv">스케일<span class="ar">→</span>효율<span class="tier" style="background:#b8860b22;color:#b8860b">B</span></div><div class="axis">지능 단가 · Jevons</div></div></div>
+      <div class="rcand" data-r="4" style="border-left-color:var(--line2)"><div class="num">5</div><div><div class="riv">디지털<span class="ar">→</span>피지컬<span class="tier" style="background:#7048e822;color:#7048e8">C</span></div><div class="axis">로봇 · 액추에이터</div></div></div>
+      <div class="rcand rcand-merged" data-r="5" style="border-left-color:var(--faint);border-style:dashed"><div class="num">6</div><div><div class="riv" style="margin-bottom:5px">후보군<span class="tier" style="background:#868e9622;color:#868e96">경계</span></div>
+        <div class="m-line"><span class="riv">자유배포<span class="ar">→</span>거버넌스<span class="tier" style="background:#b8860b22;color:#b8860b">B</span></span></div>
+        <div class="m-line"><span class="riv" style="color:var(--dim)">중앙<span class="ar" style="color:var(--faint)">→</span>엣지·분산<span class="tier" style="background:#868e9622;color:#868e96">경계</span></span></div>
       </div></div>
       </div>
-      <div class="psub" style="margin:12px 0 0;line-height:1.6">A 비합의 · B 반비합의 · C 합의화 중 · 경계=부분 종속. <b style="color:var(--dawn)">1~4</b>는 서로 비종속(독립 forcing function), <b>5</b>는 후보군(보조·경계)으로 묶음.</div>
+      <div class="psub" style="margin:12px 0 0;line-height:1.6">A 비합의 · B 반비합의 · C 합의화 중 · 경계=부분 종속. <b style="color:var(--dawn)">1~5</b>는 서로 비종속(독립 forcing function), <b>6</b>은 후보군(보조·경계)으로 묶음.</div>
     </aside>
     <div class="thread-card">
       <svg class="thread-svg" id="threadSvg" viewBox="0 0 1240 270" preserveAspectRatio="xMidYMid meet"></svg>
       <div class="tnote" id="threadNote">컴퓨트·메모리(<b>L1–L3</b>)는 이미 가격에 반영(성숙). 강물의 머리는 <b style="color:var(--dawn)">L4 패키징 · L6 광 · L8 발전</b>을 지나 <b style="color:var(--nascent)">피지컬 AI</b>로 향하는 중.</div>
       <div class="detail-strip" id="threadDetail"></div>
     </div>
+</section>
+
+<!-- 01 MACRO -->
+<section class="view" id="v-macro">
+  <div class="vhead">
+    <div class="vkick">Macro Beta · 충격 매매 룰북</div>
+    <h1 class="vtitle">매크로는 <em>타이밍</em>, 펀더멘털은 선택</h1>
+    <p class="vsub">개별 종목은 매크로에 끌려가지만, 매크로 충격은 <b>반복되는 패턴</b>이다. 공포가 3중 점등하면 분할 매수, 과열엔 <b>전량매도 대신 부분 트림</b>. 2025.1~2026.5 한·미 전수조사 기반.</p>
+  </div>
+
+  <div class="mc-sec">핵심 명제</div>
+  <div class="mc-cards">
+    <div class="mc-card"><h4>매크로 급락 = 매수 기회</h4><p>표본 내 모든 매크로 급락이 D+60 내 회복/신고가. 단 <b>정책 반전 여지</b> 확인 필수.</p></div>
+    <div class="mc-card"><h4>과열 = 부분 트림</h4><p>강세장에선 RSI70+/Greed가 추세지속 신호로 더 자주 작동. <b>전량매도 금지, 20~30% 트림.</b></p></div>
+    <div class="mc-card"><h4>종목은 매크로 종속</h4><p>충격 시 상관 ≈1로 무차별 매도. 매크로=타이밍, 펀더멘털=선택으로 분리.</p></div>
+    <div class="mc-card"><h4>패턴화는 가능</h4><p>저점·고점 예측 불가. 대신 <b>3중 점등 시그널</b>로 정량화.</p></div>
+  </div>
+  <p class="vsub" style="margin-top:4px">매크로 충격은 노이즈가 아니라 거래 가능한 신호. 단 "펀더멘털 레짐 전환"이면 이 룰북은 폐기.</p>
+
+  <div class="mc-sec">3중 점등 매수 시그널 (신호등) · <span style="color:var(--faint)">현재값 signals.json 연동</span></div>
+  <details class="sig-edit">
+    <summary>✎ 신호값 갱신 (signals.json)</summary>
+    <div class="sig-form">
+      <input id="sgVix"  type="number" step="0.1" min="0"   max="150" placeholder="VIX 종가">
+      <input id="sgFG"   type="number" step="1"   min="0"   max="100" placeholder="F&G 0–100">
+      <input id="sgSP"   type="number" step="0.1" min="-30" max="30"  placeholder="S&P 일간 %">
+      <label><input id="sgSide" type="checkbox"> KOSPI 사이드카</label>
+      <button id="sgSubmit">갱신 · 커밋</button>
+      <span id="sgMsg" class="sig-msg">빈칸은 자동으로 null(폴백).</span>
+    </div>
+  </details>
+  <table class="mc">
+    <thead><tr><th>신호</th><th class="c">현재값</th><th class="c">매수 점등</th><th class="c">매도(과열) 점등</th><th class="c">상태</th></tr></thead>
+    <tbody>
+      <tr><td>VIX 종가</td><td class="c" id="sigVix">--</td><td class="c">≥ 40</td><td class="c">≤ 14</td><td class="c"><span class="lamp" id="lampVix">⚪</span></td></tr>
+      <tr><td>CNN Fear &amp; Greed</td><td class="c" id="sigFG">--</td><td class="c">≤ 15</td><td class="c">≥ 80</td><td class="c"><span class="lamp" id="lampFG">⚪</span></td></tr>
+      <tr><td>KOSPI 사이드카 / S&amp;P 일간</td><td class="c" id="sigSide">--</td><td class="c">발동 / −5%</td><td class="c">매수 사이드카 연발</td><td class="c"><span class="lamp" id="lampSide">⚪</span></td></tr>
+    </tbody>
+  </table>
+  <div class="verdict" id="sigVerdict">신호 데이터 없음(signals.json 미입력) — 대기</div>
+  <p class="vsub">판정: 매수 3개 중 <b>≥2 → 분할매수 / 1 → 1/3 정찰 / 0 → 대기.</b> 매도는 대칭이되 결과는 <b>부분 트림만</b>. 검증: <span class="mbadge" style="background:#0ca67822;color:#0ca678">2025.4.7~8 관세 3/3 → D+20 +15%</span> <span class="mbadge" style="background:#0ca67822;color:#0ca678">2026.3.3~4 중동 3/3 → D+20 +10~15%</span></p>
+
+  <div class="mc-sec">보유·후보 종목 매크로 베타 &amp; 회복탄력성 <span style="color:var(--faint)">(★=보유)</span></div>
+  <table class="mc">
+    <thead><tr><th>#</th><th>종목</th><th>티커</th><th>레이어</th><th>보유</th><th class="c">단계</th><th class="c">매크로 베타</th><th>25.4→26.5</th><th>현재 판단</th><th>충격 시 액션</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>블룸에너지</td><td>BE</td><td>L8</td><td>★2.6%</td><td class="c"><span class="mbadge" style="background:#e0313122;color:#e03131">과열</span></td><td class="c">2.0~2.5</td><td>+1,820%</td><td>y1 4 수주실재·추격금지</td><td><b>충격=첫 눌림 기회</b>. 증액 1순위</td></tr>
+      <tr><td>2</td><td>루멘텀</td><td>LITE</td><td>L6</td><td>★(L6 13%)</td><td class="c"><span class="mbadge" style="background:#b8860b22;color:#b8860b">성숙</span></td><td class="c">1.8~2.2</td><td>+1,000%+</td><td>wk −1 트림앰버</td><td>충격 <i>전</i> 트림, 후 과매도 재매수</td></tr>
+      <tr><td>3</td><td>마이크론</td><td>MU</td><td>L3</td><td>★(L3 35.7%)</td><td class="c"><span class="mbadge" style="background:#b8860b22;color:#b8860b">성숙</span></td><td class="c">1.8~2.0</td><td>+660%</td><td>y1 3·6/24 게이트</td><td>분할매수, <b>6/24 실적 게이트</b></td></tr>
+      <tr><td>4</td><td>삼성전자</td><td>005930</td><td>L3</td><td>★(L3)</td><td class="c"><span class="mbadge" style="background:#b8860b22;color:#b8860b">성숙</span></td><td class="c">1.2~1.5</td><td>+125%(연)</td><td>y1 7 HBM4 미반영</td><td>충격 시 매수(상대 저평가)</td></tr>
+      <tr><td>5</td><td>마벨</td><td>MRVL</td><td>L2/L6</td><td>★(L2 8.3%)</td><td class="c"><span class="mbadge" style="background:#1c7ed622;color:#1c7ed6">가속</span></td><td class="c">2.0~2.2</td><td>+220%</td><td>wk −0.5·ASIC 런웨이</td><td>충격 시 <b>5분할</b>(회복 느림)</td></tr>
+      <tr><td>6</td><td>램버스</td><td>RMBS</td><td>L3 IF</td><td>probe ~1%</td><td class="c"><span class="mbadge" style="background:#1c7ed622;color:#1c7ed6">가속</span></td><td class="c">1.5~1.8</td><td>+200~300%</td><td>Q2 7/27 게이트</td><td>충격+$140 눌림+Q2 확인 후</td></tr>
+      <tr><td>7</td><td>테슬라</td><td>TSLA</td><td>기타</td><td>★7.0%</td><td class="c"><span class="mbadge" style="background:#1c7ed622;color:#1c7ed6">가속</span></td><td class="c">1.5~3.0</td><td>미회복</td><td>정치베타</td><td><b>매크로 신호로 매매 금지·별도</b></td></tr>
+      <tr><td>—</td><td>소부장(후보)</td><td>KODEX AI반도체핵심장비</td><td>L4</td><td>★2.5%</td><td class="c"><span class="mbadge" style="background:#1c7ed622;color:#1c7ed6">가속</span></td><td class="c">—</td><td>YTD −58%</td><td><b>회전 1순위 관찰</b></td><td>충격 시 증액 최우선 후보</td></tr>
+      <tr><td>—</td><td>grid 발전(미보유)</td><td>CEG·OKLO 등</td><td>L8</td><td>0%</td><td class="c">—</td><td class="c">—</td><td>—</td><td>다음 병목</td><td>충격 시 신규 진입 관찰</td></tr>
+    </tbody>
+  </table>
+  <div class="foot">L8 전력·L6 광 = 매크로 급락 시 회복탄력 1·2위. 단 LITE·BE는 지금 트림 앰버/추격금지 상태 → "충격 후 재매수"가 정석.<br>Tesla는 AI 인프라가 아닌 정치/거버넌스 베타 — 매크로 룰북 적용 제외.<br>다음 병목 L4(2.5%)·L8(2.6%)은 얇음 → 매크로 충격이 곧 회전(rotation) 기회.</div>
+
+  <div class="mc-sec">이벤트 유형 분류 (매수기회 vs 함정)</div>
+  <table class="mc">
+    <thead><tr><th>유형</th><th>25~26 사례</th><th class="c">판정</th><th>회복</th><th>대응</th></tr></thead>
+    <tbody>
+      <tr><td>지정학(일시 공습)</td><td>25.6 이란</td><td class="c" style="color:#0ca678">🟢 매수</td><td>V자 D+10</td><td>강한 매수</td></tr>
+      <tr><td>지정학(장기·유가)</td><td>26.3 호르무즈</td><td class="c" style="color:#0ca678">🟢 매수</td><td>U자 D+30~60</td><td>단계 매수·한국비중 축소</td></tr>
+      <tr><td>AI 효율 충격</td><td>25.1 DeepSeek</td><td class="c" style="color:#0ca678">🟢 매수</td><td>V자 1~4주</td><td>강한 매수(Jevons)</td></tr>
+      <tr><td>AI 수요 의문</td><td>25.11 버블설</td><td class="c" style="color:#b8860b">🟡 혼합</td><td>1~2주</td><td>부분 트림 후 재매수 대기</td></tr>
+      <tr><td>관세(정책)</td><td>25.4 Liberation Day</td><td class="c" style="color:#0ca678">🟢 매수</td><td>V자 즉시</td><td><b>정책 반전 확인 후</b> 진입</td></tr>
+      <tr><td>연준 비둘기</td><td>25.8 잭슨홀</td><td class="c" style="color:#0ca678">🟢 매수</td><td>추세강화</td><td>매수/보유</td></tr>
+      <tr><td>연준 매파 동결</td><td>25.7.31</td><td class="c" style="color:var(--dim)">⚪ 중립</td><td>단기변동</td><td>신호 약함, 패스</td></tr>
+      <tr><td>정치-거버넌스(종목)</td><td>TSLA-Musk</td><td class="c" style="color:#b8860b">🟡 함정</td><td>불확실</td><td>개별 분석</td></tr>
+      <tr><td>펀더멘털 레짐 전환</td><td>(표본 외)</td><td class="c" style="color:#e03131">🔴 함정</td><td>W자 분기~년</td><td><b>룰북 폐기</b></td></tr>
+    </tbody>
+  </table>
+
+  <div class="mc-sec">매수 / 매도 분할 규칙</div>
+  <div class="mc-2col">
+    <div class="col buy"><h4 style="color:#0ca678">매수 (분할 진입)</h4>
+      <ul>
+        <li>정찰 33%: 블록 신호등 ≥2 점등 즉시</li>
+        <li>추가 33%: D+1~2 추가 하락 시</li>
+        <li>마무리 34%: D+5~10 정책 반전/안정화 헤드라인 후</li>
+        <li>진입 우선순위: 충격 후 → L4 소부장(회전) · MU/005930(메모리) · MRVL(5분할) · LITE/BE(눌림 확인 후)</li>
+      </ul>
+    </div>
+    <div class="col sell"><h4 style="color:var(--hot)">매도 / 트림 (현재 judgment 직결)</h4>
+      <ul>
+        <li>신고가+RSI70+Greed&gt;80: <b>20% 트림</b> ← 현재 <b>LITE(wk−1 앰버)·한국전력ETF(wk−0.75)</b> 해당</li>
+        <li>+ 펀더멘털 위축(capex 가이던스 컷): <b>최대 50%</b></li>
+        <li>+ 레짐 전환 매크로: <b>최대 80%</b></li>
+        <li><b>절대 100% 매도 금지.</b> BE는 <i>추격금지·첫 눌림 대기</i>(매도 아님).</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="mc-sec">X-레이 갭 연계 (충격 = 회전 기회)</div>
+  <table class="mc">
+    <thead><tr><th>영역</th><th class="c">현재 비중</th><th>충격 시 역할</th></tr></thead>
+    <tbody>
+      <tr><td>현재 병목(선반영) L2·3·6·7</td><td class="c">≈ 75%</td><td>방어 / 트림 영역</td></tr>
+      <tr><td>다음 병목 L4·L8</td><td class="c">≈ 5.1%</td><td>증액 1순위 영역(얇음)</td></tr>
+      <tr><td>현금</td><td class="c">9%</td><td>충격 대비 실탄. 권고 레인지 향후 점검</td></tr>
+    </tbody>
+  </table>
+  <p class="vsub">매크로 급락은 비싼 선반영 층(L3·L7)을 트림해 얇은 다음 병목(L4·L8)으로 옮기는, 에크먼식 상대가치 회전을 강제 실행할 기회.</p>
+
+  <div class="mc-sec">6단계 체크리스트 + 현재 권고</div>
+  <ol class="mc-steps">
+    <li>충격 유형 분류(이벤트 표) → "레짐 전환"이면 룰북 폐기</li>
+    <li>신호 점검(3중 신호등) → 총점</li>
+    <li>매수 분할(좌)</li>
+    <li>매도 분할(우)</li>
+    <li>종목 베타 조정(베타&gt;2.0 BE·LITE·MRVL=5분할 / 1.2~1.8=3분할 / TSLA 별도)</li>
+    <li><b>현재 권고(2026-05-28)</b>: S&amp;P 사상최고 + KOSPI 미회복 → 신호 부재 구간. 현금 9% 유지, 과열 트림 모드(LITE·한국전력ETF 앰버), BE 첫 눌림 대기. MU 6/24 실적이 메모리 게이트. 다음 3중 점등 대비.</li>
+  </ol>
+  <div class="foot">Caveat: 17개월·강세장 표본. 2008/2020형 레짐 전환 미포함 — 그 경우 룰북 무효. D+N 수익률은 표본 N≤3로 신뢰구간 넓음.<br>출처: Bloomberg·CNBC·Reuters·CNN(F&amp;G)·Korea Herald/Times·Yahoo Finance·RBC WM·Macroption(VIX)·Bloom DEF 14A(SEC)·TrendForce/Counterpoint·MoneyToday. 표본 2025.1.1~2026.5.28.</div>
 </section>
 
 <!-- 01 CASCADE -->
@@ -949,6 +1111,12 @@ table.tk th.c{text-align:center}
   </div>
 
   <div class="benchrow toolbar">
+    <div class="snapsel" id="snapSel">
+      <span class="lab">시점</span>
+      <button type="button" class="snapnav" id="snapPrev" aria-label="이전 시점(←)" title="이전 시점 (← 키)">‹</button>
+      <span class="snapcur" id="snapCur" aria-live="polite">현재 (라이브)</span>
+      <button type="button" class="snapnav" id="snapNext" aria-label="다음 시점(→)" title="다음 시점 (→ 키)">›</button>
+    </div>
     <span class="lab">벤치마크</span>
     <div class="seg" id="benchSeg">
       <button data-b="NASDAQ" class="on">나스닥 (QQQ)</button>
@@ -963,6 +1131,7 @@ table.tk th.c{text-align:center}
     </div>
     <div class="legend" id="legend"></div>
   </div>
+  <div class="snap-reason" id="snapReason" hidden></div>
 
   <div class="qkey">
     <div class="qk" data-q="①"><div class="h" style="color:var(--a-dawn)">① 알파 (우상)</div><div class="d">단기·중기 모두 벤치마크 아웃퍼폼. 능동 보유가 정당화되는 칸.<span class="qk-ex"></span></div></div>
@@ -1071,6 +1240,23 @@ const RIVERS=[
    {code:'엣지',label:'엣지·온디바이스',sub:'폰·PC·글래스',stage:'초입',pos:.28,why:'추론이 단말로 — 단가↓·지연↓, mix shift (삼성 글래스 올가을·Gemini Omni 온디바이스)',plays:'QCOM · AAPL · 삼성 글래스 · 온디바이스 NPU'},
    {code:'수요',label:'Jevons 수요폭증',sub:'토큰 소비↑',stage:'가속',pos:.18,why:'단가↓ → 총 토큰 소비 폭증 → 컴퓨트 수요 환류(역설)',plays:'전 스택 되먹임 — 강물 1로 회귀'},
   ]},
+ {n:5,title:'디지털→피지컬',consensus:'C',frontCodes:['액추'],
+  front:'현재 전선(front): 휴머노이드 액추에이터',
+  note:'산업용 로봇·자율주행은 진행 중. 강물의 머리는 <b style="color:var(--dawn)">휴머노이드 액추에이터·엣지 추론</b>을 지나 <b style="color:var(--nascent)">휴머노이드 양산 통합</b>으로 — 피지컬 AI가 부품 수요로 환산되는 축.',
+  nodes:[
+   {code:'산업',label:'산업용 로봇·자동화',sub:'팩토리 오토메이션',stage:'성숙',pos:.88,why:'기존 산업 로봇 — 성숙 시장, AI는 점진 침투',plays:'FANUC · ABB 등 (성숙·선반영)'},
+   {code:'FSD',label:'자율주행·FSD',sub:'비전 실세계추론',stage:'가속',pos:.66,why:'비전 기반 실세계 추론 — 데이터 플라이휠이 해자',plays:'Tesla FSD (TSLA) · 자율주행 스택'},
+   {code:'엣지',label:'엣지 추론 실리콘',sub:'온디바이스 두뇌',stage:'가속',pos:.5,why:'피지컬 AI의 두뇌 = 온디바이스 추론 칩(저지연·저전력)',plays:'QCOM · 온디바이스 NPU'},
+   {code:'액추',label:'휴머노이드 액추에이터',sub:'관절·정밀감속기',stage:'초입',pos:.34,why:'1대당 관절 다수 = 비선형 부품 수요(현재 전선) — 감속기·모터·센서',plays:'Harmonic Drive · 정밀 감속기·액추에이터 (대부분 미상장)'},
+   {code:'통합',label:'휴머노이드 통합',sub:'양산 전',stage:'태동',pos:.14,why:'Optimus·Figure 등 — 통합·양산은 아직 전(前)단계',plays:'TSLA Optimus · Figure · 1X (미상장 다수)'},
+  ]},
+ {n:6,title:'후보군',consensus:'경계',kind:'cand',frontCodes:[],
+  front:'보조·경계 — 종목 미매핑(관찰만)',
+  note:'독립 강물(1~5)과 달리 <b>부분 종속·경계</b> 영역. 종목 매핑이 약해 <b>관찰 로그</b>로만 추적: 오픈웨이트 거버넌스 · 중앙↔엣지 분산.',
+  nodes:[
+   {code:'거버넌스',label:'자유배포→거버넌스',sub:'규제·라이선스',stage:'태동',pos:.6,why:'오픈웨이트 자유배포 → 규제·라이선스·거버넌스 (B 반비합의)',plays:'(리서치 영역 · 미매핑)'},
+   {code:'분산',label:'중앙→엣지·분산',sub:'추론 위치 이동',stage:'태동',pos:.32,why:'중앙 클라우드 추론 → 엣지·온디바이스·분산 (경계, L7/L8 부분종속)',plays:'(리서치 영역 · 미매핑)'},
+  ]},
 ];
 /* 파생 캐스케이드: 드라이버 ×10 → 함께 폭증하는 파생 가치사슬. cand=탐색기 후보 id
    [MECE 분류 규칙] 노드는 '수요 트리거가 어디서 왔나'가 아니라 '자산의 물리적 위치(전기 계량기 기준)'로 단 하나의 레이어에만 귀속한다.
@@ -1128,6 +1314,16 @@ const CASCADES=[
    {n:'연료전지 · 온사이트',why:'오프그리드 캠퍼스(Meta Columbus)',mult:'BYOP 모델 확산',cos:'Bloom',stage:'초입',cand:'be'},
    {n:'부지 4박자 희소성(α)',why:'급수권+인접송전+zoning+수용성 동시 충족',mult:'전력 단일변수 아님',cos:'(Sharpe 가설 · 리서치 영역)',stage:'태동',cand:null},
   ]},
+ /* 피지컬 AI (THREAD 꼬리) */
+ {key:'physical',driver:'피지컬 AI(휴머노이드·산업로봇)',layer:'기타',stage:'태동',
+  trigger:'추론이 디지털→물리로 이행. 단 양산 전이라 상향할 EPS 부재 → 한국 부품 소형주 1년 +300~780%는 순수 내러티브(추격 경고). ⚑',
+  primary:{label:'실펀더멘털 프록시(EPS 상향 동반)',ex:'테라다인(반도체테스트+UR) · 화낙 · 테슬라(Optimus 옵션)'},
+  nodes:[
+   {n:'로봇두뇌 NPU·온디바이스 AI',why:'추론 엣지 이행 = river① 꼬리',mult:'엣지 추론 콘텐츠↑',cos:'오픈엣지·텔레칩스·QCOM',stage:'태동',cand:'qcom'},
+   {n:'센서·비전(3D 광학)',why:'로봇 눈·신경',mult:'⚑LG이노텍 +622% 선반영',cos:'LG이노텍·고영',stage:'태동',cand:null},
+   {n:'감속기·액추에이터',why:'제조원가 30~50%·관절 구동',mult:'⚑테마 급등·양산 전',cos:'에스피지·삼현·Harmonic Drive(6324)',stage:'태동',cand:'harm'},
+   {n:'물리AI 학습데이터(모방학습)',why:'river②의 피지컬 버전',mult:'UR×Scale AI AI Trainer',cos:'테라다인·(Scale 비상장)',stage:'태동',cand:'ter'},
+  ]},
 ];
 const SIGNALS=[
  ['S1','병목 역추적','상류 레이어 병목이 이 층으로 흘러올 구조 (AVGO·NVDA 콜 단서)'],
@@ -1150,16 +1346,16 @@ function watchChips(lid){const ws=WATCH.filter(w=>w.layer===lid);if(!ws.length)r
   ws.map(w=>`<div class="wchip" title="${w.note} · 출처:${w.src}"><span class="wnm">${w.name}</span><span class="wst">${w.status}</span></div>`).join('')+`</div>`;}
 
 /* ===== HOLDINGS (5/16 브리핑 기준, 테마버킷→레이어) ===== */
-const HOLDINGS=[
- {layer:'L2',label:'연산칩 (마벨·KODEX 미국AI반도체TOP3+)',amt:75,w:8.3},
- {layer:'L3',label:'메모리 (마이크론·삼성전자·HBM ETF)',amt:320,w:35.7},
- {layer:'L4',label:'소부장 (KODEX AI반도체핵심장비)',amt:22,w:2.5},
- {layer:'L6',label:'연결 (루멘텀·KODEX 미국AI광통신네트워크)',amt:116,w:13.0},
- {layer:'L7',label:'전력·냉각 (버티브·KODEX AI전력·SOL 미국AI전력)',amt:165,w:18.3},
- {layer:'L8',label:'발전 (블룸에너지)',amt:24,w:2.6},
- {layer:'기타',label:'테슬라',amt:62,w:7.0},
- {layer:'기타',label:'지수·채권혼합 (코스피50·채권혼합)',amt:33,w:3.6},
- {layer:'현금',label:'현금',amt:81,w:9.0},
+let HOLDINGS=[
+ {layer:'L2',label:'연산칩 (마벨·KODEX 미국AI반도체TOP3+)',amt:86,w:8.9},
+ {layer:'L3',label:'메모리 (마이크론·삼성전자·HBM ETF)',amt:384,w:39.6},
+ {layer:'L4',label:'소부장 (KODEX AI반도체핵심장비)',amt:22,w:2.3},
+ {layer:'L6',label:'연결 (루멘텀·KODEX 미국AI광통신네트워크)',amt:110,w:11.3},
+ {layer:'L7',label:'전력·냉각 (버티브·KODEX AI전력·SOL 미국AI전력)',amt:151,w:15.6},
+ {layer:'L8',label:'발전 (블룸에너지)',amt:25,w:2.5},
+ {layer:'기타',label:'테슬라',amt:59,w:6.1},
+ {layer:'기타',label:'지수·채권혼합 (코스피50·채권혼합)',amt:46,w:4.7},
+ {layer:'현금',label:'현금',amt:88,w:9.1},
 ];
 function heldWeight(L){return HOLDINGS.filter(h=>h.layer===L).reduce((s,h)=>s+h.w,0);}
 function overlap(L){const w=heldWeight(L);return w>=12?'High':w>=4?'Mid':w>0?'Low-Mid':'Low';}
@@ -1276,6 +1472,13 @@ const C=[
   capex:{bull:'로보틱스·FSD 옵션 가치',base:'EV+에너지',bear:'EV 경쟁·밸류 변동'},
   thesis:'8레이어 하드웨어 스택 밖. 피지컬 AI(로보틱스) 옵션. 별도 트랙으로 관리.',
   kill:['Optimus 상용 후퇴','FSD 규제','EV 마진 압박'],S:{s1:1,s2:1,s3:1,s4:1,s5:1}},
+ /* 신규 후보 — 실펀더멘털만 */
+ {id:'ter',name:'테라다인',ticker:'TER',mkt:'NASDAQ',layer:'기타',stage:'가속',mat:.7,conv:.6,
+  sub:'반도체 테스트(79%) → 광/포토닉스 테스트 → 로보틱스(UR·MiR 10%)',compete:'반도체 테스트 + 피지컬AI 옵션',
+  up:{l:'L4',d:'중'},down:{l:'L2',d:'강'},
+  capex:{bull:'AI 테스트 복잡도↑·로보틱스 옵션·포토닉스 테스트(L6)',base:'테스트 사이클',bear:'YTD +106%·테스트 시클리컬·로보틱스 비중 작음'},
+  thesis:'기사 휴머노이드 묶음 중 유일하게 EPS 상향 동반(2026E +58%). 본질은 반도체 테스트(실펀더멘털)+로보틱스/포토닉스 옵션. 단 이미 급등·초입 아님 → 워치',
+  kill:['테스트 capex 둔화','로보틱스 성장 정체','고밸류 디레이팅'],S:{s1:2,s2:1,s3:1,s4:1,s5:1}},
 ];
 
 /* ===== STATE / STORE ===== */
@@ -1396,7 +1599,7 @@ document.getElementById('nav').addEventListener('click',e=>{const b=e.target.clo
  b.classList.add('on');document.getElementById('v-'+b.dataset.v).classList.add('on');if(b.dataset.v==='map'){drawSCurve();drawRiverCurves();}});
 
 /* ===== SIGNAL LOG (실적 콜 등 신규 시그널 → value-chain 반영, 누적 가능) ===== */
-const SIGNAL_LOG=[
+let SIGNAL_LOG=[
  {date:'2026-05-20', at:'2026-05-20T22:00+09:00', source:'NVIDIA Q1 FY27 실적·컨콜',
   srcs:[
    {label:'NVIDIA IR(8-K)', url:'https://www.sec.gov/Archives/edgar/data/0001045810/000104581026000051/q1fy27pr.htm'},
@@ -1443,22 +1646,39 @@ const SIGNAL_LOG=[
    {tag:'AMD·엣지',layer:null,col:'#1c7ed6',html:'<b>AMD Ryzen AI Halo·AI Max PRO 400 출시</b> (5.20, 공식). 에이전트 PC=온디바이스 추론 칩 수요 확장. The Thread의 엣지/클라이언트 추론 가설 보강하는 외부 증거. <b>관찰 로그</b>.'},
    {tag:'CEG·런웨이',layer:'L8',col:'#1c7ed6',html:'<b>Constellation, DOE 신뢰성 명령 대응 + 신규 가스·태양광 용량</b> (5.23). L8 발전 용량/런웨이 변화 신호. 5.22 로그서 재진입 관찰 종목 — 방향 확정 전 <b>관찰만</b>, judgment 미반영.'},
   ]},
- {date:'2026-05-27', at:'2026-05-27T08:30+09:00', source:'데일리 뉴스 인테이크 — 헤드라인 선별 (피드 5.26, 숫자 불변·로그만) · MRVL 실적 D-Day',
+ {date:'2026-05-28', at:'2026-05-28T22:00+09:00', source:'트리거 재점검 — 4사분면(judgment) 조정 (현재가·실적·내부자·목표가 종합)',
   srcs:[
-   {label:'Qualcomm/ByteDance(Reuters)', url:'https://news.google.com/rss/articles/CBMiwwFBVV95cUxOVlhVSElReFBFQV95UktOb3loME9OTEpXNmFadDdtdXZISk1RTGNBRWRFVktaZXNzNHZVR29PMFVXUFR6NHJGU3dnMHk4dkhCOWFlWTZ1REVDZWticHN0bVlkV1lIb1QyYXpRSTNYMTNGcUxiREtoUjROZFFDS0E0cHhmMEdQdnhmWWlmR3NwVUx1NWowRG1rakFlV0U5cVJUcDIyQ2U1Q2dZTVl0amVLX29RSTllY3FmN1dpX1NLUjFCRDA?oc=5'},
-   {label:'Vicor Q2 가이던스(Barrons)', url:'https://news.google.com/rss/articles/CBMijAFBVV95cUxQOHZaN1ZqRVJuOXVpT2tpeDZqY0ljMndFaEk2bmsyVGdaYm9pZzFQcGJ3aDBhM09Gb19IY0liNEU1NjE0eGVtX2pkTUxjUjQ0S3hFa3J4ekpPUXhIamd4bXV1aEl0VWR0dFJTVlJMclRXV3JOZ2JSRVZ3Y25BbExTVnlaUGRYRHBHa2dWZA?oc=5'},
-   {label:'Oklo/DOE(IBD)', url:'https://news.google.com/rss/articles/CBMijwFBVV95cUxPeVBNT1U5MnhnaW9fdjdBXzRzZ205T2VvTzJ2TlVITzRTMlV0NU1IMWFVTE9tQ1ZfZmpuQUxSLWhCUGVZVElMdnlNVHBjb3FPTlZDaXF0bVhYbFdVTUY5WFhKdVJrbW9BWjRSdms2ZE5wM1d0VFUtc0FUTHVCYWZSa0JYay1yQU0xcWZiWVMwUQ?oc=5'},
-   {label:'Sandisk(Barrons)', url:'https://news.google.com/rss/articles/CBMie0FVX3lxTFBMdktPSUgxZUhsN2dJNHBsOEdzM1dYdm55VkFFeHJZdlk0bjBjZWVKc0ZRZWNFVVhrcTNnM2xIZVJKeDJNMW9oQXdnYjJmNXRUc1ZyUVE0RnRFUXZ5TlZ0b0xfRlYzUi11b3F1SzM0dHJYRG96b1hLcEktTQ?oc=5'},
-   {label:'MRVL COMPUTEX(공식)', url:'https://news.google.com/rss/articles/CBMi4gFBVV95cUxNSGREQkhRYnVaNjgyOWxYZ1A3SlBXclg0WEFtVWlOX3F2ZkJJMjRuM05EQnZsMnRReFlUNmYxUDFvN21YTWxuQ2o1TXdGTkNraXYzRzVWSjJGVHRLLXdzamJJaXZQaWcwTFJqV3R4M000amJENWplY2kydFlnSGJTQ3VIQTdTQnV2LW9SMnVHNEhwTzNfbHViRmpqVWEzbWdqaXY3aWhkZGNwb212a0hxMUlSX3ZjTFlNbkRxMTBmQ0twc203N3RFczlkQ2Y0V2puemJOWWRBZ0dEVEJOT0F2bHhR?oc=5'},
-   {label:'Bloom/Nebius(Yahoo)', url:'https://news.google.com/rss/articles/CBMiogFBVV95cUxQdGpYbkktbkJ4dnFUdWVMS19uOGFIblF4VVlLQjNtU29meFZSWVh6a0hiM19JRGpJSkVKU0cyVGJ4RUZXZVhDQzVmeVktVVVFYkh1d2VPN0hXTnc2cDZnREs1TGJOckljYlViamx3RkMwWXBLR2hCS1ZXUE5ad0p0NXdhVWdXZWFIbHZSa3pCYmtXTjFkaE5NVTRDTVlQNmpJekE?oc=5'}
+   {label:'UBS PT $1,625 / Barclays $1,175 / Motley Fool $1,500 (MU)', url:''},
+   {label:'Oracle·Brookfield $5B·Nebius $2.6B 수주 (BE)', url:''},
+   {label:'LITE 최고위 내부자 매도 5/21~22 (SEC Form 4)', url:''}
   ],
   items:[
-   {tag:'MRVL·D-Day',layer:null,col:'#e8590c',html:'<b>MRVL 실적 D-Day (5/27 AMC, ±13.6% event-iv)</b> — 오늘 장 마감 후 발표. COMPUTEX 키노트(AI 스케일링=커넥티비티)로 ASIC·인터커넥트 런웨이 서사 재강조. 플레이북상 방향 예측 불가 → judgment wk 중립(0.5) 유지, <b>숫자 미변경</b>. D+1(내일) 실제 방향 확정 후 wk 갱신·earnings에서 제거.'},
-   {tag:'QCOM·계약',layer:null,col:'#0ca678',html:'<b>퀄컴, ByteDance와 AI 칩 공급딜</b> (Reuters/Bloomberg). 모바일 의존 탈피·데이터센터 추론 수요 트리거 — 후보 종목 펀더 증거. <b>관찰 로그</b>, 숫자 불변. 헤드라인 기반·원문 미검증.'},
-   {tag:'OKLO·규제',layer:'L8',col:'#0ca678',html:'<b>Oklo, DOE 플루토늄 원자로 연료 협상 진전</b> (IBD). L8 발전 연료·런웨이 촉매. 단 프리레비뉴·고변동 — 방향 확정 전 <b>관찰만</b>, judgment 미반영.'},
-   {tag:'SNDK·메모리',layer:null,col:'#1c7ed6',html:'<b>Sandisk CEO "메모리 공급부족 지속" + 주가 급등</b> (Barrons/Motley). NAND 언더서플라이 서사 강화 → 메모리 레이어 상대가치 우호(005930 메모리 thesis 보강). 005930 y1 7 이미 반영 — <b>로그만</b>, 숫자 불변.'},
-   {tag:'VICR·가이던스',layer:null,col:'#1c7ed6',html:'<b>Vicor Q2 매출 가이던스 상향 ~$142M</b> (Barrons/Stock Titan). 실제 펀더 상향이나 5.22 성숙 강등된 비싼 쪽 호재 → OPS 상대가치 원칙상 <b>채점 불변, 관찰만</b>.'},
-   {tag:'BE·반전점검',layer:null,col:'#e03131',html:'<b>Bloom Energy, Nebius $2.6B AI 전력딜(반복매출)</b> (Yahoo). judgment BE wk −0.5(C2 "펀더 없는 과열" 전제)의 <b>전제 약화 가능</b> 신호 — 펀더 뒷받침이면 반전 근거 소멸. 헤드라인 미검증 → 이번엔 <b>플래그만, 숫자 미변경</b>(§1 유효기간 점검 대상).'},
+   {tag:'MRVL·실적경과',layer:'L2',col:'#e03131',html:'<b>5/27 AMC 실적 경과 — 신고가 $218 재돌파 실패 후 $196 대량 되돌림.</b> judgment wk 0.5(방향 예측불가 전제) → −0.5로 교체, 사분면 ①알파→②중기알파 이동. m3·y1 ASIC 런웨이 유지. earnings.json에서 제거(이벤트 종료). AVGO 6/3 리드스루 후 재평가.'},
+   {tag:'BE·강등',layer:'L8',col:'#e03131',html:'<b>직전 \"매수 1순위\" 강등 → \"진짜 리셋/눌림 대기\".</b> Oracle 2.8GW·Brookfield $5B·Nebius $2.6B로 BYOP 수주는 실재(\"펀더 없는 과열\" 전제 폐기) → y1 0→+4 상향. 그러나 YTD +206%·신고가권·첫 눌림 부재·디렉터 내부자 매도($267)로 추격 금지 → wk −0.5 신중 유지(S5 \"첫 눌림\" 규율).'},
+   {tag:'LITE·트림앰버',layer:'L6',col:'#e03131',html:'<b>트림 트리거 앰버 점등 — 5/21~22 최고위 임원 대량 내부자 매도 + 베어리시 풋 + 피벗탑 매도신호.</b> 상단 이탈 실패 조짐 → wk −0.5→−1. 가속 런웨이(m3·y1)는 유지, thesis 훼손 아닌 트림 바이어스.'},
+   {tag:'MU·재평가',layer:'L3',col:'#1c7ed6',html:'<b>$1조 시총 + UBS PT $1,625(주가 +12%) — 추정이 가격을 앞지름.</b> 성숙 강등에 도전하는 forward γ 재개방분 미반영 → y1 1→3 소폭 상향. 단 목표가 ~5.7배 분산은 방향엣지 아닌 리스크사이징 → 6/24 실적이 해소지점, 그 전엔 보유·관망.'},
+   {tag:'상대가치',layer:'L4',col:'#b8860b',html:'<b>바스켓 거의 전부 신고가권 쏠림(MU $1조·BE +206%·LITE 고점·VRT +195%) → 깨끗한 매수 트리거 없음.</b> 유일 비과열·공포억압 = L4 소부장(KODEX AI반도체핵심장비, YTD −58%) → 회전 1순위 관찰. 단 S5 베이스 돌파·backend 캐파 트리거 미점등 → 숫자 불변, 관찰만. 실행 가능한 단 하나는 LITE 계획 트림.'},
+  ]},
+ {date:'2026-05-28', at:'2026-05-28T23:30+09:00', source:'한국경제 A3 「AI發 하드웨어 혁명」 — 데일리 인테이크 (조간·헤드라인 기반, 원문 미검증)',
+  srcs:[{label:'한국경제 2026-05-28 A3'},{label:'Omdia 2026 forecast 62.7%(4/23)'}],
+  items:[
+   {tag:'L3·크라우딩',layer:'L3',col:'#b8860b',html:'주류 1면급 "HW 시대"+헤지펀드 반도체 비중 역대 최고·SW 역대 최저 = late-cycle 크라우딩. L1–L3 성숙/과열 <b>확인(사후)</b>, 메모리 트림 thesis 강화. 단계 mover 아님 — risk-sizing 입력.'},
+   {tag:'L7·L8',layer:'L8',col:'#0ca678',html:'골드만 GSGI: capex 전력·냉각·서버랙으로 확산 + AI투자 전망 전력 slice 성장 → front(L7 가속/L8 초입) 외부 검증. 리밸 L8 빌드 보강.'},
+   {tag:'L4·caution',layer:'L4',col:'#0ca678',html:'헤지펀드 램리서치·AMAT·ASML 순매수 = L4 초입에 군중 도착. 빌드 validation이자 비대칭 축소 caution → 상대가치 체크.'},
+   {tag:'magnitude',layer:null,col:'#7048e8',html:'Omdia 산업 +62.7%(price-driven, ROI 의문 단서). 단계 미이동, kill-trigger 근시일 확률↓ 입력만.'},
+  ]},
+ {date:'2026-05-30', at:'2026-05-30T10:00+09:00', source:'주간 종가 점검 — 상대가치 스프레드 확대 + SPCX IPO 일정 확정 (헤드라인 기반·원문 미검증)',
+  srcs:[
+   {label:'메모리 3사 합산 시총 ~$3T·각 $1T (Techtimes 5/27)', url:''},
+   {label:'SpaceX S-1: SPCX 6/12 상장·$1.75T·$75B (Reuters/CNBC)', url:''},
+   {label:'KOSPI 5/28 급락·환율~1,468·금통위 매파 (Investing.kr)', url:''}
+  ],
+  items:[
+   {tag:'L3·과열심화',layer:'L3',col:'#b8860b',html:'<b>메모리 주간 +14% — 3사 합산 시총 ~$3조·각 $1조 돌파.</b> 2026 완판·2028까지 공급부족으로 병목은 여전히 binding이나 가격이 EPS 컨센을 상당폭 선반영 → γ 빠르게 닫히는 구간. 리밸 없이 시세만으로 비중 35.7%→39.6% 드리프트. 트림 1순위 thesis 강화 — risk-sizing 입력, 숫자 불변.'},
+   {tag:'L7·낙도주의',layer:'L7',col:'#e03131',html:'<b>한국 전력(KODEX AI전력) ATH −26%·주간 −14% — 그러나 매크로 게이트 4개 전부 active.</b> 코스피 변동성(중동·미이란)·환율 ~1,468·매파 금통위(인상 시사)·유가 $90대 = AND 미충족 = falling knife 확정. 가격만 빠진 것 ≠ 매수. 진입 불가, 관찰만.'},
+   {tag:'L6·트림앰버',layer:'L6',col:'#e03131',html:'<b>루멘텀·광통신 주간 −7~9% — 5/28 트림 앰버 연장.</b> 가속 런웨이(m3·y1)는 유지, thesis 훼손 아닌 트림 바이어스. 실행 가능한 단 하나의 깨끗한 액션 지위 유지.'},
+   {tag:'L1·IPO유동성',layer:'L1',col:'#7048e8',html:'<b>SPCX(SpaceX+xAI) IPO 일정 확정 — 6/4 로드쇼·6/11 가격·6/12 나스닥, $75B 조달·$1.75T(사상 최대).</b> $75B 기계적 유동성 흡수 = 기존 대형주 단기 역풍. OpenAI·Anthropic은 9월 이후 → 6~9월 IPO 흡입 파이프라인. WATCH의 SPCX 후보승격 트리거 6/12 도래. 메모: 리밸은 SPCX 상장 전 — 데드라인 다음 주.'},
+   {tag:'상대가치',layer:'L4',col:'#b8860b',html:'<b>메모리(+14%)↔L4 소부장(−0%) 스프레드 한 주 더 확대.</b> 바스켓 내 비중 이전 근거 누적. 실행 경로 = 메모리 트림(DC연금 우선·세금 드래그 없음)→L4. 단 전력은 게이트로 막힘, L4 backend/어드밴스드 패키징 비중 검증 미완 게이팅 → 회전 1순위 관찰 유지, 숫자 불변.'},
   ]},
  /* ▼ 신규 시그널은 여기에 같은 형식으로 추가 (date·source·srcs[{label,url}] 출처 필수) */
 ];
@@ -1861,7 +2081,7 @@ const LAYER_HEX={L1:'#b8860b',L2:'#1c7ed6',L3:'#0ca678',L4:'#7048e8',L5:'#e8590c
 const layerKey=d=>'L'+((String(d.layer).match(/L(\d)/)||[])[1]);
 const colorOf=d=>mode==='stage'?STAGE[d.stage]:(LAYER_HEX[layerKey(d)]||'#94a5b4');
 const D=[
- {n:'마벨',t:'MRVL',mkt:'US',layer:'L2/L6',w:6.1,aN:[1.5,7,9],aK:[1.3,5.5,5],stage:'가속',flag:'⚡5/27 실적',note:'NVLink Fusion·NVDA $2B 고유엣지. 보유 중 알파 최상. 다음주는 실적이라 ±분산 큼.'},
+ {n:'마벨',t:'MRVL',mkt:'US',layer:'L2/L6',w:6.1,aN:[1.5,7,9],aK:[1.3,5.5,5],stage:'가속',note:'NVLink Fusion·NVDA $2B 고유엣지. 보유 중 알파 최상. 5/27 실적 경과 — 신고가 $218 재돌파 실패·되돌림으로 단기 음, ASIC 런웨이는 유지.'},
  {n:'삼성전자',t:'005930',mkt:'KR',layer:'L3',w:3.4,aN:[1.5,4,7],aK:[0.6,1.5,2.5],stage:'성숙',note:'나스닥 대비 알파의 상당분은 "코스피>나스닥"+"삼성=코스피". 코스피 기준 고유 알파는 HBM4 점유율 회복분 정도로 축소.'},
  {n:'마이크론',t:'MU',mkt:'US',layer:'L3',w:10.1,aN:[0.5,5,3],aK:[0.3,3.5,-1],stage:'성숙',note:'6월말 실적·HBM 2026+ 타이트. 코스피(메모리 슈퍼사이클로 뜨거움) 기준 1Y는 지수 이하로.'},
  {n:'PLUS 글로벌HBM',t:'ETF',mkt:'US',layer:'L3',w:14.1,aN:[1,3,2],aK:[0.8,1.5,-2],stage:'성숙',note:'HBM 바스켓. 고유 알파 작음(테마 동행).'},
@@ -1891,12 +2111,14 @@ const CASH={NASDAQ:[-0.3,-2.5],KOSPI:[-0.5,-4]};
 const BNOTE={NASDAQ:'기준선=나스닥(QQQ). 각 종목의 raw 초과수익.',KOSPI:'기준선=코스피. 나스닥 대비 전 종목 동일하게 평행이동 → 순위·간격 불변, 원점만 이동.'};
 
 let bench='NASDAQ',mode='stage',showLabels=true,selected=null,showCand=true,showHeld=true,showEM=true;
+// 4사분면 시점 스냅샷: snapIdx<0 = 현재(라이브), 그 외 = SNAPS[snapIdx] 과거 배치 재현.
+let SNAPS=[],snapIdx=-1;
 // raw 알파: 벤치마크 변경 = 전 종목 동일 상수 Δ 평행이동(순위·간격 불변).
 // Δ = (코스피 수익률 − 나스닥 수익률) = 현금알파의 차이(현금선과 일치). y1은 근사 상수.
 const DELTA=[+(CASH.NASDAQ[0]-CASH.KOSPI[0]).toFixed(2),+(CASH.NASDAQ[1]-CASH.KOSPI[1]).toFixed(2),3.5];
 const av=d=>bench==='NASDAQ'?d.aN:[+(d.aN[0]-DELTA[0]).toFixed(2),+(d.aN[1]-DELTA[1]).toFixed(2),+(d.aN[2]-DELTA[2]).toFixed(2)];
 // 실적 expected move(옵션 IV 기반 ±변동, 방향 아님). earnings.json이 로드되면 덮어씀. axis: wk=세로(다음주)/m3=가로(3개월).
-let EM={MRVL:{pct:16.8,axis:'wk',date:'2026-05-27'},MU:{pct:6.5,axis:'m3',date:'2026-06-25'}};
+let EM={MU:{pct:6.5,axis:'m3',date:'2026-06-25'}};
 let EPLAY=[];
 function quad(d){const a=av(d),r=a[0]>=0,u=a[1]>=0;return u?(r?'①':'②'):(r?'④':'③');}
 
@@ -1957,11 +2179,11 @@ function draw(){
    if(d.cand)c.setAttribute('stroke-dasharray','3 3');svg.appendChild(c);
    // 실적 임박(D-3~D-Day): 점 둘레에 펄스 링 = 블링킹. EM date 기준 0~3일.
    const emI=EM[d.t];
-   if(showEM&&emI&&emI.date){const di=Math.ceil((new Date(emI.date+'T00:00:00')-Date.now())/864e5);
+   if(showEM&&snapIdx<0&&emI&&emI.date){const di=Math.ceil((new Date(emI.date+'T00:00:00')-Date.now())/864e5);
      if(di>=0&&di<=3){const ring=el('circle',{cx:x,cy:y,r:r+2,class:'em-pulse'});svg.insertBefore(ring,c);}}
    // 실적: expected move 크기를 SVG 번개 path의 색·크기로 인코딩. 다음주(wk) 실적은 수치 라벨도.
    const em=EM[d.t];
-   if(showEM&&(em||d.flag)){
+   if(showEM&&snapIdx<0&&(em||d.flag)){
      const pct=em?em.pct:0;
      drawBolt(x+r,y-r,pct);
      if(em&&em.axis==='wk'){const t2=el('text',{x:x+r+8,y:y-r+3,fill:emColor(pct),'font-size':10.5,'font-weight':800});t2.textContent=`±${em.pct}%`;t2.style.pointerEvents='none';svg.appendChild(t2);}
@@ -2125,19 +2347,79 @@ document.getElementById('candBtn').addEventListener('click',function(){showCand=
  if(!showCand&&selected!=null&&D[selected].cand){selected=null;hideTip();}draw();renderWatch();});
 document.getElementById('lblBtn').addEventListener('click',function(){showLabels=!showLabels;this.classList.toggle('on',showLabels);this.textContent=showLabels?'라벨 표시':'라벨 끄기';applyLabels();});
 document.getElementById('emBtn').addEventListener('click',function(){showEM=!showEM;this.classList.toggle('on',showEM);this.textContent=showEM?'실적 표시':'실적 끄기';draw();});
+
+// ===== 4사분면 시점 스냅샷 =====
+// 라이브 머지값을 d._aN/_aK/_stage로 보존 → 과거 스냅샷 본 뒤 '현재'로 복원 가능.
+function captureLive(){D.forEach(d=>{d._aN=d.aN.slice();d._aK=d.aK.slice();d._stage=d.stage;});}
+function applySnap(){
+ const sel=document.getElementById('snapSel'),r=document.getElementById('snapReason');
+ if(snapIdx<0){
+   D.forEach(d=>{if(d._aN){d.aN=d._aN.slice();d.aK=d._aK.slice();d.stage=d._stage;}});
+   if(sel)sel.classList.remove('hist'); if(r){r.hidden=true;r.innerHTML='';}
+ }else{
+   const s=SNAPS[snapIdx];
+   D.forEach(d=>{const p=s&&s.pos&&s.pos[d.n];
+     if(p){d.aN=(p.aN||d._aN).slice();d.aK=(p.aK||d._aK).slice();if(p.stage)d.stage=p.stage;}
+     else if(d._aN){d.aN=d._aN.slice();d.aK=d._aK.slice();d.stage=d._stage;}});
+   if(sel)sel.classList.add('hist');
+   if(r){r.hidden=false;r.innerHTML=`<b>${(s.label||s.asOf)} · 갱신 사유</b><br>${s.reason||'(사유 미기재)'}`;}
+ }
+ selected=null;hideTip();draw();renderWatch();renderSnapNav();
+}
+// 시점 = SNAPS[0](가장 과거) … SNAPS[n-1](최근) → 현재(라이브). view: 0..n, n=라이브.
+function renderSnapNav(){
+ const cur=document.getElementById('snapCur'),prev=document.getElementById('snapPrev'),next=document.getElementById('snapNext');
+ if(!cur)return;
+ const n=SNAPS.length,v=snapIdx<0?n:snapIdx;
+ cur.textContent=snapIdx<0?'현재 (라이브)':((SNAPS[snapIdx].label||SNAPS[snapIdx].asOf)+(n>0?` (${v+1}/${n})`:''));
+ if(prev)prev.disabled=(v<=0);
+ if(next)next.disabled=(v>=n);
+}
+function stepSnap(dir){
+ const n=SNAPS.length;let v=(snapIdx<0?n:snapIdx)+dir;
+ if(v<0)v=0;if(v>n)v=n;
+ const ni=(v>=n)?-1:v;
+ if(ni===snapIdx)return;
+ snapIdx=ni;applySnap();
+}
+function initSnapSel(){
+ snapIdx=-1;
+ const prev=document.getElementById('snapPrev'),next=document.getElementById('snapNext');
+ if(prev)prev.addEventListener('click',()=>stepSnap(-1));
+ if(next)next.addEventListener('click',()=>stepSnap(1));
+ renderSnapNav();
+}
+// 키보드 ←/→ : 알파맵이 보일 때만, 입력 포커스 아닐 때.
+document.addEventListener('keydown',e=>{
+ if(e.key!=='ArrowLeft'&&e.key!=='ArrowRight')return;
+ if(e.metaKey||e.ctrlKey||e.altKey)return;
+ const av=document.getElementById('v-alpha');if(!av||!av.classList.contains('on'))return;
+ const t=document.activeElement&&document.activeElement.tagName;
+ if(t==='INPUT'||t==='TEXTAREA'||t==='SELECT')return;
+ e.preventDefault();stepSnap(e.key==='ArrowLeft'?-1:1);
+});
+// 콘솔에서 호출 → 현재 라이브 배치를 스냅샷 형식 JSON으로 출력(snapshots.json에 붙여넣기용).
+window.dumpSnap=function(){const pos={};D.forEach(d=>{pos[d.n]={aN:(d._aN||d.aN),aK:(d._aK||d.aK),stage:(d._stage||d.stage)};});
+ const o={asOf:new Date().toISOString().slice(0,10),label:'',reason:'',pos};const t=JSON.stringify(o,null,1);console.log(t);return t;};
+
 document.addEventListener('click',e=>{if(!e.target.closest('.bub')&&!e.target.closest('.cashdot')&&!e.target.closest('.seg')&&!e.target.closest('.wl-item')&&!e.target.closest('.tbtn')){selected=null;hideTip();unhighlight();markWatch();}},true);
 
 // 3층 병합: 자동(alpha.json) → 실적(earnings.json) → 판단(judgment.json, 마지막에 덮어씀). 없으면 폴백.
 function paint(){renderLegend();draw();renderWatch();renderEarnOps();}
 const getJSON=u=>fetch(u,{cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null);
-Promise.all([getJSON('alpha.json'),getJSON('earnings.json'),getJSON('judgment.json')]).then(([j,e,g])=>{
+Promise.all([getJSON('alpha.json'),getJSON('earnings.json'),getJSON('judgment.json'),getJSON('snapshots.json'),getJSON('holdings.json'),getJSON('signal_log.json')]).then(([j,e,g,sn,hh,sl])=>{
+ // 5) 외부화 데이터 — 비중은 holdings.json이 있으면 교체, 시그널 로그는 signal_log.json 신규분을 인라인 히스토리 뒤에 누적
+ if(hh&&Array.isArray(hh.holdings))HOLDINGS=hh.holdings;
+ if(sl&&Array.isArray(sl.log)&&sl.log.length)SIGNAL_LOG=SIGNAL_LOG.concat(sl.log);
  // 1) 자동(alpha.json) — 모멘텀 휴리스틱
  const q=j&&j.quotes;if(q)D.forEach(d=>{const a=q[d.t];if(a){if(Array.isArray(a.aN))d.aN=a.aN;if(Array.isArray(a.aK))d.aK=a.aK;}});
  // 2) 실적 IV (earnings.json)
  if(e&&e.moves)EM=e.moves; if(e&&Array.isArray(e.playbook))EPLAY=e.playbook;
  // 3) 판단(judgment.json) — 자동 위에 마지막으로 덮어씀, null은 자동 유지
  const ov=g&&g.overrides;if(ov)D.forEach(d=>{const o=ov[d.t];if(o&&Array.isArray(o.aN))o.aN.forEach((v,k)=>{if(v!=null)d.aN[k]=v;});});
-}).finally(paint);
+ // 4) 시점 스냅샷(snapshots.json) — 라이브 머지 후 현재 배치를 보존하고 셀렉터 구성.
+ captureLive();SNAPS=(sn&&Array.isArray(sn.snapshots))?sn.snapshots:[];initSnapSel();
+}).finally(()=>{paint(); if(typeof renderSignalLog==='function')renderSignalLog(); if(typeof renderStack==='function')renderStack();});
 })();
 </script>
 <script>
@@ -2154,6 +2436,60 @@ Promise.all([getJSON('alpha.json'),getJSON('earnings.json'),getJSON('judgment.js
   root.querySelectorAll('.mx-chip').forEach(x=>x.classList.remove('mx-on'));b.classList.add('mx-on');fL=b.dataset.f;apply();});
  root.querySelectorAll('.mx-hf').forEach(b=>b.onclick=()=>{
   root.querySelectorAll('.mx-hf').forEach(x=>x.classList.remove('mx-on'));b.classList.add('mx-on');fH=b.dataset.h;apply();});
+})();
+</script>
+
+<script>
+/* ===== 01 MACRO — signals.json 연동 (VIX·F&G·사이드카) ===== */
+(function(){
+ const TH={vixBuy:40,vixSell:14,fgBuy:15,fgSell:80,spBuy:-5};
+ let SIGNALS=null;
+ function set(id,txt){const e=document.getElementById(id);if(e)e.textContent=txt;}
+ function renderSignals(){
+  const S=SIGNALS||{};
+  const vix=S.vix,fg=S.fearGreed,side=S.sidecarKR,sp=S.spDailyPct;
+  set('sigVix',vix==null?'--':vix);
+  set('sigFG',fg==null?'--':fg);
+  set('sigSide',side===true?'발동':(sp==null?'--':`S&P ${sp>0?'+':''}${sp}%`));
+  let buy=0;
+  const lamp=(id,known,buyCond,sellCond)=>{const e=document.getElementById(id);if(!e)return;
+   if(!known){e.textContent='⚪';return;}
+   if(buyCond){e.textContent='🟢';buy++;}else if(sellCond){e.textContent='🔴';}else e.textContent='⚪';};
+  lamp('lampVix',vix!=null,vix>=TH.vixBuy,vix<=TH.vixSell);
+  lamp('lampFG',fg!=null,fg<=TH.fgBuy,fg>=TH.fgSell);
+  const sideKnown=side===true||sp!=null;
+  lamp('lampSide',sideKnown,side===true||(sp!=null&&sp<=TH.spBuy),false);
+  const known=(vix!=null)+(fg!=null)+(sideKnown?1:0);
+  set('sigVerdict',known?`매수 점등 ${buy}/3 → ${buy>=2?'분할매수 (정찰 33%)':buy===1?'1/3 정찰':'대기'}`:'신호 데이터 없음(signals.json 미입력) — 대기');
+ }
+ renderSignals();
+ window.__rerenderSignals=(j)=>{SIGNALS=j;renderSignals();};
+ fetch('./signals.json',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{SIGNALS=j;renderSignals();}).catch(()=>renderSignals());
+})();
+
+/* ===== 01 MACRO — signals.json 폼 ===== */
+(function(){
+ const btn=document.getElementById('sgSubmit'),msg=document.getElementById('sgMsg');
+ if(!btn)return;
+ const v=id=>{const e=document.getElementById(id);return e?e.value:''};
+ btn.addEventListener('click',async()=>{
+  btn.disabled=true;msg.className='sig-msg';msg.textContent='커밋 중…';
+  const body={
+   vix:v('sgVix')||null, fearGreed:v('sgFG')||null, spDailyPct:v('sgSP')||null,
+   sidecarKR:document.getElementById('sgSide').checked
+  };
+  try{
+   const r=await fetch('/api/signals',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)});
+   const j=await r.json().catch(()=>({}));
+   if(r.ok){
+    msg.className='sig-msg ok';msg.textContent='커밋됨 — 약 1~2분 후 자동 배포·반영';
+    if(j.payload&&typeof window.__rerenderSignals==='function')window.__rerenderSignals(j.payload);
+   }else{
+    msg.className='sig-msg err';msg.textContent=`실패(${r.status}): ${j.error||'unknown'}`;
+   }
+  }catch(e){msg.className='sig-msg err';msg.textContent='네트워크 오류: '+e.message;}
+  finally{btn.disabled=false;}
+ });
 })();
 </script>
 
