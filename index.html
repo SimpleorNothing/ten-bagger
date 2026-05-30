@@ -431,6 +431,8 @@ table.tk th.c{text-align:center}
 #v-alpha .card{background:var(--a-surface);border:1.5px solid var(--a-line);border-radius:14px;padding:18px;position:relative;overflow:hidden;transition:.15s}
 #v-alpha .card:hover{border-color:var(--a-brand);box-shadow:0 4px 18px rgba(18,87,214,.10)}
 #v-alpha #plot{width:100%;height:auto;display:block;overflow:visible;touch-action:manipulation}
+/* 모바일: 카드를 화면 가장자리까지 풀블리드 + 패딩 최소화 → 4사분면 그래프를 최대 폭/높이로 표시 */
+@media(max-width:760px){#v-alpha .card{margin-left:-22px;margin-right:-22px;padding:8px;border-radius:0;border-left:0;border-right:0}}
 #v-alpha .qlabel{font-weight:800;pointer-events:none}
 #v-alpha .qsub{font-weight:600;pointer-events:none}
 #v-alpha .gridline{stroke:var(--a-line);stroke-width:1}
@@ -2292,7 +2294,9 @@ let EPLAY=[];
 function quad(d){const a=av(d),r=a[0]>=0,u=a[1]>=0;return u?(r?'①':'②'):(r?'④':'③');}
 
 const svg=document.getElementById('plot'),NS='http://www.w3.org/2000/svg';
-const W=860,H=470,PL=58,PR=28,PT=30,PB=52;
+let W=860,H=470;const PL=58,PR=28,PT=30,PB=52;
+// 모바일에서는 가로폭은 유지(라벨 밀집 방지)하되 세로를 키워 화면을 꽉 채운다 → 그래프가 더 크게 보임.
+function fitStage(){H=innerWidth<=760?590:470;svg.setAttribute('viewBox',`0 0 ${W} ${H}`);}
 // 축 범위는 draw()에서 데이터에 맞춰 동적 산출 → 0(벤치마크) 교차점이 가운데 고정되지 않음
 let X0=-10,X1=10,Y0=-4,Y1=3,xticks=[],yticks=[]; // X=3개월 / Y=다음주
 const px=v=>PL+(v-X0)/(X1-X0)*(W-PL-PR);
@@ -2318,6 +2322,7 @@ function computeRanges(){
 }
 
 function draw(){
+ fitStage();
  svg.innerHTML='';
  computeRanges();
  const qx=px(0),qy=py(0);
@@ -2532,6 +2537,9 @@ document.addEventListener('keydown',e=>{
  if(t==='INPUT'||t==='TEXTAREA'||t==='SELECT')return;
  e.preventDefault();stepSnap(e.key==='ArrowLeft'?-1:1);
 });
+// 화면 크기/회전 변경 시 모바일 세로 비율을 다시 맞춰 그래프를 최대 크기로 유지.
+let _rsT;addEventListener('resize',()=>{clearTimeout(_rsT);_rsT=setTimeout(()=>{
+ const av=document.getElementById('v-alpha');if(av&&av.classList.contains('on'))draw();},150);});
 // 콘솔에서 호출 → 현재 라이브 배치를 스냅샷 형식 JSON으로 출력(snapshots.json에 붙여넣기용).
 window.dumpSnap=function(){const pos={};D.forEach(d=>{pos[d.n]={aN:(d._aN||d.aN),aK:(d._aK||d.aK),stage:(d._stage||d.stage)};});
  const o={asOf:new Date().toISOString().slice(0,10),label:'',reason:'',pos};const t=JSON.stringify(o,null,1);console.log(t);return t;};
