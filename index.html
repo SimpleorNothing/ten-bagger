@@ -1005,6 +1005,75 @@ const RIVERS=[
    {code:'분산',label:'중앙→엣지·분산',sub:'추론 위치 이동',stage:'태동',pos:.32,why:'중앙 클라우드 추론 → 엣지·온디바이스·분산 (경계, L7/L8 부분종속)',plays:'(리서치 영역 · 미매핑)'},
   ]},
 ];
+/* 강물 2~5 노드별 세부 2·3차 파생 가치사슬 + 종목 (riverChainHTML이 사용)
+   [riverN][node.code] = [{n,why,cos,stage,cand?}]. 데이터 검증 ~2026년 초.
+   cand는 탐색기 STATE에 존재하는 종목만 연결(드로어). 비상장은 명시. */
+const RIVER_CHAINS={
+ 2:{
+  '웹':[
+   {n:'웹 데이터 인프라',why:'크롤·코퍼스 저장·정제는 상품화 — 무알파',cos:'AWS·Cloudflare(NET) (간접)',stage:'성숙'}],
+  '라벨':[
+   {n:'RLHF 라벨 플랫폼',why:'instruct·선호 데이터 1차 공장 — 성숙·차별화 약화',cos:'Surge·Mercor·Turing (전부 비상장)',stage:'성숙'},
+   {n:'상장 우회 노출',why:'Scale AI 49% 투자로 Meta가 라벨링 간접 노출',cos:'META (간접)',stage:'성숙'}],
+  '전문':[
+   {n:'전문가 데이터 마켓',why:'병목이 희소 전문(수학·코드·의료) 라벨로 이동',cos:'Mercor($100억)·Surge·Turing (비상장)',stage:'가속'},
+   {n:'수직 도메인 데이터 보유사',why:'의료영상·코드·금융 등 수직 데이터 해자',cos:'(수직 SaaS·헬스 데이터 · 비상장)',stage:'가속'}],
+  'RL':[
+   {n:'RL 환경·검증기',why:'에이전트 RL의 다음 병목 = 검증가능 환경·리워드. Anthropic 향후 1년 $10억+ 논의',cos:'Prime Intellect·Mechanize·Scale (전부 비상장)',stage:'초입'},
+   {n:'순수 상장주 부재 → 간접',why:'환경·verifier는 비상장만 — 프론티어랩 자본지출로만 우회 노출',cos:'(상장 순수주 없음)',stage:'태동'}],
+  '합성':[
+   {n:'합성데이터·시뮬레이션',why:'실데이터 고갈 → 모델이 데이터 생성. Gretel은 NVDA 인수(25.3)',cos:'NVDA(Omniverse)·Unity(U)·SNPS',stage:'가속'},
+   {n:'자기개선 루프',why:'RL환경+합성 결합 자기개선 — 검증이 관건',cos:'(프론티어랩 내재화)',stage:'초입'}],
+  '독점':[
+   {n:'콘텐츠 라이선싱 수혜주',why:'학습데이터 라이선스가 신규 매출축 — 소셜·뉴스·이미지',cos:'Reddit(RDDT)·News Corp(NWSA)·Getty(GETY)',stage:'가속'},
+   {n:'분쟁 리스크',why:'NYT는 라이선스 미체결·소송 중 — 불확실',cos:'NYT (소송)',stage:'태동'}]
+ },
+ 3:{
+  'HS':[
+   {n:'하이퍼스케일러 capex',why:'클라우드 임대=기본값, 선반영',cos:'MSFT·AMZN·GOOGL',stage:'성숙'}],
+  '네오':[
+   {n:'뉴클라우드(상장)',why:'하이퍼스케일러 캐파 부족분 흡수 — GPU 순수 노출',cos:'CoreWeave(CRWV)·Nebius(NBIS)',stage:'가속'},
+   {n:'뉴클라우드(비상장)',why:'IPO 파이프라인 — Lambda($59억, 26H2 추진설)',cos:'Lambda·Crusoe·Nscale (비상장)',stage:'초입'}],
+  '주권':[
+   {n:'주권 AI 칩 공급사',why:'걸프 $2조 — 빌더는 국부/비상장, 칩 공급사가 상장 수혜',cos:'NVDA(GB300 수출승인)·AMD(Humain 1GW JV)',stage:'가속',cand:'amd'},
+   {n:'시스템·네트워크·OEM',why:'소버린 빌드 = 서버·스위치·통신사 동반',cos:'CSCO·ORCL·소프트뱅크(9984)·SMCI',stage:'초입',cand:'smci'}],
+  '자본':[
+   {n:'GPU 담보 사모대출',why:'빌드아웃=자본게임 — GPU 담보 SPV·프라이빗 크레딧 폭증(MS 추정 +$8천억)',cos:'Blackstone(BX)·Blue Owl(OWL)·Apollo(APO)',stage:'가속'},
+   {n:'자산운용 대형',why:'AI 인프라 사모 신용에 자본 배분',cos:'Ares(ARES)·BlackRock(BLK)',stage:'초입'}],
+  '중립':[
+   {n:'데이터센터 REIT',why:'뉴클라우드도 부지·전력은 코로케이션 의존',cos:'Equinix(EQIX)·Digital Realty(DLR)·DigitalBridge(DBRG)',stage:'성숙'},
+   {n:'전력·냉각 인접',why:'코로케이션 = 전력/냉각 수요 동반',cos:'Vertiv(VRT)',stage:'가속',cand:'vrt'}]
+ },
+ 4:{
+  '스케일':[
+   {n:'프론티어 컴퓨트',why:'파라미터·컴퓨트 스케일링=합의, 선반영',cos:'NVDA · 프론티어 랩(비상장)',stage:'성숙'}],
+  '최적':[
+   {n:'추론 서빙·컴파일러',why:'토큰 단가 압박 → 서빙·양자화·speculative decoding 수요',cos:'Fireworks·Together·Baseten (전부 비상장)',stage:'가속'},
+   {n:'순수 상장주 부재',why:'vLLM 오픈소스 — 상장 순수주 없음, 추론칩으로 우회',cos:'(상장 순수주 없음)',stage:'초입'}],
+  '전용칩':[
+   {n:'추론 전용 실리콘',why:'토큰/와트 다음 곡선 — 웨이퍼스케일·커스텀 ASIC',cos:'Cerebras(CBRS)·Broadcom(AVGO)·Marvell(MRVL)',stage:'초입',cand:'cbrs'},
+   {n:'Groq 변수',why:'NVDA가 25.12 $200억 라이선스+인재영입(인수 아님, FTC 조사) — SRAM 추론 내재화',cos:'Groq (비상장·NVDA 라이선스)',stage:'태동'}],
+  '엣지':[
+   {n:'온디바이스 NPU',why:'추론이 단말로 — 폰·PC·글래스 mix shift',cos:'QCOM·Apple(AAPL)·ARM·삼성(005930)',stage:'초입',cand:'qcom'}],
+  '수요':[
+   {n:'Jevons 환류 → 강물 1',why:'단가↓ → 총 토큰 소비 폭증 → 컴퓨트 수요 환류(역설)',cos:'전 스택 되먹임 (→ 8레이어)',stage:'가속'}]
+ },
+ 5:{
+  '산업':[
+   {n:'산업용 로봇·자동화',why:'기존 산업 로봇 — 성숙, AI는 점진 침투',cos:'FANUC(6954)·키엔스(6861)·ABB·Rockwell(ROK)',stage:'성숙'}],
+  'FSD':[
+   {n:'자율주행 스택',why:'비전 기반 실세계 추론 — 데이터 플라이휠 해자',cos:'Tesla(TSLA)·Mobileye(MBLY)',stage:'가속',cand:'tsla'},
+   {n:'라이다·센서(주의)',why:'센서 BOM 수혜 — 단 재무 취약 주의',cos:'Luminar(LAZR·리스크)·Ouster(OUST)',stage:'초입'}],
+  '엣지':[
+   {n:'엣지 추론 실리콘',why:'피지컬 AI의 두뇌 = 온디바이스 저지연·저전력 칩',cos:'QCOM · 온디바이스 NPU',stage:'가속',cand:'qcom'}],
+  '액추':[
+   {n:'정밀 감속기·하모닉',why:'1대당 관절 다수 = 비선형 부품 수요(현재 전선)',cos:'Harmonic Drive(6324)·Nabtesco(6268)·THK(6481)',stage:'초입'},
+   {n:'모터·볼스크류·센서',why:'액추에이터 = 모터+감속기+센서 결합',cos:'Nidec(6594)·Regal Rexnord(RRX)',stage:'초입'},
+   {n:'한국 감속기',why:'국내 휴머노이드 부품 노출',cos:'에스피지(058610)·에스비비테크(389500)',stage:'태동'}],
+  '통합':[
+   {n:'휴머노이드 통합',why:'Optimus·Figure 등 — 통합·양산은 前단계, 거의 비상장',cos:'Tesla Optimus(TSLA)·Figure($390억)·1X·Agility (비상장)',stage:'태동',cand:'tsla'}]
+ }
+};
 /* 파생 캐스케이드: 드라이버 ×10 → 함께 폭증하는 파생 가치사슬. cand=탐색기 후보 id
    [MECE 분류 규칙] 노드는 '수요 트리거가 어디서 왔나'가 아니라 '자산의 물리적 위치(전기 계량기 기준)'로 단 하나의 레이어에만 귀속한다.
    레이어 간 인과(트리거)는 노드 중복이 아니라 trigger 문구의 화살표(→ ▶)로만 표기한다.
@@ -1494,6 +1563,26 @@ function layerChainHTML(layer){
   return `<div class="lc-empty">이 레이어의 2·3차 파생 분해는 상위 드라이버(예: 가속기·메모리)의 파생 노드에서 다룹니다.<br>이 층 후보: <b>${cands.map(c=>c.name).join(', ')||'—'}</b></div>`;}
  return `<div class="lc-title">2·3차 파생 가치사슬 · ${cs.length>1?cs.length+'개 드라이버':cs[0].driver}</div>`+cs.map(cascadeHTML).join('');
 }
+/* 강물 2~6 노드의 세부 value chain(2·3차 파생 + 종목)을 HTML로 — 1번 레이어 가치사슬과 동일 비주얼 */
+function riverChainHTML(d,chain){
+ if(!chain||!chain.length)
+  return `<div class="lc-empty">세부 2·3차 파생은 리서치 영역 — 현재 1차 후보: <b>${d.plays||'—'}</b></div>`;
+ const dcol=STAGE_HEX[d.stage];
+ return `<div class="casc-flow">
+   <div class="casc-driver">
+     <div class="dl">1차 · ${d.code} ${d.label}</div><div class="dn">${d.sub}</div>
+     <span class="sbadge" style="background:${dcol}22;color:${dcol}">${d.stage}</span>
+     <div class="role"><b>1차 플레이 (선반영·컨센서스 쪽)</b><br>${d.plays}</div>
+     <div class="arrowdown">▼ 2·3차 파생 (함께 커져야 할 다음 수혜)</div>
+   </div>
+   <div class="casc-nodes">${chain.map((nd,i)=>{const col=STAGE_HEX[nd.stage];
+     return `<div class="cnode" data-cand="${nd.cand||''}" style="border-left-color:${col};animation-delay:${i*70}ms">
+       <span class="jdot" style="background:${col}"></span>
+       <div class="top"><span class="nm">${nd.n}</span><span class="sbadge" style="background:${col}22;color:${col}">${nd.stage}</span>${nd.cand?'<span class="go">분해 보기 →</span>':'<span class="go" style="color:var(--faint)">리서치 영역</span>'}</div>
+       <div class="why">${nd.why}</div>
+       <div class="cos">대표: ${nd.cos}</div></div>`;}).join('')}</div>
+  </div>`;
+}
 function renderThread(){
  const svg=document.getElementById('threadSvg');if(!svg)return;
  const R=RIVERS[activeRiver]||RIVERS[0];
@@ -1527,7 +1616,7 @@ function renderThread(){
  s+=fBand;
  s+=`<path d="${path}" fill="none" stroke="url(#river)" stroke-width="3" opacity=".55"/>`;
  flow.forEach((d,i)=>{const p=pts[i],col=STAGE_HEX[d.stage],cap=d.layer||d.code||'';
-  s+=`<g class="river-node"${R.layerBased?` data-l="${d.layer}"`:' style="cursor:default"'}>
+  s+=`<g class="river-node"${R.layerBased?` data-l="${d.layer}"`:` data-i="${i}"`}>
    <line x1="${p.x}" y1="${p.y}" x2="${p.x}" y2="${bot+10}" stroke="var(--line)" stroke-width="1"/>
    <circle class="rn-box" cx="${p.x}" cy="${p.y}" r="11" fill="${col}" opacity=".95"/>
    <circle cx="${p.x}" cy="${p.y}" r="11" fill="none" stroke="${col}" stroke-width="1" opacity=".4"><animate attributeName="r" values="11;19;11" dur="2.4s" repeatCount="indefinite"/><animate attributeName="opacity" values=".4;0;.4" dur="2.4s" repeatCount="indefinite"/></circle>
@@ -1548,10 +1637,23 @@ function renderThread(){
    if(ch&&ch.classList.contains('dchain')&&ch.hidden){ch.hidden=false;exp.textContent='2·3차 가치사슬 접기 ▴';}
    card.scrollIntoView({behavior:'smooth',block:'center'});}));
  }else{
+  const RC=RIVER_CHAINS[R.n]||{};
   document.getElementById('threadDetail').innerHTML=R.nodes.map(d=>{const col=STAGE_HEX[d.stage];
-   return `<div class="dstrip" style="border-left-color:${col};cursor:default">
+   return `<div class="dstrip" data-c="${d.code}" style="border-left-color:${col}">
     <h4>${d.code} ${d.label}<span class="badge" style="background:${col}22;color:${col}">${d.stage}</span></h4>
-    <p>${d.why}<br>후보: ${d.plays}</p></div>`;}).join('');
+    <p>${d.why}<br>후보: ${d.plays}</p>
+    <div class="dexp">세부 value chain 펼치기 ▾</div></div>
+   <div class="dchain" hidden>${riverChainHTML(d,RC[d.code])}</div>`;}).join('');
+  const toggleChain=(card,force)=>{const ch=card.nextElementSibling;
+   const open=force!==undefined?force:!card.classList.contains('open');
+   card.classList.toggle('open',open);
+   if(ch&&ch.classList.contains('dchain'))ch.hidden=!open;
+   const exp=card.querySelector('.dexp');if(exp)exp.textContent=open?'세부 value chain 접기 ▴':'세부 value chain 펼치기 ▾';};
+  document.querySelectorAll('#threadDetail .dstrip').forEach(card=>card.addEventListener('click',()=>toggleChain(card)));
+  document.querySelectorAll('#threadDetail .cnode[data-cand]').forEach(el=>el.addEventListener('click',e=>{e.stopPropagation();const id=el.dataset.cand;if(id)openDrawer(id);}));
+  svg.querySelectorAll('.river-node').forEach((g,i)=>g.addEventListener('click',()=>{
+   const card=document.querySelectorAll('#threadDetail .dstrip')[i];
+   if(!card)return;toggleChain(card,true);card.scrollIntoView({behavior:'smooth',block:'center'});}));
  }
 }
 /* 강물 후보 1~4 카드 클릭 → 해당 강물 흐름·가치사슬로 전환 */
