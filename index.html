@@ -1346,7 +1346,7 @@ function watchChips(lid){const ws=WATCH.filter(w=>w.layer===lid);if(!ws.length)r
   ws.map(w=>`<div class="wchip" title="${w.note} · 출처:${w.src}"><span class="wnm">${w.name}</span><span class="wst">${w.status}</span></div>`).join('')+`</div>`;}
 
 /* ===== HOLDINGS (5/16 브리핑 기준, 테마버킷→레이어) ===== */
-const HOLDINGS=[
+let HOLDINGS=[
  {layer:'L2',label:'연산칩 (마벨·KODEX 미국AI반도체TOP3+)',amt:86,w:8.9},
  {layer:'L3',label:'메모리 (마이크론·삼성전자·HBM ETF)',amt:384,w:39.6},
  {layer:'L4',label:'소부장 (KODEX AI반도체핵심장비)',amt:22,w:2.3},
@@ -1599,7 +1599,7 @@ document.getElementById('nav').addEventListener('click',e=>{const b=e.target.clo
  b.classList.add('on');document.getElementById('v-'+b.dataset.v).classList.add('on');if(b.dataset.v==='map'){drawSCurve();drawRiverCurves();}});
 
 /* ===== SIGNAL LOG (실적 콜 등 신규 시그널 → value-chain 반영, 누적 가능) ===== */
-const SIGNAL_LOG=[
+let SIGNAL_LOG=[
  {date:'2026-05-20', at:'2026-05-20T22:00+09:00', source:'NVIDIA Q1 FY27 실적·컨콜',
   srcs:[
    {label:'NVIDIA IR(8-K)', url:'https://www.sec.gov/Archives/edgar/data/0001045810/000104581026000051/q1fy27pr.htm'},
@@ -2407,7 +2407,10 @@ document.addEventListener('click',e=>{if(!e.target.closest('.bub')&&!e.target.cl
 // 3층 병합: 자동(alpha.json) → 실적(earnings.json) → 판단(judgment.json, 마지막에 덮어씀). 없으면 폴백.
 function paint(){renderLegend();draw();renderWatch();renderEarnOps();}
 const getJSON=u=>fetch(u,{cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null);
-Promise.all([getJSON('alpha.json'),getJSON('earnings.json'),getJSON('judgment.json'),getJSON('snapshots.json')]).then(([j,e,g,sn])=>{
+Promise.all([getJSON('alpha.json'),getJSON('earnings.json'),getJSON('judgment.json'),getJSON('snapshots.json'),getJSON('holdings.json'),getJSON('signal_log.json')]).then(([j,e,g,sn,hh,sl])=>{
+ // 5) 외부화 데이터 — 비중은 holdings.json이 있으면 교체, 시그널 로그는 signal_log.json 신규분을 인라인 히스토리 뒤에 누적
+ if(hh&&Array.isArray(hh.holdings))HOLDINGS=hh.holdings;
+ if(sl&&Array.isArray(sl.log)&&sl.log.length)SIGNAL_LOG=SIGNAL_LOG.concat(sl.log);
  // 1) 자동(alpha.json) — 모멘텀 휴리스틱
  const q=j&&j.quotes;if(q)D.forEach(d=>{const a=q[d.t];if(a){if(Array.isArray(a.aN))d.aN=a.aN;if(Array.isArray(a.aK))d.aK=a.aK;}});
  // 2) 실적 IV (earnings.json)
@@ -2416,7 +2419,7 @@ Promise.all([getJSON('alpha.json'),getJSON('earnings.json'),getJSON('judgment.js
  const ov=g&&g.overrides;if(ov)D.forEach(d=>{const o=ov[d.t];if(o&&Array.isArray(o.aN))o.aN.forEach((v,k)=>{if(v!=null)d.aN[k]=v;});});
  // 4) 시점 스냅샷(snapshots.json) — 라이브 머지 후 현재 배치를 보존하고 셀렉터 구성.
  captureLive();SNAPS=(sn&&Array.isArray(sn.snapshots))?sn.snapshots:[];initSnapSel();
-}).finally(paint);
+}).finally(()=>{paint(); if(typeof renderSignalLog==='function')renderSignalLog(); if(typeof renderStack==='function')renderStack();});
 })();
 </script>
 <script>
