@@ -151,7 +151,10 @@ main{padding:36px 0 90px;position:relative}
 .cnode .nm{font-size:15px;font-weight:700}
 .cnode .why{font-size:13px;color:var(--dim);margin-top:6px}
 .cnode .mult{font-family:var(--mono);font-size:13px;color:var(--dim);margin-top:7px;background:var(--panel2);border-radius:6px;padding:5px 9px}
-.cnode .cos{font-family:var(--mono);font-size:13px;color:var(--faint);margin-top:8px}
+.cnode .cos{font-family:var(--mono);font-size:13px;color:var(--faint);margin-top:8px;display:flex;flex-wrap:wrap;gap:4px 8px;align-items:center}
+.cnode .cos .ct{display:inline-flex;align-items:center;gap:3px;white-space:nowrap}
+.cnode .cos .ct i{width:6px;height:6px;border-radius:50%;flex:none}
+.cnode .cos .ct b{font-weight:700}
 .cnode .go{margin-left:auto;font-family:var(--mono);font-size:13px;color:var(--accel)}
 
 /* ===== STACK (merged: header + candidate chips) ===== */
@@ -1083,11 +1086,11 @@ const CASCADES=[
   trigger:'Agentic AI → 지속적 에이전트 워크로드 → 서버 CPU 코어수·수요 폭증. 인퍼런스 비중↑로 CPU:GPU 비율이 균형으로 회귀. ★ NVDA Q1 FY27(5/20): Vera 단독 CPU $20B 가시성·$200B TAM — 1차주가 CPU를 공식 매출축으로 인정.',
   primary:{label:'1차주 (선반영 · 가이던스 포화)',ex:'Arm · AMD EPYC Venice(256코어) · Intel Clearwater Forest(288 E코어) · NVIDIA Vera(신규) · 하이퍼스케일러 커스텀'},
   nodes:[
-   {n:'메모리 인터페이스칩',why:'12채널 DDR5 + MRDIMM 전환',mult:'RCD 1개 → MRCD 1 + MDB 10 (모듈당 칩 ×수배)',cos:'Rambus · Montage · Renesas',stage:'가속',cand:'rmbs'},
-   {n:'FC-BGA 고사양 기판',why:'코어수↑ = 다이면적↑ = 기판 층수·면적↑',mult:'면적·층수↑ · 선반영 진행(과열)',cos:'삼성전기 · 대덕전자 · Ibiden',stage:'과열',cand:'sem'},
-   {n:'CPU 전력 전달(VPD)',why:'300W+ TDP · 1000A "라스트 인치"',mult:'전류밀도↑ · PDN 저항↓',cos:'Vicor · MPS',stage:'가속',cand:'vicr'},
-   {n:'테스트·번인 소켓',why:'코어수↑ = 테스트 시간·소켓 소모↑',mult:'소켓·번인 ASP↑',cos:'ISC · Leeno · FormFactor',stage:'가속',cand:null},
-   {n:'CXL 메모리 풀링',why:'메모리 용량·대역폭 확장',mult:'침투 초기(서버 1%)',cos:'Astera · Montage',stage:'가속',cand:'alab'},
+   {n:'메모리 인터페이스칩',why:'12채널 DDR5 + MRDIMM 전환',mult:'RCD 1개 → MRCD 1 + MDB 10 (모듈당 칩 ×수배)',cos:[['Rambus','가속'],['Montage','가속'],['Renesas','성숙']],stage:'가속',cand:'rmbs'},
+   {n:'FC-BGA 고사양 기판',why:'코어수↑ = 다이면적↑ = 기판 층수·면적↑',mult:'면적·층수↑ · 선반영 진행(과열)',cos:[['삼성전기','과열'],['대덕전자','성숙'],['Ibiden','과열']],stage:'과열',cand:'sem'},
+   {n:'CPU 전력 전달(VPD)',why:'300W+ TDP · 1000A "라스트 인치"',mult:'전류밀도↑ · PDN 저항↓',cos:[['Vicor','가속'],['MPS','가속']],stage:'가속',cand:'vicr'},
+   {n:'테스트·번인 소켓',why:'코어수↑ = 테스트 시간·소켓 소모↑',mult:'소켓·번인 ASP↑',cos:[['ISC','가속'],['Leeno','가속'],['FormFactor','가속']],stage:'가속',cand:null},
+   {n:'CXL 메모리 풀링',why:'메모리 용량·대역폭 확장',mult:'침투 초기(서버 1%)',cos:[['Astera','가속'],['Montage','가속']],stage:'가속',cand:'alab'},
   ]},
  {key:'gpu',driver:'AI 가속기(GPU/ASIC)',layer:'L2',stage:'성숙',
   trigger:'학습·추론 가속기 출하 폭증 → 동반 부품 동시 병목. ★ NVDA Q1 FY27(5/20): Vera Rubin 풀사이클 공급 제약 — CFO "제약은 수요가 아니라 모든 시스템 부품의 양산 타임라인". 다음 병목=components 직접 확인. ★ NVDA, Groq LPU $20B 라이선스+acquihire(\'25.12)로 SRAM 추론 위협 내재화 → 훈련·추론·스토리지 풀스택 장악(FTC·상원 심사 오버행).',
@@ -1440,6 +1443,11 @@ function gotoStack(layerId){
 
 /* ===== SIGNAL LOG (실적 콜 등 신규 시그널 → value-chain 반영, 누적 가능) ===== */
 let SIGNAL_LOG=[
+ {date:'2026-05-30', at:'2026-05-30T23:00+09:00', source:'파생체인 노드 대표 종목별 단계 배지화',
+  srcs:[{label:'Investing·StockAnalysis·Morningstar 시세(2026-05)'}],
+  items:[
+   {tag:'노드 분해',layer:'L2',col:'#1c7ed6',html:'cpu 캐스케이드 5개 노드의 대표 종목에 <b>개별 단계 배지</b> 부여. 노드 라벨에 가려졌던 분산 노출 — 메모리IF의 <b>Renesas(성숙)</b>, FC-BGA의 <b>대덕전자(성숙)</b>는 묶음 대비 한 단계 낮음(목표가 상회·종합주 희석). VPD·테스트소켓·CXL은 전 종목 가속이나 MPS·ISC·FORM은 ATH·내부자매도로 가속 후반.'},
+  ]},
  {date:'2026-05-30', at:'2026-05-30T22:00+09:00', source:'파생체인 노드↔WATCH 단계 정합화 (침묵 오류 정리)',
   srcs:[{label:'Investing·StockAnalysis·simplywall.st 시세(2026-05)'},{label:'Meritz 리노공업(2026-05-11)'}],
   items:[
@@ -1561,7 +1569,7 @@ function cascadeHTML(c){const dcol=STAGE_HEX[c.stage];
         <div class="top"><span class="nm">${nd.n}</span><span class="sbadge" style="background:${col}22;color:${col}">${nd.stage}</span>${nd.cand?'<span class="go">분해 보기 →</span>':'<span class="go" style="color:var(--faint)">리서치 영역</span>'}</div>
         <div class="why">${nd.why}</div>
         <div class="mult">콘텐츠 배수 · ${nd.mult}</div>
-        <div class="cos">대표: ${nd.cos}</div></div>`;}).join('')}</div>
+        <div class="cos">대표: ${Array.isArray(nd.cos)?nd.cos.map(([nm,st])=>`<span class="ct"><i style="background:${STAGE_HEX[st]}"></i>${nm} <b style="color:${STAGE_HEX[st]}">${st}</b></span>`).join(' · '):nd.cos}</div></div>`;}).join('')}</div>
   </div>`;}
 /* 한 레이어의 2·3차 가치사슬(해당 레이어를 가진 카스케이드들)을 HTML로 */
 function layerChainHTML(layer){
@@ -1587,7 +1595,7 @@ function riverChainHTML(d,chain){
        <span class="jdot" style="background:${col}"></span>
        <div class="top"><span class="nm">${nd.n}</span><span class="sbadge" style="background:${col}22;color:${col}">${nd.stage}</span>${nd.cand?'<span class="go">분해 보기 →</span>':'<span class="go" style="color:var(--faint)">리서치 영역</span>'}</div>
        <div class="why">${nd.why}</div>
-       <div class="cos">대표: ${nd.cos}</div></div>`;}).join('')}</div>
+       <div class="cos">대표: ${Array.isArray(nd.cos)?nd.cos.map(([nm,st])=>`<span class="ct"><i style="background:${STAGE_HEX[st]}"></i>${nm} <b style="color:${STAGE_HEX[st]}">${st}</b></span>`).join(' · '):nd.cos}</div></div>`;}).join('')}</div>
   </div>`;
 }
 function renderThread(){
