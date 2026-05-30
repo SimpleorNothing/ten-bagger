@@ -3,6 +3,12 @@
 // Source of truth for tickers/markets is the C array inside index.html.
 // Korean (KOSPI/KOSDAQ) -> Naver; US/Taiwan/Japan -> Yahoo. Failures are
 // non-fatal: last known price is preserved so the site never goes blank.
+//
+// changePct = YoY 수익률: (현재가 / 약 1년 전(≈365일 전) 종가 − 1) × 100.
+// 전일 대비가 아니라 전년 동기 대비. 필드명은 프런트(priceHTML) 호환을 위해
+// changePct 그대로 유지하고 의미만 YoY로 전환한다. Yahoo는 range=1y 창에서
+// 365일 전 시점 이후 첫 종가를, Naver는 ~400일 일봉에서 365일 전 이후 첫
+// 거래일 종가를 기준가로 쓴다 → US/KR 모두 '1년 전 대비'로 일원화.
 
 import fs from 'node:fs';
 
@@ -11,6 +17,8 @@ const OUT = 'prices.json';
 const UA = { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36' };
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const ymd = (d) => d.toISOString().slice(0, 10).replace(/-/g, '');
+const YEAR_AGO_SEC = () => Math.floor((Date.now() - 365 * 864e5) / 1000);
+const YEAR_AGO_YMD = () => ymd(new Date(Date.now() - 365 * 864e5));
 
 function readCandidates() {
   const html = fs.readFileSync(HTML, 'utf8');
@@ -43,20 +51,29 @@ async function yahooAuth() {
 }
 
 async function yahoo(sym) {
-  const u = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?interval=1d&range=5d`;
+  // range=1y → ~52주 일봉 확보 후 약 1년 전 종가를 YoY 기준가로 사용.
+  const u = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?interval=1d&range=1y`;
   const r = await fetch(u, { headers: { ...UA, ...(YCOOKIE ? { Cookie: YCOOKIE } : {}) } });
   if (!r.ok) throw new Error('yahoo HTTP ' + r.status);
   const j = await r.json();
-  const meta = j?.chart?.result?.[0]?.meta;
+  const res = j?.chart?.result?.[0];
+  const meta = res?.meta;
   if (!meta || meta.regularMarketPrice == null) throw new Error('yahoo no data');
   const price = meta.regularMarketPrice;
-  const prev = meta.previousClose ?? meta.chartPreviousClose ?? null;
-  return { price, changePct: prev ? +(((price - prev) / prev) * 100).toFixed(2) : null, currency: meta.currency || 'USD' };
+  // 기준가 = 365일 전 시점 이후 첫 유효 종가. 없으면 chartPreviousClose, 그래도 없으면 창의 첫 종가.
+  const ts = res.timestamp || [];
+  const cl = res.indicators?.quote?.[0]?.close || [];
+  const t0 = YEAR_AGO_SEC();
+  let base = null;
+  for (let i = 0; i < ts.length; i++) { if (ts[i] >= t0 && cl[i] != null) { base = cl[i]; break; } }
+  if (base == null) base = meta.chartPreviousClose ?? null;
+  if (base == null) base = cl.find((x) => x != null) ?? null;
+  return { price, changePct: base ? +(((price - base) / base) * 100).toFixed(2) : null, currency: meta.currency || 'USD' };
 }
 
 async function naver(code) {
   const end = ymd(new Date());
-  const start = ymd(new Date(Date.now() - 20 * 864e5));
+  const start = ymd(new Date(Date.now() - 400 * 864e5)); // ~13개월 → YoY 기준가 확보
   const u = `https://api.finance.naver.com/siseJson.naver?symbol=${encodeURIComponent(code)}&requestType=1&startTime=${start}&endTime=${end}&timeframe=day`;
   const r = await fetch(u, { headers: UA });
   if (!r.ok) throw new Error('naver HTTP ' + r.status);
@@ -65,8 +82,11 @@ async function naver(code) {
   const rows = arr.slice(1).filter((x) => Array.isArray(x) && x.length >= 5 && x[4] != null);
   if (!rows.length) throw new Error('naver empty');
   const price = Number(rows[rows.length - 1][4]); // [4] = 종가(close), not [1] 시가(open)
-  const prev = rows.length > 1 ? Number(rows[rows.length - 2][4]) : null;
-  return { price, changePct: prev ? +(((price - prev) / prev) * 100).toFixed(2) : null, currency: 'KRW' };
+  // 기준가 = 365일 전 시점 이후 첫 거래일 종가(전년 동기). 없으면 창의 첫 종가.
+  const t0 = YEAR_AGO_YMD();
+  const baseRow = rows.find((x) => String(x[0]).replace(/-/g, '') >= t0) || rows[0];
+  const base = Number(baseRow[4]);
+  return { price, changePct: base ? +(((price - base) / base) * 100).toFixed(2) : null, currency: 'KRW' };
 }
 
 async function quote(c) {
@@ -96,7 +116,7 @@ async function main() {
       const q = await quote(c);
       out.quotes[c.id] = { price: q.price, changePct: q.changePct, currency: q.currency, ticker: c.ticker, src: q.src };
       ok++;
-      console.log(`OK   ${c.id.padEnd(8)} ${c.ticker.padEnd(8)} ${q.price} ${q.currency} (${q.src})`);
+      console.log(`OK   ${c.id.padEnd(8)} ${c.ticker.padEnd(8)} ${q.price} ${q.currency} YoY=${q.changePct}% (${q.src})`);
     } catch (e) {
       fail++;
       console.log(`FAIL ${c.id.padEnd(8)} ${c.ticker.padEnd(8)} ${e.message}${out.quotes[c.id] ? ' (keeping last known)' : ''}`);
