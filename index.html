@@ -125,6 +125,14 @@ main{padding:36px 0 90px;position:relative}
 .front-pill::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--dawn);box-shadow:none;animation:pulse 1.6s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 .detail-strip{margin-top:18px;display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));gap:10px}
+/* ── 강물 value chain 카드 인라인 드릴다운 ── */
+.dstrip .dexp{margin-top:7px;font-family:var(--mono);font-size:10.5px;color:var(--dawn);letter-spacing:.04em}
+.dstrip.open{box-shadow:var(--glow)}
+.dstrip.open .dexp{color:var(--mature)}
+.dchain{grid-column:1/-1;margin:-2px 2px 8px;padding:15px 16px;background:var(--panel);border:1px solid var(--line);border-radius:12px;animation:rise .35s both}
+.dchain .lc-title{font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--faint);margin-bottom:11px}
+.dchain .casc-flow+.casc-trigger{margin-top:16px;border-top:1px solid var(--line);padding-top:16px}
+.dchain .lc-empty{font-size:12.5px;color:var(--dim);line-height:1.7}
 .dstrip{background:var(--panel);border:1px solid var(--line);border-left-width:3px;border-radius:11px;padding:12px 13px;cursor:pointer;transition:.2s}
 .dstrip:hover{transform:translateY(-2px);border-color:var(--line2)}
 .dstrip h4{font-size:15px;font-weight:700;display:flex;justify-content:space-between;align-items:center;gap:6px}
@@ -623,9 +631,8 @@ table.tk th.c{text-align:center}
     <p class="vsub">병목이 스택을 타고 흐르는 한 명제의 세 단면 — <b>① 강물</b>(forcing function S-커브) · <b>② 파생 체인</b>(×10 가치사슬) · <b>③ 8레이어 통합</b>(스택·매트릭스)을 아래 트리에서 전환합니다. 강물 후보를 누르면 그 강물의 S-커브가 펼쳐집니다.</p></div>
   <nav class="subtree" id="threadTree" aria-label="관통 흐름 하위">
     <div class="subroot">관통 흐름</div>
-    <button class="subnode on" data-sub="flow">① 강물 — forcing function S-커브<span class="sk">flow</span></button>
-    <button class="subnode" data-sub="casc">② 파생 체인 — ×10 가치사슬<span class="sk">cascade</span></button>
-    <button class="subnode" data-sub="stack">③ 8레이어 통합 — 스택 · 24종목 매트릭스<span class="sk">stack</span></button>
+    <button class="subnode on" data-sub="flow">① 강물 — forcing function · value chain 드릴다운<span class="sk">flow</span></button>
+    <button class="subnode" data-sub="stack">② 8레이어 통합 — 스택 · 24종목 매트릭스<span class="sk">stack</span></button>
   </nav>
   <div class="subview on" id="sub-flow">
   <aside class="rcand-panel">
@@ -2100,6 +2107,31 @@ function renderSignalLog(){
 
 /* ===== 00 THREAD (river) ===== */
 let activeRiver=0;
+/* 한 카스케이드(1차 드라이버 + 2·3차 파생 가치사슬)를 HTML로 */
+function cascadeHTML(c){const dcol=STAGE_HEX[c.stage];
+ return `<div class="casc-trigger"><b>거시 트리거 (L1)</b>${c.trigger}</div>
+  <div class="casc-flow">
+    <div class="casc-driver">
+      <div class="dl">1차 드라이버 · ${c.layer}</div><div class="dn">${c.driver}</div>
+      <span class="sbadge" style="background:${dcol}22;color:${dcol}">${c.stage}</span>
+      <div class="role"><b>${c.primary.label}</b><br>${c.primary.ex}</div>
+      <div class="arrowdown">▼ 2·3차 파생 가치사슬 (다음 병목 후보)</div>
+    </div>
+    <div class="casc-nodes">${c.nodes.map((nd,i)=>{const col=STAGE_HEX[nd.stage];
+      return `<div class="cnode" data-cand="${nd.cand||''}" style="border-left-color:${col};animation-delay:${i*70}ms">
+        <span class="jdot" style="background:${col}"></span>
+        <div class="top"><span class="nm">${nd.n}</span><span class="sbadge" style="background:${col}22;color:${col}">${nd.stage}</span>${nd.cand?'<span class="go">분해 보기 →</span>':'<span class="go" style="color:var(--faint)">리서치 영역</span>'}</div>
+        <div class="why">${nd.why}</div>
+        <div class="mult">콘텐츠 배수 · ${nd.mult}</div>
+        <div class="cos">대표: ${nd.cos}</div></div>`;}).join('')}</div>
+  </div>`;}
+/* 한 레이어의 2·3차 가치사슬(해당 레이어를 가진 카스케이드들)을 HTML로 */
+function layerChainHTML(layer){
+ const cs=CASCADES.filter(c=>c.layer===layer);
+ if(!cs.length){const cands=STATE.filter(c=>c.layer===layer);
+  return `<div class="lc-empty">이 레이어의 2·3차 파생 분해는 상위 드라이버(예: 가속기·메모리)의 파생 노드에서 다룹니다.<br>이 층 후보: <b>${cands.map(c=>c.name).join(', ')||'—'}</b></div>`;}
+ return `<div class="lc-title">2·3차 파생 가치사슬 · ${cs.length>1?cs.length+'개 드라이버':cs[0].driver}</div>`+cs.map(cascadeHTML).join('');
+}
 function renderThread(){
  const svg=document.getElementById('threadSvg');if(!svg)return;
  const R=RIVERS[activeRiver]||RIVERS[0];
@@ -2164,32 +2196,7 @@ document.querySelectorAll('.rcand[data-r]').forEach(card=>card.addEventListener(
  document.getElementById('threadSvg').scrollIntoView({behavior:'smooth',block:'nearest'});
 }));
 
-/* ===== 01 CASCADE ===== */
-let cascSel='cpu';
-function renderCascade(){
- const picks=document.getElementById('cascPick');if(!picks)return;
- picks.innerHTML=CASCADES.map(c=>`<button class="cpick ${c.key===cascSel?'on':''}" data-k="${c.key}">${c.driver}<span class="lb">${c.layer}</span></button>`).join('');
- picks.querySelectorAll('.cpick').forEach(b=>b.addEventListener('click',()=>{cascSel=b.dataset.k;renderCascade();}));
- const c=CASCADES.find(x=>x.key===cascSel),dcol=STAGE_HEX[c.stage];
- document.getElementById('cascView').innerHTML=`
-  <div class="casc-trigger"><b>거시 트리거 (L1)</b>${c.trigger}</div>
-  <div class="casc-flow">
-    <div class="casc-driver">
-      <div class="dl">1차 드라이버 · ${c.layer}</div><div class="dn">${c.driver}</div>
-      <span class="sbadge" style="background:${dcol}22;color:${dcol}">${c.stage}</span>
-      <div class="role"><b>${c.primary.label}</b><br>${c.primary.ex}</div>
-      <div class="arrowdown">▼ 파생 가치사슬 (다음 병목 후보)</div>
-    </div>
-    <div class="casc-nodes">${c.nodes.map((nd,i)=>{const col=STAGE_HEX[nd.stage];
-      return `<div class="cnode" data-cand="${nd.cand||''}" style="border-left-color:${col};animation-delay:${i*70}ms">
-        <span class="jdot" style="background:${col}"></span>
-        <div class="top"><span class="nm">${nd.n}</span><span class="sbadge" style="background:${col}22;color:${col}">${nd.stage}</span>${nd.cand?'<span class="go">분해 보기 →</span>':'<span class="go" style="color:var(--faint)">리서치 영역</span>'}</div>
-        <div class="why">${nd.why}</div>
-        <div class="mult">콘텐츠 배수 · ${nd.mult}</div>
-        <div class="cos">대표: ${nd.cos}</div></div>`;}).join('')}</div>
-  </div>`;
- document.querySelectorAll('#cascView .cnode').forEach(el=>el.addEventListener('click',()=>{const id=el.dataset.cand;if(id)openDrawer(id);}));
-}
+/* ===== 파생 가치사슬: 강물 value-chain 카드 인라인 드릴다운으로 통합 (cascadeHTML/layerChainHTML) ===== */
 
 /* ===== 01 STACK ===== */
 function renderStack(){
@@ -2442,7 +2449,7 @@ document.getElementById('sortSel').addEventListener('change',renderTracker);
 document.getElementById('filterSel').addEventListener('change',renderTracker);
 
 /* ===== INIT ===== */
-function renderAll(){renderSignalLog();renderThread();renderCascade();renderStack();renderPortfolio();renderTracker();}
+function renderAll(){renderSignalLog();renderThread();renderStack();renderPortfolio();renderTracker();}
 renderLegends();loadStore().then(renderAll);renderAll();updateAsof();loadPrices();
 
 /* ===== 출력(인쇄/PDF) — 페이지별 버튼: 이 페이지만 / 전체 ===== */
