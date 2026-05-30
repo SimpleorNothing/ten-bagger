@@ -281,6 +281,20 @@ table.tk th.c{text-align:center}
 .t-stage{font-family:var(--mono);font-size:13px;font-weight:700;padding:3px 8px;border-radius:20px}
 .t-date{font-family:var(--mono);font-size:13px;color:var(--faint)}
 .foot{margin-top:38px;padding-top:16px;border-top:1px solid var(--line);font-family:var(--mono);font-size:13px;color:var(--faint);line-height:1.7}.foot b{color:var(--dim)}
+/* ===== X-ray 적정밴드 갭 (TARGETS) — .pbar-track은 이미 position:relative ===== */
+.tgt-band{position:absolute;top:0;bottom:0;background:rgba(12,166,120,.14);
+  border-left:1px dashed rgba(12,166,120,.5);border-right:1px dashed rgba(12,166,120,.5);
+  pointer-events:none;z-index:1}
+.tgt-mid{position:absolute;top:-2px;bottom:-2px;width:2px;background:#0ca678;z-index:2;pointer-events:none}
+.gap-table{margin-top:18px}
+.gap-row{display:flex;align-items:center;gap:8px;font:13px/1.4 var(--mono,monospace);
+  padding:5px 0;border-bottom:1px solid var(--line)}
+.gap-lab{flex:0 0 92px;color:var(--dim)}
+.gap-cur{flex:0 0 56px;text-align:right}
+.gap-arr{flex:0 0 64px;text-align:center;font-weight:700}
+.gap-tgt{flex:0 0 78px;text-align:right;color:#0ca678}
+.gap-gate{flex:1;color:var(--faint);font-size:12px}
+@media(max-width:760px){.gap-row{flex-wrap:wrap}.gap-gate{flex:1 1 100%;padding-left:92px}}
 @media(max-width:760px){.vtitle{font-size:20px}.layer{grid-template-columns:40px 1fr;gap:10px}.layer .lright{display:none}.exrow{grid-template-columns:96px 1fr}.pbar-row{grid-template-columns:110px 1fr}.asof{position:static;text-align:left;margin:0 0 16px}.asof-row{justify-content:flex-start}.asof-k{text-align:left}}
 /* ===== THREAD: stacked sections (candidates / graph / signal log) ===== */
 .rcand-panel{background:linear-gradient(155deg,var(--panel),var(--ink2));border:1px solid var(--line);border-radius:18px;padding:20px 18px;margin-bottom:18px}
@@ -1194,10 +1208,11 @@ table.tk th.c{text-align:center}
 <section class="view" id="v-port">
   <div class="vhead"><div class="vkick">Portfolio X-ray · thesis vs book</div>
     <h1 class="vtitle">자본은 <em>현재 병목</em>에 80% — 다음 병목엔?</h1>
-    <p class="vsub">5/16 자산현황(총 898M) 기준, 보유를 8레이어에 투영. 핵심 질문: 당신이 "다음 병목"이라 지목한 곳에 자본이 가 있는가.</p></div>
+    <p class="vsub" id="portSub">자산현황 기준 보유를 8레이어에 투영. 핵심 질문: 당신이 "다음 병목"이라 지목한 곳에 자본이 가 있는가.</p></div>
   <div class="xray-hero" id="xrayHero"></div>
   <div id="portBars"></div>
   <div class="pclass" id="portClass"></div>
+  <div class="gap-table" id="portGap"></div>
 </section>
 
 <!-- 05 TRACKER -->
@@ -1457,7 +1472,7 @@ function watchChips(lid){const ws=WATCH.filter(w=>w.layer===lid);if(!ws.length)r
  return `<div class="wgroup"><div class="wlabel">◷ 비상장·워치 (트리거 / 매수불가 / 점수제외)</div>`+
   ws.map(w=>`<div class="wchip" title="${w.note} · 출처:${w.src}"><span class="wnm">${w.name}</span><span class="wst">${w.status}</span></div>`).join('')+`</div>`;}
 
-/* ===== HOLDINGS (5/16 브리핑 기준, 테마버킷→레이어) ===== */
+/* ===== HOLDINGS (5/30 동기, 테마버킷→레이어 · 실잔고 일치) ===== */
 let HOLDINGS=[
  {layer:'L2',label:'연산칩 (마벨·KODEX 미국AI반도체TOP3+)',amt:86,w:8.9},
  {layer:'L3',label:'메모리 (마이크론·삼성전자·HBM ETF)',amt:384,w:39.6},
@@ -1469,6 +1484,22 @@ let HOLDINGS=[
  {layer:'기타',label:'지수·채권혼합 (코스피50·채권혼합)',amt:46,w:4.7},
  {layer:'현금',label:'현금',amt:88,w:9.1},
 ];
+/* ===== TARGETS — 적정 비중 밴드(프레임 도출, 2026-05-30) =====
+   lo~hi = 밴드, dir = 회전방향(trim/add/hold), gate = AND 선결조건.
+   강등규칙: 'add/trim'은 가격이 아니라 단계·γ·게이트로 정당화. 매매권유 아님. */
+let TARGETS=[
+ {layer:'L2',lo:8, hi:9,  dir:'hold', gate:'ASIC 런웨이(m3·y1) 유지 시'},
+ {layer:'L3',lo:30,hi:32, dir:'trim', gate:'γ 재확인 + MU 6/24 실적 게이트(추정상향>가격이면 보류)'},
+ {layer:'L4',lo:7, hi:9,  dir:'add',  gate:'구성종목 백엔드/어드밴스드 패키징 비중 검증 통과'},
+ {layer:'L6',lo:9, hi:11, dir:'trim', gate:'LITE 트림 앰버(내부자매도·베어풋) — 광 구조 노출은 유지'},
+ {layer:'L7',lo:12,hi:14, dir:'trim', gate:'한국전력ETF 과열 앰버(wk−0.75) — VRT·미국전력은 보유'},
+ {layer:'L8',lo:5, hi:7,  dir:'add',  gate:'BE 추격금지·첫 눌림 / 신규 grid명 컨플루언스 진입'},
+ {layer:'기타',lo:8,hi:11,dir:'hold', gate:'테슬라(정치베타·8레이어 밖) 4~6% + 지수·채권 방어 4~5%'},
+ {layer:'현금',lo:9, hi:12,dir:'hold', gate:'매크로 신호 부재 구간 — 충격 실탄 유지'},
+];
+const TMAP=Object.fromEntries(TARGETS.map(t=>[t.layer,t]));
+const TARGET_HEX={trim:'#b8860b',add:'#0ca678',hold:'#64748b'};
+const TARGET_ARROW={trim:'▼',add:'▲',hold:'■'};
 function heldWeight(L){return HOLDINGS.filter(h=>h.layer===L).reduce((s,h)=>s+h.w,0);}
 function overlap(L){const w=heldWeight(L);return w>=12?'High':w>=4?'Mid':w>0?'Low-Mid':'Low';}
 
@@ -2110,15 +2141,23 @@ function renderPortfolio(){
  const current=(byL.L3?.w||0)+(byL.L6?.w||0)+(byL.L7?.w||0)+(byL.L2?.w||0);
  const next=(byL.L4?.w||0)+(byL.L8?.w||0);
  const cash=byL.현금?.w||0,etc=byL.기타?.w||0;
+ const wL=l=>(byL[l]?.w||0).toFixed(1);
+ const tot=HOLDINGS.reduce((s,h)=>s+(h.amt||0),0);
+ const sub=document.getElementById('portSub');if(sub)sub.innerHTML=`자산현황(총 ${tot}M) 기준 보유를 8레이어에 투영. 핵심 질문: 당신이 "다음 병목"이라 지목한 곳에 자본이 가 있는가.`;
+ const tgtOverlay=lid=>{const t=TMAP[lid];if(!t)return '';
+  const sc=v=>Math.min(v*2.6,100);
+  const lo=sc(t.lo),hi=sc(t.hi),mid=sc((t.lo+t.hi)/2);
+  return `<div class="tgt-band" style="left:${lo}%;width:${Math.max(hi-lo,0.6)}%"></div>`+
+         `<div class="tgt-mid" style="left:${mid}%"></div>`;};
  document.getElementById('xrayHero').innerHTML=`<h3>thesis ↔ book 갭</h3>
-  <p>AI 인프라에 약 <b>80%</b>. 그런데 그 대부분이 <span class="hot">현재 병목(L3 메모리 35.7% · L7 전력 18.3% · L6 연결 13.0% · L2 연산 8.3% ≈ ${current.toFixed(0)}%)</span> — 전부 컨센서스가 흡수한 "선반영" 구간.
-  당신이 직접 "다음 병목"으로 지목한 <span class="grn">L4 패키징(2.5%) · L8 grid 발전(2.6%)</span>은 합쳐 ${next.toFixed(0)}%로 얇고, <b>AI 보안 트랙은 0%</b>(8레이어 하드웨어 스택 밖). <br>→ Alpha 관찰: 알파라고 본 곳에 자본이 안 가 있음. 의도된 대기인지, thesis-book 불일치인지는 당신의 판단 영역.</p>`;
+  <p>AI 인프라에 약 <b>80%</b>. 그런데 그 대부분이 <span class="hot">현재 병목(L3 메모리 ${wL('L3')}% · L7 전력 ${wL('L7')}% · L6 연결 ${wL('L6')}% · L2 연산 ${wL('L2')}% ≈ ${current.toFixed(0)}%)</span> — 전부 컨센서스가 흡수한 "선반영" 구간.
+  당신이 직접 "다음 병목"으로 지목한 <span class="grn">L4 패키징(${wL('L4')}%) · L8 grid 발전(${wL('L8')}%)</span>은 합쳐 ${next.toFixed(0)}%로 얇고, <b>AI 보안 트랙은 0%</b>(8레이어 하드웨어 스택 밖). <br>→ Alpha 관찰: 알파라고 본 곳에 자본이 안 가 있음. 아래 <b>적정 밴드·회전 표</b>가 "어디서 빼서 어디로"를 보여줌(게이트는 AND).</p>`;
  document.getElementById('portBars').innerHTML=order.map(lid=>{
   const d=byL[lid];if(!d)return '';
   const L=LMAP[lid]||{id:lid,name:lid==='현금'?'현금':'기타(8레이어 외)',color:lid==='현금'?'#64748b':'#7048e8'};
   const isCurrent=['L3','L6','L7','L2'].includes(lid),col=lid==='현금'?'#64748b':isCurrent?'var(--mature)':lid==='기타'?'#7048e8':'var(--dawn)';
   return `<div class="pbar-row"><div class="pbar-lab">${L.id} ${L.name.split('(')[0].split('/')[0].trim()}<span class="sub">${d.labels.join(' · ').slice(0,46)}</span></div>
-    <div class="pbar-track"><div class="pbar-fill" style="width:${Math.min(d.w*2.6,100)}%;background:${col}">${d.w.toFixed(1)}%</div></div>
+    <div class="pbar-track">${tgtOverlay(lid)}<div class="pbar-fill" style="width:${Math.min(d.w*2.6,100)}%;background:${col}">${d.w.toFixed(1)}%</div></div>
     <div class="pbar-amt">${d.amt}M</div></div>`;
  }).join('');
  document.getElementById('portClass').innerHTML=`
@@ -2126,6 +2165,22 @@ function renderPortfolio(){
   <div class="pc"><div class="pct" style="color:var(--dawn)">${next.toFixed(0)}%</div><div class="lbl">다음 병목 초입 (L4·L8)</div></div>
   <div class="pc"><div class="pct" style="color:var(--hot)">0%</div><div class="lbl">AI 보안 (별도 thesis · 미진입)</div></div>
   <div class="pc"><div class="pct" style="color:var(--dim)">${(cash+etc).toFixed(0)}%</div><div class="lbl">현금 ${cash.toFixed(0)}% + 기타 ${etc.toFixed(0)}%</div></div>`;
+ const ord2=['L2','L3','L4','L6','L7','L8','기타','현금'];
+ document.getElementById('portGap').innerHTML=
+  `<div class="gap-row" style="color:var(--txt);font-weight:700;border-bottom:1px solid var(--line)">
+     <div class="gap-lab">레이어</div><div class="gap-cur">현재</div><div class="gap-arr">회전</div>
+     <div class="gap-tgt">적정밴드</div><div class="gap-gate">게이트(AND)</div></div>`+
+  ord2.map(lid=>{const d=byL[lid],t=TMAP[lid];if(!d||!t)return '';
+   const cur=d.w,arr=TARGET_ARROW[t.dir],ac=TARGET_HEX[t.dir];
+   const gap=(((t.lo+t.hi)/2)-cur);
+   const gtxt=Math.abs(gap)<0.5?'~0':(gap>0?'+':'')+gap.toFixed(0);
+   return `<div class="gap-row">
+     <div class="gap-lab">${lid}</div>
+     <div class="gap-cur">${cur.toFixed(1)}%</div>
+     <div class="gap-arr" style="color:${ac}">${arr} ${gtxt}</div>
+     <div class="gap-tgt">${t.lo}–${t.hi}%</div>
+     <div class="gap-gate">${t.gate}</div></div>`;}).join('')+
+  `<div class="foot" style="margin-top:8px">밴드=프레임 도출(8레이어·단계·유한자본/상대가치). <b>▼트림 ▲증액 ■유지</b>. 회전·게이트는 <b>AND 조건</b> — 통과 전 진입 보류. 강등규칙: 가격 상승은 점검 플래그지 트림 결론 아님(γ 우선). <b>의사결정 지원 · 매매 권유 아님 · 최종 사이징은 운영자 판단.</b></div>`;
 }
 
 /* ===== 05 TRACKER ===== */
