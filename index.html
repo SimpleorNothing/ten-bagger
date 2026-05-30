@@ -1347,15 +1347,15 @@ function watchChips(lid){const ws=WATCH.filter(w=>w.layer===lid);if(!ws.length)r
 
 /* ===== HOLDINGS (5/16 브리핑 기준, 테마버킷→레이어) ===== */
 const HOLDINGS=[
- {layer:'L2',label:'연산칩 (마벨·KODEX 미국AI반도체TOP3+)',amt:75,w:8.3},
- {layer:'L3',label:'메모리 (마이크론·삼성전자·HBM ETF)',amt:320,w:35.7},
- {layer:'L4',label:'소부장 (KODEX AI반도체핵심장비)',amt:22,w:2.5},
- {layer:'L6',label:'연결 (루멘텀·KODEX 미국AI광통신네트워크)',amt:116,w:13.0},
- {layer:'L7',label:'전력·냉각 (버티브·KODEX AI전력·SOL 미국AI전력)',amt:165,w:18.3},
- {layer:'L8',label:'발전 (블룸에너지)',amt:24,w:2.6},
- {layer:'기타',label:'테슬라',amt:62,w:7.0},
- {layer:'기타',label:'지수·채권혼합 (코스피50·채권혼합)',amt:33,w:3.6},
- {layer:'현금',label:'현금',amt:81,w:9.0},
+ {layer:'L2',label:'연산칩 (마벨·KODEX 미국AI반도체TOP3+)',amt:86,w:8.9},
+ {layer:'L3',label:'메모리 (마이크론·삼성전자·HBM ETF)',amt:384,w:39.6},
+ {layer:'L4',label:'소부장 (KODEX AI반도체핵심장비)',amt:22,w:2.3},
+ {layer:'L6',label:'연결 (루멘텀·KODEX 미국AI광통신네트워크)',amt:110,w:11.3},
+ {layer:'L7',label:'전력·냉각 (버티브·KODEX AI전력·SOL 미국AI전력)',amt:151,w:15.6},
+ {layer:'L8',label:'발전 (블룸에너지)',amt:25,w:2.5},
+ {layer:'기타',label:'테슬라',amt:59,w:6.1},
+ {layer:'기타',label:'지수·채권혼합 (코스피50·채권혼합)',amt:46,w:4.7},
+ {layer:'현금',label:'현금',amt:88,w:9.1},
 ];
 function heldWeight(L){return HOLDINGS.filter(h=>h.layer===L).reduce((s,h)=>s+h.w,0);}
 function overlap(L){const w=heldWeight(L);return w>=12?'High':w>=4?'Mid':w>0?'Low-Mid':'Low';}
@@ -1666,6 +1666,19 @@ const SIGNAL_LOG=[
    {tag:'L7·L8',layer:'L8',col:'#0ca678',html:'골드만 GSGI: capex 전력·냉각·서버랙으로 확산 + AI투자 전망 전력 slice 성장 → front(L7 가속/L8 초입) 외부 검증. 리밸 L8 빌드 보강.'},
    {tag:'L4·caution',layer:'L4',col:'#0ca678',html:'헤지펀드 램리서치·AMAT·ASML 순매수 = L4 초입에 군중 도착. 빌드 validation이자 비대칭 축소 caution → 상대가치 체크.'},
    {tag:'magnitude',layer:null,col:'#7048e8',html:'Omdia 산업 +62.7%(price-driven, ROI 의문 단서). 단계 미이동, kill-trigger 근시일 확률↓ 입력만.'},
+  ]},
+ {date:'2026-05-30', at:'2026-05-30T10:00+09:00', source:'주간 종가 점검 — 상대가치 스프레드 확대 + SPCX IPO 일정 확정 (헤드라인 기반·원문 미검증)',
+  srcs:[
+   {label:'메모리 3사 합산 시총 ~$3T·각 $1T (Techtimes 5/27)', url:''},
+   {label:'SpaceX S-1: SPCX 6/12 상장·$1.75T·$75B (Reuters/CNBC)', url:''},
+   {label:'KOSPI 5/28 급락·환율~1,468·금통위 매파 (Investing.kr)', url:''}
+  ],
+  items:[
+   {tag:'L3·과열심화',layer:'L3',col:'#b8860b',html:'<b>메모리 주간 +14% — 3사 합산 시총 ~$3조·각 $1조 돌파.</b> 2026 완판·2028까지 공급부족으로 병목은 여전히 binding이나 가격이 EPS 컨센을 상당폭 선반영 → γ 빠르게 닫히는 구간. 리밸 없이 시세만으로 비중 35.7%→39.6% 드리프트. 트림 1순위 thesis 강화 — risk-sizing 입력, 숫자 불변.'},
+   {tag:'L7·낙도주의',layer:'L7',col:'#e03131',html:'<b>한국 전력(KODEX AI전력) ATH −26%·주간 −14% — 그러나 매크로 게이트 4개 전부 active.</b> 코스피 변동성(중동·미이란)·환율 ~1,468·매파 금통위(인상 시사)·유가 $90대 = AND 미충족 = falling knife 확정. 가격만 빠진 것 ≠ 매수. 진입 불가, 관찰만.'},
+   {tag:'L6·트림앰버',layer:'L6',col:'#e03131',html:'<b>루멘텀·광통신 주간 −7~9% — 5/28 트림 앰버 연장.</b> 가속 런웨이(m3·y1)는 유지, thesis 훼손 아닌 트림 바이어스. 실행 가능한 단 하나의 깨끗한 액션 지위 유지.'},
+   {tag:'L1·IPO유동성',layer:'L1',col:'#7048e8',html:'<b>SPCX(SpaceX+xAI) IPO 일정 확정 — 6/4 로드쇼·6/11 가격·6/12 나스닥, $75B 조달·$1.75T(사상 최대).</b> $75B 기계적 유동성 흡수 = 기존 대형주 단기 역풍. OpenAI·Anthropic은 9월 이후 → 6~9월 IPO 흡입 파이프라인. WATCH의 SPCX 후보승격 트리거 6/12 도래. 메모: 리밸은 SPCX 상장 전 — 데드라인 다음 주.'},
+   {tag:'상대가치',layer:'L4',col:'#b8860b',html:'<b>메모리(+14%)↔L4 소부장(−0%) 스프레드 한 주 더 확대.</b> 바스켓 내 비중 이전 근거 누적. 실행 경로 = 메모리 트림(DC연금 우선·세금 드래그 없음)→L4. 단 전력은 게이트로 막힘, L4 backend/어드밴스드 패키징 비중 검증 미완 게이팅 → 회전 1순위 관찰 유지, 숫자 불변.'},
   ]},
  /* ▼ 신규 시그널은 여기에 같은 형식으로 추가 (date·source·srcs[{label,url}] 출처 필수) */
 ];
