@@ -1083,8 +1083,8 @@ const CASCADES=[
   trigger:'Agentic AI → 지속적 에이전트 워크로드 → 서버 CPU 코어수·수요 폭증. 인퍼런스 비중↑로 CPU:GPU 비율이 균형으로 회귀. ★ NVDA Q1 FY27(5/20): Vera 단독 CPU $20B 가시성·$200B TAM — 1차주가 CPU를 공식 매출축으로 인정.',
   primary:{label:'1차주 (선반영 · 가이던스 포화)',ex:'Arm · AMD EPYC Venice(256코어) · Intel Clearwater Forest(288 E코어) · NVIDIA Vera(신규) · 하이퍼스케일러 커스텀'},
   nodes:[
-   {n:'메모리 인터페이스칩',why:'12채널 DDR5 + MRDIMM 전환',mult:'RCD 1개 → MRCD 1 + MDB 10 (모듈당 칩 ×수배)',cos:'Rambus · Montage · Renesas',stage:'초입',cand:'rmbs'},
-   {n:'FC-BGA 고사양 기판',why:'코어수↑ = 다이면적↑ = 기판 층수·면적↑',mult:'면적·층수↑ · 다운사이클로 덜오름',cos:'삼성전기 · 대덕전자 · Ibiden',stage:'초입',cand:'sem'},
+   {n:'메모리 인터페이스칩',why:'12채널 DDR5 + MRDIMM 전환',mult:'RCD 1개 → MRCD 1 + MDB 10 (모듈당 칩 ×수배)',cos:'Rambus · Montage · Renesas',stage:'가속',cand:'rmbs'},
+   {n:'FC-BGA 고사양 기판',why:'코어수↑ = 다이면적↑ = 기판 층수·면적↑',mult:'면적·층수↑ · 선반영 진행(과열)',cos:'삼성전기 · 대덕전자 · Ibiden',stage:'과열',cand:'sem'},
    {n:'CPU 전력 전달(VPD)',why:'300W+ TDP · 1000A "라스트 인치"',mult:'전류밀도↑ · PDN 저항↓',cos:'Vicor · MPS',stage:'가속',cand:'vicr'},
    {n:'테스트·번인 소켓',why:'코어수↑ = 테스트 시간·소켓 소모↑',mult:'소켓·번인 ASP↑',cos:'ISC · Leeno · FormFactor',stage:'가속',cand:null},
    {n:'CXL 메모리 풀링',why:'메모리 용량·대역폭 확장',mult:'침투 초기(서버 1%)',cos:'Astera · Montage',stage:'가속',cand:'alab'},
@@ -1102,7 +1102,7 @@ const CASCADES=[
   trigger:'AI 메모리 슈퍼사이클(BofA: 2026 DRAM +51%) → DRAM 재배치(HBM) → 후공정·인터페이스 동반 폭증.',
   primary:{label:'1차주 (확인된 사실 · 선반영)',ex:'마이크론(+102%) · 삼성(+53%) · SK하이닉스'},
   nodes:[
-   {n:'메모리 인터페이스칩',why:'서버 DDR5·MRDIMM 콘텐츠 증가',mult:'MRCD + MDB ×수배',cos:'Rambus · Montage · Renesas',stage:'초입',cand:'rmbs'},
+   {n:'메모리 인터페이스칩',why:'서버 DDR5·MRDIMM 콘텐츠 증가',mult:'MRCD + MDB ×수배',cos:'Rambus · Montage · Renesas',stage:'가속',cand:'rmbs'},
    {n:'HBM 후공정·TSV·본딩',why:'스택 단수↑ = TSV·하이브리드 본딩↑',mult:'본딩 장비·소재 콘텐츠↑',cos:'후공정 장비(KODEX) · 한미반도체',stage:'가속',cand:'kodexeq'},
    {n:'메모리 테스트',why:'고단 HBM·MRDIMM 검사 난도↑',mult:'번인·모듈 테스터↑',cos:'ISC · Teradyne',stage:'가속',cand:null},
   ]},
@@ -1440,6 +1440,13 @@ function gotoStack(layerId){
 
 /* ===== SIGNAL LOG (실적 콜 등 신규 시그널 → value-chain 반영, 누적 가능) ===== */
 let SIGNAL_LOG=[
+ {date:'2026-05-30', at:'2026-05-30T22:00+09:00', source:'파생체인 노드↔WATCH 단계 정합화 (침묵 오류 정리)',
+  srcs:[{label:'Investing·StockAnalysis·simplywall.st 시세(2026-05)'},{label:'Meritz 리노공업(2026-05-11)'}],
+  items:[
+   {tag:'L2·CPU 파생',layer:'L2',col:'#1c7ed6',html:'<b>메모리 인터페이스칩(Rambus·Montage·Renesas)</b> 캐스케이드 노드를 <b>초입→가속</b>. Montage 1Y +112%·52주고점 근처·fwd PER50, RMBS 가속(WATCH 기판정). Renesas는 종합 MCU주로 순수플레이 아님. cand(rmbs=가속)와 일관화.'},
+   {tag:'과열 동기화',layer:'L4',col:'#e03131',html:'<b>FC-BGA 고사양 기판(삼성전기·대덕·Ibiden)</b> 노드를 <b>초입→과열</b>. 5/22 WATCH에서 삼성전기 과열·대덕 성숙으로 이미 강등됐으나 cascade 노드만 방치됐던 침묵 오류 정리. Ibiden 1Y +115%·5월 ATH·평균목표가 +36% 상회로 확인.'},
+   {tag:'유지·관찰',layer:null,col:'#b8860b',html:'VPD(Vicor·MPS)·테스트번인소켓(ISC·리노·FormFactor)·CXL(Astera)은 <b>가속 유지</b>. 단 MPS·ISC·FORM은 ATH 부근·내부자매도 = <b>가속 후반</b> → 다음 분기 5신호 재점검 1순위. 리노공업만 상대 저평가(AI 직노출 약·모바일/의료 비중).'},
+  ]},
  {date:'2026-05-20', at:'2026-05-20T22:00+09:00', source:'NVIDIA Q1 FY27 실적·컨콜',
   srcs:[
    {label:'NVIDIA IR(8-K)', url:'https://www.sec.gov/Archives/edgar/data/0001045810/000104581026000051/q1fy27pr.htm'},
