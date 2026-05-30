@@ -611,16 +611,15 @@ table.tk th.c{text-align:center}
   </div>
   <p class="vsub" style="margin-top:4px">매크로 충격은 노이즈가 아니라 거래 가능한 신호. 단 "펀더멘털 레짐 전환"이면 이 룰북은 폐기.</p>
 
-  <div class="mc-sec">3중 점등 매수 시그널 (신호등) · <span style="color:var(--faint)">현재값 signals.json 연동</span></div>
+  <div class="mc-sec">3중 점등 매수 시그널 (신호등) · <span style="color:var(--faint)">자동 갱신(미국장 마감 후 1일 1회) · signals.json</span></div>
   <details class="sig-edit">
-    <summary>✎ 신호값 갱신 (signals.json)</summary>
+    <summary>✎ 신호값 수동 보정 (보통은 자동)</summary>
     <div class="sig-form">
       <input id="sgVix"  type="number" step="0.1" min="0"   max="150" placeholder="VIX 종가">
       <input id="sgFG"   type="number" step="1"   min="0"   max="100" placeholder="F&G 0–100">
       <input id="sgSP"   type="number" step="0.1" min="-30" max="30"  placeholder="S&P 일간 %">
-      <label><input id="sgSide" type="checkbox"> KOSPI 사이드카</label>
       <button id="sgSubmit">갱신 · 커밋</button>
-      <span id="sgMsg" class="sig-msg">빈칸은 자동으로 null(폴백).</span>
+      <span id="sgMsg" class="sig-msg">빈칸은 자동으로 null(폴백). 다음 자동 수집 때 덮어쓰여집니다.</span>
     </div>
   </details>
   <table class="mc">
@@ -628,7 +627,7 @@ table.tk th.c{text-align:center}
     <tbody>
       <tr><td>VIX 종가</td><td class="c" id="sigVix">--</td><td class="c">≥ 40</td><td class="c">≤ 14</td><td class="c"><span class="lamp" id="lampVix">⚪</span></td></tr>
       <tr><td>CNN Fear &amp; Greed</td><td class="c" id="sigFG">--</td><td class="c">≤ 15</td><td class="c">≥ 80</td><td class="c"><span class="lamp" id="lampFG">⚪</span></td></tr>
-      <tr><td>KOSPI 사이드카 / S&amp;P 일간</td><td class="c" id="sigSide">--</td><td class="c">발동 / −5%</td><td class="c">매수 사이드카 연발</td><td class="c"><span class="lamp" id="lampSide">⚪</span></td></tr>
+      <tr><td>S&amp;P 500 일간</td><td class="c" id="sigSP">--</td><td class="c">≤ −5%</td><td class="c">—</td><td class="c"><span class="lamp" id="lampSP">⚪</span></td></tr>
     </tbody>
   </table>
   <div class="verdict" id="sigVerdict">신호 데이터 없음(signals.json 미입력) — 대기</div>
@@ -2440,26 +2439,25 @@ Promise.all([getJSON('alpha.json'),getJSON('earnings.json'),getJSON('judgment.js
 </script>
 
 <script>
-/* ===== 01 MACRO — signals.json 연동 (VIX·F&G·사이드카) ===== */
+/* ===== 01 MACRO — signals.json 연동 (VIX·F&G·S&P) ===== */
 (function(){
  const TH={vixBuy:40,vixSell:14,fgBuy:15,fgSell:80,spBuy:-5};
  let SIGNALS=null;
  function set(id,txt){const e=document.getElementById(id);if(e)e.textContent=txt;}
  function renderSignals(){
   const S=SIGNALS||{};
-  const vix=S.vix,fg=S.fearGreed,side=S.sidecarKR,sp=S.spDailyPct;
+  const vix=S.vix,fg=S.fearGreed,sp=S.spDailyPct;
   set('sigVix',vix==null?'--':vix);
   set('sigFG',fg==null?'--':fg);
-  set('sigSide',side===true?'발동':(sp==null?'--':`S&P ${sp>0?'+':''}${sp}%`));
+  set('sigSP',sp==null?'--':`${sp>0?'+':''}${sp}%`);
   let buy=0;
   const lamp=(id,known,buyCond,sellCond)=>{const e=document.getElementById(id);if(!e)return;
    if(!known){e.textContent='⚪';return;}
    if(buyCond){e.textContent='🟢';buy++;}else if(sellCond){e.textContent='🔴';}else e.textContent='⚪';};
   lamp('lampVix',vix!=null,vix>=TH.vixBuy,vix<=TH.vixSell);
   lamp('lampFG',fg!=null,fg<=TH.fgBuy,fg>=TH.fgSell);
-  const sideKnown=side===true||sp!=null;
-  lamp('lampSide',sideKnown,side===true||(sp!=null&&sp<=TH.spBuy),false);
-  const known=(vix!=null)+(fg!=null)+(sideKnown?1:0);
+  lamp('lampSP',sp!=null,sp!=null&&sp<=TH.spBuy,false);
+  const known=(vix!=null)+(fg!=null)+(sp!=null);
   set('sigVerdict',known?`매수 점등 ${buy}/3 → ${buy>=2?'분할매수 (정찰 33%)':buy===1?'1/3 정찰':'대기'}`:'신호 데이터 없음(signals.json 미입력) — 대기');
  }
  renderSignals();
@@ -2475,8 +2473,7 @@ Promise.all([getJSON('alpha.json'),getJSON('earnings.json'),getJSON('judgment.js
  btn.addEventListener('click',async()=>{
   btn.disabled=true;msg.className='sig-msg';msg.textContent='커밋 중…';
   const body={
-   vix:v('sgVix')||null, fearGreed:v('sgFG')||null, spDailyPct:v('sgSP')||null,
-   sidecarKR:document.getElementById('sgSide').checked
+   vix:v('sgVix')||null, fearGreed:v('sgFG')||null, spDailyPct:v('sgSP')||null
   };
   try{
    const r=await fetch('/api/signals',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)});

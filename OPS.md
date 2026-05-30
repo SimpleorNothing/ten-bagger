@@ -17,7 +17,7 @@
 | 실적 크기 | `earnings.json` | **판단+데이터** | 운영자/Claude | O(번개) |
 | 판단 알파 | `judgment.json` | **판단** | 운영자/Claude | O(점 위치) |
 | 뉴스 피드 | `news.json` | 자동 수집·**미선별** | 크론(매일) | X (리포 전용 검토자료) |
-| 장중 신호 | `signals.json` | **보조 입력(운영자 수동·반자동)** | 운영자(01 매크로 사이트 폼 → Worker → GitHub) | X (01 매크로 매매 신호등 전용) |
+| 매크로 신호 | `signals.json` | 자동(VIX·S&P·CNN F&G) | 크론(미국장 마감 후 1일 1회) + 사이트 폼 수동 보정 | X (01 매크로 매매 신호등 전용) |
 
 병합 순서(차트 렌더 시): **alpha.json → earnings.json → judgment.json** (판단이 자동을 이김, 마지막에 덮어씀). 봇이 `alpha.json`을 재계산해도 판단은 매번 그 위에 다시 얹힌다. `news.json`은 차트에 안 쓰이고 사람/Claude의 큐레이션 입력일 뿐.
 

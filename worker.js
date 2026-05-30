@@ -105,9 +105,8 @@ async function handleSignalsUpdate(request, env) {
     source: "수동(사이트 폼)",
     vix:        num(body.vix, 0, 150),
     fearGreed:  num(body.fearGreed, 0, 100),
-    sidecarKR:  body.sidecarKR === true,
     spDailyPct: num(body.spDailyPct, -30, 30),
-    note: "VIX 종가·CNN F&G·한국 사이드카·S&P 일간. null이면 페이지 '--' 폴백. 충격 시 1회 갱신.",
+    note: "VIX 종가·CNN F&G·S&P 일간. 자동 수집(크론) 기본, 폼은 수동 보정. null이면 페이지 '--' 폴백.",
   };
 
   // 1) 기존 파일 sha 조회 (없으면 최초 생성)
@@ -124,7 +123,7 @@ async function handleSignalsUpdate(request, env) {
   // 2) PUT
   const content = btoa(unescape(encodeURIComponent(JSON.stringify(payload, null, 2) + "\n")));
   const putBody = {
-    message: `signals: vix=${payload.vix ?? "-"} fg=${payload.fearGreed ?? "-"} side=${payload.sidecarKR ? "ON" : "off"} (web form)`,
+    message: `signals: vix=${payload.vix ?? "-"} fg=${payload.fearGreed ?? "-"} sp=${payload.spDailyPct ?? "-"} (web form)`,
     branch: BRANCH,
     content,
     ...(sha ? { sha } : {}),
