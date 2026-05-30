@@ -171,6 +171,11 @@ main{padding:36px 0 90px;position:relative}
 .wlabel{font:600 10px var(--mono);color:var(--dim);letter-spacing:1px;margin-bottom:6px}
 .wchip{display:inline-flex;align-items:center;gap:6px;margin:0 6px 6px 0;padding:4px 9px;border-radius:8px;border:1px dashed var(--dim);font-size:12px;cursor:help}
 .wnm{font-weight:600}.wst{font:500 10px var(--mono);color:var(--dawn)}
+/* 통합 트리: 레이어 카드 내부 2·3차 가치사슬 드릴다운 */
+.lbody .lchain-wrap{flex-basis:100%;width:100%;margin-top:10px;padding-top:8px;border-top:1px dashed var(--line2)}
+.lbody .dexp{font-family:var(--mono);font-size:11px;color:var(--dawn);letter-spacing:.04em;cursor:pointer;padding:3px 0;display:inline-block}
+.lbody .dexp:hover{color:var(--mature)}
+.lbody .dchain{margin-top:8px}
 
 /* ===== STACK ===== */
 .stack-wrap{display:grid;grid-template-columns:1fr 300px;gap:18px}
@@ -573,7 +578,7 @@ table.tk th.c{text-align:center}
   <div id="sub-stack" style="margin-top:34px;border-top:1px solid var(--line);padding-top:30px">
   <div class="vhead"><div class="vkick">The Stack · 8레이어 AI 인프라 척추</div>
     <h1 class="vtitle">capex 병목은 스택을 <em>타고 흐른다</em></h1>
-    <p class="vsub">가이드 §2-C의 8레이어를 기본 프레임으로 — <b>스택(층별 상태·보유)과 탐색기(후보·§2-C 분해)를 한 화면에 통합</b>했습니다. 우측 막대는 그 층에 실제로 깔아둔 자본. 각 층 <b>헤더를 누르면 후보가 접히고</b>, <b>후보 칩을 누르면</b> §2-C 분해가 열립니다.</p></div>
+    <p class="vsub">가이드 §2-C의 8레이어(+기타)를 한 트리로 — <b>층별 상태·보유·종목·2·3차 가치사슬을 한 카드에 통합</b>했습니다. 우측 막대는 그 층에 실제로 깔아둔 자본. 각 층 <b>헤더를 누르면 카드가 접히고</b>, <b>종목 칩</b>은 §2-C 분해, <b>'2·3차 가치사슬 펼치기'</b>는 파생 가치사슬 드릴다운을 엽니다. 위 강물 곡선의 노드를 누르면 해당 층 카드로 점프합니다.</p></div>
   <div class="legend" id="legendStack"></div>
   <div class="stack-wrap">
     <div id="stackList"></div>
@@ -1530,25 +1535,15 @@ function renderThread(){
  svg.innerHTML=s;
  const note=document.getElementById('threadNote');if(note)note.innerHTML=R.note;
  if(R.layerBased){
-  document.getElementById('threadDetail').innerHTML=THREAD.map(d=>{const col=STAGE_HEX[d.stage];
-   const cands=STATE.filter(c=>c.layer===d.layer);
-   return `<div class="dstrip" data-l="${d.layer}" style="border-left-color:${col}">
-    <h4>${d.layer} ${d.label}<span class="badge" style="background:${col}22;color:${col}">${d.stage}</span></h4>
-    <p>${d.sub}<br>후보 ${cands.length}: ${cands.slice(0,3).map(c=>c.name).join(', ')||'—'}</p>
-    <div class="dexp">2·3차 가치사슬 펼치기 ▾</div></div>
-   <div class="dchain" data-l="${d.layer}" hidden>${layerChainHTML(d.layer)}</div>`;}).join('');
-  /* value chain 카드 클릭 → 그 레이어의 2·3차 파생 가치사슬 인라인 펼침 */
-  const toggleChain=(card,force)=>{const ch=card.nextElementSibling;
-   const open=force!==undefined?force:!card.classList.contains('open');
-   card.classList.toggle('open',open);
-   if(ch&&ch.classList.contains('dchain'))ch.hidden=!open;
-   const exp=card.querySelector('.dexp');if(exp)exp.textContent=open?'2·3차 가치사슬 접기 ▴':'2·3차 가치사슬 펼치기 ▾';};
-  document.querySelectorAll('#threadDetail .dstrip').forEach(card=>card.addEventListener('click',()=>toggleChain(card)));
-  document.querySelectorAll('#threadDetail .cnode[data-cand]').forEach(el=>el.addEventListener('click',e=>{e.stopPropagation();const id=el.dataset.cand;if(id)openDrawer(id);}));
-  /* 강물 곡선 노드 클릭 → 해당 레이어 카드 펼치고 스크롤 */
+  /* 레이어별 상태·보유·종목·2·3차 가치사슬은 아래 8레이어 통합 트리(stackList)로 일원화.
+     여기선 강물 곡선 노드 클릭 → 해당 레이어 트리 카드를 펼치고 스크롤만 한다. */
+  const td=document.getElementById('threadDetail');if(td)td.innerHTML='';
   svg.querySelectorAll('.river-node').forEach(g=>g.addEventListener('click',()=>{
-   const card=document.querySelector(`#threadDetail .dstrip[data-l="${g.dataset.l}"]`);
-   if(!card)return;toggleChain(card,true);card.scrollIntoView({behavior:'smooth',block:'center'});}));
+   const card=document.getElementById('lay-'+g.dataset.l);if(!card)return;
+   card.classList.remove('collapsed');
+   const exp=card.querySelector('.dexp'),ch=exp&&exp.nextElementSibling;
+   if(ch&&ch.classList.contains('dchain')&&ch.hidden){ch.hidden=false;exp.textContent='2·3차 가치사슬 접기 ▴';}
+   card.scrollIntoView({behavior:'smooth',block:'center'});}));
  }else{
   document.getElementById('threadDetail').innerHTML=R.nodes.map(d=>{const col=STAGE_HEX[d.stage];
    return `<div class="dstrip" style="border-left-color:${col};cursor:default">
@@ -1569,7 +1564,9 @@ document.querySelectorAll('.rcand[data-r]').forEach(card=>card.addEventListener(
 /* ===== 01 STACK ===== */
 function renderStack(){
  const front=['L4','L8'];
- document.getElementById('stackList').innerHTML=LAYERS.map(l=>{
+ /* 8레이어 밖(피지컬 AI·TSLA 등)도 한 트리에 포함 — 정보 손실 방지 */
+ const ETC={id:'기타',name:'기타 / 8레이어 외',en:'TSLA · 로보틱스 · 엣지',color:'#7048e8',stage:'태동',flow:'피지컬 AI = 부품 수요로 환산'};
+ document.getElementById('stackList').innerHTML=[...LAYERS,ETC].map(l=>{
   const w=heldWeight(l.id),cands=STATE.filter(c=>c.layer===l.id);
   const isFront=front.includes(l.id);
   const chips=cands.length?cands.map(c=>{const col=STAGE_HEX[c.stage];
@@ -1586,10 +1583,18 @@ function renderStack(){
        <div class="lheldtxt">보유 ${w?w.toFixed(1)+'%':'0%'}</div>
      </div>
    </div>
-   <div class="lbody">${chips}${watchChips(l.id)}</div></div>`;
+   <div class="lbody">${chips}${watchChips(l.id)}
+     <div class="lchain-wrap">
+       <div class="dexp" data-l="${l.id}">2·3차 가치사슬 펼치기 ▾</div>
+       <div class="dchain" data-l="${l.id}" hidden>${layerChainHTML(l.id)}</div>
+     </div></div></div>`;
  }).join('');
  document.querySelectorAll('#stackList .lhead').forEach(h=>h.addEventListener('click',()=>h.parentElement.classList.toggle('collapsed')));
- document.querySelectorAll('#stackList .chip').forEach(ch=>ch.addEventListener('click',e=>{e.stopPropagation();openDrawer(ch.dataset.id);}));
+ document.querySelectorAll('#stackList .chip[data-id]').forEach(ch=>ch.addEventListener('click',e=>{e.stopPropagation();openDrawer(ch.dataset.id);}));
+ document.querySelectorAll('#stackList .dexp').forEach(exp=>exp.addEventListener('click',e=>{e.stopPropagation();
+   const ch=exp.nextElementSibling;if(!ch||!ch.classList.contains('dchain'))return;
+   const open=ch.hidden;ch.hidden=!open;exp.textContent=open?'2·3차 가치사슬 접기 ▴':'2·3차 가치사슬 펼치기 ▾';}));
+ document.querySelectorAll('#stackList .cnode[data-cand]').forEach(el=>el.addEventListener('click',e=>{e.stopPropagation();const id=el.dataset.cand;if(id)openDrawer(id);}));
 }
 /* ===== 02 EXPLORER ===== */
 function renderLegends(){const h=Object.keys(STAGE_HEX).map(s=>`<span class="lg"><span class="dot s-${s}"></span>${s}</span>`).join('')+'<span class="lg" style="color:var(--mature)">★ 보유</span>';
