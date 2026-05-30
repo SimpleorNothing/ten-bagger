@@ -364,7 +364,7 @@ table.tk th.c{text-align:center}
 #v-alpha .tbtn:hover{border-color:var(--a-brand)}
 #v-alpha .tbtn.on{color:var(--a-brand);border-color:var(--a-brand);background:rgba(18,87,214,.06)}
 #v-alpha .legend{display:flex;gap:3px 9px;flex-wrap:wrap;font-size:11px;color:var(--a-dim);margin-left:auto}
-#v-alpha .snapsel{display:flex;align-items:center;gap:4px;margin-left:14px}
+#v-alpha .snapsel{display:flex;align-items:center;gap:4px;margin-right:14px}
 #v-alpha .snapsel .lab{font-size:11px;color:var(--a-dim)}
 #v-alpha .snapnav{font-family:var(--mono);font-size:15px;font-weight:700;line-height:1;color:var(--a-brand);background:#fff;border:1.5px solid var(--a-line);border-radius:7px;width:26px;height:26px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.15s;padding:0}
 #v-alpha .snapnav:hover:not(:disabled){border-color:var(--a-brand);background:rgba(28,126,214,.06)}
@@ -1111,6 +1111,12 @@ table.tk th.c{text-align:center}
   </div>
 
   <div class="benchrow toolbar">
+    <div class="snapsel" id="snapSel">
+      <span class="lab">시점</span>
+      <button type="button" class="snapnav" id="snapPrev" aria-label="이전 시점(←)" title="이전 시점 (← 키)">‹</button>
+      <span class="snapcur" id="snapCur" aria-live="polite">현재 (라이브)</span>
+      <button type="button" class="snapnav" id="snapNext" aria-label="다음 시점(→)" title="다음 시점 (→ 키)">›</button>
+    </div>
     <span class="lab">벤치마크</span>
     <div class="seg" id="benchSeg">
       <button data-b="NASDAQ" class="on">나스닥 (QQQ)</button>
@@ -1124,12 +1130,6 @@ table.tk th.c{text-align:center}
       <button class="tbtn on" id="emBtn">실적 표시</button>
     </div>
     <div class="legend" id="legend"></div>
-    <div class="snapsel" id="snapSel">
-      <span class="lab">시점</span>
-      <button type="button" class="snapnav" id="snapPrev" aria-label="이전 시점(←)" title="이전 시점 (← 키)">‹</button>
-      <span class="snapcur" id="snapCur" aria-live="polite">현재 (라이브)</span>
-      <button type="button" class="snapnav" id="snapNext" aria-label="다음 시점(→)" title="다음 시점 (→ 키)">›</button>
-    </div>
   </div>
   <div class="snap-reason" id="snapReason" hidden></div>
 
