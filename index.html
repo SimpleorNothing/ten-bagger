@@ -1497,6 +1497,9 @@ function layerChainHTML(layer){
 function renderThread(){
  const svg=document.getElementById('threadSvg');if(!svg)return;
  const R=RIVERS[activeRiver]||RIVERS[0];
+ /* 8레이어 capex 스택은 레이어 기반 강물(1번 학습→추론)에만 해당.
+    강물 2~6은 자체 가치사슬 노드(threadDetail)만 표시하고 스택 섹션은 숨긴다. */
+ const ss=document.getElementById('sub-stack');if(ss)ss.style.display=R.layerBased?'':'none';
  const flow=R.layerBased?THREAD:R.nodes;
  const W=1240,H=270,padX=72,top=48,bot=204,n=flow.length,gap=(W-padX*2)/(n-1);
  const pts=flow.map((d,i)=>({x:padX+gap*i,y:top+(bot-top)*(1-d.pos)}));
