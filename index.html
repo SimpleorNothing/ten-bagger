@@ -181,6 +181,16 @@ main{padding:36px 0 90px;position:relative}
 .lbody .dchain{margin-top:8px}
 
 /* ===== STACK ===== */
+/* 스택 컨트롤 바: value chain 깊이(좌) + 단계 범례(우) */
+.stack-bar{display:flex;align-items:center;justify-content:space-between;gap:14px 18px;flex-wrap:wrap;margin:16px 0 22px}
+.stack-bar .legend{margin:0}
+.vc-depth{display:inline-flex;align-items:center;gap:0;border:1px solid var(--line);border-radius:9px;overflow:hidden;background:var(--panel)}
+.vc-depth .vc-lbl{font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--faint);padding:0 10px;text-transform:uppercase}
+.vc-depth button{font-family:var(--mono);font-size:13px;padding:6px 14px;border:0;border-left:1px solid var(--line);background:transparent;color:var(--dim);cursor:pointer;transition:.13s}
+.vc-depth button.on{background:var(--dawn);color:var(--onacc);font-weight:700}
+.vc-depth button:hover:not(.on){background:var(--ink2);color:var(--txt)}
+/* 깊이: 1차=종목 칩만(드릴다운 접힘) · 2차=파생 노드까지(대표 종목 숨김) · 3차=대표 종목까지 전부 */
+#stackList.d2 .cnode .cos{display:none}
 .stack-wrap{display:grid;grid-template-columns:1fr 300px;gap:18px}
 @media(max-width:980px){.stack-wrap{grid-template-columns:1fr}}
 .layer{display:grid;grid-template-columns:54px 1fr 132px;align-items:center;gap:14px;background:linear-gradient(100deg,var(--panel),var(--ink2));border:1px solid var(--line);border-left-width:4px;border-radius:13px;padding:13px 16px;margin-bottom:9px;cursor:pointer;transition:.18s;position:relative}
@@ -570,7 +580,15 @@ table.tk th.c{text-align:center}
   <div class="vhead"><div class="vkick">The Stack · 8레이어 AI 인프라 척추</div>
     <h1 class="vtitle">capex 병목은 스택을 <em>타고 흐른다</em></h1>
     <p class="vsub">가이드 §2-C의 8레이어(+기타)를 한 트리로 — <b>층별 상태·보유·종목·2·3차 가치사슬을 한 카드에 통합</b>했습니다. 우측 막대는 그 층에 실제로 깔아둔 자본. 각 층 <b>헤더를 누르면 카드가 접히고</b>, <b>종목 칩</b>은 §2-C 분해, <b>'2·3차 가치사슬 펼치기'</b>는 파생 가치사슬 드릴다운을 엽니다. 위 강물 곡선의 노드를 누르면 해당 층 카드로 점프합니다.</p></div>
-  <div class="legend" id="legendStack"></div>
+  <div class="stack-bar">
+    <div class="seg vc-depth" id="vcDepth" role="group" aria-label="value chain 표시 깊이">
+      <span class="vc-lbl">value chain</span>
+      <button type="button" data-d="1" class="on">1차</button>
+      <button type="button" data-d="2">2차</button>
+      <button type="button" data-d="3">3차</button>
+    </div>
+    <div class="legend" id="legendStack"></div>
+  </div>
   <div class="stack-wrap">
     <div id="stackList"></div>
     <div class="sidecard">
@@ -1692,7 +1710,21 @@ function renderStack(){
    const ch=exp.nextElementSibling;if(!ch||!ch.classList.contains('dchain'))return;
    const open=ch.hidden;ch.hidden=!open;exp.textContent=open?'2·3차 가치사슬 접기 ▴':'2·3차 가치사슬 펼치기 ▾';}));
  document.querySelectorAll('#stackList .cnode[data-cand]').forEach(el=>el.addEventListener('click',e=>{e.stopPropagation();const id=el.dataset.cand;if(id)openDrawer(id);}));
+ applyVcDepth(VC_DEPTH);
 }
+/* ===== value chain 표시 깊이 (1차 칩 / 2차 파생노드 / 3차 대표종목) — 스택 트리 전역 ===== */
+let VC_DEPTH=1;
+function applyVcDepth(d){
+ VC_DEPTH=d;
+ const dep=document.getElementById('vcDepth');
+ if(dep)dep.querySelectorAll('[data-d]').forEach(x=>x.classList.toggle('on',+x.dataset.d===d));
+ const list=document.getElementById('stackList');if(!list)return;
+ list.classList.toggle('d2',d===2);
+ list.querySelectorAll('.dchain').forEach(ch=>{ch.hidden=(d===1);});
+ list.querySelectorAll('.dexp').forEach(exp=>{exp.textContent=(d===1)?'2·3차 가치사슬 펼치기 ▾':'2·3차 가치사슬 접기 ▴';});
+}
+(function(){const dep=document.getElementById('vcDepth');if(!dep)return;
+ dep.addEventListener('click',e=>{const b=e.target.closest('[data-d]');if(!b)return;applyVcDepth(+b.dataset.d);});})();
 /* ===== 02 EXPLORER ===== */
 function renderLegends(){const h=Object.keys(STAGE_HEX).map(s=>`<span class="lg"><span class="dot s-${s}"></span>${s}</span>`).join('')+'<span class="lg" style="color:var(--mature)">★ 보유</span>';
  const ls=document.getElementById('legendStack');if(ls)ls.innerHTML=h;
