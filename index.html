@@ -108,19 +108,15 @@ main{padding:36px 0 90px;position:relative}
 .front-pill::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--dawn);box-shadow:none;animation:pulse 1.6s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 .detail-strip{margin-top:18px;display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));gap:10px}
+/* 강물 2~6 가치사슬을 강물 1 스택과 동일한 lcard로 — 단일 컬럼 스택 레이아웃 */
+.detail-strip.as-stack{display:block}
+.detail-strip.as-stack .chip.nolink{cursor:default}
+.detail-strip.as-stack .chip.nolink:hover{transform:none;border-color:var(--line);background:var(--ink2)}
 /* ── 강물 value chain 카드 인라인 드릴다운 ── */
-.dstrip .dexp{margin-top:7px;font-family:var(--mono);font-size:10.5px;color:var(--dawn);letter-spacing:.04em}
-.dstrip.open{box-shadow:var(--glow)}
-.dstrip.open .dexp{color:var(--mature)}
 .dchain{grid-column:1/-1;margin:-2px 2px 8px;padding:15px 16px;background:var(--panel);border:1px solid var(--line);border-radius:12px;animation:rise .35s both}
 .dchain .lc-title{font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--faint);margin-bottom:11px}
 .dchain .casc-flow+.casc-trigger{margin-top:16px;border-top:1px solid var(--line);padding-top:16px}
 .dchain .lc-empty{font-size:12.5px;color:var(--dim);line-height:1.7}
-.dstrip{background:var(--panel);border:1px solid var(--line);border-left-width:3px;border-radius:11px;padding:12px 13px;cursor:pointer;transition:.2s}
-.dstrip:hover{transform:translateY(-2px);border-color:var(--line2)}
-.dstrip h4{font-size:15px;font-weight:700;display:flex;justify-content:space-between;align-items:center;gap:6px}
-.dstrip .badge{font-family:var(--mono);font-size:13px;padding:2px 6px;border-radius:20px;font-weight:700;white-space:nowrap}
-.dstrip p{font-size:14px;color:var(--dim);margin-top:6px;font-family:var(--mono);line-height:1.5}
 
 /* ===== CASCADE (derivative chain) ===== */
 .casc-pick{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
@@ -179,6 +175,16 @@ main{padding:36px 0 90px;position:relative}
 .lbody .dexp{font-family:var(--mono);font-size:11px;color:var(--dawn);letter-spacing:.04em;cursor:pointer;padding:3px 0;display:inline-block}
 .lbody .dexp:hover{color:var(--mature)}
 .lbody .dchain{margin-top:8px}
+/* 모바일: lcard 헤더(스택·강물 공용)의 고정 3컬럼 그리드가 좁은 화면에서 중앙 컬럼을 짓눌러
+   한 글자씩 세로로 깨지는 문제 → 2컬럼(아이콘+본문)으로, 우측(배지·성숙도 막대)은 아래 줄로 흐르게 */
+@media(max-width:760px){
+ .lhead{grid-template-columns:40px 1fr;gap:10px;padding:12px 13px}
+ .lhead .lid{font-size:24px}
+ .lhead .lright{grid-column:1/-1;flex-direction:row;flex-wrap:wrap;align-items:center;justify-content:flex-start;gap:8px;text-align:left;margin-top:2px}
+ .lhead .lright .lheld{width:110px!important}
+ .lbody{padding:2px 14px 14px 14px}
+ .lmid .lflow{overflow-wrap:anywhere}
+}
 
 /* ===== STACK ===== */
 /* 스택 컨트롤 바: value chain 깊이(좌) + 단계 범례(우) */
@@ -571,6 +577,15 @@ table.tk th.c{text-align:center}
     <div class="thread-card">
       <svg class="thread-svg" id="threadSvg" viewBox="0 0 1240 270" preserveAspectRatio="xMidYMid meet"></svg>
       <div class="tnote" id="threadNote">컴퓨트·메모리(<b>L1–L3</b>)는 이미 가격에 반영(성숙). 강물의 머리는 <b style="color:var(--dawn)">L4 패키징 · L6 광 · L8 발전</b>을 지나 <b style="color:var(--nascent)">피지컬 AI</b>로 향하는 중.</div>
+      <div class="stack-bar" id="riverBar" style="display:none;margin:18px 0 0">
+        <div class="seg vc-depth" id="vcDepthRiver" role="group" aria-label="value chain 표시 깊이">
+          <span class="vc-lbl">value chain</span>
+          <button type="button" data-d="1" class="on">1</button>
+          <button type="button" data-d="2">2</button>
+          <button type="button" data-d="3">3</button>
+        </div>
+        <div class="legend" id="legendRiver"></div>
+      </div>
       <div class="detail-strip" id="threadDetail"></div>
     </div>
   </div><!-- /sub-flow -->
@@ -1622,6 +1637,7 @@ function renderThread(){
  /* 8레이어 capex 스택은 레이어 기반 강물(1번 학습→추론)에만 해당.
     강물 2~6은 자체 가치사슬 노드(threadDetail)만 표시하고 스택 섹션은 숨긴다. */
  const ss=document.getElementById('sub-stack');if(ss)ss.style.display=R.layerBased?'':'none';
+ const rb=document.getElementById('riverBar');if(rb)rb.style.display=R.layerBased?'none':'';
  const flow=R.layerBased?THREAD:R.nodes;
  const W=1240,H=270,padX=72,top=48,bot=204,n=flow.length,gap=(W-padX*2)/(n-1);
  const pts=flow.map((d,i)=>({x:padX+gap*i,y:top+(bot-top)*(1-d.pos)}));
@@ -1662,7 +1678,7 @@ function renderThread(){
  if(R.layerBased){
   /* 레이어별 상태·보유·종목·2·3차 가치사슬은 아래 8레이어 통합 트리(stackList)로 일원화.
      여기선 강물 곡선 노드 클릭 → 해당 레이어 트리 카드를 펼치고 스크롤만 한다. */
-  const td=document.getElementById('threadDetail');if(td)td.innerHTML='';
+  const td=document.getElementById('threadDetail');if(td){td.className='detail-strip';td.innerHTML='';}
   svg.querySelectorAll('.river-node').forEach(g=>g.addEventListener('click',()=>{
    const card=document.getElementById('lay-'+g.dataset.l);if(!card)return;
    card.classList.remove('collapsed');
@@ -1670,23 +1686,45 @@ function renderThread(){
    if(ch&&ch.classList.contains('dchain')&&ch.hidden){ch.hidden=false;exp.textContent='2·3차 가치사슬 접기 ▴';}
    card.scrollIntoView({behavior:'smooth',block:'center'});}));
  }else{
+  /* 강물 2~6: 자체 가치사슬 노드를 강물 1(8레이어 스택)과 동일한 lcard 비주얼로 렌더.
+     lid=노드 코드 · 종목 칩=RIVER_CHAINS의 대표 종목 · 우측 막대=성숙도(pos) · 드릴다운=riverChainHTML. */
   const RC=RIVER_CHAINS[R.n]||{};
-  document.getElementById('threadDetail').innerHTML=R.nodes.map(d=>{const col=STAGE_HEX[d.stage];
-   return `<div class="dstrip" data-c="${d.code}" style="border-left-color:${col}">
-    <h4>${d.code} ${d.label}<span class="badge" style="background:${col}22;color:${col}">${d.stage}</span></h4>
-    <p>${d.why}<br>후보: ${d.plays}</p>
-    <div class="dexp">세부 value chain 펼치기 ▾</div></div>
-   <div class="dchain" hidden>${riverChainHTML(d,RC[d.code])}</div>`;}).join('');
-  const toggleChain=(card,force)=>{const ch=card.nextElementSibling;
-   const open=force!==undefined?force:!card.classList.contains('open');
-   card.classList.toggle('open',open);
-   if(ch&&ch.classList.contains('dchain'))ch.hidden=!open;
-   const exp=card.querySelector('.dexp');if(exp)exp.textContent=open?'세부 value chain 접기 ▴':'세부 value chain 펼치기 ▾';};
-  document.querySelectorAll('#threadDetail .dstrip').forEach(card=>card.addEventListener('click',()=>toggleChain(card)));
-  document.querySelectorAll('#threadDetail .cnode[data-cand]').forEach(el=>el.addEventListener('click',e=>{e.stopPropagation();const id=el.dataset.cand;if(id)openDrawer(id);}));
+  const td=document.getElementById('threadDetail');
+  td.className='detail-strip as-stack';
+  td.innerHTML=R.nodes.map((d,i)=>{const col=STAGE_HEX[d.stage];
+   const chain=RC[d.code]||[];
+   /* cos 대표 종목은 개별 탐색기 id 매핑이 없어 정보용 칩(비클릭). 정확한 드릴다운(드로어 점프)은 riverChainHTML의 .cnode[data-cand]가 담당. */
+   const chips=chain.flatMap(cn=>Array.isArray(cn.cos)?cn.cos.map(([nm,st,h])=>({nm,st:st||cn.stage,h})):[]);
+   const isFront=(R.frontCodes||[]).includes(d.code);
+   const pos=Math.round((d.pos||0)*100);
+   const chipHTML=chips.length?chips.map(c=>{const cc=STAGE_HEX[c.st]||col;
+     return `<div class="chip nolink" style="border-left-color:${cc}"><span class="sd" style="background:${cc}"></span><span class="nm">${c.nm}</span>${c.h?'<span class="heldstar">★</span>':''}</div>`;}).join(''):`<span class="emptyc">— ${d.plays} —</span>`;
+   return `<div class="lcard" id="rnode-${i}" data-c="${d.code}" style="border-left-color:${col}">
+    <div class="lhead">
+      <div class="lid" style="color:${col}">${d.code}</div>
+      <div class="lmid"><div class="lname">${d.label}</div><div class="lex">${d.sub}</div>
+        <div class="lflow">→ ${d.why} · 후보 ${chips.length}<span class="caret">▾</span></div></div>
+      <div class="lright">
+        ${isFront?'<span class="lstage" style="background:var(--dawn);color:var(--onacc)">◂ 현재 전선</span>':''}
+        <span class="lstage" style="background:${col}22;color:${col}">${d.stage}</span>
+        <div class="lheld" style="width:120px"><i style="width:${pos}%;background:${col}"></i></div>
+        <div class="lheldtxt">성숙도 ${pos}%</div>
+      </div>
+    </div>
+    <div class="lbody">${chipHTML}
+      <div class="lchain-wrap">
+        <div class="dexp">세부 value chain 펼치기 ▾</div>
+        <div class="dchain" hidden>${riverChainHTML(d,chain)}</div>
+      </div></div></div>`;}).join('');
+  td.querySelectorAll('.lhead').forEach(h=>h.addEventListener('click',()=>h.parentElement.classList.toggle('collapsed')));
+  td.querySelectorAll('.dexp').forEach(exp=>exp.addEventListener('click',e=>{e.stopPropagation();
+    const ch=exp.nextElementSibling;if(!ch||!ch.classList.contains('dchain'))return;
+    const open=ch.hidden;ch.hidden=!open;exp.textContent=open?'세부 value chain 접기 ▴':'세부 value chain 펼치기 ▾';}));
+  td.querySelectorAll('.cnode[data-cand]').forEach(el=>el.addEventListener('click',e=>{e.stopPropagation();const id=el.dataset.cand;if(id)openDrawer(id);}));
   svg.querySelectorAll('.river-node').forEach((g,i)=>g.addEventListener('click',()=>{
-   const card=document.querySelectorAll('#threadDetail .dstrip')[i];
-   if(!card)return;toggleChain(card,true);card.scrollIntoView({behavior:'smooth',block:'center'});}));
+   const card=document.getElementById('rnode-'+i);if(!card)return;
+   card.classList.remove('collapsed');card.scrollIntoView({behavior:'smooth',block:'center'});}));
+  applyRiverVcDepth(RIVER_VC_DEPTH);
  }
 }
 /* 강물 후보 1~4 카드 클릭 → 해당 강물 흐름·가치사슬로 전환 */
@@ -1749,9 +1787,23 @@ function applyVcDepth(d){
 }
 (function(){const dep=document.getElementById('vcDepth');if(!dep)return;
  dep.addEventListener('click',e=>{const b=e.target.closest('[data-d]');if(!b)return;applyVcDepth(+b.dataset.d);});})();
+/* 강물 2~6 가치사슬 깊이 — 강물 1 스택과 동일(1=헤더만 · 2=헤더+종목 칩 · 3=세부 value chain까지) */
+let RIVER_VC_DEPTH=1;
+function applyRiverVcDepth(d){
+ RIVER_VC_DEPTH=d;
+ const dep=document.getElementById('vcDepthRiver');
+ if(dep)dep.querySelectorAll('[data-d]').forEach(x=>x.classList.toggle('on',+x.dataset.d===d));
+ const list=document.getElementById('threadDetail');if(!list)return;
+ list.querySelectorAll('.lcard').forEach(card=>card.classList.toggle('collapsed',d===1));
+ list.querySelectorAll('.dchain').forEach(ch=>{ch.hidden=(d!==3);});
+ list.querySelectorAll('.dexp').forEach(exp=>{exp.textContent=(d===3)?'세부 value chain 접기 ▴':'세부 value chain 펼치기 ▾';});
+}
+(function(){const dep=document.getElementById('vcDepthRiver');if(!dep)return;
+ dep.addEventListener('click',e=>{const b=e.target.closest('[data-d]');if(!b)return;applyRiverVcDepth(+b.dataset.d);});})();
 /* ===== 02 EXPLORER ===== */
 function renderLegends(){const h=Object.keys(STAGE_HEX).map(s=>`<span class="lg"><span class="dot s-${s}"></span>${s}</span>`).join('')+'<span class="lg" style="color:var(--mature)">★ 보유</span>';
  const ls=document.getElementById('legendStack');if(ls)ls.innerHTML=h;
+ const lr=document.getElementById('legendRiver');if(lr)lr.innerHTML=h;
  const allKeys=Object.keys(MAP_LAYER_HEX),allOn=mapFilter.size===allKeys.length;
  const lm=Object.entries(MAP_LAYER_HEX).map(([id,c])=>`<span class="lg lg-f${!mapFilter.has(id)?' off':''}" data-l="${id}"><span class="dot" style="background:${c}"></span>${id}</span>`).join('')+'<span class="lg" style="color:var(--mature)">★ 보유</span>'+`<button type="button" class="lg-all">${allOn?'전체 해제':'전체 선택'}</button>`;
  const lmEl=document.getElementById('legendMap');lmEl.innerHTML=lm;
