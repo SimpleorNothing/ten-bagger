@@ -1484,8 +1484,8 @@ const scoreCol=s=>s>=8?STAGE_HEX.초입:s>=5?STAGE_HEX.가속:s>=3?STAGE_HEX.성
 
 /* ===== PRICE DISPLAY ===== */
 let PRICES={},PRICES_ASOF=null;
-function fmtMoney(v,cur){if(v==null)return '';if(cur==='KRW')return '₩'+Math.round(v).toLocaleString();if(cur==='JPY')return '¥'+Math.round(v).toLocaleString();if(cur==='TWD')return 'NT$'+(+v).toFixed(1);return '$'+(+v).toFixed(2);}
-function priceHTML(c){const q=PRICES[c.id];if(!q||q.price==null)return '';const ch=q.changePct;const col=ch==null?'var(--dim)':ch>=0?'var(--dawn)':'var(--hot)';const sg=ch==null?'':(' '+(ch>=0?'▲':'▼')+Math.abs(ch).toFixed(2)+'%');return `<span style="font-family:var(--mono);font-weight:600;white-space:nowrap;color:${col}">${fmtMoney(q.price,q.currency)}${sg}</span>`;}
+function fmtMoney(v,cur){if(v==null)return '';if(cur==='KRW')return '₩'+Math.round(v).toLocaleString();if(cur==='JPY')return '¥'+Math.round(v).toLocaleString();if(cur==='TWD')return 'NT$'+Math.round(v).toLocaleString();return '$'+Math.round(v).toLocaleString();}
+function priceHTML(c){const q=PRICES[c.id];if(!q||q.price==null)return '';const ch=q.changePct;const col=ch==null?'var(--dim)':ch>=0?'var(--dawn)':'var(--hot)';const sg=ch==null?'':(' '+(ch>=0?'▲':'▼')+Math.round(Math.abs(ch))+'%');return `<span style="font-family:var(--mono);font-weight:600;white-space:nowrap;color:${col}">${fmtMoney(q.price,q.currency)}${sg}</span>`;}
 function pricePill(c){const h=priceHTML(c);return h?`<span class="pill">${h}</span>`:'';}
 function fmtKST(iso){if(!iso)return '—';const d=new Date(iso);if(isNaN(d))return '—';const k=new Date(d.getTime()+9*3600000);const p=n=>String(n).padStart(2,'0');return `${k.getUTCFullYear()}-${p(k.getUTCMonth()+1)}-${p(k.getUTCDate())} ${p(k.getUTCHours())}:${p(k.getUTCMinutes())} KST`;}
 function infoAsof(){if(!SIGNAL_LOG||!SIGNAL_LOG.length)return null;let best=null,bestT=0;for(const e of SIGNAL_LOG){const t=new Date(e.at||e.date).getTime();if(t>bestT){bestT=t;best=e;}}return best?(best.at||best.date):null;}

@@ -4,11 +4,11 @@
 // Korean (KOSPI/KOSDAQ) -> Naver; US/Taiwan/Japan -> Yahoo. Failures are
 // non-fatal: last known price is preserved so the site never goes blank.
 //
-// changePct = YoY 수익률: (현재가 / 약 1년 전(≈365일 전) 종가 − 1) × 100.
-// 전일 대비가 아니라 전년 동기 대비. 필드명은 프런트(priceHTML) 호환을 위해
-// changePct 그대로 유지하고 의미만 YoY로 전환한다. Yahoo는 range=1y 창에서
-// 365일 전 시점 이후 첫 종가를, Naver는 ~400일 일봉에서 365일 전 이후 첫
-// 거래일 종가를 기준가로 쓴다 → US/KR 모두 '1년 전 대비'로 일원화.
+// changePct = YTD 수익률: (현재가 / 전년도 마지막 거래일 종가 − 1) × 100.
+// 전일 대비가 아니라 연초 대비(올해 누적). 필드명은 프런트(priceHTML) 호환을
+// 위해 changePct 그대로 유지하고 의미만 YTD로 전환한다. Yahoo는 range=1y 창에서
+// 1/1 직전 마지막 종가(없으면 올해 첫 종가)를, Naver는 ~400일 일봉에서 같은
+// 기준가를 쓴다 → US/KR 모두 '연초 대비'로 일원화.
 
 import fs from 'node:fs';
 
@@ -17,8 +17,9 @@ const OUT = 'prices.json';
 const UA = { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36' };
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const ymd = (d) => d.toISOString().slice(0, 10).replace(/-/g, '');
-const YEAR_AGO_SEC = () => Math.floor((Date.now() - 365 * 864e5) / 1000);
-const YEAR_AGO_YMD = () => ymd(new Date(Date.now() - 365 * 864e5));
+const YEAR_START = () => new Date(Date.UTC(new Date().getUTCFullYear(), 0, 1));
+const YEAR_START_SEC = () => Math.floor(YEAR_START().getTime() / 1000);
+const YEAR_START_YMD = () => ymd(YEAR_START());
 
 function readCandidates() {
   const html = fs.readFileSync(HTML, 'utf8');
@@ -51,7 +52,7 @@ async function yahooAuth() {
 }
 
 async function yahoo(sym) {
-  // range=1y → ~52주 일봉 확보 후 약 1년 전 종가를 YoY 기준가로 사용.
+  // range=1y → ~52주 일봉 확보 후 올해 1/1 직전 마지막 종가를 YTD 기준가로 사용.
   const u = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?interval=1d&range=1y`;
   const r = await fetch(u, { headers: { ...UA, ...(YCOOKIE ? { Cookie: YCOOKIE } : {}) } });
   if (!r.ok) throw new Error('yahoo HTTP ' + r.status);
@@ -60,20 +61,23 @@ async function yahoo(sym) {
   const meta = res?.meta;
   if (!meta || meta.regularMarketPrice == null) throw new Error('yahoo no data');
   const price = meta.regularMarketPrice;
-  // 기준가 = 365일 전 시점 이후 첫 유효 종가. 없으면 chartPreviousClose, 그래도 없으면 창의 첫 종가.
+  // 기준가 = 1/1 직전 마지막 유효 종가(전년도 마지막 거래일). 없으면 올해 첫 종가, 그래도 없으면 chartPreviousClose/창 첫 종가.
   const ts = res.timestamp || [];
   const cl = res.indicators?.quote?.[0]?.close || [];
-  const t0 = YEAR_AGO_SEC();
-  let base = null;
-  for (let i = 0; i < ts.length; i++) { if (ts[i] >= t0 && cl[i] != null) { base = cl[i]; break; } }
-  if (base == null) base = meta.chartPreviousClose ?? null;
-  if (base == null) base = cl.find((x) => x != null) ?? null;
+  const t0 = YEAR_START_SEC();
+  let before = null, after = null;
+  for (let i = 0; i < ts.length; i++) {
+    if (cl[i] == null) continue;
+    if (ts[i] < t0) before = cl[i];      // 1/1 이전 마지막 종가로 계속 갱신
+    else { after = cl[i]; break; }       // 1/1 이후 첫 종가
+  }
+  const base = before ?? after ?? meta.chartPreviousClose ?? cl.find((x) => x != null) ?? null;
   return { price, changePct: base ? +(((price - base) / base) * 100).toFixed(2) : null, currency: meta.currency || 'USD' };
 }
 
 async function naver(code) {
   const end = ymd(new Date());
-  const start = ymd(new Date(Date.now() - 400 * 864e5)); // ~13개월 → YoY 기준가 확보
+  const start = ymd(new Date(Date.now() - 400 * 864e5)); // ~13개월 → 연초(전년도 말) 기준가 확보
   const u = `https://api.finance.naver.com/siseJson.naver?symbol=${encodeURIComponent(code)}&requestType=1&startTime=${start}&endTime=${end}&timeframe=day`;
   const r = await fetch(u, { headers: UA });
   if (!r.ok) throw new Error('naver HTTP ' + r.status);
@@ -82,9 +86,14 @@ async function naver(code) {
   const rows = arr.slice(1).filter((x) => Array.isArray(x) && x.length >= 5 && x[4] != null);
   if (!rows.length) throw new Error('naver empty');
   const price = Number(rows[rows.length - 1][4]); // [4] = 종가(close), not [1] 시가(open)
-  // 기준가 = 365일 전 시점 이후 첫 거래일 종가(전년 동기). 없으면 창의 첫 종가.
-  const t0 = YEAR_AGO_YMD();
-  const baseRow = rows.find((x) => String(x[0]).replace(/-/g, '') >= t0) || rows[0];
+  // 기준가 = 1/1 직전 마지막 거래일 종가(전년도 말). 없으면 올해 첫 거래일 종가.
+  const t0 = YEAR_START_YMD();
+  let before = null, after = null;
+  for (const x of rows) {
+    const d = String(x[0]).replace(/-/g, '');
+    if (d < t0) before = x; else { after = x; break; }
+  }
+  const baseRow = before || after || rows[0];
   const base = Number(baseRow[4]);
   return { price, changePct: base ? +(((price - base) / base) * 100).toFixed(2) : null, currency: 'KRW' };
 }
@@ -116,7 +125,7 @@ async function main() {
       const q = await quote(c);
       out.quotes[c.id] = { price: q.price, changePct: q.changePct, currency: q.currency, ticker: c.ticker, src: q.src };
       ok++;
-      console.log(`OK   ${c.id.padEnd(8)} ${c.ticker.padEnd(8)} ${q.price} ${q.currency} YoY=${q.changePct}% (${q.src})`);
+      console.log(`OK   ${c.id.padEnd(8)} ${c.ticker.padEnd(8)} ${q.price} ${q.currency} YTD=${q.changePct}% (${q.src})`);
     } catch (e) {
       fail++;
       console.log(`FAIL ${c.id.padEnd(8)} ${c.ticker.padEnd(8)} ${e.message}${out.quotes[c.id] ? ' (keeping last known)' : ''}`);
