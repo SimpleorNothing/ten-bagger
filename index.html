@@ -101,12 +101,22 @@ main{padding:36px 0 90px;position:relative}
 
 /* ===== THREAD (river) ===== */
 .thread-card{background:linear-gradient(155deg,var(--panel),var(--ink2));border:1px solid var(--line);border-radius:18px;padding:28px 26px 18px;position:relative;overflow:hidden}
+.thread-svg-wrap{position:relative}
 .thread-svg{width:100%;height:auto;display:block}
 .river-node{cursor:pointer}.rn-box{transition:.2s}.river-node:hover .rn-box{filter:brightness(1.25)}
 .tnote{margin-top:14px;color:var(--dim);font-size:15px;line-height:1.6}
 .front-pill{display:inline-flex;gap:7px;align-items:center;font-family:var(--mono);font-size:13px;color:var(--dawn);border:1px solid var(--line2);border-radius:30px;padding:4px 11px;background:var(--panel2)}
 .front-pill::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--dawn);box-shadow:none;animation:pulse 1.6s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+@media(max-width:760px){
+ .thread-card{padding:18px 12px 14px}
+ /* 가로로 긴 강물 다이어그램: 축소해 뭉개지 않고 읽을 수 있는 배율로 가로 스크롤 */
+ .thread-svg-wrap{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;margin:0 -12px;padding:0 12px;scrollbar-width:thin}
+ .thread-svg{min-width:880px}
+ /* 스와이프 힌트 — 스크롤되지 않는 카드에 고정해 더 볼 내용이 있음을 알림 */
+ .thread-card::after{content:"⟷ 좌우로 밀어보세요";position:absolute;right:10px;top:8px;font-family:var(--mono);font-size:11px;color:var(--faint);background:var(--panel2);border:1px solid var(--line);border-radius:20px;padding:2px 9px;pointer-events:none;opacity:.9;z-index:2}
+ .tnote{font-size:14px;margin-top:12px}
+}
 .detail-strip{margin-top:18px;display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));gap:10px}
 /* 강물 2~6 가치사슬을 강물 1 스택과 동일한 lcard로 — 단일 컬럼 스택 레이아웃 */
 .detail-strip.as-stack{display:block}
@@ -592,7 +602,7 @@ table.tk th.c{text-align:center}
   <div id="sub-flow" style="margin-top:30px">
     <div class="vhead"><div class="vkick">① 강물 흐름 · 현재 전선</div></div>
     <div class="thread-card">
-      <svg class="thread-svg" id="threadSvg" viewBox="0 0 1240 270" preserveAspectRatio="xMidYMid meet"></svg>
+      <div class="thread-svg-wrap"><svg class="thread-svg" id="threadSvg" viewBox="0 0 1240 270" preserveAspectRatio="xMidYMid meet"></svg></div>
       <div class="tnote" id="threadNote">컴퓨트·메모리(<b>L1–L3</b>)는 이미 가격에 반영(성숙). 강물의 머리는 <b style="color:var(--dawn)">L4 패키징 · L6 광 · L8 발전</b>을 지나 <b style="color:var(--nascent)">피지컬 AI</b>로 향하는 중.</div>
       <div class="stack-bar" id="riverBar" style="display:none;margin:18px 0 0">
         <div class="seg vc-depth" id="vcDepthRiver" role="group" aria-label="value chain 표시 깊이">
