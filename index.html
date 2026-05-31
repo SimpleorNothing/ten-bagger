@@ -151,6 +151,9 @@ main{padding:36px 0 90px;position:relative}
 .cnode .cos .ct{display:inline-flex;align-items:center;gap:3px;white-space:nowrap}
 .cnode .cos .ct i{width:6px;height:6px;border-radius:50%;flex:none}
 .cnode .cos .ct b{font-weight:700}
+.cnode .cos .ct.dvct{background:#e0313114;border-radius:5px;padding:0 4px}
+.dvf{color:var(--st-hot);font-weight:700;font-size:11px;margin-left:3px;cursor:help}
+.chip.dvchip{box-shadow:0 0 0 1px var(--st-hot) inset}
 .cnode .go{margin-left:auto;font-family:var(--mono);font-size:13px;color:var(--accel)}
 
 /* ===== STACK (merged: header + candidate chips) ===== */
@@ -593,7 +596,7 @@ table.tk th.c{text-align:center}
   <div id="sub-stack" style="margin-top:34px;border-top:1px solid var(--line);padding-top:30px">
   <div class="vhead"><div class="vkick">The Stack · 8레이어 AI 인프라 척추</div>
     <h1 class="vtitle">capex 병목은 스택을 <em>타고 흐른다</em></h1>
-    <p class="vsub">가이드 §2-C의 8레이어(+기타)를 한 트리로 — <b>층별 상태·보유·종목·2·3차 가치사슬을 한 카드에 통합</b>했습니다. 우측 막대는 그 층에 실제로 깔아둔 자본. 각 층 <b>헤더를 누르면 카드가 접히고</b>, <b>종목 칩</b>은 §2-C 분해, <b>'2·3차 가치사슬 펼치기'</b>는 파생 가치사슬 드릴다운을 엽니다. 위 강물 곡선의 노드를 누르면 해당 층 카드로 점프합니다.</p></div>
+    <p class="vsub">가이드 §2-C의 8레이어(+기타)를 한 트리로 — <b>층별 상태·보유·종목·2·3차 가치사슬을 한 카드에 통합</b>했습니다. 우측 막대는 그 층에 실제로 깔아둔 자본. 각 층 <b>헤더를 누르면 카드가 접히고</b>, <b>종목 칩</b>은 §2-C 분해, <b>'2·3차 가치사슬 펼치기'</b>는 파생 가치사슬 드릴다운을 엽니다. 위 강물 곡선의 노드를 누르면 해당 층 카드로 점프합니다. <b style="color:var(--st-hot)">⚑</b> = 종목의 <b>차트 단계(가격)</b>가 그 층·노드의 <b>테마 단계</b>보다 2단계 이상 앞선 경우 — 구조는 일러도 진입 가능한 대표주는 이미 더 성숙·과열이라는 뜻.</p></div>
   <div class="stack-bar">
     <div class="seg vc-depth" id="vcDepth" role="group" aria-label="value chain 표시 깊이">
       <span class="vc-lbl">value chain</span>
@@ -956,6 +959,11 @@ table.tk th.c{text-align:center}
 
 <script>
 const STAGE_HEX={태동:'#7048e8',초입:'#0ca678',가속:'#1c7ed6',성숙:'#b8860b',과열:'#e03131'};
+/* ===== 단계 정합: 테마(노드/레이어) 시계 vs 차트(종목) 시계 분리 ===== */
+const STAGE_ORDER=['태동','초입','가속','성숙','과열'];
+const stageIdx=s=>STAGE_ORDER.indexOf(s);
+function stageGap(a,b){const i=stageIdx(a),j=stageIdx(b);return (i<0||j<0)?0:Math.abs(i-j);} // 방어 등 곡선밖=0
+const STAGE_DIVERGE=2; // 테마 vs 차트가 이 값 이상 벌어지면 ⚑
 /* 초입 지도: 단계(태동~과열)는 x축 위치로 읽고, 점 색은 L1~L8 레이어로 구분 */
 const MAP_LAYER_HEX={L1:'#7048e8',L2:'#4263eb',L3:'#1c7ed6',L4:'#0ca678',L5:'#f59f00',L6:'#ae3ec9',L7:'#1098ad',L8:'#f76707','기타':'#868e96'};
 const layerCol=l=>MAP_LAYER_HEX[l]||MAP_LAYER_HEX['기타'];
@@ -1602,7 +1610,7 @@ function cascadeHTML(c){const dcol=STAGE_HEX[c.stage];
         <div class="top"><span class="nm">${nd.n}</span><span class="sbadge" style="background:${col}22;color:${col}">${nd.stage}</span>${nd.cand?'<span class="go">분해 보기 →</span>':'<span class="go" style="color:var(--faint)">리서치 영역</span>'}</div>
         <div class="why">${nd.why}</div>
         <div class="mult">콘텐츠 배수 · ${nd.mult}</div>
-        <div class="cos">대표: ${Array.isArray(nd.cos)?nd.cos.map(([nm,st,h])=>`<span class="ct"><i style="background:${STAGE_HEX[st]}"></i>${nm}${h?'<span class="heldstar"> ★</span>':''} <b style="color:${STAGE_HEX[st]}">${st}</b></span>`).join(' · '):nd.cos}</div></div>`;}).join('')}</div>
+        <div class="cos">대표: ${Array.isArray(nd.cos)?nd.cos.map(([nm,st,h])=>{const g=stageGap(nd.stage,st),dv=g>=STAGE_DIVERGE;return `<span class="ct${dv?' dvct':''}"><i style="background:${STAGE_HEX[st]}"></i>${nm}${h?'<span class="heldstar"> ★</span>':''} <b style="color:${STAGE_HEX[st]}">${st}</b>${dv?`<span class="dvf" title="테마 ${nd.stage} vs 차트 ${st} · ${g}단계 발산">⚑</span>`:''}</span>`;}).join(' · '):nd.cos}</div></div>`;}).join('')}</div>
   </div>`;}
 /* 한 레이어의 2·3차 가치사슬(해당 레이어를 가진 카스케이드들)을 HTML로 */
 function layerChainHTML(layer){
@@ -1628,7 +1636,7 @@ function riverChainHTML(d,chain){
        <span class="jdot" style="background:${col}"></span>
        <div class="top"><span class="nm">${nd.n}</span><span class="sbadge" style="background:${col}22;color:${col}">${nd.stage}</span>${nd.cand?'<span class="go">분해 보기 →</span>':'<span class="go" style="color:var(--faint)">리서치 영역</span>'}</div>
        <div class="why">${nd.why}</div>
-       <div class="cos">대표: ${Array.isArray(nd.cos)?nd.cos.map(([nm,st,h])=>`<span class="ct"><i style="background:${STAGE_HEX[st]}"></i>${nm}${h?'<span class="heldstar"> ★</span>':''} <b style="color:${STAGE_HEX[st]}">${st}</b></span>`).join(' · '):nd.cos}</div></div>`;}).join('')}</div>
+       <div class="cos">대표: ${Array.isArray(nd.cos)?nd.cos.map(([nm,st,h])=>{const g=stageGap(nd.stage,st),dv=g>=STAGE_DIVERGE;return `<span class="ct${dv?' dvct':''}"><i style="background:${STAGE_HEX[st]}"></i>${nm}${h?'<span class="heldstar"> ★</span>':''} <b style="color:${STAGE_HEX[st]}">${st}</b>${dv?`<span class="dvf" title="테마 ${nd.stage} vs 차트 ${st} · ${g}단계 발산">⚑</span>`:''}</span>`;}).join(' · '):nd.cos}</div></div>`;}).join('')}</div>
   </div>`;
 }
 function renderThread(){
@@ -1745,8 +1753,8 @@ function renderStack(){
  document.getElementById('stackList').innerHTML=[...LAYERS,ETC].map(l=>{
   const w=heldWeight(l.id),cands=STATE.filter(c=>c.layer===l.id);
   const isFront=front.includes(l.id);
-  const chips=cands.length?cands.map(c=>{const col=STAGE_HEX[c.stage];
-    return `<div class="chip" data-id="${c.id}" style="border-left-color:${col}"><span class="sd" style="background:${col}"></span><span class="nm">${c.name}</span><span class="tk">${c.ticker}</span>${c.held?'<span class="heldstar">★</span>':''}${priceHTML(c)}</div>`;}).join(''):'<span class="emptyc">— 리서치 영역 (후보 추가) —</span>';
+  const chips=cands.length?cands.map(c=>{const col=STAGE_HEX[c.stage];const g=stageGap(l.stage,c.stage),dv=g>=STAGE_DIVERGE;
+    return `<div class="chip${dv?' dvchip':''}" data-id="${c.id}" style="border-left-color:${col}"><span class="sd" style="background:${col}"></span><span class="nm">${c.name}</span><span class="tk">${c.ticker}</span>${c.held?'<span class="heldstar">★</span>':''}${dv?`<span class="dvf" title="레이어 ${l.stage} vs 차트 ${c.stage} · ${g}단계 발산">⚑</span>`:''}${priceHTML(c)}</div>`;}).join(''):'<span class="emptyc">— 리서치 영역 (후보 추가) —</span>';
   return `<div class="lcard" id="lay-${l.id}" style="border-left-color:${l.color}">
    <div class="lhead" data-l="${l.id}">
      <div class="lid" style="color:${l.color}">${l.id}</div>
