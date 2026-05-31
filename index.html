@@ -567,6 +567,15 @@ table.tk th.c{text-align:center}
     <div class="thread-card">
       <svg class="thread-svg" id="threadSvg" viewBox="0 0 1240 270" preserveAspectRatio="xMidYMid meet"></svg>
       <div class="tnote" id="threadNote">컴퓨트·메모리(<b>L1–L3</b>)는 이미 가격에 반영(성숙). 강물의 머리는 <b style="color:var(--dawn)">L4 패키징 · L6 광 · L8 발전</b>을 지나 <b style="color:var(--nascent)">피지컬 AI</b>로 향하는 중.</div>
+      <div class="stack-bar" id="riverBar" style="display:none;margin:18px 0 0">
+        <div class="seg vc-depth" id="vcDepthRiver" role="group" aria-label="value chain 표시 깊이">
+          <span class="vc-lbl">value chain</span>
+          <button type="button" data-d="1" class="on">1</button>
+          <button type="button" data-d="2">2</button>
+          <button type="button" data-d="3">3</button>
+        </div>
+        <div class="legend" id="legendRiver"></div>
+      </div>
       <div class="detail-strip" id="threadDetail"></div>
     </div>
   </div><!-- /sub-flow -->
@@ -1618,6 +1627,7 @@ function renderThread(){
  /* 8레이어 capex 스택은 레이어 기반 강물(1번 학습→추론)에만 해당.
     강물 2~6은 자체 가치사슬 노드(threadDetail)만 표시하고 스택 섹션은 숨긴다. */
  const ss=document.getElementById('sub-stack');if(ss)ss.style.display=R.layerBased?'':'none';
+ const rb=document.getElementById('riverBar');if(rb)rb.style.display=R.layerBased?'none':'';
  const flow=R.layerBased?THREAD:R.nodes;
  const W=1240,H=270,padX=72,top=48,bot=204,n=flow.length,gap=(W-padX*2)/(n-1);
  const pts=flow.map((d,i)=>({x:padX+gap*i,y:top+(bot-top)*(1-d.pos)}));
@@ -1704,6 +1714,7 @@ function renderThread(){
   svg.querySelectorAll('.river-node').forEach((g,i)=>g.addEventListener('click',()=>{
    const card=document.getElementById('rnode-'+i);if(!card)return;
    card.classList.remove('collapsed');card.scrollIntoView({behavior:'smooth',block:'center'});}));
+  applyRiverVcDepth(RIVER_VC_DEPTH);
  }
 }
 /* 강물 후보 1~4 카드 클릭 → 해당 강물 흐름·가치사슬로 전환 */
@@ -1766,9 +1777,23 @@ function applyVcDepth(d){
 }
 (function(){const dep=document.getElementById('vcDepth');if(!dep)return;
  dep.addEventListener('click',e=>{const b=e.target.closest('[data-d]');if(!b)return;applyVcDepth(+b.dataset.d);});})();
+/* 강물 2~6 가치사슬 깊이 — 강물 1 스택과 동일(1=헤더만 · 2=헤더+종목 칩 · 3=세부 value chain까지) */
+let RIVER_VC_DEPTH=1;
+function applyRiverVcDepth(d){
+ RIVER_VC_DEPTH=d;
+ const dep=document.getElementById('vcDepthRiver');
+ if(dep)dep.querySelectorAll('[data-d]').forEach(x=>x.classList.toggle('on',+x.dataset.d===d));
+ const list=document.getElementById('threadDetail');if(!list)return;
+ list.querySelectorAll('.lcard').forEach(card=>card.classList.toggle('collapsed',d===1));
+ list.querySelectorAll('.dchain').forEach(ch=>{ch.hidden=(d!==3);});
+ list.querySelectorAll('.dexp').forEach(exp=>{exp.textContent=(d===3)?'세부 value chain 접기 ▴':'세부 value chain 펼치기 ▾';});
+}
+(function(){const dep=document.getElementById('vcDepthRiver');if(!dep)return;
+ dep.addEventListener('click',e=>{const b=e.target.closest('[data-d]');if(!b)return;applyRiverVcDepth(+b.dataset.d);});})();
 /* ===== 02 EXPLORER ===== */
 function renderLegends(){const h=Object.keys(STAGE_HEX).map(s=>`<span class="lg"><span class="dot s-${s}"></span>${s}</span>`).join('')+'<span class="lg" style="color:var(--mature)">★ 보유</span>';
  const ls=document.getElementById('legendStack');if(ls)ls.innerHTML=h;
+ const lr=document.getElementById('legendRiver');if(lr)lr.innerHTML=h;
  const allKeys=Object.keys(MAP_LAYER_HEX),allOn=mapFilter.size===allKeys.length;
  const lm=Object.entries(MAP_LAYER_HEX).map(([id,c])=>`<span class="lg lg-f${!mapFilter.has(id)?' off':''}" data-l="${id}"><span class="dot" style="background:${c}"></span>${id}</span>`).join('')+'<span class="lg" style="color:var(--mature)">★ 보유</span>'+`<button type="button" class="lg-all">${allOn?'전체 해제':'전체 선택'}</button>`;
  const lmEl=document.getElementById('legendMap');lmEl.innerHTML=lm;
