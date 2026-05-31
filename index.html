@@ -475,6 +475,9 @@ table.tk th.c{text-align:center}
 #v-alpha .bub{cursor:pointer;transition:opacity .2s,stroke-width .15s,cx .35s,cy .35s}
 #v-alpha .bub:hover{stroke-width:3}
 #v-alpha .bublab{font-size:11.5px;font-weight:700;fill:var(--a-txt);pointer-events:none;paint-order:stroke;stroke:#fff;stroke-width:3px;transition:x .35s,y .35s}
+/* S-커브 종목명: 곡선·겹친 라벨 위에서도 또렷하게 — 흰색 외곽선(halo) */
+#scurve .s-lbl,.scurve-r .s-lbl{paint-order:stroke;stroke:var(--ink);stroke-width:3.5px;stroke-linejoin:round;pointer-events:none}
+.s-dot:hover .s-lbl{stroke-width:4px}
 #v-alpha .dim .bub{opacity:.22}#v-alpha .dim .bublab{opacity:.18}
 #v-alpha .bub.hot-sel,#v-alpha .bublab.hot-sel{opacity:1 !important}
 #v-alpha .em-pulse{fill:none;stroke:var(--a-hot);stroke-width:2.4;transform-box:fill-box;transform-origin:center;animation:emPulse 1.15s ease-out infinite;pointer-events:none}
@@ -1997,7 +2000,7 @@ function drawRiverCurves(){
    const held=c.held?`<circle cx="${cx}" cy="${cy}" r="${r+4}" fill="none" stroke="var(--mature)" stroke-width="1.5" stroke-dasharray="2 2"/>`:'';
    const ldr=displaced?`<line x1="${lx}" y1="${abv?ly+3:ly-TH+1}" x2="${cx}" y2="${abv?cy-r-1:cy+r+1}" stroke="${col}" stroke-width=".8" opacity=".4" stroke-dasharray="2 3"/>`:'';
    s+=`<g class="s-dot rv-dot" data-id="${c.id}">${glow}${held}${ldr}<circle cx="${cx}" cy="${cy}" r="${r}" fill="${col}" stroke="var(--ink)" stroke-width="1.5"/>
-    <text x="${lx}" y="${ly}" text-anchor="middle" fill="var(--txt)" font-family="var(--mono)" font-size="${FS}" font-weight="600">${c.name} <tspan fill="${col}">${c.ticker}</tspan></text></g>`;});
+    <text class="s-lbl" x="${lx}" y="${ly}" text-anchor="middle" fill="var(--txt)" font-family="var(--mono)" font-size="${FS}" font-weight="700">${c.name} <tspan fill="${col}">${c.ticker}</tspan></text></g>`;});
   return `<div class="map-card river-map">${head}
    <svg class="scurve-r" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">${s}</svg>
    <div class="tnote">${R.note}</div></div>`;
@@ -2030,8 +2033,8 @@ function drawSCurve(){
  // pass 2: iterative vertical push-apart for x-overlapping labels
  for(let k=0;k<120;k++)for(let i=0;i<pts.length;i++)for(let j=i+1;j<pts.length;j++){
   const a=pts[i],b=pts[j];
-  if(Math.abs(a.lx-b.lx)>(a.lw+b.lw)/2+6)continue; // no x-overlap → skip
-  const gap=Math.abs(a.ly-b.ly),need=TH+3;
+  if(Math.abs(a.lx-b.lx)>(a.lw+b.lw)/2+9)continue; // no x-overlap → skip
+  const gap=Math.abs(a.ly-b.ly),need=TH+5;
   if(gap<need){const push=(need-gap)/2+.5;a.ly<=b.ly?(a.ly-=push,b.ly+=push):(a.ly+=push,b.ly-=push);}
  }
  // pass 3: clamp + render
@@ -2044,7 +2047,7 @@ function drawSCurve(){
   const held=c.held?`<circle cx="${cx}" cy="${cy}" r="${r+4}" fill="none" stroke="var(--mature)" stroke-width="1.5" stroke-dasharray="2 2"/>`:'';
   const ldr=displaced?`<line x1="${lx}" y1="${abv?ly+3:ly-TH+1}" x2="${cx}" y2="${abv?cy-r-1:cy+r+1}" stroke="${col}" stroke-width=".8" opacity=".4" stroke-dasharray="2 3"/>`:'';
   s+=`<g class="s-dot" data-id="${c.id}">${glow}${held}${ldr}<circle cx="${cx}" cy="${cy}" r="${r}" fill="${col}" stroke="var(--ink)" stroke-width="1.5"/>
-   <text x="${lx}" y="${ly}" text-anchor="middle" fill="var(--txt)" font-family="var(--mono)" font-size="${FS}" font-weight="600">${c.name} <tspan fill="${col}">${c.layer}</tspan></text></g>`;});
+   <text class="s-lbl" x="${lx}" y="${ly}" text-anchor="middle" fill="var(--txt)" font-family="var(--mono)" font-size="${FS}" font-weight="700">${c.name} <tspan fill="${col}">${c.layer}</tspan></text></g>`;});
  svg.innerHTML=s;
  const tip=document.getElementById('tip');
  svg.querySelectorAll('.s-dot').forEach(g=>{const c=STATE.find(x=>x.id===g.dataset.id);
