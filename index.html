@@ -46,7 +46,7 @@ main{padding:36px 0 90px;position:relative}
 .view{display:none;animation:rise .5s cubic-bezier(.2,.7,.2,1)}
 .view.on{display:block}
 /* 관통 흐름: 통합 페이지 내 8레이어 스택 섹션의 자체 vhead 타이틀은 한 단계 줄여 위계 중복 방지 */
-#sub-stack>.vhead .vtitle{font-size:20px}
+#sub-stack>.vhead .vtitle,#sub-map>.vhead .vtitle{font-size:20px}
 @keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 .vhead{margin-bottom:28px}
 .vkick{font-family:var(--mono);font-size:13px;color:var(--dawn);letter-spacing:.14em;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:8px}
@@ -199,8 +199,6 @@ main{padding:36px 0 90px;position:relative}
 .vc-depth button.on{background:var(--dawn);color:var(--onacc);font-weight:700}
 .vc-depth button:hover:not(.on){background:var(--ink2);color:var(--txt)}
 /* 깊이: 1=레이어 헤더만(카드 접힘) · 2=헤더+종목 칩 · 3=2·3차 가치사슬까지 펼침 */
-.stack-wrap{display:grid;grid-template-columns:1fr 300px;gap:18px}
-@media(max-width:980px){.stack-wrap{grid-template-columns:1fr}}
 .layer{display:grid;grid-template-columns:54px 1fr 132px;align-items:center;gap:14px;background:linear-gradient(100deg,var(--panel),var(--ink2));border:1px solid var(--line);border-left-width:4px;border-radius:13px;padding:13px 16px;margin-bottom:9px;cursor:pointer;transition:.18s;position:relative}
 .layer:hover{transform:translateX(3px);border-color:var(--line2)}
 .layer .lid{font-family:var(--serif);font-size:30px;font-weight:800}
@@ -544,8 +542,7 @@ table.tk th.c{text-align:center}
     <button class="tab" data-v="macro"><span class="n">01</span>매크로 매매</button>
     <button class="tab" data-v="cal"><span class="n">02</span>투자 캘린더</button>
     <button class="tab" data-v="thread"><span class="n">03</span>관통 흐름</button>
-    <button class="tab" data-v="map"><span class="n">04</span>초입 지도</button>
-    <button class="tab" data-v="port"><span class="n">05</span>포트폴리오 X-레이</button>
+    <button class="tab" data-v="port"><span class="n">04</span>포트폴리오 X-레이</button>
   </nav>
 </div></header>
 
@@ -559,11 +556,11 @@ table.tk th.c{text-align:center}
 <section class="view" id="v-thread">
   <div class="vhead">
     <h1 class="vtitle">병목은 <em>이동</em>한다 — 그 앞단에 알파가 있다</h1>
-    <p class="vsub">병목이 스택을 타고 흐르는 한 명제 — 위쪽 <b>강물</b>(forcing function S-커브 · value chain 드릴다운)에서 아래쪽 <b>8레이어 통합</b>(스택)으로 이어집니다. 강물 후보를 누르면 그 강물의 S-커브가 펼쳐지고, 가치사슬 카드를 누르면 §2-C 분해가 열립니다.</p></div>
-  <div id="sub-flow">
+    <p class="vsub">아래 <b>강물 후보</b>를 선택하면, 그 후보에 대해 <b>① 강물 흐름·현재 전선</b> → <b>② 8레이어 스택</b> → <b>③ 인접 레이어 의존(§2-C)</b> → <b>④ Dawn Map</b>(여명 구간 후보)이 차례로 펼쳐집니다.</p></div>
+
   <aside class="rcand-panel">
       <div class="ph">새로운 강물 후보</div>
-      <div class="psub">독립 강물 5 (1~5) + 후보군 1 (6) · 서로 비종속(MECE)</div>
+      <div class="psub">독립 강물 5 (1~5) + 후보군 1 (6) · 후보를 누르면 아래 ①~④가 그 후보로 갱신</div>
       <div class="rcand-row">
       <div class="rcand active" data-r="0"><div class="num">1</div><div><div class="riv">학습<span class="ar">→</span>추론<span class="tier" style="background:#0ca67822;color:#0ca678">현재</span></div><div class="axis">워크로드 · A의 사슬 소유</div></div></div>
       <div class="rcand" data-r="1" style="border-left-color:var(--line2)"><div class="num">2</div><div><div class="riv">데이터<span class="ar">→</span>RL·합성<span class="tier" style="background:#1c7ed622;color:#1c7ed6">A</span></div><div class="axis">모델 연료 · 입력</div></div></div>
@@ -577,6 +574,10 @@ table.tk th.c{text-align:center}
       </div>
       <div class="psub" style="margin:12px 0 0;line-height:1.6">A 비합의 · B 반비합의 · C 합의화 중 · 경계=부분 종속. <b style="color:var(--dawn)">1~5</b>는 서로 비종속(독립 forcing function), <b>6</b>은 후보군(보조·경계)으로 묶음.</div>
     </aside>
+
+  <!-- ① 강물 흐름 · 현재 전선 -->
+  <div id="sub-flow" style="margin-top:30px">
+    <div class="vhead"><div class="vkick">① 강물 흐름 · 현재 전선</div></div>
     <div class="thread-card">
       <svg class="thread-svg" id="threadSvg" viewBox="0 0 1240 270" preserveAspectRatio="xMidYMid meet"></svg>
       <div class="tnote" id="threadNote">컴퓨트·메모리(<b>L1–L3</b>)는 이미 가격에 반영(성숙). 강물의 머리는 <b style="color:var(--dawn)">L4 패키징 · L6 광 · L8 발전</b>을 지나 <b style="color:var(--nascent)">피지컬 AI</b>로 향하는 중.</div>
@@ -594,7 +595,7 @@ table.tk th.c{text-align:center}
   </div><!-- /sub-flow -->
 
   <div id="sub-stack" style="margin-top:34px;border-top:1px solid var(--line);padding-top:30px">
-  <div class="vhead"><div class="vkick">The Stack · 8레이어 AI 인프라 척추</div>
+  <div class="vhead"><div class="vkick">② The Stack · 8레이어 AI 인프라 척추</div>
     <h1 class="vtitle">capex 병목은 스택을 <em>타고 흐른다</em></h1>
     <p class="vsub">가이드 §2-C의 8레이어(+기타)를 한 트리로 — <b>층별 상태·보유·종목·2·3차 가치사슬을 한 카드에 통합</b>했습니다. 우측 막대는 그 층에 실제로 깔아둔 자본. 각 층 <b>헤더를 누르면 카드가 접히고</b>, <b>종목 칩</b>은 §2-C 분해, <b>'2·3차 가치사슬 펼치기'</b>는 파생 가치사슬 드릴다운을 엽니다. 위 강물 곡선의 노드를 누르면 해당 층 카드로 점프합니다. <b style="color:var(--st-hot)">⚑</b> = 종목의 <b>차트 단계(가격)</b>가 그 층·노드의 <b>테마 단계</b>보다 2단계 이상 앞선 경우 — 구조는 일러도 진입 가능한 대표주는 이미 더 성숙·과열이라는 뜻.</p></div>
   <div class="stack-bar">
@@ -606,19 +607,30 @@ table.tk th.c{text-align:center}
     </div>
     <div class="legend" id="legendStack"></div>
   </div>
-  <div class="stack-wrap">
-    <div id="stackList"></div>
-    <div class="sidecard">
-      <h4>인접 레이어 의존 흐름 (§2-C)</h4>
+  <div id="stackList"></div>
+</div><!-- /sub-stack -->
+
+  <!-- ③ 인접 레이어 의존 흐름 (§2-C) -->
+  <div id="sub-adj" style="margin-top:34px;border-top:1px solid var(--line);padding-top:30px">
+    <div class="vhead"><div class="vkick">③ 인접 레이어 의존 흐름 (§2-C)</div></div>
+    <div class="sidecard" style="position:static">
       <div class="flowline"><b>L1 모델</b><span class="ar">→</span>L2 가속기 수요</div>
       <div class="flowline"><b>L2 GPU/ASIC</b><span class="ar">→</span>L3 HBM <span class="ar">+</span>L4 CoWoS <span class="ar">+</span>L6 광</div>
       <div class="flowline"><b>L2·3·4</b><span class="ar">→</span>L7 전력·냉각 폭증</div>
       <div class="flowline"><b>L7</b><span class="ar">→</span>L8 발전·그리드 제약</div>
       <p>현재 시장 합의: 병목이 <b style="color:var(--mature)">L3 메모리·L7 전력</b>에 도달(선반영). Alpha 가설의 다음 전선은 <b style="color:var(--dawn)">L4 패키징 backend · L6 광(CPO) · L8 grid 전력</b>. 5종목(SNDK·MRVL·ALAB·LITE·QCOM)은 전부 한 층에서 수요폭발+공급병목이 동시에 터진 케이스.<br><br><b style="color:var(--accel)">NVDA Q1 FY27(5/20):</b> CFO가 공급 제약을 "모든 시스템 부품의 양산"이라 명시 → 다음 병목=components 확인. 네트워킹 +199%로 L6 가속, Vera($20B)로 CPU가 1차 매출축 합류, ACIE/Edge 세그먼트 신설로 수요 광역화.</p>
     </div>
-  </div>
+  </div><!-- /sub-adj -->
 
-</div>
+  <!-- ④ Dawn Map · 주가 사이클 S-커브 -->
+  <div id="sub-map" style="margin-top:34px;border-top:1px solid var(--line);padding-top:30px">
+    <div class="vhead"><div class="vkick">④ Dawn Map · 주가 사이클 S-커브</div>
+      <h1 class="vtitle">지금 <em>여명</em> 구간에 선 후보는?</h1>
+      <p class="vsub">선택한 강물 후보의 종목을 성숙도 S-커브(좌:태동→우:과열)에 투영. 여명(초입) 밴드에 든 종목이 빛납니다. 점을 누르면 상세. ★ 보유는 테두리. 강물 2~6은 가치사슬 마디 곡선도 함께 표시.</p></div>
+    <div class="legend" id="legendMap"></div>
+    <div class="map-card"><svg id="scurve" viewBox="0 0 1180 620" preserveAspectRatio="xMidYMid meet"></svg></div>
+    <div id="mapRivers"></div>
+  </div><!-- /sub-map -->
 </section>
 
 
@@ -849,18 +861,6 @@ table.tk th.c{text-align:center}
     <b>표기:</b> 굵은 행(key)=확정·고임팩트 게이트. 점선 태그=IR/기관 미확정 추정(경과 시 갱신). 카테고리 색은 사이트 stage hue set 재사용.<br>
     <b>출처:</b> Federal Reserve(FOMC) · BLS/BEA(CPI·PCE) · 한국은행(금통위) · CNBC/Reuters/WaPo(SpaceX·이란) · Congress.gov/House of Commons Library(이란) · earnings.json. 기준일 2026-05-30.
   </div>
-</section>
-
-<!-- 03 MAP -->
-<section class="view" id="v-map">
-  <div class="vhead"><div class="vkick">Dawn Map · 주가 사이클 S-커브</div>
-    <h1 class="vtitle">지금 <em>여명</em> 구간에 선 후보는?</h1>
-    <p class="vsub">가로축=테마 성숙도(좌:태동→우:과열). 여명 밴드(초입)에 든 종목이 빛납니다. 점을 누르면 상세. ★ 보유 종목은 테두리로 표시.</p></div>
-  <div class="legend" id="legendMap"></div>
-  <div class="map-card"><svg id="scurve" viewBox="0 0 1180 620" preserveAspectRatio="xMidYMid meet"></svg></div>
-  <div class="vkick" style="margin:34px 0 4px">강물 2~4 · 독립 forcing function</div>
-  <p class="vsub" style="margin:0 0 4px">강물 1(위)은 종목으로 투영. 강물 2~4는 각 가치사슬 마디를 같은 S-커브에 얹어, 어느 마디가 <em>여명(초입)</em>에 있는지 봅니다. 점에 올리면 근거·후보.</p>
-  <div id="mapRivers"></div>
 </section>
 
 <!-- 04 PORTFOLIO -->
@@ -1474,7 +1474,7 @@ async function loadPrices(){try{const r=await fetch('./prices.json',{cache:'no-s
 /* ===== TABS ===== */
 document.getElementById('nav').addEventListener('click',e=>{const b=e.target.closest('.tab');if(!b)return;
  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));document.querySelectorAll('.view').forEach(v=>v.classList.remove('on'));
- b.classList.add('on');document.getElementById('v-'+b.dataset.v).classList.add('on');if(b.dataset.v==='map'){drawSCurve();drawRiverCurves();}});
+ b.classList.add('on');document.getElementById('v-'+b.dataset.v).classList.add('on');if(b.dataset.v==='thread'){drawSCurve();drawRiverCurves();}});
 /* 다른 페이지/로그에서 8레이어 스택으로 점프 (단일 페이지 통합) */
 function gotoStack(layerId){
  const tab=document.querySelector('.tab[data-v="thread"]');if(tab&&!tab.classList.contains('on'))tab.click();
@@ -1645,6 +1645,7 @@ function renderThread(){
  /* 8레이어 capex 스택은 레이어 기반 강물(1번 학습→추론)에만 해당.
     강물 2~6은 자체 가치사슬 노드(threadDetail)만 표시하고 스택 섹션은 숨긴다. */
  const ss=document.getElementById('sub-stack');if(ss)ss.style.display=R.layerBased?'':'none';
+ const sa=document.getElementById('sub-adj');if(sa)sa.style.display=R.layerBased?'':'none';
  const rb=document.getElementById('riverBar');if(rb)rb.style.display=R.layerBased?'none':'';
  const flow=R.layerBased?THREAD:R.nodes;
  const W=1240,H=270,padX=72,top=48,bot=204,n=flow.length,gap=(W-padX*2)/(n-1);
@@ -1734,6 +1735,8 @@ function renderThread(){
    card.classList.remove('collapsed');card.scrollIntoView({behavior:'smooth',block:'center'});}));
   applyRiverVcDepth(RIVER_VC_DEPTH);
  }
+ // 선택 강물에 맞춰 ④ Dawn Map(메인 S-커브 + 강물 마디 곡선) 재렌더
+ if(document.getElementById('scurve')){drawSCurve();drawRiverCurves();}
 }
 /* 강물 후보 1~4 카드 클릭 → 해당 강물 흐름·가치사슬로 전환 */
 document.querySelectorAll('.rcand[data-r]').forEach(card=>card.addEventListener('click',()=>{
@@ -1877,7 +1880,23 @@ document.getElementById('drawerBg').addEventListener('click',closeDrawer);window
 function setS(id,s,n){const c=STATE.find(x=>x.id===id);if(c){c.S[s]=n;recompute();saveStore();}}
 function markChecked(id){const c=STATE.find(x=>x.id===id);if(c){c.lastChecked=new Date(Date.now()+9*3600000).toISOString().slice(0,10);saveStore();openDrawer(id);renderTracker();}}
 window.markChecked=markChecked;
-function recompute(){renderTracker();if(document.getElementById('v-map').classList.contains('on'))drawSCurve();}
+function recompute(){renderTracker();if(document.getElementById('v-thread').classList.contains('on'))drawSCurve();}
+
+/* ===== 강물별 Dawn Map 종목 스코프 (강물1=L1~L8 스택 전체 투영 · 2~5=RIVER_CHAINS 체인 매칭) ===== */
+const _LORDER=['L1','L2','L3','L4','L5','L6','L7','L8','기타'];
+function riverCandidates(n){
+ const R=RIVERS.find(r=>r.n===n);if(!R)return [];
+ const byLayer=(a,b)=>(_LORDER.indexOf(a.layer)-_LORDER.indexOf(b.layer))||((b.mat||0)-(a.mat||0));
+ if(R.layerBased)return STATE.slice().sort(byLayer); // 강물1 = Dawn Map 종목 전체(스택 투영)
+ const ids=new Set(),chains=RIVER_CHAINS[n]||{};
+ Object.values(chains).forEach(arr=>arr.forEach(node=>{
+  if(node.cand&&STATE.some(x=>x.id===node.cand))ids.add(node.cand);
+  if(Array.isArray(node.cos))node.cos.forEach(co=>{
+   const toks=(Array.isArray(co)?co[0]:co).split(/[^A-Za-z0-9]+/);
+   STATE.forEach(c=>{if(toks.includes(c.ticker))ids.add(c.id);});});
+ }));
+ return [...ids].map(id=>STATE.find(x=>x.id===id)).filter(Boolean).sort(byLayer);
+}
 
 /* ===== 03 S-CURVE ===== */
 function scurveBase(W,H,sfx,padTop){
@@ -1900,7 +1919,8 @@ function drawRiverCurves(){
  const host=document.getElementById('mapRivers');if(!host)return;
  const tip=document.getElementById('tip'),FS=17,TH=FS+4,r=9;
  const lw=txt=>{let w=0;for(const ch of txt){const c=ch.charCodeAt(0);w+=(c>=0xAC00&&c<=0xD7A3||c>=0x1100&&c<=0x11FF||c>=0x3130&&c<=0x318F)?FS*1.1:FS*0.62;}return w;};
- host.innerHTML=RIVERS.filter(R=>!R.layerBased).map(R=>{
+ const _RN=(RIVERS[activeRiver]||RIVERS[0]).n;
+ host.innerHTML=RIVERS.filter(R=>R.n===_RN&&!R.layerBased).map(R=>{
   const W=1180,H=300,b=scurveBase(W,H,'-r'+R.n),{sx,sy,Sc,y0,y1}=b;let s=b.s;
   const pts=R.nodes.map(d=>{const cx=sx(d.pos),cy=sy(Sc(d.pos));return{d,cx,cy,col:STAGE_HEX[d.stage],lx:cx,ly:cy-r-10,lw:lw(d.label+' '+d.code)};});
   for(let k=0;k<30;k++)for(let i=0;i<pts.length;i++)for(let j=i+1;j<pts.length;j++){
@@ -1932,8 +1952,9 @@ function drawSCurve(){
  const FS=15,TH=FS+4;
  // estimate rendered width: Korean chars are ~full-width, ASCII ~0.62em
  const lw=txt=>{let w=0;for(const ch of txt){const c=ch.charCodeAt(0);w+=(c>=0xAC00&&c<=0xD7A3||c>=0x1100&&c<=0x11FF||c>=0x3130&&c<=0x318F)?FS*1.1:FS*0.62;}return w;};
- // pass 1: compute dot + initial label positions
- const pts=STATE.filter(c=>mapFilter.has(c.layer)).map(c=>{const t=c.mat,cx=sx(t),cy=sy(Sc(t))-(c.conv-.6)*40,sc=score(c),r=6+sc*.7;
+ // pass 1: compute dot + initial label positions (선택 강물의 매칭 종목으로 스코프)
+ const _RN=(RIVERS[activeRiver]||RIVERS[0]).n,_allow=new Set(riverCandidates(_RN).map(c=>c.id));
+ const pts=STATE.filter(c=>mapFilter.has(c.layer)&&_allow.has(c.id)).map(c=>{const t=c.mat,cx=sx(t),cy=sy(Sc(t))-(c.conv-.6)*40,sc=score(c),r=6+sc*.7;
   return {c,cx,cy,r,col:layerCol(c.layer),lx:cx,ly:cy-r-10,lw:lw(c.name+' '+c.layer)};});
  // pass 2: iterative vertical push-apart for x-overlapping labels
  for(let k=0;k<120;k++)for(let i=0;i<pts.length;i++)for(let j=i+1;j<pts.length;j++){
@@ -2040,11 +2061,11 @@ renderLegends();loadStore().then(renderAll);renderAll();updateAsof();loadPrices(
 
 /* ===== 출력(인쇄/PDF) — 페이지별 버튼: 이 페이지만 / 전체 ===== */
 (function initPrint(){
- const order=['alpha','macro','cal','thread','map','port'];
+ const order=['alpha','macro','cal','thread','port'];
  order.forEach((v,i)=>{const el=document.getElementById('v-'+v);if(!el)return;
   el.classList.add('pview');el.style.order=i;
   const bar=document.createElement('div');bar.className='printbar';
-  bar.innerHTML=`<div class="print-menu" hidden><button type="button" data-pm="one">이 페이지만 출력</button><button type="button" data-pm="all">전체 페이지 출력 (00~05)</button></div><button type="button" class="print-btn">인쇄 / PDF로 저장</button>`;
+  bar.innerHTML=`<div class="print-menu" hidden><button type="button" data-pm="one">이 페이지만 출력</button><button type="button" data-pm="all">전체 페이지 출력 (00~04)</button></div><button type="button" class="print-btn">인쇄 / PDF로 저장</button>`;
   el.appendChild(bar);
   const pn=document.createElement('div');pn.className='pagenum';el.appendChild(pn);});
  const closeAll=()=>document.querySelectorAll('.print-menu').forEach(m=>m.hidden=true);
