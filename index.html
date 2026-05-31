@@ -1166,7 +1166,7 @@ const CASCADES=[
   nodes:[
    {n:'EML / 외장 레이저(ELS)',why:'CPO는 외장 레이저 광원 필요',mult:'레이저 채널 수↑',cos:[['Coherent','가속'],['Lumentum','성숙',1]],stage:'가속',cand:'cohr'},
    {n:'광 DSP · 리타이머',why:'고속 신호 정합·등화',mult:'채널·속도↑ 콘텐츠↑',cos:[['MRVL','가속',1],['Astera','가속']],stage:'가속',cand:'mrvl'},
-   {n:'광 커넥터 · 도파로',why:'CPO 패키지 광 결합',mult:'미반영 잔량 · 검증 필요',cos:'(리서치 영역)',stage:'초입',cand:null},
+   {n:'광 커넥터 · 도파로',why:'CPO 패키지 광 결합 (FAU·글래스 도파로·정밀파이버)',mult:'잔량 소진 · 공개통로 성숙 선반영 (차트검증 26.5)',cos:[['Corning GLW','성숙'],['Fabrinet FN','성숙'],['Sumitomo 5802','성숙'],['Fujikura 5803','성숙'],['POET·순수주','태동']],stage:'초입',cand:null},
   ]},
  {key:'power',driver:'전력·냉각(in-rack)',layer:'L7',stage:'가속',
   trigger:'랙 전력밀도 폭증(GB200 NVL72 ~120kW) → in-rack 병목이 grid로 확산. 2026 capex 제약 = 칩 아닌 전력. → 그리드 부족은 L8 온사이트 발전(BYOP)을 견인 ▶ L8 캐스케이드 참조.',
@@ -1209,7 +1209,7 @@ const WATCH=[
  {id:'openai',name:'OpenAI',layer:'L1',status:'비상장·S-1제출',note:"ChatGPT. '26.5.22 컨피덴셜 S-1, Q4 상장 목표. CoreWeave $11.9B·Stargate(SoftBank·Oracle).",src:'보도'},
  {id:'xai',name:'xAI / SpaceX',layer:'L1',status:'IPO확정·6/12 NASDAQ(SPCX)',note:'Grok+SpaceX 합병. NASDAQ 상장 확정 — 티커 SPCX·상장일 6/12(로드쇼 6/4·공모가 6/11). 상장 후 밸류 $1.75~2T(글로벌 시총 최상위권)·5:1 액면분할·머스크 의결권 85.1% 유지. Colossus 1(22만+GPU·300MW)를 앤쓰로픽에 임대·궤도DC 추진. 인프라(L5·L7·L8)까지 겸영. (상장 후 매수가능 → 후보 승격 검토)',src:'SpaceX S-1·SEC'},
  {id:'lambda',name:'Lambda',layer:'L5',status:'비상장·IPO추진',note:'GPU 클라우드 ~$5.9~7.5B, H2 2026 IPO 거론. CoreWeave 대안.',src:'보도'},
- {id:'photonics',name:'실리콘포토닉스·CPO (Ayar·Lightmatter 등)',layer:'L6',status:'비상장·태동',note:'CPO 전환기 비상장군 — 리서치 영역, 수치 미검증.',src:'(검증 필요)'},
+ {id:'photonics',name:'실리콘포토닉스·CPO 광결합 (Ayar·Lightmatter·Senko·US Conec 비상장)',layer:'L6',status:'비상장 코어 + POET 상장(태동)',note:'L6 광커넥터·도파로 노드 검증(26.5). 순수주 POET은 상장이나 매출~0·집단소송·증자희석으로 사실상 투자부적격(태동). 실펀더멘털 통로 Corning GLW·Fabrinet FN·Sumitomo 5802·Fujikura 5803는 전부 ATH권 성숙=추격금지. 코어 광결합은 여전히 비상장.',src:'Investing·SEC·TradingView 26.5'},
  {id:'fusion',name:'핵융합·첨단원전 (Helion·TerraPower·X-energy 등)',layer:'L8',status:'비상장·태동',note:'L8 진짜 다음 병목 후보 — 리서치 영역, 수치 미검증.',src:'(검증 필요)'},
 ];
 function watchChips(lid){const ws=WATCH.filter(w=>w.layer===lid);if(!ws.length)return '';
