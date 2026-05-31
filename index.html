@@ -1010,48 +1010,48 @@ const RIVER_CHAINS={
  },
  3:{
   'HS':[
-   {n:'하이퍼스케일러 capex',why:'클라우드 임대=기본값, 선반영',cos:'MSFT·AMZN·GOOGL',stage:'성숙'}],
+   {n:'하이퍼스케일러 capex',why:'클라우드 임대=기본값, 선반영',cos:[['MSFT','성숙'],['AMZN','성숙'],['GOOGL','성숙']],stage:'성숙'}],
   '네오':[
-   {n:'뉴클라우드(상장)',why:'하이퍼스케일러 캐파 부족분 흡수 — GPU 순수 노출',cos:'CoreWeave(CRWV)·Nebius(NBIS)',stage:'가속'},
-   {n:'뉴클라우드(비상장)',why:'IPO 파이프라인 — Lambda($59억, 26H2 추진설)',cos:'Lambda·Crusoe·Nscale (비상장)',stage:'초입'}],
+   {n:'뉴클라우드(상장)',why:'하이퍼스케일러 캐파 부족분 흡수 — GPU 순수 노출',cos:[['CoreWeave CRWV','가속'],['Nebius NBIS','가속']],stage:'가속'},
+   {n:'뉴클라우드(비상장)',why:'IPO 파이프라인 — Lambda($59억, 26H2 추진설)',cos:[['Lambda·비상장','초입'],['Crusoe·비상장','초입'],['Nscale·비상장','초입']],stage:'초입'}],
   '주권':[
-   {n:'주권 AI 칩 공급사',why:'걸프 $2조 — 빌더는 국부/비상장, 칩 공급사가 상장 수혜',cos:'NVDA(GB300 수출승인)·AMD(Humain 1GW JV)',stage:'가속',cand:'amd'},
-   {n:'시스템·네트워크·OEM',why:'소버린 빌드 = 서버·스위치·통신사 동반',cos:'CSCO·ORCL·소프트뱅크(9984)·SMCI',stage:'초입',cand:'smci'}],
+   {n:'주권 AI 칩 공급사',why:'걸프 $2조 — 빌더는 국부/비상장, 칩 공급사가 상장 수혜',cos:[['NVDA','가속'],['AMD(Humain 1GW JV)','가속']],stage:'가속',cand:'amd'},
+   {n:'시스템·네트워크·OEM',why:'소버린 빌드 = 서버·스위치·통신사 동반',cos:[['CSCO','가속'],['ORCL','가속'],['소프트뱅크 9984','초입'],['SMCI','초입']],stage:'초입',cand:'smci'}],
   '자본':[
-   {n:'GPU 담보 사모대출',why:'빌드아웃=자본게임 — GPU 담보 SPV·프라이빗 크레딧 폭증(MS 추정 +$8천억)',cos:'Blackstone(BX)·Blue Owl(OWL)·Apollo(APO)',stage:'가속'},
-   {n:'자산운용 대형',why:'AI 인프라 사모 신용에 자본 배분',cos:'Ares(ARES)·BlackRock(BLK)',stage:'초입'}],
+   {n:'GPU 담보 사모대출',why:'빌드아웃=자본게임 — GPU 담보 SPV·프라이빗 크레딧 폭증(MS 추정 +$8천억)',cos:[['Blackstone BX','가속'],['Blue Owl OWL','가속'],['Apollo APO','가속']],stage:'가속'},
+   {n:'자산운용 대형',why:'AI 인프라 사모 신용에 자본 배분',cos:[['Ares ARES','초입'],['BlackRock BLK','성숙']],stage:'초입'}],
   '중립':[
-   {n:'데이터센터 REIT',why:'뉴클라우드도 부지·전력은 코로케이션 의존',cos:'Equinix(EQIX)·Digital Realty(DLR)·DigitalBridge(DBRG)',stage:'성숙'},
-   {n:'전력·냉각 인접',why:'코로케이션 = 전력/냉각 수요 동반',cos:'Vertiv(VRT)',stage:'가속',cand:'vrt'}]
+   {n:'데이터센터 REIT',why:'뉴클라우드도 부지·전력은 코로케이션 의존',cos:[['Equinix EQIX','성숙'],['Digital Realty DLR','성숙'],['DigitalBridge DBRG','가속']],stage:'성숙'},
+   {n:'전력·냉각 인접',why:'코로케이션 = 전력/냉각 수요 동반',cos:[['Vertiv VRT','성숙',1]],stage:'가속',cand:'vrt'}]
  },
  4:{
   '스케일':[
-   {n:'프론티어 컴퓨트',why:'파라미터·컴퓨트 스케일링=합의, 선반영',cos:'NVDA · 프론티어 랩(비상장)',stage:'성숙'}],
+   {n:'프론티어 컴퓨트',why:'파라미터·컴퓨트 스케일링=합의, 선반영',cos:[['NVDA','성숙'],['프론티어 랩·비상장','성숙']],stage:'성숙'}],
   '최적':[
-   {n:'추론 서빙·컴파일러',why:'토큰 단가 압박 → 서빙·양자화·speculative decoding 수요',cos:'Fireworks·Together·Baseten (전부 비상장)',stage:'가속'},
+   {n:'추론 서빙·컴파일러',why:'토큰 단가 압박 → 서빙·양자화·speculative decoding 수요',cos:[['Fireworks·비상장','가속'],['Together·비상장','가속'],['Baseten·비상장','가속']],stage:'가속'},
    {n:'순수 상장주 부재',why:'vLLM 오픈소스 — 상장 순수주 없음, 추론칩으로 우회',cos:'(상장 순수주 없음)',stage:'초입'}],
   '전용칩':[
-   {n:'추론 전용 실리콘',why:'토큰/와트 다음 곡선 — 웨이퍼스케일·커스텀 ASIC',cos:'Cerebras(CBRS)·Broadcom(AVGO)·Marvell(MRVL)',stage:'초입',cand:'cbrs'},
-   {n:'Groq 변수',why:'NVDA가 25.12 $200억 라이선스+인재영입(인수 아님, FTC 조사) — SRAM 추론 내재화',cos:'Groq (비상장·NVDA 라이선스)',stage:'태동'}],
+   {n:'추론 전용 실리콘',why:'토큰/와트 다음 곡선 — 웨이퍼스케일·커스텀 ASIC',cos:[['Cerebras CBRS','초입'],['Broadcom AVGO','가속'],['Marvell MRVL','가속',1]],stage:'초입',cand:'cbrs'},
+   {n:'Groq 변수',why:'NVDA가 25.12 $200억 라이선스+인재영입(인수 아님, FTC 조사) — SRAM 추론 내재화',cos:[['Groq·비상장·NVDA 라이선스','태동']],stage:'태동'}],
   '엣지':[
-   {n:'온디바이스 NPU',why:'추론이 단말로 — 폰·PC·글래스 mix shift',cos:'QCOM·Apple(AAPL)·ARM·삼성(005930)',stage:'초입',cand:'qcom'}],
+   {n:'온디바이스 NPU',why:'추론이 단말로 — 폰·PC·글래스 mix shift',cos:[['QCOM','가속'],['Apple AAPL','성숙'],['ARM','가속'],['삼성 005930','성숙',1]],stage:'초입',cand:'qcom'}],
   '수요':[
    {n:'Jevons 환류 → 강물 1',why:'단가↓ → 총 토큰 소비 폭증 → 컴퓨트 수요 환류(역설)',cos:'전 스택 되먹임 (→ 8레이어)',stage:'가속'}]
  },
  5:{
   '산업':[
-   {n:'산업용 로봇·자동화',why:'기존 산업 로봇 — 성숙, AI는 점진 침투',cos:'FANUC(6954)·키엔스(6861)·ABB·Rockwell(ROK)',stage:'성숙'}],
+   {n:'산업용 로봇·자동화',why:'기존 산업 로봇 — 성숙, AI는 점진 침투',cos:[['FANUC 6954','성숙'],['키엔스 6861','성숙'],['ABB','성숙'],['Rockwell ROK','성숙']],stage:'성숙'}],
   'FSD':[
-   {n:'자율주행 스택',why:'비전 기반 실세계 추론 — 데이터 플라이휠 해자',cos:'Tesla(TSLA)·Mobileye(MBLY)',stage:'가속',cand:'tsla'},
-   {n:'라이다·센서(주의)',why:'센서 BOM 수혜 — 단 재무 취약 주의',cos:'Luminar(LAZR·리스크)·Ouster(OUST)',stage:'초입'}],
+   {n:'자율주행 스택',why:'비전 기반 실세계 추론 — 데이터 플라이휠 해자',cos:[['Tesla TSLA','가속',1],['Mobileye MBLY','초입']],stage:'가속',cand:'tsla'},
+   {n:'라이다·센서(주의)',why:'센서 BOM 수혜 — 단 재무 취약 주의',cos:[['Luminar LAZR·리스크','초입'],['Ouster OUST','초입']],stage:'초입'}],
   '엣지':[
-   {n:'엣지 추론 실리콘',why:'피지컬 AI의 두뇌 = 온디바이스 저지연·저전력 칩',cos:'QCOM · 온디바이스 NPU',stage:'가속',cand:'qcom'}],
+   {n:'엣지 추론 실리콘',why:'피지컬 AI의 두뇌 = 온디바이스 저지연·저전력 칩',cos:[['QCOM','가속'],['온디바이스 NPU(범주)','가속']],stage:'가속',cand:'qcom'}],
   '액추':[
-   {n:'정밀 감속기·하모닉',why:'1대당 관절 다수 = 비선형 부품 수요(현재 전선)',cos:'Harmonic Drive(6324)·Nabtesco(6268)·THK(6481)',stage:'초입'},
-   {n:'모터·볼스크류·센서',why:'액추에이터 = 모터+감속기+센서 결합',cos:'Nidec(6594)·Regal Rexnord(RRX)',stage:'초입'},
-   {n:'한국 감속기',why:'국내 휴머노이드 부품 노출',cos:'에스피지(058610)·에스비비테크(389500)',stage:'태동'}],
+   {n:'정밀 감속기·하모닉',why:'1대당 관절 다수 = 비선형 부품 수요(현재 전선)',cos:[['Harmonic Drive 6324','초입'],['Nabtesco 6268','초입'],['THK 6481','초입']],stage:'초입'},
+   {n:'모터·볼스크류·센서',why:'액추에이터 = 모터+감속기+센서 결합',cos:[['Nidec 6594','초입'],['Regal Rexnord RRX','초입']],stage:'초입'},
+   {n:'한국 감속기',why:'국내 휴머노이드 부품 노출',cos:[['에스피지 058610','태동'],['에스비비테크 389500','태동']],stage:'태동'}],
   '통합':[
-   {n:'휴머노이드 통합',why:'Optimus·Figure 등 — 통합·양산은 前단계, 거의 비상장',cos:'Tesla Optimus(TSLA)·Figure($390억)·1X·Agility (비상장)',stage:'태동',cand:'tsla'}]
+   {n:'휴머노이드 통합',why:'Optimus·Figure 등 — 통합·양산은 前단계, 거의 비상장',cos:[['Tesla Optimus TSLA','가속',1],['Figure·비상장','태동'],['1X·비상장','태동'],['Agility·비상장','태동']],stage:'태동',cand:'tsla'}]
  }
 };
 /* 파생 캐스케이드: 드라이버 ×10 → 함께 폭증하는 파생 가치사슬. cand=탐색기 후보 id
