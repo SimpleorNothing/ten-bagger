@@ -2299,7 +2299,6 @@ Promise.all([getJSON('alpha.json'),getJSON('earnings.json'),getJSON('judgment.js
   set('sigVerdict',known?`매수 점등 ${buy}/3 → ${buy>=2?'분할매수 (정찰 33%)':buy===1?'1/3 정찰':'대기'}`:'신호 데이터 없음(signals.json 미입력) — 대기');
  }
  renderSignals();
- window.__rerenderSignals=(j)=>{SIGNALS=j;renderSignals();};
  fetch('./signals.json',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{SIGNALS=j;renderSignals();}).catch(()=>renderSignals());
 })();
 </script>
