@@ -1181,7 +1181,7 @@ const CASCADES=[
   trigger:'전력 발표분 따라잡힌 뒤(2027~29) 진짜 다음 병목 = 발전·부지 4박자(급수+송전+zoning+수용성) 희소성(α).',
   primary:{label:'다음 전선 (초입~태동)',ex:'Constellation · Vistra · Bloom<span class="heldstar">★</span> · SMR plays'},
   nodes:[
-   {n:'원전 · SMR',why:'24/7 무탄소 기저전력',mult:'데이터센터 PPA · SMR 2028+',cos:[['CEG','가속'],['VST','가속'],['Oklo','초입']],stage:'가속',cand:'ceg'},
+   {n:'원전 · SMR',why:'24/7 무탄소 기저전력',mult:'데이터센터 PPA · SMR 2028+',cos:[['CEG','가속'],['VST','가속'],['Oklo','과열']],stage:'가속',cand:'ceg'},
    {n:'연료전지 · 온사이트',why:'오프그리드 캠퍼스(Meta Columbus)',mult:'BYOP 모델 확산',cos:[['Bloom','과열',1]],stage:'초입',cand:'be'},
    {n:'부지 4박자 희소성(α)',why:'급수권+인접송전+zoning+수용성 동시 충족',mult:'전력 단일변수 아님',cos:'(Sharpe 가설 · 리서치 영역)',stage:'태동',cand:null},
   ]},
@@ -1347,10 +1347,10 @@ const C=[
   capex:{bull:'데이터센터 PPA 확대',base:'전력가 강세',bear:'규제·금리'},
   thesis:'grid 전력 1차 수혜. 단 최근 52주 저점 부근·평균 목표가 하회 조정 → 오히려 재진입 관찰 구간. α: 부지 4박자 희소성.',
   kill:['데이터센터 PPA 둔화','전력 도매가 약세','원전 규제 변화'],S:{s1:2,s2:1,s3:2,s4:1,s5:1}},
- {id:'oklo',name:'SMR plays (Oklo 등)',ticker:'OKLO',mkt:'NYSE',layer:'L8',stage:'태동',mat:.2,conv:.45,
+ {id:'oklo',name:'SMR plays (Oklo 등)',ticker:'OKLO',mkt:'NYSE',layer:'L8',stage:'과열',mat:.9,conv:.45,
   sub:'소형모듈원전 → 온사이트 발전 → 2028+ 상용',compete:'SMR 초기·미상용',up:{l:'—',d:'—'},down:{l:'L7',d:'강'},
   capex:{bull:'데이터센터 SMR 발주',base:'시범 프로젝트',bear:'인허가 지연·미상용'},
-  thesis:'grid 다음의 발전 옵션. 태동·고변동·검증 필요.',kill:['인허가 지연','초기 프로젝트 좌초','자금조달 경색'],S:{s1:1,s2:0,s3:1,s4:0,s5:0}},
+  thesis:'SMR 테마(데이터센터 PPA·2027~28 상용)는 유효하나 매출 0인데 저점比 ~36x($5.35→$193.84) 폭등 후 고점比 −65%($67) 조정 — FY28 매출 추정比 ~326x·컨센 목표가 하향·CEO 매도. 테마 성숙도(태동)와 가격 반영도(과열)가 분리된 케이스 → 초입/태동 라벨은 테마축 한정이고 가격축은 과열, 진입가 아님. 7/4 파일럿로·NRC 상업라이선스가 진짜 게이트.',kill:['인허가 지연','초기 프로젝트 좌초','자금조달 경색'],S:{s1:1,s2:0,s3:1,s4:0,s5:0}},
  {id:'qcom',name:'Qualcomm',ticker:'QCOM',mkt:'NASDAQ',layer:'L2',stage:'가속',mat:.56,conv:.6,
   sub:'모바일 AP → 자동차·엣지AI mix shift → 데이터센터 진입 타진',compete:'엣지·오토모티브 전환',up:{l:'L4',d:'중'},down:{l:'L5',d:'약'},
   capex:{bull:'엣지 추론·오토 mix shift',base:'모바일 안정+오토 성장',bear:'모바일 의존·DC 진입 실패'},
@@ -2186,7 +2186,7 @@ const D=[
  {n:'코히어런트',t:'COHR',mkt:'US',layer:'L6',cand:true,aN:[0.5,2,2],aK:[0.3,0.5,-2],stage:'성숙',note:'광 트랜시버·소자. LITE와 동행하나 합의 진행 → 고유 알파 축소.'},
  {n:'바이코어',t:'VICR',mkt:'US',layer:'L7',cand:true,aN:[-0.5,1,3],aK:[-0.7,-0.5,-1],stage:'과열',vol:true,note:'고밀도 전력 모듈(48V). 1년 +600%·ATH·P/E 110x·내부자 매도 → 초입 아닌 과열. VPD 테제 유효하나 가격이 매출 추월, 진입가 아님. 800V 상류(Navitas)가 더 초입 후보(검증 전).'},
  {n:'컨스텔레이션',t:'CEG',mkt:'US',layer:'L8',cand:true,aN:[0.5,2,3],aK:[0.3,0.5,-1],stage:'가속',note:'원전 기반 무탄소 전력. 데이터센터 PPA 수요 직결.'},
- {n:'오클로',t:'OKLO',mkt:'US',layer:'L8',cand:true,aN:[-1,0,6],aK:[-1.2,-1.5,2],stage:'태동',vol:true,note:'SMR 차세대 원자력. 상용화 전 단계 → 단기 베타, 1Y runway는 큼·고변동.'},
+ {n:'오클로',t:'OKLO',mkt:'US',layer:'L8',cand:true,aN:[-1,-1,2],aK:[-1.2,-1.5,2],stage:'과열',vol:true,note:'SMR(매출0)이 저점比 ~36x→고점比 −65%($67) 조정·FY28매출 ~326x·목표가 하향·CEO 매도 → 테마(태동) vs 가격(과열) 분리. 초입 아님·진입가 아님. 2027~28 상용·7/4 파일럿로가 게이트. 고변동.'},
  {n:'퀄컴',t:'QCOM',mkt:'US',layer:'L2',cand:true,aN:[0.5,1,1],aK:[0.3,-0.5,-3],stage:'성숙',note:'엣지 추론·온디바이스 AI. 고유 알파 작음(성숙·합의).'},
 ];
 const CASH={NASDAQ:[-0.3,-2.5],KOSPI:[-0.5,-4]};
