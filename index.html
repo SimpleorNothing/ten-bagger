@@ -189,8 +189,7 @@ main{padding:36px 0 90px;position:relative}
 .vc-depth button{font-family:var(--mono);font-size:13px;padding:6px 14px;border:0;border-left:1px solid var(--line);background:transparent;color:var(--dim);cursor:pointer;transition:.13s}
 .vc-depth button.on{background:var(--dawn);color:var(--onacc);font-weight:700}
 .vc-depth button:hover:not(.on){background:var(--ink2);color:var(--txt)}
-/* 깊이: 1차=종목 칩만(드릴다운 접힘) · 2차=파생 노드까지(대표 종목 숨김) · 3차=대표 종목까지 전부 */
-#stackList.d2 .cnode .cos{display:none}
+/* 깊이: 1=레이어 헤더만(카드 접힘) · 2=헤더+종목 칩 · 3=2·3차 가치사슬까지 펼침 */
 .stack-wrap{display:grid;grid-template-columns:1fr 300px;gap:18px}
 @media(max-width:980px){.stack-wrap{grid-template-columns:1fr}}
 .layer{display:grid;grid-template-columns:54px 1fr 132px;align-items:center;gap:14px;background:linear-gradient(100deg,var(--panel),var(--ink2));border:1px solid var(--line);border-left-width:4px;border-radius:13px;padding:13px 16px;margin-bottom:9px;cursor:pointer;transition:.18s;position:relative}
@@ -583,9 +582,9 @@ table.tk th.c{text-align:center}
   <div class="stack-bar">
     <div class="seg vc-depth" id="vcDepth" role="group" aria-label="value chain 표시 깊이">
       <span class="vc-lbl">value chain</span>
-      <button type="button" data-d="1" class="on">1차</button>
-      <button type="button" data-d="2">2차</button>
-      <button type="button" data-d="3">3차</button>
+      <button type="button" data-d="1" class="on">1</button>
+      <button type="button" data-d="2">2</button>
+      <button type="button" data-d="3">3</button>
     </div>
     <div class="legend" id="legendStack"></div>
   </div>
@@ -1719,9 +1718,10 @@ function applyVcDepth(d){
  const dep=document.getElementById('vcDepth');
  if(dep)dep.querySelectorAll('[data-d]').forEach(x=>x.classList.toggle('on',+x.dataset.d===d));
  const list=document.getElementById('stackList');if(!list)return;
- list.classList.toggle('d2',d===2);
- list.querySelectorAll('.dchain').forEach(ch=>{ch.hidden=(d===1);});
- list.querySelectorAll('.dexp').forEach(exp=>{exp.textContent=(d===1)?'2·3차 가치사슬 펼치기 ▾':'2·3차 가치사슬 접기 ▴';});
+ /* 1 = 레이어 헤더만(카드 접힘) · 2 = 헤더+종목 칩(드릴다운 접힘) · 3 = 2·3차 가치사슬까지 펼침 */
+ list.querySelectorAll('.lcard').forEach(card=>card.classList.toggle('collapsed',d===1));
+ list.querySelectorAll('.dchain').forEach(ch=>{ch.hidden=(d!==3);});
+ list.querySelectorAll('.dexp').forEach(exp=>{exp.textContent=(d===3)?'2·3차 가치사슬 접기 ▴':'2·3차 가치사슬 펼치기 ▾';});
 }
 (function(){const dep=document.getElementById('vcDepth');if(!dep)return;
  dep.addEventListener('click',e=>{const b=e.target.closest('[data-d]');if(!b)return;applyVcDepth(+b.dataset.d);});})();
