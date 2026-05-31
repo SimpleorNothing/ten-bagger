@@ -636,9 +636,9 @@ table.tk th.c{text-align:center}
   <div id="sub-map" style="margin-top:34px;border-top:1px solid var(--line);padding-top:30px">
     <div class="vhead"><div class="vkick">④ Dawn Map · 주가 사이클 S-커브</div>
       <h1 class="vtitle">지금 <em>여명</em> 구간에 선 후보는?</h1>
-      <p class="vsub">선택한 강물 후보의 종목을 성숙도 S-커브(좌:태동→우:과열)에 투영. 여명(초입) 밴드에 든 종목이 빛납니다. 점을 누르면 상세. ★ 보유는 테두리. 강물 2~6은 가치사슬 마디 곡선도 함께 표시.</p></div>
+      <p class="vsub">선택한 강물 후보의 <b>매칭 종목</b>을 성숙도 S-커브(좌:태동→우:과열)에 투영. 여명(초입) 밴드에 든 종목이 빛납니다. 점을 누르면 상세. ★ 보유는 테두리. 강물1은 스택 전체 투영, 강물 2~5는 그 강물에 매칭된 종목을 곡선에 얹습니다.</p></div>
     <div class="legend" id="legendMap"></div>
-    <div class="map-card"><svg id="scurve" viewBox="0 0 1180 620" preserveAspectRatio="xMidYMid meet"></svg></div>
+    <div class="map-card" id="mainMap"><svg id="scurve" viewBox="0 0 1180 620" preserveAspectRatio="xMidYMid meet"></svg></div>
     <div id="mapRivers"></div>
   </div><!-- /sub-map -->
 </section>
@@ -1948,39 +1948,55 @@ function scurveBase(W,H,sfx,padTop){
  s+=`<path d="${cp}" fill="none" stroke="url(#cg${sfx})" stroke-width="2.5" opacity=".5"/>`;
  return {s,sx,sy,Sc,x0,x1,y0,y1};
 }
-/* 강물 2~4 (forcing function) — 각 가치사슬 마디를 pos(성숙도)로 같은 S-커브에 투영 */
+/* 강물 2~5 (forcing function) — 그 강물에 매칭된 실제 종목을 c.mat(성숙도)로 같은 S-커브에 투영 */
 function drawRiverCurves(){
  const host=document.getElementById('mapRivers');if(!host)return;
- const tip=document.getElementById('tip'),FS=17,TH=FS+4,r=9;
+ const tip=document.getElementById('tip'),FS=17,TH=FS+4;
  const lw=txt=>{let w=0;for(const ch of txt){const c=ch.charCodeAt(0);w+=(c>=0xAC00&&c<=0xD7A3||c>=0x1100&&c<=0x11FF||c>=0x3130&&c<=0x318F)?FS*1.1:FS*0.62;}return w;};
  const _RN=(RIVERS[activeRiver]||RIVERS[0]).n;
  host.innerHTML=RIVERS.filter(R=>R.n===_RN&&!R.layerBased).map(R=>{
   const W=1180,H=300,b=scurveBase(W,H,'-r'+R.n),{sx,sy,Sc,y0,y1}=b;let s=b.s;
-  const pts=R.nodes.map(d=>{const cx=sx(d.pos),cy=sy(Sc(d.pos));return{d,cx,cy,col:STAGE_HEX[d.stage],lx:cx,ly:cy-r-10,lw:lw(d.label+' '+d.code)};});
-  for(let k=0;k<30;k++)for(let i=0;i<pts.length;i++)for(let j=i+1;j<pts.length;j++){
+  const cands=riverCandidates(R.n);
+  const head=`<div class="rm-head"><span class="rm-n">강물 ${R.n}</span><span class="rm-title">${R.title}</span><span class="front-pill">${R.front}</span></div>`;
+  if(!cands.length)
+   return `<div class="map-card river-map">${head}
+    <svg class="scurve-r" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">${s}</svg>
+    <div class="rd-empty" style="padding:8px 4px">— 이 강물에 매칭되는 상장 종목 없음 (비상장·관찰 영역) —</div>
+    <div class="tnote">${R.note}</div></div>`;
+  const pts=cands.map(c=>{const cx=sx(c.mat),cy=sy(Sc(c.mat));return{c,cx,cy,col:STAGE_HEX[c.stage],lx:cx,ly:cy-9-10,lw:lw(c.name+' '+c.ticker)};});
+  for(let k=0;k<60;k++)for(let i=0;i<pts.length;i++)for(let j=i+1;j<pts.length;j++){
    const a=pts[i],b2=pts[j];if(Math.abs(a.lx-b2.lx)>(a.lw+b2.lw)/2+6)continue;
    const gap=Math.abs(a.ly-b2.ly),need=TH+3;
    if(gap<need){const push=(need-gap)/2+.5;a.ly<=b2.ly?(a.ly-=push,b2.ly+=push):(a.ly+=push,b2.ly-=push);}
   }
-  pts.forEach((p,i)=>{const {d,cx,cy,col,lx}=p;let ly=p.ly;
+  pts.forEach(p=>{const {c,cx,cy,col,lx}=p;const r=9;let ly=p.ly;
    if(ly<y1+TH)ly=cy+r+TH+3;ly=Math.max(y1+TH,Math.min(y0-6,ly));
    const displaced=Math.abs(ly-(cy-r-10))>TH*2,abv=ly<cy;
-   const glow=d.stage==='초입'?`<circle cx="${cx}" cy="${cy}" r="${r+7}" fill="${col}" opacity=".14"/>`:'';
+   const glow=c.stage==='초입'?`<circle cx="${cx}" cy="${cy}" r="${r+7}" fill="${col}" opacity=".14"/>`:'';
+   const held=c.held?`<circle cx="${cx}" cy="${cy}" r="${r+4}" fill="none" stroke="var(--mature)" stroke-width="1.5" stroke-dasharray="2 2"/>`:'';
    const ldr=displaced?`<line x1="${lx}" y1="${abv?ly+3:ly-TH+1}" x2="${cx}" y2="${abv?cy-r-1:cy+r+1}" stroke="${col}" stroke-width=".8" opacity=".4" stroke-dasharray="2 3"/>`:'';
-   s+=`<g class="s-dot rv-dot" data-r="${R.n}" data-i="${i}">${glow}${ldr}<circle cx="${cx}" cy="${cy}" r="${r}" fill="${col}" stroke="var(--ink)" stroke-width="1.5"/>
-    <text x="${lx}" y="${ly}" text-anchor="middle" fill="var(--txt)" font-family="var(--mono)" font-size="${FS}" font-weight="600">${d.label} <tspan fill="${col}">${d.code}</tspan></text></g>`;});
-  return `<div class="map-card river-map"><div class="rm-head"><span class="rm-n">강물 ${R.n}</span><span class="rm-title">${R.title}</span><span class="front-pill">${R.front}</span></div>
+   s+=`<g class="s-dot rv-dot" data-id="${c.id}">${glow}${held}${ldr}<circle cx="${cx}" cy="${cy}" r="${r}" fill="${col}" stroke="var(--ink)" stroke-width="1.5"/>
+    <text x="${lx}" y="${ly}" text-anchor="middle" fill="var(--txt)" font-family="var(--mono)" font-size="${FS}" font-weight="600">${c.name} <tspan fill="${col}">${c.ticker}</tspan></text></g>`;});
+  return `<div class="map-card river-map">${head}
    <svg class="scurve-r" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">${s}</svg>
    <div class="tnote">${R.note}</div></div>`;
  }).join('');
- host.querySelectorAll('.rv-dot').forEach(g=>{const R=RIVERS.find(x=>x.n==+g.dataset.r),nd=R.nodes[+g.dataset.i],col=STAGE_HEX[nd.stage];
+ host.querySelectorAll('.rv-dot').forEach(g=>{const c=STATE.find(x=>x.id===g.dataset.id);if(!c)return;const col=STAGE_HEX[c.stage];
   g.addEventListener('mousemove',e=>{tip.classList.add('on');
-   tip.innerHTML=`<div class="tn">${nd.label} <span style="color:${col}">●</span></div><div class="tt">${nd.code} · ${nd.stage} · 성숙도 ${Math.round(nd.pos*100)}</div><div class="tx">${nd.why}<br><b style="color:var(--dawn)">후보:</b> ${nd.plays}</div>`;
+   tip.innerHTML=`<div class="tn">${c.name} <span style="color:${col}">●</span> ${c.held?'<span style="color:var(--mature)">★</span>':''}</div><div class="tt">${c.layer}${c.layer2?'/'+c.layer2:''} · ${c.stage} · ${c.mkt}·${c.ticker} · 점수 ${score(c)}/10</div><div class="tx">${c.sub.split('→')[0]}…</div>`;
    tip.style.left=Math.min(e.clientX+14,innerWidth-256)+'px';tip.style.top=(e.clientY+14)+'px';});
-  g.addEventListener('mouseleave',()=>tip.classList.remove('on'));});
+  g.addEventListener('mouseleave',()=>tip.classList.remove('on'));
+  g.addEventListener('click',()=>{tip.classList.remove('on');openDrawer(c.id);});});
 }
 function drawSCurve(){
  const svg=document.getElementById('scurve'),W=1180,H=620;svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+ // 강물1(스택 기반)만 메인 S-커브에 종목 전체를 투영. 강물 2~5는 메인 차트를 숨기고
+ // 아래 강물별 곡선(drawRiverCurves)에 그 강물의 매칭 종목을 직접 얹는다.
+ const _R=RIVERS[activeRiver]||RIVERS[0];
+ const mainMap=document.getElementById('mainMap'),legMap=document.getElementById('legendMap');
+ if(mainMap)mainMap.style.display=_R.layerBased?'':'none';
+ if(legMap)legMap.style.display=_R.layerBased?'':'none';
+ if(!_R.layerBased){svg.innerHTML='';return;}
  const {s:base,sx,sy,Sc,y0,y1}=scurveBase(W,H,'',160);let s=base;
  // ── label placement: font-size 11, push-apart to prevent overlap ──
  const FS=15,TH=FS+4;
