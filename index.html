@@ -175,6 +175,16 @@ main{padding:36px 0 90px;position:relative}
 .lbody .dexp{font-family:var(--mono);font-size:11px;color:var(--dawn);letter-spacing:.04em;cursor:pointer;padding:3px 0;display:inline-block}
 .lbody .dexp:hover{color:var(--mature)}
 .lbody .dchain{margin-top:8px}
+/* 모바일: lcard 헤더(스택·강물 공용)의 고정 3컬럼 그리드가 좁은 화면에서 중앙 컬럼을 짓눌러
+   한 글자씩 세로로 깨지는 문제 → 2컬럼(아이콘+본문)으로, 우측(배지·성숙도 막대)은 아래 줄로 흐르게 */
+@media(max-width:760px){
+ .lhead{grid-template-columns:40px 1fr;gap:10px;padding:12px 13px}
+ .lhead .lid{font-size:24px}
+ .lhead .lright{grid-column:1/-1;flex-direction:row;flex-wrap:wrap;align-items:center;justify-content:flex-start;gap:8px;text-align:left;margin-top:2px}
+ .lhead .lright .lheld{width:110px!important}
+ .lbody{padding:2px 14px 14px 14px}
+ .lmid .lflow{overflow-wrap:anywhere}
+}
 
 /* ===== STACK ===== */
 /* 스택 컨트롤 바: value chain 깊이(좌) + 단계 범례(우) */
