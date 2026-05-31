@@ -976,8 +976,8 @@ const LAYERS=[
  {id:'L4',name:'Foundry / Packaging',en:'TSM·ASML·삼성파운드리',stage:'초입',color:'#0ca678',flow:'CoWoS·backend가 다음 깔때기'},
  {id:'L5',name:'Server / Storage',en:'DELL·SMCI·HPE',stage:'가속',color:'#1c7ed6',flow:'조립·통합'},
  {id:'L6',name:'Optical Networking',en:'AVGO·MRVL·LITE·Coherent',stage:'가속',color:'#1c7ed6',flow:'CPO·scale-up이 미반영 잔량'},
- {id:'L7',name:'Power / Cooling / DC REIT',en:'VRT·ETN·EQIX·DLR',stage:'가속',color:'#1c7ed6',flow:'in-rack 병목=합의 도달'},
- {id:'L8',name:'Energy / Power Generation',en:'CEG·VST·BE·SMR',stage:'초입',color:'#0ca678',flow:'grid·발전이 진짜 다음 병목'},
+ {id:'L7',name:'Power Delivery / Cooling / DC REIT',en:'VRT·ETN·EQIX·DLR',stage:'가속',color:'#1c7ed6',flow:'전기를 나르고 식힘(배전·냉각, in-rack)=합의 도달'},
+ {id:'L8',name:'Energy / Power Generation',en:'CEG·VST·BE·SMR',stage:'초입',color:'#0ca678',flow:'전기를 만듦(발전·온사이트·grid)=진짜 다음 병목'},
 ];
 const LMAP=Object.fromEntries(LAYERS.map(l=>[l.id,l]));
 /* river thread = capex 병목 이동 순서 (좌:성숙 → 우:초입), 8레이어에 매핑 */
@@ -1211,8 +1211,8 @@ let HOLDINGS=[
  {layer:'L3',label:'메모리 (마이크론·삼성전자·HBM ETF)',amt:384,w:39.6},
  {layer:'L4',label:'소부장 (KODEX AI반도체핵심장비)',amt:22,w:2.3},
  {layer:'L6',label:'연결 (루멘텀·KODEX 미국AI광통신네트워크)',amt:109,w:11.3},
- {layer:'L7',label:'전력·냉각 (버티브·KODEX AI전력·SOL 미국AI전력)',amt:151,w:15.6},
- {layer:'L8',label:'발전 (블룸에너지)',amt:25,w:2.5},
+ {layer:'L7',label:'전력·냉각·배전 (버티브·KODEX AI전력핵심설비)',amt:105,w:10.8},
+ {layer:'L8',label:'발전 (블룸에너지·SOL 미국AI전력)',amt:71,w:7.3},
  {layer:'기타',label:'테슬라',amt:59,w:6.1},
  {layer:'기타',label:'지수·채권혼합 (코스피50·채권혼합)',amt:46,w:4.7},
  {layer:'현금',label:'현금',amt:88,w:9.1},
@@ -1227,8 +1227,8 @@ let TARGETS=[
  {layer:'L3',lo:30,hi:32, dir:'trim', gate:'γ 재확인 + MU 6/24 실적 게이트(추정상향>가격이면 보류)'},
  {layer:'L4',lo:7, hi:9,  dir:'add',  gate:'구성종목 백엔드/어드밴스드 패키징 비중 검증 통과'},
  {layer:'L6',lo:9, hi:11, dir:'trim', gate:'LITE 트림 앰버(내부자매도·베어풋) — 광 구조 노출은 유지'},
- {layer:'L7',lo:12,hi:14, dir:'trim', gate:'한국전력ETF 과열 앰버(wk−0.75) — VRT·미국전력은 보유'},
- {layer:'L8',lo:5, hi:7,  dir:'add',  gate:'BE 추격금지·첫 눌림 / 신규 grid명 컨플루언스 진입'},
+ {layer:'L7',lo:12,hi:14, dir:'trim', gate:'한국전력ETF(전력핵심설비) 과열 앰버(wk−0.75) — VRT는 보유'},
+ {layer:'L8',lo:5, hi:7,  dir:'add',  gate:'BE 추격금지·첫 눌림 / SOL 미국전력(발전 바스켓) 보유 / 신규 grid명 컨플루언스 진입'},
  {layer:'기타',lo:8,hi:11,dir:'hold', gate:'테슬라(정치베타·8레이어 밖) 4~6% + 지수·채권 방어 4~5%'},
  {layer:'현금',lo:9, hi:12,dir:'hold', gate:'매크로 신호 부재 구간 — 충격 실탄 유지'},
 ];
@@ -2088,8 +2088,8 @@ const D=[
  {n:'KODEX 미AI광통신',t:'ETF',mkt:'US',layer:'L6',w:5.1,aN:[0,1,1],aK:[-0.2,-0.5,-3],stage:'가속',note:'광 테마 프록시. 고유 알파 미미.'},
  {n:'테슬라',t:'TSLA',mkt:'US',layer:'기타',w:6.9,aN:[0,0,3],aK:[-0.2,-1.5,-1],stage:'가속',note:'8레이어 밖. 순수 베타에 가까움. 로보틱스 옵션만 소폭.'},
  {n:'버티브',t:'VRT',mkt:'US',layer:'L7',w:4.2,aN:[-1.5,1,3],aK:[-1.7,-0.5,-1],stage:'성숙',note:'단기 음(−)은 현재 추세가 실제 약세라서(모멘텀, 회귀 아님). 백로그+109%·B2B 2.9x로 이익추세 양(+).'},
- {n:'SOL 미AI전력',t:'ETF',mkt:'US',layer:'L7',w:5.0,aN:[0,0,0],aK:[-0.2,-1.5,-4],stage:'가속',note:'전력 capex 확장 동행. 고유 알파 없음 → 베타 수렴.'},
- {n:'KODEX AI전력핵심설비',t:'한국 ETF',mkt:'KR',layer:'L7/L8',w:8.5,aN:[0,0,1],aK:[-0.2,-1,-2],stage:'과열',vol:true,note:'전력 capex 확장 지속. 공급과잉은 실(實)리스크로 별도 관찰. 고변동.'},
+ {n:'SOL 미AI전력',t:'ETF',mkt:'US',layer:'L8',w:5.0,aN:[0,0,0],aK:[-0.2,-1.5,-4],stage:'가속',note:'구성종목 다수가 발전(Oklo·Bloom·GE Vernova·Constellation·Vistra·NuScale·Cameco 등) → 발전(L8) 귀속. 고유 알파 없음 → 베타 수렴.'},
+ {n:'KODEX AI전력핵심설비',t:'한국 ETF',mkt:'KR',layer:'L7',w:8.5,aN:[0,0,1],aK:[-0.2,-1,-2],stage:'과열',vol:true,note:'변압기·배전반·전선 등 grid 인프라(전력·배전) 중심 → L7. 공급과잉은 실(實)리스크로 별도 관찰. 고변동.'},
  {n:'블룸에너지',t:'BE',mkt:'US',layer:'L8',w:2.8,aN:[1,1,2],aK:[0.8,-0.5,-2],stage:'과열',vol:true,note:'BYOP 온사이트 발전 수요 전방 증가. 단 고변동·내부자 매도 리스크.'},
  {n:'채권혼합(2종)',t:'방어',mkt:'KR',layer:'방어',w:13.1,aN:[-2,-4.5,-6],aK:[-2.2,-6,-9],stage:'방어',note:'음(−)알파는 설계상 정상 — 방어자산. 지수 추월이 목적 아님. 변동성 헤지.'},
  // ===== 미보유 후보군 (cand:true) — 비중 없음, 알파는 컨빅션 기반 추정 =====
