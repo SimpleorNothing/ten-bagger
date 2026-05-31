@@ -359,19 +359,6 @@ table.tk th.c{text-align:center}
 #v-macro .mc-2col ul{margin:0;padding-left:18px;font-size:13px;color:var(--dim);line-height:1.65}
 #v-macro .verdict{font-family:var(--mono);font-size:13px;padding:10px 12px;border-radius:9px;background:var(--panel2);margin:10px 0;line-height:1.6;border-left:3px solid var(--dawn)}
 #v-macro ol.mc-steps{margin:6px 0;padding-left:20px;font-size:13.5px;color:var(--dim);line-height:1.75}
-.sig-edit{margin:10px 0 6px;border:1px solid var(--line);border-radius:8px;background:var(--panel2);padding:6px 12px}
-.sig-edit summary{font-family:var(--mono);font-size:13px;color:var(--dim);cursor:pointer;padding:4px 0;list-style:none}
-.sig-edit summary::-webkit-details-marker{display:none}
-.sig-edit[open] summary{color:var(--txt);padding-bottom:8px;border-bottom:1px dashed var(--line)}
-.sig-form{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;padding:10px 0 6px;align-items:center}
-.sig-form input[type=number]{font-family:var(--mono);font-size:13px;padding:7px 9px;border:1px solid var(--line);border-radius:6px;background:var(--panel);color:var(--txt);min-width:0}
-.sig-form input[type=number]:focus{outline:none;border-color:var(--dawn)}
-.sig-form label{font-family:var(--mono);font-size:13px;color:var(--dim);display:flex;gap:6px;align-items:center}
-.sig-form button{font-family:var(--mono);font-size:13px;padding:7px 14px;background:var(--dawn);color:var(--onacc);border:0;border-radius:6px;cursor:pointer}
-.sig-form button:disabled{opacity:.5;cursor:not-allowed}
-.sig-form .sig-msg{font-family:var(--mono);font-size:12px;color:var(--dim);grid-column:1/-1;margin-top:2px}
-.sig-form .sig-msg.ok{color:#0ca678}
-.sig-form .sig-msg.err{color:#e03131}
 @media(max-width:760px){#v-macro .mc-cards{grid-template-columns:1fr 1fr}#v-macro .mc-2col{grid-template-columns:1fr}#v-macro table.mc{display:block;overflow-x:auto;white-space:nowrap}}
 /* ===== 02 CALENDAR (v-cal) ===== */
 #v-cal{--cat-macro:#1c7ed6;--cat-infl:#7048e8;--cat-earn:#0ca678;--cat-event:#e8590c;--cat-pol:#b8860b;--cat-watch:#e03131}
@@ -618,18 +605,7 @@ table.tk th.c{text-align:center}
   </div>
   <p class="vsub" style="margin-top:4px">매크로 충격은 노이즈가 아니라 거래 가능한 신호. 단 "펀더멘털 레짐 전환"이면 이 룰북은 폐기.</p>
 
-  <div class="mc-sec">3중 점등 매수 시그널 (신호등) · <span style="color:var(--faint)">현재값 signals.json 연동</span></div>
-  <details class="sig-edit">
-    <summary>✎ 신호값 갱신 (signals.json)</summary>
-    <div class="sig-form">
-      <input id="sgVix"  type="number" step="0.1" min="0"   max="150" placeholder="VIX 종가">
-      <input id="sgFG"   type="number" step="1"   min="0"   max="100" placeholder="F&G 0–100">
-      <input id="sgSP"   type="number" step="0.1" min="-30" max="30"  placeholder="S&P 일간 %">
-      <label><input id="sgSide" type="checkbox"> KOSPI 사이드카</label>
-      <button id="sgSubmit">갱신 · 커밋</button>
-      <span id="sgMsg" class="sig-msg">빈칸은 자동으로 null(폴백).</span>
-    </div>
-  </details>
+  <div class="mc-sec">3중 점등 매수 시그널 (신호등) · <span style="color:var(--faint)">현재값 signals.json 자동 연동(update-signals 크론)</span></div>
   <table class="mc">
     <thead><tr><th>신호</th><th class="c">현재값</th><th class="c">매수 점등</th><th class="c">매도(과열) 점등</th><th class="c">상태</th></tr></thead>
     <tbody>
@@ -2325,31 +2301,6 @@ Promise.all([getJSON('alpha.json'),getJSON('earnings.json'),getJSON('judgment.js
  renderSignals();
  window.__rerenderSignals=(j)=>{SIGNALS=j;renderSignals();};
  fetch('./signals.json',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{SIGNALS=j;renderSignals();}).catch(()=>renderSignals());
-})();
-
-/* ===== 01 MACRO — signals.json 폼 ===== */
-(function(){
- const btn=document.getElementById('sgSubmit'),msg=document.getElementById('sgMsg');
- if(!btn)return;
- const v=id=>{const e=document.getElementById(id);return e?e.value:''};
- btn.addEventListener('click',async()=>{
-  btn.disabled=true;msg.className='sig-msg';msg.textContent='커밋 중…';
-  const body={
-   vix:v('sgVix')||null, fearGreed:v('sgFG')||null, spDailyPct:v('sgSP')||null,
-   sidecarKR:document.getElementById('sgSide').checked
-  };
-  try{
-   const r=await fetch('/api/signals',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)});
-   const j=await r.json().catch(()=>({}));
-   if(r.ok){
-    msg.className='sig-msg ok';msg.textContent='커밋됨 — 약 1~2분 후 자동 배포·반영';
-    if(j.payload&&typeof window.__rerenderSignals==='function')window.__rerenderSignals(j.payload);
-   }else{
-    msg.className='sig-msg err';msg.textContent=`실패(${r.status}): ${j.error||'unknown'}`;
-   }
-  }catch(e){msg.className='sig-msg err';msg.textContent='네트워크 오류: '+e.message;}
-  finally{btn.disabled=false;}
- });
 })();
 </script>
 
