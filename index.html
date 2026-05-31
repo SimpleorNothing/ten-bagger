@@ -117,6 +117,16 @@ main{padding:36px 0 90px;position:relative}
 .dchain .lc-title{font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--faint);margin-bottom:11px}
 .dchain .casc-flow+.casc-trigger{margin-top:16px;border-top:1px solid var(--line);padding-top:16px}
 .dchain .lc-empty{font-size:12.5px;color:var(--dim);line-height:1.7}
+.dchain .lc-borrow{margin-top:14px;padding-top:13px;border-top:1px dashed var(--line2)}
+.dchain .lc-borrow-h{font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--faint);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.dchain .lc-borrow-n{background:var(--line);color:var(--dim);border-radius:8px;padding:0 6px;font-weight:700}
+.cnode.borrowed{border-style:dashed}
+.cnode .borrow-src{font-family:var(--mono);font-size:11px;color:var(--faint);background:var(--panel2);border-radius:6px;padding:1px 6px}
+.dstrip{background:var(--panel);border:1px solid var(--line);border-left-width:3px;border-radius:11px;padding:12px 13px;cursor:pointer;transition:.2s}
+.dstrip:hover{transform:translateY(-2px);border-color:var(--line2)}
+.dstrip h4{font-size:15px;font-weight:700;display:flex;justify-content:space-between;align-items:center;gap:6px}
+.dstrip .badge{font-family:var(--mono);font-size:13px;padding:2px 6px;border-radius:20px;font-weight:700;white-space:nowrap}
+.dstrip p{font-size:14px;color:var(--dim);margin-top:6px;font-family:var(--mono);line-height:1.5}
 
 /* ===== CASCADE (derivative chain) ===== */
 .casc-pick{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
@@ -1612,11 +1622,35 @@ function cascadeHTML(c){const dcol=STAGE_HEX[c.stage];
         <div class="mult">콘텐츠 배수 · ${nd.mult}</div>
         <div class="cos">대표: ${Array.isArray(nd.cos)?nd.cos.map(([nm,st,h])=>{const g=stageGap(nd.stage,st),dv=g>=STAGE_DIVERGE;return `<span class="ct${dv?' dvct':''}"><i style="background:${STAGE_HEX[st]}"></i>${nm}${h?'<span class="heldstar"> ★</span>':''} <b style="color:${STAGE_HEX[st]}">${st}</b>${dv?`<span class="dvf" title="테마 ${nd.stage} vs 차트 ${st} · ${g}단계 발산">⚑</span>`:''}</span>`;}).join(' · '):nd.cos}</div></div>`;}).join('')}</div>
   </div>`;}
+/* 한 노드가 특정 레이어의 종목을 다루는지 — cand(STATE id→layer) 또는 cos 종목명/티커 일치로 판정.
+   매칭은 단방향(cos명이 STATE 종목명을 포함)으로 좁혀 '삼성'이 '삼성전기'에 오인 매칭되는 것을 방지. */
+function nodeTouchesLayer(nd,layer){
+ const lc=STATE.filter(s=>s.layer===layer); if(!lc.length) return false;
+ if(nd.cand){const c=STATE.find(s=>s.id===nd.cand); if(c&&c.layer===layer) return true;}
+ if(!Array.isArray(nd.cos)) return false;
+ const norm=s=>String(s).toLowerCase().replace(/\s|\(.*?\)|·.*$/g,'');
+ return nd.cos.some(([nm])=>lc.some(s=>{const a=norm(nm),b=norm(s.name),t=String(s.ticker).toLowerCase();
+   return (b.length>=2&&a.includes(b)) || (t.length>=3&&/[a-z]/.test(t)&&a.includes(t));}));
+}
+/* 다른 드라이버 캐스케이드에서 이 레이어 종목을 다루는 노드를 끌어와 (출처 표시) 반복 렌더 */
+function borrowedNodesHTML(layer){
+ const hits=[];
+ CASCADES.forEach(c=>{(c.nodes||[]).forEach(nd=>{if(nodeTouchesLayer(nd,layer)) hits.push({c,nd});});});
+ if(!hits.length) return '';
+ const cards=hits.map(({c,nd},i)=>{const col=STAGE_HEX[nd.stage];
+  return `<div class="cnode borrowed" data-cand="${nd.cand||''}" style="border-left-color:${col};animation-delay:${i*70}ms">
+    <span class="jdot" style="background:${col}"></span>
+    <div class="top"><span class="nm">${nd.n}</span><span class="sbadge" style="background:${col}22;color:${col}">${nd.stage}</span><span class="borrow-src">↩ ${c.driver}(${c.layer}) 파생</span>${nd.cand?'<span class="go">분해 보기 →</span>':'<span class="go" style="color:var(--faint)">리서치 영역</span>'}</div>
+    <div class="why">${nd.why}</div>
+    ${nd.mult?`<div class="mult">콘텐츠 배수 · ${nd.mult}</div>`:''}
+    <div class="cos">대표: ${Array.isArray(nd.cos)?nd.cos.map(([nm,st,h])=>{const g=stageGap(nd.stage,st),dv=g>=STAGE_DIVERGE;return `<span class="ct${dv?' dvct':''}"><i style="background:${STAGE_HEX[st]}"></i>${nm}${h?'<span class="heldstar"> ★</span>':''} <b style="color:${STAGE_HEX[st]}">${st}</b>${dv?`<span class="dvf" title="테마 ${nd.stage} vs 차트 ${st} · ${g}단계 발산">⚑</span>`:''}</span>`;}).join(' · '):nd.cos}</div></div>`;}).join('');
+ return `<div class="lc-borrow"><div class="lc-borrow-h">다른 드라이버에서 이 층 종목을 다루는 파생 마디 <span class="lc-borrow-n">${hits.length}</span></div><div class="casc-nodes">${cards}</div></div>`;
+}
 /* 한 레이어의 2·3차 가치사슬(해당 레이어를 가진 카스케이드들)을 HTML로 */
 function layerChainHTML(layer){
  const cs=CASCADES.filter(c=>c.layer===layer);
- if(!cs.length){const cands=STATE.filter(c=>c.layer===layer);
-  return `<div class="lc-empty">이 레이어의 2·3차 파생 분해는 상위 드라이버(예: 가속기·메모리)의 파생 노드에서 다룹니다.<br>이 층 후보: <b>${cands.map(c=>c.name).join(', ')||'—'}</b></div>`;}
+ if(!cs.length){const cands=STATE.filter(c=>c.layer===layer);const borrowed=borrowedNodesHTML(layer);
+  return `<div class="lc-empty">이 레이어 전용 2·3차 캐스케이드는 없습니다 — 상위 드라이버(예: 가속기·메모리)의 파생 노드에서 다룹니다.<br>이 층 후보: <b>${cands.map(c=>c.name).join(', ')||'—'}</b></div>`+borrowed;}
  return `<div class="lc-title">2·3차 파생 가치사슬 · ${cs.length>1?cs.length+'개 드라이버':cs[0].driver}</div>`+cs.map(cascadeHTML).join('');
 }
 /* 강물 2~6 노드의 세부 value chain(2·3차 파생 + 종목)을 HTML로 — 1번 레이어 가치사슬과 동일 비주얼 */
