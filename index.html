@@ -39,9 +39,9 @@ nav{display:flex;gap:3px;margin-left:auto;flex-wrap:wrap}
 .iobtn{font-family:var(--mono);font-size:13px;color:var(--dim);background:var(--panel);border:1px solid var(--line);padding:8px 10px;border-radius:8px;cursor:pointer;transition:.15s}
 .iobtn:hover{border-color:var(--dawn);color:var(--dawn)}
 main{padding:36px 0 90px;position:relative}
-.asof{position:absolute;top:6px;right:22px;z-index:2;font-family:var(--mono);text-align:right;line-height:1.55}
-.asof-row{display:flex;gap:8px;justify-content:flex-end;align-items:baseline}
-.asof-k{font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--dawn);min-width:30px;text-align:right}
+.asof{margin:40px 0 8px;font-family:var(--mono);text-align:left;line-height:1.55;border-top:1px solid var(--line);padding-top:14px}
+.asof-row{display:flex;gap:8px;justify-content:flex-start;align-items:baseline}
+.asof-k{font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--dawn);min-width:30px;text-align:left}
 .asof-v{font-size:13px;color:var(--dim);font-variant-numeric:tabular-nums;white-space:nowrap}
 .view{display:none;animation:rise .5s cubic-bezier(.2,.7,.2,1)}
 .view.on{display:block}
@@ -363,7 +363,7 @@ table.tk th.c{text-align:center}
  .scurve-scroll::-webkit-scrollbar{height:5px}
  .scurve-scroll::-webkit-scrollbar-thumb{background:var(--line2);border-radius:3px}
 }
-@media(max-width:760px){.vtitle{font-size:20px}.layer{grid-template-columns:40px 1fr;gap:10px}.layer .lright{display:none}.exrow{grid-template-columns:96px 1fr}.pbar-row{grid-template-columns:110px 1fr}.asof{position:static;text-align:left;margin:0 0 16px}.asof-row{justify-content:flex-start}.asof-k{text-align:left}}
+@media(max-width:760px){.vtitle{font-size:20px}.layer{grid-template-columns:40px 1fr;gap:10px}.layer .lright{display:none}.exrow{grid-template-columns:96px 1fr}.pbar-row{grid-template-columns:110px 1fr}}
 /* ===== THREAD: stacked sections (candidates / graph / signal log) ===== */
 .rcand-panel{background:linear-gradient(155deg,var(--panel),var(--ink2));border:1px solid var(--line);border-radius:18px;padding:20px 18px;margin-bottom:18px}
 .rcand-panel .ph{font-family:var(--serif);font-size:17px;font-weight:700}
@@ -584,10 +584,6 @@ table.tk th.c{text-align:center}
 </div></header>
 
 <main class="wrap">
-<div class="asof" id="asofBox">
-  <div class="asof-row"><span class="asof-k">시세</span><span class="asof-v" id="pxAsof">—</span></div>
-  <div class="asof-row"><span class="asof-k">정보</span><span class="asof-v" id="infoAsof">—</span></div>
-</div>
 
 <!-- 03 THREAD (알파 찾기) -->
 <section class="view" id="v-thread">
@@ -994,6 +990,11 @@ table.tk th.c{text-align:center}
 
   <div class="atip" id="alphaTip"></div>
 </section>
+
+<div class="asof" id="asofBox">
+  <div class="asof-row"><span class="asof-k">시세</span><span class="asof-v" id="pxAsof">—</span></div>
+  <div class="asof-row"><span class="asof-k">정보</span><span class="asof-v" id="infoAsof">—</span></div>
+</div>
 </main>
 
 <div class="drawer-bg" id="drawerBg"></div>
