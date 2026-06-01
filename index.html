@@ -1198,6 +1198,7 @@ const CASCADES=[
   nodes:[
    {n:'HBM',why:'가속기당 HBM 스택 수·단수↑',mult:'HBM3E → HBM4 용량·단수↑',cos:[['SK하이닉스','성숙'],['삼성','성숙',1],['마이크론','성숙',1]],stage:'성숙',cand:'mu'},
    {n:'어드밴스드 패키징(CoWoS)',why:'대형 다이 + HBM 통합',mult:'CoWoS 캐파 = 진짜 supply 병목',cos:[['TSMC','가속'],['Ibiden','과열'],['ASE','가속']],stage:'초입',cand:null},
+   {n:'하이브리드 본딩 장비',why:'스택 단수↑·열제약 → 솔더범프를 Cu-Cu 직접접합으로 대체(CoWoS 후속 S커브)',mult:'본더 ASP 수배·서비스 매출↑ · 미반영 잔량(γ) 잔존',cos:[['BESI','초입'],['Applied Materials','가속'],['ASMPT','가속']],stage:'초입',cand:'besi'},
    {n:'광 인터커넥트',why:'GPU-GPU scale-up 대역폭',mult:'800G → 1.6T → CPO 전환',cos:[['Lumentum','성숙',1],['Coherent','가속'],['MRVL','가속',1]],stage:'가속',cand:'lite'},
    {n:'전력·냉각',why:'랙 100kW+ 발열·전력밀도',mult:'액체냉각 표준화',cos:[['Vertiv','성숙',1],['Vicor','과열']],stage:'가속',cand:'vrt'},
   ]},
@@ -1382,6 +1383,11 @@ const C=[
   capex:{bull:'어드밴스드 패키징 capex↑',base:'장비 사이클',bear:'capex 축소'},
   thesis:'다음 병목(패키징) 노출 통로지만 비중 2.3%로 얇음. 후공정 실제 구성비 검증 필요.',
   kill:['패키징 capex 둔화','ETF 구성 전공정 편중','국내 장비주 약세'],S:{s1:2,s2:1,s3:1,s4:0,s5:1}},
+ {id:'besi',name:'BE Semiconductor',ticker:'BESI',mkt:'Euronext·NASDAQ(BESIY)',layer:'L4',stage:'초입',mat:.4,conv:.7,
+  sub:'하이브리드 본딩 장비 → D2W/W2W → CoWoS 차세대 후속',compete:'하이브리드 본딩 30%+·다이어태치 42% (AMAT 9% 지분)',up:{l:'—',d:'—'},down:{l:'L2/L3',d:'강'},
+  capex:{bull:'HBM4·로직 하이브리드 본딩 본격 채택',base:'AP capex 동행',bear:'하이브리드 본딩 채택 지연(W2W 타이밍)'},
+  thesis:'CoWoS 다음 S커브를 쥔 하이브리드 본딩 사실상 독점. Q1\'26 수주 +104% YoY인데 1년 주가는 +15%대 — OSAT(~7x)·검사주(ATH) 대비 미반영 잔량(γ)의 교과서. 단 245% 프리미엄·25년 trailing EPS 역성장 → "싼 종목"이 아니라 "수주로 이른 종목"이므로 추격 아닌 수주→실적 전환 확인 후 정찰(1/3). AMAT 9% 지분·MS 통한 M&A설 옵셔널리티.',
+  kill:['book-to-bill 1.0 하회','하이브리드 본딩 양산 채택 지연(W2W 타이밍)','CoWoP가 ABF·일부 본딩 노드 우회'],S:{s1:2,s2:1,s3:2,s4:2,s5:1}},
  {id:'smci',name:'Supermicro',ticker:'SMCI',mkt:'NASDAQ',layer:'L5',stage:'가속',mat:.42,conv:.55,
   sub:'AI 서버 → 액체냉각 랙 → 시스템 통합',compete:'AI 서버 ODM 상위',up:{l:'L2',d:'강'},down:{l:'L7',d:'강'},
   capex:{bull:'액체냉각 랙 표준화',base:'서버 출하 증가',bear:'마진 압박·회계 리스크'},
@@ -1599,6 +1605,15 @@ function gotoStack(layerId){
 
 /* ===== SIGNAL LOG (실적 콜 등 신규 시그널 → value-chain 반영, 누적 가능) ===== */
 let SIGNAL_LOG=[
+ {date:'2026-06-01', at:'2026-06-01T23:00+09:00', source:'L4 밸류체인 세분화 + 신규 발굴 — 하이브리드 본딩 노드 신설·BESI 워치 등록',
+  srcs:[{label:'BESI Q1\'26: 수주 +104% YoY(€269.7M)·매출 +28%·하이브리드 본딩 폭증 (Lightyear·StockAnalysis 2026)'},{label:'Applied Materials 9% 지분·D2W 하이브리드 본딩 공동개발 (SEC 8-K 2025)'},{label:'AMKR 1Y ~7x·52주 $79·P/E 40·적정가 $60<현재가 / ASX 6M +131% (Investing·finviz 2026)'},{label:'TSMC CoWoS 타이난 28억$ 증설·NVDA 2026 캐파 50%+ 선점 (Mordor·FinancialContent 2026)'},{label:'CoWoP 테일리스크 — NVDA 인터포저 직접 PCB 실장 ABF 우회 테스트 (NextFinancial 2026)'}],
+  items:[
+   {tag:'L4 노드 분해',layer:'L4',col:'#1c7ed6',html:'AP backend는 단일 노드가 아니라 <b>6개 율속 단계</b>(①CoWoS캐파 ②OSAT 2nd-source ③하이브리드 본딩 장비 ④검사·계측 ⑤테스트·프로브 ⑥ABF/글래스 기판). gpu 캐스케이드에 <b>③하이브리드 본딩 장비 노드 신설</b>(CoWoS 뒤). 나머지는 대부분 성숙~과열까지 선반영 = cand:null이 프레임 오류 아닌 실재 공백.'},
+   {tag:'신규 발굴',layer:'L4',col:'#0ca678',html:'<b>BESI(BE Semiconductor) 워치 등록 — L4에서 유일하게 "수요폭발+미반영" 동시 생존.</b> 하이브리드 본딩 30%+ 독점, Q1\'26 수주 <b>+104% YoY</b>인데 1년 주가 +15%대(OSAT 7x·검사 ATH 대비 미반영 잔량 γ). AMAT 9% 지분·D2W 공동개발 + MS 통한 M&A설 옵셔널리티. <b>5신호 8/10·초입(여명 경계)</b>(S2=1: trailing EPS 25년 역성장·전환 미확인).'},
+   {tag:'스틸맨·추격금지',layer:'L4',col:'#e03131',html:'<b>BESI는 싼 종목 아님</b> — 245% 프리미엄·25년 이익 역성장·W2W 채택 타이밍·고객집중 리스크. 즉 "trailing 멀티플로 싼"이 아니라 "수주 사이클로 이른". → 추격 아닌 <b>수주→실적 전환 확인 후 정찰(1/3)</b>. ①CoWoS는 TSMC 내재로 깨끗한 통로 부재 = <b>cand:null 유지</b>가 솔직한 thesis-book gap.'},
+   {tag:'상대가치',layer:'L4',col:'#b8860b',html:'L4 증액 시 이미 +734%/+305% 간 삼성전기·대덕(과열/성숙)이나 ATH의 AMKR·CAMT 추격 대신 <b>같은 레이어 안에서 공포·미반영 쪽(BESI)으로 회전</b>(§6 거울적용). 단 judgment.json은 미보유 후보라 손대지 않음(규칙). ⑤테스트(FORM/Advantest)는 다음 발굴 큐.'},
+   {tag:'테일리스크 등록',layer:'L4',col:'#7048e8',html:'<b>CoWoP</b> — NVDA가 인터포저를 PCB에 직접 올려 ABF를 우회하는 방식 테스트 중, 26년 말 Grace Rubin 150 검증 시 ABF 생태계 재편 가능. 삼성전기(ABF)·일부 본딩 노드 kill 신호로 등록.'},
+  ]},
  {date:'2026-06-01', at:'2026-06-01T15:00+09:00', source:'L6 포지셔닝 — APH는 LITE 대체 아닌 L6 내부 분산·저베타 보완재 (비중·타이밍 판단)',
   srcs:[{label:'Amphenol Q1 FY26: record orders +78%·B2B 1.24·IT datacom 41%·Q2 가이던스 상향 (TIKR·Yahoo Finance)'},{label:'Lumentum: NVIDIA $2B 전략투자·Q3 +90%·Q4 가이던스 상향 (StocksToTrade 2026-05)'},{label:'APH 베타1.39·NYSE/S&P500·NASDAQ100 미편입 (TradingView·Finbox)'}],
   items:[
