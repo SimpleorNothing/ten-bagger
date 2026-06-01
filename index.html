@@ -810,12 +810,12 @@ table.tk th.c{text-align:center}
     <p class="vsub">매크로 매매가 "충격이 오면 무엇을 할지"라면, 투자 캘린더는 "그 충격이 언제 올지"를 고정한다. 통화정책·물가·내 자산 실적·메가 이벤트·지정학 워치를 하나의 D-카운트다운으로 묶어, 다가오는 게이트를 놓치지 않는다. <b>확정 일정은 굵게, 추정(IR 미확정·기관 미확정)은 점선 태그로 표기.</b></p>
   </div>
 
-  <div class="cal-sec">임박 이벤트 <span class="sub">· 기준일 2026-05-30</span></div>
+  <div class="cal-sec">임박 이벤트 <span class="sub">· 기준일 <span id="calAsOf">2026-05-30</span></span></div>
   <div class="cal-now">
-    <div class="now-card" style="--c:var(--cat-infl)"><div class="dn">D-11</div><div class="when">2026-06-10 (수)</div><div class="lbl">美 CPI · 5월분</div><div class="meta">08:30 ET · 4월 +3.8% YoY (여전히 높음)</div></div>
-    <div class="now-card" style="--c:var(--cat-event)"><div class="dn">D-13</div><div class="when">~2026-06-12 (금)</div><div class="lbl">SpaceX(SPCX) 거래 개시</div><div class="meta">나스닥 · $1.75~2T · 메모리 직격 선반영 시작</div></div>
-    <div class="now-card" style="--c:var(--cat-macro)"><div class="dn">D-17</div><div class="when">2026-06-16~17</div><div class="lbl">FOMC (점도표*)</div><div class="meta">현 3.50~3.75% 동결 유지 중</div></div>
-    <div class="now-card" style="--c:var(--cat-earn)"><div class="dn">D-25</div><div class="when">~2026-06-24 (AMC)</div><div class="lbl">마이크론 <span style="font-family:var(--mono);color:var(--faint);font-weight:600">MU</span></div><div class="meta">메모리 강등 게이트 · IR 확정 전 추정</div></div>
+    <div class="now-card" data-d="2026-06-10" style="--c:var(--cat-infl)"><div class="dn">D-11</div><div class="when">2026-06-10 (수)</div><div class="lbl">美 CPI · 5월분</div><div class="meta">08:30 ET · 4월 +3.8% YoY (여전히 높음)</div></div>
+    <div class="now-card" data-d="2026-06-12" style="--c:var(--cat-event)"><div class="dn">D-13</div><div class="when">~2026-06-12 (금)</div><div class="lbl">SpaceX(SPCX) 거래 개시</div><div class="meta">나스닥 · $1.75~2T · 메모리 직격 선반영 시작</div></div>
+    <div class="now-card" data-d="2026-06-16" style="--c:var(--cat-macro)"><div class="dn">D-17</div><div class="when">2026-06-16~17</div><div class="lbl">FOMC (점도표*)</div><div class="meta">현 3.50~3.75% 동결 유지 중</div></div>
+    <div class="now-card" data-d="2026-06-24" style="--c:var(--cat-earn)"><div class="dn">D-25</div><div class="when">~2026-06-24 (AMC)</div><div class="lbl">마이크론 <span style="font-family:var(--mono);color:var(--faint);font-weight:600">MU</span></div><div class="meta">메모리 강등 게이트 · IR 확정 전 추정</div></div>
   </div>
 
   <div class="cal-legend">
@@ -1536,6 +1536,19 @@ function fmtUpd(v){if(!v)return null;
 function stampText(v){const f=fmtUpd(v);return f?'update : '+f:'';}
 function setStamp(id,v){const e=document.getElementById(id);if(e)e.textContent=stampText(v);}
 function stampStatics(){setStamp('updCal',VIEW_UPDATED);setStamp('updThread',VIEW_UPDATED);setStamp('updPort',VIEW_UPDATED);}
+/* ===== 임박 이벤트: 기준일=오늘(KST) + D-카운트 동적 계산 =====
+   기준일을 고정값이 아닌 런타임 오늘로 두어 D-카운트가 항상 유효하도록. */
+function renderCalNow(){
+ const today=new Date(Date.now()+9*3600000);today.setUTCHours(0,0,0,0);
+ const p=n=>String(n).padStart(2,'0');
+ const as=document.getElementById('calAsOf');
+ if(as)as.textContent=`${today.getUTCFullYear()}-${p(today.getUTCMonth()+1)}-${p(today.getUTCDate())}`;
+ document.querySelectorAll('#v-cal .now-card[data-d]').forEach(card=>{
+  const d=Math.round((new Date(card.dataset.d+'T00:00:00Z')-today)/864e5);
+  const dn=card.querySelector('.dn');
+  if(dn)dn.textContent=d>0?'D-'+d:d===0?'D-Day':'D+'+(-d);
+ });
+}
 function updateAsof(){const pe=document.getElementById('pxAsof');if(pe)pe.textContent=fmtKST(PRICES_ASOF);const ie=document.getElementById('infoAsof');if(ie)ie.textContent=fmtKST(infoAsof());}
 async function loadPrices(){try{const r=await fetch('./prices.json',{cache:'no-store'});if(!r.ok)return;const p=await r.json();PRICES=p.quotes||{};PRICES_ASOF=p.asOf||null;renderAll();updateAsof();}catch(e){}}
 
@@ -2197,7 +2210,7 @@ document.getElementById('filterSel').addEventListener('change',renderTracker);
 
 /* ===== INIT ===== */
 function renderAll(){renderSignalLog();renderThread();renderStack();renderPortfolio();renderTracker();}
-renderLegends();loadStore().then(renderAll);renderAll();updateAsof();loadPrices();stampStatics();
+renderLegends();loadStore().then(renderAll);renderAll();updateAsof();loadPrices();stampStatics();renderCalNow();
 
 /* ===== 출력(인쇄/PDF) — 페이지별 버튼: 이 페이지만 / 전체 ===== */
 (function initPrint(){
