@@ -1410,12 +1410,12 @@ const C=[
   capex:{bull:'AI 테스트 복잡도↑·로보틱스 옵션·포토닉스 테스트(L6)',base:'테스트 사이클',bear:'YTD +106%·테스트 시클리컬·로보틱스 비중 작음'},
   thesis:'기사 휴머노이드 묶음 중 유일하게 EPS 상향 동반(2026E +58%). 본질은 반도체 테스트(실펀더멘털)+로보틱스/포토닉스 옵션. 단 이미 급등·초입 아님 → 워치',
   kill:['테스트 capex 둔화','로보틱스 성장 정체','고밸류 디레이팅'],S:{s1:2,s2:1,s3:1,s4:1,s5:1}},
- {id:'aph',name:'암페놀',ticker:'APH',mkt:'NASDAQ',layer:'L6',stage:'가속',mat:.55,conv:.62,
-  sub:'고속 인터커넥트(카퍼+광+전력) → 데이터센터·AI 백본',compete:'AVGO/NVDA 인터커넥트 수요의 부품 수혜',
+ {id:'aph',name:'암페놀',ticker:'APH',mkt:'NYSE',layer:'L6',stage:'가속',mat:.55,conv:.65,
+  sub:'고속 인터커넥트(카퍼+광+전력) → 데이터센터·AI 백본',compete:'AVGO/NVDA 인터커넥트 수요의 부품 수혜·분산형(LITE 순수 optical의 보완재)',
   up:{l:'L2',d:'강'},down:{l:'L7',d:'중'},
-  capex:{bull:'IT datacom 40%+·CommScope CCS로 데이터센터 정체성 강화·마진 25%+ 레벨업',base:'다변화 우량주·전방시장 분산',bear:'P/E~39x·5Y +383%·Q4후 −15% 고밸류 취약'},
-  thesis:'L6 인터커넥트 종합 플레이. FY25 매출 +52%·영업이익률 20→25% 동반 점프=단일동인(데이터센터·AI). 펀더 최상이나 차트·밸류 선반영으로 초입 asymmetry 소진 → 가속~과열, 눌림 대기.',
-  kill:['IT datacom 성장 둔화','AI capex 피크','고밸류 디레이팅'],S:{s1:2,s2:1,s3:2,s4:2,s5:1}},
+  capex:{bull:'Q1 record orders +78%·B2B 1.24·IT datacom 41%(세자릿수 성장)·Q2 가이던스 상향=B&R 신선',base:'다변화 우량주·전방시장 분산·베타1.39 저베타',bear:'fwd P/E~32x 프리미엄·$135 저항 미돌파(S5 미점등)'},
+  thesis:'L6 인터커넥트 분산 플레이 — LITE(순수 optical γ)의 대체가 아닌 저베타·분산 보완재. 주가는 ATH($167)比 −21% 눌렸는데 추정은 상향(γ 열림)·내부자매도 無. 정찰만(1/3, LITE 트림 재원)·추격금지, 본매수는 7/29 실적 게이트(IT datacom 순차성장 가이드 상회 확인) 또는 매크로 충격 3중점등 시 3분할. NASDAQ100 미편입 → 7월 SpaceX 패스트엔트리 기계적 매도 무관(저베타 디핑 기회).',
+  kill:['IT datacom 성장 둔화','AI capex 피크','고밸류 디레이팅'],S:{s1:2,s2:2,s3:2,s4:2,s5:1}},
 ];
 
 /* ===== STATE / STORE ===== */
@@ -1566,6 +1566,14 @@ function gotoStack(layerId){
 
 /* ===== SIGNAL LOG (실적 콜 등 신규 시그널 → value-chain 반영, 누적 가능) ===== */
 let SIGNAL_LOG=[
+ {date:'2026-06-01', at:'2026-06-01T15:00+09:00', source:'L6 포지셔닝 — APH는 LITE 대체 아닌 L6 내부 분산·저베타 보완재 (비중·타이밍 판단)',
+  srcs:[{label:'Amphenol Q1 FY26: record orders +78%·B2B 1.24·IT datacom 41%·Q2 가이던스 상향 (TIKR·Yahoo Finance)'},{label:'Lumentum: NVIDIA $2B 전략투자·Q3 +90%·Q4 가이던스 상향 (StocksToTrade 2026-05)'},{label:'APH 베타1.39·NYSE/S&P500·NASDAQ100 미편입 (TradingView·Finbox)'}],
+  items:[
+   {tag:'L6 구조 진단',layer:'L6',col:'#b8860b',html:'<b>L6(연결) 109.5M = 총자산 11.3%가 100% 광 순수 베팅</b>(LITE 64.1M + KODEX 광통신 45.4M). copper scale-up·전력 인터커넥트·분산 노출 0 + LITE 베타>2.0 + 단일종목 집중 → L6가 매크로 충격에 가장 취약한 구성. 상대가치 결론: 신규자본 아니라 <b>내부 구성 회전</b>.'},
+   {tag:'LITE 트림',layer:'L6',col:'#e03131',html:'<b>LITE = 성숙·γ 대부분 소진</b>(NVIDIA $2B·Q3 +90%로 펀더는 폭발이나 ~$975 포물선·가격이 낙관 추정 추월) → 강등규칙 충족. 베타>2.0(5분할군) → 트림 재원을 APH로 회전 = 애크먼 GOOGL→MSFT를 L6 바스켓 내부에 적용(유한자본·상대가치). judgment.json LITE wk −1 유지+회전 근거 보강.'},
+   {tag:'APH 편입후보',layer:'L6',col:'#1c7ed6',html:'<b>APH = γ 열림(가격 ATH比 −21%인데 추정 상향)·내부자매도 無.</b> Q1 record orders +78%·B2B 1.24·IT datacom 41%=B&R 신선(트래커 S2 1→2, S=9). 단 순수 CPO γ 아닌 <b>분산 인터커넥트(LITE 보완재)</b>·$135 저항 미돌파(S5 미점등) → 정찰만(1/3)·추격금지. 본매수는 <b>7/29 실적 게이트</b> 또는 매크로 3중점등 시 3분할(베타1.39=3분할군). NASDAQ100 미편입 → 7월 SpaceX 리밸런스 무관.'},
+   {tag:'트레이드오프',layer:null,col:'#b8860b',html:'덜 오른 순수 CPO 베히클은 사실상 부재(COHR도 성숙 강등·L4 패키징 cand:null과 같은 구조적 공백). 따라서 APH는 <b>분산+상대가치+저베타의 최적 조합</b>으로 보되 광 γ 대체로 보면 안 됨 → L6은 "광 코어(LITE/ETF 일부 유지)+인터커넥트 분산(APH)" 2축. 적정밴드: optical 60~70%/APH 30~40%(APH ~30~40M, 총자산 3~4%), L6 총비중 11~13% 유지.'},
+  ]},
  {date:'2026-06-01', at:'2026-06-01T09:00+09:00', source:'L7 800V HVDC 변환 노드 — 명명 5종목 차트 위치 검증 완료 (결론 보류 해제)',
   srcs:[{label:'barchart·Power Electronics News·CoinCentral·TrendForce(2026-05-27~31)'},{label:'ROHM 6963.T: Investing·Morningstar 시세 + 9-analyst 컨센서스(2026-05-28)'}],
   items:[
@@ -2278,7 +2286,7 @@ const D=[
  {n:'컨스텔레이션',t:'CEG',mkt:'US',layer:'L8',cand:true,aN:[0.5,2,3],aK:[0.3,0.5,-1],stage:'가속',note:'원전 기반 무탄소 전력. 데이터센터 PPA 수요 직결.'},
  {n:'오클로',t:'OKLO',mkt:'US',layer:'L8',cand:true,aN:[-1,-1,2],aK:[-1.2,-1.5,2],stage:'과열',vol:true,note:'SMR(매출0)이 저점比 ~36x→고점比 −65%($67) 조정·FY28매출 ~326x·목표가 하향·CEO 매도 → 테마(태동) vs 가격(과열) 분리. 초입 아님·진입가 아님. 2027~28 상용·7/4 파일럿로가 게이트. 고변동.'},
  {n:'퀄컴',t:'QCOM',mkt:'US',layer:'L2',cand:true,aN:[0.5,1,1],aK:[0.3,-0.5,-3],stage:'성숙',note:'엣지 추론·온디바이스 AI. 고유 알파 작음(성숙·합의).'},
- {n:'암페놀',t:'APH',mkt:'US',layer:'L6',cand:true,aN:[0.5,3,3],aK:[0.3,1.5,-0.5],stage:'가속',note:'고속 인터커넥트(카퍼+광+전력). IT datacom 40%+·AI 견인. FY25 매출 +52%·GAAP 영업이익률 20→25%로 레벨업. 펀더 최상이나 P/E~39x·5Y +383%·Q4후 −15%로 진입 asymmetry 소진(과열 근접)·고밸류 취약.'},
+ {n:'암페놀',t:'APH',mkt:'US',layer:'L6',cand:true,aN:[0.5,3,3],aK:[0.3,1.5,-0.5],stage:'가속',note:'고속 인터커넥트(카퍼+광+전력)·LITE 보완재(분산·베타1.39). IT datacom 41%·AI 견인, Q1 record orders +78%·B2B 1.24·가이던스 상향(B&R 신선). 주가 ATH比 −21% 눌림+추정 상향=γ 열림. 단 $135 저항 미돌파(S5 미점등) → 정찰만, 본매수 7/29 게이트.'},
 ];
 const CASH={NASDAQ:[-0.3,-2.5],KOSPI:[-0.5,-4]};
 const BNOTE={NASDAQ:'기준선=나스닥(QQQ). 각 종목의 raw 초과수익.',KOSPI:'기준선=코스피. 나스닥 대비 전 종목 동일하게 평행이동 → 순위·간격 불변, 원점만 이동.'};
