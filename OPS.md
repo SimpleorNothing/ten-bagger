@@ -33,6 +33,7 @@
 - `index.html`의 `D` 배열·`HOLDINGS` 비중은 **실제 잔고와 항상 일치**시킨다. 리밸런싱 후 동기화는 필수.
 - **판단(4사분면)을 갱신할 때마다 `snapshots.json`에 시점 스냅샷을 1건 append.** 차트 우하단 "시점" 셀렉터로 과거 배치를 재현·비교하고, 각 시점의 갱신 사유(`reason`)를 누적 추적하기 위함. 절차: `judgment.json` 수정 → 사이트에서 브라우저 콘솔에 `dumpSnap()` 입력 → 출력 JSON을 `snapshots.json`의 `snapshots[]` 끝에 붙여넣고 `asOf`·`label`·`reason` 기입(배열 끝이 최신). 스냅샷은 자기완결(전 종목 aN·aK·stage 포함)이라 D 배열이 바뀌어도 과거 배치가 보존된다.
 - 2026-05-30: CASCADES cpu/memory의 '메모리 인터페이스칩' 노드 초입→가속, cpu의 'FC-BGA' 노드 초입→과열. WATCH(5/22 강등) 정합화. gpu CoWoS(초입)는 의도적 유지(캐파 병목 γ).
+- 2026-06-01: L7 **800V HVDC 변환** 노드 명명 5종목(Navitas·Infineon·ROHM·ST·TI) 차트 위치 검증 완료 → **전부 52주 고점권**. NVTS 1년+994%·EPS음수·포물선(S5=0)=추격경고, IFX·STM 신고가·EPS상향 동반(과열), ROHM ¥5,078(고점−4%·저점比+232%)·평균목표가 +73% 상회·FY25 SiC감손 적자 → **'펀더 훼손형 저점' 기각**(가격이 추정 추월=초입 아님). 결론: 노드는 기술 초입이나 **안-과열 공개 비히클 부재 → cand:null 유지**(L4 CoWoS와 동일), 단계 배지 '검증 전 보류' 해제. SIGNAL_LOG 1건 추가.
 - 2026-05-31: 전력 반도체(VPD) 차트 검증 → VICR 가속→**과열**(1년+600%·ATH·P/E110x·내부자매도, 가격이 매출 추월), MPS 가속→**성숙 경계**(fwd61x·GM캡, 단 추정 상향이 받쳐 덜 극단). CASCADES(cpu/gpu/power VPD 노드)·vicr 드로어·차트 점 일괄 정합화. power 캐스케이드에 **800V HVDC 변환(SiC/GaN)** 노드 신설 — Navitas/NVTS 등 VPD 상류·더 초입 후보지만 **차트 위치 검증 전 결론 금지**(리서치 영역 표기, 단계 배지 보류). 상대가치 결론: VPD=합의 반영 → 다음 자본은 L4·L8 또는 검증 통과 시 NVTS. SIGNAL_LOG 1건 추가.
 
 ---
