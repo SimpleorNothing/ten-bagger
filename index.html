@@ -354,7 +354,12 @@ table.tk th.c{text-align:center}
 .gap-arr{flex:0 0 64px;text-align:center;font-weight:700}
 .gap-tgt{flex:0 0 78px;text-align:right;color:#0ca678}
 .gap-gate{flex:1;color:var(--faint);font-size:12px}
-@media(max-width:760px){.gap-row{flex-wrap:wrap}.gap-gate{flex:1 1 100%;padding-left:92px}}
+.gap-secttl{margin:26px 0 8px;font-family:var(--serif);font-size:17px;font-weight:700;color:var(--txt)}
+.gap-secttl .gap-secsub{display:block;font-family:var(--sans,inherit);font-size:12px;font-weight:400;color:var(--faint);margin-top:2px}
+.gap-row.gap-sub{border-bottom:1px solid var(--line2);padding-top:10px}
+.gap-nm{display:flex;align-items:center;gap:6px;color:var(--txt);font-weight:600}
+.gap-tk{font:600 11px var(--mono);padding:1px 5px;border-radius:4px;white-space:nowrap}
+@media(max-width:760px){.gap-row{flex-wrap:wrap}.gap-gate{flex:1 1 100%;padding-left:92px}.gap-nm{flex:1 1 100%}}
 /* S-커브 차트: 모바일에서 1180폭이 화면에 짓눌려 라벨이 4px로 뭉개지므로, 카드 안에서 읽을 수 있는 크기로 렌더하고 가로 스크롤 */
 @media(max-width:760px){
  .scurve-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 -22px;padding:0 22px;scrollbar-width:thin}
@@ -922,6 +927,7 @@ table.tk th.c{text-align:center}
   <div id="portBars"></div>
   <div class="pclass" id="portClass"></div>
   <div class="gap-table" id="portGap"></div>
+  <div class="gap-table" id="portGapDetail"></div>
 </section>
 
 <!-- 05 TRACKER -->
@@ -1274,6 +1280,29 @@ let HOLDINGS=[
 ];
 /* 원본 총자산(M). 레이어 amt는 개별 반올림이라 합산 시 누적오차(971) — 표시 총액은 원본 총계 기준. holdings.json.total로 갱신. */
 let HOLD_TOTAL=970;
+/* ===== HOLD_DETAIL — 개별 종목/ETF 현보유 vs 적정 비중(5/30 계좌 기준) =====
+   w = 실잔고 비중(계좌 CSV 5/30, 970M 기준 · 레이어 합은 HOLDINGS와 일치).
+   적정(tlo~thi) = 레이어 밴드(TARGETS)를 그 안에서 '향후 상승가능성'으로 배분한 운영자 조언.
+   dir = 회전(trim/add/hold), note = 상방 근거. 종목별 밴드 mid 합 ≈ 레이어 밴드 mid. 매매 권유 아님. */
+let HOLD_DETAIL=[
+ {layer:'L2', name:'마벨',                     ticker:'MRVL',   kind:'종목', w:6.09, tlo:5,  thi:6,  dir:'hold', note:'가속·ASIC+광 양다리, 1y 상방 최상 — 레이어 내 우선 보유'},
+ {layer:'L2', name:'KODEX 미국AI반도체TOP3+',  ticker:'ETF',    kind:'ETF',  w:2.76, tlo:2.5,thi:3.5,dir:'hold', note:'성숙 대형주 바스켓 — 한계 상방 제한, 유지'},
+ {layer:'L3', name:'마이크론',                 ticker:'MU',     kind:'종목', w:11.68,tlo:6,  thi:8,  dir:'trim', note:'성숙·+660%/트림 1순위, 1y 상방 소진 — 6/24 실적 후 감축'},
+ {layer:'L3', name:'글로벌HBM반도체',          ticker:'ETF',    kind:'ETF',  w:15.61,tlo:10, thi:12, dir:'trim', note:'국내 HBM 바스켓 +66%·과열 해소 — 1순위 트림 통로'},
+ {layer:'L3', name:'삼성전자',                 ticker:'005930', kind:'종목', w:3.48, tlo:3,  thi:5,  dir:'hold', note:'성숙이나 상대 저평가·HBM4 회복 미반영(비대칭 상방) — 유지/충격 시 매수'},
+ {layer:'L3', name:'삼성·SK 채권혼합',         ticker:'ETF',    kind:'ETF',  w:8.85, tlo:8,  thi:10, dir:'hold', note:'메모리 방어자산(채권혼합) — 변동성 대비 유지·보강'},
+ {layer:'L4', name:'KODEX AI반도체핵심장비',   ticker:'471990', kind:'ETF',  w:2.27, tlo:7,  thi:9,  dir:'add',  note:'다음 병목(패키징)·YTD−58% 소외 = 1y 상방 최대 — 백엔드 비중 검증 후 증액'},
+ {layer:'L6', name:'루멘텀',                   ticker:'LITE',   kind:'종목', w:6.61, tlo:4,  thi:6,  dir:'trim', note:'성숙·ATH·내부자매도(트림 앰버), 1y 상방 제한 — 차익 실현'},
+ {layer:'L6', name:'KODEX 미국AI광통신네트워크',ticker:'0173Y0',kind:'ETF',  w:4.68, tlo:4,  thi:6,  dir:'hold', note:'CPO 전환 잔여 상방 — 광 구조 노출 유지'},
+ {layer:'L7', name:'버티브',                   ticker:'VRT',    kind:'종목', w:3.92, tlo:7,  thi:9,  dir:'add',  note:'밴드 증액분은 미보유 800V HVDC(NVTS 등) 신규명 대상 — VRT 단독 추격금지(성숙)'},
+ {layer:'L8', name:'KODEX AI전력핵심설비',     ticker:'ETF',    kind:'ETF',  w:6.93, tlo:3,  thi:5,  dir:'trim', note:'한국 grid 과체중·추격금지, 1y 상방 제한 — 차익 실현'},
+ {layer:'L8', name:'SOL 미국AI전력인프라',     ticker:'ETF',    kind:'ETF',  w:4.73, tlo:2,  thi:4,  dir:'trim', note:'grid 재분류 과체중 — 신규 미반영 grid명만 선별, 추격금지'},
+ {layer:'L8', name:'블룸에너지',               ticker:'BE',     kind:'종목', w:2.54, tlo:1,  thi:3,  dir:'trim', note:'과열·+1,200%/내부자매도, 1y 상방 0 — 추격금지·첫 눌림 대기'},
+ {layer:'기타',name:'테슬라',                  ticker:'TSLA',   kind:'종목', w:6.07, tlo:4,  thi:6,  dir:'hold', note:'정치베타(8레이어 밖)·1y 상방은 있으나 별도 트랙 — 4~6% 유지'},
+ {layer:'기타',name:'코스피50',               ticker:'ETF',    kind:'ETF',  w:0.27, tlo:0.5,thi:1.5,dir:'add',  note:'지수 방어 — 소폭 보강'},
+ {layer:'기타',name:'코스피200 채권혼합',      ticker:'ETF',    kind:'ETF',  w:4.42, tlo:3,  thi:4,  dir:'hold', note:'방어자산(채권혼합) — 유지'},
+ {layer:'현금',name:'현금',                    ticker:'—',      kind:'현금', w:9.10, tlo:9,  thi:12, dir:'hold', note:'매크로 신호 부재 구간 — 충격 실탄, 하단권에서 확보 여지'},
+];
 /* ===== TARGETS — 적정 비중 밴드(프레임 도출, 2026-05-30) =====
    lo~hi = 밴드, dir = 회전방향(trim/add/hold), gate = AND 선결조건.
    강등규칙: 'add/trim'은 가격이 아니라 단계·γ·게이트로 정당화. 매매권유 아님. */
@@ -2208,6 +2237,34 @@ function renderPortfolio(){
      <div class="gap-tgt">${t.lo}–${t.hi}%</div>
      <div class="gap-gate">${t.gate}</div></div>`;}).join('')+
   `<div class="foot" style="margin-top:8px">밴드=프레임 도출(8레이어·단계·유한자본/상대가치). <b>▼트림 ▲증액 ■유지</b>. 회전·게이트는 <b>AND 조건</b> — 통과 전 진입 보류. 강등규칙: 가격 상승은 점검 플래그지 트림 결론 아님(γ 우선). <b>의사결정 지원 · 매매 권유 아님 · 최종 사이징은 운영자 판단.</b></div>`;
+ // ── 개별 종목/ETF 현보유 vs 적정 비중 ──
+ const detOrd=['L2','L3','L4','L6','L7','L8','기타','현금'];
+ const detByL={};HOLD_DETAIL.forEach(h=>{(detByL[h.layer]=detByL[h.layer]||[]).push(h);});
+ let detHTML=`<div class="gap-secttl">종목별 현보유 vs 적정 비중 <span class="gap-secsub">개별종목 · ETF 기준 (계좌 5/30) — 레이어 밴드를 향후 상승가능성으로 배분</span></div>`+
+  `<div class="gap-row" style="color:var(--txt);font-weight:700;border-bottom:1px solid var(--line)">
+     <div class="gap-lab">종목 / ETF</div><div class="gap-cur">현재</div><div class="gap-arr">회전</div>
+     <div class="gap-tgt">적정밴드</div><div class="gap-gate">상방 근거 (레이어 내)</div></div>`;
+ detOrd.forEach(lid=>{
+  const items=detByL[lid];if(!items)return;
+  const t=TMAP[lid],L=LMAP[lid]||{name:lid==='현금'?'현금':'기타',color:lid==='현금'?'#64748b':'#7048e8'};
+  const lname=(L.name||lid).split('(')[0].split('/')[0].trim();
+  detHTML+=`<div class="gap-row gap-sub"><div class="gap-lab" style="flex-basis:auto;flex:1;color:var(--dim)">${lid} · ${lname}</div>`+
+    (t?`<div style="font:12px var(--mono);color:var(--faint)">레이어 밴드 ${t.lo}–${t.hi}% · ${TARGET_ARROW[t.dir]}</div>`:'')+`</div>`;
+  items.forEach(h=>{
+   const ac=TARGET_HEX[h.dir],arr=TARGET_ARROW[h.dir];
+   const gap=((h.tlo+h.thi)/2)-h.w;
+   const gtxt=Math.abs(gap)<0.5?'~0':(gap>0?'+':'')+gap.toFixed(1);
+   const tkCol=h.kind==='ETF'?'#1c7ed6':h.kind==='현금'?'#64748b':L.color;
+   detHTML+=`<div class="gap-row">
+     <div class="gap-lab gap-nm"><span class="gap-tk" style="background:${tkCol}1f;color:${tkCol}">${h.kind==='현금'?'현금':h.ticker}</span>${h.name}</div>
+     <div class="gap-cur">${h.w.toFixed(1)}%</div>
+     <div class="gap-arr" style="color:${ac}">${arr} ${gtxt}</div>
+     <div class="gap-tgt">${h.tlo}–${h.thi}%</div>
+     <div class="gap-gate">${h.note}</div></div>`;
+  });
+ });
+ detHTML+=`<div class="foot" style="margin-top:8px">현재=계좌 실잔고(5/30, 총 ${tot}M). 적정밴드=해당 레이어 밴드를 <b>레이어 내 향후 상승가능성</b>(단계·forward γ·상대가치)으로 배분한 운영자 조언 — 종목 밴드 합 ≈ 레이어 밴드. <b>▼트림 ▲증액 ■유지</b>. 단일종목 레이어(L4·L7)는 레이어 밴드를 그대로 적용하되, L7 증액분은 미보유 800V 신규명 대상(VRT 단독 추격금지). <b>매매 권유 아님 · 최종 사이징은 운영자 판단.</b></div>`;
+ document.getElementById('portGapDetail').innerHTML=detHTML;
 }
 
 /* ===== 05 TRACKER ===== */
