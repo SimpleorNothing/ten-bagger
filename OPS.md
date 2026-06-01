@@ -12,12 +12,12 @@
 
 | 층 | 파일 | 성격 | 갱신 주체 | 차트 반영 |
 |----|------|------|-----------|-----------|
-| 시세 | `prices.json` | 자동 | 크론(매일) | O |
-| 자동 알파 | `alpha.json` | 자동(momentum 휴리스틱) | Actions 수동 실행 | O |
+| 시세 | `prices.json` | 자동 | 크론(매일 06:37 KST) | O |
+| 자동 알파 | `alpha.json` | 자동(momentum 휴리스틱) | 크론(주1회 토 08:30 KST) + Actions 수동 | O |
 | 실적 크기 | `earnings.json` | **판단+데이터** | 운영자/Claude | O(번개) |
 | 판단 알파 | `judgment.json` | **판단** | 운영자/Claude | O(점 위치) |
-| 뉴스 피드 | `news.json` | 자동 수집·**미선별** | 크론(매일) | X (리포 전용 검토자료) |
-| 매크로 신호 | `signals.json` | 자동(VIX·S&P·CNN F&G) | 크론(`update-signals.yml`, 미국장 마감 후 1일 1회) — 사이트 수동 입력폼은 제거(2026-05-31, cron 일원화) | X (01 매크로 매매 신호등 전용) |
+| 뉴스 피드 | `news.json` | 자동 수집·**미선별** | 크론(매일 06:37 KST) | X (리포 전용 검토자료) |
+| 매크로 신호 | `signals.json` | 자동(VIX·S&P·CNN F&G) | 크론(`update-signals.yml`, 매일 06:37 KST 1일 1회) — 사이트 수동 입력폼은 제거(2026-05-31, cron 일원화) | X (01 매크로 매매 신호등 전용) |
 
 병합 순서(차트 렌더 시): **alpha.json → earnings.json → judgment.json** (판단이 자동을 이김, 마지막에 덮어씀). 봇이 `alpha.json`을 재계산해도 판단은 매번 그 위에 다시 얹힌다. `news.json`은 차트에 안 쓰이고 사람/Claude의 큐레이션 입력일 뿐.
 
@@ -46,8 +46,8 @@
 ### 실적마다 (주 루프) — 캘린더가 자동으로 호출
 가장 임박한 실적의 D-N에 따라 플레이북이 점등된다(§3).
 
-### 월 1회쯤
-1. GitHub **Actions 탭 -> `Compute alpha map` -> Run** (momentum 새로고침). *운영자 단독, 클릭 1번.*
+### 주 1회 — 알파맵은 자동
+1. `alpha.json` momentum 재계산은 **크론 자동**(매주 토 08:30 KST, `Compute alpha map`). 필요 시 Actions 탭에서 수동 실행도 가능.
 2. `judgment.json` override가 아직 유효한지 점검(조건 살아있나). *Claude와 함께.*
 
 ### 분기 1회

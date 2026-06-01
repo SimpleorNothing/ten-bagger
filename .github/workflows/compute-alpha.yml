@@ -1,8 +1,9 @@
 name: Compute alpha map
 
-# Manual-only for now: run it once from the Actions tab, review the alpha.json
-# diff (and the live chart), then add a `schedule:` block when you're happy.
+# 주 1회 자동(매주 토요일 08:30 KST) + Actions 탭 수동 실행.
 on:
+  schedule:
+    - cron: '30 23 * * 5'   # 토 08:30 KST (금 23:30 UTC) · 주 1회
   workflow_dispatch: {}
 
 permissions:
