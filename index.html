@@ -1527,8 +1527,10 @@ function pricePill(c){const h=priceHTML(c);return h?`<span class="pill">${h}</sp
 function fmtKST(iso){if(!iso)return '—';const d=new Date(iso);if(isNaN(d))return '—';const k=new Date(d.getTime()+9*3600000);const p=n=>String(n).padStart(2,'0');return `${k.getUTCFullYear()}-${p(k.getUTCMonth()+1)}-${p(k.getUTCDate())} ${p(k.getUTCHours())}:${p(k.getUTCMinutes())} KST`;}
 function infoAsof(){if(!SIGNAL_LOG||!SIGNAL_LOG.length)return null;let best=null,bestT=0;for(const e of SIGNAL_LOG){const t=new Date(e.at||e.date).getTime();if(t>bestT){bestT=t;best=e;}}return best?(best.at||best.date):null;}
 /* ===== 메뉴별 업데이트 시점 배지 =====
-   정적(수기 큐레이션) 뷰의 최종 갱신 시각. 콘텐츠를 손보면 이 값만 갱신. */
-const VIEW_UPDATED='2026-06-01 21:00 KST';
+   정적(수기 큐레이션) 뷰의 최종 갱신 시각 = 페이지 자체의 최종 수정·배포 시각.
+   document.lastModified(=Cloudflare 자산 Last-Modified)에 연동 → 콘텐츠를 고쳐
+   배포할 때마다 자동 갱신(시세·뉴스 크론 커밋은 deploy paths-ignore라 재배포 안 됨). */
+const VIEW_UPDATED=(()=>{const d=new Date(document.lastModified);return isNaN(d)?null:fmtKST(d.toISOString());})();
 function fmtUpd(v){if(!v)return null;
  if(/KST$/.test(v))return v;                         // 이미 포맷된 상수
  if(/^\d{4}-\d{2}-\d{2}$/.test(v))return v+' KST';    // 날짜만(예: signals.json asOf)
