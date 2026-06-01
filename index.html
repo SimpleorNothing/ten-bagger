@@ -1187,7 +1187,7 @@ const CASCADES=[
   nodes:[
    {n:'변압기 · 송전 인터커넥트',why:'HV 변압기 리드타임 3~5년',mult:'grid 병목 = 다음 전선 · 통로 식별됨(대부분 가속~과열) · 미반영 잔량 잔존',cos:'GE Vernova·Quanta·Eaton (글로벌·SOL 內) / 효성·LS일렉 (한국·가속·KODEX)',stage:'초입',cand:null},
    {n:'액체냉각',why:'50kW+ 랙 표준화',mult:'D2C → immersion 단계',cos:[['Vertiv','성숙',1],['SMCI','가속']],stage:'가속',cand:'vrt'},
-   {n:'800V HVDC 변환(SiC/GaN)',why:'13.8kV→800V 솔리드스테이트 변압 · VPD 상류 변환단',mult:'NVIDIA 800V 전환 = AC/DC·DC/DC 단계 제거 · VPD보다 초입',cos:'(Navitas·Infineon·ROHM·ST·TI · 차트 위치 검증 전 결론 보류)',stage:'초입',cand:null},
+   {n:'800V HVDC 변환(SiC/GaN)',why:'13.8kV→800V 솔리드스테이트 변압 · VPD 상류 변환단',mult:'NVIDIA 800V 전환 = AC/DC·DC/DC 단계 제거 · VPD보다 초입(실램프 Rubin Ultra/Kyber 2027+)',cos:'검증완료(26.6.1) 전 종목 52주 고점권 — NVTS 과열(1Y+994%·EPS음수·포물선) / IFX·STM 과열(신고가·단 EPS상향 동반) / ROHM 과열(가격>컨센목표 +73%·FY25 SiC감손 적자) / TI 분산 · 안-과열 공개 비히클 부재 → L4 CoWoS와 동일 cand:null',stage:'초입',cand:null},
    {n:'전력 반도체(VPD)',why:'고전류 변환 효율 "라스트 인치"',mult:'전류밀도↑ · 합의 도달',cos:[['Vicor','과열'],['MPS','성숙']],stage:'성숙',cand:'vicr'},
   ]},
  {key:'grid',driver:'발전·그리드(L8)',layer:'L8',stage:'초입',
@@ -1515,6 +1515,13 @@ function gotoStack(layerId){
 
 /* ===== SIGNAL LOG (실적 콜 등 신규 시그널 → value-chain 반영, 누적 가능) ===== */
 let SIGNAL_LOG=[
+ {date:'2026-06-01', at:'2026-06-01T09:00+09:00', source:'L7 800V HVDC 변환 노드 — 명명 5종목 차트 위치 검증 완료 (결론 보류 해제)',
+  srcs:[{label:'barchart·Power Electronics News·CoinCentral·TrendForce(2026-05-27~31)'},{label:'ROHM 6963.T: Investing·Morningstar 시세 + 9-analyst 컨센서스(2026-05-28)'}],
+  items:[
+   {tag:'검증·과열',layer:'L7',col:'#e03131',html:'<b>800V HVDC 변환단 명명 5종목 전부 52주 고점권 = 안-과열 공개 비히클 부재.</b> NVTS 1년 +994%·EPS 음수·포물선(<b>S5=0</b>) → 강등규칙상 따라잡을 추정치 자체가 부재 = 순수 내러티브(추격경고). IFX·STM은 신고가권이나 반복 가격인상·구조적 수요이동으로 EPS 상향 동반 = 내러티브 아니나 차트 과열 플래그. <b>노드 자체는 기술 초입 유지(cand:null)</b> — L4 CoWoS와 동일 구조적 공백.'},
+   {tag:'ROHM 판정',layer:'L7',col:'#e03131',html:'<b>ROHM(6963.T) "펀더 훼손형 저점" 가설 기각.</b> 현재가 ¥5,078 = 52주 고점(¥5,288) −4%·저점比 +232% → <b>저점 아님</b>. 평균 목표가 ¥2,944를 <b>+73% 상회</b>(최고 목표가 ¥3,900도 상회)·FY25 순손실 ¥1,584억(SiC 감손·BEV 둔화·중국 경쟁). 펀더 훼손 + 주가만 신고가 = <b>미반영 γ 아님(가격이 추정을 추월)</b> → 5종목 중 가격-추정 괴리 최대 과열. 초입 아님.'},
+   {tag:'상대가치',layer:null,col:'#b8860b',html:'노드(기술)는 진짜 초입(실양산 램프 Rubin Ultra/Kyber 2027+)이나 <b>종목 진입점은 전무</b>. NVTS만 needle-moving pure-play지만 포물선·첫 눌림 전. 자본 규율 결론 유지: 다음 한 단위는 <b>L4 패키징·L8 grid</b> 또는 NVTS <b>첫 눌림/베이스 재형성</b> 후 — 현 고점권 추격 금지(기술 신호만으론 부족, AND 게이트 선결).'},
+  ]},
  {date:'2026-05-31', at:'2026-05-31T20:00+09:00', source:'전력 반도체(VPD) 차트 위치 검증 — 단계 라벨 재평가 (theme-maturity lag 정리)',
   srcs:[{label:'Investing·StockAnalysis·Morningstar 시세(2026-05-30)'},{label:'NVIDIA 800V HVDC 공급망(Infineon·MPS·Navitas·ROHM·ST·TI / Delta·Vertiv 등)'}],
   items:[
@@ -2216,7 +2223,7 @@ const D=[
  {n:'램버스',t:'RMBS',mkt:'US',layer:'L3',cand:true,aN:[0.5,3,4],aK:[0.3,1.5,0],stage:'가속',note:'메모리 인터페이스 IP·로열티. HBM4/DDR5 세대전환 레버리지.'},
  {n:'슈퍼마이크로',t:'SMCI',mkt:'US',layer:'L7',cand:true,aN:[-1,1,3],aK:[-1.2,-0.5,-1],stage:'과열',vol:true,note:'AI 서버 시스템. 회계·거버넌스 리스크 잔존 → 단기 음(−), 변동 큼.'},
  {n:'코히어런트',t:'COHR',mkt:'US',layer:'L6',cand:true,aN:[0.5,2,2],aK:[0.3,0.5,-2],stage:'성숙',note:'광 트랜시버·소자. LITE와 동행하나 합의 진행 → 고유 알파 축소.'},
- {n:'바이코어',t:'VICR',mkt:'US',layer:'L7',cand:true,aN:[-0.5,1,3],aK:[-0.7,-0.5,-1],stage:'과열',vol:true,note:'고밀도 전력 모듈(48V). 1년 +600%·ATH·P/E 110x·내부자 매도 → 초입 아닌 과열. VPD 테제 유효하나 가격이 매출 추월, 진입가 아님. 800V 상류(Navitas)가 더 초입 후보(검증 전).'},
+ {n:'바이코어',t:'VICR',mkt:'US',layer:'L7',cand:true,aN:[-0.5,1,3],aK:[-0.7,-0.5,-1],stage:'과열',vol:true,note:'고밀도 전력 모듈(48V). 1년 +600%·ATH·P/E 110x·내부자 매도 → 초입 아닌 과열. VPD 테제 유효하나 가격이 매출 추월, 진입가 아님. 800V 상류(Navitas)는 노드는 초입이나 검증 결과 과열(1Y+994%·EPS음수·포물선) — 안-과열 비히클 부재.'},
  {n:'컨스텔레이션',t:'CEG',mkt:'US',layer:'L8',cand:true,aN:[0.5,2,3],aK:[0.3,0.5,-1],stage:'가속',note:'원전 기반 무탄소 전력. 데이터센터 PPA 수요 직결.'},
  {n:'오클로',t:'OKLO',mkt:'US',layer:'L8',cand:true,aN:[-1,-1,2],aK:[-1.2,-1.5,2],stage:'과열',vol:true,note:'SMR(매출0)이 저점比 ~36x→고점比 −65%($67) 조정·FY28매출 ~326x·목표가 하향·CEO 매도 → 테마(태동) vs 가격(과열) 분리. 초입 아님·진입가 아님. 2027~28 상용·7/4 파일럿로가 게이트. 고변동.'},
  {n:'퀄컴',t:'QCOM',mkt:'US',layer:'L2',cand:true,aN:[0.5,1,1],aK:[0.3,-0.5,-3],stage:'성숙',note:'엣지 추론·온디바이스 AI. 고유 알파 작음(성숙·합의).'},
