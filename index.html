@@ -291,6 +291,7 @@ main{padding:36px 0 90px;position:relative}
 /* map */
 .map-card{background:linear-gradient(165deg,var(--panel),var(--ink2));border:1px solid var(--line);border-radius:18px;padding:22px;position:relative}
 #scurve{width:100%;height:auto;display:block;overflow:visible}
+.scurve-scroll{width:100%}
 .river-map{margin-top:18px}
 .rm-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:8px}
 .rm-n{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--faint)}
@@ -350,6 +351,14 @@ table.tk th.c{text-align:center}
 .gap-tgt{flex:0 0 78px;text-align:right;color:#0ca678}
 .gap-gate{flex:1;color:var(--faint);font-size:12px}
 @media(max-width:760px){.gap-row{flex-wrap:wrap}.gap-gate{flex:1 1 100%;padding-left:92px}}
+/* S-커브 차트: 모바일에서 1180폭이 화면에 짓눌려 라벨이 4px로 뭉개지므로, 카드 안에서 읽을 수 있는 크기로 렌더하고 가로 스크롤 */
+@media(max-width:760px){
+ .scurve-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 -22px;padding:0 22px;scrollbar-width:thin}
+ .scurve-scroll #scurve{min-width:720px}
+ .scurve-scroll .scurve-r{min-width:680px}
+ .scurve-scroll::-webkit-scrollbar{height:5px}
+ .scurve-scroll::-webkit-scrollbar-thumb{background:var(--line2);border-radius:3px}
+}
 @media(max-width:760px){.vtitle{font-size:20px}.layer{grid-template-columns:40px 1fr;gap:10px}.layer .lright{display:none}.exrow{grid-template-columns:96px 1fr}.pbar-row{grid-template-columns:110px 1fr}.asof{position:static;text-align:left;margin:0 0 16px}.asof-row{justify-content:flex-start}.asof-k{text-align:left}}
 /* ===== THREAD: stacked sections (candidates / graph / signal log) ===== */
 .rcand-panel{background:linear-gradient(155deg,var(--panel),var(--ink2));border:1px solid var(--line);border-radius:18px;padding:20px 18px;margin-bottom:18px}
@@ -651,7 +660,7 @@ table.tk th.c{text-align:center}
       <h1 class="vtitle">지금 <em>여명</em> 구간에 선 후보는?</h1>
       <p class="vsub">선택한 강물 후보의 <b>매칭 종목</b>을 성숙도 S-커브(좌:태동→우:과열)에 투영. 여명(초입) 밴드에 든 종목이 빛납니다. 점을 누르면 상세. ★ 보유는 테두리. 강물1은 스택 전체 투영, 강물 2~5는 그 강물에 매칭된 종목을 곡선에 얹습니다.</p></div>
     <div class="legend" id="legendMap"></div>
-    <div class="map-card" id="mainMap"><svg id="scurve" viewBox="0 0 1180 620" preserveAspectRatio="xMidYMid meet"></svg></div>
+    <div class="map-card" id="mainMap"><div class="scurve-scroll"><svg id="scurve" viewBox="0 0 1180 620" preserveAspectRatio="xMidYMid meet"></svg></div></div>
     <div id="mapRivers"></div>
   </div><!-- /sub-map -->
 </section>
@@ -2013,7 +2022,7 @@ function drawRiverCurves(){
   const head=`<div class="rm-head"><span class="rm-n">강물 ${R.n}</span><span class="rm-title">${R.title}</span><span class="front-pill">${R.front}</span></div>`;
   if(!cands.length)
    return `<div class="map-card river-map">${head}
-    <svg class="scurve-r" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">${s}</svg>
+    <div class="scurve-scroll"><svg class="scurve-r" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">${s}</svg></div>
     <div class="rd-empty" style="padding:8px 4px">— 이 강물에 매칭되는 상장 종목 없음 (비상장·관찰 영역) —</div>
     <div class="tnote">${R.note}</div></div>`;
   const pts=cands.map(c=>{const cx=sx(c.mat),cy=sy(Sc(c.mat));return{c,cx,cy,col:STAGE_HEX[c.stage],lx:cx,ly:cy-9-10,lw:lw(c.name+' '+c.ticker)};});
@@ -2031,7 +2040,7 @@ function drawRiverCurves(){
    s+=`<g class="s-dot rv-dot" data-id="${c.id}">${glow}${held}${ldr}<circle cx="${cx}" cy="${cy}" r="${r}" fill="${col}" stroke="var(--ink)" stroke-width="1.5"/>
     <text class="s-lbl" x="${lx}" y="${ly}" text-anchor="middle" fill="var(--txt)" font-family="var(--mono)" font-size="${FS}" font-weight="700">${c.name} <tspan fill="${col}">${c.ticker}</tspan></text></g>`;});
   return `<div class="map-card river-map">${head}
-   <svg class="scurve-r" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">${s}</svg>
+   <div class="scurve-scroll"><svg class="scurve-r" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">${s}</svg></div>
    <div class="tnote">${R.note}</div></div>`;
  }).join('');
  host.querySelectorAll('.rv-dot').forEach(g=>{const c=STATE.find(x=>x.id===g.dataset.id);if(!c)return;const col=STAGE_HEX[c.stage];
