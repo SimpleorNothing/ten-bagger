@@ -86,6 +86,10 @@ main{padding:36px 0 90px;position:relative}
 .siglog .sh .ttl{font-family:var(--serif);font-size:20px;font-weight:700}
 .siglog .sh .meta{font-family:var(--mono);font-size:13px;color:var(--faint)}
 .siglog .sh .live{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--onacc);background:var(--hot);padding:2px 7px;border-radius:20px}
+/* 메뉴별 업데이트 시점 배지 */
+.updstamp{font-family:var(--mono);font-size:11.5px;color:var(--faint);white-space:nowrap;font-weight:600}
+.updstamp:empty{display:none}
+.updstamp.abs{position:absolute;top:0;right:0;z-index:3}
 .thread-sep{height:1px;border:0;margin:34px 0 26px;background:linear-gradient(90deg,transparent,var(--line) 12%,var(--line) 88%,transparent)}
 .sigitem{display:grid;grid-template-columns:78px 1fr;gap:11px;padding:9px 0;border-top:1px solid var(--line);align-items:start}
 .sigtag{font-family:var(--mono);font-size:13px;font-weight:700;padding:3px 6px;border-radius:7px;text-align:center}
@@ -570,11 +574,12 @@ table.tk th.c{text-align:center}
 <header><div class="wrap bar">
   <div class="brand"><span class="mark">알파맵</span></div>
   <nav id="nav">
-    <button class="tab on" data-v="thread"><span class="n">01</span>관통 흐름</button>
-    <button class="tab" data-v="alpha"><span class="n">02</span>알파 맵</button>
-    <button class="tab" data-v="cal"><span class="n">03</span>투자 캘린더</button>
-    <button class="tab" data-v="macro"><span class="n">04</span>매크로 매매</button>
-    <button class="tab" data-v="port"><span class="n">05</span>포트폴리오 X-레이</button>
+    <button class="tab on" data-v="cal"><span class="n">01</span>투자 캘린더</button>
+    <button class="tab" data-v="siglog"><span class="n">02</span>시그널 로그</button>
+    <button class="tab" data-v="thread"><span class="n">03</span>알파 찾기</button>
+    <button class="tab" data-v="alpha"><span class="n">04</span>알파 맵</button>
+    <button class="tab" data-v="macro"><span class="n">05</span>매크로 매매</button>
+    <button class="tab" data-v="port"><span class="n">06</span>포트폴리오 X-레이</button>
   </nav>
 </div></header>
 
@@ -584,8 +589,8 @@ table.tk th.c{text-align:center}
   <div class="asof-row"><span class="asof-k">정보</span><span class="asof-v" id="infoAsof">—</span></div>
 </div>
 
-<!-- 00 THREAD -->
-<section class="view on" id="v-thread">
+<!-- 03 THREAD (알파 찾기) -->
+<section class="view" id="v-thread">
   <div class="vhead">
     <h1 class="vtitle">병목은 <em>이동</em>한다 — 그 앞단에 알파가 있다</h1>
     <p class="vsub">아래 <b>강물 후보</b>를 선택하면, 그 후보에 대해 <b>① 강물 흐름·현재 전선</b> → <b>② 8레이어 스택</b> → <b>③ 인접 레이어 의존(§2-C)</b> → <b>④ Dawn Map</b>(여명 구간 후보)이 차례로 펼쳐집니다.</p></div>
@@ -626,7 +631,8 @@ table.tk th.c{text-align:center}
     </div>
   </div><!-- /sub-flow -->
 
-  <div id="sub-stack" style="margin-top:34px;border-top:1px solid var(--line);padding-top:30px">
+  <div id="sub-stack" style="margin-top:34px;border-top:1px solid var(--line);padding-top:30px;position:relative">
+  <span class="updstamp abs" id="updThread" style="top:30px;right:0"></span>
   <div class="vhead"><div class="vkick">② The Stack · 8레이어 AI 인프라 척추</div>
     <h1 class="vtitle">capex 병목은 스택을 <em>타고 흐른다</em></h1>
     <p class="vsub">가이드 §2-C의 8레이어(+기타)를 한 트리로 — <b>층별 상태·보유·종목·2·3차 가치사슬을 한 카드에 통합</b>했습니다. 우측 막대는 그 층에 실제로 깔아둔 자본. 각 층 <b>헤더를 누르면 카드가 접히고</b>, <b>종목 칩</b>은 §2-C 분해, <b>'2·3차 가치사슬 펼치기'</b>는 파생 가치사슬 드릴다운을 엽니다. 위 강물 곡선의 노드를 누르면 해당 층 카드로 점프합니다. <b style="color:var(--st-hot)">⚑</b> = 종목의 <b>차트 단계(가격)</b>가 그 층·노드의 <b>테마 단계</b>보다 2단계 이상 앞선 경우 — 구조는 일러도 진입 가능한 대표주는 이미 더 성숙·과열이라는 뜻.</p></div>
@@ -684,7 +690,7 @@ table.tk th.c{text-align:center}
   </div>
   <p class="vsub" style="margin-top:4px">매크로 충격은 노이즈가 아니라 거래 가능한 신호. 단 "펀더멘털 레짐 전환"이면 이 룰북은 폐기.</p>
 
-  <div class="mc-sec">3중 점등 매수 시그널 (신호등) · <span style="color:var(--faint)">현재값 signals.json 자동 연동(update-signals 크론)</span></div>
+  <div class="mc-sec" style="display:flex;align-items:baseline;gap:8px">3중 점등 매수 시그널 (신호등) · <span style="color:var(--faint)">현재값 signals.json 자동 연동(update-signals 크론)</span><span class="updstamp" id="updMacro" style="margin-left:auto"></span></div>
   <table class="mc">
     <thead><tr><th>신호</th><th class="c">현재값</th><th class="c">매수 점등</th><th class="c">매도(과열) 점등</th><th class="c">상태</th></tr></thead>
     <tbody>
@@ -797,7 +803,7 @@ table.tk th.c{text-align:center}
 </section>
 
 <!-- 02 CALENDAR -->
-<section class="view" id="v-cal">
+<section class="view on" id="v-cal">
   <div class="vhead">
     <div class="vkick">Calendar · 투자 일정 관제</div>
     <h1 class="vtitle">타이밍을 <em>지도</em>로 — 거시·실적·이벤트 한 화면</h1>
@@ -821,7 +827,7 @@ table.tk th.c{text-align:center}
     <span class="lg"><span class="dot" style="background:var(--cat-watch)"></span>글로벌 워치</span>
   </div>
 
-  <div class="cal-sec">아젠다 타임라인 <span class="sub">· 2026 6월 → 12월</span></div>
+  <div class="cal-sec">아젠다 타임라인 <span class="sub">· 2026 6월 → 12월</span><span class="updstamp" id="updCal" style="margin-left:auto"></span></div>
 
   <div class="cal-month">6월 <span class="mo-sub">— SpaceX·CPI·FOMC·MU + 메가테크 키노트가 몰린 고밀도 구간</span></div>
   <div class="cal-row"><div class="date-chip">06.01~05</div><div class="cat-dot" style="background:var(--cat-event)"></div><div class="cal-body"><div class="ti">엔비디아 Computex·GTC Taipei 키노트 <span class="tk">NVDA</span> <span class="mbadge" style="background:#e8590c22;color:#e8590c">내러티브</span></div><div class="mt">6/1 젠슨 황 키노트(Vera Rubin VR200·RTX Spark·피지컬 AI), Computex 6/2~5. 강물①·⑤ 수요 확인 — <b>레이어 수요 확정이지 종목 채점 아님</b>(I/O 2026과 동일 처리·추격 경고).</div></div></div>
@@ -900,9 +906,18 @@ table.tk th.c{text-align:center}
   </div>
 </section>
 
-<!-- 04 PORTFOLIO -->
+<!-- 02 SIGNAL LOG (시그널 로그) -->
+<section class="view" id="v-siglog">
+  <div class="vhead">
+    <div class="vkick">Signal Log · 신규 시그널 누적</div>
+    <h1 class="vtitle">실적 콜·뉴스 시그널을 <em>value-chain</em>에 반영</h1>
+    <p class="vsub">새로 들어온 시그널(실적 콜·공급 계약·정책 등)을 출처와 함께 누적 기록한다. 각 태그를 누르면 해당 8레이어 스택 카드로 점프. 알파 맵에서 분리해 독립 메뉴로 운영.</p></div>
+  <div class="siglog" id="signalLog"></div>
+</section>
+
+<!-- 06 PORTFOLIO -->
 <section class="view" id="v-port">
-  <div class="vhead"><div class="vkick">Portfolio X-ray · thesis vs book</div>
+  <div class="vhead" style="position:relative"><span class="updstamp abs" id="updPort"></span><div class="vkick">Portfolio X-ray · thesis vs book</div>
     <h1 class="vtitle">자본은 <em>현재 병목</em>에 80% — 다음 병목엔?</h1>
     <p class="vsub" id="portSub">자산현황 기준 보유를 8레이어에 투영. 핵심 질문: 당신이 "다음 병목"이라 지목한 곳에 자본이 가 있는가.</p></div>
   <div class="xray-hero" id="xrayHero"></div>
@@ -933,7 +948,8 @@ table.tk th.c{text-align:center}
   <div class="kick">初入 Observatory · Alpha Map</div>
   <h1>보유종목 4사분면 — 벤치마크 대비 알파</h1>
 
-  <div class="card">
+  <div class="card" style="position:relative">
+    <span class="updstamp abs" id="updAlpha" style="top:12px;right:14px"></span>
     <svg id="plot" viewBox="0 0 860 470" preserveAspectRatio="xMidYMid meet"></svg>
   </div>
 
@@ -975,9 +991,6 @@ table.tk th.c{text-align:center}
   <hr class="a-sep">
 
   <div class="eops" id="earnOps"></div>
-
-  <hr class="a-sep">
-  <div class="siglog" id="signalLog"></div>
 
   <div class="atip" id="alphaTip"></div>
 </section>
@@ -1513,6 +1526,16 @@ function priceHTML(c){const q=PRICES[c.id];if(!q||q.price==null)return '';const 
 function pricePill(c){const h=priceHTML(c);return h?`<span class="pill">${h}</span>`:'';}
 function fmtKST(iso){if(!iso)return '—';const d=new Date(iso);if(isNaN(d))return '—';const k=new Date(d.getTime()+9*3600000);const p=n=>String(n).padStart(2,'0');return `${k.getUTCFullYear()}-${p(k.getUTCMonth()+1)}-${p(k.getUTCDate())} ${p(k.getUTCHours())}:${p(k.getUTCMinutes())} KST`;}
 function infoAsof(){if(!SIGNAL_LOG||!SIGNAL_LOG.length)return null;let best=null,bestT=0;for(const e of SIGNAL_LOG){const t=new Date(e.at||e.date).getTime();if(t>bestT){bestT=t;best=e;}}return best?(best.at||best.date):null;}
+/* ===== 메뉴별 업데이트 시점 배지 =====
+   정적(수기 큐레이션) 뷰의 최종 갱신 시각. 콘텐츠를 손보면 이 값만 갱신. */
+const VIEW_UPDATED='2026-06-01 21:00 KST';
+function fmtUpd(v){if(!v)return null;
+ if(/KST$/.test(v))return v;                         // 이미 포맷된 상수
+ if(/^\d{4}-\d{2}-\d{2}$/.test(v))return v+' KST';    // 날짜만(예: signals.json asOf)
+ const k=fmtKST(v);return k==='—'?null:k;}            // ISO 타임스탬프
+function stampText(v){const f=fmtUpd(v);return f?'update : '+f:'';}
+function setStamp(id,v){const e=document.getElementById(id);if(e)e.textContent=stampText(v);}
+function stampStatics(){setStamp('updCal',VIEW_UPDATED);setStamp('updThread',VIEW_UPDATED);setStamp('updPort',VIEW_UPDATED);}
 function updateAsof(){const pe=document.getElementById('pxAsof');if(pe)pe.textContent=fmtKST(PRICES_ASOF);const ie=document.getElementById('infoAsof');if(ie)ie.textContent=fmtKST(infoAsof());}
 async function loadPrices(){try{const r=await fetch('./prices.json',{cache:'no-store'});if(!r.ok)return;const p=await r.json();PRICES=p.quotes||{};PRICES_ASOF=p.asOf||null;renderAll();updateAsof();}catch(e){}}
 
@@ -1657,7 +1680,7 @@ let SIGNAL_LOG=[
 ];
 function renderSignalLog(){
  const el=document.getElementById('signalLog');if(!el)return;
- el.innerHTML=`<div class="sh"><span class="live">LOG</span><span class="ttl">시그널 로그</span><span class="meta">신규 시그널 → value-chain 반영 · 출처 표기</span></div>`
+ el.innerHTML=`<div class="sh"><span class="live">LOG</span><span class="ttl">시그널 로그</span><span class="meta">신규 시그널 → value-chain 반영 · 출처 표기</span><span class="updstamp" style="margin-left:auto">${stampText(infoAsof())}</span></div>`
   +SIGNAL_LOG.slice().reverse().map(en=>`<div class="sigentry">
      <div class="eh"><span class="edate">${en.date}</span><span class="esrc">${en.source}</span>
        ${en.srcs&&en.srcs.length?`<span class="srctxt">출처: ${en.srcs.map(s=>s.label).join(' · ')}</span>`:''}</div>
@@ -2174,15 +2197,15 @@ document.getElementById('filterSel').addEventListener('change',renderTracker);
 
 /* ===== INIT ===== */
 function renderAll(){renderSignalLog();renderThread();renderStack();renderPortfolio();renderTracker();}
-renderLegends();loadStore().then(renderAll);renderAll();updateAsof();loadPrices();
+renderLegends();loadStore().then(renderAll);renderAll();updateAsof();loadPrices();stampStatics();
 
 /* ===== 출력(인쇄/PDF) — 페이지별 버튼: 이 페이지만 / 전체 ===== */
 (function initPrint(){
- const order=['alpha','macro','cal','thread','port'];
+ const order=['cal','siglog','thread','alpha','macro','port'];
  order.forEach((v,i)=>{const el=document.getElementById('v-'+v);if(!el)return;
   el.classList.add('pview');el.style.order=i;
   const bar=document.createElement('div');bar.className='printbar';
-  bar.innerHTML=`<div class="print-menu" hidden><button type="button" data-pm="one">이 페이지만 출력</button><button type="button" data-pm="all">전체 페이지 출력 (00~04)</button></div><button type="button" class="print-btn">인쇄 / PDF로 저장</button>`;
+  bar.innerHTML=`<div class="print-menu" hidden><button type="button" data-pm="one">이 페이지만 출력</button><button type="button" data-pm="all">전체 페이지 출력 (01~06)</button></div><button type="button" class="print-btn">인쇄 / PDF로 저장</button>`;
   el.appendChild(bar);
   const pn=document.createElement('div');pn.className='pagenum';el.appendChild(pn);});
  const closeAll=()=>document.querySelectorAll('.print-menu').forEach(m=>m.hidden=true);
@@ -2520,6 +2543,7 @@ Promise.all([getJSON('alpha.json'),getJSON('earnings.json'),getJSON('judgment.js
  if(hh&&Number.isFinite(hh.total))HOLD_TOTAL=hh.total;
  if(sl&&Array.isArray(sl.log)&&sl.log.length)SIGNAL_LOG=SIGNAL_LOG.concat(sl.log);
  // 1) 자동(alpha.json) — 모멘텀 휴리스틱
+ if(j&&j.asOf)setStamp('updAlpha',j.asOf);
  const q=j&&j.quotes;if(q)D.forEach(d=>{const a=q[d.t];if(a){if(Array.isArray(a.aN))d.aN=a.aN;if(Array.isArray(a.aK))d.aK=a.aK;}});
  // 2) 실적 IV (earnings.json)
  if(e&&e.moves)EM=e.moves; if(e&&Array.isArray(e.playbook))EPLAY=e.playbook;
@@ -2552,6 +2576,7 @@ Promise.all([getJSON('alpha.json'),getJSON('earnings.json'),getJSON('judgment.js
   lamp('lampSide',sideKnown,side===true||(sp!=null&&sp<=TH.spBuy),false);
   const known=(vix!=null)+(fg!=null)+(sideKnown?1:0);
   set('sigVerdict',known?`매수 점등 ${buy}/3 → ${buy>=2?'분할매수 (정찰 33%)':buy===1?'1/3 정찰':'대기'}`:'신호 데이터 없음(signals.json 미입력) — 대기');
+  setStamp('updMacro',S.asOf);
  }
  renderSignals();
  fetch('./signals.json',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{SIGNALS=j;renderSignals();}).catch(()=>renderSignals());
