@@ -1235,9 +1235,9 @@ let HOLDINGS=[
  {layer:'L3',label:'메모리 (마이크론·삼성전자·HBM ETF)',amt:384,w:39.6},
  {layer:'L4',label:'소부장 (KODEX AI반도체핵심장비)',amt:22,w:2.3},
  {layer:'L6',label:'연결 (루멘텀·KODEX 미국AI광통신네트워크)',amt:109,w:11.3},
- /* 전력 ETF(KODEX·SOL) DC펜스 안분: in-rack(L7) ~13~18% · 그리드/송전/발전(L8) ~82~83%. 차트 점은 단일 instrument라 D배열에선 우세 레이어(L8)에 표기. */
- {layer:'L7',label:'전력·냉각 in-rack (버티브 + 전력ETF 內 L7 ~13~18% 안분)',amt:55,w:5.7},
- {layer:'L8',label:'그리드·송전·발전 (전력ETF 內 L8 안분 + 블룸)',amt:121,w:12.5},
+ /* 전력 ETF는 DC펜스 우세 레이어로 단일 귀속(차트 점=단일 instrument, 분할 불가). KODEX·SOL 구성 ~82~83% 그리드측 → L8. in-rack(L7)은 버티브 단독. D배열 종목 w 합과 일치. */
+ {layer:'L7',label:'전력·냉각 in-rack (버티브)',amt:38,w:3.9},
+ {layer:'L8',label:'그리드·송전·발전 (KODEX·SOL 전력ETF + 블룸)',amt:138,w:14.2},
  {layer:'기타',label:'테슬라',amt:59,w:6.1},
  {layer:'기타',label:'지수·채권혼합 (코스피50·채권혼합)',amt:46,w:4.7},
  {layer:'현금',label:'현금',amt:88,w:9.1},
@@ -1252,8 +1252,8 @@ let TARGETS=[
  {layer:'L3',lo:30,hi:32, dir:'trim', gate:'γ 재확인 + MU 6/24 실적 게이트(추정상향>가격이면 보류)'},
  {layer:'L4',lo:7, hi:9,  dir:'add',  gate:'구성종목 백엔드/어드밴스드 패키징 비중 검증 통과'},
  {layer:'L6',lo:9, hi:11, dir:'trim', gate:'LITE 트림 앰버(내부자매도·베어풋) — 광 구조 노출은 유지'},
- {layer:'L7',lo:7, hi:9,  dir:'add',  gate:'전력ETF 재분류 후 실질 in-rack 얇음(VRT 위주 ~5.7%) — VPD·액체냉각 직접 보강 / 한국 grid ETF는 L7 아님'},
- {layer:'L8',lo:8, hi:10, dir:'trim', gate:'KODEX/SOL grid분 재분류로 실질 과체중(~12.5%) — 한국 변압기·송전 추격금지·BE 추격금지 / 신규 미반영 grid명만 선별'},
+ {layer:'L7',lo:7, hi:9,  dir:'add',  gate:'재분류 후 in-rack 실질 얇음(VRT 단독 ~3.9%) — 추가는 800V HVDC(SiC/GaN) 초입에 한정 / VRT·액체냉각 성숙 추격금지 / 한국 grid ETF는 L7 아님'},
+ {layer:'L8',lo:8, hi:10, dir:'trim', gate:'KODEX·SOL grid분 재분류로 실질 과체중(~14.2%) — 한국 변압기·송전·발전 추격금지·BE 추격금지 / 신규 미반영 grid명(예: CEG 52주 저점권)만 선별'},
  {layer:'기타',lo:8,hi:11,dir:'hold', gate:'테슬라(정치베타·8레이어 밖) 4~6% + 지수·채권 방어 4~5%'},
  {layer:'현금',lo:9, hi:12,dir:'hold', gate:'매크로 신호 부재 구간 — 충격 실탄 유지'},
 ];
@@ -1566,7 +1566,7 @@ let SIGNAL_LOG=[
    {tag:'L6·L7·L8',layer:null,col:'#1c7ed6',html:'상시 에이전트·검색 추론 = 데이터센터 네트워킹·전력 부하. 구글이 이를 <b>제품화·대규모 배포</b> → 광(L6)·전력(L7)·발전(L8) <b>수요 가시성(S3 방향) 거시 레벨 +1칸</b>. 단 이건 레이어 수요 확인일 뿐, 보유 종목(루멘텀·버티브·블룸) 개별 S3 채점은 아님 — 각사 실적으로 따로.'},
    {tag:'기타·엣지',layer:null,col:'#7048e8',html:'삼성 Intelligent Eyewear 글래스 올가을 출시 + Gemini Omni 온디바이스 흐름 = <b>온디바이스 추론 칩 수요</b>. 프레임 안 <b>QCOM mix shift(S4) 가설</b>을 직접 보강하는 외부 증거. 채점 아닌 <b>관찰 로그</b>로 기록.'},
    {tag:'AI 보안',layer:null,col:'#0ca678',html:'SynthID·C2PA Content Credentials를 검색·크롬으로 확대 — 비디오 생성 폭증의 필연적 짝. 프레임이 이미 <b>"AI 보안 트랙 0%"</b> 빈칸으로 표시한 부분, I/O가 이 트랙 수요를 키우는 거시 트리거. <b>별도 thesis 진입 검토</b> 트리거로 기록.'},
-   {tag:'상대가치',layer:null,col:'#b8860b',html:'자본 규율 렌즈: I/O는 "수요가 진짜다"는 확인하지만 <b>어느 층이 싼지는 말 안 함.</b> 수요 확정은 광역(L1→전 스택)인데 바스켓은 이미 오른 <b>L3 메모리(39.6%)·L8 그리드(12.5%)</b>에 쏠림. ※전력 ETF 재분류(DC펜스): KODEX·SOL 구성종목 ~82~83%가 그리드측(L8) → L8은 이미 과체중, &quot;L8 얇음&quot;은 라벨 착시였음. 진짜 얇은 곳은 <b>L4 패키징(2.3%)·L7 in-rack(VPD·액체냉각 직접, VRT 외 ~5.7%)</b>. 실질 함의: 비싼 쪽(한국 변압기·송전 가속) → 미반영 다음 병목(L4·L7 in-rack)으로 <b>비중 이전 근거 +1</b> (종목 추가매수 아님).'},
+   {tag:'상대가치',layer:null,col:'#b8860b',html:'자본 규율 렌즈: I/O는 "수요가 진짜다"는 확인하지만 <b>어느 층이 싼지는 말 안 함.</b> 수요 확정은 광역(L1→전 스택)인데 바스켓은 이미 오른 <b>L3 메모리(39.6%)·L8 그리드(14.2%)</b>에 쏠림. ※전력 ETF 재분류(DC펜스): KODEX·SOL 구성종목 ~82~83%가 그리드측(L8) → L8은 이미 과체중, &quot;L8 얇음&quot;은 라벨 착시였음. 진짜 얇은 곳은 <b>L4 패키징(2.3%)·L7 in-rack(800V HVDC·VPD 직접, VRT 단독 ~3.9%)</b>. 실질 함의: 비싼 쪽(한국 변압기·송전 가속) → 미반영 다음 병목(L4·L7 in-rack)으로 <b>비중 이전 근거 +1</b> (종목 추가매수 아님).'},
   ]},
  {date:'2026-05-26', at:'2026-05-26T08:00+09:00', source:'데일리 뉴스 인테이크 — 헤드라인 선별 (피드 5.20~5.23 기사, 숫자 불변·로그만)',
   srcs:[
@@ -1830,7 +1830,7 @@ document.querySelectorAll('.rcand[data-r]').forEach(card=>card.addEventListener(
 
 /* ===== 01 STACK ===== */
 function renderStack(){
- const front=['L4','L8'];
+ const front=['L4'];
  /* 8레이어 밖(피지컬 AI·TSLA 등)도 한 트리에 포함 — 정보 손실 방지 */
  const ETC={id:'기타',name:'기타 / 8레이어 외',en:'TSLA · 로보틱스 · 엣지',color:'#7048e8',stage:'태동',flow:'피지컬 AI = 부품 수요로 환산'};
  document.getElementById('stackList').innerHTML=[...LAYERS,ETC].map(l=>{
@@ -2085,8 +2085,8 @@ function renderPortfolio(){
  const order=['L1','L2','L3','L4','L5','L6','L7','L8','기타','현금'];
  const byL={};HOLDINGS.forEach(h=>{byL[h.layer]=byL[h.layer]||{amt:0,w:0,labels:[]};byL[h.layer].amt+=h.amt;byL[h.layer].w+=h.w;byL[h.layer].labels.push(h.label);});
  // classification
- const current=(byL.L3?.w||0)+(byL.L6?.w||0)+(byL.L7?.w||0)+(byL.L2?.w||0);
- const next=(byL.L4?.w||0)+(byL.L8?.w||0);
+ const current=(byL.L2?.w||0)+(byL.L3?.w||0)+(byL.L6?.w||0)+(byL.L7?.w||0)+(byL.L8?.w||0);
+ const next=(byL.L4?.w||0);
  const cash=byL.현금?.w||0,etc=byL.기타?.w||0;
  const wL=l=>(byL[l]?.w||0).toFixed(1);
  const tot=HOLD_TOTAL||HOLDINGS.reduce((s,h)=>s+(h.amt||0),0);
@@ -2097,8 +2097,8 @@ function renderPortfolio(){
   return `<div class="tgt-band" style="left:${lo}%;width:${Math.max(hi-lo,0.6)}%"></div>`+
          `<div class="tgt-mid" style="left:${mid}%"></div>`;};
  document.getElementById('xrayHero').innerHTML=`<h3>thesis ↔ book 갭</h3>
-  <p>AI 인프라에 약 <b>80%</b>. 그런데 그 대부분이 <span class="hot">현재 병목(L3 메모리 ${wL('L3')}% · L7 전력 ${wL('L7')}% · L6 연결 ${wL('L6')}% · L2 연산 ${wL('L2')}% ≈ ${current.toFixed(0)}%)</span> — 전부 컨센서스가 흡수한 "선반영" 구간.
-  당신이 직접 "다음 병목"으로 지목한 <span class="grn">L4 패키징(${wL('L4')}%) · L8 grid 발전(${wL('L8')}%)</span>은 합쳐 ${next.toFixed(0)}%로 얇고, <b>AI 보안 트랙은 0%</b>(8레이어 하드웨어 스택 밖). <br>→ Alpha 관찰: 알파라고 본 곳에 자본이 안 가 있음. 아래 <b>적정 밴드·회전 표</b>가 "어디서 빼서 어디로"를 보여줌(게이트는 AND).</p>`;
+  <p>AI 인프라에 약 <b>80%</b>. 그리고 그 대부분이 <span class="hot">선반영 구간(L3 메모리 ${wL('L3')}% · L8 그리드 ${wL('L8')}% · L6 연결 ${wL('L6')}% · L2 연산 ${wL('L2')}% · L7 in-rack ${wL('L7')}% ≈ ${current.toFixed(0)}%)</span> — 한국 변압기·송전·발전(L8)까지 급등으로 합류, 전부 컨센서스가 흡수.
+  보유 기준 <span class="grn">미반영으로 남은 얇은 층은 L4 패키징(${wL('L4')}%)뿐</span>(다음 병목 ${next.toFixed(0)}%), <b>AI 보안 트랙은 0%</b>(8레이어 하드웨어 스택 밖). <br>→ Alpha 관찰: L8 그리드는 <b>테마상 다음 전선이나 보유 통로(한국 변압기·송전·발전)는 이미 가속~과열</b> — 테마 성숙도 ≠ 보유 위치. 아래 <b>적정 밴드·회전 표</b>가 "어디서 빼서 어디로"(게이트 AND).</p>`;
  document.getElementById('portBars').innerHTML=order.map(lid=>{
   const d=byL[lid];if(!d)return '';
   const L=LMAP[lid]||{id:lid,name:lid==='현금'?'현금':'기타(8레이어 외)',color:lid==='현금'?'#64748b':'#7048e8'};
@@ -2108,8 +2108,8 @@ function renderPortfolio(){
     <div class="pbar-amt">${d.amt}M</div></div>`;
  }).join('');
  document.getElementById('portClass').innerHTML=`
-  <div class="pc"><div class="pct" style="color:var(--mature)">${current.toFixed(0)}%</div><div class="lbl">현재 병목 (선반영 · L2·3·6·7)</div></div>
-  <div class="pc"><div class="pct" style="color:var(--dawn)">${next.toFixed(0)}%</div><div class="lbl">다음 병목 초입 (L4·L8)</div></div>
+  <div class="pc"><div class="pct" style="color:var(--mature)">${current.toFixed(0)}%</div><div class="lbl">선반영 (L2·3·6·7·8 — 그리드 합류)</div></div>
+  <div class="pc"><div class="pct" style="color:var(--dawn)">${next.toFixed(0)}%</div><div class="lbl">미반영 얇은 층 (L4 패키징)</div></div>
   <div class="pc"><div class="pct" style="color:var(--hot)">0%</div><div class="lbl">AI 보안 (별도 thesis · 미진입)</div></div>
   <div class="pc"><div class="pct" style="color:var(--dim)">${(cash+etc).toFixed(0)}%</div><div class="lbl">현금 ${cash.toFixed(0)}% + 기타 ${etc.toFixed(0)}%</div></div>`;
  const ord2=['L2','L3','L4','L6','L7','L8','기타','현금'];
@@ -2196,19 +2196,19 @@ const layerKey=d=>'L'+((String(d.layer).match(/L(\d)/)||[])[1]);
 const colorOf=d=>mode==='stage'?STAGE[d.stage]:(LAYER_HEX[layerKey(d)]||'#94a5b4');
 const D=[
  {n:'마벨',t:'MRVL',mkt:'US',layer:'L2/L6',w:6.1,aN:[1.5,7,9],aK:[1.3,5.5,5],stage:'가속',note:'NVLink Fusion·NVDA $2B 고유엣지. 보유 중 알파 최상. 5/27 실적 경과 — 신고가 $218 재돌파 실패·되돌림으로 단기 음, ASIC 런웨이는 유지.'},
- {n:'삼성전자',t:'005930',mkt:'KR',layer:'L3',w:3.4,aN:[1.5,4,7],aK:[0.6,1.5,2.5],stage:'성숙',note:'나스닥 대비 알파의 상당분은 "코스피>나스닥"+"삼성=코스피". 코스피 기준 고유 알파는 HBM4 점유율 회복분 정도로 축소.'},
- {n:'마이크론',t:'MU',mkt:'US',layer:'L3',w:10.1,aN:[0.5,5,3],aK:[0.3,3.5,-1],stage:'성숙',note:'6월말 실적·HBM 2026+ 타이트. 코스피(메모리 슈퍼사이클로 뜨거움) 기준 1Y는 지수 이하로.'},
- {n:'PLUS 글로벌HBM',t:'ETF',mkt:'US',layer:'L3',w:14.1,aN:[1,3,2],aK:[0.8,1.5,-2],stage:'성숙',note:'HBM 바스켓. 고유 알파 작음(테마 동행).'},
+ {n:'삼성전자',t:'005930',mkt:'KR',layer:'L3',w:3.5,aN:[1.5,4,7],aK:[0.6,1.5,2.5],stage:'성숙',note:'나스닥 대비 알파의 상당분은 "코스피>나스닥"+"삼성=코스피". 코스피 기준 고유 알파는 HBM4 점유율 회복분 정도로 축소.'},
+ {n:'마이크론',t:'MU',mkt:'US',layer:'L3',w:11.7,aN:[0.5,5,3],aK:[0.3,3.5,-1],stage:'성숙',note:'6월말 실적·HBM 2026+ 타이트. 코스피(메모리 슈퍼사이클로 뜨거움) 기준 1Y는 지수 이하로.'},
+ {n:'PLUS 글로벌HBM',t:'ETF',mkt:'US',layer:'L3',w:15.6,aN:[1,3,2],aK:[0.8,1.5,-2],stage:'성숙',note:'HBM 바스켓. 고유 알파 작음(테마 동행).'},
  {n:'KODEX 미AI반도체TOP3',t:'ETF',mkt:'US',layer:'L2',w:2.8,aN:[0.5,2,4],aK:[0.3,0.5,0],stage:'가속',note:'≈QQQ AI 코어 — 나스닥 기준 알파 미미, 코스피 기준 거의 0.'},
- {n:'KODEX AI반도체핵심장비',t:'소부장 L4',mkt:'KR',layer:'L4',w:2.4,aN:[-0.5,1,8],aK:[-0.7,-0.5,4],stage:'가속',note:'다음 병목(패키징) runway. 코스피 기준에선 바가 높아 1Y +4로 축소되나 여전히 양(+).'},
- {n:'루멘텀',t:'LITE',mkt:'US',layer:'L6',w:7.6,aN:[0.5,2,1],aK:[0.3,0.5,-3],stage:'성숙',note:'광 콘텐츠(800G→1.6T→CPO) 증가 추세+모멘텀 양호.'},
- {n:'KODEX 미AI광통신',t:'ETF',mkt:'US',layer:'L6',w:5.1,aN:[0,1,1],aK:[-0.2,-0.5,-3],stage:'가속',note:'광 테마 프록시. 고유 알파 미미.'},
- {n:'테슬라',t:'TSLA',mkt:'US',layer:'기타',w:6.9,aN:[0,0,3],aK:[-0.2,-1.5,-1],stage:'가속',note:'8레이어 밖. 순수 베타에 가까움. 로보틱스 옵션만 소폭.'},
- {n:'버티브',t:'VRT',mkt:'US',layer:'L7',w:4.2,aN:[-1.5,1,3],aK:[-1.7,-0.5,-1],stage:'성숙',note:'단기 음(−)은 현재 추세가 실제 약세라서(모멘텀, 회귀 아님). 백로그+109%·B2B 2.9x로 이익추세 양(+).'},
- {n:'SOL 미AI전력',t:'ETF',mkt:'US',layer:'L8',w:5.0,aN:[0,0,0],aK:[-0.2,-1.5,-4],stage:'가속',note:'구성종목 DC펜스 기준 ~82%가 발전·그리드(Oklo·Bloom·GE Vernova·Quanta·Constellation·Vistra 등) → L8. 단 Vertiv·Eaton 등 ~18%는 DC-내부 in-rack(L7). 고유 알파 없음 → 베타 수렴.'},
- {n:'KODEX AI전력핵심설비',t:'한국 ETF',mkt:'KR',layer:'L8',w:8.5,aN:[0,0,1],aK:[-0.2,-1,-2],stage:'과열',vol:true,note:'구성종목 DC펜스 기준 ~83%가 그리드측 변압기·송전·변전(효성·LS일렉·HD현대일렉·대한전선 등) → L8 귀속. DC-내부 배전 ~13%만 L7. 공급과잉 실(實)리스크·고변동.'},
- {n:'블룸에너지',t:'BE',mkt:'US',layer:'L8',w:2.8,aN:[1,1,2],aK:[0.8,-0.5,-2],stage:'과열',vol:true,note:'BYOP 온사이트 발전 수요 전방 증가. 단 고변동·내부자 매도 리스크.'},
- {n:'채권혼합(2종)',t:'방어',mkt:'KR',layer:'방어',w:13.1,aN:[-2,-4.5,-6],aK:[-2.2,-6,-9],stage:'방어',note:'음(−)알파는 설계상 정상 — 방어자산. 지수 추월이 목적 아님. 변동성 헤지.'},
+ {n:'KODEX AI반도체핵심장비',t:'소부장 L4',mkt:'KR',layer:'L4',w:2.3,aN:[-0.5,1,8],aK:[-0.7,-0.5,4],stage:'가속',note:'다음 병목(패키징) runway. 코스피 기준에선 바가 높아 1Y +4로 축소되나 여전히 양(+).'},
+ {n:'루멘텀',t:'LITE',mkt:'US',layer:'L6',w:6.6,aN:[0.5,2,1],aK:[0.3,0.5,-3],stage:'성숙',note:'광 콘텐츠(800G→1.6T→CPO) 증가 추세+모멘텀 양호.'},
+ {n:'KODEX 미AI광통신',t:'ETF',mkt:'US',layer:'L6',w:4.7,aN:[0,1,1],aK:[-0.2,-0.5,-3],stage:'가속',note:'광 테마 프록시. 고유 알파 미미.'},
+ {n:'테슬라',t:'TSLA',mkt:'US',layer:'기타',w:6.1,aN:[0,0,3],aK:[-0.2,-1.5,-1],stage:'가속',note:'8레이어 밖. 순수 베타에 가까움. 로보틱스 옵션만 소폭.'},
+ {n:'버티브',t:'VRT',mkt:'US',layer:'L7',w:3.9,aN:[-1.5,1,3],aK:[-1.7,-0.5,-1],stage:'성숙',note:'단기 음(−)은 현재 추세가 실제 약세라서(모멘텀, 회귀 아님). 백로그+109%·B2B 2.9x로 이익추세 양(+).'},
+ {n:'SOL 미AI전력',t:'ETF',mkt:'US',layer:'L8',w:4.7,aN:[0,0,0],aK:[-0.2,-1.5,-4],stage:'가속',note:'구성종목 DC펜스 기준 ~82%가 발전·그리드(Oklo·Bloom·GE Vernova·Quanta·Constellation·Vistra 등) → L8. 단 Vertiv·Eaton 등 ~18%는 DC-내부 in-rack(L7). 고유 알파 없음 → 베타 수렴.'},
+ {n:'KODEX AI전력핵심설비',t:'한국 ETF',mkt:'KR',layer:'L8',w:6.9,aN:[0,0,1],aK:[-0.2,-1,-2],stage:'과열',vol:true,note:'구성종목 DC펜스 기준 ~83%가 그리드측 변압기·송전·변전(효성·LS일렉·HD현대일렉·대한전선 등) → L8 귀속. DC-내부 배전 ~13%만 L7. 공급과잉 실(實)리스크·고변동.'},
+ {n:'블룸에너지',t:'BE',mkt:'US',layer:'L8',w:2.5,aN:[1,1,2],aK:[0.8,-0.5,-2],stage:'과열',vol:true,note:'BYOP 온사이트 발전 수요 전방 증가. 단 고변동·내부자 매도 리스크.'},
+ {n:'채권혼합(2종)',t:'방어',mkt:'KR',layer:'방어',w:13.2,aN:[-2,-4.5,-6],aK:[-2.2,-6,-9],stage:'방어',note:'음(−)알파는 설계상 정상 — 방어자산. 지수 추월이 목적 아님. 변동성 헤지.'},
  // ===== 미보유 후보군 (cand:true) — 비중 없음, 알파는 컨빅션 기반 추정 =====
  {n:'아스테라랩스',t:'ALAB',mkt:'US',layer:'L6',cand:true,aN:[1,5,7],aK:[0.8,3.5,3],stage:'가속',note:'PCIe/CXL 리타이머·커넥티비티. NVLink Fusion 생태계 수혜. 고밸류·고변동이 진입 리스크.'},
  {n:'AMD',t:'AMD',mkt:'US',layer:'L2',cand:true,aN:[0.5,3,5],aK:[0.3,1.5,1],stage:'가속',note:'MI 시리즈 추론 점유 확대 시 L2 2등 알파. NVDA 대비 카탈리스트 의존.'},
