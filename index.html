@@ -1852,7 +1852,7 @@ function renderThread(){
  const sa=document.getElementById('sub-adj');if(sa)sa.style.display=R.layerBased?'':'none';
  const rb=document.getElementById('riverBar');if(rb)rb.style.display=R.layerBased?'none':'';
  const flow=R.layerBased?THREAD:R.nodes;
- const W=1240,H=270,padX=72,top=48,bot=204,n=flow.length,gap=(W-padX*2)/(n-1);
+ const W=1240,H=288,padX=64,top=52,bot=204,n=flow.length,gap=(W-padX*2)/(n-1);
  const pts=flow.map((d,i)=>({x:padX+gap*i,y:top+(bot-top)*(1-d.pos)}));
  // 현재 전선(front): 강물의 머리를 곡선 위에 직접 표시
  const fkey=d=>R.layerBased?d.layer:d.code;
@@ -1864,17 +1864,17 @@ function renderThread(){
   fBand=`<rect x="${minX-26}" y="${top-2}" width="${maxX-minX+52}" height="${bot+10-(top-2)}" fill="var(--dawn)" opacity=".07" rx="11"/>`;
   fFlag=`<line x1="${midx}" y1="28" x2="${midx}" y2="${tgtY-13}" stroke="var(--dawn)" stroke-width="1.2" stroke-dasharray="3 3" opacity=".7"/>
    <path d="M ${midx-4} ${tgtY-17} L ${midx} ${tgtY-11} L ${midx+4} ${tgtY-17} Z" fill="var(--dawn)"/>
-   <g><rect x="${midx-52}" y="8" width="104" height="20" rx="10" fill="var(--dawn)"/>
-    <circle cx="${midx-34}" cy="18" r="3.2" fill="var(--onacc)"><animate attributeName="opacity" values="1;.25;1" dur="1.6s" repeatCount="indefinite"/></circle>
-    <text x="${midx+6}" y="22.5" text-anchor="middle" fill="var(--onacc)" font-family="var(--mono)" font-size="12.5" font-weight="700">현재 전선</text></g>`;
+   <g><rect x="${midx-62}" y="4" width="124" height="25" rx="12" fill="var(--dawn)"/>
+    <circle cx="${midx-42}" cy="16.5" r="3.6" fill="var(--onacc)"><animate attributeName="opacity" values="1;.25;1" dur="1.6s" repeatCount="indefinite"/></circle>
+    <text x="${midx+8}" y="22" text-anchor="middle" fill="var(--onacc)" font-family="var(--mono)" font-size="16" font-weight="700">현재 전선</text></g>`;
  }
  let path=`M ${pts[0].x} ${pts[0].y}`;
  for(let i=1;i<pts.length;i++){const p0=pts[i-1],p1=pts[i],cx=(p0.x+p1.x)/2;path+=` C ${cx} ${p0.y}, ${cx} ${p1.y}, ${p1.x} ${p1.y}`;}
  let s=`<defs><linearGradient id="river" x1="0" y1="0" x2="1" y2="0">
    <stop offset="0" stop-color="#b8860b"/><stop offset=".4" stop-color="#1c7ed6"/><stop offset=".72" stop-color="#0ca678"/><stop offset="1" stop-color="#7048e8"/></linearGradient></defs>`;
  s+=`<line x1="${padX}" y1="${bot+16}" x2="${W-padX}" y2="${bot+16}" stroke="var(--line)" stroke-dasharray="2 5"/>`;
- s+=`<text x="${padX}" y="${bot+50}" fill="var(--mature)" font-family="var(--mono)" font-size="13">← 성숙 / 선반영</text>`;
- s+=`<text x="${W-padX}" y="${bot+50}" fill="var(--dawn)" font-family="var(--mono)" font-size="13" text-anchor="end">초입 / 미반영 →</text>`;
+ s+=`<text x="${padX}" y="${bot+54}" fill="var(--mature)" font-family="var(--mono)" font-size="19">← 성숙 / 선반영</text>`;
+ s+=`<text x="${W-padX}" y="${bot+54}" fill="var(--dawn)" font-family="var(--mono)" font-size="19" text-anchor="end">초입 / 미반영 →</text>`;
  s+=fBand;
  s+=`<path d="${path}" fill="none" stroke="url(#river)" stroke-width="3" opacity=".55"/>`;
  flow.forEach((d,i)=>{const p=pts[i],col=STAGE_HEX[d.stage],cap=d.layer||d.code||'';
@@ -1882,9 +1882,9 @@ function renderThread(){
    <line x1="${p.x}" y1="${p.y}" x2="${p.x}" y2="${bot+10}" stroke="var(--line)" stroke-width="1"/>
    <circle class="rn-box" cx="${p.x}" cy="${p.y}" r="11" fill="${col}" opacity=".95"/>
    <circle cx="${p.x}" cy="${p.y}" r="11" fill="none" stroke="${col}" stroke-width="1" opacity=".4"><animate attributeName="r" values="11;19;11" dur="2.4s" repeatCount="indefinite"/><animate attributeName="opacity" values=".4;0;.4" dur="2.4s" repeatCount="indefinite"/></circle>
-   <text x="${p.x}" y="${p.y-32}" text-anchor="middle" fill="${col}" font-family="var(--mono)" font-size="13" font-weight="700">${cap}</text>
-   <text x="${p.x}" y="${p.y-15}" text-anchor="middle" fill="var(--txt)" font-family="var(--serif)" font-size="13" font-weight="600">${d.label}</text>
-   <text x="${p.x}" y="${bot+28}" text-anchor="middle" fill="var(--dim)" font-family="var(--mono)" font-size="13">${d.sub}</text></g>`;});
+   <text x="${p.x}" y="${p.y-40}" text-anchor="middle" fill="${col}" font-family="var(--mono)" font-size="19" font-weight="700">${cap}</text>
+   <text x="${p.x}" y="${p.y-18}" text-anchor="middle" fill="var(--txt)" font-family="var(--serif)" font-size="19" font-weight="600">${d.label}</text>
+   <text x="${p.x}" y="${bot+30}" text-anchor="middle" fill="var(--dim)" font-family="var(--mono)" font-size="18">${d.sub}</text></g>`;});
  s+=fFlag;
  svg.innerHTML=s;
  const note=document.getElementById('threadNote');if(note)note.innerHTML=R.note;
