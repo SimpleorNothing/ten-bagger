@@ -1075,10 +1075,10 @@ const RIVERS=[
   note:'하이퍼스케일러 임대(AWS·Azure·GCP)는 기본값으로 선반영. 강물의 머리는 <b style="color:var(--dawn)">뉴클라우드·주권 AI</b>를 지나 <b style="color:var(--nascent)">GPU 담보 파이낸싱</b>으로 — 컴퓨트의 소유·자본이 다음 축.',
   nodes:[
    {code:'HS',label:'하이퍼스케일러 임대',sub:'AWS·Azure·GCP',stage:'성숙',pos:.88,why:'클라우드 임대 = 기본값, 선반영',plays:'MSFT · AMZN · GOOGL (1차·컨센서스)'},
-   {code:'네오',label:'뉴클라우드',sub:'GPU 전용 클라우드',stage:'가속',pos:.62,why:'GPU 순수 노출 — 하이퍼스케일러 캐파 부족분 흡수. 자가 기가클러스터의 임대 전환도 가세',plays:'CoreWeave · Nebius · Crusoe · Lambda · xAI Colossus(SPCX·앤쓰로픽 임대)'},
+   {code:'네오',label:'뉴클라우드',sub:'GPU 전용 클라우드',stage:'가속',pos:.62,why:'GPU 순수 노출 — 하이퍼스케일러 캐파 부족분 흡수. 26.6월 상장 양극화: NBIS ATH·+600%(γ 잔존) vs CRWV ATH−42% 냉각',plays:'CoreWeave · Nebius · Crusoe · Lambda · xAI Colossus(SPCX·앤쓰로픽 임대)'},
    {code:'주권',label:'주권 AI',sub:'국가·소버린',stage:'초입',pos:.42,why:'국가별 자국 컴퓨트 구축 — NVDA가 지목한 신수요축(ACIE 소버린 +80%)',plays:'G42 · Humain(사우디) · Stargate UAE · 통신사 AI클라우드'},
    {code:'자본',label:'GPU 파이낸싱',sub:'SPV·GPU 담보',stage:'초입',pos:.28,why:'빌드아웃 = 자본 게임 — GPU 담보대출·SPV·프라이빗 크레딧',plays:'프라이빗 크레딧(Blackstone 등) · CoreWeave형 GPU 담보 채권 · SPV'},
-   {code:'중립',label:'중립 코로케이션',sub:'뉴트럴 호스트',stage:'초입',pos:.18,why:'뉴클라우드도 부지·전력은 코로케이션에 의존',plays:'DLR · EQIX · 뉴트럴 호스트'},
+   {code:'중립',label:'중립 코로케이션',sub:'뉴트럴 호스트',stage:'초입',pos:.18,why:'뉴클라우드도 부지·전력은 코로케이션에 의존. SoftBank가 DBRG를 $16/주에 인수($4B·H2 26 상폐) — 강물 3 내부 통합 진행',plays:'DLR · EQIX · DBRG(SoftBank 인수)'},
   ]},
  {n:4,title:'스케일→효율',frontCodes:['전용칩','엣지'],
   front:'현재 전선(front): 추론 전용 실리콘 · 엣지 추론',
@@ -1095,7 +1095,7 @@ const RIVERS=[
   note:'산업용 로봇·자율주행은 진행 중. 강물의 머리는 <b style="color:var(--dawn)">휴머노이드 액추에이터·엣지 추론</b>을 지나 <b style="color:var(--nascent)">휴머노이드 양산 통합</b>으로 — 피지컬 AI가 부품 수요로 환산되는 축.',
   nodes:[
    {code:'산업',label:'산업용 로봇·자동화',sub:'팩토리 오토메이션',stage:'성숙',pos:.88,why:'기존 산업 로봇 — 성숙 시장, AI는 점진 침투',plays:'FANUC · ABB 등 (성숙·선반영)'},
-   {code:'FSD',label:'자율주행·FSD',sub:'비전 실세계추론',stage:'가속',pos:.66,why:'비전 기반 실세계 추론 — 데이터 플라이휠이 해자',plays:'Tesla FSD (TSLA) · 자율주행 스택'},
+   {code:'FSD',label:'자율주행·FSD',sub:'비전 실세계추론',stage:'가속',pos:.66,why:'비전 기반 실세계 추론 — 데이터 플라이휠이 해자. TSLA 52주 고점권(로보택시) vs MBLY 52주 저점·Q1 비트&레이즈 = 리스트 내 공포눌림 쪽',plays:'Tesla FSD (TSLA) · 자율주행 스택'},
    {code:'엣지',label:'엣지 추론 실리콘',sub:'온디바이스 두뇌',stage:'가속',pos:.5,why:'피지컬 AI의 두뇌 = 온디바이스 추론 칩(저지연·저전력)',plays:'QCOM · 온디바이스 NPU'},
    {code:'액추',label:'휴머노이드 액추에이터',sub:'관절·정밀감속기',stage:'가속',pos:.34,why:'1대당 관절 다수 = 비선형 부품 수요(현재 전선) — 감속기·모터·센서. 상장 노출주(Harmonic Drive·에스피지) 신고가 급등으로 선반영 진행',plays:'Harmonic Drive · 정밀 감속기·액추에이터 (대부분 미상장)'},
    {code:'통합',label:'휴머노이드 통합',sub:'양산 전',stage:'태동',pos:.14,why:'Optimus·Figure 등 — 통합·양산은 아직 전(前)단계',plays:'TSLA Optimus · Figure · 1X (미상장 다수)'},
@@ -1135,16 +1135,16 @@ const RIVER_CHAINS={
   'HS':[
    {n:'하이퍼스케일러 capex',why:'클라우드 임대=기본값, 선반영',cos:[['MSFT','성숙'],['AMZN','성숙'],['GOOGL','성숙']],stage:'성숙'}],
   '네오':[
-   {n:'뉴클라우드(상장)',why:'하이퍼스케일러 캐파 부족분 흡수 — GPU 순수 노출',cos:[['CoreWeave CRWV','가속'],['Nebius NBIS','가속']],stage:'가속'},
+   {n:'뉴클라우드(상장)',why:'하이퍼스케일러 캐파 부족분 흡수 — GPU 순수 노출. 26.6월 양극화: NBIS ATH 부근·1년 +600%(저점 $34.7→~$242)·Q1 매출 +684%·Citi 목표가 +70% = 추정 리비전이 주가를 앞서 γ 잔존(가속 유지·단 FV +189% 프리미엄으로 S5 리셋 리스크). CRWV는 ATH($187) 대비 −42%·1년 보합·마진압박·다운그레이드·목표가(~$81) 주가 하회 = 식는 중(가속 하단·상대 공포쪽)',cos:[['Nebius NBIS·~$242·+600%·ATH','가속'],['CoreWeave CRWV·~$109·ATH−42% 냉각','가속']],stage:'가속'},
    {n:'뉴클라우드(비상장)',why:'IPO 파이프라인 — Lambda($59억, 26H2 추진설)',cos:[['Lambda·비상장','초입'],['Crusoe·비상장','초입'],['Nscale·비상장','초입']],stage:'초입'}],
   '주권':[
    {n:'주권 AI 칩 공급사',why:'걸프 $2조 — 빌더는 국부/비상장, 칩 공급사가 상장 수혜',cos:[['NVDA','가속'],['AMD(Humain 1GW JV)','가속']],stage:'가속',cand:'amd'},
-   {n:'시스템·네트워크·OEM',why:'소버린 빌드 = 서버·스위치·통신사 동반',cos:[['CSCO','가속'],['ORCL','가속'],['소프트뱅크 9984','초입'],['SMCI','초입']],stage:'초입',cand:'smci'}],
+   {n:'시스템·네트워크·OEM',why:'소버린 빌드 = 서버·스위치·통신사 동반. ORCL ~$226·1년 +36%·OCI/Stargate 재평가로 $345 고점서 조정 후 재랠리(가속). SoftBank 9984는 Stargate 스폰서이자 DBRG($4B) 인수 주체 — 강물 내 통합 축',cos:[['CSCO','가속'],['ORCL·~$226·OCI/Stargate 재랠리','가속'],['소프트뱅크 9984·DBRG 인수','초입'],['SMCI·52주 저점권','초입']],stage:'초입',cand:'smci'}],
   '자본':[
-   {n:'GPU 담보 사모대출',why:'빌드아웃=자본게임 — GPU 담보 SPV·프라이빗 크레딧 폭증(MS 추정 +$8천억)',cos:[['Blackstone BX','가속'],['Blue Owl OWL','가속'],['Apollo APO','가속']],stage:'가속'},
+   {n:'GPU 담보 사모대출',why:'빌드아웃=자본게임 — GPU 담보 SPV·프라이빗 크레딧 폭증(MS 추정 +$8천억). 26초 유동성 스캔들(Blue Owl 리테일 펀드 환매 제한 → 섹터 셀오프)로 주식은 공포 재가격: OWL ~$10 고점($21)−53%·BX ~$117 52주 저점($102)권. 동시에 딜플로우는 가속 — BX·APO가 Anthropic용 $36B 채무 주관·Blackstone Anthropic Series H($965B) 투자·Google JV $5B. 테마 가속 vs 주가 공포눌림 = 상대가치 매력 쪽(노드 stage 유지)',cos:[['Blackstone BX·52주 저점권','가속'],['Blue Owl OWL·고점−53% 스캔들','가속'],['Apollo APO·$36B Anthropic 주관','가속']],stage:'가속'},
    {n:'자산운용 대형',why:'AI 인프라 사모 신용에 자본 배분',cos:[['Ares ARES','초입'],['BlackRock BLK','성숙']],stage:'초입'}],
   '중립':[
-   {n:'데이터센터 REIT',why:'뉴클라우드도 부지·전력은 코로케이션 의존',cos:[['Equinix EQIX','성숙'],['Digital Realty DLR','성숙'],['DigitalBridge DBRG','가속']],stage:'성숙'},
+   {n:'데이터센터 REIT',why:'뉴클라우드도 부지·전력은 코로케이션 의존. DBRG는 SoftBank가 $16/주에 인수(25.12 발표·26.4 주총 승인·H2 26 상폐 예정) → 성장주 아닌 딜·$16 캡 머지아빗(상방 소멸). 공교롭게 주권 노드의 SoftBank가 중립 노드의 DBRG를 흡수 = 강물 3 내부 통합. EQIX·DLR은 신고가권 성숙 유지',cos:[['Equinix EQIX','성숙'],['Digital Realty DLR','성숙'],['DigitalBridge DBRG·SoftBank 인수 $16·H2 26 상폐','성숙']],stage:'성숙'},
    {n:'전력·냉각 인접',why:'코로케이션 = 전력/냉각 수요 동반',cos:[['Vertiv VRT','성숙',1]],stage:'가속',cand:'vrt'}]
  },
  4:{
@@ -1165,14 +1165,14 @@ const RIVER_CHAINS={
   '산업':[
    {n:'산업용 로봇·자동화',why:'기존 산업 로봇 — 성숙, AI는 점진 침투',cos:[['FANUC 6954','성숙'],['키엔스 6861','성숙'],['ABB','성숙'],['Rockwell ROK','성숙']],stage:'성숙'}],
   'FSD':[
-   {n:'자율주행 스택',why:'비전 기반 실세계 추론 — 데이터 플라이휠 해자',cos:[['Tesla TSLA','가속',1],['Mobileye MBLY','초입']],stage:'가속',cand:'tsla'},
-   {n:'라이다·센서(주의)',why:'센서 BOM 수혜 — 단 재무 취약 주의',cos:[['Luminar LAZR·리스크','초입'],['Ouster OUST','초입']],stage:'초입'}],
+   {n:'자율주행 스택',why:'비전 기반 실세계 추론 — 데이터 플라이휠 해자. TSLA ~$430·52주 고점권($273~$499)·1Y +19%·로보택시(텍사스 무인 승인)·5개월 조정 후 돌파(가속). MBLY는 ~$10·52주 저점권($8.3~$22.5)·1Y −38%지만 Q1 매출 +27%·EPS +50%·2026 가이던스 상향 = 리스트 내 유일한 공포눌림 beat&raise(초입의 진짜 모습)',cos:[['Tesla TSLA·~$430·52주 고점권','가속',1],['Mobileye MBLY·~$10·52주 저점·Q1 비트레이즈','초입']],stage:'가속',cand:'tsla'},
+   {n:'라이다·센서(주의)',why:'센서 BOM 수혜 — 단 재무 취약 주의. LAZR 시총 ~$0.14B로 사실상 붕괴(감자·적자). OUST ~$21·52주 $6.3~$41.7 변동성 큼·흑자 28년+ — 둘 다 진입 부적, 같은 AV축이면 MBLY가 더 싸고 펀더 우위(공포눌림 쪽)',cos:[['Luminar LAZR·시총 붕괴·리스크','초입'],['Ouster OUST·~$21·투기적','초입']],stage:'초입'}],
   '엣지':[
    {n:'엣지 추론 실리콘',why:'피지컬 AI의 두뇌 = 온디바이스 저지연·저전력 칩',cos:[['QCOM','가속'],['온디바이스 NPU(범주)','가속']],stage:'가속',cand:'qcom'}],
   '액추':[
-   {n:'정밀 감속기·하모닉',why:'1대당 관절 다수 = 비선형 부품 수요(현재 전선)',cos:[['Harmonic Drive 6324','가속'],['Nabtesco 6268','초입'],['THK 6481','초입']],stage:'초입'},
+   {n:'정밀 감속기·하모닉',why:'1대당 관절 다수 = 비선형 부품 수요(현재 전선). Harmonic Drive ~¥7,800·52주 ¥2,316~¥8,400(저점比 +237%)·P/E 457·평균목표가 −30% = 밸류 부담, 단 FY26 가이던스 +14%·수주 4년 최고·흑자 전환 = 펀더 동반(순수 내러티브 아닌 가속). Nabtesco·THK는 상승세 초입',cos:[['Harmonic Drive 6324·~¥7.8k·ATH권·P/E 457','가속'],['Nabtesco 6268·~¥5.5k','초입'],['THK 6481·~¥7.6k','초입']],stage:'초입'},
    {n:'모터·볼스크류·센서',why:'액추에이터 = 모터+감속기+센서 결합',cos:[['Nidec 6594','초입'],['Regal Rexnord RRX','초입']],stage:'초입'},
-   {n:'한국 감속기',why:'국내 휴머노이드 부품 노출',cos:[['에스피지 058610','과열'],['에스비비테크 389500','태동']],stage:'태동'}],
+   {n:'한국 감속기',why:'국내 휴머노이드 부품 노출. K-휴머노이드(현대차 아틀라스 CES 2026 시연·로보티즈·ACE K휴머노이드 ETF) 테마로 급등 선반영 — 에스피지 5Y +871% 과열, 에스비비테크 양산 전 태동. 양산 EPS 부재로 순수 내러티브(추격 금지)',cos:[['에스피지 058610·5Y +871%','과열'],['에스비비테크 389500·양산 전','태동']],stage:'태동'}],
   '통합':[
    {n:'휴머노이드 통합',why:'Optimus·Figure 등 — 통합·양산은 前단계, 거의 비상장',cos:[['Tesla Optimus TSLA','가속',1],['Figure·비상장','태동'],['1X·비상장','태동'],['Agility·비상장','태동']],stage:'태동',cand:'tsla'}]
  }
@@ -1749,6 +1749,34 @@ let SIGNAL_LOG=[
   items:[
    {tag:'L3·메모리',layer:'L3',col:'#0ca678',html:'<b>삼성전자 HBM4E 12단 세계 첫 샘플 출하(5/28, 자사 뉴스룸 — "20% 빠르다"·vs 하이닉스).</b> 캘린더 005930 7/31 행의 <b>HBM4 점유율 회복 비대칭 상방(y1 7)</b>에 해자 회복 데이터포인트 1점 점등. 동시에 6/24 MU 메모리 성숙 강등 게이트의 <b>선행 경쟁강도</b> 입력 — 차세대 메모리 선점 경합 가열. <b>추격/채점 변경 아님</b>(샘플≠양산·점유율, 7/31 실적이 진짜 게이트). 숫자 불변, 로그·캘린더 메타만 갱신.'},
    {tag:'L6·광 냉각',layer:'L6',col:'#e03131',html:'<b>광 묶음 동반 냉각 — AOI −9%·COHR −8%·LITE −4%(5/29) + LITE 임원 베어리시 시그널(5/30).</b> 5/22 이후 유지한 <b>L6 트림 앰버</b>(캘린더 LITE 8/12·내부자 매도) 정합. AI 랠리 피로의 단기 과열 되돌림이지 수요 훼손 아님 — 상대가치상 광은 합의 반영 쪽, 다음 자본 우선순위 아님 재확인. 숫자 불변.'}
+  ]},
+ {date:'2026-06-02', at:'2026-06-02T22:00+09:00', source:'강물3(임대→주권·뉴클라우드) 주가 현실 점검 — 단계 재평가 (시세·52주 위치·리비전 vs 강등규칙)',
+  srcs:[
+   {label:'CRWV·NBIS·ORCL·BX·OWL·DBRG 시세(Google/Robinhood/Investing/Morningstar 2026-06-01~02)'},
+   {label:'NBIS Q1 매출 +684%·가이던스 $3B·Citi 목표가 +70%'},
+   {label:'DBRG: SoftBank $16/주 인수(25.12 발표·26.4 주총 승인·H2 26 상폐)'},
+   {label:'Anthropic $36B 채무(BX·APO 주관)·Series H $965B(Blackstone)'}
+  ],
+  items:[
+   {tag:'네오·양극화',layer:null,col:'#1c7ed6',html:'<b>상장 뉴클라우드 둘이 정반대로 갈림 — 같은 가속이라도 성격이 다름.</b> NBIS ~$242로 ATH 부근·1년 +600%(저점 $34.7)·Q1 매출 +684%·가이던스 $3B 유지·Citi 목표가 +70% → 강등규칙상 추정 리비전이 주가를 앞서 <b>γ 잔존(가속 유지)</b>, 단 FV +189% 프리미엄·신고가 = S5 리셋 리스크. 반대로 CRWV ~$109는 ATH($187) 대비 −42%·1년 보합·마진압박·다운그레이드·평균목표가($81) 주가 하회 = <b>식는 중(가속 하단·상대 공포쪽)</b>. 바스켓 내 상대가치는 NBIS=비싼 쪽, CRWV=눌린 쪽.'},
+   {tag:'자본·공포눌림',layer:null,col:'#b8860b',html:'<b>사모신용 노드 = 테마 가속인데 주식은 공포 재가격(전형적 fear-suppressed).</b> 26초 Blue Owl 리테일 펀드 환매 제한 스캔들 → 섹터 셀오프: OWL ~$10 고점($21)−53%·Q1 미스·목표가 컷, BX ~$117 52주 저점($102)권(−38%). 동시에 딜플로우는 폭증 — BX·APO가 Anthropic용 <b>$36B 채무 주관</b>·Blackstone Anthropic <b>Series H $965B</b> 투자·Google JV $5B. 가격(공포)과 펀더(딜)의 괴리 = Ackman식 공포눌림 쪽, 노드 stage 유지·추격 아님·관찰.'},
+   {tag:'중립·통합',layer:null,col:'#7048e8',html:'<b>DBRG는 더 이상 진입 비히클 아님 — SoftBank가 $16/주에 인수(주총 승인 완료·H2 26 상폐).</b> 가속 라벨 → <b>$16 캡 머지아빗(상방 소멸)으로 성숙 강등</b>. 주목점: 주권 노드의 SoftBank(9984)가 중립 노드의 DBRG($4B)를 흡수 = <b>강물 3 내부 통합</b>(임대·코로케이션·소버린 자본이 한 주체로 수렴). EQIX·DLR은 신고가권 성숙 유지.'},
+   {tag:'주권·재랠리',layer:null,col:'#1c7ed6',html:'<b>ORCL ~$226·1년 +36%, $345 고점서 −30% 조정 후 OCI/Stargate(OpenAI 미시간 DC)로 5월말 +9~11% 재랠리 → 가속 유지.</b> 소버린·시스템 축의 1차 수혜. SMCI는 52주 저점권 디레이팅(초입 라벨=저평가 소외, 가속 아님) 그대로.'},
+   {tag:'상대가치',layer:null,col:'#b8860b',html:'<b>강물 3 결론 — 단계 대량 이동 없음(메가캡 HS·NVDA·EQIX·DLR 성숙 불변), 변화는 “성격”.</b> 비싼 쪽=NBIS(신고가 γ)·ORCL(재랠리), 눌린 쪽=CRWV(ATH−42%)·사모신용(스캔들 −38~53%). 자본 규율 함의: 강물 3에 신규 진입한다면 추격(NBIS·ORCL)이 아니라 <b>공포눌림(CRWV 베이스 재형성·사모신용 AND 게이트 통과 후)</b>. 단 강물 3은 보유 0%·관찰 영역, 매크로 게이트 미충족 → <b>채점/숫자 갱신만, 신규 매수 아님.</b>'}
+  ]},
+ {date:'2026-06-02', at:'2026-06-02T22:30+09:00', source:'강물5(디지털→피지컬) 밸류체인 시세 갱신 — CASCADE_DETAIL[5] 재점검 (5/31 physical 드라이버와 별개·세부 카드 종목)',
+  srcs:[
+   {label:'TSLA·MBLY·LAZR·OUST·Harmonic 6324·Nabtesco·THK·Nidec 시세(Investing/Yahoo/Morningstar 2026-05-29~06-01)'},
+   {label:'MBLY Q1: 매출 +27% YoY·EPS +50%·2026 가이던스 상향'},
+   {label:'Harmonic Drive 6324: FY26 가이던스 +14%·수주 4년 최고·P/E 457·평균목표가 −30%'},
+   {label:'K-휴머노이드: 현대차 아틀라스 CES 2026·로보티즈·ACE K휴머노이드 ETF'}
+  ],
+  items:[
+   {tag:'FSD·상대가치',layer:null,col:'#0ca678',html:'<b>강물5 상장 종목 중 진짜 공포눌림 초입 = MBLY.</b> ~$10·52주 저점권($8.3~$22.5)·1Y −38%인데 Q1 매출 +27%·EPS +50%·2026 가이던스 상향 = <b>가격은 눌리고 추정은 올라가는 beat&raise</b>(미반영 γ 열림). 반면 TSLA ~$430·52주 고점권·로보택시(텍사스 무인 승인) = 추격 쪽. 같은 AV축에서 비싼 쪽(TSLA)↔눌린 쪽(MBLY) 분리 명확. 단 MBLY 본격 인플렉션은 28년+ 로보택시 — 관찰.'},
+   {tag:'액추·가속캡션',layer:null,col:'#b8860b',html:'<b>휴머노이드 액추에이터 = 현재 전선이나 상장 노출주는 선반영 진행.</b> Harmonic Drive(6324) ~¥7,800·저점比 +237%·52주 고점권·P/E 457·평균목표가 −30%로 밸류 극단이나, FY26 가이던스 +14%·수주 4년 최고·흑자전환 = 순수 내러티브 아닌 <b>펀더 동반 가속</b>(과열 강등 보류, 단 추격가 아님). Nabtesco·THK·Nidec 상승세 초입 유지.'},
+   {tag:'라이다·리스크',layer:null,col:'#e03131',html:'<b>센서 노드는 진입 부적 — 재무 취약.</b> LAZR 시총 ~$0.14B로 사실상 붕괴(감자·적자), OUST ~$21·52주 $6.3~$41.7 고변동·흑자 28년+. 같은 센서 노출이면 펀더·밸류 우위인 MBLY가 합리. 센서 BOM 테제는 유효하나 깨끗한 비히클 부재(L4 CoWoS·강물3 사모신용과 같은 공백 구조).'},
+   {tag:'한국·과열',layer:null,col:'#e03131',html:'<b>K-휴머노이드 테마 급등 선반영 — 추격 금지.</b> 현대차 아틀라스 CES 2026 시연·로보티즈·ACE K휴머노이드 ETF로 부품주 일제 급등. 에스피지 5Y +871% 과열·에스비비테크 양산 전 태동 = <b>양산 EPS 부재 + 주가만 폭등</b>으로 강등규칙상 따라잡을 추정치 부재(순수 내러티브). 5/31 LG이노텍·삼현 과열 판정과 동일 결.'},
+   {tag:'결론·상대가치',layer:null,col:'#b8860b',html:'<b>강물5 결론 — 단계 대량 이동 없음(산업 FANUC·키엔스·ABB·ROK 성숙 / 통합 Optimus·Figure 태동 불변), 변화는 “성격”.</b> 추격 쪽=TSLA·Harmonic Drive·에스피지(고점·과열), 눌린 쪽=MBLY(저점 beat&raise). 자본 규율: 강물5에서 한 단위 진입한다면 추격 아닌 <b>MBLY 공포눌림</b>이 후보지만, 보유 0%·양산 전·매크로 게이트 미충족·인플렉션 28년+ → <b>채점/숫자 갱신만, 신규 매수 아님.</b>'}
   ]},
  /* ▼ 신규 시그널은 여기에 같은 형식으로 추가 (date·source·srcs[{label,url}] 출처 필수) */
 ];
