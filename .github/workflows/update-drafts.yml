@@ -1,0 +1,37 @@
+name: Derive signal drafts
+
+on:
+  schedule:
+    - cron: '45 21 * * *'   # 06:45 KST · 1일 1회 (update-news 8분 뒤)
+  workflow_dispatch: {}      # 수동 실행도 가능 (첫 실행 권장)
+
+permissions:
+  contents: write
+
+concurrency:
+  group: derive-drafts
+  cancel-in-progress: false
+
+jobs:
+  drafts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: claude/wizardly-rubin-SubA1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Derive signal drafts from news.json
+        run: node scripts/derive-drafts.mjs
+      - name: Commit signal_drafts.json if changed
+        run: |
+          if [ -n "$(git status --porcelain signal_drafts.json)" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add signal_drafts.json
+            git commit -m "chore: derive signal drafts from news"
+            git push origin HEAD:claude/wizardly-rubin-SubA1
+          else
+            echo "No draft change."
+          fi
