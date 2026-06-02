@@ -1197,8 +1197,8 @@ const CASCADES=[
   primary:{label:'1차주 (선반영)',ex:'NVDA(Blackwell/Vera Rubin) · AVGO · AMD · 커스텀 ASIC(MRVL<span class="heldstar">★</span>)'},
   nodes:[
    {n:'HBM',why:'가속기당 HBM 스택 수·단수↑',mult:'HBM3E → HBM4 용량·단수↑',cos:[['SK하이닉스','성숙'],['삼성','성숙',1],['마이크론','성숙',1]],stage:'성숙',cand:'mu'},
-   {n:'어드밴스드 패키징(CoWoS)',why:'대형 다이 + HBM 통합',mult:'CoWoS 캐파 = 진짜 supply 병목',cos:[['TSMC','가속'],['Ibiden','과열'],['ASE','가속']],stage:'초입',cand:null},
-   {n:'하이브리드 본딩 장비',why:'스택 단수↑·열제약 → 솔더범프를 Cu-Cu 직접접합으로 대체(CoWoS 후속 S커브)',mult:'본더 ASP 수배·서비스 매출↑ · 미반영 잔량(γ) 잔존',cos:[['Applied Materials','가속'],['ASMPT','가속']],stage:'초입',cand:null},
+   {n:'어드밴스드 패키징(CoWoS)',why:'대형 다이 + HBM 통합',mult:'CoWoS 캐파 = 진짜 supply 병목',cos:[['TSMC','가속'],['Amkor AMKR','가속'],['Ibiden','과열'],['ASE','가속']],stage:'초입',cand:null},
+   {n:'하이브리드 본딩 장비',why:'스택 단수↑·열제약 → 솔더범프를 Cu-Cu 직접접합으로 대체(CoWoS 후속 S커브)',mult:'본더 ASP 수배·서비스 매출↑ · 미반영 잔량(γ) 잔존 · 순수주 BESI는 유로넥스트(BESIY ADR만)·매매 통로 부재로 제외 → AMAT·ASMPT는 분산형이라 cand:null',cos:[['Applied Materials','가속'],['ASMPT','가속']],stage:'초입',cand:null},
    {n:'광 인터커넥트',why:'GPU-GPU scale-up 대역폭',mult:'800G → 1.6T → CPO 전환',cos:[['Lumentum','성숙',1],['Coherent','가속'],['MRVL','가속',1]],stage:'가속',cand:'lite'},
    {n:'전력·냉각',why:'랙 100kW+ 발열·전력밀도',mult:'액체냉각 표준화',cos:[['Vertiv','성숙',1],['Vicor','과열']],stage:'가속',cand:'vrt'},
   ]},
@@ -1216,6 +1216,7 @@ const CASCADES=[
   nodes:[
    {n:'EML / 외장 레이저(ELS)',why:'CPO는 외장 레이저 광원 필요',mult:'레이저 채널 수↑',cos:[['Coherent','가속'],['Lumentum','성숙',1]],stage:'가속',cand:'cohr'},
    {n:'광 DSP · 리타이머',why:'고속 신호 정합·등화',mult:'채널·속도↑ 콘텐츠↑',cos:[['MRVL','가속',1],['Astera','가속']],stage:'가속',cand:'mrvl'},
+   {n:'실리콘 포토닉스 파운드리(PIC fab)',why:'CPO·1.6T 트랜시버·광엔진 속 PIC은 어딘가서 fab돼야 함 — 광 밸류체인 최상류, 대부분 투자자가 아직 안 짚은 층',mult:'TSMC COUPE가 26년 CoWoS에 광 통합(Quantum-X 첫 채택·Rubin 확대). 단 순수+초입+깨끗한 단일통로 3박자 동시충족 없음: TSEM 순수도 최고나 1Y +605%·ATH근접(과열, 단 EPS 추정 상향 동반) / GFS Fotonix+AMF인수로 통로 있으나 SiPho 매출 일부(thesis 희석) → L4 CoWoS·800V와 동일 cand:null',cos:[['TSMC COUPE','가속'],['Tower TSEM','과열'],['GlobalFoundries GFS','가속']],stage:'초입',cand:null},
    {n:'광 커넥터 · 도파로',why:'CPO 패키지 광 결합 (FAU·글래스 도파로·정밀파이버)',mult:'잔량 소진 · 공개통로 성숙 선반영 (차트검증 26.5)',cos:[['Corning GLW','성숙'],['Fabrinet FN','성숙'],['Sumitomo 5802','성숙'],['Fujikura 5803','성숙'],['POET·순수주','태동']],stage:'초입',cand:null},
   ]},
  {key:'power',driver:'전력·냉각(in-rack)',layer:'L7',stage:'가속',
@@ -1600,10 +1601,11 @@ function gotoStack(layerId){
 
 /* ===== SIGNAL LOG (실적 콜 등 신규 시그널 → value-chain 반영, 누적 가능) ===== */
 let SIGNAL_LOG=[
- {date:'2026-06-01', at:'2026-06-01T23:00+09:00', source:'L4 밸류체인 세분화 — 하이브리드 본딩 노드 신설·CoWoP 테일리스크 등록',
-  srcs:[{label:'Applied Materials 9% 지분·D2W 하이브리드 본딩 공동개발 (SEC 8-K 2025)'},{label:'AMKR 1Y ~7x·52주 $79·P/E 40·적정가 $60<현재가 / ASX 6M +131% (Investing·finviz 2026)'},{label:'TSMC CoWoS 타이난 28억$ 증설·NVDA 2026 캐파 50%+ 선점 (Mordor·FinancialContent 2026)'},{label:'CoWoP 테일리스크 — NVDA 인터포저 직접 PCB 실장 ABF 우회 테스트 (NextFinancial 2026)'}],
+ {date:'2026-06-01', at:'2026-06-01T23:00+09:00', source:'L4 밸류체인 세분화 — 하이브리드 본딩 노드 신설 (BESI 워치는 6/02 매매불가로 철회·아래 정정)',
+  srcs:[{label:'BESI Q1\'26: 수주 +104% YoY(€269.7M)·매출 +28%·하이브리드 본딩 폭증 (Lightyear·StockAnalysis 2026)'},{label:'Applied Materials 9% 지분·D2W 하이브리드 본딩 공동개발 (SEC 8-K 2025)'},{label:'AMKR 1Y ~7x·52주 $79·P/E 40·적정가 $60<현재가 / ASX 6M +131% (Investing·finviz 2026)'},{label:'TSMC CoWoS 타이난 28억$ 증설·NVDA 2026 캐파 50%+ 선점 (Mordor·FinancialContent 2026)'},{label:'CoWoP 테일리스크 — NVDA 인터포저 직접 PCB 실장 ABF 우회 테스트 (NextFinancial 2026)'}],
   items:[
    {tag:'L4 노드 분해',layer:'L4',col:'#1c7ed6',html:'AP backend는 단일 노드가 아니라 <b>6개 율속 단계</b>(①CoWoS캐파 ②OSAT 2nd-source ③하이브리드 본딩 장비 ④검사·계측 ⑤테스트·프로브 ⑥ABF/글래스 기판). gpu 캐스케이드에 <b>③하이브리드 본딩 장비 노드 신설</b>(CoWoS 뒤). 나머지는 대부분 성숙~과열까지 선반영 = cand:null이 프레임 오류 아닌 실재 공백.'},
+   {tag:'정정·BESI 철회',layer:'L4',col:'#e03131',html:'<b>BESI(BE Semiconductor) 워치 철회(6/02) — 유로넥스트 상장·BESIY ADR뿐이라 매매 통로 부재.</b> 6/01엔 L4 유일 "수요폭발+미반영" 후보(5신호 8/10·하이브리드 본딩 30%+ 독점·Q1 수주 +104% YoY)로 등록했으나 거래 불가 확인 → 노드 cand:null 환원·C 엔트리 삭제. 하이브리드 본딩 순수 노출은 당분간 공백(AMAT·ASMPT 분산형). 상대가치 회전 후보로 부적격.'},
    {tag:'테일리스크 등록',layer:'L4',col:'#7048e8',html:'<b>CoWoP</b> — NVDA가 인터포저를 PCB에 직접 올려 ABF를 우회하는 방식 테스트 중, 26년 말 Grace Rubin 150 검증 시 ABF 생태계 재편 가능. 삼성전기(ABF)·일부 본딩 노드 kill 신호로 등록.'},
   ]},
  {date:'2026-06-01', at:'2026-06-01T15:00+09:00', source:'L6 포지셔닝 — APH는 LITE 대체 아닌 L6 내부 분산·저베타 보완재 (비중·타이밍 판단)',
