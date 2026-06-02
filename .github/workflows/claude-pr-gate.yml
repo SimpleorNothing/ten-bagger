@@ -1,0 +1,33 @@
+name: Claude PR Gate
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: [claude/wizardly-rubin-SubA1]
+permissions:
+  contents: write
+  pull-requests: write
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: index.html / JSON 무결성
+        run: |
+          SIZE=$(stat -c%s index.html); echo "index.html size: $SIZE"
+          [ "$SIZE" -gt 150000 ] || { echo "::error::index.html 비정상 축소($SIZE) - 잘림 의심"; exit 1; }
+          grep -q "const D=" index.html  || { echo "::error::const D= 앵커 소실"; exit 1; }
+          grep -q "HOLDINGS" index.html  || { echo "::error::HOLDINGS 앵커 소실"; exit 1; }
+          for f in alpha.json earnings.json judgment.json news.json prices.json; do
+            if [ -f "$f" ]; then python3 -c "import json;json.load(open('$f'))" \
+              || { echo "::error::$f JSON 깨짐"; exit 1; }; fi
+          done
+  auto-merge:
+    needs: validate
+    runs-on: ubuntu-latest
+    if: startsWith(github.event.pull_request.head.ref, 'claude/')
+    steps:
+      - run: gh pr merge "$PR" --squash --delete-branch
+        env:
+          GH_TOKEN: ${{ secrets.AUTO_MERGE_TOKEN }}
+          PR: ${{ github.event.pull_request.number }}
+          GH_REPO: ${{ github.repository }}
