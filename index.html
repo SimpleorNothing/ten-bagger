@@ -602,10 +602,10 @@ table.tk th.c{text-align:center}
       <div class="psub">독립 강물 5 (1~5) + 후보군 1 (6) · 후보를 누르면 아래 ①~④가 그 후보로 갱신</div>
       <div class="rcand-row">
       <div class="rcand active" data-r="0"><div class="num">1</div><div><div class="riv">학습<span class="ar">→</span>추론<span class="tier" style="background:#0ca67822;color:#0ca678">현재</span></div><div class="axis">워크로드 · A의 사슬 소유</div></div></div>
-      <div class="rcand" data-r="1" style="border-left-color:var(--line2)"><div class="num">2</div><div><div class="riv">데이터<span class="ar">→</span>RL·합성<span class="tier" style="background:#1c7ed622;color:#1c7ed6">A</span></div><div class="axis">모델 연료 · 입력</div></div></div>
+      <div class="rcand" data-r="1" style="border-left-color:var(--line2)"><div class="num">2</div><div><div class="riv">스케일<span class="ar">→</span>효율<span class="tier" style="background:#b8860b22;color:#b8860b">B</span></div><div class="axis">지능 단가 · Jevons</div></div></div>
       <div class="rcand" data-r="2" style="border-left-color:var(--line2)"><div class="num">3</div><div><div class="riv">임대<span class="ar">→</span>주권·뉴클라우드<span class="tier" style="background:#b8860b22;color:#b8860b">B</span></div><div class="axis">소유·자본 · 누가</div></div></div>
-      <div class="rcand" data-r="3" style="border-left-color:var(--line2)"><div class="num">4</div><div><div class="riv">스케일<span class="ar">→</span>효율<span class="tier" style="background:#b8860b22;color:#b8860b">B</span></div><div class="axis">지능 단가 · Jevons</div></div></div>
-      <div class="rcand" data-r="4" style="border-left-color:var(--line2)"><div class="num">5</div><div><div class="riv">디지털<span class="ar">→</span>피지컬<span class="tier" style="background:#7048e822;color:#7048e8">C</span></div><div class="axis">로봇 · 액추에이터</div></div></div>
+      <div class="rcand" data-r="3" style="border-left-color:var(--line2)"><div class="num">4</div><div><div class="riv">디지털<span class="ar">→</span>피지컬<span class="tier" style="background:#7048e822;color:#7048e8">C</span></div><div class="axis">로봇 · 액추에이터</div></div></div>
+      <div class="rcand" data-r="4" style="border-left-color:var(--line2)"><div class="num">5</div><div><div class="riv">데이터<span class="ar">→</span>RL·합성<span class="tier" style="background:#1c7ed622;color:#1c7ed6">A</span></div><div class="axis">모델 연료 · 입력</div></div></div>
       <div class="rcand rcand-merged" data-r="5" style="border-left-color:var(--faint);border-style:dashed"><div class="num">6</div><div><div class="riv" style="margin-bottom:5px">후보군<span class="tier" style="background:#868e9622;color:#868e96">경계</span></div>
         <div class="m-line"><span class="riv">자유배포<span class="ar">→</span>거버넌스<span class="tier" style="background:#b8860b22;color:#b8860b">B</span></span></div>
         <div class="m-line"><span class="riv" style="color:var(--dim)">중앙<span class="ar" style="color:var(--faint)">→</span>엣지·분산<span class="tier" style="background:#868e9622;color:#868e96">경계</span></span></div>
@@ -1069,16 +1069,15 @@ const RIVERS=[
  {n:1,title:'학습→추론',layerBased:true,frontCodes:['L4','L8'],
   front:'현재 전선(front): L4 패키징 backend · L8 grid 전력',
   note:'컴퓨트·메모리(<b>L1–L3</b>)는 이미 가격에 반영(성숙). 강물의 머리는 <b style="color:var(--dawn)">L4 패키징 · L6 광 · L8 발전</b>을 지나 <b style="color:var(--nascent)">피지컬 AI</b>로 향하는 중.'},
- {n:2,title:'데이터→RL·합성',frontCodes:['RL','합성'],
-  front:'현재 전선(front): RL 환경·검증기 · 합성 데이터',
-  note:'공개 웹 데이터(피크 데이터)·휴먼 라벨링은 이미 반영(성숙). 강물의 머리는 <b style="color:var(--dawn)">RL 환경·합성 데이터</b>를 지나 <b style="color:var(--nascent)">독점 데이터 해자</b>로 향하는 중.',
+ {n:2,title:'스케일→효율',frontCodes:['전용칩','엣지'],
+  front:'현재 전선(front): 추론 전용 실리콘 · 엣지 추론',
+  note:'파라미터 스케일링·추론 최적화는 진행 중. 강물의 머리는 <b style="color:var(--dawn)">추론 전용 실리콘·엣지</b>로 — 지능 단가↓가 <b style="color:var(--nascent)">Jevons 수요폭증</b>으로 환류(→ 강물 1).',
   nodes:[
-   {code:'웹',label:'공개 웹 데이터',sub:'크롤·코퍼스',stage:'성숙',pos:.88,why:'사전학습 토큰 고갈 — 공개 웹은 소진(피크 데이터)',plays:'Common Crawl·공개 코퍼스 (상품화·무알파)'},
-   {code:'라벨',label:'휴먼 라벨·RLHF',sub:'선호·instruct',stage:'성숙',pos:.66,why:'instruct·선호 데이터는 상품화 — 휴먼 라벨 1차 공장은 성숙·차별화 약화',plays:'Surge AI · Mercor · Turing (Scale AI는 Meta 종속으로 중립화)'},
-   {code:'전문',label:'전문가 데이터',sub:'PhD·코드·도메인',stage:'가속',pos:.5,why:'프론티어는 희소 전문 데이터로 이동 (수학·코드·의료)',plays:'Mercor · Surge · 도메인 전문가 마켓'},
-   {code:'RL',label:'RL 환경·검증기',sub:'에이전트 환경',stage:'초입',pos:.32,why:'에이전트 RL의 다음 병목 = 검증가능 환경·리워드 (현재 전선)',plays:'환경·verifier 스타트업 (Prime Intellect · Mechanize 등·비상장)'},
-   {code:'합성',label:'합성 데이터',sub:'모델→데이터',stage:'가속',pos:.22,why:'모델이 데이터를 생성 — RL 환경과 결합한 자기개선 루프 본격화, 검증이 관건',plays:'프론티어랩 내재화 · 합성데이터 툴링'},
-   {code:'독점',label:'독점·라이선스',sub:'비공개 코퍼스',stage:'태동',pos:.12,why:'독점 데이터 해자 — 출판·금융·헬스 라이선싱',plays:'콘텐츠 보유사 (Reddit·뉴스·출판 라이선싱)'},
+   {code:'스케일',label:'프론티어 스케일링',sub:'더 큰 모델',stage:'성숙',pos:.86,why:'파라미터·컴퓨트 스케일링 = 합의, 선반영',plays:'NVDA · 프론티어 랩 (1차)'},
+   {code:'최적',label:'추론 최적화',sub:'양자화·디코딩',stage:'가속',pos:.62,why:'같은 칩에서 토큰당 비용↓ (speculative decoding·양자화·KV캐시)',plays:'추론 서빙·컴파일러 (vLLM 생태계·비상장)'},
+   {code:'전용칩',label:'추론 전용 실리콘',sub:'LPU·웨이퍼스케일',stage:'초입',pos:.42,why:'추론 단가의 다음 곡선 = 전용 가속기 (토큰/와트). 단 NVDA가 Groq LPU 라이선스+acquihire로 SRAM 추론 위협 내재화',plays:'Cerebras(CBRS·상장) · SambaNova · 커스텀 ASIC (Groq는 NVDA 내재화)'},
+   {code:'엣지',label:'엣지·온디바이스',sub:'폰·PC·글래스',stage:'초입',pos:.28,why:'추론이 단말로 — 단가↓·지연↓, mix shift (삼성 글래스 올가을·Gemini Omni 온디바이스)',plays:'QCOM · AAPL · 삼성 글래스 · 온디바이스 NPU'},
+   {code:'수요',label:'Jevons 수요폭증',sub:'토큰 소비↑',stage:'가속',pos:.18,why:'단가↓ → 총 토큰 소비 폭증 → 컴퓨트 수요 환류(역설)',plays:'전 스택 되먹임 — 강물 1로 회귀'},
   ]},
  {n:3,title:'임대→주권·뉴클라우드',frontCodes:['주권','자본'],
   front:'현재 전선(front): 주권 AI · GPU 파이낸싱',
@@ -1090,17 +1089,7 @@ const RIVERS=[
    {code:'자본',label:'GPU 파이낸싱',sub:'SPV·GPU 담보',stage:'초입',pos:.28,why:'빌드아웃 = 자본 게임 — GPU 담보대출·SPV·프라이빗 크레딧',plays:'프라이빗 크레딧(Blackstone 등) · CoreWeave형 GPU 담보 채권 · SPV'},
    {code:'중립',label:'중립 코로케이션',sub:'뉴트럴 호스트',stage:'초입',pos:.18,why:'뉴클라우드도 부지·전력은 코로케이션에 의존. SoftBank가 DBRG를 $16/주에 인수($4B·H2 26 상폐) — 강물 3 내부 통합 진행',plays:'DLR · EQIX · DBRG(SoftBank 인수)'},
   ]},
- {n:4,title:'스케일→효율',frontCodes:['전용칩','엣지'],
-  front:'현재 전선(front): 추론 전용 실리콘 · 엣지 추론',
-  note:'파라미터 스케일링·추론 최적화는 진행 중. 강물의 머리는 <b style="color:var(--dawn)">추론 전용 실리콘·엣지</b>로 — 지능 단가↓가 <b style="color:var(--nascent)">Jevons 수요폭증</b>으로 환류(→ 강물 1).',
-  nodes:[
-   {code:'스케일',label:'프론티어 스케일링',sub:'더 큰 모델',stage:'성숙',pos:.86,why:'파라미터·컴퓨트 스케일링 = 합의, 선반영',plays:'NVDA · 프론티어 랩 (1차)'},
-   {code:'최적',label:'추론 최적화',sub:'양자화·디코딩',stage:'가속',pos:.62,why:'같은 칩에서 토큰당 비용↓ (speculative decoding·양자화·KV캐시)',plays:'추론 서빙·컴파일러 (vLLM 생태계·비상장)'},
-   {code:'전용칩',label:'추론 전용 실리콘',sub:'LPU·웨이퍼스케일',stage:'초입',pos:.42,why:'추론 단가의 다음 곡선 = 전용 가속기 (토큰/와트). 단 NVDA가 Groq LPU 라이선스+acquihire로 SRAM 추론 위협 내재화',plays:'Cerebras(CBRS·상장) · SambaNova · 커스텀 ASIC (Groq는 NVDA 내재화)'},
-   {code:'엣지',label:'엣지·온디바이스',sub:'폰·PC·글래스',stage:'초입',pos:.28,why:'추론이 단말로 — 단가↓·지연↓, mix shift (삼성 글래스 올가을·Gemini Omni 온디바이스)',plays:'QCOM · AAPL · 삼성 글래스 · 온디바이스 NPU'},
-   {code:'수요',label:'Jevons 수요폭증',sub:'토큰 소비↑',stage:'가속',pos:.18,why:'단가↓ → 총 토큰 소비 폭증 → 컴퓨트 수요 환류(역설)',plays:'전 스택 되먹임 — 강물 1로 회귀'},
-  ]},
- {n:5,title:'디지털→피지컬',consensus:'C',frontCodes:['액추'],
+ {n:4,title:'디지털→피지컬',consensus:'C',frontCodes:['액추'],
   front:'현재 전선(front): 휴머노이드 액추에이터',
   note:'산업용 로봇·자율주행은 진행 중. 강물의 머리는 <b style="color:var(--dawn)">휴머노이드 액추에이터·엣지 추론</b>을 지나 <b style="color:var(--nascent)">휴머노이드 양산 통합</b>으로 — 피지컬 AI가 부품 수요로 환산되는 축.',
   nodes:[
@@ -1109,6 +1098,17 @@ const RIVERS=[
    {code:'엣지',label:'엣지 추론 실리콘',sub:'온디바이스 두뇌',stage:'가속',pos:.5,why:'피지컬 AI의 두뇌 = 온디바이스 추론 칩(저지연·저전력)',plays:'QCOM · 온디바이스 NPU'},
    {code:'액추',label:'휴머노이드 액추에이터',sub:'관절·정밀감속기',stage:'가속',pos:.34,why:'1대당 관절 다수 = 비선형 부품 수요(현재 전선) — 감속기·모터·센서. 상장 노출주(Harmonic Drive·에스피지) 신고가 급등으로 선반영 진행',plays:'Harmonic Drive · 정밀 감속기·액추에이터 (대부분 미상장)'},
    {code:'통합',label:'휴머노이드 통합',sub:'양산 전',stage:'태동',pos:.14,why:'Optimus·Figure 등 — 통합·양산은 아직 전(前)단계',plays:'TSLA Optimus · Figure · 1X (미상장 다수)'},
+  ]},
+ {n:5,title:'데이터→RL·합성',frontCodes:['RL','합성'],
+  front:'현재 전선(front): RL 환경·검증기 · 합성 데이터',
+  note:'공개 웹 데이터(피크 데이터)·휴먼 라벨링은 이미 반영(성숙). 강물의 머리는 <b style="color:var(--dawn)">RL 환경·합성 데이터</b>를 지나 <b style="color:var(--nascent)">독점 데이터 해자</b>로 향하는 중.',
+  nodes:[
+   {code:'웹',label:'공개 웹 데이터',sub:'크롤·코퍼스',stage:'성숙',pos:.88,why:'사전학습 토큰 고갈 — 공개 웹은 소진(피크 데이터)',plays:'Common Crawl·공개 코퍼스 (상품화·무알파)'},
+   {code:'라벨',label:'휴먼 라벨·RLHF',sub:'선호·instruct',stage:'성숙',pos:.66,why:'instruct·선호 데이터는 상품화 — 휴먼 라벨 1차 공장은 성숙·차별화 약화',plays:'Surge AI · Mercor · Turing (Scale AI는 Meta 종속으로 중립화)'},
+   {code:'전문',label:'전문가 데이터',sub:'PhD·코드·도메인',stage:'가속',pos:.5,why:'프론티어는 희소 전문 데이터로 이동 (수학·코드·의료)',plays:'Mercor · Surge · 도메인 전문가 마켓'},
+   {code:'RL',label:'RL 환경·검증기',sub:'에이전트 환경',stage:'초입',pos:.32,why:'에이전트 RL의 다음 병목 = 검증가능 환경·리워드 (현재 전선)',plays:'환경·verifier 스타트업 (Prime Intellect · Mechanize 등·비상장)'},
+   {code:'합성',label:'합성 데이터',sub:'모델→데이터',stage:'가속',pos:.22,why:'모델이 데이터를 생성 — RL 환경과 결합한 자기개선 루프 본격화, 검증이 관건',plays:'프론티어랩 내재화 · 합성데이터 툴링'},
+   {code:'독점',label:'독점·라이선스',sub:'비공개 코퍼스',stage:'태동',pos:.12,why:'독점 데이터 해자 — 출판·금융·헬스 라이선싱',plays:'콘텐츠 보유사 (Reddit·뉴스·출판 라이선싱)'},
   ]},
  {n:6,title:'후보군',consensus:'경계',kind:'cand',frontCodes:[],
   front:'보조·경계 — 종목 미매핑(관찰만)',
@@ -1123,23 +1123,18 @@ const RIVERS=[
    cand는 탐색기 STATE에 존재하는 종목만 연결(드로어). 비상장은 명시. */
 const RIVER_CHAINS={
  2:{
-  '웹':[
-   {n:'웹 데이터 인프라',why:'크롤·코퍼스 저장·정제는 상품화 — 무알파(투자 표면 0)',cos:[['AWS(간접)','성숙'],['Cloudflare NET(간접)','성숙']],stage:'성숙'}],
-  '라벨':[
-   {n:'RLHF 라벨 플랫폼',why:'instruct·선호 데이터 1차 공장 — 성숙·차별화 약화',cos:[['Surge·비상장','성숙'],['Mercor·비상장','성숙'],['Turing·비상장','성숙']],stage:'성숙'},
-   {n:'상장 우회 노출',why:'Scale AI 49% 투자로 Meta가 라벨링 간접 노출. Appen(ASX)은 상장이나 구조적 함정',cos:[['META(간접)','성숙'],['Appen ASX·함정','성숙']],stage:'성숙'}],
-  '전문':[
-   {n:'전문가 데이터 마켓',why:'병목이 희소 전문(수학·코드·의료)으로 이동 — 전문가 시급 ×(의료 $250~450·C레벨 $500~1,000)',cos:[['Mercor·비상장','가속'],['Surge·비상장','가속'],['Turing·비상장','가속']],stage:'가속'},
-   {n:'수직 도메인 데이터 보유사',why:'의료영상·코드·금융 등 수직 데이터 해자',cos:'(수직 SaaS·헬스 데이터 · 비상장)',stage:'가속'}],
-  'RL':[
-   {n:'RL 환경·검증기',why:'에이전트 RL의 다음 병목 = 검증가능 환경·리워드. Anthropic 향후 1년 $10억+ 논의',cos:[['Prime Intellect·비상장','초입'],['Mechanize·비상장','초입'],['HUD·비상장','초입']],stage:'초입'},
-   {n:'순수 상장주 부재 → 간접',why:'환경·verifier는 비상장만 — 프론티어랩 자본지출로만 우회 노출',cos:'(상장 순수주 없음)',stage:'태동'}],
-  '합성':[
-   {n:'합성데이터·시뮬레이션',why:'실데이터 고갈 → 모델이 데이터 생성. Gretel은 NVDA 인수(25.3)',cos:[['NVDA(Omniverse)','성숙'],['Unity U','가속'],['SNPS','성숙'],['Mostly AI·비상장','가속']],stage:'가속'},
-   {n:'자기개선 루프',why:'RL환경+합성 결합 자기개선 — 검증이 관건',cos:'(프론티어랩 내재화)',stage:'초입'}],
-  '독점':[
-   {n:'콘텐츠 라이선싱 수혜주',why:'학습데이터 라이선스가 신규 매출축 — 소셜·뉴스·이미지·UGC',cos:[['Reddit RDDT','가속'],['News Corp NWSA','성숙'],['Getty GETY','초입'],['Palantir PLTR·인접','과열']],stage:'가속'},
-   {n:'분쟁 리스크',why:'NYT는 라이선스 미체결·소송 중 — 불확실',cos:[['NYT·소송','태동']],stage:'태동'}]
+  '스케일':[
+   {n:'프론티어 컴퓨트',why:'파라미터·컴퓨트 스케일링=합의, 선반영',cos:[['NVDA','성숙'],['프론티어 랩·비상장','성숙']],stage:'성숙'}],
+  '최적':[
+   {n:'추론 서빙·컴파일러',why:'토큰 단가 압박 → 서빙·양자화·speculative decoding 수요',cos:[['Fireworks·비상장','가속'],['Together·비상장','가속'],['Baseten·비상장','가속']],stage:'가속'},
+   {n:'순수 상장주 부재',why:'vLLM 오픈소스 — 상장 순수주 없음, 추론칩으로 우회',cos:'(상장 순수주 없음)',stage:'초입'}],
+  '전용칩':[
+   {n:'추론 전용 실리콘',why:'토큰/와트 다음 곡선 — 웨이퍼스케일·커스텀 ASIC',cos:[['Cerebras CBRS','초입'],['Broadcom AVGO','가속'],['Marvell MRVL','가속',1]],stage:'초입',cand:'cbrs'},
+   {n:'Groq 변수',why:'NVDA가 25.12 $200억 라이선스+인재영입(인수 아님, FTC 조사) — SRAM 추론 내재화',cos:[['Groq·비상장·NVDA 라이선스','태동']],stage:'태동'}],
+  '엣지':[
+   {n:'온디바이스 NPU',why:'추론이 단말로 — 폰·PC·글래스 mix shift',cos:[['QCOM','가속'],['Apple AAPL','성숙'],['ARM','가속'],['삼성 005930','성숙',1]],stage:'초입',cand:'qcom'}],
+  '수요':[
+   {n:'Jevons 환류 → 강물 1',why:'단가↓ → 총 토큰 소비 폭증 → 컴퓨트 수요 환류(역설)',cos:'전 스택 되먹임 (→ 8레이어)',stage:'가속'}]
  },
  3:{
   'HS':[
@@ -1158,20 +1153,6 @@ const RIVER_CHAINS={
    {n:'전력·냉각 인접',why:'코로케이션 = 전력/냉각 수요 동반',cos:[['Vertiv VRT','성숙',1]],stage:'가속',cand:'vrt'}]
  },
  4:{
-  '스케일':[
-   {n:'프론티어 컴퓨트',why:'파라미터·컴퓨트 스케일링=합의, 선반영',cos:[['NVDA','성숙'],['프론티어 랩·비상장','성숙']],stage:'성숙'}],
-  '최적':[
-   {n:'추론 서빙·컴파일러',why:'토큰 단가 압박 → 서빙·양자화·speculative decoding 수요',cos:[['Fireworks·비상장','가속'],['Together·비상장','가속'],['Baseten·비상장','가속']],stage:'가속'},
-   {n:'순수 상장주 부재',why:'vLLM 오픈소스 — 상장 순수주 없음, 추론칩으로 우회',cos:'(상장 순수주 없음)',stage:'초입'}],
-  '전용칩':[
-   {n:'추론 전용 실리콘',why:'토큰/와트 다음 곡선 — 웨이퍼스케일·커스텀 ASIC',cos:[['Cerebras CBRS','초입'],['Broadcom AVGO','가속'],['Marvell MRVL','가속',1]],stage:'초입',cand:'cbrs'},
-   {n:'Groq 변수',why:'NVDA가 25.12 $200억 라이선스+인재영입(인수 아님, FTC 조사) — SRAM 추론 내재화',cos:[['Groq·비상장·NVDA 라이선스','태동']],stage:'태동'}],
-  '엣지':[
-   {n:'온디바이스 NPU',why:'추론이 단말로 — 폰·PC·글래스 mix shift',cos:[['QCOM','가속'],['Apple AAPL','성숙'],['ARM','가속'],['삼성 005930','성숙',1]],stage:'초입',cand:'qcom'}],
-  '수요':[
-   {n:'Jevons 환류 → 강물 1',why:'단가↓ → 총 토큰 소비 폭증 → 컴퓨트 수요 환류(역설)',cos:'전 스택 되먹임 (→ 8레이어)',stage:'가속'}]
- },
- 5:{
   '산업':[
    {n:'산업용 로봇·자동화',why:'기존 산업 로봇 — 성숙, AI는 점진 침투',cos:[['FANUC 6954','성숙'],['키엔스 6861','성숙'],['ABB','성숙'],['Rockwell ROK','성숙']],stage:'성숙'}],
   'FSD':[
@@ -1185,7 +1166,26 @@ const RIVER_CHAINS={
    {n:'한국 감속기',why:'국내 휴머노이드 부품 노출. K-휴머노이드(현대차 아틀라스 CES 2026 시연·로보티즈·ACE K휴머노이드 ETF) 테마로 급등 선반영 — 에스피지 5Y +871% 과열, 에스비비테크 양산 전 태동. 양산 EPS 부재로 순수 내러티브(추격 금지)',cos:[['에스피지 058610·5Y +871%','과열'],['에스비비테크 389500·양산 전','태동']],stage:'태동'}],
   '통합':[
    {n:'휴머노이드 통합',why:'Optimus·Figure 등 — 통합·양산은 前단계, 거의 비상장',cos:[['Tesla Optimus TSLA','가속',1],['Figure·비상장','태동'],['1X·비상장','태동'],['Agility·비상장','태동']],stage:'태동',cand:'tsla'}]
- }
+ },
+ 5:{
+  '웹':[
+   {n:'웹 데이터 인프라',why:'크롤·코퍼스 저장·정제는 상품화 — 무알파(투자 표면 0)',cos:[['AWS(간접)','성숙'],['Cloudflare NET(간접)','성숙']],stage:'성숙'}],
+  '라벨':[
+   {n:'RLHF 라벨 플랫폼',why:'instruct·선호 데이터 1차 공장 — 성숙·차별화 약화',cos:[['Surge·비상장','성숙'],['Mercor·비상장','성숙'],['Turing·비상장','성숙']],stage:'성숙'},
+   {n:'상장 우회 노출',why:'Scale AI 49% 투자로 Meta가 라벨링 간접 노출. Appen(ASX)은 상장이나 구조적 함정',cos:[['META(간접)','성숙'],['Appen ASX·함정','성숙']],stage:'성숙'}],
+  '전문':[
+   {n:'전문가 데이터 마켓',why:'병목이 희소 전문(수학·코드·의료)으로 이동 — 전문가 시급 ×(의료 $250~450·C레벨 $500~1,000)',cos:[['Mercor·비상장','가속'],['Surge·비상장','가속'],['Turing·비상장','가속']],stage:'가속'},
+   {n:'수직 도메인 데이터 보유사',why:'의료영상·코드·금융 등 수직 데이터 해자',cos:'(수직 SaaS·헬스 데이터 · 비상장)',stage:'가속'}],
+  'RL':[
+   {n:'RL 환경·검증기',why:'에이전트 RL의 다음 병목 = 검증가능 환경·리워드. Anthropic 향후 1년 $10억+ 논의',cos:[['Prime Intellect·비상장','초입'],['Mechanize·비상장','초입'],['HUD·비상장','초입']],stage:'초입'},
+   {n:'순수 상장주 부재 → 간접',why:'환경·verifier는 비상장만 — 프론티어랩 자본지출로만 우회 노출',cos:'(상장 순수주 없음)',stage:'태동'}],
+  '합성':[
+   {n:'합성데이터·시뮬레이션',why:'실데이터 고갈 → 모델이 데이터 생성. Gretel은 NVDA 인수(25.3)',cos:[['NVDA(Omniverse)','성숙'],['Unity U','가속'],['SNPS','성숙'],['Mostly AI·비상장','가속']],stage:'가속'},
+   {n:'자기개선 루프',why:'RL환경+합성 결합 자기개선 — 검증이 관건',cos:'(프론티어랩 내재화)',stage:'초입'}],
+  '독점':[
+   {n:'콘텐츠 라이선싱 수혜주',why:'학습데이터 라이선스가 신규 매출축 — 소셜·뉴스·이미지·UGC',cos:[['Reddit RDDT','가속'],['News Corp NWSA','성숙'],['Getty GETY','초입'],['Palantir PLTR·인접','과열']],stage:'가속'},
+   {n:'분쟁 리스크',why:'NYT는 라이선스 미체결·소송 중 — 불확실',cos:[['NYT·소송','태동']],stage:'태동'}]
+ },
 };
 /* 파생 캐스케이드: 드라이버 ×10 → 함께 폭증하는 파생 가치사슬. cand=탐색기 후보 id
    [MECE 분류 규칙] 노드는 '수요 트리거가 어디서 왔나'가 아니라 '자산의 물리적 위치(전기 계량기 기준)'로 단 하나의 레이어에만 귀속한다.
@@ -1744,10 +1744,10 @@ let SIGNAL_LOG=[
    {tag:'L1·IPO유동성',layer:'L1',col:'#7048e8',html:'<b>SPCX(SpaceX+xAI) IPO 일정 확정 — 6/4 로드쇼·6/11 가격·6/12 나스닥, $75B 조달·$1.75T(사상 최대).</b> $75B 기계적 유동성 흡수 = 기존 대형주 단기 역풍. OpenAI·Anthropic은 9월 이후 → 6~9월 IPO 흡입 파이프라인. WATCH의 SPCX 후보승격 트리거 6/12 도래. 메모: 리밸은 SPCX 상장 전 — 데드라인 다음 주.'},
    {tag:'상대가치',layer:'L4',col:'#b8860b',html:'<b>메모리(+14%)↔L4 소부장(−0%) 스프레드 한 주 더 확대.</b> 바스켓 내 비중 이전 근거 누적. 실행 경로 = 메모리 트림(DC연금 우선·세금 드래그 없음)→L4. 단 전력은 게이트로 막힘, L4 backend/어드밴스드 패키징 비중 검증 미완 게이팅 → 회전 1순위 관찰 유지, 숫자 불변.'},
   ]},
- {date:'2026-05-31', at:'2026-05-31T17:00+09:00', source:'강물5(피지컬 AI) 주가 현실 점검 — 단계 라벨 vs 차트 괴리',
+ {date:'2026-05-31', at:'2026-05-31T17:00+09:00', source:'강물4(피지컬 AI) 주가 현실 점검 — 단계 라벨 vs 차트 괴리',
   srcs:[{label:'Investing·StockAnalysis·Morningstar 시세(2026-05)'}],
   items:[
-   {tag:'재판정·강등',layer:'기타',col:'#e03131',html:'<b>피지컬 AI 캐스케이드 전체 태동 라벨이 차트와 괴리 → 주가 기준 재판정.</b> 5/22 메모리·전력에 적용한 "이미 크게 오른 종목은 초입이 아니다" 원칙을 강물5에 적용. <b>진짜 여명(초입)은 오픈엣지·텔레칩스 둘뿐</b>(고점 대비 한참 아래·흑자전환 회복 초기). 나머지는 선반영 — LG이노텍(+924% 1Y)·에스피지(5Y +871%)·삼현(매출 −7%인데 주가 2배+) <b>과열</b>, 고영·Harmonic Drive·테라다인·화낙 <b>가속</b>. 노드 stage(NPU 초입 / 센서·감속기 과열 / 학습데이터 가속) + 강물5 액추 노드 초입→가속 반영. <b>종목 추가 아님, 추격 금지 재확인.</b>'},
+   {tag:'재판정·강등',layer:'기타',col:'#e03131',html:'<b>피지컬 AI 캐스케이드 전체 태동 라벨이 차트와 괴리 → 주가 기준 재판정.</b> 5/22 메모리·전력에 적용한 "이미 크게 오른 종목은 초입이 아니다" 원칙을 강물4에 적용. <b>진짜 여명(초입)은 오픈엣지·텔레칩스 둘뿐</b>(고점 대비 한참 아래·흑자전환 회복 초기). 나머지는 선반영 — LG이노텍(+924% 1Y)·에스피지(5Y +871%)·삼현(매출 −7%인데 주가 2배+) <b>과열</b>, 고영·Harmonic Drive·테라다인·화낙 <b>가속</b>. 노드 stage(NPU 초입 / 센서·감속기 과열 / 학습데이터 가속) + 강물4 액추 노드 초입→가속 반영. <b>종목 추가 아님, 추격 금지 재확인.</b>'},
   ]},
  {date:'2026-05-31', at:'2026-05-31T12:00+09:00', source:'Nvidia·MS·Arm "A new era of PC" — N1X Arm Windows SoC 공개 예고 (Computex 6/1 Jensen 키노트 · MS Build) · 데일리 인테이크 (헤드라인 기반, 미출시)',
   srcs:[
@@ -1756,10 +1756,10 @@ let SIGNAL_LOG=[
    {label:"Tom's Guide — N1X/N1 정리", url:'https://www.tomsguide.com/computing/cpus/nvidia-n1x-cpu-everything-we-know-so-far'}
   ],
   items:[
-   {tag:'분류·엣지추론',layer:null,col:'#7048e8',html:'<b>DC 이벤트 아님 — 엣지·온디바이스 추론(L2 경계) 이벤트.</b> N1X = MediaTek Arm CPU + Blackwell GPU(RTX 5070급·6,144 CUDA·NVFP4) + 128GB 통합메모리, GB10 슈퍼칩의 노트북 변종. The Thread "추론 클라우드→엣지" 꼬리 + 강물5 "로봇두뇌 NPU·온디바이스 AI" 노드 접점. AMD Ryzen AI(5/20)·구글 I/O 삼성글래스(5/23)에 이은 <b>온디바이스 추론 수요 4번째 확증</b>.'},
-   {tag:'QCOM·해자훼손',layer:'L2',col:'#e03131',html:'<b>최강 상대가치 후보 QCOM에 양날.</b> 수요가설(S4 mix-shift)은 보강되나, N1X가 Windows-on-Arm에서 <b>퀄컴 독점을 깨고</b> GPU 우위로 Snapdragon X 직격 → 엣지 리더십 레그 컨빅션 하향. 단 진짜 미반영 촉매(H2 26 DC 추론칩)는 불변. <b>채점 변경 없음·관찰 로그</b> — QCOM "다음 자본" 후보 강화 안 됨. 깨끗한 강물5 진입은 경쟁격화 CPU층 아닌 component bottleneck(비전·액추에이터·NPU 소형주) 재확인.'},
+   {tag:'분류·엣지추론',layer:null,col:'#7048e8',html:'<b>DC 이벤트 아님 — 엣지·온디바이스 추론(L2 경계) 이벤트.</b> N1X = MediaTek Arm CPU + Blackwell GPU(RTX 5070급·6,144 CUDA·NVFP4) + 128GB 통합메모리, GB10 슈퍼칩의 노트북 변종. The Thread "추론 클라우드→엣지" 꼬리 + 강물4 "로봇두뇌 NPU·온디바이스 AI" 노드 접점. AMD Ryzen AI(5/20)·구글 I/O 삼성글래스(5/23)에 이은 <b>온디바이스 추론 수요 4번째 확증</b>.'},
+   {tag:'QCOM·해자훼손',layer:'L2',col:'#e03131',html:'<b>최강 상대가치 후보 QCOM에 양날.</b> 수요가설(S4 mix-shift)은 보강되나, N1X가 Windows-on-Arm에서 <b>퀄컴 독점을 깨고</b> GPU 우위로 Snapdragon X 직격 → 엣지 리더십 레그 컨빅션 하향. 단 진짜 미반영 촉매(H2 26 DC 추론칩)는 불변. <b>채점 변경 없음·관찰 로그</b> — QCOM "다음 자본" 후보 강화 안 됨. 깨끗한 강물4 진입은 경쟁격화 CPU층 아닌 component bottleneck(비전·액추에이터·NPU 소형주) 재확인.'},
    {tag:'시장독법',layer:null,col:'#b8860b',html:'<b>당일 MSFT +5.45% vs NVDA −1.45%</b> = 시장은 엔비디아 매출 아닌 <b>MS 플랫폼 스토리</b>(Windows AI PC·로컬 에이전트 OS)로 읽음. 저마진 PC SoC는 엔비디아엔 TAM 확장·마진 희석 (Jensen "ASIC=niche" 결). 실제 노트북 출하는 26말~27초로 매출 임팩트 지연.'},
-   {tag:'보유바스켓·2차',layer:null,col:'#b8860b',html:'<b>"클라우드 없는 로컬 AI 에이전트" = 추론 locus 부분 분산(DC→엣지).</b> 강물4(Jevons) 렌즈로 역사적 net-positive (DeepSeek 25.1과 동류). 매도신호 아님. L3 메모리(35.7%)·L7 전력(18.3%) 집중을 "추론=100% DC" 세계에 과앵커링 말라는 리마인더. 단 128GB LPDDR5X 온디바이스 = 엣지 메모리 콘텐츠↑ 양면. <b>액션 없음</b>, 5/28 권고(현금 유지·과열 트림) 정합.'}
+   {tag:'보유바스켓·2차',layer:null,col:'#b8860b',html:'<b>"클라우드 없는 로컬 AI 에이전트" = 추론 locus 부분 분산(DC→엣지).</b> 강물2(Jevons) 렌즈로 역사적 net-positive (DeepSeek 25.1과 동류). 매도신호 아님. L3 메모리(35.7%)·L7 전력(18.3%) 집중을 "추론=100% DC" 세계에 과앵커링 말라는 리마인더. 단 128GB LPDDR5X 온디바이스 = 엣지 메모리 콘텐츠↑ 양면. <b>액션 없음</b>, 5/28 권고(현금 유지·과열 트림) 정합.'}
   ]},
  {date:'2026-06-01', at:'2026-06-01T21:00+09:00', source:'삼성 HBM4E 12단 세계 첫 샘플 출하 + 광(L6) 동반 냉각 — 데일리 인테이크 (헤드라인/뉴스룸 기반)',
   srcs:[
@@ -1785,7 +1785,7 @@ let SIGNAL_LOG=[
    {tag:'주권·재랠리',layer:null,col:'#1c7ed6',html:'<b>ORCL ~$226·1년 +36%, $345 고점서 −30% 조정 후 OCI/Stargate(OpenAI 미시간 DC)로 5월말 +9~11% 재랠리 → 가속 유지.</b> 소버린·시스템 축의 1차 수혜. SMCI는 52주 저점권 디레이팅(초입 라벨=저평가 소외, 가속 아님) 그대로.'},
    {tag:'상대가치',layer:null,col:'#b8860b',html:'<b>강물 3 결론 — 단계 대량 이동 없음(메가캡 HS·NVDA·EQIX·DLR 성숙 불변), 변화는 “성격”.</b> 비싼 쪽=NBIS(신고가 γ)·ORCL(재랠리), 눌린 쪽=CRWV(ATH−42%)·사모신용(스캔들 −38~53%). 자본 규율 함의: 강물 3에 신규 진입한다면 추격(NBIS·ORCL)이 아니라 <b>공포눌림(CRWV 베이스 재형성·사모신용 AND 게이트 통과 후)</b>. 단 강물 3은 보유 0%·관찰 영역, 매크로 게이트 미충족 → <b>채점/숫자 갱신만, 신규 매수 아님.</b>'}
   ]},
- {date:'2026-06-02', at:'2026-06-02T22:30+09:00', source:'강물5(디지털→피지컬) 밸류체인 시세 갱신 — CASCADE_DETAIL[5] 재점검 (5/31 physical 드라이버와 별개·세부 카드 종목)',
+ {date:'2026-06-02', at:'2026-06-02T22:30+09:00', source:'강물4(디지털→피지컬) 밸류체인 시세 갱신 — CASCADE_DETAIL[4] 재점검 (5/31 physical 드라이버와 별개·세부 카드 종목)',
   srcs:[
    {label:'TSLA·MBLY·LAZR·OUST·Harmonic 6324·Nabtesco·THK·Nidec 시세(Investing/Yahoo/Morningstar 2026-05-29~06-01)'},
    {label:'MBLY Q1: 매출 +27% YoY·EPS +50%·2026 가이던스 상향'},
@@ -1793,11 +1793,11 @@ let SIGNAL_LOG=[
    {label:'K-휴머노이드: 현대차 아틀라스 CES 2026·로보티즈·ACE K휴머노이드 ETF'}
   ],
   items:[
-   {tag:'FSD·상대가치',layer:null,col:'#0ca678',html:'<b>강물5 상장 종목 중 진짜 공포눌림 초입 = MBLY.</b> ~$10·52주 저점권($8.3~$22.5)·1Y −38%인데 Q1 매출 +27%·EPS +50%·2026 가이던스 상향 = <b>가격은 눌리고 추정은 올라가는 beat&raise</b>(미반영 γ 열림). 반면 TSLA ~$430·52주 고점권·로보택시(텍사스 무인 승인) = 추격 쪽. 같은 AV축에서 비싼 쪽(TSLA)↔눌린 쪽(MBLY) 분리 명확. 단 MBLY 본격 인플렉션은 28년+ 로보택시 — 관찰.'},
+   {tag:'FSD·상대가치',layer:null,col:'#0ca678',html:'<b>강물4 상장 종목 중 진짜 공포눌림 초입 = MBLY.</b> ~$10·52주 저점권($8.3~$22.5)·1Y −38%인데 Q1 매출 +27%·EPS +50%·2026 가이던스 상향 = <b>가격은 눌리고 추정은 올라가는 beat&raise</b>(미반영 γ 열림). 반면 TSLA ~$430·52주 고점권·로보택시(텍사스 무인 승인) = 추격 쪽. 같은 AV축에서 비싼 쪽(TSLA)↔눌린 쪽(MBLY) 분리 명확. 단 MBLY 본격 인플렉션은 28년+ 로보택시 — 관찰.'},
    {tag:'액추·가속캡션',layer:null,col:'#b8860b',html:'<b>휴머노이드 액추에이터 = 현재 전선이나 상장 노출주는 선반영 진행.</b> Harmonic Drive(6324) ~¥7,800·저점比 +237%·52주 고점권·P/E 457·평균목표가 −30%로 밸류 극단이나, FY26 가이던스 +14%·수주 4년 최고·흑자전환 = 순수 내러티브 아닌 <b>펀더 동반 가속</b>(과열 강등 보류, 단 추격가 아님). Nabtesco·THK·Nidec 상승세 초입 유지.'},
    {tag:'라이다·리스크',layer:null,col:'#e03131',html:'<b>센서 노드는 진입 부적 — 재무 취약.</b> LAZR 시총 ~$0.14B로 사실상 붕괴(감자·적자), OUST ~$21·52주 $6.3~$41.7 고변동·흑자 28년+. 같은 센서 노출이면 펀더·밸류 우위인 MBLY가 합리. 센서 BOM 테제는 유효하나 깨끗한 비히클 부재(L4 CoWoS·강물3 사모신용과 같은 공백 구조).'},
    {tag:'한국·과열',layer:null,col:'#e03131',html:'<b>K-휴머노이드 테마 급등 선반영 — 추격 금지.</b> 현대차 아틀라스 CES 2026 시연·로보티즈·ACE K휴머노이드 ETF로 부품주 일제 급등. 에스피지 5Y +871% 과열·에스비비테크 양산 전 태동 = <b>양산 EPS 부재 + 주가만 폭등</b>으로 강등규칙상 따라잡을 추정치 부재(순수 내러티브). 5/31 LG이노텍·삼현 과열 판정과 동일 결.'},
-   {tag:'결론·상대가치',layer:null,col:'#b8860b',html:'<b>강물5 결론 — 단계 대량 이동 없음(산업 FANUC·키엔스·ABB·ROK 성숙 / 통합 Optimus·Figure 태동 불변), 변화는 “성격”.</b> 추격 쪽=TSLA·Harmonic Drive·에스피지(고점·과열), 눌린 쪽=MBLY(저점 beat&raise). 자본 규율: 강물5에서 한 단위 진입한다면 추격 아닌 <b>MBLY 공포눌림</b>이 후보지만, 보유 0%·양산 전·매크로 게이트 미충족·인플렉션 28년+ → <b>채점/숫자 갱신만, 신규 매수 아님.</b>'}
+   {tag:'결론·상대가치',layer:null,col:'#b8860b',html:'<b>강물4 결론 — 단계 대량 이동 없음(산업 FANUC·키엔스·ABB·ROK 성숙 / 통합 Optimus·Figure 태동 불변), 변화는 “성격”.</b> 추격 쪽=TSLA·Harmonic Drive·에스피지(고점·과열), 눌린 쪽=MBLY(저점 beat&raise). 자본 규율: 강물4에서 한 단위 진입한다면 추격 아닌 <b>MBLY 공포눌림</b>이 후보지만, 보유 0%·양산 전·매크로 게이트 미충족·인플렉션 28년+ → <b>채점/숫자 갱신만, 신규 매수 아님.</b>'}
   ]},
  {date:'2026-06-04', at:'2026-06-04T22:30+09:00', source:'L4 2·3차 가치사슬 확장 발굴 — 테크윙·ASMPT 등록 + 한미 kill 플래그 + 테스트·유리기판 판정',
   srcs:[{label:'테크윙: 큐브프로버 3사 현황·1Q26 OP +444% QoQ·26E OP +503% (신한 4/28·알파증류소 2026.5)'},{label:'테크윙 시세: 52주 26,050~74,000·컨센 목표 85,000 (한경마켓·Investing 2026)'},{label:'ASMPT: SK하이닉스 HBM4 TC본더 ~절반·~100대 추가 발주 예정·TCB $0.76B→$1.6B (TrendForce 25.12·BambooWorks 26.3)'},{label:'TCB 채널체크: BESI·ASMPT가 한미·한화 잠식, 한미 점유 20~30%로 하락 전망 (LumenAlpha 25.7)'},{label:'FORM $125·ATH $159·내부자매도 $6.1M / Advantest 1Y +275%·목표가 +18% 상회 (GuruFocus·TradingView·Investing 26.6)'},{label:'TPRO 1Q26 사상최대·가이던스 상향·고점比 −40%대, 밀라노 상장 (Investing·StockAnalysis 26.5)'},{label:'유리기판: SKC 상업화 3년 지연·플랜B 공식화·26E OP −800억 (SBS Biz 26.5.29·SIGLAB)'}],
@@ -2417,7 +2417,7 @@ const D=[
  {n:'AMD',t:'AMD',mkt:'US',layer:'L2',cand:true,aN:[-0.5,2,4],aK:[-0.7,0.5,0],stage:'가속',vol:true,note:'L2 2등(EPYC+MI). DC매출+57%·Meta 6GW·OpenAI로 펀더 가속·EPS 상향(고점추정 $665>현재가). 단 현재 $510(52주 $111~527)·1개월+53%·평균목표가($472) 하회=가격이 추정 추월속도 앞섬 → 가속(연장)·추격금지. 단기 wk 음. γ는 27년 out-year에 잔존.'},
  {n:'램버스',t:'RMBS',mkt:'US',layer:'L3',cand:true,aN:[0,2,3],aK:[-0.2,0.5,-1],stage:'가속',vol:true,note:'메모리 인터페이스 IP·로열티(HBM4/DDR5 레버리지). 현재 ~$147(52주 신고가권)·평균목표가 부근 도달·내부자 순매도. ⚑26.1Q~ 美 연방 대배심 소환 대응 중(거버넌스 오버행) → 가속(연장)·관찰. 소환 격화 시 1순위 삭제 후보.'},
  {n:'컨스텔레이션',t:'CEG',mkt:'US',layer:'L8',cand:true,aN:[0.5,2,5],aK:[0.3,0.5,1],stage:'가속',note:'원전 무탄소 기저전력·DC PPA 직결. 현재가($266·52주 $243~413 저점권)가 평균목표가($368) 대비 +38% 여력+Q1 비트(EPS+5.7%·매출+26% 서프라이즈)=강등규칙①상 γ 활짝. 11M 증자로 −7.7% 눌림은 일시. 후보군 中 유일한 공포억눌림 재진입 셋업. 8/6 실적 게이트.'},
- {n:'퀄컴',t:'QCOM',mkt:'US',layer:'L2',cand:true,aN:[-1,-1,1],aK:[-1.2,-2.5,-3],stage:'성숙',note:'엣지 추론·온디바이스 AI(강물5 앵커였음). ⚑현재가 $229가 평균목표가($176) 22% 상회+52주 고점권+6/1 −8.8%(NVDA RTX Spark 온디바이스 경쟁)으로 "least extended" 전제 소멸·DC 추론 카탈리스트 위협. 성숙·진입근거 약화 → 관찰. P/E 19로 싸나 차별화 옵션 훼손.'},
+ {n:'퀄컴',t:'QCOM',mkt:'US',layer:'L2',cand:true,aN:[-1,-1,1],aK:[-1.2,-2.5,-3],stage:'성숙',note:'엣지 추론·온디바이스 AI(강물4 앵커였음). ⚑현재가 $229가 평균목표가($176) 22% 상회+52주 고점권+6/1 −8.8%(NVDA RTX Spark 온디바이스 경쟁)으로 "least extended" 전제 소멸·DC 추론 카탈리스트 위협. 성숙·진입근거 약화 → 관찰. P/E 19로 싸나 차별화 옵션 훼손.'},
  {n:'암페놀',t:'APH',mkt:'US',layer:'L6',cand:true,aN:[0.5,3,3],aK:[0.3,1.5,-0.5],stage:'가속',note:'고속 인터커넥트(카퍼+광+전력)·LITE 보완재(분산·베타1.39). IT datacom 41%·AI 견인, Q1 record orders +78%·B2B 1.24·가이던스 상향(B&R 신선). 주가 ATH比 −21% 눌림+추정 상향=γ 열림. 현재 ~$146(52주 $87~167·ATH−12~21%)·평균목표가 $182(+22~37% 여력)·EPS 11명 상향 = γ 열림 재확인. $135~148 저항 미돌파(S5 미점등) → 정찰만, 본매수 7/29 게이트.'},
 ];
 const CASH={NASDAQ:[-0.3,-2.5],KOSPI:[-0.5,-4]};
