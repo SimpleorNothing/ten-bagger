@@ -1208,7 +1208,7 @@ const CASCADES=[
   nodes:[
    {n:'HBM',why:'가속기당 HBM 스택 수·단수↑',mult:'HBM3E → HBM4 용량·단수↑',cos:[['SK하이닉스','성숙'],['삼성','성숙',1],['마이크론','성숙',1]],stage:'성숙',cand:'mu'},
    {n:'어드밴스드 패키징(CoWoS)',why:'대형 다이 + HBM 통합',mult:'CoWoS 캐파 = 진짜 supply 병목',cos:[['TSMC','가속'],['Amkor AMKR','가속'],['Ibiden','과열'],['ASE','가속']],stage:'초입',cand:null},
-   {n:'하이브리드 본딩 장비',why:'스택 단수↑·열제약 → 솔더범프를 Cu-Cu 직접접합으로 대체(CoWoS 후속 S커브)',mult:'본더 ASP 수배·서비스 매출↑ · 미반영 잔량(γ) 잔존 · 순수주 BESI는 유로넥스트(BESIY ADR만)·매매 통로 부재로 제외 → AMAT·ASMPT는 분산형이라 cand:null',cos:[['Applied Materials','가속'],['ASMPT','가속']],stage:'초입',cand:null},
+   {n:'하이브리드 본딩 장비',why:'스택 단수↑·열제약 → 솔더범프를 Cu-Cu 직접접합으로 대체(CoWoS 후속 S커브)',mult:'본더 ASP 수배·서비스 매출↑ · 미반영 잔량(γ) 잔존 · 순수주 BESI는 유로넥스트(BESIY ADR만)·매매 통로 부재로 제외 → AMAT은 분산형 / 접근가능 차선으로 ASMPT(홍콩) C등록(26.6.4, 분산형 캐비앗)',cos:[['Applied Materials','가속'],['ASMPT','가속']],stage:'초입',cand:'asmpt'},
    {n:'광 인터커넥트',why:'GPU-GPU scale-up 대역폭',mult:'800G → 1.6T → CPO 전환',cos:[['Lumentum','성숙',1],['Coherent','가속'],['MRVL','가속',1]],stage:'가속',cand:'lite'},
    {n:'전력·냉각',why:'랙 100kW+ 발열·전력밀도',mult:'액체냉각 표준화',cos:[['Vertiv','성숙',1],['Vicor','과열']],stage:'가속',cand:'vrt'},
   ]},
@@ -1217,8 +1217,8 @@ const CASCADES=[
   primary:{label:'1차주 (확인된 사실 · 선반영)',ex:'마이크론<span class="heldstar">★</span>(+102%) · 삼성<span class="heldstar">★</span>(+53%) · SK하이닉스'},
   nodes:[
    {n:'메모리 인터페이스칩',why:'서버 DDR5·MRDIMM 콘텐츠 증가',mult:'MRCD + MDB ×수배',cos:[['Rambus','가속'],['Montage','가속'],['Renesas','성숙']],stage:'가속',cand:'rmbs'},
-   {n:'HBM 후공정·TSV·본딩',why:'스택 단수↑ = TSV·하이브리드 본딩↑',mult:'본딩 장비·소재 콘텐츠↑',cos:[['후공정 장비(KODEX)','가속',1],['한미반도체','가속']],stage:'가속',cand:'kodexeq'},
-   {n:'메모리 테스트',why:'고단 HBM·MRDIMM 검사 난도↑',mult:'번인·모듈 테스터↑',cos:[['ISC','가속'],['Teradyne','가속']],stage:'가속',cand:null},
+   {n:'HBM 후공정·TSV·본딩',why:'스택 단수↑ = TSV·하이브리드 본딩↑',mult:'본딩 장비·소재 콘텐츠↑',cos:[['후공정 장비(KODEX)','가속',1],['ASMPT','가속'],['한미반도체','가속']],stage:'가속',cand:'kodexeq'},
+   {n:'메모리 테스트',why:'고단 HBM·MRDIMM 검사 난도↑ + 다이레벨(큐브프로버) 검사 표준화',mult:'번인·모듈·다이레벨 테스터↑',cos:[['테크윙','가속',],['ISC','가속'],['Teradyne','가속']],stage:'가속',cand:'twng'},
   ]},
  {key:'optical',driver:'광 연결(Optical)',layer:'L6',stage:'가속',
   trigger:'AI 인터커넥트 요구가 pluggable 한계 초과 → CPO·scale-up 광 전환. ★ NVDA Q1 FY27(5/20): 데이터센터 네트워킹 $14.8B·+199% YoY(컴퓨트 +92%보다 빠름) — "networking이 컴퓨트보다 늦게 반영(γ)" 가설 강력 확인.',
@@ -1394,6 +1394,16 @@ const C=[
   capex:{bull:'어드밴스드 패키징 capex↑',base:'장비 사이클',bear:'capex 축소'},
   thesis:'다음 병목(패키징) 노출 통로지만 비중 2.3%로 얇음. 후공정 실제 구성비 검증 필요.',
   kill:['패키징 capex 둔화','ETF 구성 전공정 편중','국내 장비주 약세'],S:{s1:2,s2:1,s3:1,s4:0,s5:1}},
+ {id:'twng',name:'테크윙',ticker:'089030',mkt:'KOSDAQ',layer:'L4',stage:'가속',mat:.45,conv:.65,
+  sub:'메모리 테스트 핸들러 1위 → 큐브프로버(HBM 다이레벨 검사) → 메모리 3사 유일 통로',compete:'HBM 다이레벨 검사 사실상 독점 — 삼성 양산(24~)·하이닉스 퀄 통과(26.3.5)·마이크론 퀄 진행',up:{l:'L3',d:'강'},down:{l:'—',d:'—'},
+  capex:{bull:'HBM4 적층↑=다이레벨 검사 표준화·큐브프로버 추가 발주',base:'메모리 3사 순차 채택',bear:'마이크론 퀄 탈락·검사 내재화'},
+  thesis:'L4 2·3차 발굴(26.6.4). 1Q26 OP +444% QoQ·26E 매출 +171%/OP +503%·매출 50%+ HBM 연동. 52주 26,050→74,000원 후 −19% 눌림인데 컨센 목표 85,000원이 가격 상회 = 추정>가격(γ 열림). 단 EB 933억 오버행(6/1~ 교환청구)·코스닥 고베타 → 정찰 1% 한정·매크로 게이트 선결.',
+  kill:['마이크론 퀄 탈락','큐브프로버 분기 PO 부재(발주 정체)','EB 물량 출회로 베이스 붕괴'],S:{s1:2,s2:2,s3:2,s4:1,s5:1}},
+ {id:'asmpt',name:'ASMPT',ticker:'0522',mkt:'HKEX',layer:'L4',stage:'가속',mat:.6,conv:.6,
+  sub:'TC본더(HBM4 주력) → 하이브리드 본딩 2위 → SMT 분산',compete:'SK하이닉스 HBM4 본더 ~절반 점유 — 한미·한화 잠식 진행형',up:{l:'—',d:'—'},down:{l:'L3',d:'강'},
+  capex:{bull:'TCB 시장 $0.76B(25)→$1.6B(28)·하이닉스 ~100대 추가 발주',base:'AP capex 동행',bear:'MR-MUF 유지로 fluxless 지연·SMT 부진'},
+  thesis:'BESI 매매불가 공백의 접근가능 차선(홍콩). 단 52주 HK$51→222(~4배)·P/E 77로 상당 선반영 → 추격금지·7월 실적+첫 눌림 대기. 분산형(SMT 동거) 캐비앗 — 순수 본딩 γ로 보면 안 됨.',
+  kill:['TCB 수주 QoQ 둔화','하이닉스 발주 한미·한화 회귀','SMT 적자 확대'],S:{s1:2,s2:1,s3:2,s4:1,s5:0}},
  {id:'smci',name:'Supermicro',ticker:'SMCI',mkt:'NASDAQ',layer:'L5',stage:'가속',mat:.42,conv:.55,
   sub:'AI 서버 → 액체냉각 랙 → 시스템 통합',compete:'AI 서버 ODM 상위',up:{l:'L2',d:'강'},down:{l:'L7',d:'강'},
   capex:{bull:'액체냉각 랙 표준화',base:'서버 출하 증가',bear:'마진 압박·회계 리스크'},
@@ -1788,6 +1798,15 @@ let SIGNAL_LOG=[
    {tag:'라이다·리스크',layer:null,col:'#e03131',html:'<b>센서 노드는 진입 부적 — 재무 취약.</b> LAZR 시총 ~$0.14B로 사실상 붕괴(감자·적자), OUST ~$21·52주 $6.3~$41.7 고변동·흑자 28년+. 같은 센서 노출이면 펀더·밸류 우위인 MBLY가 합리. 센서 BOM 테제는 유효하나 깨끗한 비히클 부재(L4 CoWoS·강물3 사모신용과 같은 공백 구조).'},
    {tag:'한국·과열',layer:null,col:'#e03131',html:'<b>K-휴머노이드 테마 급등 선반영 — 추격 금지.</b> 현대차 아틀라스 CES 2026 시연·로보티즈·ACE K휴머노이드 ETF로 부품주 일제 급등. 에스피지 5Y +871% 과열·에스비비테크 양산 전 태동 = <b>양산 EPS 부재 + 주가만 폭등</b>으로 강등규칙상 따라잡을 추정치 부재(순수 내러티브). 5/31 LG이노텍·삼현 과열 판정과 동일 결.'},
    {tag:'결론·상대가치',layer:null,col:'#b8860b',html:'<b>강물5 결론 — 단계 대량 이동 없음(산업 FANUC·키엔스·ABB·ROK 성숙 / 통합 Optimus·Figure 태동 불변), 변화는 “성격”.</b> 추격 쪽=TSLA·Harmonic Drive·에스피지(고점·과열), 눌린 쪽=MBLY(저점 beat&raise). 자본 규율: 강물5에서 한 단위 진입한다면 추격 아닌 <b>MBLY 공포눌림</b>이 후보지만, 보유 0%·양산 전·매크로 게이트 미충족·인플렉션 28년+ → <b>채점/숫자 갱신만, 신규 매수 아님.</b>'}
+  ]},
+ {date:'2026-06-04', at:'2026-06-04T22:30+09:00', source:'L4 2·3차 가치사슬 확장 발굴 — 테크윙·ASMPT 등록 + 한미 kill 플래그 + 테스트·유리기판 판정',
+  srcs:[{label:'테크윙: 큐브프로버 3사 현황·1Q26 OP +444% QoQ·26E OP +503% (신한 4/28·알파증류소 2026.5)'},{label:'테크윙 시세: 52주 26,050~74,000·컨센 목표 85,000 (한경마켓·Investing 2026)'},{label:'ASMPT: SK하이닉스 HBM4 TC본더 ~절반·~100대 추가 발주 예정·TCB $0.76B→$1.6B (TrendForce 25.12·BambooWorks 26.3)'},{label:'TCB 채널체크: BESI·ASMPT가 한미·한화 잠식, 한미 점유 20~30%로 하락 전망 (LumenAlpha 25.7)'},{label:'FORM $125·ATH $159·내부자매도 $6.1M / Advantest 1Y +275%·목표가 +18% 상회 (GuruFocus·TradingView·Investing 26.6)'},{label:'TPRO 1Q26 사상최대·가이던스 상향·고점比 −40%대, 밀라노 상장 (Investing·StockAnalysis 26.5)'},{label:'유리기판: SKC 상업화 3년 지연·플랜B 공식화·26E OP −800억 (SBS Biz 26.5.29·SIGLAB)'}],
+  items:[
+   {tag:'신규 발굴·테스트핸들러',layer:'L4',col:'#0ca678',html:'<b>테크윙(089030) C등록 — L4 2·3차 확장에서 유일한 "수요폭발+추정>가격" 동시생존.</b> 큐브프로버(HBM 다이레벨 검사) 메모리 3사 유일 통로(삼성 양산·하이닉스 퀄 통과 3/5·마이크론 퀄중). 1Q26 OP +444% QoQ·26E OP +503%, 고점比 −19% 눌림인데 컨센 목표 85,000원이 가격 상회 = γ 열림. <b>5신호 8/10·가속.</b> 리스크: EB 933억 오버행(6/1~ 교환청구). 정찰 1%도 매크로 게이트(FOMC 6/16·MU 6/24) 선결.'},
+   {tag:'신규 등록·TC본더',layer:'L4',col:'#1c7ed6',html:'<b>ASMPT(0522.HK) C등록 — BESI 매매불가 공백의 접근가능 차선.</b> SK하이닉스 HBM4 TC본더 ~절반 점유·내년 3월 ~100대 발주 예정·TCB 시장 +30%/yr. 단 52주 HK$51→222(~4배)·P/E 77 = 상당 선반영 → <b>5신호 6/10·추격금지·7월 실적+첫 눌림 대기.</b> 하이브리드 본딩 노드 cand 연결(분산형 캐비앗).'},
+   {tag:'kill 플래그',layer:'L4',col:'#e03131',html:'<b>한미반도체 강등 검토 플래그 — 발굴보다 중요.</b> 채널체크상 정밀도 요구 강화로 BESI·ASMPT가 한미·한화 점유 잠식, SK하이닉스 내 한미 TCB 점유 26년 20~30%로 하락 전망 + 한미–한화 특허분쟁 진행. <b>KODEX AI반도체핵심장비 "백엔드 구성비 검증" 게이트와 직결</b> — 한미 상위 구성 시 ETF 증액 논거 약화. 칩 라벨 불변·로그만, 분기 재채점 시 반영.'},
+   {tag:'테스트 노드 판정',layer:'L4',col:'#b8860b',html:'⑤테스트 발굴 큐 처리: <b>FORM 성숙~과열</b>(가격>목표가·내부자매도·저점比 ~5x), <b>Advantest 가속~성숙 경계</b>(목표가 +18% 상회 = γ 일부 잔존, 단 1Y +275%·β2.7 → 7/29 게이트), <b>TPRO 7/10이나 등록 보류</b>(밀라노 상장 = BESI와 동일 매매통로 리스크, 국내 매매 가능 확인 시 재검토).'},
+   {tag:'유리기판·태동',layer:'L4',col:'#7048e8',html:'<b>유리기판 = 순수 내러티브(태동), 숫자 없는 로그만.</b> SKC 상업화 2024.6 → 3년 지연·플랜B 공식화·26E OP −800억 적자에 PBR 4배대 = 옵션가치 선반영 + 삼성전기-스미토모·BOE·인텔 26~27 양산 예고로 "최초" 프리미엄 축소. §6 내러티브 금지조항 적용. 인접 실적주(이오테크닉스 HBM 다이싱·필옵틱스·ISC·리노공업)는 다음 발굴 큐.'},
   ]},
  /* ▼ 신규 시그널은 여기에 같은 형식으로 추가 (date·source·srcs[{label,url}] 출처 필수) */
 ];
