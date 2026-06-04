@@ -19,3 +19,10 @@
   (gh 가 없거나 실패하면 사용 가능한 GitHub PR 생성 도구로 동일하게 PR을 만든다.)
 - base 는 반드시 claude/wizardly-rubin-SubA1. PR 제목/본문에 무엇을 왜 바꿨는지 한국어로 요약한다.
 - PR을 실제로 생성한 뒤, 댓글에 생성된 PR 번호/링크를 보고한다. 링크 안내만으로 종료하지 않는다.
+
+## 머지 결과 확인/보고 (중요)
+- 이 리포는 `.github/workflows/claude-pr-gate.yml` 의 validate → auto-merge 잡이 base=claude/wizardly-rubin-SubA1·head=claude/* PR 을 검사 통과 시 자동 squash 머지(+브랜치 삭제)한다.
+- 따라서 PR 생성 후 "queued/진행 중" 상태로 끝내지 말 것. **게이트가 끝날 때까지 확인하여 실제 머지 여부를 명시 보고**한다.
+- 보고에는 머지됨/안 됨을 분명히 적는다. 머지됐으면 squash 커밋 SHA(또는 (#PR번호) 커밋)와 head 브랜치 삭제 여부로 확정 짓는다.
+- auto-merge 가 곧바로 안 떴으면 게이트 잡 상태를 재확인한다(생성 직후엔 queued 일 수 있음 — 그 스냅샷만 보고 "안 됐다"고 단정하지 말 것).
+- 머지가 실패/대기로 끝났으면 그 사유(validate 실패 로그 등)를 보고한다.
