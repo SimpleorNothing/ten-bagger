@@ -1,11 +1,18 @@
 /* ── 01 투자 캘린더(#v-cal): 팬튼 A안(절제형) ─────────────────────────
-   Cloud Dancer 카드 + Blue Fusion 메인 강조. 레이아웃·radius·타이포 불변, 색만 교체.
+   시안과 동일: 페이지 배경 Cloud Dancer + 흰색 카드 + Blue Fusion 메인 강조.
+   레이아웃·radius·타이포 불변, 색만 교체. 01 탭이 켜진 동안에만 배경 전환(:has).
    카테고리 매핑: 실적→Blue Fusion #496176 / 거시→Baltic Sea #7AB6D7 / 물가→Quiet Violet #A792AC
-                 이벤트→Golden Mist #D6CC94 / 글로벌 워치→Hematite #746F69 / 정치→Cloud Cover #989292
+                 이벤트→Golden Mist(진톤 #C2B36A) / 글로벌 워치→Hematite #746F69 / 정치→Cloud Cover #989292
    index.html </head> 직전 <link rel="stylesheet" href="/pantone.css"> 로 활성화. 제거하면 원복. ── */
 
+/* 페이지 배경·헤더·활성 탭 — 01 탭이 켜져 있을 때만 */
+body:has(#v-cal.view.on){background:#F0EFEB}
+body:has(#v-cal.view.on) header{background:linear-gradient(180deg,rgba(240,239,235,.94),rgba(240,239,235,.72));border-bottom-color:#dedbd3}
+body:has(#v-cal.view.on) .tab.on{background:#496176;color:#fff}
+body:has(#v-cal.view.on) .tab:hover:not(.on){background:rgba(73,97,118,.08)}
+
 #v-cal{
-  --pt-bg:#F0EFEB;--pt-line:#dedbd3;--pt-ink:#3d3935;--pt-txt:#746F69;--pt-mut:#989292;--pt-brand:#496176;
+  --pt-bg:#F0EFEB;--pt-card:#ffffff;--pt-line:#dedbd3;--pt-ink:#3d3935;--pt-txt:#746F69;--pt-mut:#989292;--pt-brand:#496176;
   /* 카테고리 색 재정의 → cat-dot·now-card 좌측바·shelf-fill에 자동 반영 */
   --cat-macro:#7AB6D7;--cat-infl:#A792AC;--cat-earn:#496176;--cat-event:#C2B36A;--cat-pol:#989292;--cat-watch:#746F69;
 }
@@ -14,8 +21,8 @@
 #v-cal .cal-sec{color:var(--pt-brand)}
 #v-cal .cal-sec .sub{color:var(--pt-mut)}
 
-/* 임박 이벤트 카드 */
-#v-cal .now-card{border:1px solid var(--pt-line);background:var(--pt-bg)}
+/* 임박 이벤트 카드 — Cloud Dancer 배경 위 흰색 카드 */
+#v-cal .now-card{border:1.5px solid var(--pt-line);background:var(--pt-card)}
 #v-cal .now-card .dn{color:var(--pt-ink)}
 #v-cal .now-card .when{color:var(--pt-mut)}
 #v-cal .now-card .lbl{color:var(--pt-ink)}
@@ -28,28 +35,25 @@
 #v-cal .cal-month{color:var(--pt-ink);border-bottom:1px solid var(--pt-line)}
 #v-cal .cal-month .mo-sub{color:var(--pt-mut)}
 #v-cal .cal-row{border-bottom:1px solid var(--pt-line)}
-#v-cal .cal-row:hover{background:rgba(240,239,235,.6)}
-#v-cal .cal-row.key{background:linear-gradient(90deg,rgba(73,97,118,.06),transparent)}
+#v-cal .cal-row:hover{background:rgba(255,255,255,.75)}
+#v-cal .cal-row.key{background:linear-gradient(90deg,rgba(73,97,118,.07),transparent)}
 #v-cal .date-chip{color:var(--pt-ink)}
 #v-cal .cal-body .ti{color:var(--pt-ink)}
 #v-cal .cal-body .ti .tk{color:var(--pt-mut)}
 #v-cal .cal-body .mt{color:var(--pt-txt)}
-#v-cal .tag-est{color:var(--pt-mut);border:1px dashed var(--pt-line)}
+#v-cal .tag-est{color:var(--pt-mut);border:1px dashed #cbc7bd}
 
 /* 인라인 하드코딩 배지(mbadge·st) 팬튼 톤으로 — 인라인 style은 !important로만 덮임 */
-#v-cal [style*="e8590c"]{background:rgba(214,204,148,.38)!important;color:#7a6c2c!important}      /* 이벤트 → Golden Mist */
-#v-cal [style*="1c7ed6"]{background:rgba(122,182,215,.22)!important;color:#33617e!important}      /* 거시 → Baltic Sea */
-#v-cal [style*="7048e8"]{background:rgba(167,146,172,.24)!important;color:#6d5a73!important}      /* 물가 → Quiet Violet */
-#v-cal [style*="b8860b"]{background:rgba(152,146,146,.22)!important;color:#6b6565!important}      /* 정치 → Cloud Cover */
-#v-cal [style*="e03131"]{background:rgba(116,111,105,.18)!important;color:#574f47!important}      /* 워치 → Hematite */
-/* 단, cat-dot·shelf-fill·watch-card 좌측바는 var(--cat-*) 인라인이라 위 변수 재정의로 이미 처리됨 — 배경/글자만 덮는 위 규칙이 dot에 닿지 않도록 복원 */
-#v-cal .cat-dot[style], #v-cal .dot[style], #v-cal .shelf-fill[style]{color:inherit!important}
+#v-cal .mbadge[style*="e8590c"],#v-cal .st[style*="e8590c"]{background:rgba(194,179,106,.30)!important;color:#7a6c2c!important}   /* 이벤트 → Golden Mist */
+#v-cal .mbadge[style*="1c7ed6"],#v-cal .st[style*="1c7ed6"]{background:rgba(122,182,215,.24)!important;color:#33617e!important}   /* 거시 → Baltic Sea */
+#v-cal .mbadge[style*="7048e8"],#v-cal .st[style*="7048e8"]{background:rgba(167,146,172,.26)!important;color:#6d5a73!important}   /* 물가 → Quiet Violet */
+#v-cal .mbadge[style*="b8860b"],#v-cal .st[style*="b8860b"]{background:rgba(152,146,146,.24)!important;color:#6b6565!important}   /* 정치 → Cloud Cover */
+#v-cal .mbadge[style*="e03131"],#v-cal .st[style*="e03131"]{background:rgba(116,111,105,.20)!important;color:#574f47!important}   /* 워치 → Hematite */
 
 /* 글로벌 워치리스트 카드 */
-#v-cal .watch-card{border:1px solid var(--pt-line);background:var(--pt-bg)}
+#v-cal .watch-card{border:1.5px solid var(--pt-line);background:var(--pt-card)}
 #v-cal .watch-card h4{color:var(--pt-ink)}
-#v-cal .watch-card .st{color:#fff}
 #v-cal .watch-card p{color:var(--pt-txt)}
 #v-cal .watch-card p b{color:var(--pt-ink)}
 #v-cal .shelf-lab{color:var(--pt-mut)}
-#v-cal .shelf-bar{background:#e7e5df}
+#v-cal .shelf-bar{background:#eceae4}
