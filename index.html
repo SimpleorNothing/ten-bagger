@@ -998,6 +998,7 @@ table.tk th.c{text-align:center}
   </div>
 
   <div class="foot">
+    <b>주도주 표기(파생·자동):</b> ①사분면이라도 같지 않다 — <b style="color:#d4a017">♕ 금색 링 = 주도주 확립</b>(가속·①·γ열림=추정&gt;가격, 능동 보유 정당), <b style="color:#e03131">빨강 점선 링 = 강등/트랩</b>(γ소진=가격&gt;추정 또는 내러티브 S5=0, 추격금지). γ 상태는 judgment.json `g`(open/spent/none)에서 옴 — 점 클릭 시 툴팁에 표시.<br>
     <b>알파 도출:</b> 베타(고변동 AI주)×모멘텀/카탈리스트 + runway − 지수 기대. 평균회귀(많이올라서↓/떨어져서↑) 미사용. MRVL 5/27·MU 6월말 실적, 삼성 HBM4 6월 공급 반영. 모두 <b>추정치</b>.<br>
     <b>이중 벤치마크 주의:</b> 코스피 기준은 (지수 스프레드)+(자기 시장 조정)을 반영한 추정. 채권혼합의 음(−)알파는 설계상 정상(방어자산). 의사결정 지원용, 매매 권유 아님 · 기준일 2026-05-24 KST.
   </div>
@@ -2404,26 +2405,26 @@ const LAYER_HEX={L1:'#b8860b',L2:'#1c7ed6',L3:'#0ca678',L4:'#7048e8',L5:'#e8590c
 const layerKey=d=>'L'+((String(d.layer).match(/L(\d)/)||[])[1]);
 const colorOf=d=>mode==='stage'?STAGE[d.stage]:(LAYER_HEX[layerKey(d)]||'#94a5b4');
 const D=[
- {n:'마벨',t:'MRVL',mkt:'US',layer:'L2/L6',w:6.1,aN:[1.5,7,9],aK:[1.3,5.5,5],stage:'가속',note:'NVLink Fusion·NVDA $2B 고유엣지. 보유 중 알파 최상. 5/27 실적 경과 — 신고가 $218 재돌파 실패·되돌림으로 단기 음, ASIC 런웨이는 유지.'},
- {n:'삼성전자',t:'005930',mkt:'KR',layer:'L3',w:3.5,aN:[1.5,4,7],aK:[0.6,1.5,2.5],stage:'성숙',note:'나스닥 대비 알파의 상당분은 "코스피>나스닥"+"삼성=코스피". 코스피 기준 고유 알파는 HBM4 점유율 회복분 정도로 축소.'},
- {n:'마이크론',t:'MU',mkt:'US',layer:'L3',w:11.7,aN:[0.5,5,3],aK:[0.3,3.5,-1],stage:'성숙',note:'6월말 실적·HBM 2026+ 타이트. 코스피(메모리 슈퍼사이클로 뜨거움) 기준 1Y는 지수 이하로.'},
+ {n:'마벨',t:'MRVL',mkt:'US',layer:'L2/L6',w:6.1,aN:[1.5,7,9],aK:[1.3,5.5,5],stage:'가속',g:'open',note:'NVLink Fusion·NVDA $2B 고유엣지. 보유 중 알파 최상. 5/27 실적 경과 — 신고가 $218 재돌파 실패·되돌림으로 단기 음, ASIC 런웨이는 유지.'},
+ {n:'삼성전자',t:'005930',mkt:'KR',layer:'L3',w:3.5,aN:[1.5,4,7],aK:[0.6,1.5,2.5],stage:'성숙',g:'open',note:'나스닥 대비 알파의 상당분은 "코스피>나스닥"+"삼성=코스피". 코스피 기준 고유 알파는 HBM4 점유율 회복분 정도로 축소.'},
+ {n:'마이크론',t:'MU',mkt:'US',layer:'L3',w:11.7,aN:[0.5,5,3],aK:[0.3,3.5,-1],stage:'성숙',g:'spent',note:'6월말 실적·HBM 2026+ 타이트. 코스피(메모리 슈퍼사이클로 뜨거움) 기준 1Y는 지수 이하로.'},
  {n:'PLUS 글로벌HBM',t:'ETF',mkt:'US',layer:'L3',w:15.6,aN:[1,3,2],aK:[0.8,1.5,-2],stage:'성숙',note:'HBM 바스켓. 고유 알파 작음(테마 동행).'},
  {n:'KODEX 미AI반도체TOP3',t:'ETF',mkt:'US',layer:'L2',w:2.8,aN:[0.5,2,4],aK:[0.3,0.5,0],stage:'가속',note:'≈QQQ AI 코어 — 나스닥 기준 알파 미미, 코스피 기준 거의 0.'},
  {n:'KODEX AI반도체핵심장비',t:'소부장 L4',mkt:'KR',layer:'L4',w:2.3,aN:[-0.5,1,8],aK:[-0.7,-0.5,4],stage:'가속',note:'다음 병목(패키징) runway. 코스피 기준에선 바가 높아 1Y +4로 축소되나 여전히 양(+).'},
- {n:'루멘텀',t:'LITE',mkt:'US',layer:'L6',w:6.6,aN:[0.5,2,1],aK:[0.3,0.5,-3],stage:'성숙',note:'광 콘텐츠(800G→1.6T→CPO) 증가 추세+모멘텀 양호.'},
+ {n:'루멘텀',t:'LITE',mkt:'US',layer:'L6',w:6.6,aN:[0.5,2,1],aK:[0.3,0.5,-3],stage:'성숙',g:'spent',note:'광 콘텐츠(800G→1.6T→CPO) 증가 추세+모멘텀 양호.'},
  {n:'KODEX 미AI광통신',t:'ETF',mkt:'US',layer:'L6',w:4.7,aN:[0,1,1],aK:[-0.2,-0.5,-3],stage:'가속',note:'광 테마 프록시. 고유 알파 미미.'},
  {n:'테슬라',t:'TSLA',mkt:'US',layer:'기타',w:6.1,aN:[0,0,3],aK:[-0.2,-1.5,-1],stage:'가속',note:'8레이어 밖. 순수 베타에 가까움. 로보틱스 옵션만 소폭.'},
- {n:'버티브',t:'VRT',mkt:'US',layer:'L7',w:3.9,aN:[-1.5,1,3],aK:[-1.7,-0.5,-1],stage:'성숙',note:'단기 음(−)은 현재 추세가 실제 약세라서(모멘텀, 회귀 아님). 백로그+109%·B2B 2.9x로 이익추세 양(+).'},
+ {n:'버티브',t:'VRT',mkt:'US',layer:'L7',w:3.9,aN:[-1.5,1,3],aK:[-1.7,-0.5,-1],stage:'성숙',g:'open',note:'단기 음(−)은 현재 추세가 실제 약세라서(모멘텀, 회귀 아님). 백로그+109%·B2B 2.9x로 이익추세 양(+).'},
  {n:'SOL 미AI전력',t:'ETF',mkt:'US',layer:'L8',w:4.7,aN:[0,0,0],aK:[-0.2,-1.5,-4],stage:'가속',note:'구성종목 DC펜스 기준 ~82%가 발전·그리드(Oklo·Bloom·GE Vernova·Quanta·Constellation·Vistra 등) → L8. 단 Vertiv·Eaton 등 ~18%는 DC-내부 in-rack(L7). 고유 알파 없음 → 베타 수렴.'},
  {n:'KODEX AI전력핵심설비',t:'한국 ETF',mkt:'KR',layer:'L8',w:6.9,aN:[0,0,1],aK:[-0.2,-1,-2],stage:'과열',vol:true,note:'구성종목 DC펜스 기준 ~83%가 그리드측 변압기·송전·변전(효성·LS일렉·HD현대일렉·대한전선 등) → L8 귀속. DC-내부 배전 ~13%만 L7. 공급과잉 실(實)리스크·고변동.'},
- {n:'블룸에너지',t:'BE',mkt:'US',layer:'L8',w:2.5,aN:[1,1,2],aK:[0.8,-0.5,-2],stage:'과열',vol:true,note:'BYOP 온사이트 발전 수요 전방 증가. 단 고변동·내부자 매도 리스크.'},
+ {n:'블룸에너지',t:'BE',mkt:'US',layer:'L8',w:2.5,aN:[1,1,2],aK:[0.8,-0.5,-2],stage:'과열',g:'open',vol:true,note:'BYOP 온사이트 발전 수요 전방 증가. 단 고변동·내부자 매도 리스크.'},
  {n:'채권혼합(2종)',t:'방어',mkt:'KR',layer:'방어',w:13.2,aN:[-2,-4.5,-6],aK:[-2.2,-6,-9],stage:'방어',note:'음(−)알파는 설계상 정상 — 방어자산. 지수 추월이 목적 아님. 변동성 헤지.'},
  // ===== 미보유 후보군 (cand:true) — 비중 없음, 알파는 컨빅션 기반 추정 =====
- {n:'AMD',t:'AMD',mkt:'US',layer:'L2',cand:true,aN:[-0.5,2,4],aK:[-0.7,0.5,0],stage:'가속',vol:true,note:'L2 2등(EPYC+MI). DC매출+57%·Meta 6GW·OpenAI로 펀더 가속·EPS 상향(고점추정 $665>현재가). 단 현재 $510(52주 $111~527)·1개월+53%·평균목표가($472) 하회=가격이 추정 추월속도 앞섬 → 가속(연장)·추격금지. 단기 wk 음. γ는 27년 out-year에 잔존.'},
- {n:'램버스',t:'RMBS',mkt:'US',layer:'L3',cand:true,aN:[0,2,3],aK:[-0.2,0.5,-1],stage:'가속',vol:true,note:'메모리 인터페이스 IP·로열티(HBM4/DDR5 레버리지). 현재 ~$147(52주 신고가권)·평균목표가 부근 도달·내부자 순매도. ⚑26.1Q~ 美 연방 대배심 소환 대응 중(거버넌스 오버행) → 가속(연장)·관찰. 소환 격화 시 1순위 삭제 후보.'},
- {n:'컨스텔레이션',t:'CEG',mkt:'US',layer:'L8',cand:true,aN:[0.5,2,5],aK:[0.3,0.5,1],stage:'가속',note:'원전 무탄소 기저전력·DC PPA 직결. 현재가($266·52주 $243~413 저점권)가 평균목표가($368) 대비 +38% 여력+Q1 비트(EPS+5.7%·매출+26% 서프라이즈)=강등규칙①상 γ 활짝. 11M 증자로 −7.7% 눌림은 일시. 후보군 中 유일한 공포억눌림 재진입 셋업. 8/6 실적 게이트.'},
- {n:'퀄컴',t:'QCOM',mkt:'US',layer:'L2',cand:true,aN:[-1,-1,1],aK:[-1.2,-2.5,-3],stage:'성숙',note:'엣지 추론·온디바이스 AI(강물4 앵커였음). ⚑현재가 $229가 평균목표가($176) 22% 상회+52주 고점권+6/1 −8.8%(NVDA RTX Spark 온디바이스 경쟁)으로 "least extended" 전제 소멸·DC 추론 카탈리스트 위협. 성숙·진입근거 약화 → 관찰. P/E 19로 싸나 차별화 옵션 훼손.'},
- {n:'암페놀',t:'APH',mkt:'US',layer:'L6',cand:true,aN:[0.5,3,3],aK:[0.3,1.5,-0.5],stage:'가속',note:'고속 인터커넥트(카퍼+광+전력)·LITE 보완재(분산·베타1.39). IT datacom 41%·AI 견인, Q1 record orders +78%·B2B 1.24·가이던스 상향(B&R 신선). 주가 ATH比 −21% 눌림+추정 상향=γ 열림. 현재 ~$146(52주 $87~167·ATH−12~21%)·평균목표가 $182(+22~37% 여력)·EPS 11명 상향 = γ 열림 재확인. $135~148 저항 미돌파(S5 미점등) → 정찰만, 본매수 7/29 게이트.'},
+ {n:'AMD',t:'AMD',mkt:'US',layer:'L2',cand:true,aN:[-0.5,2,4],aK:[-0.7,0.5,0],stage:'가속',g:'open',vol:true,note:'L2 2등(EPYC+MI). DC매출+57%·Meta 6GW·OpenAI로 펀더 가속·EPS 상향(고점추정 $665>현재가). 단 현재 $510(52주 $111~527)·1개월+53%·평균목표가($472) 하회=가격이 추정 추월속도 앞섬 → 가속(연장)·추격금지. 단기 wk 음. γ는 27년 out-year에 잔존.'},
+ {n:'램버스',t:'RMBS',mkt:'US',layer:'L3',cand:true,aN:[0,2,3],aK:[-0.2,0.5,-1],stage:'가속',g:'open',vol:true,note:'메모리 인터페이스 IP·로열티(HBM4/DDR5 레버리지). 현재 ~$147(52주 신고가권)·평균목표가 부근 도달·내부자 순매도. ⚑26.1Q~ 美 연방 대배심 소환 대응 중(거버넌스 오버행) → 가속(연장)·관찰. 소환 격화 시 1순위 삭제 후보.'},
+ {n:'컨스텔레이션',t:'CEG',mkt:'US',layer:'L8',cand:true,aN:[0.5,2,5],aK:[0.3,0.5,1],stage:'가속',g:'open',note:'원전 무탄소 기저전력·DC PPA 직결. 현재가($266·52주 $243~413 저점권)가 평균목표가($368) 대비 +38% 여력+Q1 비트(EPS+5.7%·매출+26% 서프라이즈)=강등규칙①상 γ 활짝. 11M 증자로 −7.7% 눌림은 일시. 후보군 中 유일한 공포억눌림 재진입 셋업. 8/6 실적 게이트.'},
+ {n:'퀄컴',t:'QCOM',mkt:'US',layer:'L2',cand:true,aN:[-1,-1,1],aK:[-1.2,-2.5,-3],stage:'성숙',g:'spent',note:'엣지 추론·온디바이스 AI(강물4 앵커였음). ⚑현재가 $229가 평균목표가($176) 22% 상회+52주 고점권+6/1 −8.8%(NVDA RTX Spark 온디바이스 경쟁)으로 "least extended" 전제 소멸·DC 추론 카탈리스트 위협. 성숙·진입근거 약화 → 관찰. P/E 19로 싸나 차별화 옵션 훼손.'},
+ {n:'암페놀',t:'APH',mkt:'US',layer:'L6',cand:true,aN:[0.5,3,3],aK:[0.3,1.5,-0.5],stage:'가속',g:'open',note:'고속 인터커넥트(카퍼+광+전력)·LITE 보완재(분산·베타1.39). IT datacom 41%·AI 견인, Q1 record orders +78%·B2B 1.24·가이던스 상향(B&R 신선). 주가 ATH比 −21% 눌림+추정 상향=γ 열림. 현재 ~$146(52주 $87~167·ATH−12~21%)·평균목표가 $182(+22~37% 여력)·EPS 11명 상향 = γ 열림 재확인. $135~148 저항 미돌파(S5 미점등) → 정찰만, 본매수 7/29 게이트.'},
 ];
 const CASH={NASDAQ:[-0.3,-2.5],KOSPI:[-0.5,-4]};
 const BNOTE={NASDAQ:'기준선=나스닥(QQQ). 각 종목의 raw 초과수익.',KOSPI:'기준선=코스피. 나스닥 대비 전 종목 동일하게 평행이동 → 순위·간격 불변, 원점만 이동.'};
@@ -2498,6 +2499,16 @@ function draw(){
    const col=colorOf(d);
    const c=el('circle',{cx:x,cy:y,r,fill:col+(d.cand?'12':'2e'),stroke:col,'stroke-width':d.cand?1.6:2,class:'bub','data-i':i});
    if(d.cand)c.setAttribute('stroke-dasharray','3 3');svg.appendChild(c);
+   // 주도주 파생 마크(저장 X, render-only) — 라이브 모드만. ♕확립=가속·①사분면·γ열림 / 강등·트랩=γ소진|없음.
+   if(snapIdx<0){
+     const stg=d._stage||d.stage;
+     if(!d.cand&&stg==='가속'&&a[0]>=0&&a[1]>=0&&d.g==='open'){
+       svg.appendChild(el('circle',{cx:x,cy:y,r:r+4,fill:'none',stroke:'#d4a017','stroke-width':2,opacity:.9,style:'pointer-events:none'}));
+       const cr=el('path',{d:'M-5,3 L-5,-2 L-2,1 L0,-4 L2,1 L5,-2 L5,3 Z',fill:'#d4a017',stroke:'#fff','stroke-width':.6,transform:`translate(${x},${y-r-8})`,style:'pointer-events:none'});svg.appendChild(cr);
+     } else if(d.g==='spent'||d.g==='none'){
+       svg.appendChild(el('circle',{cx:x,cy:y,r:r+4,fill:'none',stroke:'#e03131','stroke-width':1.6,'stroke-dasharray':'2 3',opacity:.55,style:'pointer-events:none'}));
+     }
+   }
    // 실적 임박(D-3~D-Day): 점 둘레에 펄스 링 = 블링킹. EM date 기준 0~3일.
    const emI=EM[d.t];
    if(showEM&&snapIdx<0&&emI&&emI.date){const di=Math.ceil((new Date(emI.date+'T00:00:00')-Date.now())/864e5);
@@ -2559,6 +2570,8 @@ function showTip(d){
    <div class="row"><span>3개월 vs ${bn}</span><b class="${cls(a[1])}">${fmt(a[1])}%p</b></div>
    <div class="row"><span>1년 vs ${bn}</span><b class="${cls(a[2])}">${fmt(a[2])}%p</b></div>
    <div class="row"><span>사분면</span><b>${q} ${({'①':'알파','②':'중기 알파','③':'벤치마크 이하','④':'단기만'})[q]}</b></div>
+   ${d.g?`<div class="row"><span>γ(추정속도)</span><b style="color:${d.g==='open'?'#0ca678':'#e03131'}">${d.g==='open'?'열림 · 추정>가격':d.g==='spent'?'소진 · 가격>추정':'없음 · 내러티브(S5=0)'}</b></div>`:''}
+   ${(()=>{const stg=d._stage||d.stage;if(!d.cand&&stg==='가속'&&a[0]>=0&&a[1]>=0&&d.g==='open')return '<div class="row"><span>주도주</span><b style="color:#d4a017">♕ 확립 · 가속·①·γ열림</b></div>';if(d.g==='spent'||d.g==='none')return '<div class="row"><span>주도주</span><b style="color:#e03131">강등/트랩 · γ소진 추격금지</b></div>';return '';})()}
    ${EM[d.t]?`<div class="row"><span>실적 ${EM[d.t].basis==='event-iv'?'(IV·실측)':'(추정)'}</span><b style="color:#f59f00">${EM[d.t].date} · ±${EM[d.t].pct}%</b></div>`:''}
    <span class="stagepill" style="background:${col}22;color:${col}">${d.stage} · ${d.mkt}${d.cand?' · 미보유':''}${d.flag?' · '+d.flag:''}</span>
    <div class="note">${d.note}</div>`;
@@ -2707,7 +2720,7 @@ Promise.all([getJSON('alpha.json'),getJSON('earnings.json'),getJSON('judgment.js
  // 2) 실적 IV (earnings.json)
  if(e&&e.moves)EM=e.moves; if(e&&Array.isArray(e.playbook))EPLAY=e.playbook;
  // 3) 판단(judgment.json) — 자동 위에 마지막으로 덮어씀, null은 자동 유지
- const ov=g&&g.overrides;if(ov)D.forEach(d=>{const o=ov[d.t];if(o&&Array.isArray(o.aN))o.aN.forEach((v,k)=>{if(v!=null)d.aN[k]=v;});});
+ const ov=g&&g.overrides;if(ov)D.forEach(d=>{const o=ov[d.t];if(o){if(Array.isArray(o.aN))o.aN.forEach((v,k)=>{if(v!=null)d.aN[k]=v;});if(o.g)d.g=o.g;}});
  // 4) 시점 스냅샷(snapshots.json) — 라이브 머지 후 현재 배치를 보존하고 셀렉터 구성.
  captureLive();SNAPS=(sn&&Array.isArray(sn.snapshots))?sn.snapshots:[];initSnapSel();
 }).finally(()=>{paint(); if(typeof renderSignalLog==='function')renderSignalLog(); if(typeof renderStack==='function')renderStack(); if(typeof renderPortfolio==='function')renderPortfolio(); if(typeof updateAsof==='function')updateAsof();});
