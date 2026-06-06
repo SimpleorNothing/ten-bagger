@@ -1,0 +1,77 @@
+name: Apply index.html patch
+
+# ≤200KB MCP 파이프라인: index.html(296KB+)을 통째로 푸시하는 대신,
+# 변경분만 담은 unified diff를 base64로 patches/*.b64 에 푸시하면
+# 이 워크플로가 저장소 안에서 git apply → 검증 → 커밋 → 배포한다.
+# git apply --check 실패 시 원자적으로 중단(손상 없음).
+
+on:
+  push:
+    branches: [claude/wizardly-rubin-SubA1]
+    paths: ['patches/*.b64']
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: apply-patch
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: claude/wizardly-rubin-SubA1
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Apply new patches
+        run: |
+          set -e
+          mkdir -p patches/applied
+          CHANGED=$(git diff --name-only HEAD^ HEAD -- 'patches/*.b64' 2>/dev/null || true)
+          if [ -z "$CHANGED" ]; then CHANGED=$(ls patches/*.b64 2>/dev/null || true); fi
+          if [ -z "$CHANGED" ]; then echo "no new patch"; exit 0; fi
+          for B in $CHANGED; do
+            [ -f "$B" ] || continue
+            echo "== applying $B =="
+            base64 -d "$B" > /tmp/p.patch
+            git apply --check /tmp/p.patch
+            git apply /tmp/p.patch
+            git mv "$B" "patches/applied/$(basename "$B")"
+          done
+
+      - name: Validate inline script syntax
+        run: |
+          node -e 'const fs=require("fs");const s=fs.readFileSync("index.html","utf8");const m=[...s.matchAll(/<script>([\s\S]*?)<\/script>/g)];m.forEach((x,i)=>fs.writeFileSync("/tmp/s"+i+".js",x[1]));console.log("script blocks:",m.length);'
+          for f in /tmp/s*.js; do node --check "$f"; done
+
+      - name: Commit & push (rebase-safe)
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then echo "nothing to commit"; exit 0; fi
+          git commit -m "chore: apply index.html patch via patches/*.b64 (≤200KB MCP 파이프라인)"
+          for i in 1 2 3 4 5; do
+            if git pull --rebase --autostash origin claude/wizardly-rubin-SubA1 && git push origin HEAD:claude/wizardly-rubin-SubA1; then
+              echo "pushed on attempt $i"; exit 0
+            fi
+            git rebase --abort 2>/dev/null || true
+            sleep $(( RANDOM % 6 + 3 ))
+          done
+          echo "::error::push failed after 5 attempts"; exit 1
+
+      - name: Deploy (bot push does not trigger deploy.yml)
+        run: |
+          npm install -g wrangler@4
+          wrangler deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
