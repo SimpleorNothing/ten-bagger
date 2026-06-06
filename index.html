@@ -1295,21 +1295,26 @@ let HOLD_TOTAL=968;
 /* ===== HOLD_DETAIL — 개별 종목/ETF 현보유 vs 적정 비중(6/6 계좌 기준) =====
    w = 실잔고 비중(자산현황_260606, 968M 기준 · 레이어 합은 HOLDINGS와 일치).
    적정(tlo~thi) = 레이어 밴드(TARGETS)를 그 안에서 '향후 상승가능성'으로 배분한 운영자 조언.
-   dir = 회전(trim/add/hold), note = 상방 근거. 종목별 밴드 mid 합 ≈ 레이어 밴드 mid. 매매 권유 아님. */
+   dir = 회전(trim/add/hold), note = 상방 근거. 종목별 밴드 mid 합 ≈ 레이어 밴드 mid(◷ 미보유 후보 w:0 행은 합산 규칙 제외 — 게이트 통과 시 진입 상한만 표기). 매매 권유 아님. */
 let HOLD_DETAIL=[
  {layer:'L2', name:'마벨',                     ticker:'MRVL',   kind:'종목', w:8.38, tlo:5,  thi:6,  dir:'hold', note:'가속·ASIC+광 양다리, 1y 상방 최상 — ⚑ 밴드 초과(8.4%>6): γ(추정상향 vs 주가 +82%) 점검 후 사이징'},
  {layer:'L2', name:'KODEX 미국AI반도체TOP3+',  ticker:'ETF',    kind:'ETF',  w:2.74, tlo:2.5,thi:3.5,dir:'hold', note:'성숙 대형주 바스켓 — 한계 상방 제한, 유지'},
+ {layer:'L2', name:'◷ 퀄컴 (미보유 후보)',        ticker:'QCOM',   kind:'종목', w:0,    tlo:0,  thi:2,  dir:'add',  note:'미보유 — 3중 AND: A $205~220 눌림(진입 중 ✓)+B 7/29 실적(DC매출 정량·2nd고객·EPS상향)+C 매크로. A만으론 행동 없음'},
  {layer:'L3', name:'마이크론',                 ticker:'MU',     kind:'종목', w:10.77,tlo:6,  thi:8,  dir:'trim', note:'성숙·+660%/트림 1순위, 1y 상방 소진 — 6/24 실적 후 감축'},
  {layer:'L3', name:'글로벌HBM반도체',          ticker:'ETF',    kind:'ETF',  w:15.71,tlo:10, thi:12, dir:'trim', note:'국내 HBM 바스켓 +66%·과열 해소 — 1순위 트림 통로'},
  {layer:'L3', name:'삼성전자',                 ticker:'005930', kind:'종목', w:3.60, tlo:3,  thi:5,  dir:'hold', note:'성숙이나 상대 저평가·HBM4 회복 미반영(비대칭 상방) — 유지/충격 시 매수'},
  {layer:'L3', name:'삼성·SK 채권혼합',         ticker:'ETF',    kind:'ETF',  w:8.73, tlo:8,  thi:10, dir:'hold', note:'메모리 방어자산(채권혼합) — 변동성 대비 유지·보강'},
+ {layer:'L3', name:'◷ 램버스 (미보유 후보)',       ticker:'RMBS',   kind:'종목', w:0,    tlo:0,  thi:1,  dir:'add',  note:'미보유 — L3 인터페이스IP 프로브: $140 눌림 + 7/27 Q2 확인 AND, 점등 전 정찰 상한 ~1%'},
  {layer:'L4', name:'KODEX AI반도체핵심장비',   ticker:'471990', kind:'ETF',  w:2.15, tlo:7,  thi:9,  dir:'add',  note:'다음 병목(패키징)·YTD−58% 소외 = 1y 상방 최대 — 백엔드 비중 검증 후 증액'},
+ {layer:'L4', name:'◷ 테크윙 (미보유 후보)',       ticker:'089030', kind:'종목', w:0,    tlo:0,  thi:1.5,dir:'add',  note:'미보유 — 가속 8/10·HBM 다이검사 독점·γ open. FOMC 6/16~17·MU 6/24 게이트 후 / 대안: ASMPT 0522.HK(6/10)'},
  {layer:'L6', name:'루멘텀',                   ticker:'LITE',   kind:'종목', w:6.75, tlo:4,  thi:6,  dir:'trim', note:'성숙·트림 앰버 — 이미 70→50주 실행(평단 683 리셋), 잔여는 밴드 상단 소폭 트림만'},
  {layer:'L6', name:'KODEX 미국AI광통신네트워크',ticker:'0173Y0',kind:'ETF',  w:5.36, tlo:4,  thi:6,  dir:'hold', note:'CPO 전환 잔여 상방 — 광 구조 노출 유지'},
  {layer:'L7', name:'버티브',                   ticker:'VRT',    kind:'종목', w:3.77, tlo:7,  thi:9,  dir:'add',  note:'밴드 증액분은 미보유 800V HVDC(NVTS 등) 신규명 대상 — VRT 단독 추격금지(성숙)'},
+ {layer:'L7', name:'◷ 800V HVDC 신규명 (NVTS 등)',ticker:'—',     kind:'종목', w:0,    tlo:0,  thi:3,  dir:'add',  note:'미보유 — L7 증액 지정 통로. 단 6/1 검증상 전원 52주 고점권 = 투자가능 비히클 부재(cand:null), 눌림 출현 대기'},
  {layer:'L8', name:'KODEX AI전력핵심설비',     ticker:'ETF',    kind:'ETF',  w:6.38, tlo:3,  thi:5,  dir:'trim', note:'한국 grid 과체중·추격금지, 1y 상방 제한 — 차익 실현'},
  {layer:'L8', name:'SOL 미국AI전력인프라',     ticker:'ETF',    kind:'ETF',  w:4.78, tlo:2,  thi:4,  dir:'trim', note:'grid 재분류 과체중 — 신규 미반영 grid명만 선별, 추격금지'},
  {layer:'L8', name:'블룸에너지',               ticker:'BE',     kind:'종목', w:2.35, tlo:1,  thi:3,  dir:'trim', note:'과열·+1,200%/내부자매도, 1y 상방 0 — 추격금지·첫 눌림 대기'},
+ {layer:'L8', name:'◷ CEG 가동원전 (미보유 후보)',  ticker:'CEG',    kind:'종목', w:0,    tlo:0,  thi:2,  dir:'add',  note:'미보유 — grid 발전 빈칸: 52주 저점권 관찰 + 매크로 게이트 AND / OKLO는 과열 강등(진입가 아님)'},
  {layer:'기타',name:'테슬라',                  ticker:'TSLA',   kind:'종목', w:5.59, tlo:4,  thi:6,  dir:'hold', note:'정치베타(8레이어 밖)·1y 상방은 있으나 별도 트랙 — 4~6% 유지'},
  {layer:'기타',name:'코스피50',               ticker:'ETF',    kind:'ETF',  w:0.27, tlo:0.5,thi:1.5,dir:'add',  note:'지수 방어 — 소폭 보강'},
  {layer:'기타',name:'코스피200 채권혼합',      ticker:'ETF',    kind:'ETF',  w:4.37, tlo:3,  thi:4,  dir:'hold', note:'방어자산(채권혼합) — 유지'},
@@ -2307,7 +2312,7 @@ function renderPortfolio(){
  // ── 개별 종목/ETF 현보유 vs 적정 비중 ──
  const detOrd=['L2','L3','L4','L6','L7','L8','기타','현금'];
  const detByL={};HOLD_DETAIL.forEach(h=>{(detByL[h.layer]=detByL[h.layer]||[]).push(h);});
- let detHTML=`<div class="gap-secttl">종목별 현보유 vs 적정 비중 <span class="gap-secsub">개별종목 · ETF 기준 (계좌 6/6) — 레이어 밴드를 향후 상승가능성으로 배분</span></div>`+
+ let detHTML=`<div class="gap-secttl">종목별 현보유 vs 적정 비중 <span class="gap-secsub">개별종목 · ETF 기준 (계좌 6/6) — 레이어 밴드를 향후 상승가능성으로 배분 · ◷=미보유 후보(게이트 통과 전 0%, 리밸런싱 참고)</span></div>`+
   `<div class="gap-row" style="color:var(--txt);font-weight:700;border-bottom:1px solid var(--line)">
      <div class="gap-lab">종목 / ETF</div><div class="gap-cur">현재</div><div class="gap-arr">회전</div>
      <div class="gap-tgt">적정밴드</div><div class="gap-gate">상방 근거 (레이어 내)</div></div>`;
