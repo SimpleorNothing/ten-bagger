@@ -1,0 +1,24 @@
+/* ── 실적 운영 캘린더: 팬튼 A안(절제형) ─────────────────────────
+   Cloud Dancer 바탕 + Blue Fusion 단색 강조. 레이아웃·radius 14px·타이포 불변, 색만 교체.
+   매핑: bg→Cloud Dancer #F0EFEB / brand→Blue Fusion #496176 / text→Hematite #746F69 / muted→Cloud Cover #989292
+   index.html </head> 직전에 <link rel="stylesheet" href="/pantone.css"> 추가로 활성화. 제거하면 원복. ── */
+#v-alpha .eops{--pt-bg:#F0EFEB;--pt-line:#dedbd3;--pt-ink:#3d3935;--pt-txt:#746F69;--pt-mut:#989292;--pt-brand:#496176;
+  border:1.5px solid var(--pt-line);background:var(--pt-bg)}
+#v-alpha .eops-h{color:var(--pt-ink)}
+#v-alpha .eops-h em{color:var(--pt-brand)}
+#v-alpha .eops-row{border-top:1px solid var(--pt-line)}
+#v-alpha .eops-row:first-child{border-top:0}
+#v-alpha .eops-dn{color:var(--pt-txt)}
+#v-alpha .eops-do{color:var(--pt-txt)}
+#v-alpha .eops-st{color:var(--pt-mut)}
+#v-alpha .eops-row.now{background:rgba(73,97,118,.08);box-shadow:inset 0 0 0 1.5px var(--pt-brand)}
+#v-alpha .eops-row.now .eops-dn,#v-alpha .eops-row.now .eops-do{color:var(--pt-ink)}
+#v-alpha .eops-row.now .eops-st{color:var(--pt-brand)}
+#v-alpha .eops-row.past .eops-st{color:var(--pt-mut)}
+#v-alpha .eops-tl{border-left:1px solid var(--pt-line)}
+@media(max-width:760px){#v-alpha .eops-tl{border-left:0;border-top:1px solid var(--pt-line)}}
+#v-alpha .eops-tlh{color:var(--pt-mut)}
+#v-alpha .eops-tlr b{color:var(--pt-brand)}
+#v-alpha .eops-tlh+.eops-tlr b{background:var(--pt-brand);color:#fff;border-radius:7px;text-align:center;padding:1px 6px}
+#v-alpha .eops-tlr .nm{color:var(--pt-ink)}
+#v-alpha .eops-tlr .mt{color:var(--pt-mut)}
