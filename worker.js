@@ -174,7 +174,15 @@ export default {
       if (request.method === "POST" && url.pathname === "/api/signals") {
         return handleSignalsUpdate(request, env);
       }
-      return env.ASSETS.fetch(request);
+      const res = await env.ASSETS.fetch(request);
+      // HTML 응답에 1Y 호버 차트 모듈 주입 (index.html 본문은 그대로 유지하기 위한 worker-side 주입).
+      const ct = res.headers.get("content-type") || "";
+      if (ct.includes("text/html")) {
+        return new HTMLRewriter()
+          .on("body", { element(el) { el.append('<script src="/hover-chart.js" defer></scr' + 'ipt>', { html: true }); } })
+          .transform(res);
+      }
+      return res;
     }
 
     // Anything else (page or .json) gets the login screen, never the data.
