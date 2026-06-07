@@ -14,6 +14,7 @@ import fs from 'node:fs';
 
 const HTML = 'index.html';
 const OUT = 'prices.json';
+const CHARTS_OUT = 'charts.json'; // 1Y 일봉 시계열(호버 차트용). t=epoch day, c=close.
 const UA = { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36' };
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const ymd = (d) => d.toISOString().slice(0, 10).replace(/-/g, '');
@@ -72,7 +73,15 @@ async function yahoo(sym) {
     else { after = cl[i]; break; }       // 1/1 이후 첫 종가
   }
   const base = before ?? after ?? meta.chartPreviousClose ?? cl.find((x) => x != null) ?? null;
-  return { price, changePct: base ? +(((price - base) / base) * 100).toFixed(2) : null, currency: meta.currency || 'USD' };
+  // 1Y 시계열 (null 캔들 제거, t=epoch day)
+  const st = [], sc = [];
+  for (let i = 0; i < ts.length; i++) {
+    if (cl[i] == null || !Number.isFinite(cl[i])) continue;
+    st.push(Math.floor(ts[i] / 86400));
+    sc.push(+cl[i].toFixed(cl[i] >= 1000 ? 0 : 2));
+  }
+  return { price, changePct: base ? +(((price - base) / base) * 100).toFixed(2) : null, currency: meta.currency || 'USD',
+    series: sc.length >= 20 ? { t: st, c: sc } : null };
 }
 
 async function naver(code) {
@@ -95,7 +104,17 @@ async function naver(code) {
   }
   const baseRow = before || after || rows[0];
   const base = Number(baseRow[4]);
-  return { price, changePct: base ? +(((price - base) / base) * 100).toFixed(2) : null, currency: 'KRW' };
+  // 1Y 시계열 (최근 ~252 거래일, t=epoch day)
+  const oneY = rows.slice(-260);
+  const st = [], sc = [];
+  for (const x of oneY) {
+    const ds = String(x[0]).replace(/-/g, '');
+    const t = Math.floor(Date.UTC(+ds.slice(0, 4), +ds.slice(4, 6) - 1, +ds.slice(6, 8)) / 864e5);
+    st.push(t);
+    sc.push(Math.round(Number(x[4])));
+  }
+  return { price, changePct: base ? +(((price - base) / base) * 100).toFixed(2) : null, currency: 'KRW',
+    series: sc.length >= 20 ? { t: st, c: sc } : null };
 }
 
 async function quote(c) {
@@ -117,6 +136,9 @@ async function main() {
   let prev = { asOf: null, quotes: {} };
   try { prev = JSON.parse(fs.readFileSync(OUT, 'utf8')); } catch (e) { /* first run */ }
   const out = { asOf: prev.asOf, quotes: { ...(prev.quotes || {}) } };
+  let prevCharts = { asOf: null, series: {} };
+  try { prevCharts = JSON.parse(fs.readFileSync(CHARTS_OUT, 'utf8')); } catch (e) { /* first run */ }
+  const charts = { asOf: prevCharts.asOf, series: { ...(prevCharts.series || {}) } };
 
   await yahooAuth();
   let ok = 0, fail = 0;
@@ -124,6 +146,7 @@ async function main() {
     try {
       const q = await quote(c);
       out.quotes[c.id] = { price: q.price, changePct: q.changePct, currency: q.currency, ticker: c.ticker, src: q.src };
+      if (q.series) charts.series[c.id] = q.series; // 시리즈 없으면 이전 유지
       ok++;
       console.log(`OK   ${c.id.padEnd(8)} ${c.ticker.padEnd(8)} ${q.price} ${q.currency} YTD=${q.changePct}% (${q.src})`);
     } catch (e) {
@@ -132,8 +155,9 @@ async function main() {
     }
     await sleep(300);
   }
-  if (ok > 0) out.asOf = new Date().toISOString();
+  if (ok > 0) { out.asOf = new Date().toISOString(); charts.asOf = out.asOf; }
   fs.writeFileSync(OUT, JSON.stringify(out, null, 2) + '\n');
+  fs.writeFileSync(CHARTS_OUT, JSON.stringify(charts) + '\n'); // 시계열은 압축 직렬화(파일 크기)
   console.log(`\nDone: ${ok} ok, ${fail} failed. asOf=${out.asOf}`);
 }
 
