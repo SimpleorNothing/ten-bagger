@@ -102,14 +102,16 @@ main{padding:36px 0 90px;position:relative}
 .sigentry .edate{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--txt)}
 .sigentry .esrc{font-size:15px;font-weight:700}
 .srctxt{font-family:var(--mono);font-size:13px;color:var(--faint)}
-/* ── 시그널 로그 종목 호버 → value chain(알파 찾기) 팝업 ── */
-.vc-stock{text-decoration:underline dotted var(--dawn);text-underline-offset:2px;cursor:help;border-radius:3px;transition:background .12s,color .12s}
+/* ── 시그널 로그 종목 클릭 → value chain(알파 찾기) 팝업 (Ctrl+클릭=새 탭) ── */
+.vc-stock{text-decoration:underline dotted var(--dawn);text-underline-offset:2px;cursor:pointer;border-radius:3px;transition:background .12s,color .12s}
 .vc-stock:hover{background:var(--dawn);color:var(--onacc)}
 .vc-pop{position:fixed;z-index:9999;width:min(560px,92vw);max-height:72vh;overflow:auto;background:var(--panel);border:1px solid var(--line2);border-radius:14px;box-shadow:0 18px 50px rgba(0,0,0,.45);padding:14px 16px;font-family:var(--sans)}
 .vc-pop[hidden]{display:none}
 .vc-pop-h{font-family:var(--mono);font-size:12px;color:var(--faint);letter-spacing:.04em;margin-bottom:12px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .vc-pop-h b{color:var(--txt);font-size:14px}
 .vc-pop-h span{color:var(--dawn)}
+.vc-pop-x{margin-left:auto;cursor:pointer;color:var(--faint);font-size:13px;padding:0 2px}
+.vc-pop-x:hover{color:var(--txt)}
 .vc-pop .casc-flow{grid-template-columns:1fr;gap:12px}
 .vc-pop .casc-driver{position:static;top:auto}
 .vc-pop .casc-trigger{margin-bottom:14px}
@@ -374,9 +376,6 @@ table.tk th.c{text-align:center}
 .gap-secttl{margin:26px 0 8px;font-family:var(--serif);font-size:17px;font-weight:700;color:var(--txt)}
 .gap-secttl .gap-secsub{display:block;font-family:var(--sans,inherit);font-size:12px;font-weight:400;color:var(--faint);margin-top:2px}
 .gap-row.gap-sub{border-bottom:1px solid var(--line2);padding-top:10px}
-.gap-row.is-trim,.gap-row.is-add{padding-left:8px;padding-right:8px;margin-left:-8px;margin-right:-8px;border-radius:5px}
-.gap-row.is-trim{background:#b8860b14;box-shadow:inset 3px 0 0 #b8860b}
-.gap-row.is-add{background:#0ca67814;box-shadow:inset 3px 0 0 #0ca678}
 .gap-nm{display:flex;align-items:center;gap:6px;color:var(--txt);font-weight:600}
 .gap-tk{font:600 11px var(--mono);padding:1px 5px;border-radius:4px;white-space:nowrap}
 @media(max-width:760px){.gap-row{flex-wrap:wrap}.gap-gate{flex:1 1 100%;padding-left:92px}.gap-nm{flex:1 1 100%}}
@@ -1996,21 +1995,21 @@ function vcDecorate(root){
 /* 팝업 엘리먼트(1회 생성) + 표시/숨김 */
 function vcPopEl(){
  let p=document.getElementById('vcPop');
- if(!p){p=document.createElement('div');p.id='vcPop';p.className='vc-pop';p.hidden=true;document.body.appendChild(p);
-   p.addEventListener('mouseenter',()=>clearTimeout(p._t));
-   p.addEventListener('mouseleave',vcHide);}
+ if(!p){p=document.createElement('div');p.id='vcPop';p.className='vc-pop';p.hidden=true;document.body.appendChild(p);}
  return p;
 }
-function vcHide(){const p=document.getElementById('vcPop');if(p)p._t=setTimeout(()=>{p.hidden=true;p._cur=null;},120);}
+function vcHide(){const p=document.getElementById('vcPop');if(p){p.hidden=true;p._cur=null;}}
+/* 종목 span → value chain 카드 HTML (없으면 '') */
+function vcCards(span){
+ const keys=(span.dataset.vc||'').split(',').filter(Boolean);if(!keys.length)return '';
+ return keys.map(k=>{const c=CASCADES.find(x=>x.key===k);return c?cascadeHTML(c):'';}).filter(Boolean).join('<hr class="vc-sep">');
+}
+/* 좌클릭: 같은 자리(팝업) */
 function vcShow(span){
- const keys=(span.dataset.vc||'').split(',').filter(Boolean);if(!keys.length)return;
- const p=vcPopEl();clearTimeout(p._t);
- if(p._cur===span&&!p.hidden)return;
- p._cur=span;
+ const cards=vcCards(span);if(!cards){vcHide();return;}
+ const p=vcPopEl();p._cur=span;
  const name=span.dataset.nm||span.textContent;
- const cards=keys.map(k=>{const c=CASCADES.find(x=>x.key===k);return c?cascadeHTML(c):'';}).filter(Boolean).join('<hr class="vc-sep">');
- if(!cards){p.hidden=true;return;}
- p.innerHTML=`<div class="vc-pop-h"><b>${span.textContent}</b> · value chain <span>알파 찾기</span></div>${cards}`;
+ p.innerHTML=`<div class="vc-pop-h"><b>${span.textContent}</b> · value chain <span>알파 찾기</span><span class="vc-pop-x" title="닫기">✕</span></div>${cards}`;
  p.querySelectorAll('.cnode .cos .ct').forEach(ct=>{if(name&&ct.textContent.includes(name))ct.classList.add('vc-hit');});
  p.hidden=false;
  const r=span.getBoundingClientRect(),pw=p.offsetWidth,ph=p.offsetHeight;
@@ -2019,11 +2018,36 @@ function vcShow(span){
  if(top+ph>innerHeight-10)top=Math.max(10,r.top-8-ph);
  p.style.left=left+'px';p.style.top=top+'px';
 }
+/* Ctrl/Cmd+좌클릭: 새 탭으로 해당 value chain (페이지 스타일 복제로 동일 비주얼) */
+function vcOpenTab(span){
+ const cards=vcCards(span);if(!cards)return;
+ const name=span.textContent,nm=span.dataset.nm||name;
+ const w=window.open('','_blank');if(!w)return;
+ const styles=[...document.querySelectorAll('style')].map(s=>s.textContent).join('\n');
+ const extra='.vc-page{max-width:1100px;margin:0 auto;padding:28px 22px}'
+  +'.vc-page .vc-pop-h{font-family:var(--mono);font-size:13px;color:var(--faint);letter-spacing:.04em;margin-bottom:18px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}'
+  +'.vc-page .vc-pop-h b{color:var(--txt);font-size:18px}.vc-page .vc-pop-h span{color:var(--dawn)}'
+  +'.vc-page .cnode{cursor:default}.vc-page .cnode .go{display:none}';
+ const body='<div class="vc-page"><div class="vc-pop-h"><b>'+name+'</b> · value chain <span>알파 찾기</span></div>'+cards+'</div>';
+ w.document.open();
+ w.document.write('<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+name+' · value chain</title><style>'+styles+'\n'+extra+'</style></head><body>'+body+'</body></html>');
+ w.document.close();
+ try{w.document.querySelectorAll('.cnode .cos .ct').forEach(ct=>{if(nm&&ct.textContent.includes(nm))ct.classList.add('vc-hit');});}catch(e){}
+}
 if(!window.__vcInit){window.__vcInit=1;
- document.addEventListener('mouseover',e=>{const s=e.target.closest&&e.target.closest('.vc-stock');if(s)vcShow(s);});
- document.addEventListener('mouseout',e=>{const s=e.target.closest&&e.target.closest('.vc-stock');if(!s)return;
-   const to=e.relatedTarget;if(to&&to.closest&&(to.closest('.vc-stock')===s||to.closest('#vcPop')))return;vcHide();});
- window.addEventListener('scroll',()=>{const p=document.getElementById('vcPop');if(p&&!p.hidden){p.hidden=true;p._cur=null;}},true);
+ /* 캡처 단계: 종목 클릭이 .sigtag 레이어 점프로 버블되기 전에 가로챈다 */
+ document.addEventListener('click',e=>{
+   if(e.target.closest&&e.target.closest('.vc-pop-x')){e.preventDefault();e.stopPropagation();vcHide();return;}
+   const s=e.target.closest&&e.target.closest('.vc-stock');
+   if(s){e.preventDefault();e.stopPropagation();
+     if(e.ctrlKey||e.metaKey){vcOpenTab(s);return;}
+     const p=document.getElementById('vcPop');
+     if(p&&!p.hidden&&p._cur===s)vcHide();else vcShow(s);
+     return;}
+   if(!(e.target.closest&&e.target.closest('#vcPop')))vcHide(); /* 바깥 클릭 → 닫기 */
+ },true);
+ window.addEventListener('scroll',()=>{const p=document.getElementById('vcPop');if(p&&!p.hidden)vcHide();},true);
+ document.addEventListener('keydown',e=>{if(e.key==='Escape')vcHide();});
 }
 
 /* 한 노드가 특정 레이어의 종목을 다루는지 — cand(STATE id→layer) 또는 cos 종목명/티커 일치로 판정.
@@ -2479,8 +2503,7 @@ function renderPortfolio(){
    const cur=d.w,arr=TARGET_ARROW[t.dir],ac=TARGET_HEX[t.dir];
    const gap=(((t.lo+t.hi)/2)-cur);
    const gtxt=Math.abs(gap)<0.5?'~0':(gap>0?'+':'')+gap.toFixed(0);
-   const hl=t.dir==='trim'?' is-trim':t.dir==='add'?' is-add':'';
-   return `<div class="gap-row${hl}">
+   return `<div class="gap-row">
      <div class="gap-lab">${lid}</div>
      <div class="gap-cur">${cur.toFixed(1)}%</div>
      <div class="gap-arr" style="color:${ac}">${arr} ${gtxt}</div>
@@ -2505,8 +2528,7 @@ function renderPortfolio(){
    const gap=((h.tlo+h.thi)/2)-h.w;
    const gtxt=Math.abs(gap)<0.5?'~0':(gap>0?'+':'')+gap.toFixed(1);
    const tkCol=h.kind==='ETF'?'#1c7ed6':h.kind==='현금'?'#64748b':L.color;
-   const hl=h.dir==='trim'?' is-trim':h.dir==='add'?' is-add':'';
-   detHTML+=`<div class="gap-row${hl}">
+   detHTML+=`<div class="gap-row">
      <div class="gap-lab gap-nm"><span class="gap-tk" style="background:${tkCol}1f;color:${tkCol}">${h.kind==='현금'?'현금':h.ticker}</span>${h.name}</div>
      <div class="gap-cur">${h.w.toFixed(1)}%</div>
      <div class="gap-arr" style="color:${ac}">${arr} ${gtxt}</div>
