@@ -102,6 +102,23 @@ main{padding:36px 0 90px;position:relative}
 .sigentry .edate{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--txt)}
 .sigentry .esrc{font-size:15px;font-weight:700}
 .srctxt{font-family:var(--mono);font-size:13px;color:var(--faint)}
+/* ── 시그널 로그 종목 호버 → value chain(알파 찾기) 팝업 ── */
+.vc-stock{text-decoration:underline dotted var(--dawn);text-underline-offset:2px;cursor:help;border-radius:3px;transition:background .12s,color .12s}
+.vc-stock:hover{background:var(--dawn);color:var(--onacc)}
+.vc-pop{position:fixed;z-index:9999;width:min(560px,92vw);max-height:72vh;overflow:auto;background:var(--panel);border:1px solid var(--line2);border-radius:14px;box-shadow:0 18px 50px rgba(0,0,0,.45);padding:14px 16px;font-family:var(--sans)}
+.vc-pop[hidden]{display:none}
+.vc-pop-h{font-family:var(--mono);font-size:12px;color:var(--faint);letter-spacing:.04em;margin-bottom:12px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.vc-pop-h b{color:var(--txt);font-size:14px}
+.vc-pop-h span{color:var(--dawn)}
+.vc-pop .casc-flow{grid-template-columns:1fr;gap:12px}
+.vc-pop .casc-driver{position:static;top:auto}
+.vc-pop .casc-trigger{margin-bottom:14px}
+.vc-pop .cnode{cursor:default}
+.vc-pop .cnode:hover{transform:none}
+.vc-pop .cnode .go{display:none}
+.vc-sep{border:0;border-top:1px dashed var(--line2);margin:16px 0}
+.cnode .cos .ct.vc-hit{background:var(--dawn);border-radius:5px;padding:0 4px;color:var(--onacc)}
+.cnode .cos .ct.vc-hit b{color:var(--onacc)!important}
 
 /* ===== THREAD (river) ===== */
 .thread-card{background:linear-gradient(155deg,var(--panel),var(--ink2));border:1px solid var(--line);border-radius:18px;padding:28px 26px 18px;position:relative;overflow:hidden}
@@ -1855,6 +1872,7 @@ function renderSignalLog(){
    </div>`).join('');
  el.querySelectorAll('.sigtag.jump').forEach(t=>t.addEventListener('click',()=>{
    gotoStack(t.dataset.l);}));
+ vcDecorate(el);
 }
 
 /* ===== 00 THREAD (river) ===== */
@@ -1877,6 +1895,134 @@ function cascadeHTML(c){const dcol=STAGE_HEX[c.stage];
         <div class="mult">콘텐츠 배수 · ${nd.mult}</div>
         <div class="cos">대표: ${Array.isArray(nd.cos)?nd.cos.map(([nm,st,h])=>{const g=stageGap(nd.stage,st),dv=g>=STAGE_DIVERGE;return `<span class="ct${dv?' dvct':''}"><i style="background:${STAGE_HEX[st]}"></i>${nm}${h?'<span class="heldstar"> ★</span>':''} <b style="color:${STAGE_HEX[st]}">${st}</b>${dv?`<span class="dvf" title="테마 ${nd.stage} vs 차트 ${st} · ${g}단계 발산">⚑</span>`:''}</span>`;}).join(' · '):nd.cos}</div></div>`;}).join('')}</div>
   </div>`;}
+
+/* ===== 시그널 로그 종목 → value chain(알파 찾기) 호버 팝업 =====
+   CASCADES(강물1 · 8레이어 2·3차 파생 가치사슬)에서 종목→카스케이드 인덱스를 구축하고,
+   시그널 로그 본문/태그의 종목명·티커에 마우스를 올리면 그 종목의 value chain 카드를 팝업으로 띄운다. */
+/* 시그널 로그 표기(티커·한글/영문 변형) → CASCADES cos의 대표 종목명(canonical)으로 라우팅 */
+const VC_ALIAS={
+ 'LITE':'Lumentum','루멘텀':'Lumentum',
+ 'VICR':'Vicor',
+ 'VRT':'Vertiv','버티브':'Vertiv',
+ 'MU':'마이크론','Micron':'마이크론',
+ '마벨':'MRVL','Marvell':'MRVL',
+ 'COHR':'Coherent','코히런트':'Coherent',
+ 'RMBS':'Rambus','램버스':'Rambus',
+ 'ALAB':'Astera','Astera Labs':'Astera',
+ 'AMAT':'Applied Materials',
+ 'AMKR':'Amkor','FORM':'FormFactor',
+ '리노':'Leeno','리노공업':'Leeno',
+ '퀄컴':'QCOM',
+ '컨스텔레이션':'CEG','Constellation':'CEG',
+ 'BE':'Bloom','블룸에너지':'Bloom','블룸':'Bloom','Oklo':'Oklo','OKLO':'Oklo',
+ '테슬라':'Tesla','TSLA':'Tesla',
+ 'SEM':'삼성전기','하이닉스':'SK하이닉스','대덕':'대덕전자','한미':'한미반도체',
+ 'TWNG':'테크윙','089030':'테크윙','0522':'ASMPT',
+ 'Vistra':'VST','하모닉':'Harmonic Drive',
+};
+/* 배열 cos가 아닌 문자열 cos에만 등장하는 종목 → 카스케이드 직접 보강 */
+const VC_EXTRA={
+ '효성':['power'],'LS일렉':['power'],'Eaton':['power'],'Quanta':['power'],
+ 'GE Vernova':['power'],'Vernova':['power'],'Navitas':['power'],'NVTS':['power'],
+ 'ROHM':['power'],'Infineon':['power'],'IFX':['power'],'STM':['power'],
+ /* 메모리 3사 = memory·gpu(HBM) 양쪽 가치사슬 노출 */
+ '마이크론':['gpu','memory'],'SK하이닉스':['gpu','memory'],'삼성전자':['gpu','memory'],
+};
+let _vcEnts=null;
+function vcEntries(){
+ if(_vcEnts)return _vcEnts;
+ const idx={};const add=(t,k)=>{t=String(t||'').trim();if(!t)return;(idx[t]=idx[t]||new Set()).add(k);};
+ CASCADES.forEach(c=>(c.nodes||[]).forEach(nd=>{
+   if(Array.isArray(nd.cos))nd.cos.forEach(([nm])=>{
+     let t=String(nm).split(/[·(]/)[0].trim();
+     const mm=t.match(/^(.+?)\s+([A-Z]{2,5}|\d{3,6})$/); // 후행 티커/코드 분리: 'Tesla TSLA'→'Tesla'+'TSLA'
+     if(mm){add(mm[1].trim(),c.key);add(mm[2],c.key);}else add(t,c.key);
+   });
+ }));
+ Object.entries(VC_EXTRA).forEach(([t,ks])=>ks.forEach(k=>add(t,k)));
+ const map={};
+ Object.keys(idx).forEach(t=>{map[t]={tok:t,keys:new Set(idx[t]),name:t};});
+ Object.entries(VC_ALIAS).forEach(([al,canon])=>{
+   if(!idx[canon])return;
+   if(!map[al])map[al]={tok:al,keys:new Set(),name:canon};
+   idx[canon].forEach(k=>map[al].keys.add(k));map[al].name=canon;
+ });
+ const ents=Object.values(map).filter(e=>e.tok.length>=2)
+   .map(e=>({...e,ascii:/^[\x20-\x7e]+$/.test(e.tok)}));
+ ents.sort((a,b)=>b.tok.length-a.tok.length); // 긴 토큰 우선(삼성전기 > 삼성)
+ _vcEnts=ents;return ents;
+}
+/* 시그널 로그 텍스트 노드를 순회하며 종목명·티커를 .vc-stock 으로 감싼다(태그 속성은 건드리지 않음) */
+function vcDecorate(root){
+ if(!root)return;
+ const ents=vcEntries();
+ const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,null);
+ const targets=[];let n;
+ while(n=walker.nextNode()){
+   const pe=n.parentElement;if(!pe)continue;
+   if(pe.closest('.vc-stock'))continue;
+   if(!pe.closest('.sigtxt,.sigtag'))continue;
+   if(!n.nodeValue||!n.nodeValue.trim())continue;
+   targets.push(n);
+ }
+ targets.forEach(node=>{
+   const text=node.nodeValue;let i=0,buf='';const parts=[];
+   const flush=()=>{if(buf){parts.push(document.createTextNode(buf));buf='';}};
+   while(i<text.length){
+     let m=null;
+     for(const e of ents){const L=e.tok.length;
+       if(text.substr(i,L)!==e.tok)continue;
+       if(e.ascii){const b=text[i-1],a=text[i+L];
+         if(b&&/[A-Za-z0-9]/.test(b))continue;
+         if(a&&/[A-Za-z0-9]/.test(a))continue;}
+       m=e;break;}
+     if(m){flush();
+       const span=document.createElement('span');span.className='vc-stock';
+       span.dataset.vc=[...m.keys].join(',');span.dataset.nm=m.name;
+       span.textContent=text.substr(i,m.tok.length);
+       parts.push(span);i+=m.tok.length;
+     }else{buf+=text[i];i++;}
+   }
+   flush();
+   if(parts.some(p=>p.nodeType!==3)){
+     const frag=document.createDocumentFragment();parts.forEach(p=>frag.appendChild(p));
+     node.parentNode.replaceChild(frag,node);
+   }
+ });
+}
+/* 팝업 엘리먼트(1회 생성) + 표시/숨김 */
+function vcPopEl(){
+ let p=document.getElementById('vcPop');
+ if(!p){p=document.createElement('div');p.id='vcPop';p.className='vc-pop';p.hidden=true;document.body.appendChild(p);
+   p.addEventListener('mouseenter',()=>clearTimeout(p._t));
+   p.addEventListener('mouseleave',vcHide);}
+ return p;
+}
+function vcHide(){const p=document.getElementById('vcPop');if(p)p._t=setTimeout(()=>{p.hidden=true;p._cur=null;},120);}
+function vcShow(span){
+ const keys=(span.dataset.vc||'').split(',').filter(Boolean);if(!keys.length)return;
+ const p=vcPopEl();clearTimeout(p._t);
+ if(p._cur===span&&!p.hidden)return;
+ p._cur=span;
+ const name=span.dataset.nm||span.textContent;
+ const cards=keys.map(k=>{const c=CASCADES.find(x=>x.key===k);return c?cascadeHTML(c):'';}).filter(Boolean).join('<hr class="vc-sep">');
+ if(!cards){p.hidden=true;return;}
+ p.innerHTML=`<div class="vc-pop-h"><b>${span.textContent}</b> · value chain <span>알파 찾기</span></div>${cards}`;
+ p.querySelectorAll('.cnode .cos .ct').forEach(ct=>{if(name&&ct.textContent.includes(name))ct.classList.add('vc-hit');});
+ p.hidden=false;
+ const r=span.getBoundingClientRect(),pw=p.offsetWidth,ph=p.offsetHeight;
+ let left=r.left,top=r.bottom+8;
+ if(left+pw>innerWidth-10)left=Math.max(10,innerWidth-10-pw);
+ if(top+ph>innerHeight-10)top=Math.max(10,r.top-8-ph);
+ p.style.left=left+'px';p.style.top=top+'px';
+}
+if(!window.__vcInit){window.__vcInit=1;
+ document.addEventListener('mouseover',e=>{const s=e.target.closest&&e.target.closest('.vc-stock');if(s)vcShow(s);});
+ document.addEventListener('mouseout',e=>{const s=e.target.closest&&e.target.closest('.vc-stock');if(!s)return;
+   const to=e.relatedTarget;if(to&&to.closest&&(to.closest('.vc-stock')===s||to.closest('#vcPop')))return;vcHide();});
+ window.addEventListener('scroll',()=>{const p=document.getElementById('vcPop');if(p&&!p.hidden){p.hidden=true;p._cur=null;}},true);
+}
+
 /* 한 노드가 특정 레이어의 종목을 다루는지 — cand(STATE id→layer) 또는 cos 종목명/티커 일치로 판정.
    매칭은 단방향(cos명이 STATE 종목명을 포함)으로 좁혀 '삼성'이 '삼성전기'에 오인 매칭되는 것을 방지. */
 function nodeTouchesLayer(nd,layer){
