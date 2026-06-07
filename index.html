@@ -118,6 +118,11 @@ main{padding:36px 0 90px;position:relative}
 .vc-pop .cnode{cursor:default}
 .vc-pop .cnode:hover{transform:none}
 .vc-pop .cnode .go{display:none}
+/* 밸류체인 밖 종목 — 클릭 시 정보 카드 폴백 */
+.vc-info{display:flex;flex-direction:column;gap:8px}
+.vc-irow{display:flex;gap:10px;font-size:13px;line-height:1.5}
+.vc-irow .vc-ik{flex:0 0 60px;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.03em;padding-top:1px}
+.vc-inote{margin-top:4px;padding-top:10px;border-top:1px solid var(--line2);font-size:13px;line-height:1.6;color:var(--dim)}
 .vc-sep{border:0;border-top:1px dashed var(--line2);margin:16px 0}
 .cnode .cos .ct.vc-hit{background:var(--dawn);border-radius:5px;padding:0 4px;color:var(--onacc)}
 .cnode .cos .ct.vc-hit b{color:var(--onacc)!important}
@@ -1955,10 +1960,14 @@ function vcEntries(){
    if(!map[al])map[al]={tok:al,keys:new Set(),name:canon};
    idx[canon].forEach(k=>map[al].keys.add(k));map[al].name=canon;
  });
+ /* 탐색기(D) 종목 카탈로그 — 밸류체인 매핑이 없는 종목도 로그에서 클릭→정보 팝업 뜨도록 등록(빈 keys=정보카드 폴백) */
+ const cat=(typeof window!=='undefined'&&window.VC_STOCKS)||[];
+ cat.forEach(d=>{const reg=t=>{t=String(t||'').trim();if(t.length<2||map[t])return;map[t]={tok:t,keys:new Set(),name:d.n};};
+   reg(d.n);if(d.t&&d.t!=='ETF'&&(/^[A-Za-z]{2,5}$/.test(d.t)||/^\d{4,6}$/.test(d.t)))reg(d.t);});
  const ents=Object.values(map).filter(e=>e.tok.length>=2)
    .map(e=>({...e,ascii:/^[\x20-\x7e]+$/.test(e.tok)}));
  ents.sort((a,b)=>b.tok.length-a.tok.length); // 긴 토큰 우선(삼성전기 > 삼성)
- _vcEnts=ents;return ents;
+ if(cat.length)_vcEnts=ents;return ents; // 카탈로그 준비 전(최초 동기 렌더)엔 캐시 보류 → JSON 신규 로그 반영 후 재구성
 }
 /* 시그널 로그 텍스트 노드를 순회하며 종목명·티커를 .vc-stock 으로 감싼다(태그 속성은 건드리지 않음) */
 function vcDecorate(root){
@@ -2010,13 +2019,27 @@ function vcCards(span){
  const keys=(span.dataset.vc||'').split(',').filter(Boolean);if(!keys.length)return '';
  return keys.map(k=>{const c=CASCADES.find(x=>x.key===k);return c?cascadeHTML(c):'';}).filter(Boolean).join('<hr class="vc-sep">');
 }
+/* 종목 span → 밸류체인이 없을 때 탐색기(D)·HOLD_DETAIL 기반 정보 카드 (없으면 '') */
+function vcStockCard(name){
+ const cat=(typeof window!=='undefined'&&window.VC_STOCKS)||[];
+ const d=cat.find(x=>x.n===name||x.t===name);if(!d)return '';
+ const hd=(typeof HOLD_DETAIL!=='undefined')?HOLD_DETAIL.find(h=>h.ticker===d.t):null;
+ const dirLabel={trim:'트림(축소)',add:'증액',hold:'유지'};
+ const rows=[`<div class="vc-irow"><span class="vc-ik">레이어</span><span>${(d.layer||'—')}${d.stage?' · '+d.stage:''}</span></div>`];
+ if(d.cand)rows.push(`<div class="vc-irow"><span class="vc-ik">보유</span><span>미보유 후보(관찰)</span></div>`);
+ else if(Number.isFinite(d.w))rows.push(`<div class="vc-irow"><span class="vc-ik">현보유</span><span>${d.w}%</span></div>`);
+ if(hd&&(Number.isFinite(hd.tlo)||Number.isFinite(hd.thi)))rows.push(`<div class="vc-irow"><span class="vc-ik">적정밴드</span><span>${hd.tlo}~${hd.thi}%${hd.dir?' · '+(dirLabel[hd.dir]||hd.dir):''}</span></div>`);
+ const note=(hd&&hd.note)||d.note||'';
+ return `<div class="vc-info">${rows.join('')}${note?`<div class="vc-inote">${note}</div>`:''}</div>`;
+}
 /* 좌클릭: 같은 자리(팝업) */
 function vcShow(span){
- const cards=vcCards(span);if(!cards){vcHide();return;}
- const p=vcPopEl();p._cur=span;
  const name=span.dataset.nm||span.textContent;
- p.innerHTML=`<div class="vc-pop-h"><b>${span.textContent}</b> · value chain <span>알파 찾기</span><span class="vc-pop-x" title="닫기">✕</span></div>${cards}`;
- p.querySelectorAll('.cnode .cos .ct').forEach(ct=>{if(name&&ct.textContent.includes(name))ct.classList.add('vc-hit');});
+ const vc=vcCards(span);const cards=vc||vcStockCard(name);if(!cards){vcHide();return;}
+ const p=vcPopEl();p._cur=span;
+ const hdr=vc?'value chain <span>알파 찾기</span>':'<span>종목 정보</span>';
+ p.innerHTML=`<div class="vc-pop-h"><b>${span.textContent}</b> · ${hdr}<span class="vc-pop-x" title="닫기">✕</span></div>${cards}`;
+ if(vc)p.querySelectorAll('.cnode .cos .ct').forEach(ct=>{if(name&&ct.textContent.includes(name))ct.classList.add('vc-hit');});
  p.hidden=false;
  const r=span.getBoundingClientRect(),pw=p.offsetWidth,ph=p.offsetHeight;
  let left=r.left,top=r.bottom+8;
@@ -2026,17 +2049,18 @@ function vcShow(span){
 }
 /* Ctrl/Cmd+좌클릭: 새 탭으로 해당 value chain (페이지 스타일 복제로 동일 비주얼) */
 function vcOpenTab(span){
- const cards=vcCards(span);if(!cards)return;
  const name=span.textContent,nm=span.dataset.nm||name;
+ const vc=vcCards(span);const cards=vc||vcStockCard(nm);if(!cards)return;
  const w=window.open('','_blank');if(!w)return;
  const styles=[...document.querySelectorAll('style')].map(s=>s.textContent).join('\n');
  const extra='.vc-page{max-width:1100px;margin:0 auto;padding:28px 22px}'
   +'.vc-page .vc-pop-h{font-family:var(--mono);font-size:13px;color:var(--faint);letter-spacing:.04em;margin-bottom:18px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}'
   +'.vc-page .vc-pop-h b{color:var(--txt);font-size:18px}.vc-page .vc-pop-h span{color:var(--dawn)}'
   +'.vc-page .cnode{cursor:default}.vc-page .cnode .go{display:none}';
- const body='<div class="vc-page"><div class="vc-pop-h"><b>'+name+'</b> · value chain <span>알파 찾기</span></div>'+cards+'</div>';
+ const hdr=vc?'value chain <span>알파 찾기</span>':'<span>종목 정보</span>';
+ const body='<div class="vc-page"><div class="vc-pop-h"><b>'+name+'</b> · '+hdr+'</div>'+cards+'</div>';
  w.document.open();
- w.document.write('<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+name+' · value chain</title><style>'+styles+'\n'+extra+'</style></head><body>'+body+'</body></html>');
+ w.document.write('<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+name+(vc?' · value chain':' · 종목 정보')+'</title><style>'+styles+'\n'+extra+'</style></head><body>'+body+'</body></html>');
  w.document.close();
  try{w.document.querySelectorAll('.cnode .cos .ct').forEach(ct=>{if(nm&&ct.textContent.includes(nm))ct.classList.add('vc-hit');});}catch(e){}
 }
@@ -2636,6 +2660,8 @@ const D=[
  {n:'퀄컴',t:'QCOM',mkt:'US',layer:'L2',cand:true,aN:[-1,-1,1],aK:[-1.2,-2.5,-3],stage:'성숙',g:'spent',note:'엣지 추론·온디바이스 AI(강물4 앵커였음). ⚑현재가 $229가 평균목표가($176) 22% 상회+52주 고점권+6/1 −8.8%(NVDA RTX Spark 온디바이스 경쟁)으로 "least extended" 전제 소멸·DC 추론 카탈리스트 위협. 성숙·진입근거 약화 → 관찰. P/E 19로 싸나 차별화 옵션 훼손.'},
  {n:'암페놀',t:'APH',mkt:'US',layer:'L6',cand:true,aN:[0.5,3,3],aK:[0.3,1.5,-0.5],stage:'가속',g:'open',note:'고속 인터커넥트(카퍼+광+전력)·LITE 보완재(분산·베타1.39). IT datacom 41%·AI 견인, Q1 record orders +78%·B2B 1.24·가이던스 상향(B&R 신선). 주가 ATH比 −21% 눌림+추정 상향=γ 열림. 현재 ~$146(52주 $87~167·ATH−12~21%)·평균목표가 $182(+22~37% 여력)·EPS 11명 상향 = γ 열림 재확인. $135~148 저항 미돌파(S5 미점등) → 정찰만, 본매수 7/29 게이트.'},
 ];
+/* 시그널 로그 종목 클릭 팝업용 카탈로그 노출(밸류체인 밖 종목 정보 폴백 — vcEntries/vcStockCard에서 사용) */
+window.VC_STOCKS=D.map(d=>({n:d.n,t:d.t,layer:d.layer,stage:d.stage,note:d.note,w:d.w,cand:!!d.cand}));
 const CASH={NASDAQ:[-0.3,-2.5],KOSPI:[-0.5,-4]};
 const BNOTE={NASDAQ:'기준선=나스닥(QQQ). 각 종목의 raw 초과수익.',KOSPI:'기준선=코스피. 나스닥 대비 전 종목 동일하게 평행이동 → 순위·간격 불변, 원점만 이동.'};
 
