@@ -2038,7 +2038,9 @@ if(!window.__vcInit){window.__vcInit=1;
  /* 캡처 단계: 종목 클릭이 .sigtag 레이어 점프로 버블되기 전에 가로챈다 */
  document.addEventListener('click',e=>{
    if(e.target.closest&&e.target.closest('.vc-pop-x')){e.preventDefault();e.stopPropagation();vcHide();return;}
-   const s=e.target.closest&&e.target.closest('.vc-stock');
+   let s=e.target.closest&&e.target.closest('.vc-stock');
+   /* 시그널 로그 태그 칩(예: "테크윙 합본화") 어디를 눌러도 그 안의 종목 팝업으로 — 종목 없는 태그만 레이어 점프 유지 */
+   if(!s){const tag=e.target.closest&&e.target.closest('.sigtag');if(tag)s=tag.querySelector('.vc-stock');}
    if(s){e.preventDefault();e.stopPropagation();
      if(e.ctrlKey||e.metaKey){vcOpenTab(s);return;}
      const p=document.getElementById('vcPop');
