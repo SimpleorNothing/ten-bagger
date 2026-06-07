@@ -27,14 +27,14 @@ jobs:
         run: node scripts/fetch-prices.mjs
       - name: Commit & push if changed (rebase-safe)
         run: |
-          FILE="prices.json"
-          if [ -z "$(git status --porcelain "$FILE")" ]; then
-            echo "No change in $FILE."; exit 0
+          FILES="prices.json charts.json"
+          if [ -z "$(git status --porcelain $FILES)" ]; then
+            echo "No change in $FILES."; exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add "$FILE"
-          git commit -m "chore: update stock prices"
+          git add $FILES
+          git commit -m "chore: update stock prices + 1y charts"
           for i in 1 2 3 4 5; do
             if git pull --rebase --autostash origin claude/wizardly-rubin-SubA1 \
                && git push origin HEAD:claude/wizardly-rubin-SubA1; then
