@@ -718,21 +718,24 @@ table.tk th.c{text-align:center}
     <div class="mc-card"><h4>매크로 급락 = 매수 기회</h4><p>표본 내 모든 매크로 급락이 D+60 내 회복/신고가. 단 <b>정책 반전 여지</b> 확인 필수.</p></div>
     <div class="mc-card"><h4>과열 = 부분 트림</h4><p>강세장에선 RSI70+/Greed가 추세지속 신호로 더 자주 작동. <b>전량매도 금지, 20~30% 트림.</b></p></div>
     <div class="mc-card"><h4>종목은 매크로 종속</h4><p>충격 시 상관 ≈1로 무차별 매도. 매크로=타이밍, 펀더멘털=선택으로 분리.</p></div>
-    <div class="mc-card"><h4>패턴화는 가능</h4><p>저점·고점 예측 불가. 대신 <b>3중 점등 시그널</b>로 정량화.</p></div>
+    <div class="mc-card"><h4>패턴화는 가능</h4><p>저점·고점 예측 불가. 대신 <b>3등급 게이트(드로다운×공포)</b>로 정량화.</p></div>
   </div>
   <p class="vsub" style="margin-top:4px">매크로 충격은 노이즈가 아니라 거래 가능한 신호. 단 "펀더멘털 레짐 전환"이면 이 룰북은 폐기.</p>
 
-  <div class="mc-sec" style="display:flex;align-items:baseline;gap:8px">3중 점등 매수 시그널 (신호등) · <span style="color:var(--faint)">현재값 signals.json 자동 연동(update-signals 크론)</span><span class="updstamp" id="updMacro" style="margin-left:auto"></span></div>
+  <div class="mc-sec" style="display:flex;align-items:baseline;gap:8px">통합 매수 게이트 · 3등급 (2026-06-07 개편) · <span style="color:var(--faint)">현재값 signals.json 자동 연동(update-signals 크론)</span><span class="updstamp" id="updMacro" style="margin-left:auto"></span></div>
   <table class="mc">
-    <thead><tr><th>신호</th><th class="c">현재값</th><th class="c">매수 점등</th><th class="c">매도(과열) 점등</th><th class="c">상태</th></tr></thead>
+    <thead><tr><th>입력</th><th class="c">현재값</th><th class="c">G1 조정</th><th class="c">G2 급락</th><th class="c">G3 패닉</th><th class="c">매도(과열)</th><th class="c">상태</th></tr></thead>
     <tbody>
-      <tr><td>VIX 종가</td><td class="c" id="sigVix">--</td><td class="c">≥ 40</td><td class="c">≤ 14</td><td class="c"><span class="lamp" id="lampVix">⚪</span></td></tr>
-      <tr><td>CNN Fear &amp; Greed</td><td class="c" id="sigFG">--</td><td class="c">≤ 15</td><td class="c">≥ 80</td><td class="c"><span class="lamp" id="lampFG">⚪</span></td></tr>
-      <tr><td>KOSPI 사이드카 / S&amp;P 일간</td><td class="c" id="sigSide">--</td><td class="c">발동 / −5%</td><td class="c">매수 사이드카 연발</td><td class="c"><span class="lamp" id="lampSide">⚪</span></td></tr>
+      <tr><td>나스닥 드로다운 (5y 고점比)</td><td class="c" id="sigDD">--</td><td class="c">≤ −8%</td><td class="c">≤ −13%</td><td class="c">≤ −20%</td><td class="c">—</td><td class="c"><span class="lamp" id="lampDD">⚪</span></td></tr>
+      <tr><td>추세 (40주선 기울기·이격)</td><td class="c" id="sigTrend">--</td><td class="c">상승 + 이격 ≥ −5%</td><td class="c">기울기 상승</td><td class="c">필터 없음</td><td class="c">—</td><td class="c"><span class="lamp" id="lampTrend">⚪</span></td></tr>
+      <tr><td>VIX (종가 / 장중)</td><td class="c" id="sigVix">--</td><td class="c" colspan="2">장중 ≥40 또는 종가 ≥30</td><td class="c">종가 ≥35</td><td class="c">≤ 14</td><td class="c"><span class="lamp" id="lampVix">⚪</span></td></tr>
+      <tr><td>CNN Fear &amp; Greed</td><td class="c" id="sigFG">--</td><td class="c" colspan="2">≤ 20</td><td class="c">≤ 15</td><td class="c">≥ 80</td><td class="c"><span class="lamp" id="lampFG">⚪</span></td></tr>
+      <tr><td>KOSPI 매도 사이드카 / S&amp;P 일간</td><td class="c" id="sigSide">--</td><td class="c" colspan="2">발동 또는 −4%</td><td class="c">−5% / 서킷</td><td class="c">매수 사이드카 연발</td><td class="c"><span class="lamp" id="lampSide">⚪</span></td></tr>
+      <tr><td>VIX 기간구조 (VIX vs 3M)</td><td class="c" id="sigTerm">--</td><td class="c" colspan="2">역전 (VIX &gt; VIX3M)</td><td class="c">역전</td><td class="c">—</td><td class="c"><span class="lamp" id="lampTerm">⚪</span></td></tr>
     </tbody>
   </table>
   <div class="verdict" id="sigVerdict">신호 데이터 없음(signals.json 미입력) — 대기</div>
-  <p class="vsub">판정: 매수 3개 중 <b>≥2 → 분할매수 / 1 → 1/3 정찰 / 0 → 대기.</b> 매도는 대칭이되 결과는 <b>부분 트림만</b>. 검증: <span class="mbadge" style="background:#0ca67822;color:#0ca678">2025.4.7~8 관세 3/3 → D+20 +15%</span> <span class="mbadge" style="background:#0ca67822;color:#0ca678">2026.3.3~4 중동 3/3 → D+20 +10~15%</span></p>
+  <p class="vsub">판정: <b>G1</b> = 드로다운 −8% + 추세 생존(40주선 상승·이격 −5%내) → 트랜치 3% · <b>G2</b> = −13% 또는 공포 2신호 (+기울기 상승) → +3% · <b>G3</b> = −20% 또는 공포 강(强)3신호, 추세필터 없음(평균회귀 국면) → +3%(잔여 전액). 등급당 집행은 50/50 분할·<b>반전 트리거 확인 후</b>(저점 미갱신 첫 주봉 양봉 / 아래꼬리 주봉 후 고점 돌파 — 떨어지는 칼 금지). 공통 거부권: <b>레짐 전환 의심이면 등급 무관 보류.</b> 역방향 재집행 금지, 신고가 회복 시 사용분은 차기 과열 트림에서 보충. 매도는 과열 열 대칭이되 <b>부분 트림만</b>.<br>재판정 검증: <span class="mbadge" style="background:#0ca67822;color:#0ca678">2023.10 G1</span> <span class="mbadge" style="background:#0ca67822;color:#0ca678">2024.8 엔캐리 G2 (구 신호등 미점등)</span> <span class="mbadge" style="background:#0ca67822;color:#0ca678">2025.4 관세 G3 (구 3/3)</span> <span class="mbadge" style="background:#0ca67822;color:#0ca678">2026.3 중동 G2 (구 '3/3'은 VIX 종가 35 미달 — 과대판정 정정)</span> <span class="mbadge" style="background:#e0313122;color:#e03131">2022 약세장 — 추세필터·레짐 D 차단</span></p>
 
   <div class="mc-sec">보유·후보 종목 매크로 베타 &amp; 회복탄력성 <span style="color:var(--faint)">(★=보유)</span></div>
   <table class="mc">
@@ -817,7 +820,7 @@ table.tk th.c{text-align:center}
     <tbody>
       <tr><td>현재 병목(선반영) L2·3·6·7</td><td class="c">≈ 75%</td><td>방어 / 트림 영역</td></tr>
       <tr><td>다음 병목 L4·L8</td><td class="c">≈ 4.8%</td><td>증액 1순위 영역(얇음)</td></tr>
-      <tr><td>현금</td><td class="c">9%</td><td>충격 대비 실탄. 권고 레인지 향후 점검</td></tr>
+      <tr><td>현금</td><td class="c">9%</td><td>충격 대비 실탄 — <b>트랜치 3%/3%/3% (G1/G2/G3)</b> 분리. 역방향 재집행 금지·신고가 회복 시 트림으로 보충</td></tr>
     </tbody>
   </table>
   <p class="vsub">매크로 급락은 비싼 선반영 층(L3·L7)을 트림해 얇은 다음 병목(L4·L8)으로 옮기는, 에크먼식 상대가치 회전을 강제 실행할 기회.</p>
@@ -825,11 +828,11 @@ table.tk th.c{text-align:center}
   <div class="mc-sec">6단계 체크리스트 + 현재 권고</div>
   <ol class="mc-steps">
     <li>충격 유형 분류(이벤트 표) → "레짐 전환"이면 룰북 폐기</li>
-    <li>신호 점검(3중 신호등) → 총점</li>
+    <li>신호 점검(3등급 게이트) → 등급</li>
     <li>매수 분할(좌)</li>
     <li>매도 분할(우)</li>
     <li>종목 베타 조정(베타&gt;2.0 BE·LITE·MRVL=5분할 / 1.2~1.8=3분할 / TSLA 별도)</li>
-    <li><b>현재 권고(2026-05-31)</b>: S&amp;P·KOSPI <b>동반 사상최고</b> + VIX 15 → 신호 부재를 넘어 <b style="color:#b8860b">과열·트림 구간</b>(5/29 KOSPI 신고가 회복으로 "KOSPI 미회복" 전제 붕괴 → 한 칸 이동). 이란 게이트는 <b>선반영 소진·둔감화 N차</b> — 같은 호르무즈 헤드라인은 잔물결(−0.4% 안팎)이라 기다리던 눌림을 더는 못 만든다. 다음 드로다운 트리거는 <b>이란 밖</b>(PCE·FOMC·AI capex·IPO 공급) 또는 <b>다른 종류</b> 충격(유가 $100+ 2주·MOU 붕괴). 현금 9% 유지, 과열 트림 모드(LITE·한국전력ETF 앰버), BE 첫 눌림 대기. MU 6/24 실적이 메모리 게이트.</li>
+    <li><b>현재 권고(2026-06-07)</b>: AVGO 가이던스 쇼크(FY26 AI 미상향)+5월 고용 172K 인상 리스크로 <b>6/4~5 SOX 2일 −10%·나스닥 −4.2%·코스피 매도 사이드카(−5.54%)</b>. 신 게이트 기준 나스닥 고점比 ~−6% = <b style="color:#b8860b">무등급 관찰</b>(G1 −8% 미달), 충격 유형은 <b style="color:#e03131">레짐 의심</b>(인상 사이클+AI capex) → 등급 도달해도 D 보류, <b>6/10 CPI·6/16~17 FOMC가 판정선</b>. 현금 9~10%는 트랜치 3/3/3(G1/G2/G3) 분리·투입 금지. 과열 트림 모드 유지하되 급락일 투매 금지 — LITE 트림 밴드(870~900) 하향 이탈로 반등 조건부 재설계, TSLA 트림은 SpaceX ~6/12 상장 전 반등일이 마지막 윈도. MU 6/24 D-1 중립 프로토콜.</li>
   </ol>
   <div class="foot">Caveat: 17개월·강세장 표본. 2008/2020형 레짐 전환 미포함 — 그 경우 룰북 무효. D+N 수익률은 표본 N≤3로 신뢰구간 넓음.<br>출처: Bloomberg·CNBC·Reuters·CNN(F&amp;G)·Korea Herald/Times·Yahoo Finance·RBC WM·Macroption(VIX)·Bloom DEF 14A(SEC)·TrendForce/Counterpoint·MoneyToday. 표본 2025.1.1~2026.5.28.</div>
 </section>
@@ -2934,27 +2937,62 @@ Promise.all([getJSON('alpha.json'),getJSON('earnings.json'),getJSON('judgment.js
 })();
 </script>
 <script>
-/* ===== 01 MACRO — signals.json 연동 (VIX·F&G·사이드카) ===== */
+/* ===== 01 MACRO — signals.json 연동 (통합 매수 게이트 3등급 · 2026-06-07) ===== */
 (function(){
- const TH={vixBuy:40,vixSell:14,fgBuy:15,fgSell:80,spBuy:-5};
+ const TH={ddG1:-8,ddG2:-13,ddG3:-20,gapMin:-5,vixF:30,vixS:35,vixHighF:40,fgF:20,fgS:15,spF:-4,spS:-5,vixSell:14,fgSell:80};
  let SIGNALS=null;
  function set(id,txt){const e=document.getElementById(id);if(e)e.textContent=txt;}
+ function lampSet(id,sym){const e=document.getElementById(id);if(e)e.textContent=sym;}
  function renderSignals(){
   const S=SIGNALS||{};
-  const vix=S.vix,fg=S.fearGreed,side=S.sidecarKR,sp=S.spDailyPct;
-  set('sigVix',vix==null?'--':vix);
+  const vix=S.vix,vixHigh=S.vixHigh,fg=S.fearGreed,sp=S.spDailyPct,v3=S.vix3m;
+  const side=S.sidecarKR===true&&S.sidecarDate&&S.sidecarDate===S.asOf; // 당일 수동 입력만 점등(스테일 무효)
+  const dd=S.nasdaqDrawdownPct,slopeUp=S.wma40SlopeUp,gap=S.wma40GapPct;
+  set('sigDD',dd==null?'--':`${dd}%`);
+  set('sigTrend',(slopeUp==null||gap==null)?'--':`${slopeUp?'상승':'하락'} · 이격 ${gap>0?'+':''}${gap}%`);
+  set('sigVix',vix==null?'--':(vixHigh!=null?`${vix} / H ${vixHigh}`:`${vix}`));
   set('sigFG',fg==null?'--':fg);
-  set('sigSide',side===true?'발동':(sp==null?'--':`S&P ${sp>0?'+':''}${sp}%`));
-  let buy=0;
-  const lamp=(id,known,buyCond,sellCond)=>{const e=document.getElementById(id);if(!e)return;
-   if(!known){e.textContent='⚪';return;}
-   if(buyCond){e.textContent='🟢';buy++;}else if(sellCond){e.textContent='🔴';}else e.textContent='⚪';};
-  lamp('lampVix',vix!=null,vix>=TH.vixBuy,vix<=TH.vixSell);
-  lamp('lampFG',fg!=null,fg<=TH.fgBuy,fg>=TH.fgSell);
-  const sideKnown=side===true||sp!=null;
-  lamp('lampSide',sideKnown,side===true||(sp!=null&&sp<=TH.spBuy),false);
-  const known=(vix!=null)+(fg!=null)+(sideKnown?1:0);
-  set('sigVerdict',known?`매수 점등 ${buy}/3 → ${buy>=2?'분할매수 (정찰 33%)':buy===1?'1/3 정찰':'대기'}`:'신호 데이터 없음(signals.json 미입력) — 대기');
+  set('sigSide',side?'발동':(sp==null?'--':`S&P ${sp>0?'+':''}${sp}%`));
+  set('sigTerm',(vix==null||v3==null)?'--':`${vix} vs ${v3} ${vix>v3?'역전':'콘탱고'}`);
+  // 공포 4신호 — fear(G2 강도) / strong(G3 강도)
+  const f1=(vixHigh!=null&&vixHigh>=TH.vixHighF)||(vix!=null&&vix>=TH.vixF), s1=(vixHigh!=null&&vixHigh>=TH.vixHighF)||(vix!=null&&vix>=TH.vixS);
+  const f2=fg!=null&&fg<=TH.fgF, s2=fg!=null&&fg<=TH.fgS;
+  const f3=side||(sp!=null&&sp<=TH.spF), s3=(sp!=null&&sp<=TH.spS);
+  const f4=(vix!=null&&v3!=null&&vix>v3), s4=f4;
+  const fear=(f1?1:0)+(f2?1:0)+(f3?1:0)+(f4?1:0);
+  const strong=(s1?1:0)+(s2?1:0)+(s3?1:0)+(s4?1:0);
+  const trendG1=slopeUp===true&&gap!=null&&gap>=TH.gapMin;
+  // 등급 판정 (D 레짐 거부권·반전 트리거는 수동 판단)
+  let grade=0;
+  if(dd!=null){
+   if(dd<=TH.ddG3||strong>=3)grade=3;
+   else if((dd<=TH.ddG2||fear>=2)&&slopeUp===true)grade=2;
+   else if(dd<=TH.ddG1&&trendG1)grade=1;
+  }
+  // 램프
+  lampSet('lampDD',dd==null?'⚪':dd<=TH.ddG3?'🔴':dd<=TH.ddG2?'🟠':dd<=TH.ddG1?'🟡':'⚪');
+  lampSet('lampTrend',(slopeUp==null)?'⚪':slopeUp?'🟢':'🔴');
+  lampSet('lampVix',vix==null?'⚪':(s1?'🔴':f1?'🟠':vix<=TH.vixSell?'🟣':'⚪'));
+  lampSet('lampFG',fg==null?'⚪':(s2?'🔴':f2?'🟠':fg>=TH.fgSell?'🟣':'⚪'));
+  lampSet('lampSide',(side||sp!=null)?(s3?'🔴':f3?'🟠':'⚪'):'⚪');
+  lampSet('lampTerm',(vix==null||v3==null)?'⚪':f4?'🔴':'⚪');
+  // 판정 문구
+  if(dd==null&&(vix!=null||fg!=null)){
+   // 신규 필드 수집 전 — 구 3중 신호등 폴백
+   let buy=0;
+   if(vix!=null&&vix>=40)buy++;
+   if(fg!=null&&fg<=15)buy++;
+   if(side||(sp!=null&&sp<=-5))buy++;
+   set('sigVerdict',`(폴백·구 3중 기준 — 드로다운 수집 전) 매수 점등 ${buy}/3 → ${buy>=2?'분할매수':buy===1?'1/3 정찰':'대기'}`);
+  }else if(dd==null){
+   set('sigVerdict','신호 데이터 없음(signals.json 미입력) — 대기');
+  }else{
+   const txt=grade===3?`G3 패닉 — 트랜치 +3%(잔여 전액) 권한. 반전 트리거 확인+레짐 D 통과 후 50/50 집행`
+    :grade===2?`G2 급락 — 트랜치 +3% 권한. 반전 트리거 확인+레짐 D 통과 후 50/50 집행`
+    :grade===1?`G1 조정 — 트랜치 3% 권한. 반전 트리거 확인+레짐 D 통과 후 50/50 집행`
+    :`무등급 — 대기 (드로다운 ${dd}% · 공포 ${fear}/4${strong?` · 강 ${strong}/4`:''})`;
+   set('sigVerdict',`판정: ${txt}`);
+  }
   setStamp('updMacro',S.asOf);
  }
  renderSignals();
