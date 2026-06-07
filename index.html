@@ -376,6 +376,9 @@ table.tk th.c{text-align:center}
 .gap-secttl{margin:26px 0 8px;font-family:var(--serif);font-size:17px;font-weight:700;color:var(--txt)}
 .gap-secttl .gap-secsub{display:block;font-family:var(--sans,inherit);font-size:12px;font-weight:400;color:var(--faint);margin-top:2px}
 .gap-row.gap-sub{border-bottom:1px solid var(--line2);padding-top:10px}
+.gap-row.is-trim,.gap-row.is-add{padding-left:8px;padding-right:8px;margin-left:-8px;margin-right:-8px;border-radius:5px}
+.gap-row.is-trim{background:#b8860b24;box-shadow:inset 3px 0 0 #b8860b}
+.gap-row.is-add{background:#0ca67824;box-shadow:inset 3px 0 0 #0ca678}
 .gap-nm{display:flex;align-items:center;gap:6px;color:var(--txt);font-weight:600}
 .gap-tk{font:600 11px var(--mono);padding:1px 5px;border-radius:4px;white-space:nowrap}
 @media(max-width:760px){.gap-row{flex-wrap:wrap}.gap-gate{flex:1 1 100%;padding-left:92px}.gap-nm{flex:1 1 100%}}
@@ -2505,7 +2508,8 @@ function renderPortfolio(){
    const cur=d.w,arr=TARGET_ARROW[t.dir],ac=TARGET_HEX[t.dir];
    const gap=(((t.lo+t.hi)/2)-cur);
    const gtxt=Math.abs(gap)<0.5?'~0':(gap>0?'+':'')+gap.toFixed(0);
-   return `<div class="gap-row">
+   const hl=t.dir==='trim'?' is-trim':t.dir==='add'?' is-add':'';
+   return `<div class="gap-row${hl}">
      <div class="gap-lab">${lid}</div>
      <div class="gap-cur">${cur.toFixed(1)}%</div>
      <div class="gap-arr" style="color:${ac}">${arr} ${gtxt}</div>
@@ -2530,7 +2534,8 @@ function renderPortfolio(){
    const gap=((h.tlo+h.thi)/2)-h.w;
    const gtxt=Math.abs(gap)<0.5?'~0':(gap>0?'+':'')+gap.toFixed(1);
    const tkCol=h.kind==='ETF'?'#1c7ed6':h.kind==='현금'?'#64748b':L.color;
-   detHTML+=`<div class="gap-row">
+   const hl=h.dir==='trim'?' is-trim':h.dir==='add'?' is-add':'';
+   detHTML+=`<div class="gap-row${hl}">
      <div class="gap-lab gap-nm"><span class="gap-tk" style="background:${tkCol}1f;color:${tkCol}">${h.kind==='현금'?'현금':h.ticker}</span>${h.name}</div>
      <div class="gap-cur">${h.w.toFixed(1)}%</div>
      <div class="gap-arr" style="color:${ac}">${arr} ${gtxt}</div>
