@@ -993,12 +993,151 @@ table.tk th.c{text-align:center}
 </section>
 
 <!-- 05 확률 추정 -->
+<style>
+/* Probability Lab — index.html 디자인 토큰에 맞춰 .problab 로 스코프 (iframe 제거, 인라인 렌더) */
+.problab{
+  --canvas:var(--panel); --canvas-warm:var(--panel2);
+  --ink:var(--txt); --ink-soft:var(--txt); --graphite:var(--dim);
+  --slate:var(--dim); --slate-soft:var(--dim); --mute:var(--faint); --stone:var(--faint); --ash:#c4ccd2;
+  --hairline:var(--line); --hairline-soft:var(--line);
+  --primary:var(--dawn); --on-primary:var(--onacc);
+  --up:var(--txt); --down:var(--faint); --flat:var(--dim);
+  --disp:var(--serif);
+  color:var(--dim);font-variant-numeric:tabular-nums}
+.problab .tickrow{display:flex;gap:24px;flex-wrap:wrap;align-items:flex-end}
+.problab .field{display:flex;flex-direction:column;gap:7px}
+.problab .field label{font-size:11px;font-weight:600;letter-spacing:.06em;color:var(--faint)}
+.problab input,.problab select{font-family:var(--disp);font-size:16px;color:var(--txt);background:transparent;border:0;border-bottom:1px solid var(--line);border-radius:0;padding:9px 1px;outline:none;transition:border-color .15s}
+.problab input:focus,.problab select:focus{border-bottom-color:var(--dawn)}
+.problab input::placeholder{color:var(--faint)}
+.problab input.tick{width:168px;font-weight:700;text-transform:uppercase;letter-spacing:.02em}
+.problab input.num{width:92px}
+.problab .btn{font-family:var(--disp);font-size:14px;font-weight:600;line-height:1.43;cursor:pointer;border-radius:9999px;border:1px solid var(--dawn);padding:10px 22px;background:var(--panel);color:var(--dawn);transition:background .15s,color .15s,border-color .15s}
+.problab .btn:hover{background:var(--panel2)}
+.problab .btn.primary{background:var(--dawn);color:var(--onacc);border-color:var(--dawn)}
+.problab .btn.primary:hover{background:#0c161c}
+.problab .btn[disabled]{opacity:.45;cursor:wait}
+.problab .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}
+.problab .chip{font-size:13px;font-weight:500;padding:6px 14px;border-radius:9999px;border:1px solid var(--line);background:var(--panel);color:var(--txt);cursor:pointer;transition:border-color .15s,color .15s}
+.problab .chip:hover{border-color:var(--dawn);color:var(--dawn)}
+.problab .chip b{color:var(--dawn);font-weight:700}
+.problab .aimsg{font-size:13px;color:var(--faint);margin-top:14px;min-height:16px}
+.problab .aimsg.ok{color:var(--txt)} .problab .aimsg.err{color:var(--st-hot);font-weight:500}
+.problab .pl-hr{height:1px;background:var(--line);border:0;margin:34px 0}
+.problab .controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:24px;margin-top:8px;align-items:start}
+.problab .scenwrap{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;width:fit-content;margin-top:6px}
+.problab .scenwrap button{font-family:var(--disp);font-size:13px;font-weight:500;padding:10px 16px;background:var(--panel);color:var(--dim);border:0;border-right:1px solid var(--line);cursor:pointer;transition:color .15s,background .15s}
+.problab .scenwrap button:last-child{border-right:0}
+.problab .scenwrap button:hover{color:var(--dawn)}
+.problab .scenwrap button.on{background:var(--dawn);color:var(--onacc);font-weight:600}
+.problab .bandedit{display:flex;gap:14px;flex-wrap:wrap;margin-top:8px}
+.problab .bandedit .field input{width:70px;font-size:14px}
+.problab .grid{display:grid;grid-template-columns:1.12fr 1fr;gap:28px;margin-top:8px}
+@media(max-width:860px){.problab .grid{grid-template-columns:1fr}}
+.problab .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:24px}
+.problab .card h3{font-size:11px;font-weight:600;letter-spacing:.06em;color:var(--faint);margin:0 0 18px}
+.problab table{width:100%;border-collapse:collapse}
+.problab th,.problab td{text-align:right;padding:13px 8px;font-size:15px;border-bottom:1px solid var(--line)}
+.problab th:first-child,.problab td:first-child{text-align:left}
+.problab tbody tr:last-child td{border-bottom:0}
+.problab thead th{font-size:11px;font-weight:600;letter-spacing:.05em;color:var(--faint)}
+.problab .hz{color:var(--txt);font-weight:500}
+.problab .hz small{display:block;color:var(--faint);font-size:11px;font-weight:400;margin-top:2px;letter-spacing:0}
+.problab td.out{color:var(--dim)}
+.problab td.lead{color:var(--txt);font-weight:700}
+.problab .conewrap svg{display:block;width:100%;height:auto}
+.problab .legend{display:flex;gap:18px;flex-wrap:wrap;font-size:12px;color:var(--faint);margin-top:12px}
+.problab .legend i{display:inline-block;width:10px;height:10px;margin-right:6px;vertical-align:-1px}
+.problab .readout{font-size:13px;color:var(--dim);margin-top:10px;line-height:1.7}
+.problab .readout b{color:var(--txt);font-weight:600}
+.problab .ptag{display:inline-block;font-size:11px;padding:2px 9px;border-radius:9999px;border:1px solid var(--line);color:var(--dim);margin-left:6px;letter-spacing:.04em;font-weight:500}
+.problab .barwrap{margin:11px 0}
+.problab .barhead{display:flex;justify-content:space-between;font-size:11px;color:var(--faint);margin-bottom:5px}
+.problab .bar{display:flex;height:10px;overflow:hidden;border:1px solid var(--line);background:var(--panel);border-radius:3px}
+.problab .bar span{height:100%}
+.problab .bar .bu{background:var(--txt)}
+.problab .bar .bf{background:var(--dim);border-left:1px solid var(--panel)}
+.problab .bar .bd{background:var(--ash);border-left:1px solid var(--panel)}
+.problab .method{font-size:13px;color:var(--dim);line-height:1.75;max-width:80ch}
+.problab .method b{color:var(--txt);font-weight:600}
+.problab .method code{font-family:var(--mono);background:var(--panel2);padding:1px 6px;border-radius:5px;color:var(--txt);font-size:12.5px}
+.problab .method p{margin:0 0 12px}
+.problab .method p:last-child{margin-bottom:0}
+.problab details{margin-top:0}
+.problab summary{cursor:pointer;font-size:11px;letter-spacing:.06em;color:var(--faint);margin-bottom:14px}
+.problab summary:hover{color:var(--dawn)}
+.problab .disclaimer{border-left:2px solid var(--line);padding-left:16px;margin-top:24px;font-size:13px;color:var(--dim);max-width:80ch;line-height:1.7}
+</style>
 <section class="view" id="v-prob">
   <div class="vhead">
     <div class="vkick">Probability Lab · 상승/유지/하락</div>
     <h1 class="vtitle">종목별 <em>확률의 모양</em></h1>
-    <p class="vsub">변동성(σ)·드리프트(μ) 가정을 로그정규(GBM) 분포로 변환해 D+1일·1M·3M·6M의 상승/유지/하락 확률을 추정한다. 급락-후 시나리오 오버레이(Raw/Filtered) 포함. <a href="prob.html" target="_blank" rel="noopener" style="color:var(--dawn)">새 탭에서 열기 ↗</a></p></div>
-  <iframe src="prob.html" loading="lazy" title="확률 추정기" style="width:100%;height:88vh;border:1px solid var(--line);border-radius:14px;background:var(--panel)"></iframe>
+    <p class="vsub">변동성(σ)·드리프트(μ) 가정을 로그정규(GBM) 분포로 변환해 D+1일·1M·3M·6M의 상승/유지/하락 확률을 추정한다. 급락-후 시나리오 오버레이(Raw/Filtered) 포함.</p></div>
+
+  <div class="problab">
+    <div class="tickrow">
+      <div class="field"><label for="pl_tk">종목 (티커/이름)</label><input id="pl_tk" class="tick" value="MU" autocomplete="off" spellcheck="false"></div>
+      <div class="field"><label for="pl_sg">연 변동성 σ (%)</label><input id="pl_sg" class="num" type="number" step="1" value="55"></div>
+      <div class="field"><label for="pl_mu">연 드리프트 μ (%)</label><input id="pl_mu" class="num" type="number" step="1" value="15"></div>
+      <button id="pl_ai" class="btn primary">AI로 σ·μ 추정</button>
+      <button id="pl_reset" class="btn">기본값</button>
+    </div>
+    <div class="chips" id="pl_chips"></div>
+    <div class="aimsg" id="pl_aimsg">종목 프리셋을 누르면 σ·μ가 채워집니다. 임의 티커는 "AI로 σ·μ 추정"으로 최근 변동성을 가져옵니다.</div>
+
+    <hr class="pl-hr">
+
+    <div class="controls">
+      <div class="field">
+        <label>급락-후 시나리오 (드리프트 오버레이)</label>
+        <div class="scenwrap" id="pl_scen">
+          <button data-s="normal" class="on">일반</button>
+          <button data-s="raw">급락후 · Raw</button>
+          <button data-s="filtered">급락후 · Filtered</button>
+        </div>
+      </div>
+      <div class="field" style="grid-column:span 2">
+        <label>유지(보합) 밴드 · 종가가 ±이 % 이내면 "유지"</label>
+        <div class="bandedit" id="pl_bands"></div>
+      </div>
+    </div>
+
+    <div class="grid" style="margin-top:28px">
+      <div class="card conewrap">
+        <h3>확률 콘 · 로그정규 분포 (±1σ·±2σ)</h3>
+        <svg id="pl_cone" viewBox="0 0 560 360" preserveAspectRatio="xMidYMid meet" role="img" aria-label="확률 분포 콘 차트"></svg>
+        <div class="legend">
+          <span><i style="background:var(--txt)"></i>상승 영역</span>
+          <span><i style="background:var(--dim)"></i>유지 밴드</span>
+          <span><i style="background:var(--ash)"></i>하락 영역</span>
+          <span><i style="background:var(--dawn)"></i>중앙값 경로</span>
+        </div>
+        <div class="readout" id="pl_readout"></div>
+      </div>
+
+      <div class="card">
+        <h3 id="pl_resTitle">확률 추정</h3>
+        <table>
+          <thead><tr><th>구간</th><th>상승</th><th>유지</th><th>하락</th></tr></thead>
+          <tbody id="pl_rows"></tbody>
+        </table>
+        <div style="margin-top:16px" id="pl_barsHost"></div>
+      </div>
+    </div>
+
+    <div class="foot" style="border-top:0;padding-top:28px;margin-top:8px">
+      <details open>
+        <summary>방법론 · 가정 · 한계</summary>
+        <div class="method">
+          <p><b>모델.</b> 주가가 기하 브라운 운동을 따른다고 가정합니다. 기간 <code>t</code>(연) 동안 로그수익률은 정규분포 <code>r ~ N((μ − σ²/2)·t + δ , σ²·t)</code>를 따르고, δ는 시나리오 오버레이(급락 후 반등 기대치)입니다. 유지 밴드 ±b에 대해 상승=<code>P(r &gt; ln(1+b))</code>, 하락=<code>P(r &lt; ln(1−b))</code>, 나머지가 유지입니다. 구간 환산: D+1일=1/252년, 1개월=21/252, 3개월=63/252, 6개월=126/252.</p>
+          <p><b>시나리오 오버레이(기대 단순수익률, 편집 가능).</b> 일반=0. 급락후 Raw=[1일 0 · 1M +2% · 3M +6% · 6M +12%]. 급락후 Filtered(추세생존+외생·기계적 충격)=[+0.5% · +4% · +10% · +20%]. 3M·6M 값은 과거 코스피 서킷브레이커 이후 평균 회복(약 32거래일 +9.9%, 60거래일 +20%)에 앵커한 추정치이며, Filtered는 추세이탈·내생(금리레짐) 충격을 걸러낸 조건부 분포를 가정합니다.</p>
+          <p><b>σ·μ 프리셋.</b> 포트폴리오 종목의 σ·μ는 자산군 특성에 기반한 합리적 기본값이며 정밀 추정이 아닙니다. 직접 수정하거나 AI 추정으로 갱신하십시오. μ(기대수익)는 본질적으로 알 수 없는 값이라 장기 구간의 상승/하락 확률을 지배합니다 — 가정일 뿐입니다.</p>
+          <p><b>한계.</b> 로그정규는 실제의 두꺼운 꼬리·점프·변동성 군집을 과소평가하며, 단일 종목의 실적·이벤트 리스크는 반영되지 않습니다. 이 페이지는 가정→확률 변환기이며 투자 권유나 예측이 아닙니다.</p>
+        </div>
+      </details>
+      <div class="disclaimer">이 도구는 입력한 σ·μ 가정에 따른 시나리오 계산기입니다. 어떤 종목의 실제 미래 수익률도 보장하거나 예측하지 않으며, 투자 자문이 아닙니다. 의사결정은 SimpleorNothing 본인의 판단으로 하십시오.</div>
+    </div>
+  </div>
 </section>
 
 <!-- 06 US10Y -->
@@ -3070,6 +3209,232 @@ Promise.all([getJSON('alpha.json'),getJSON('earnings.json'),getJSON('judgment.js
  }
  renderSignals();
  fetch('./signals.json',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{SIGNALS=j;renderSignals();}).catch(()=>renderSignals());
+})();
+</script>
+
+<!-- 05 확률 추정 (Probability Lab) — prob.html 인라인화, IIFE 로 전역 격리 -->
+<script>
+(function(){
+"use strict";
+var $=function(id){return document.getElementById(id);};
+// ---------- math ----------
+function erf(x){ // Abramowitz & Stegun 7.1.26
+  var s=x<0?-1:1; x=Math.abs(x);
+  var t=1/(1+0.3275911*x);
+  var y=1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-0.284496736)*t+0.254829592)*t*Math.exp(-x*x);
+  return s*y;
+}
+function normCDF(z){ return 0.5*(1+erf(z/Math.SQRT2)); }
+
+// ---------- state ----------
+var HZ=[{key:'d1',label:'D+1일',sub:'1 거래일',days:1},
+        {key:'m1',label:'D+1개월',sub:'21 거래일',days:21},
+        {key:'m3',label:'D+3개월',sub:'63 거래일',days:63},
+        {key:'m6',label:'D+6개월',sub:'126 거래일',days:126}];
+var SCEN={
+  normal:{d1:0,m1:0,m3:0,m6:0},
+  raw:{d1:0,m1:2,m3:6,m6:12},
+  filtered:{d1:0.5,m1:4,m3:10,m6:20}
+};
+var BAND_DEFAULT={d1:2,m1:5,m3:8,m6:12};
+var band=Object.assign({},BAND_DEFAULT);
+var scenario='normal';
+
+var PRESETS=[
+  {t:'MU',n:'마이크론',sg:55,mu:15},
+  {t:'MRVL',n:'마벨',sg:55,mu:18},
+  {t:'NVDA',n:'엔비디아',sg:50,mu:15},
+  {t:'LITE',n:'루멘텀',sg:60,mu:12},
+  {t:'VRT',n:'버티브',sg:55,mu:15},
+  {t:'BE',n:'블룸에너지',sg:80,mu:10},
+  {t:'TSLA',n:'테슬라',sg:65,mu:8},
+  {t:'005930',n:'삼성전자',sg:30,mu:10},
+  {t:'471990',n:'KODEX AI반도체핵심장비',sg:45,mu:12},
+  {t:'QQQ',n:'나스닥100',sg:22,mu:10},
+  {t:'SPY',n:'S&P500',sg:16,mu:8},
+  {t:'KOSPI',n:'코스피',sg:18,mu:7}
+];
+
+// ---------- compute ----------
+function computeAll(){
+  var sg=parseFloat($('pl_sg').value)/100;
+  var mu=parseFloat($('pl_mu').value)/100;
+  if(!isFinite(sg)||sg<=0) sg=0.0001;
+  if(!isFinite(mu)) mu=0;
+  var ov=SCEN[scenario];
+  return HZ.map(function(h){
+    var t=h.days/252;
+    var delta=Math.log(1+(ov[h.key]||0)/100);
+    var m=(mu-sg*sg/2)*t+delta;
+    var s=sg*Math.sqrt(t);
+    var b=band[h.key]/100;
+    var logHi=Math.log(1+b), logLo=Math.log(1-b);
+    var pUp=1-normCDF((logHi-m)/s);
+    var pDown=normCDF((logLo-m)/s);
+    var pFlat=Math.max(0,1-pUp-pDown);
+    var q=[-2,-1,0,1,2].map(function(z){return Math.exp(m+z*s)-1;});
+    return {h:h,t:t,m:m,s:s,b:b,pUp:pUp,pFlat:pFlat,pDown:pDown,q:q,med:Math.exp(m)-1};
+  });
+}
+
+function pct(x){return (x*100).toFixed(1);}
+function signPct(x){return (x>=0?'+':'')+(x*100).toFixed(1)+'%';}
+
+// ---------- table + bars ----------
+function renderTable(res){
+  var rows=$('pl_rows'); rows.innerHTML='';
+  var bars=$('pl_barsHost'); bars.innerHTML='';
+  res.forEach(function(r){
+    var lead=r.pUp>=r.pDown&&r.pUp>=r.pFlat?'up':(r.pDown>=r.pFlat?'down':'flat');
+    var tr=document.createElement('tr');
+    tr.innerHTML='<td class="hz">'+r.h.label+'<small>'+r.h.sub+' · ±'+band[r.h.key]+'%</small></td>'+
+      '<td class="out'+(lead==='up'?' lead':'')+'">'+pct(r.pUp)+'</td>'+
+      '<td class="out'+(lead==='flat'?' lead':'')+'">'+pct(r.pFlat)+'</td>'+
+      '<td class="out'+(lead==='down'?' lead':'')+'">'+pct(r.pDown)+'</td>';
+    rows.appendChild(tr);
+    var wrap=document.createElement('div');
+    wrap.className='barwrap';
+    wrap.innerHTML='<div class="barhead"><span>'+r.h.label+'</span><span>중앙값 '+signPct(r.med)+'</span></div>'+
+      '<div class="bar"><span class="bu" style="width:'+pct(r.pUp)+'%"></span>'+
+      '<span class="bf" style="width:'+pct(r.pFlat)+'%"></span>'+
+      '<span class="bd" style="width:'+pct(r.pDown)+'%"></span></div>';
+    bars.appendChild(wrap);
+  });
+  $('pl_resTitle').textContent=$('pl_tk').value.toUpperCase()+' · 확률 추정';
+}
+
+// ---------- cone ----------
+function renderCone(res){
+  var W=560,H=360,padL=52,padR=16,padT=18,padB=34;
+  var iw=W-padL-padR, ih=H-padT-padB;
+  var n=res.length;
+  function xAt(i){return padL + iw*(i/(n));}
+  var ymax=0.02, ymin=-0.02;
+  res.forEach(function(r){ ymax=Math.max(ymax,r.q[4]); ymin=Math.min(ymin,r.q[0]); });
+  ymax*=1.08; ymin*=1.08;
+  function yAt(v){return padT + ih*(1-(v-ymin)/(ymax-ymin));}
+  var svg='';
+  var gy=[ymax,ymax/2,0,ymin/2,ymin];
+  gy.forEach(function(v){
+    var y=yAt(v);
+    svg+='<line x1="'+padL+'" y1="'+y+'" x2="'+(W-padR)+'" y2="'+y+'" stroke="var(--line)" stroke-width="1"/>';
+    svg+='<text x="'+(padL-8)+'" y="'+(y+4)+'" fill="var(--faint)" font-size="10.5" font-family="var(--disp)" text-anchor="end">'+signPct(v)+'</text>';
+  });
+  function pathFor(idx){
+    var d='M '+xAt(0)+' '+yAt(0);
+    res.forEach(function(r,i){ d+=' L '+xAt(i+1)+' '+yAt(r.q[idx]); });
+    return d;
+  }
+  function areaFill(lo,hi){
+    var d='M '+xAt(0)+' '+yAt(0);
+    res.forEach(function(r,i){ d+=' L '+xAt(i+1)+' '+yAt(r.q[hi]); });
+    for(var i=res.length-1;i>=0;i--){ d+=' L '+xAt(i+1)+' '+yAt(res[i].q[lo]); }
+    d+=' L '+xAt(0)+' '+yAt(0)+' Z';
+    return d;
+  }
+  svg+='<path d="'+areaFill(0,4)+'" fill="var(--dawn)" opacity="0.07"/>';
+  svg+='<path d="'+areaFill(1,3)+'" fill="var(--dawn)" opacity="0.13"/>';
+  svg+='<path d="'+pathFor(0)+'" fill="none" stroke="var(--down)" stroke-width="1.2" opacity="0.7" stroke-dasharray="3 3"/>';
+  svg+='<path d="'+pathFor(4)+'" fill="none" stroke="var(--up)" stroke-width="1.2" opacity="0.55" stroke-dasharray="3 3"/>';
+  svg+='<path d="'+pathFor(2)+'" fill="none" stroke="var(--dawn)" stroke-width="2.2"/>';
+  svg+='<line x1="'+padL+'" y1="'+yAt(0)+'" x2="'+(W-padR)+'" y2="'+yAt(0)+'" stroke="var(--faint)" stroke-width="1" stroke-dasharray="2 4"/>';
+  res.forEach(function(r,i){
+    var x=xAt(i+1);
+    svg+='<circle cx="'+x+'" cy="'+yAt(r.med)+'" r="3.2" fill="var(--dawn)"/>';
+    svg+='<text x="'+x+'" y="'+(H-12)+'" fill="var(--txt)" font-size="11" font-family="var(--disp)" text-anchor="middle">'+r.h.label+'</text>';
+  });
+  svg+='<text x="'+xAt(0)+'" y="'+(H-12)+'" fill="var(--faint)" font-size="11" font-family="var(--disp)" text-anchor="middle">now</text>';
+  $('pl_cone').innerHTML=svg;
+
+  var last=res[res.length-1];
+  $('pl_readout').innerHTML=
+    '6개월 중앙 경로 <b>'+signPct(last.med)+'</b> · ±1σ <b>'+signPct(last.q[1])+' ~ '+signPct(last.q[3])+'</b> · ±2σ <b>'+signPct(last.q[0])+' ~ '+signPct(last.q[4])+'</b>'+
+    '<span class="ptag">'+(scenario==='normal'?'일반':scenario==='raw'?'급락후 Raw':'급락후 Filtered')+'</span>';
+}
+
+function renderAll(){
+  var res=computeAll();
+  renderTable(res);
+  renderCone(res);
+}
+
+// ---------- UI ----------
+function buildChips(){
+  var host=$('pl_chips'); host.innerHTML='';
+  PRESETS.forEach(function(p){
+    var c=document.createElement('button'); c.className='chip';
+    c.innerHTML='<b>'+p.t+'</b> '+p.n;
+    c.onclick=function(){
+      $('pl_tk').value=p.t;
+      $('pl_sg').value=p.sg;
+      $('pl_mu').value=p.mu;
+      setMsg('프리셋 적용: '+p.n+' (σ '+p.sg+'% · μ '+p.mu+'%) — 기본 가정값, 수정 가능','');
+      renderAll();
+    };
+    host.appendChild(c);
+  });
+}
+function buildBands(){
+  var host=$('pl_bands'); host.innerHTML='';
+  HZ.forEach(function(h){
+    var f=document.createElement('div'); f.className='field';
+    f.innerHTML='<label>'+h.label+'</label><input class="num" type="number" step="0.5" value="'+band[h.key]+'" data-k="'+h.key+'">';
+    f.querySelector('input').oninput=function(e){
+      var v=parseFloat(e.target.value); if(isFinite(v)&&v>=0&&v<99) band[h.key]=v; renderAll();
+    };
+    host.appendChild(f);
+  });
+}
+function setMsg(t,cls){var m=$('pl_aimsg');m.textContent=t;m.className='aimsg'+(cls?' '+cls:'');}
+
+$('pl_scen').addEventListener('click',function(e){
+  var b=e.target.closest('button'); if(!b)return;
+  scenario=b.getAttribute('data-s');
+  [].forEach.call(this.children,function(c){c.classList.toggle('on',c===b);});
+  renderAll();
+});
+['pl_sg','pl_mu','pl_tk'].forEach(function(id){
+  $(id).addEventListener('input',renderAll);
+});
+$('pl_reset').onclick=function(){
+  band=Object.assign({},BAND_DEFAULT); buildBands();
+  scenario='normal';
+  [].forEach.call($('pl_scen').children,function(c){c.classList.toggle('on',c.getAttribute('data-s')==='normal');});
+  renderAll();
+  setMsg('기본 밴드·일반 시나리오로 초기화','');
+};
+
+// ---------- AI σ·μ estimation ----------
+$('pl_ai').onclick=async function(){
+  var tk=$('pl_tk').value.trim();
+  if(!tk){setMsg('먼저 티커를 입력하십시오','err');return;}
+  var btn=this; btn.disabled=true; var old=btn.textContent; btn.textContent='추정 중…';
+  setMsg('웹에서 '+tk.toUpperCase()+'의 최근 변동성을 조사하는 중…','');
+  try{
+    var prompt='You are a quant. For the stock/ETF ticker or name "'+tk+'", estimate its ANNUALIZED volatility (%) from recent ~1y daily returns, and a reasonable ANNUAL expected drift (%) assumption. Use web search for recent data. Respond with ONLY a compact JSON object, no prose, no markdown fences: {"ticker":"","name":"","annualizedVolPct":number,"suggestedDriftPct":number,"note":"one short sentence in Korean"}';
+    var resp=await fetch("https://api.anthropic.com/v1/messages",{
+      method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({
+        model:"claude-sonnet-4-20250514",max_tokens:1000,
+        messages:[{role:"user",content:prompt}],
+        tools:[{type:"web_search_20250305",name:"web_search"}]
+      })
+    });
+    var data=await resp.json();
+    var text=(data.content||[]).filter(function(b){return b.type==='text';}).map(function(b){return b.text;}).join("\n");
+    var clean=text.replace(/```json|```/g,'').trim();
+    var mm=clean.match(/\{[\s\S]*\}/); if(mm) clean=mm[0];
+    var obj=JSON.parse(clean);
+    if(isFinite(obj.annualizedVolPct)) $('pl_sg').value=Math.round(obj.annualizedVolPct);
+    if(isFinite(obj.suggestedDriftPct)) $('pl_mu').value=Math.round(obj.suggestedDriftPct);
+    renderAll();
+    setMsg('추정 완료 · '+(obj.name||tk)+' σ '+Math.round(obj.annualizedVolPct)+'% · μ '+Math.round(obj.suggestedDriftPct)+'%'+(obj.note?' — '+obj.note:''),'ok');
+  }catch(err){
+    setMsg('자동 추정 실패 — σ·μ를 직접 입력하거나 프리셋을 사용하십시오. ('+(err&&err.message?err.message:'network')+')','err');
+  }finally{ btn.disabled=false; btn.textContent=old; }
+};
+
+buildChips(); buildBands(); renderAll();
 })();
 </script>
 
