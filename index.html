@@ -737,10 +737,11 @@ table.tk th.c{text-align:center}
       <tr><td>CNN Fear &amp; Greed</td><td class="c" id="sigFG">--</td><td class="c" colspan="2">≤ 20</td><td class="c">≤ 15</td><td class="c">≥ 80</td><td class="c"><span class="lamp" id="lampFG">⚪</span></td></tr>
       <tr><td>KOSPI 매도 사이드카 / S&amp;P 일간</td><td class="c" id="sigSide">--</td><td class="c" colspan="2">발동 또는 −4%</td><td class="c">−5% / 서킷</td><td class="c">매수 사이드카 연발</td><td class="c"><span class="lamp" id="lampSide">⚪</span></td></tr>
       <tr><td>VIX 기간구조 (VIX vs 3M)</td><td class="c" id="sigTerm">--</td><td class="c" colspan="2">역전 (VIX &gt; VIX3M)</td><td class="c">역전</td><td class="c">—</td><td class="c"><span class="lamp" id="lampTerm">⚪</span></td></tr>
+      <tr><td>🇰🇷 속도 정찰 (사이드카/서킷 × 추세)</td><td class="c" id="sigVelo">--</td><td class="c" colspan="3">사이드카/서킷 발동 + 40주선 생존 → 정찰 1.5% (US 깊이와 별도)</td><td class="c">—</td><td class="c"><span class="lamp" id="lampVelo">⚪</span></td></tr>
     </tbody>
   </table>
   <div class="verdict" id="sigVerdict">신호 데이터 없음(signals.json 미입력) — 대기</div>
-  <p class="vsub">판정: <b>G1</b> = 드로다운 −8% + 추세 생존(40주선 상승·이격 −5%내) → 트랜치 3% · <b>G2</b> = −13% 또는 공포 2신호 (+기울기 상승) → +3% · <b>G3</b> = −20% 또는 공포 강(强)3신호, 추세필터 없음(평균회귀 국면) → +3%(잔여 전액). 등급당 집행은 50/50 분할·<b>반전 트리거 확인 후</b>(저점 미갱신 첫 주봉 양봉 / 아래꼬리 주봉 후 고점 돌파 — 떨어지는 칼 금지). 공통 거부권: <b>레짐 전환 의심이면 등급 무관 보류.</b> 역방향 재집행 금지, 신고가 회복 시 사용분은 차기 과열 트림에서 보충. 매도는 과열 열 대칭이되 <b>부분 트림만</b>.<br>재판정 검증: <span class="mbadge" style="background:#0ca67822;color:#0ca678">2023.10 G1</span> <span class="mbadge" style="background:#0ca67822;color:#0ca678">2024.8 엔캐리 G2 (구 신호등 미점등)</span> <span class="mbadge" style="background:#0ca67822;color:#0ca678">2025.4 관세 G3 (구 3/3)</span> <span class="mbadge" style="background:#0ca67822;color:#0ca678">2026.3 중동 G2 (구 '3/3'은 VIX 종가 35 미달 — 과대판정 정정)</span> <span class="mbadge" style="background:#e0313122;color:#e03131">2022 약세장 — 추세필터·레짐 D 차단</span></p>
+  <p class="vsub">판정: <b>G1</b> = 드로다운 −8% + 추세 생존(40주선 상승·이격 −5%내) → 트랜치 3% · <b>G2</b> = −13% 또는 공포 2신호 (+기울기 상승) → +3% · <b>G3</b> = −20% 또는 공포 강(强)3신호, 추세필터 없음(평균회귀 국면) → +3%(잔여 전액). 등급당 집행은 50/50 분할·<b>반전 트리거 확인 후</b>(저점 미갱신 첫 주봉 양봉 / 아래꼬리 주봉 후 고점 돌파 — 떨어지는 칼 금지). 공통 거부권: <b>레짐 전환 의심이면 등급 무관 보류.</b> 역방향 재집행 금지, 신고가 회복 시 사용분은 차기 과열 트림에서 보충. 매도는 과열 열 대칭이되 <b>부분 트림만</b>.<br><b>🇰🇷 속도 정찰 티어(깊이 게이트와 별도)</b>: 깊이 게이트가 무등급이어도 <b>코스피 매도 사이드카(선물 −5%/1분) 또는 서킷브레이커(현물 −8%)</b>가 당일 발동 + <b>40주선 생존</b>이면 정찰 <b>1.5%</b> 권한 — 충격유형이 외생·기계적·반복형이 아니라 <b>내생·신종·신용</b>이면 거부(레짐 D). 깊이≪속도 단독 사건(US 잠잠한데 코스피만 환율·프로그램 폭락) 포착용. 집행은 충격유형 수동확인 + 반전 트리거 후, 우선순위 <b>① L4 소부장(KODEX AI반도체핵심장비) ② 삼성전자(상대저평가·충격매수)</b>. <span style="color:#b8860b">2026-06-08 검은월요일 = 코스피 서킷+매도사이드카·추세생존 = 속도 점등 사례(익일 매수사이드카 V반등) — 단 당시 sidecarKR 미입력으로 게이트 미포착.</span> sidecarKR/circuitKR은 cron 미수집 → <b>폭락일 수동 입력 필수</b>.<br>재판정 검증: <span class="mbadge" style="background:#0ca67822;color:#0ca678">2023.10 G1</span> <span class="mbadge" style="background:#0ca67822;color:#0ca678">2024.8 엔캐리 G2 (구 신호등 미점등)</span> <span class="mbadge" style="background:#0ca67822;color:#0ca678">2025.4 관세 G3 (구 3/3)</span> <span class="mbadge" style="background:#0ca67822;color:#0ca678">2026.3 중동 G2 (구 '3/3'은 VIX 종가 35 미달 — 과대판정 정정)</span> <span class="mbadge" style="background:#e0313122;color:#e03131">2022 약세장 — 추세필터·레짐 D 차단</span></p>
 
   <div class="mc-sec">보유·후보 종목 매크로 베타 &amp; 회복탄력성 <span style="color:var(--faint)">(★=보유)</span></div>
   <table class="mc">
@@ -837,7 +838,7 @@ table.tk th.c{text-align:center}
     <li>매수 분할(좌)</li>
     <li>매도 분할(우)</li>
     <li>종목 베타 조정(베타&gt;2.0 BE·LITE·MRVL=5분할 / 1.2~1.8=3분할 / TSLA 별도)</li>
-    <li><b>현재 권고(2026-06-07)</b>: AVGO 가이던스 쇼크(FY26 AI 미상향)+5월 고용 172K 인상 리스크로 <b>6/4~5 SOX 2일 −10%·나스닥 −4.2%·코스피 매도 사이드카(−5.54%)</b>. 신 게이트 기준 나스닥 고점比 ~−6% = <b style="color:#b8860b">무등급 관찰</b>(G1 −8% 미달), 충격 유형은 <b style="color:#e03131">레짐 의심</b>(인상 사이클+AI capex) → 등급 도달해도 D 보류, <b>6/10 CPI·6/16~17 FOMC가 판정선</b>. 현금 9~10%는 트랜치 3/3/3(G1/G2/G3) 분리·투입 금지. 과열 트림 모드 유지하되 급락일 투매 금지 — LITE 트림 밴드(870~900) 하향 이탈로 반등 조건부 재설계, TSLA 트림은 SpaceX ~6/12 상장 전 반등일이 마지막 윈도. MU 6/24 D-1 중립 프로토콜.</li>
+    <li><b>현재 권고(2026-06-09)</b>: <b>6/8 검은월요일 — 코스피 장중 −8%+ 서킷브레이커 + 매도 사이드카(선물 −6.26%)·7500선 붕괴·환율 1555·코스닥 −9%</b>(촉매: 美 5월 고용 호조發 인상공포 + 호르무즈). <b>6/9 익일 V반등</b> — 매수 사이드카 동시 발동·7800선 회복·삼성전자 +3.2%·하이닉스 +6.4%. 이 사건은 US 깊이 게이트(나스닥 −4.3%·VIX 18.9·F&amp;G 40)로는 <b style="color:#b8860b">무등급</b>이었으나 <b style="color:#0ca678">🇰🇷속도 정찰 티어</b>(서킷/사이드카 × 추세생존)로는 점등 — <b>다만 sidecarKR 수동 미입력으로 실시간 포착 실패</b>(운영 갭). 충격유형은 외생·기계적·반복형(스필오버+Nth호르무즈)이라 거부 대상 아님. 다음 폭락일엔 <b>sidecarKR=true 즉시 수동 입력</b> → 속도 점등 시 정찰 1.5%(① L4 소부장 KODEX 471990 ② 삼성전자), 반전 트리거(익일 매수사이드카·저점미갱신 양봉) 후 집행. 깊이 게이트는 여전히 무등급·트랜치 3/3/3 동결, <b>6/10 CPI·6/16~17 FOMC가 레짐 판정선</b>. MU 6/24 D-1 중립.</li>
   </ol>
   <div class="foot">Caveat: 17개월·강세장 표본. 2008/2020형 레짐 전환 미포함 — 그 경우 룰북 무효. D+N 수익률은 표본 N≤3로 신뢰구간 넓음.<br>출처: Bloomberg·CNBC·Reuters·CNN(F&amp;G)·Korea Herald/Times·Yahoo Finance·RBC WM·Macroption(VIX)·Bloom DEF 14A(SEC)·TrendForce/Counterpoint·MoneyToday. 표본 2025.1.1~2026.5.28.</div>
 </section>
@@ -2991,7 +2992,7 @@ Promise.all([getJSON('alpha.json'),getJSON('earnings.json'),getJSON('judgment.js
 <script>
 /* ===== 01 MACRO — signals.json 연동 (통합 매수 게이트 3등급 · 2026-06-07) ===== */
 (function(){
- const TH={ddG1:-8,ddG2:-13,ddG3:-20,gapMin:-5,vixF:30,vixS:35,vixHighF:40,fgF:20,fgS:15,spF:-4,spS:-5,vixSell:14,fgSell:80};
+ const TH={ddG1:-8,ddG2:-13,ddG3:-20,gapMin:-5,vixF:30,vixS:35,vixHighF:40,fgF:20,fgS:15,spF:-4,spS:-5,vixSell:14,fgSell:80,veloTranche:1.5};
  let SIGNALS=null;
  function set(id,txt){const e=document.getElementById(id);if(e)e.textContent=txt;}
  function lampSet(id,sym){const e=document.getElementById(id);if(e)e.textContent=sym;}
@@ -3021,6 +3022,13 @@ Promise.all([getJSON('alpha.json'),getJSON('earnings.json'),getJSON('judgment.js
    else if((dd<=TH.ddG2||fear>=2)&&slopeUp===true)grade=2;
    else if(dd<=TH.ddG1&&trendG1)grade=1;
   }
+  // 🇰🇷 속도 정찰 티어 — 코스피 사이드카/서킷 × 추세생존 (US 깊이 게이트와 별도)
+  const circuit=S.circuitKR===true&&S.sidecarDate&&S.sidecarDate===S.asOf; // 서킷브레이커(현물 −8%) 당일
+  const veloMarker=side||circuit;            // 매도 사이드카(선물 −5%/1분) 또는 서킷 = 속도 마커
+  const veloTrend=slopeUp===true&&gap!=null&&gap>=TH.gapMin; // 추세 생존(=trendG1)
+  const velo=veloMarker&&veloTrend;          // 충격유형(외생·기계적·반복) 거부권은 수동
+  set('sigVelo',veloMarker?((circuit?'서킷 발동':'매도 사이드카 발동')+(veloTrend?' · 추세생존':' · 추세이탈')):(dd!=null?'미발동':'--'));
+  lampSet('lampVelo',velo?(circuit?'🔴':'🟡'):(veloMarker?'🟠':'⚪'));
   // 램프
   lampSet('lampDD',dd==null?'⚪':dd<=TH.ddG3?'🔴':dd<=TH.ddG2?'🟠':dd<=TH.ddG1?'🟡':'⚪');
   lampSet('lampTrend',(slopeUp==null)?'⚪':slopeUp?'🟢':'🔴');
@@ -3043,7 +3051,10 @@ Promise.all([getJSON('alpha.json'),getJSON('earnings.json'),getJSON('judgment.js
     :grade===2?`G2 급락 — 트랜치 +3% 권한. 반전 트리거 확인+레짐 D 통과 후 50/50 집행`
     :grade===1?`G1 조정 — 트랜치 3% 권한. 반전 트리거 확인+레짐 D 통과 후 50/50 집행`
     :`무등급 — 대기 (드로다운 ${dd}% · 공포 ${fear}/4${strong?` · 강 ${strong}/4`:''})`;
-   set('sigVerdict',`판정: ${txt}`);
+   const veloTxt=velo
+    ?` ⚡ 🇰🇷속도 정찰 점등 — 코스피 ${circuit?'서킷':'매도 사이드카'}+추세생존 → 정찰 ${TH.veloTranche}% 권한(깊이 게이트와 별도). 충격유형(외생·기계적·반복형) 수동확인 + 반전 트리거 후 집행 · 우선순위 ① L4 소부장(KODEX 471990) ② 삼성전자(005930)`
+    :(veloMarker?` · ⚠️🇰🇷속도 마커 점등이나 추세이탈 = 거부(떨어지는 칼)`:'');
+   set('sigVerdict',`판정: ${txt}${veloTxt}`);
   }
   setStamp('updMacro',S.asOf);
  }
