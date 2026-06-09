@@ -618,9 +618,10 @@ table.tk th.c{text-align:center}
     <button class="tab" data-v="siglog"><span class="n">02</span>시그널 로그</button>
     <button class="tab" data-v="thread"><span class="n">03</span>알파 찾기</button>
     <button class="tab" data-v="alpha"><span class="n">04</span>알파 맵</button>
-    <button class="tab" data-v="us10y"><span class="n">05</span>US10Y</button>
-    <button class="tab" data-v="macro"><span class="n">06</span>매크로 매매</button>
-    <button class="tab" data-v="port"><span class="n">07</span>포트폴리오 X-레이</button>
+    <button class="tab" data-v="prob"><span class="n">05</span>확률 추정</button>
+    <button class="tab" data-v="us10y"><span class="n">06</span>US10Y</button>
+    <button class="tab" data-v="macro"><span class="n">07</span>매크로 매매</button>
+    <button class="tab" data-v="port"><span class="n">08</span>포트폴리오 X-레이</button>
   </nav>
 </div></header>
 
@@ -991,7 +992,16 @@ table.tk th.c{text-align:center}
   <div class="siglog" id="signalLog"></div>
 </section>
 
-<!-- 05 US10Y -->
+<!-- 05 확률 추정 -->
+<section class="view" id="v-prob">
+  <div class="vhead">
+    <div class="vkick">Probability Lab · 상승/유지/하락</div>
+    <h1 class="vtitle">종목별 <em>확률의 모양</em></h1>
+    <p class="vsub">변동성(σ)·드리프트(μ) 가정을 로그정규(GBM) 분포로 변환해 D+1일·1M·3M·6M의 상승/유지/하락 확률을 추정한다. 급락-후 시나리오 오버레이(Raw/Filtered) 포함. <a href="prob.html" target="_blank" rel="noopener" style="color:var(--dawn)">새 탭에서 열기 ↗</a></p></div>
+  <iframe src="prob.html" loading="lazy" title="확률 추정기" style="width:100%;height:88vh;border:1px solid var(--line);border-radius:14px;background:var(--panel)"></iframe>
+</section>
+
+<!-- 06 US10Y -->
 <section class="view" id="v-us10y">
   <div class="vhead">
     <div class="vkick">US10Y · 미 10년물 금리</div>
