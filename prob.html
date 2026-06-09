@@ -9,12 +9,11 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;450;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
-    --canvas:#FFFFFF; --canvas-warm:#F0EFEB;     /* Cloud Dancer retained as paper temperature */
+    --canvas:#FFFFFF; --canvas-warm:#F0EFEB;
     --ink:#141414; --ink-soft:#2B2B2B; --graphite:#54565B;
     --slate:#5C6B7A; --slate-soft:#7E8A97; --mute:#8A8A8A; --stone:#A3A3A3; --ash:#BCBCBC;
     --hairline:#E7E6E2; --hairline-soft:#F0EFEC; --surface-cool:#EDEFF1;
     --scrim:#0D0F12; --footer:#141312; --primary:#0A0A0A; --on-primary:#FFFFFF;
-    /* aliases consumed by chart JS (monochrome remap, no signal colour) */
     --dawn:#0A0A0A; --up:#141414; --down:#A3A3A3; --flat:#5C6B7A;
     --faint:#A3A3A3; --txt:#54565B; --line:#E7E6E2;
     --disp:'Inter',system-ui,-apple-system,sans-serif;
@@ -25,23 +24,17 @@
   ::selection{background:var(--ink);color:#fff}
   a{color:var(--ink);text-decoration:none}
   :focus-visible{outline:2px solid var(--ink);outline-offset:2px;border-radius:4px}
-
-  /* top bar */
   .topbar{display:flex;justify-content:space-between;align-items:center;padding-bottom:18px;border-bottom:1px solid var(--hairline)}
   .wordmark{font-size:15px;font-weight:600;color:var(--ink);letter-spacing:-0.2px}
   .topmeta{font-size:11px;font-weight:500;letter-spacing:0.2px;text-transform:uppercase;color:var(--stone)}
-
-  /* editorial lockup */
-  .hero{padding:56px 0 0}
+  .hero{padding:48px 0 0}
   .kick{font-size:14px;font-weight:500;letter-spacing:0.35px;text-transform:uppercase;color:var(--slate);margin-bottom:18px}
   .title{font-size:clamp(34px,5.2vw,49px);font-weight:400;line-height:1.0;letter-spacing:-1.4px;color:var(--ink);margin:0}
   .title em{font-style:normal;color:var(--ink)}
   .sub{font-size:19px;line-height:1.5;color:var(--graphite);max-width:60ch;margin:20px 0 0;letter-spacing:-0.1px}
   .sub b{color:var(--ink);font-weight:600}
-  .hr{height:1px;background:var(--hairline);border:0;margin:40px 0}
-
-  /* fields */
-  .tickrow{display:flex;gap:24px;flex-wrap:wrap;align-items:flex-end;margin-top:48px}
+  .hr{height:1px;background:var(--hairline);border:0;margin:36px 0}
+  .tickrow{display:flex;gap:24px;flex-wrap:wrap;align-items:flex-end;margin-top:44px}
   .field{display:flex;flex-direction:column;gap:7px}
   .field label{font-size:11px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:var(--stone)}
   input,select{font-family:var(--disp);font-size:16px;color:var(--ink);background:transparent;border:0;border-bottom:1px solid var(--hairline);
@@ -50,7 +43,6 @@
   input::placeholder{color:var(--stone)}
   input.tick{width:168px;font-weight:600;text-transform:uppercase;letter-spacing:0.02em}
   input.num{width:92px;font-variant-numeric:tabular-nums}
-
   .btn{font-family:var(--disp);font-size:14px;font-weight:600;line-height:1.43;cursor:pointer;border-radius:9999px;
     border:1px solid var(--ink);padding:10px 22px;background:var(--canvas);color:var(--ink);transition:background .15s,color .15s,border-color .15s}
   .btn:hover{background:var(--canvas-warm)}
@@ -58,17 +50,28 @@
   .btn.primary:hover{background:#000}
   .btn.ghost{background:var(--canvas);color:var(--ink);border-color:var(--ink)}
   .btn[disabled]{opacity:.45;cursor:wait}
-
   .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}
   .chip{font-size:13px;font-weight:500;padding:6px 14px;border-radius:9999px;border:1px solid var(--hairline);
     background:var(--canvas);color:var(--ink-soft);cursor:pointer;transition:border-color .15s,color .15s}
   .chip:hover{border-color:var(--ink);color:var(--ink)}
   .chip b{color:var(--ink);font-weight:600}
-
   .aimsg{font-size:13px;color:var(--stone);margin-top:14px;min-height:16px;letter-spacing:-0.1px}
   .aimsg.ok{color:var(--ink)} .aimsg.err{color:var(--ink);font-weight:500}
 
-  /* controls */
+  /* live context */
+  .live{border:1px solid var(--hairline);border-radius:0;padding:18px 20px;margin-top:28px}
+  .live .lh{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+  .live .lh .k{font-size:11px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:var(--stone)}
+  .badge{font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;padding:3px 10px;border:1px solid var(--ink);border-radius:9999px;color:var(--ink)}
+  .badge.manual{border-color:var(--stone);color:var(--stone)}
+  .badge.off{border-color:var(--ash);color:var(--ash)}
+  .livegrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:18px 16px}
+  .lstat .k{font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:var(--stone);margin-bottom:4px}
+  .lstat .v{font-size:15px;color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:-0.1px}
+  .lstat .v small{font-weight:400;color:var(--graphite);font-size:12px}
+  .live .note{font-size:12px;color:var(--graphite);margin-top:14px;line-height:1.6}
+  .live .reset{margin-top:14px;display:inline-block}
+
   .controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:24px;margin-top:8px;align-items:start}
   .scenwrap{display:inline-flex;border:1px solid var(--hairline);border-radius:0;overflow:hidden;width:fit-content;margin-top:6px}
   .scenwrap button{font-family:var(--disp);font-size:13px;font-weight:500;padding:10px 16px;background:var(--canvas);color:var(--graphite);
@@ -78,14 +81,10 @@
   .scenwrap button.on{background:var(--hairline);color:var(--ink);font-weight:600}
   .bandedit{display:flex;gap:14px;flex-wrap:wrap;margin-top:8px}
   .bandedit .field input{width:70px;font-size:14px}
-
-  /* result panels (flat, hairline, no shadow) */
   .grid{display:grid;grid-template-columns:1.12fr 1fr;gap:28px;margin-top:8px}
   @media(max-width:860px){.grid{grid-template-columns:1fr}}
   .card{background:var(--canvas);border:1px solid var(--hairline);border-radius:0;padding:24px}
   .card h3{font-size:11px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:var(--stone);margin:0 0 18px}
-
-  /* table — flat slab */
   table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
   th,td{text-align:right;padding:13px 8px;font-size:15px;border-bottom:1px solid var(--hairline)}
   th:first-child,td:first-child{text-align:left}
@@ -93,37 +92,32 @@
   thead th{font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--stone)}
   .hz{color:var(--ink);font-weight:500}
   .hz small{display:block;color:var(--stone);font-size:11px;font-weight:400;margin-top:2px;letter-spacing:0}
+  .hz .ev{color:var(--ink-soft);font-weight:500}
   td.out{color:var(--graphite)}
   td.lead{color:var(--ink);font-weight:600}
-
   .barcell{padding:6px 8px}
   .bar{display:flex;height:10px;border-radius:0;overflow:hidden;border:1px solid var(--hairline);background:var(--canvas)}
   .bar span{height:100%}
   .bar .bu{background:var(--ink)}
   .bar .bf{background:var(--slate);border-left:1px solid var(--canvas)}
   .bar .bd{background:var(--ash);border-left:1px solid var(--canvas)}
-
   .conewrap svg{display:block;width:100%;height:auto}
   .legend{display:flex;gap:18px;flex-wrap:wrap;font-size:12px;color:var(--stone);margin-top:12px}
   .legend i{display:inline-block;width:10px;height:10px;border-radius:0;margin-right:6px;vertical-align:-1px}
   .readout{font-size:13px;color:var(--graphite);margin-top:10px;line-height:1.7;letter-spacing:-0.1px}
   .readout b{color:var(--ink);font-weight:600}
   .tag{display:inline-block;font-size:11px;padding:2px 9px;border-radius:9999px;border:1px solid var(--hairline);color:var(--graphite);margin-left:6px;text-transform:uppercase;letter-spacing:0.08em;font-weight:500}
-
   .barwrap{margin:11px 0}
   .barhead{display:flex;justify-content:space-between;font-size:11px;color:var(--stone);margin-bottom:5px;letter-spacing:0.02em}
-
-  /* dark terminal footer */
   .foot{background:var(--footer);color:#C9CBD0;margin:64px -32px 0;padding:48px 32px 56px;border-radius:0}
   .foot .feyebrow{font-size:11px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:#7E828A;margin-bottom:16px}
-  .method{font-size:13px;color:#A9ADB4;line-height:1.75;max-width:78ch}
+  .method{font-size:13px;color:#A9ADB4;line-height:1.75;max-width:80ch}
   .method b{color:#FFFFFF;font-weight:600}
   .method code{font-family:var(--disp);background:rgba(255,255,255,.07);padding:1px 6px;border-radius:0;color:#E6E8EC;font-size:12.5px}
   .method p{margin:0 0 12px}
-  details{margin-top:0}
   summary{cursor:pointer;font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:#7E828A;margin-bottom:14px}
   summary:hover{color:#FFFFFF}
-  .disclaimer{border-left:1px solid rgba(255,255,255,.22);padding-left:16px;margin-top:24px;font-size:13px;color:#9095A0;max-width:78ch;line-height:1.7}
+  .disclaimer{border-left:1px solid rgba(255,255,255,.22);padding-left:16px;margin-top:24px;font-size:13px;color:#9095A0;max-width:80ch;line-height:1.7}
   @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
   @media(max-width:560px){body{padding:28px 20px 0}.foot{margin:48px -20px 0;padding:40px 20px 48px}}
 </style>
@@ -135,9 +129,9 @@
   </header>
 
   <section class="hero">
-    <div class="kick">Probability Lab</div>
+    <div class="kick">Probability Lab · Live</div>
     <h1 class="title">종목 하나로 <em>확률의 모양</em>을 본다</h1>
-    <p class="sub">미래를 맞히는 도구가 아닙니다. 종목의 <b>변동성(σ)</b>과 <b>기대 드리프트(μ)</b> 가정을 로그정규(GBM) 분포로 변환해, D+1일·1개월·3개월·6개월에 <b>상승·유지·하락</b> 확률을 계산합니다. 급락 직후라면 앞서 조사한 반등 통계를 시나리오로 얹습니다.</p>
+    <p class="sub">종목의 <b>변동성(σ)</b>·<b>드리프트(μ)</b>를 로그정규(GBM) 분포로 변환해 D+1일·1M·3M·6M의 <b>상승·유지·하락</b> 확률을 계산합니다. 배포 환경에서는 σ를 <b>VIX×매크로베타</b>로, 시나리오를 <b>매크로 게이트</b>로, 분포 폭을 <b>실적 이벤트</b>로 자동 보정합니다.</p>
   </section>
 
   <div class="tickrow">
@@ -148,7 +142,9 @@
     <button id="reset" class="btn ghost">기본값</button>
   </div>
   <div class="chips" id="chips"></div>
-  <div class="aimsg" id="aimsg">종목 프리셋을 누르면 σ·μ가 채워집니다. 임의 티커는 "AI로 σ·μ 추정"으로 최근 변동성을 가져옵니다.</div>
+  <div class="aimsg" id="aimsg">프리셋을 누르면 σ·μ가 채워집니다. 배포 환경에선 라이브 피드가 자동으로 σ·시나리오·이벤트를 보정합니다.</div>
+
+  <div class="live" id="livebox"></div>
 
   <hr class="hr">
 
@@ -179,7 +175,6 @@
       </div>
       <div class="readout" id="readout"></div>
     </div>
-
     <div class="card">
       <h3 id="resTitle">확률 추정</h3>
       <table>
@@ -191,98 +186,145 @@
   </div>
 
   <footer class="foot">
-    <div class="feyebrow">Method · Assumptions · Limits</div>
+    <div class="feyebrow">Method · Live Wiring · Limits</div>
     <details open>
-      <summary>방법론 · 가정 · 한계</summary>
+      <summary>방법론 · 라이브 배선 · 한계</summary>
       <div class="method">
-        <p><b>모델.</b> 주가가 기하 브라운 운동을 따른다고 가정합니다. 기간 <code>t</code>(연) 동안 로그수익률은 정규분포 <code>r ~ N((μ − σ²/2)·t + δ , σ²·t)</code>를 따르고, δ는 시나리오 오버레이(급락 후 반등 기대치)입니다. 유지 밴드 ±b에 대해 상승=<code>P(r &gt; ln(1+b))</code>, 하락=<code>P(r &lt; ln(1−b))</code>, 나머지가 유지입니다. 구간 환산: D+1일=1/252년, 1개월=21/252, 3개월=63/252, 6개월=126/252.</p>
-        <p><b>시나리오 오버레이(기대 단순수익률, 편집 가능).</b> 일반=0. 급락후 Raw=[1일 0 · 1M +2% · 3M +6% · 6M +12%]. 급락후 Filtered(추세생존+외생·기계적 충격)=[+0.5% · +4% · +10% · +20%]. 3M·6M 값은 과거 코스피 서킷브레이커 이후 평균 회복(약 32거래일 +9.9%, 60거래일 +20%)에 앵커한 추정치이며, Filtered는 추세이탈·내생(금리레짐) 충격을 걸러낸 조건부 분포를 가정합니다.</p>
-        <p><b>σ·μ 프리셋.</b> 포트폴리오 종목의 σ·μ는 자산군 특성에 기반한 합리적 기본값이며 정밀 추정이 아닙니다. 직접 수정하거나 AI 추정으로 갱신하십시오. μ(기대수익)는 본질적으로 알 수 없는 값이라 장기 구간의 상승/하락 확률을 지배합니다 — 가정일 뿐입니다.</p>
-        <p><b>한계.</b> 로그정규는 실제의 두꺼운 꼬리·점프·변동성 군집을 과소평가하며, 단일 종목의 실적·이벤트 리스크는 반영되지 않습니다. 이 페이지는 가정→확률 변환기이며 투자 권유나 예측이 아닙니다.</p>
+        <p><b>모델.</b> 기하 브라운 운동. 기간 <code>t</code>(연) 로그수익률 <code>r ~ N((μ − σ²/2)·t + δ , σ²·t + e²)</code>. δ=시나리오 오버레이, e=실적 이벤트 예상변동(해당 호라이즌이 실적일을 포함할 때만). 상승=<code>P(r &gt; ln(1+b))</code>, 하락=<code>P(r &lt; ln(1−b))</code>.</p>
+        <p><b>① 라이브 σ (VIX×베타).</b> 리포 <code>prices.json</code>은 스냅샷이라 실현변동성을 못 냅니다. 대신 <code>signals.json</code>의 VIX와 알파맵 매크로-베타로 σ를 분해·재합성합니다: <code>σ = √((β·VIX/100)² + idio²)</code>, idio는 기준 VIX 18에서 프리셋 σ에 맞춰 보정. VIX가 오르면 베타에 비례해 σ가 커집니다(매일 크론 갱신).</p>
+        <p><b>② 라이브 이벤트.</b> <code>earnings.json</code>의 종목별 예상변동(±%)·실적일을 읽어, 그 실적일을 포함하는 호라이즌에만 점프 분산 <code>e²</code>를 더합니다 — 분포가 넓어지고 유지 확률이 낮아집니다.</p>
+        <p><b>③ 라이브 시나리오.</b> <code>signals.json</code>으로 매크로 게이트(드로다운×공포 + 속도 정찰 티어)를 재계산해 시나리오를 자동 선택합니다: 속도 점등·G2↑ → Filtered, G1 → Raw, 무등급 → 일반. 오버레이 3M·6M 값은 과거 코스피 서킷 회복(32일 +9.9%·60일 +20%) 앵커.</p>
+        <p><b>알파맵 연동.</b> <code>holdings.json</code> 레이어 비중, 매크로-베타·단계·충격 액션을 컨텍스트로 표시. 수동 입력 시 라이브 보정은 멈추고("수동" 배지), "라이브로 리셋"으로 복귀합니다.</p>
+        <p><b>한계.</b> 라이브 피드는 <b>배포 환경(simpleornothing.com)에서만</b> 로드됩니다. 로그정규는 두꺼운 꼬리·점프를 과소평가하고, 유가·FOMC·전쟁은 σ(VIX)·시나리오에 <b>간접 반영</b>될 뿐 직접 입력이 아닙니다. 가정→확률 변환기이며 투자 자문이 아닙니다.</p>
       </div>
     </details>
-    <div class="disclaimer">이 도구는 입력한 σ·μ 가정에 따른 시나리오 계산기입니다. 어떤 종목의 실제 미래 수익률도 보장하거나 예측하지 않으며, 투자 자문이 아닙니다. 의사결정은 SimpleorNothing 본인의 판단으로 하십시오.</div>
+    <div class="disclaimer">입력·피드 가정에 따른 시나리오 계산기입니다. 실제 미래 수익률을 보장·예측하지 않으며 투자 자문이 아닙니다. 의사결정은 SimpleorNothing 본인의 판단으로 하십시오.</div>
   </footer>
 
 <script>
 "use strict";
-// ---------- math ----------
-function erf(x){ // Abramowitz & Stegun 7.1.26
-  var s=x<0?-1:1; x=Math.abs(x);
-  var t=1/(1+0.3275911*x);
-  var y=1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-0.284496736)*t+0.254829592)*t*Math.exp(-x*x);
-  return s*y;
-}
-function normCDF(z){ return 0.5*(1+erf(z/Math.SQRT2)); }
+function erf(x){var s=x<0?-1:1;x=Math.abs(x);var t=1/(1+0.3275911*x);
+  var y=1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-0.284496736)*t+0.254829592)*t*Math.exp(-x*x);return s*y;}
+function normCDF(z){return 0.5*(1+erf(z/Math.SQRT2));}
 
-// ---------- state ----------
 var HZ=[{key:'d1',label:'D+1일',sub:'1 거래일',days:1},
         {key:'m1',label:'D+1개월',sub:'21 거래일',days:21},
         {key:'m3',label:'D+3개월',sub:'63 거래일',days:63},
         {key:'m6',label:'D+6개월',sub:'126 거래일',days:126}];
-var SCEN={
-  normal:{d1:0,m1:0,m3:0,m6:0},
-  raw:{d1:0,m1:2,m3:6,m6:12},
-  filtered:{d1:0.5,m1:4,m3:10,m6:20}
-};
+var SCEN={normal:{d1:0,m1:0,m3:0,m6:0},raw:{d1:0,m1:2,m3:6,m6:12},filtered:{d1:0.5,m1:4,m3:10,m6:20}};
 var BAND_DEFAULT={d1:2,m1:5,m3:8,m6:12};
 var band=Object.assign({},BAND_DEFAULT);
 var scenario='normal';
+var userOverride=false;
+var VIX0=18;
+var FEEDS={signals:null,earnings:null,holdings:null,prices:null};
 
 var PRESETS=[
-  {t:'MU',n:'마이크론',sg:55,mu:15},
-  {t:'MRVL',n:'마벨',sg:55,mu:18},
-  {t:'NVDA',n:'엔비디아',sg:50,mu:15},
-  {t:'LITE',n:'루멘텀',sg:60,mu:12},
-  {t:'VRT',n:'버티브',sg:55,mu:15},
-  {t:'BE',n:'블룸에너지',sg:80,mu:10},
-  {t:'TSLA',n:'테슬라',sg:65,mu:8},
-  {t:'005930',n:'삼성전자',sg:30,mu:10},
-  {t:'471990',n:'KODEX AI반도체핵심장비',sg:45,mu:12},
-  {t:'QQQ',n:'나스닥100',sg:22,mu:10},
-  {t:'SPY',n:'S&P500',sg:16,mu:8},
-  {t:'KOSPI',n:'코스피',sg:18,mu:7}
+  {t:'MU',n:'마이크론',sg:55,mu:15},{t:'MRVL',n:'마벨',sg:55,mu:18},{t:'NVDA',n:'엔비디아',sg:50,mu:15},
+  {t:'LITE',n:'루멘텀',sg:60,mu:12},{t:'VRT',n:'버티브',sg:55,mu:15},{t:'BE',n:'블룸에너지',sg:80,mu:10},
+  {t:'TSLA',n:'테슬라',sg:65,mu:8},{t:'005930',n:'삼성전자',sg:30,mu:10},
+  {t:'471990',n:'KODEX AI반도체핵심장비',sg:45,mu:12},{t:'QQQ',n:'나스닥100',sg:22,mu:10},
+  {t:'SPY',n:'S&P500',sg:16,mu:8},{t:'KOSPI',n:'코스피',sg:18,mu:7}
 ];
+var META={
+  'MU':{layer:'L3',stage:'성숙',beta:1.9,act:'분할매수 · 6/24 실적 게이트'},
+  '005930':{layer:'L3',stage:'성숙',beta:1.35,act:'충격 시 매수(상대 저평가)'},
+  'MRVL':{layer:'L2',stage:'가속',beta:2.1,act:'충격 시 5분할(회복 느림)'},
+  'LITE':{layer:'L6',stage:'성숙',beta:2.0,act:'충격 전 트림 · 후 재매수'},
+  'BE':{layer:'L8',stage:'과열',beta:2.25,act:'충격=첫 눌림 기회 · 증액 1순위'},
+  'RMBS':{layer:'L3',stage:'가속',beta:1.65,act:'충격 + $140 + Q2 확인 후'},
+  'TSLA':{layer:'기타',stage:'가속',beta:2.2,act:'매크로 룰북 제외(정치 베타)'},
+  '471990':{layer:'L4',stage:'가속',beta:1.6,act:'충격 시 증액 최우선'},
+  'VRT':{layer:'L7',stage:'가속',beta:2.0,act:'금리 민감 — 인상 국면 우선 트림'},
+  'NVDA':{layer:'L1·L2',stage:'가속',beta:1.6,act:'—'},
+  'QQQ':{layer:'지수',stage:'—',beta:1.1,act:'—'},'SPY':{layer:'지수',stage:'—',beta:1.0,act:'—'},
+  'KOSPI':{layer:'지수',stage:'—',beta:1.0,act:'—'}
+};
+var NAMEMAP={'삼성전자':'005930','SAMSUNG':'005930','KODEX AI반도체핵심장비':'471990','나스닥100':'QQQ','S&P500':'SPY','코스피':'KOSPI','마이크론':'MU','마벨':'MRVL','엔비디아':'NVDA','루멘텀':'LITE','버티브':'VRT','블룸에너지':'BE','테슬라':'TSLA'};
+function norm(t){t=(t||'').trim().toUpperCase();return NAMEMAP[t]||t;}
+function presetSigma(t){var p=PRESETS.find(function(x){return x.t===t;});return p?p.sg/100:null;}
+function presetMu(t){var p=PRESETS.find(function(x){return x.t===t;});return p?p.mu/100:null;}
+
+// ---------- live feeds ----------
+async function loadFeeds(){
+  var names=['signals','earnings','holdings','prices'];
+  await Promise.all(names.map(async function(f){
+    try{var r=await fetch(f+'.json',{cache:'no-store'});if(r.ok)FEEDS[f]=await r.json();}catch(e){}
+  }));
+  applyLive(true);
+}
+function gateFrom(S){
+  if(!S)return null;
+  var vix=S.vix,vh=S.vixHigh,fg=S.fearGreed,sp=S.spDailyPct,v3=S.vix3m;
+  var side=S.sidecarKR===true&&S.sidecarDate&&S.sidecarDate===S.asOf;
+  var circuit=S.circuitKR===true&&S.sidecarDate&&S.sidecarDate===S.asOf;
+  var dd=S.nasdaqDrawdownPct,slope=S.wma40SlopeUp,gap=S.wma40GapPct;
+  var f1=(vh>=40)||(vix>=30),f2=fg<=20,f3=side||(sp<=-4),f4=(v3!=null&&vix>v3);
+  var fear=[f1,f2,f3,f4].filter(Boolean).length;
+  var s1=(vh>=40)||(vix>=35),s2=fg<=15,s3=sp<=-5,s4=f4;
+  var strong=[s1,s2,s3,s4].filter(Boolean).length;
+  var trendG1=slope===true&&gap!=null&&gap>=-5;
+  var grade=0;
+  if(dd!=null){if(dd<=-20||strong>=3)grade=3;else if((dd<=-13||fear>=2)&&slope===true)grade=2;else if(dd<=-8&&trendG1)grade=1;}
+  var veloMarker=side||circuit,velo=veloMarker&&trendG1;
+  return {vix:vix,fg:fg,dd:dd,fear:fear,strong:strong,grade:grade,velo:velo,veloMarker:veloMarker,circuit:circuit,asOf:S.asOf};
+}
+function autoScenario(g){if(!g)return null;if(g.velo||g.grade>=2)return 'filtered';if(g.grade===1)return 'raw';return 'normal';}
+function liveSigma(tk,g){
+  var meta=META[tk];if(!meta||!meta.beta||!g||g.vix==null)return null;
+  var preset=presetSigma(tk);if(preset==null)preset=0.5;
+  var sys0=meta.beta*VIX0/100;
+  var idio=Math.sqrt(Math.max(0,preset*preset-sys0*sys0));
+  var sys=meta.beta*g.vix/100;
+  return Math.sqrt(sys*sys+idio*idio);
+}
+function earnFor(tk){var mv=FEEDS.earnings&&FEEDS.earnings.moves;return mv?(mv[tk]||null):null;}
+function layerWeight(layer){var hs=FEEDS.holdings&&FEEDS.holdings.holdings;if(!hs)return null;var sum=0,hit=false;hs.forEach(function(h){if(h.layer===layer){sum+=h.w;hit=true;}});return hit?sum:null;}
+function today(){return (FEEDS.signals&&FEEDS.signals.asOf)?new Date(FEEDS.signals.asOf):new Date();}
 
 // ---------- compute ----------
 function computeAll(){
   var sg=parseFloat(document.getElementById('sg').value)/100;
   var mu=parseFloat(document.getElementById('mu').value)/100;
-  if(!isFinite(sg)||sg<=0) sg=0.0001;
-  if(!isFinite(mu)) mu=0;
+  if(!isFinite(sg)||sg<=0)sg=0.0001; if(!isFinite(mu))mu=0;
   var ov=SCEN[scenario];
+  var tk=norm(document.getElementById('tk').value);
+  var ev=earnFor(tk); var t0=today();
   return HZ.map(function(h){
     var t=h.days/252;
     var delta=Math.log(1+(ov[h.key]||0)/100);
     var m=(mu-sg*sg/2)*t+delta;
     var s=sg*Math.sqrt(t);
+    var evHit=false;
+    if(ev&&ev.date){
+      var dCal=(new Date(ev.date)-t0)/86400000;
+      var winCal=h.days*7/5;
+      if(dCal>0&&dCal<=winCal){ s=Math.sqrt(s*s+(ev.pct/100)*(ev.pct/100)); evHit=true; }
+    }
     var b=band[h.key]/100;
-    var logHi=Math.log(1+b), logLo=Math.log(1-b);
+    var logHi=Math.log(1+b),logLo=Math.log(1-b);
     var pUp=1-normCDF((logHi-m)/s);
     var pDown=normCDF((logLo-m)/s);
     var pFlat=Math.max(0,1-pUp-pDown);
     var q=[-2,-1,0,1,2].map(function(z){return Math.exp(m+z*s)-1;});
-    return {h:h,t:t,m:m,s:s,b:b,pUp:pUp,pFlat:pFlat,pDown:pDown,q:q,med:Math.exp(m)-1};
+    return {h:h,t:t,m:m,s:s,b:b,pUp:pUp,pFlat:pFlat,pDown:pDown,q:q,med:Math.exp(m)-1,evHit:evHit};
   });
 }
-
 function pct(x){return (x*100).toFixed(1);}
 function signPct(x){return (x>=0?'+':'')+(x*100).toFixed(1)+'%';}
 
-// ---------- table + bars ----------
 function renderTable(res){
-  var rows=document.getElementById('rows'); rows.innerHTML='';
-  var bars=document.getElementById('barsHost'); bars.innerHTML='';
+  var rows=document.getElementById('rows');rows.innerHTML='';
+  var bars=document.getElementById('barsHost');bars.innerHTML='';
   res.forEach(function(r){
     var lead=r.pUp>=r.pDown&&r.pUp>=r.pFlat?'up':(r.pDown>=r.pFlat?'down':'flat');
     var tr=document.createElement('tr');
-    tr.innerHTML='<td class="hz">'+r.h.label+'<small>'+r.h.sub+' · ±'+band[r.h.key]+'%</small></td>'+
+    tr.innerHTML='<td class="hz">'+r.h.label+'<small>'+r.h.sub+' · ±'+band[r.h.key]+'%'+(r.evHit?' · <span class="ev">실적 포함</span>':'')+'</small></td>'+
       '<td class="out'+(lead==='up'?' lead':'')+'">'+pct(r.pUp)+'</td>'+
       '<td class="out'+(lead==='flat'?' lead':'')+'">'+pct(r.pFlat)+'</td>'+
       '<td class="out'+(lead==='down'?' lead':'')+'">'+pct(r.pDown)+'</td>';
     rows.appendChild(tr);
-    var wrap=document.createElement('div');
-    wrap.className='barwrap';
+    var wrap=document.createElement('div');wrap.className='barwrap';
     wrap.innerHTML='<div class="barhead"><span>'+r.h.label+'</span><span>중앙값 '+signPct(r.med)+'</span></div>'+
       '<div class="bar"><span class="bu" style="width:'+pct(r.pUp)+'%"></span>'+
       '<span class="bf" style="width:'+pct(r.pFlat)+'%"></span>'+
@@ -291,139 +333,137 @@ function renderTable(res){
   });
   document.getElementById('resTitle').textContent=document.getElementById('tk').value.toUpperCase()+' · 확률 추정';
 }
-
-// ---------- cone ----------
 function renderCone(res){
   var W=560,H=360,padL=52,padR=16,padT=18,padB=34;
-  var iw=W-padL-padR, ih=H-padT-padB;
-  var n=res.length;
-  function xAt(i){return padL + iw*(i/(n));}
-  var ymax=0.02, ymin=-0.02;
-  res.forEach(function(r){ ymax=Math.max(ymax,r.q[4]); ymin=Math.min(ymin,r.q[0]); });
-  ymax*=1.08; ymin*=1.08;
-  function yAt(v){return padT + ih*(1-(v-ymin)/(ymax-ymin));}
+  var iw=W-padL-padR,ih=H-padT-padB,n=res.length;
+  function xAt(i){return padL+iw*(i/n);}
+  var ymax=0.02,ymin=-0.02;
+  res.forEach(function(r){ymax=Math.max(ymax,r.q[4]);ymin=Math.min(ymin,r.q[0]);});
+  ymax*=1.08;ymin*=1.08;
+  function yAt(v){return padT+ih*(1-(v-ymin)/(ymax-ymin));}
   var svg='';
-  var gy=[ymax,ymax/2,0,ymin/2,ymin];
-  gy.forEach(function(v){
-    var y=yAt(v);
+  [ymax,ymax/2,0,ymin/2,ymin].forEach(function(v){var y=yAt(v);
     svg+='<line x1="'+padL+'" y1="'+y+'" x2="'+(W-padR)+'" y2="'+y+'" stroke="var(--line)" stroke-width="1"/>';
-    svg+='<text x="'+(padL-8)+'" y="'+(y+4)+'" fill="var(--faint)" font-size="10.5" font-family="var(--disp)" text-anchor="end">'+signPct(v)+'</text>';
-  });
-  function pathFor(idx){
-    var d='M '+xAt(0)+' '+yAt(0);
-    res.forEach(function(r,i){ d+=' L '+xAt(i+1)+' '+yAt(r.q[idx]); });
-    return d;
-  }
-  function areaFill(lo,hi){
-    var d='M '+xAt(0)+' '+yAt(0);
-    res.forEach(function(r,i){ d+=' L '+xAt(i+1)+' '+yAt(r.q[hi]); });
-    for(var i=res.length-1;i>=0;i--){ d+=' L '+xAt(i+1)+' '+yAt(res[i].q[lo]); }
-    d+=' L '+xAt(0)+' '+yAt(0)+' Z';
-    return d;
-  }
+    svg+='<text x="'+(padL-8)+'" y="'+(y+4)+'" fill="var(--faint)" font-size="10.5" font-family="var(--disp)" text-anchor="end">'+signPct(v)+'</text>';});
+  function pathFor(idx){var d='M '+xAt(0)+' '+yAt(0);res.forEach(function(r,i){d+=' L '+xAt(i+1)+' '+yAt(r.q[idx]);});return d;}
+  function areaFill(lo,hi){var d='M '+xAt(0)+' '+yAt(0);res.forEach(function(r,i){d+=' L '+xAt(i+1)+' '+yAt(r.q[hi]);});
+    for(var i=res.length-1;i>=0;i--){d+=' L '+xAt(i+1)+' '+yAt(res[i].q[lo]);}d+=' L '+xAt(0)+' '+yAt(0)+' Z';return d;}
   svg+='<path d="'+areaFill(0,4)+'" fill="var(--dawn)" opacity="0.07"/>';
   svg+='<path d="'+areaFill(1,3)+'" fill="var(--dawn)" opacity="0.13"/>';
   svg+='<path d="'+pathFor(0)+'" fill="none" stroke="var(--down)" stroke-width="1.2" opacity="0.7" stroke-dasharray="3 3"/>';
   svg+='<path d="'+pathFor(4)+'" fill="none" stroke="var(--up)" stroke-width="1.2" opacity="0.55" stroke-dasharray="3 3"/>';
   svg+='<path d="'+pathFor(2)+'" fill="none" stroke="var(--dawn)" stroke-width="2.2"/>';
   svg+='<line x1="'+padL+'" y1="'+yAt(0)+'" x2="'+(W-padR)+'" y2="'+yAt(0)+'" stroke="var(--faint)" stroke-width="1" stroke-dasharray="2 4"/>';
-  res.forEach(function(r,i){
-    var x=xAt(i+1);
+  res.forEach(function(r,i){var x=xAt(i+1);
     svg+='<circle cx="'+x+'" cy="'+yAt(r.med)+'" r="3.2" fill="var(--dawn)"/>';
-    svg+='<text x="'+x+'" y="'+(H-12)+'" fill="var(--txt)" font-size="11" font-family="var(--disp)" text-anchor="middle">'+r.h.label+'</text>';
-  });
+    svg+='<text x="'+x+'" y="'+(H-12)+'" fill="var(--txt)" font-size="11" font-family="var(--disp)" text-anchor="middle">'+r.h.label+'</text>';});
   svg+='<text x="'+xAt(0)+'" y="'+(H-12)+'" fill="var(--faint)" font-size="11" font-family="var(--disp)" text-anchor="middle">now</text>';
   document.getElementById('cone').innerHTML=svg;
-
   var last=res[res.length-1];
-  document.getElementById('readout').innerHTML=
-    '6개월 중앙 경로 <b>'+signPct(last.med)+'</b> · ±1σ <b>'+signPct(last.q[1])+' ~ '+signPct(last.q[3])+'</b> · ±2σ <b>'+signPct(last.q[0])+' ~ '+signPct(last.q[4])+'</b>'+
-    '<span class="tag">'+(scenario==='normal'?'일반':scenario==='raw'?'급락후 Raw':'급락후 Filtered')+'</span>';
+  document.getElementById('readout').innerHTML='6개월 중앙 경로 <b>'+signPct(last.med)+'</b> · ±1σ <b>'+signPct(last.q[1])+' ~ '+signPct(last.q[3])+'</b> · ±2σ <b>'+signPct(last.q[0])+' ~ '+signPct(last.q[4])+'</b><span class="tag">'+(scenario==='normal'?'일반':scenario==='raw'?'급락후 Raw':'급락후 Filtered')+'</span>';
+}
+function renderAll(){var res=computeAll();renderTable(res);renderCone(res);}
+
+// ---------- live context ----------
+function renderContext(g,tk,liveOn){
+  var box=document.getElementById('livebox');
+  var meta=META[tk];
+  var badge = !liveOn ? '<span class="badge off">수동 모드</span>'
+            : userOverride ? '<span class="badge manual">수동 오버라이드</span>'
+            : '<span class="badge">라이브</span>';
+  var cells='';
+  if(liveOn&&g){
+    var gtxt=g.velo?'속도 정찰 점등':(g.grade>0?('G'+g.grade):'무등급');
+    cells+='<div class="lstat"><div class="k">VIX</div><div class="v">'+(g.vix!=null?g.vix.toFixed(1):'—')+'</div></div>';
+    cells+='<div class="lstat"><div class="k">F&amp;G / 드로다운</div><div class="v">'+(g.fg!=null?g.fg:'—')+' <small>/ '+(g.dd!=null?g.dd+'%':'—')+'</small></div></div>';
+    cells+='<div class="lstat"><div class="k">매크로 게이트</div><div class="v">'+gtxt+' <small>공포 '+g.fear+'/4</small></div></div>';
+    cells+='<div class="lstat"><div class="k">자동 시나리오</div><div class="v">'+(scenario==='normal'?'일반':scenario==='raw'?'급락후 Raw':'급락후 Filtered')+'</div></div>';
+  }
+  if(meta){
+    var lw=layerWeight(meta.layer);
+    cells+='<div class="lstat"><div class="k">레이어 · 단계</div><div class="v">'+meta.layer+' <small>'+meta.stage+'</small></div></div>';
+    cells+='<div class="lstat"><div class="k">매크로 베타</div><div class="v">'+meta.beta.toFixed(2)+'</div></div>';
+    if(lw!=null)cells+='<div class="lstat"><div class="k">레이어 보유비중</div><div class="v">'+lw.toFixed(1)+'%</div></div>';
+  }
+  var ev=earnFor(tk);
+  if(ev&&ev.date){
+    var dCal=Math.round((new Date(ev.date)-today())/86400000);
+    cells+='<div class="lstat"><div class="k">다음 실적</div><div class="v">'+ev.date+' <small>D'+(dCal>=0?'-'+dCal+'일':'경과')+' · ±'+ev.pct+'%</small></div></div>';
+  }
+  if(!cells)cells='<div class="lstat"><div class="k">상태</div><div class="v">입력 기반 수동 계산</div></div>';
+  var note = !liveOn
+    ? '라이브 피드(signals·earnings·holdings)는 배포 환경에서 로드됩니다. 지금은 입력·프리셋 기반 수동 계산입니다.'
+    : (meta?(meta.act?'충격 시 액션: '+meta.act:''):'보유·추적 외 종목 — σ는 프리셋/수동, 라이브 베타 스케일 미적용.');
+  box.innerHTML='<div class="lh"><span class="k">라이브 컨텍스트 · 알파맵 연동</span>'+badge+'</div>'+
+    '<div class="livegrid">'+cells+'</div>'+
+    (note?'<div class="note">'+note+'</div>':'')+
+    (liveOn&&userOverride?'<button class="btn ghost reset" id="liveReset">라이브로 리셋</button>':'');
+  var lr=document.getElementById('liveReset');
+  if(lr)lr.onclick=function(){userOverride=false;applyLive(true);};
 }
 
-function renderAll(){
-  var res=computeAll();
-  renderTable(res);
-  renderCone(res);
+function syncScen(){[].forEach.call(document.getElementById('scen').children,function(c){c.classList.toggle('on',c.getAttribute('data-s')===scenario);});}
+
+function applyLive(populate){
+  var g=gateFrom(FEEDS.signals);
+  var tk=norm(document.getElementById('tk').value);
+  var liveOn=!!(FEEDS.signals||FEEDS.earnings||FEEDS.holdings);
+  if(populate&&liveOn&&!userOverride){
+    var sc=autoScenario(g);if(sc){scenario=sc;syncScen();}
+    var ls=liveSigma(tk,g);if(ls!=null)document.getElementById('sg').value=Math.round(ls*100);
+    var pm=presetMu(tk);if(pm!=null)document.getElementById('mu').value=Math.round(pm*100);
+  }
+  renderContext(g,tk,liveOn);
+  renderAll();
 }
 
 // ---------- UI ----------
 function buildChips(){
-  var host=document.getElementById('chips'); host.innerHTML='';
-  PRESETS.forEach(function(p){
-    var c=document.createElement('button'); c.className='chip';
-    c.innerHTML='<b>'+p.t+'</b> '+p.n;
-    c.onclick=function(){
-      document.getElementById('tk').value=p.t;
-      document.getElementById('sg').value=p.sg;
-      document.getElementById('mu').value=p.mu;
-      setMsg('프리셋 적용: '+p.n+' (σ '+p.sg+'% · μ '+p.mu+'%) — 기본 가정값, 수정 가능','');
-      renderAll();
-    };
-    host.appendChild(c);
-  });
+  var host=document.getElementById('chips');host.innerHTML='';
+  PRESETS.forEach(function(p){var c=document.createElement('button');c.className='chip';c.innerHTML='<b>'+p.t+'</b> '+p.n;
+    c.onclick=function(){document.getElementById('tk').value=p.t;userOverride=false;
+      if(!(FEEDS.signals||FEEDS.earnings)){document.getElementById('sg').value=p.sg;document.getElementById('mu').value=p.mu;}
+      applyLive(true);setMsg('프리셋 적용: '+p.n,'');};
+    host.appendChild(c);});
 }
 function buildBands(){
-  var host=document.getElementById('bands'); host.innerHTML='';
-  HZ.forEach(function(h){
-    var f=document.createElement('div'); f.className='field';
+  var host=document.getElementById('bands');host.innerHTML='';
+  HZ.forEach(function(h){var f=document.createElement('div');f.className='field';
     f.innerHTML='<label>'+h.label+'</label><input class="num" type="number" step="0.5" value="'+band[h.key]+'" data-k="'+h.key+'">';
-    f.querySelector('input').oninput=function(e){
-      var v=parseFloat(e.target.value); if(isFinite(v)&&v>=0&&v<99) band[h.key]=v; renderAll();
-    };
-    host.appendChild(f);
-  });
+    f.querySelector('input').oninput=function(e){var v=parseFloat(e.target.value);if(isFinite(v)&&v>=0&&v<99)band[h.key]=v;renderAll();};
+    host.appendChild(f);});
 }
 function setMsg(t,cls){var m=document.getElementById('aimsg');m.textContent=t;m.className='aimsg'+(cls?' '+cls:'');}
 
-document.getElementById('scen').addEventListener('click',function(e){
-  var b=e.target.closest('button'); if(!b)return;
-  scenario=b.getAttribute('data-s');
-  [].forEach.call(this.children,function(c){c.classList.toggle('on',c===b);});
-  renderAll();
-});
-['sg','mu','tk'].forEach(function(id){
-  document.getElementById(id).addEventListener('input',renderAll);
-});
-document.getElementById('reset').onclick=function(){
-  band=Object.assign({},BAND_DEFAULT); buildBands();
-  scenario='normal';
-  [].forEach.call(document.getElementById('scen').children,function(c){c.classList.toggle('on',c.getAttribute('data-s')==='normal');});
-  renderAll();
-  setMsg('기본 밴드·일반 시나리오로 초기화','');
-};
+document.getElementById('scen').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;
+  scenario=b.getAttribute('data-s');userOverride=true;syncScen();applyLive(false);});
+document.getElementById('tk').addEventListener('input',function(){applyLive(true);});
+['sg','mu'].forEach(function(id){document.getElementById(id).addEventListener('input',function(){userOverride=true;applyLive(false);});});
+document.getElementById('reset').onclick=function(){band=Object.assign({},BAND_DEFAULT);buildBands();userOverride=false;applyLive(true);setMsg('기본값·라이브로 초기화','');};
 
-// ---------- AI σ·μ estimation ----------
 document.getElementById('ai').onclick=async function(){
   var tk=document.getElementById('tk').value.trim();
   if(!tk){setMsg('먼저 티커를 입력하십시오','err');return;}
-  var btn=this; btn.disabled=true; var old=btn.textContent; btn.textContent='추정 중…';
+  var btn=this;btn.disabled=true;var old=btn.textContent;btn.textContent='추정 중…';
   setMsg('웹에서 '+tk.toUpperCase()+'의 최근 변동성을 조사하는 중…','');
   try{
     var prompt='You are a quant. For the stock/ETF ticker or name "'+tk+'", estimate its ANNUALIZED volatility (%) from recent ~1y daily returns, and a reasonable ANNUAL expected drift (%) assumption. Use web search for recent data. Respond with ONLY a compact JSON object, no prose, no markdown fences: {"ticker":"","name":"","annualizedVolPct":number,"suggestedDriftPct":number,"note":"one short sentence in Korean"}';
-    var resp=await fetch("https://api.anthropic.com/v1/messages",{
-      method:"POST",headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({
-        model:"claude-sonnet-4-20250514",max_tokens:1000,
-        messages:[{role:"user",content:prompt}],
-        tools:[{type:"web_search_20250305",name:"web_search"}]
-      })
-    });
+    var resp=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,messages:[{role:"user",content:prompt}],tools:[{type:"web_search_20250305",name:"web_search"}]})});
     var data=await resp.json();
     var text=(data.content||[]).filter(function(b){return b.type==='text';}).map(function(b){return b.text;}).join("\n");
-    var clean=text.replace(/```json|```/g,'').trim();
-    var mm=clean.match(/\{[\s\S]*\}/); if(mm) clean=mm[0];
+    var clean=text.replace(/```json|```/g,'').trim();var mm=clean.match(/\{[\s\S]*\}/);if(mm)clean=mm[0];
     var obj=JSON.parse(clean);
-    if(isFinite(obj.annualizedVolPct)) document.getElementById('sg').value=Math.round(obj.annualizedVolPct);
-    if(isFinite(obj.suggestedDriftPct)) document.getElementById('mu').value=Math.round(obj.suggestedDriftPct);
-    renderAll();
+    if(isFinite(obj.annualizedVolPct))document.getElementById('sg').value=Math.round(obj.annualizedVolPct);
+    if(isFinite(obj.suggestedDriftPct))document.getElementById('mu').value=Math.round(obj.suggestedDriftPct);
+    userOverride=true;applyLive(false);
     setMsg('추정 완료 · '+(obj.name||tk)+' σ '+Math.round(obj.annualizedVolPct)+'% · μ '+Math.round(obj.suggestedDriftPct)+'%'+(obj.note?' — '+obj.note:''),'ok');
-  }catch(err){
-    setMsg('자동 추정 실패 — σ·μ를 직접 입력하거나 프리셋을 사용하십시오. ('+(err&&err.message?err.message:'network')+')','err');
-  }finally{ btn.disabled=false; btn.textContent=old; }
+  }catch(err){setMsg('자동 추정 실패 — σ·μ 직접 입력 또는 프리셋 사용. ('+(err&&err.message?err.message:'network')+')','err');}
+  finally{btn.disabled=false;btn.textContent=old;}
 };
 
-buildChips(); buildBands(); renderAll();
+buildChips();buildBands();renderAll();
+loadFeeds();
 </script>
 </body>
 </html>
