@@ -447,10 +447,10 @@ document.getElementById('ai').onclick=async function(){
   var btn=this;btn.disabled=true;var old=btn.textContent;btn.textContent='추정 중…';
   setMsg('웹에서 '+tk.toUpperCase()+'의 최근 변동성을 조사하는 중…','');
   try{
-    var prompt='You are a quant. For the stock/ETF ticker or name "'+tk+'", estimate its ANNUALIZED volatility (%) from recent ~1y daily returns, and a reasonable ANNUAL expected drift (%) assumption. Use web search for recent data. Respond with ONLY a compact JSON object, no prose, no markdown fences: {"ticker":"","name":"","annualizedVolPct":number,"suggestedDriftPct":number,"note":"one short sentence in Korean"}';
-    var resp=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,messages:[{role:"user",content:prompt}],tools:[{type:"web_search_20250305",name:"web_search"}]})});
+    var resp=await fetch("/api/estimate",{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({ticker:tk})});
     var data=await resp.json();
+    if(!resp.ok)throw new Error((data&&data.error?data.error:'HTTP '+resp.status)+(data&&data.status?' '+data.status:''));
     var text=(data.content||[]).filter(function(b){return b.type==='text';}).map(function(b){return b.text;}).join("\n");
     var clean=text.replace(/```json|```/g,'').trim();var mm=clean.match(/\{[\s\S]*\}/);if(mm)clean=mm[0];
     var obj=JSON.parse(clean);
