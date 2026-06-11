@@ -140,6 +140,54 @@ async function handleSignalsUpdate(request, env) {
     { status: 200, headers: { "content-type": "application/json" } });
 }
 
+// σ·μ 추정 — Anthropic Messages API 프록시 (브라우저 직접 호출은 CORS·키 부재로 실패하므로 서버측에서 중계)
+async function handleEstimate(request, env) {
+  const json = (obj, status) => new Response(JSON.stringify(obj),
+    { status, headers: { "content-type": "application/json" } });
+
+  if (!env.ANTHROPIC_API_KEY) {
+    return json({ error: "ANTHROPIC_API_KEY not configured" }, 503);
+  }
+
+  let body;
+  try { body = await request.json(); }
+  catch { return json({ error: "invalid json" }, 400); }
+
+  const tk = (body && body.ticker ? String(body.ticker) : "").trim();
+  if (!tk) return json({ error: "ticker required" }, 400);
+
+  const prompt = 'You are a quant. For the stock/ETF ticker or name "' + tk + '", estimate its ANNUALIZED volatility (%) from recent ~1y daily returns, and a reasonable ANNUAL expected drift (%) assumption. Use web search for recent data. Respond with ONLY a compact JSON object, no prose, no markdown fences: {"ticker":"","name":"","annualizedVolPct":number,"suggestedDriftPct":number,"note":"one short sentence in Korean"}';
+
+  let upstream;
+  try {
+    upstream = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "x-api-key": env.ANTHROPIC_API_KEY,
+        "anthropic-version": "2023-06-01",
+      },
+      body: JSON.stringify({
+        model: "claude-opus-4-8",
+        max_tokens: 1500,
+        messages: [{ role: "user", content: prompt }],
+        tools: [{ type: "web_search_20260209", name: "web_search" }],
+      }),
+    });
+  } catch (e) {
+    return json({ error: "anthropic fetch failed", detail: String(e && e.message ? e.message : e) }, 502);
+  }
+
+  if (!upstream.ok) {
+    const t = await upstream.text();
+    return json({ error: "anthropic api failed", status: upstream.status, detail: t.slice(0, 400) }, 502);
+  }
+
+  // 응답 본문(content 블록 배열)을 그대로 전달 — 클라이언트가 text 블록을 추출·파싱.
+  const data = await upstream.json();
+  return json(data, 200);
+}
+
 export default {
   async fetch(request, env) {
     const password = env.SITE_PASSWORD;
@@ -173,6 +221,10 @@ export default {
       // signals 갱신 엔드포인트 (인증된 디바이스만 도달)
       if (request.method === "POST" && url.pathname === "/api/signals") {
         return handleSignalsUpdate(request, env);
+      }
+      // σ·μ AI 추정 프록시 (인증된 디바이스만 도달)
+      if (request.method === "POST" && url.pathname === "/api/estimate") {
+        return handleEstimate(request, env);
       }
       const res = await env.ASSETS.fetch(request);
       // HTML 응답에 1Y 호버 차트 모듈 주입 (index.html 본문은 그대로 유지하기 위한 worker-side 주입).
