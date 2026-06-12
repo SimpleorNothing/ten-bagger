@@ -3412,14 +3412,16 @@ $('pl_ai').onclick=async function(){
   setMsg('웹에서 '+tk.toUpperCase()+'의 최근 변동성을 조사하는 중…','');
   try{
     var prompt='You are a quant. For the stock/ETF ticker or name "'+tk+'", estimate its ANNUALIZED volatility (%) from recent ~1y daily returns, and a reasonable ANNUAL expected drift (%) assumption. Use web search for recent data. Respond with ONLY a compact JSON object, no prose, no markdown fences: {"ticker":"","name":"","annualizedVolPct":number,"suggestedDriftPct":number,"note":"one short sentence in Korean"}';
-    var resp=await fetch("https://api.anthropic.com/v1/messages",{
+    // 브라우저에서 api.anthropic.com 직접 호출은 CORS·API키 부재로 실패한다.
+    // 동일 오리진 worker 프록시(/api/estimate)를 경유한다 — 키·웹검색은 서버측에서 처리.
+    var resp=await fetch("/api/estimate",{
       method:"POST",headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({
-        model:"claude-sonnet-4-20250514",max_tokens:1000,
-        messages:[{role:"user",content:prompt}],
-        tools:[{type:"web_search_20250305",name:"web_search"}]
-      })
+      body:JSON.stringify({ticker:tk})
     });
+    if(!resp.ok){
+      var et=''; try{ var ej=await resp.json(); et=ej&&(ej.detail||ej.error)?(ej.error||'')+(ej.detail?' · '+ej.detail:''):''; }catch(_){}
+      throw new Error('서버 '+resp.status+(et?' · '+et:''));
+    }
     var data=await resp.json();
     var text=(data.content||[]).filter(function(b){return b.type==='text';}).map(function(b){return b.text;}).join("\n");
     var clean=text.replace(/```json|```/g,'').trim();
