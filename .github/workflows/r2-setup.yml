@@ -1,0 +1,64 @@
+name: Setup MEMO R2
+
+# 1회성: Cloudflare R2 버킷(ten-bagger-memo)을 생성하고 wrangler.jsonc 의
+# MEMO_BUCKET 바인딩을 활성화하는 PR을 자동으로 연다
+# (게이트가 자동 머지 → 배포 → 메모가 R2에 저장).
+# 수동 실행: Actions 탭 → "Setup MEMO R2" → Run workflow.
+
+on:
+  workflow_dispatch:
+    inputs:
+      bucket:
+        description: "R2 bucket name"
+        required: false
+        default: "ten-bagger-memo"
+
+permissions:
+  contents: read
+
+jobs:
+  setup-r2:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: claude/wizardly-rubin-SubA1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Wrangler v4
+        run: npm install -g wrangler@4
+
+      - name: Create R2 bucket (idempotent)
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          BUCKET: ${{ github.event.inputs.bucket }}
+        run: |
+          set -e
+          # 이미 있으면 create 가 에러 → 무시. 이후 list 로 존재를 확인한다.
+          wrangler r2 bucket create "$BUCKET" || echo "create skipped (bucket may already exist)"
+          wrangler r2 bucket list | tee r2-list.txt
+          grep -q "$BUCKET" r2-list.txt || { echo "::error::R2 bucket '$BUCKET' not found after create"; exit 1; }
+
+      - name: Wire binding into wrangler.jsonc and open PR
+        env:
+          GH_TOKEN: ${{ secrets.AUTO_MERGE_TOKEN }}
+          BUCKET: ${{ github.event.inputs.bucket }}
+        run: |
+          set -e
+          node scripts/enable-r2.mjs "$BUCKET"
+          node -e "const fs=require('fs');let s=fs.readFileSync('wrangler.jsonc','utf8').replace(/\/\/.*$/gm,'').replace(/\/\*[\s\S]*?\*\//g,'');const o=JSON.parse(s);if(!o.r2_buckets||!o.r2_buckets[0]||!o.r2_buckets[0].bucket_name){throw new Error('r2 binding not wired');}console.log('wrangler.jsonc OK, MEMO_BUCKET bucket:',o.r2_buckets[0].bucket_name);"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          BR="claude/r2-enable-${GITHUB_RUN_ID}"
+          git checkout -b "$BR"
+          git add wrangler.jsonc
+          git commit -m "feat(memo): MEMO_BUCKET(R2) 바인딩 활성화 — R2 클라우드 저장 켜기"
+          git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git push -u origin "$BR"
+          gh pr create --base claude/wizardly-rubin-SubA1 --head "$BR" \
+            --title "메모 Cloudflare R2 활성화 (MEMO_BUCKET 연결)" \
+            --body "Setup MEMO R2 워크플로가 생성/확인한 R2 버킷을 wrangler.jsonc 의 MEMO_BUCKET 바인딩에 연결합니다. 머지·배포되면 메모가 Cloudflare R2(notes.json)에 저장돼 기기 간 동기화됩니다."

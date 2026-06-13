@@ -188,7 +188,11 @@ async function handleEstimate(request, env) {
   return json(data, 200);
 }
 
-// ===== 메모 저장 — Cloudflare KV (MEMO_KV) =====
+// ===== 메모 저장 — Cloudflare R2 (MEMO_BUCKET) · DA Space 방식 =====
+// 메모 노트 JSON 을 R2 오브젝트("notes.json")로 보관. KV 의 25MiB 단일값 한도가 없어
+// 이미지(캡쳐) 누적에도 여유가 크다. 클라이언트(/api/memo)는 백엔드를 모른 채 그대로 동작.
+const MEMO_KEY = "notes.json";
+
 function memoJson(obj, status) {
   return new Response(JSON.stringify(obj), {
     status,
@@ -197,8 +201,9 @@ function memoJson(obj, status) {
 }
 
 async function handleMemoGet(env) {
-  if (!env.MEMO_KV) return memoJson({ error: "MEMO_KV not configured" }, 503);
-  const v = await env.MEMO_KV.get("notes");
+  if (!env.MEMO_BUCKET) return memoJson({ error: "MEMO_BUCKET not configured" }, 503);
+  const obj = await env.MEMO_BUCKET.get(MEMO_KEY);
+  const v = obj ? await obj.text() : "";
   return new Response(v && v.trim() ? v : "[]", {
     status: 200,
     headers: { "content-type": "application/json", "cache-control": "no-store" },
@@ -206,7 +211,7 @@ async function handleMemoGet(env) {
 }
 
 async function handleMemoPut(request, env) {
-  if (!env.MEMO_KV) return memoJson({ error: "MEMO_KV not configured" }, 503);
+  if (!env.MEMO_BUCKET) return memoJson({ error: "MEMO_BUCKET not configured" }, 503);
   let raw;
   try { raw = await request.text(); }
   catch { return memoJson({ error: "read failed" }, 400); }
@@ -214,9 +219,11 @@ async function handleMemoPut(request, env) {
   try { arr = JSON.parse(raw); }
   catch { return memoJson({ error: "invalid json" }, 400); }
   if (!Array.isArray(arr)) return memoJson({ error: "expected array" }, 400);
-  // KV 단일 값 한도(25MiB) 보호 — 여유분 24MiB에서 컷.
-  if (raw.length > 24 * 1024 * 1024) return memoJson({ error: "too large", bytes: raw.length }, 413);
-  await env.MEMO_KV.put("notes", JSON.stringify(arr));
+  // R2 단일 오브젝트 보호 — 메모 분량으로는 한참 여유인 64MiB 에서 컷.
+  if (raw.length > 64 * 1024 * 1024) return memoJson({ error: "too large", bytes: raw.length }, 413);
+  await env.MEMO_BUCKET.put(MEMO_KEY, JSON.stringify(arr), {
+    httpMetadata: { contentType: "application/json" },
+  });
   return memoJson({ ok: true, count: arr.length }, 200);
 }
 

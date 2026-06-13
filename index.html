@@ -3557,7 +3557,7 @@ buildChips(); buildBands(); renderAll();
 /* ===== 09 메모 (순간 아이디어 + 뉴스 캡쳐) — Cloudflare KV 저장 + localStorage 오프라인 캐시 ===== */
 (function(){
   var KEY='alphamap_notes_v1';   // 오프라인 캐시 키
-  var API='/api/memo';           // worker.js KV 엔드포인트(기존 패스워드 쿠키로 보호)
+  var API='/api/memo';           // worker.js R2 엔드포인트(기존 패스워드 쿠키로 보호)
   var notes=[], draft=[], editingId=null, q='', activeTag=null, syncState='', putTimer=null;
   var $=function(id){return document.getElementById(id);};
 
