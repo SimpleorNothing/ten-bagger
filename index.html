@@ -852,17 +852,8 @@ table.tk th.c{text-align:center}
     <p class="vsub">매크로 매매가 "충격이 오면 무엇을 할지"라면, 투자 캘린더는 "그 충격이 언제 올지"를 고정한다. 통화정책·물가·내 자산 실적·메가 이벤트·지정학 워치를 하나의 D-카운트다운으로 묶어, 다가오는 게이트를 놓치지 않는다. <b>확정 일정은 굵게, 추정(IR 미확정·기관 미확정)은 점선 태그로 표기.</b></p>
   </div>
 
-  <div class="cal-sec">임박 이벤트 <span class="sub">· 기준일 <span id="calAsOf">2026-05-30</span></span></div>
-  <div class="cal-now">
-    <div class="now-card" data-d="2026-06-03" style="--c:var(--cat-earn)"><div class="dn">D-2</div><div class="when">2026-06-03 (수·AMC)</div><div class="lbl">브로드컴 <span style="font-family:var(--mono);color:var(--faint);font-weight:600">AVGO</span></div><div class="meta">AI매출 가이드 $10.7B · MRVL 커스텀ASIC 리드스루 게이트</div></div>
-    <div class="now-card" data-d="2026-06-10" style="--c:var(--cat-infl)"><div class="dn">D-11</div><div class="when">2026-06-10 (수)</div><div class="lbl">美 CPI · 5월분</div><div class="meta">08:30 ET · 4월 +3.8% YoY (여전히 높음)</div></div>
-    <div class="now-card" data-d="2026-06-11" style="--c:var(--cat-macro)"><div class="dn">D-4</div><div class="when">2026-06-11 (목)</div><div class="lbl">ECB 통화정책회의</div><div class="meta">금리결정 14:15 CET · 유로존 디스인플레 경로</div></div>
-    <div class="now-card" data-d="2026-06-12" style="--c:var(--cat-event)"><div class="dn">D-13</div><div class="when">~2026-06-12 (금)</div><div class="lbl">SpaceX(SPCX) 거래 개시</div><div class="meta">나스닥 · $1.75~2T · 메모리 직격 선반영 시작</div></div>
-    <div class="now-card" data-d="2026-06-15" style="--c:var(--cat-macro)"><div class="dn">D-8</div><div class="when">2026-06-15~16 (월·화)</div><div class="lbl">일본은행 (BOJ) 금정위</div><div class="meta">금리결정 · 엔·JGB 수익률 변수</div></div>
-    <div class="now-card" data-d="2026-06-16" style="--c:var(--cat-macro)"><div class="dn">D-17</div><div class="when">2026-06-16~17</div><div class="lbl">FOMC (점도표*)</div><div class="meta">현 3.50~3.75% 동결 유지 중</div></div>
-    <div class="now-card" data-d="2026-06-22" style="--c:var(--cat-event)"><div class="dn">D-23</div><div class="when">~2026-06-22 (월·장전)</div><div class="lbl">S&amp;P500 편입 효력 <span style="font-family:var(--mono);color:var(--faint);font-weight:600">MRVL·FLEX</span></div><div class="meta">지수 편입 효력일 · 관찰 로그(mechanical)·채점 무관</div></div>
-    <div class="now-card" data-d="2026-06-24" style="--c:var(--cat-earn)"><div class="dn">D-25</div><div class="when">~2026-06-24 (AMC)</div><div class="lbl">마이크론 <span style="font-family:var(--mono);color:var(--faint);font-weight:600">MU</span></div><div class="meta">메모리 강등 게이트 · IR 확정 전 추정</div></div>
-  </div>
+  <div class="cal-sec">임박 이벤트 <span class="sub">· 기준일(자동) <span id="calAsOf">2026-05-30</span> · 매 접속 시 재계산 · 실적은 earnings.json 자동 병합</span></div>
+  <div class="cal-now" id="calNow"></div>
 
   <div class="cal-legend">
     <span class="lg"><span class="dot" style="background:var(--cat-macro)"></span>거시(Fed·ECB·BOJ·금통위)</span>
@@ -1817,7 +1808,7 @@ function infoAsof(){if(!SIGNAL_LOG||!SIGNAL_LOG.length)return null;let best=null
    document.lastModified는 CSS·JS·문구 등 정보와 무관한 수정·재배포에도 튀므로 쓰지 않고,
    "정보를 실제로 고칠 때만" 손으로 갱신하는 아래 상수에 연동한다.
    형식: ISO8601(+09:00 권장). 정보 변경 없는 배포에서는 절대 건드리지 말 것. */
-const VIEW_UPDATED='2026-06-09T12:00:00+09:00';
+const VIEW_UPDATED='2026-06-13T12:00:00+09:00';
 function fmtUpd(v){if(!v)return null;
  if(/KST$/.test(v))return v;                         // 이미 포맷된 상수
  if(/^\d{4}-\d{2}-\d{2}$/.test(v))return v+' KST';    // 날짜만(예: signals.json asOf)
@@ -1825,18 +1816,58 @@ function fmtUpd(v){if(!v)return null;
 function stampText(v){const f=fmtUpd(v);return f?'update : '+f:'';}
 function setStamp(id,v){const e=document.getElementById(id);if(e)e.textContent=stampText(v);}
 function stampStatics(){setStamp('updCal',VIEW_UPDATED);setStamp('updThread',VIEW_UPDATED);setStamp('updPort',VIEW_UPDATED);}
-/* ===== 임박 이벤트: 기준일=오늘(KST) + D-카운트 동적 계산 =====
-   기준일을 고정값이 아닌 런타임 오늘로 두어 D-카운트가 항상 유효하도록. */
+/* ===== 임박 이벤트: 데이터 구동 자동 큐레이션 (2026-06-13 개편) =====
+   매 접속 시 오늘(KST) 기준으로 ① 지난 이벤트 자동 제거 ② 날짜순 정렬
+   ③ 가장 임박한 N개만 카드 렌더 ④ D-카운트 동적 계산.
+   거시·이벤트·지정학 = CAL_NOW(수기 큐레이션 — narrative≠numbers, 향후 calendar.json 외부화 후보).
+   실적 = earnings.json moves에서 자동 병합(크론/운영자 단일 소스 → 이중관리 제거). */
+const CAL_NOW_MAX=8;     // 임박 카드 최대 표시 수
+const CAL_NOW_GRACE=0;   // D+grace일까지 유지(0 = D-Day까지만, 익일 자동 제거)
+const CAL_NOW=[
+ {d:'2026-06-15',cat:'macro',lbl:'일본은행 (BOJ) 금정위',meta:'금리결정 · 엔캐리 청산 변수 · FOMC와 48h 중첩',when:'06-15~16 (월·화)'},
+ {d:'2026-06-16',cat:'macro',lbl:'FOMC',tk:'점도표·SEP',meta:'현 3.50~3.75% 동결 유지 · 워시 첫 회의 · 언어·dissent가 연말 경로 결정',when:'06-16~17'},
+ {d:'2026-06-22',cat:'event',lbl:'S&P500 편입 효력',tk:'MRVL·FLEX',meta:'지수 편입 효력 · mechanical 관찰 로그 · 채점 무관',when:'~06-22 (월·장전)'},
+ {d:'2026-06-30',cat:'infl',lbl:'美 PCE · 5월분',meta:'Fed 선호 지표 · FOMC 직후 인플레 재확인',when:'06월말'},
+ {d:'2026-07-03',cat:'watch',lbl:'이란 60일 휴전 시한',meta:'프레임워크 만료 · 결렬 시 호르무즈·유가 재점화 → L7 역풍',when:'~07-03'},
+ {d:'2026-07-08',cat:'event',lbl:'SPCX 나스닥100 fast-entry',meta:'패시브 강제매수 → MU·MRVL·TSLA 강제매도(+15거래일)',when:'07월 초·중(추정)'},
+ {d:'2026-07-14',cat:'infl',lbl:'美 CPI · 6월분',meta:'BLS 확정',when:'~07-14'},
+ {d:'2026-07-28',cat:'macro',lbl:'FOMC',meta:'7월 회의',when:'07-28~29'},
+ {d:'2026-08-26',cat:'earn',lbl:'엔비디아',tk:'NVDA',meta:'스택 정점 · 분기 최대 게이트 · 확정',when:'08-26 (AMC)'},
+ {d:'2026-11-03',cat:'pol',lbl:'美 중간선거',meta:'하원 전체·상원 1/3 · AI 인프라 정책 베타',when:'11-03'},
+];
+/* earnings.json 티커 → 한글명·프레임 메모(카드 라벨/보조). 매핑 없으면 티커만. */
+const EARN_NAME={MU:'마이크론',VRT:'버티브','005930':'삼성전자',TSLA:'테슬라',RMBS:'램버스',SNDK:'샌디스크',QCOM:'퀄컴',ALAB:'아스테라랩스',AMD:'AMD',CEG:'컨스텔레이션',SMCI:'슈퍼마이크로',VICR:'바이코'};
+const EARN_NOTE={MU:'메모리(L3) 강등 게이트',VRT:'L7 인랙 전력','005930':'HBM4 점유율 회복 비대칭 상방',TSLA:'거버넌스 베타 · 룰북 제외',RMBS:'2분기 연속 QoQ 감소 시 kill',QCOM:'엣지 추론 mix shift(S4)',VICR:'전력반도체 과열'};
+function calToday(){const t=new Date(Date.now()+9*3600000);t.setUTCHours(0,0,0,0);return t;}
+function calDDiff(d,today){return Math.round((new Date(d+'T00:00:00Z')-today)/864e5);}
+function calDNText(n){return n>0?'D-'+n:n===0?'D-Day':'D+'+(-n);}
+function calEsc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function renderCalNow(){
- const today=new Date(Date.now()+9*3600000);today.setUTCHours(0,0,0,0);
+ const today=calToday();
  const p=n=>String(n).padStart(2,'0');
  const as=document.getElementById('calAsOf');
  if(as)as.textContent=`${today.getUTCFullYear()}-${p(today.getUTCMonth()+1)}-${p(today.getUTCDate())}`;
- document.querySelectorAll('#v-cal .now-card[data-d]').forEach(card=>{
-  const d=Math.round((new Date(card.dataset.d+'T00:00:00Z')-today)/864e5);
-  const dn=card.querySelector('.dn');
-  if(dn)dn.textContent=d>0?'D-'+d:d===0?'D-Day':'D+'+(-d);
+ const ev=CAL_NOW.map(e=>({...e}));
+ const mv=window.CAL_EARN_MOVES||null;
+ if(mv)Object.keys(mv).forEach(tk=>{const m=mv[tk];if(!m||!m.date)return;
+  const pct=Number.isFinite(m.pct)?` · ±${m.pct}%`:'';
+  const basis=m.basis==='event-iv'?' (IV)':m.basis==='hist'?' (추정)':'';
+  ev.push({d:m.date,cat:'earn',lbl:EARN_NAME[tk]||tk,tk:tk,
+   meta:(EARN_NOTE[tk]?EARN_NOTE[tk]+' · ':'')+'실적'+pct+basis,when:m.date});
  });
+ const cards=ev.map(e=>({...e,_n:calDDiff(e.d,today)}))
+  .filter(e=>e._n>=-CAL_NOW_GRACE)
+  .sort((a,b)=>a._n-b._n)
+  .slice(0,CAL_NOW_MAX);
+ const box=document.getElementById('calNow');if(!box)return;
+ box.innerHTML=cards.map(e=>{
+  const tk=e.tk?` <span style="font-family:var(--mono);color:var(--faint);font-weight:600">${calEsc(e.tk)}</span>`:'';
+  return `<div class="now-card" data-d="${e.d}" style="--c:var(--cat-${e.cat})">`+
+   `<div class="dn">${calDNText(e._n)}</div>`+
+   `<div class="when">${calEsc(e.when||e.d)}</div>`+
+   `<div class="lbl">${calEsc(e.lbl)}${tk}</div>`+
+   `<div class="meta">${calEsc(e.meta||'')}</div></div>`;
+ }).join('');
 }
 function updateAsof(){const pe=document.getElementById('pxAsof');if(pe)pe.textContent=fmtKST(PRICES_ASOF);const ie=document.getElementById('infoAsof');if(ie)ie.textContent=fmtKST(infoAsof());}
 async function loadPrices(){try{const r=await fetch('./prices.json',{cache:'no-store'});if(!r.ok)return;const p=await r.json();PRICES=p.quotes||{};PRICES_ASOF=p.asOf||null;renderAll();updateAsof();}catch(e){}}
@@ -3130,12 +3161,12 @@ Promise.all([getJSON('alpha.json'),getJSON('earnings.json'),getJSON('judgment.js
  if(j&&j.asOf)setStamp('updAlpha',j.asOf);
  const q=j&&j.quotes;if(q)D.forEach(d=>{const a=q[d.t];if(a){if(Array.isArray(a.aN))d.aN=a.aN;if(Array.isArray(a.aK))d.aK=a.aK;}});
  // 2) 실적 IV (earnings.json)
- if(e&&e.moves)EM=e.moves; if(e&&Array.isArray(e.playbook))EPLAY=e.playbook;
+ if(e&&e.moves){EM=e.moves;window.CAL_EARN_MOVES=e.moves;} if(e&&Array.isArray(e.playbook))EPLAY=e.playbook;
  // 3) 판단(judgment.json) — 자동 위에 마지막으로 덮어씀, null은 자동 유지
  const ov=g&&g.overrides;if(ov)D.forEach(d=>{const o=ov[d.t];if(o){if(Array.isArray(o.aN))o.aN.forEach((v,k)=>{if(v!=null)d.aN[k]=v;});if(o.g)d.g=o.g;}});
  // 4) 시점 스냅샷(snapshots.json) — 라이브 머지 후 현재 배치를 보존하고 셀렉터 구성.
  captureLive();SNAPS=(sn&&Array.isArray(sn.snapshots))?sn.snapshots:[];initSnapSel();
-}).finally(()=>{paint(); if(typeof renderSignalLog==='function')renderSignalLog(); if(typeof renderStack==='function')renderStack(); if(typeof renderPortfolio==='function')renderPortfolio(); if(typeof updateAsof==='function')updateAsof();});
+}).finally(()=>{paint(); if(typeof renderSignalLog==='function')renderSignalLog(); if(typeof renderStack==='function')renderStack(); if(typeof renderPortfolio==='function')renderPortfolio(); if(typeof updateAsof==='function')updateAsof(); if(typeof renderCalNow==='function')renderCalNow();});
 })();
 </script>
 <script>
