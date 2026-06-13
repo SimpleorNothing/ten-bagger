@@ -1482,6 +1482,76 @@ const RIVER_CHAINS={
    {n:'분쟁 리스크',why:'NYT는 라이선스 미체결·소송 중 — 불확실',cos:[['NYT·소송','태동']],stage:'태동'}]
  },
 };
+/* ===== 강물 후보 칩 호버 차트 매핑 (RV_PX) =====
+   강물 2~6 노드 카드의 종목 칩(cos)에 마우스를 올리면 1Y 주가 차트 팝업을 띄우기 위한 시세 매핑.
+   cos 라벨에서 티커 토큰(NBIS·CRWV·6954·005930 등)을 뽑아 아래 표와 대조 → data-id 부여.
+   라벨이 내러티브(가격·코멘트)로 바뀌어도 티커 토큰만 남으면 매칭이 유지된다(전체-문자열 키 아님).
+   inC:1 = 이미 C 배열에 있는 종목 → 그 id 의 charts.json 시계열 공유(크론 추가 fetch 불필요).
+   inC 미지정 = 신규 티커 → fetch-prices 크론이 prices.json·charts.json 에 매일 채운다.
+   id 는 charts/prices.json 의 키이자 호버 차트 조회 키 — C id 와 충돌 금지. */
+const RV_PX=[
+ /* 이미 C 배열에 있는 종목(차트 공유) */
+ {t:'NVDA', id:'nvda', name:'엔비디아',         mkt:'NASDAQ', stage:'가속'},
+ {t:'MRVL', id:'mrvl', inC:1},
+ {t:'CBRS', id:'cbrs', inC:1},
+ {t:'AMD',  id:'amd',  inC:1},
+ {t:'QCOM', id:'qcom', inC:1},
+ {t:'005930', id:'sec', inC:1},
+ {t:'SMCI', id:'smci', inC:1},
+ {t:'VRT',  id:'vrt',  inC:1},
+ {t:'TSLA', id:'tsla', inC:1},
+ {t:'PLTR', id:'pltr', inC:1},
+ /* 신규 티커 — 크론이 시세를 받아 채움 */
+ {t:'AVGO', id:'avgo', name:'브로드컴',        mkt:'NASDAQ', stage:'가속'},
+ {t:'AAPL', id:'aapl', name:'애플',           mkt:'NASDAQ', stage:'성숙'},
+ {t:'ARM',  id:'arm',  name:'ARM',           mkt:'NASDAQ', stage:'가속'},
+ {t:'MSFT', id:'msft', name:'마이크로소프트',   mkt:'NASDAQ', stage:'성숙'},
+ {t:'AMZN', id:'amzn', name:'아마존',          mkt:'NASDAQ', stage:'성숙'},
+ {t:'GOOGL',id:'googl',name:'알파벳',          mkt:'NASDAQ', stage:'성숙'},
+ {t:'NBIS', id:'nbis', name:'Nebius',        mkt:'NASDAQ', stage:'가속'},
+ {t:'CRWV', id:'crwv', name:'CoreWeave',     mkt:'NASDAQ', stage:'가속'},
+ {t:'CSCO', id:'csco', name:'시스코',          mkt:'NASDAQ', stage:'가속'},
+ {t:'ORCL', id:'orcl', name:'오라클',          mkt:'NYSE',   stage:'가속'},
+ {t:'9984', id:'sb',   name:'소프트뱅크',       mkt:'TSE',    stage:'초입'},
+ {t:'BX',   id:'bx',   name:'Blackstone',    mkt:'NYSE',   stage:'가속'},
+ {t:'OWL',  id:'owl',  name:'Blue Owl',      mkt:'NYSE',   stage:'가속'},
+ {t:'APO',  id:'apo',  name:'Apollo',        mkt:'NYSE',   stage:'가속'},
+ {t:'ARES', id:'ares', name:'Ares',          mkt:'NYSE',   stage:'초입'},
+ {t:'BLK',  id:'blk',  name:'BlackRock',     mkt:'NYSE',   stage:'성숙'},
+ {t:'EQIX', id:'eqix', name:'Equinix',       mkt:'NASDAQ', stage:'성숙'},
+ {t:'DLR',  id:'dlr',  name:'Digital Realty',mkt:'NYSE',   stage:'성숙'},
+ {t:'DBRG', id:'dbrg', name:'DigitalBridge', mkt:'NYSE',   stage:'성숙'},
+ {t:'6954', id:'fanuc',name:'FANUC',         mkt:'TSE',    stage:'성숙'},
+ {t:'6861', id:'keyence',name:'키엔스',        mkt:'TSE',    stage:'성숙'},
+ {t:'ABB',  id:'abb',  name:'ABB',           mkt:'NYSE',   stage:'성숙'},
+ {t:'ROK',  id:'rok',  name:'Rockwell',      mkt:'NYSE',   stage:'성숙'},
+ {t:'MBLY', id:'mbly', name:'Mobileye',      mkt:'NASDAQ', stage:'초입'},
+ {t:'LAZR', id:'lazr', name:'Luminar',       mkt:'NASDAQ', stage:'초입'},
+ {t:'OUST', id:'oust', name:'Ouster',        mkt:'NASDAQ', stage:'초입'},
+ {t:'6324', id:'hdrv', name:'Harmonic Drive',mkt:'TSE',    stage:'가속'},
+ {t:'6268', id:'nabtesco',name:'Nabtesco',   mkt:'TSE',    stage:'초입'},
+ {t:'6481', id:'thk',  name:'THK',           mkt:'TSE',    stage:'초입'},
+ {t:'6594', id:'nidec',name:'Nidec',         mkt:'TSE',    stage:'초입'},
+ {t:'RRX',  id:'rrx',  name:'Regal Rexnord', mkt:'NYSE',   stage:'초입'},
+ {t:'058610',id:'spg', name:'에스피지',        mkt:'KOSDAQ', stage:'과열'},
+ {t:'389500',id:'sbbt',name:'에스비비테크',     mkt:'KOSDAQ', stage:'태동'},
+ {t:'NET',  id:'net',  name:'Cloudflare',    mkt:'NYSE',   stage:'성숙'},
+ {t:'META', id:'meta', name:'Meta',          mkt:'NASDAQ', stage:'성숙'},
+ {t:'U',    id:'unty', name:'Unity',         mkt:'NYSE',   stage:'가속'},
+ {t:'SNPS', id:'snps', name:'Synopsys',      mkt:'NASDAQ', stage:'성숙'},
+ {t:'RDDT', id:'rddt', name:'Reddit',        mkt:'NYSE',   stage:'가속'},
+ {t:'NWSA', id:'nwsa', name:'News Corp',     mkt:'NASDAQ', stage:'성숙'},
+ {t:'GETY', id:'gety', name:'Getty',         mkt:'NYSE',   stage:'초입'},
+ {t:'NYT',  id:'nyt',  name:'NYT',           mkt:'NYSE',   stage:'태동'},
+];
+/* 런타임 인덱스: 티커 토큰 → 엔트리 · id → 엔트리. hover-chart.js 도 RV_BY_ID 를 참조. */
+const RV_BY_TICKER={}, RV_BY_ID={};
+RV_PX.forEach(e=>{RV_BY_TICKER[e.t]=e; RV_BY_ID[e.id]=e;});
+/* cos 라벨 → 시세 엔트리. 라벨을 영숫자 토큰으로 쪼개 티커 표와 대조(대소문자 구분). */
+function rvPx(label){if(!label)return null;
+ const toks=String(label).split(/[^A-Za-z0-9]+/);
+ for(let i=0;i<toks.length;i++){if(toks[i]&&RV_BY_TICKER[toks[i]])return RV_BY_TICKER[toks[i]];}
+ return null;}
 /* 파생 캐스케이드: 드라이버 ×10 → 함께 폭증하는 파생 가치사슬. cand=탐색기 후보 id
    [MECE 분류 규칙] 노드는 '수요 트리거가 어디서 왔나'가 아니라 '자산의 물리적 위치(전기 계량기 기준)'로 단 하나의 레이어에만 귀속한다.
    레이어 간 인과(트리거)는 노드 중복이 아니라 trigger 문구의 화살표(→ ▶)로만 표기한다.
@@ -2488,8 +2558,13 @@ function renderThread(){
    const chips=chain.flatMap(cn=>Array.isArray(cn.cos)?cn.cos.map(([nm,st,h])=>({nm,st:st||cn.stage,h})):[]);
    const isFront=(R.frontCodes||[]).includes(d.code);
    const pos=Math.round((d.pos||0)*100);
+   /* cos 라벨이 RV_PX 티커에 매핑되면 data-id 부여 → hover-chart.js 가 1Y 차트 팝업.
+      미매핑(비상장 등)은 종전대로 정보용 비클릭 칩(nolink) 유지. */
    const chipHTML=chips.length?chips.map(c=>{const cc=STAGE_HEX[c.st]||col;
-     return `<div class="chip nolink" style="border-left-color:${cc}"><span class="sd" style="background:${cc}"></span><span class="nm">${c.nm}</span>${c.h?'<span class="heldstar">★</span>':''}</div>`;}).join(''):`<span class="emptyc">— ${d.plays} —</span>`;
+     const px=rvPx(c.nm);
+     const cls=px?'chip rvpx':'chip nolink';
+     const did=px?` data-id="${px.id}"`:'';
+     return `<div class="${cls}"${did} style="border-left-color:${cc}"><span class="sd" style="background:${cc}"></span><span class="nm">${c.nm}</span>${c.h?'<span class="heldstar">★</span>':''}</div>`;}).join(''):`<span class="emptyc">— ${d.plays} —</span>`;
    return `<div class="lcard" id="rnode-${i}" data-c="${d.code}" style="border-left-color:${col}">
     <div class="lhead">
       <div class="lid" style="color:${col}">${d.code}</div>

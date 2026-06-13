@@ -28,7 +28,20 @@ function readCandidates() {
   if (!m) throw new Error('C array not found in index.html');
   // C contains only literals -> safe to evaluate.
   const C = eval(m[1].replace(/;\s*$/, ''));
-  return C.map((c) => ({ id: c.id, ticker: c.ticker, mkt: c.mkt }));
+  const list = C.map((c) => ({ id: c.id, ticker: c.ticker, mkt: c.mkt }));
+  // 강물 후보 칩 호버 차트용 추가 티커(RV_PX). inC 항목은 위 C 에 이미 있으니 제외,
+  // 신규 티커만 합류시켜 prices.json·charts.json 에 같이 채운다.
+  const rm = html.match(/const RV_PX=(\[[\s\S]*?\n\];)/);
+  if (rm) {
+    const seen = new Set(list.map((c) => c.id));
+    const RV = eval(rm[1].replace(/;\s*$/, ''));
+    for (const e of RV) {
+      if (e.inC || !e.t || !e.mkt || seen.has(e.id)) continue;
+      seen.add(e.id);
+      list.push({ id: e.id, ticker: e.t, mkt: e.mkt });
+    }
+  }
+  return list;
 }
 
 function yahooSymbol(ticker, mkt) {

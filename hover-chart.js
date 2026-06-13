@@ -96,6 +96,11 @@
   function show(chip) {
     var id = chip.dataset.id, co = null;
     for (var i = 0; i < C.length; i++) if (C[i].id === id) { co = C[i]; break; }
+    // 강물 후보 칩(RV_PX) — C 배열에 없는 종목은 RV_BY_ID 로 이름·티커·단계 해석.
+    if (!co && typeof RV_BY_ID !== 'undefined' && RV_BY_ID[id]) {
+      var e = RV_BY_ID[id];
+      co = { id: e.id, name: e.name, ticker: e.t, stage: e.stage };
+    }
     if (!co) return;
     curId = id;
     pop.innerHTML = popHTML(co);
