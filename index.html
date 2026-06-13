@@ -517,7 +517,8 @@ table.tk th.c{text-align:center}
 #v-memo .m-filterchips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
 #v-memo .m-chip{font:600 12px var(--serif);padding:5px 10px;border-radius:999px;border:1px solid var(--line2);background:var(--panel);color:var(--dim);cursor:pointer;transition:.12s}
 #v-memo .m-chip.on{background:var(--st-dawn);color:#fff;border-color:var(--st-dawn)}
-#v-memo .note{border:1px solid var(--line2);border-radius:14px;background:var(--panel);padding:15px 18px;margin-bottom:12px}
+#v-memo #mList{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;align-items:start}
+#v-memo .note{border:1px solid var(--line2);border-radius:14px;background:var(--panel);padding:15px 18px}
 #v-memo .note.pinned{border-color:var(--st-mature);box-shadow:0 0 0 1px rgba(184,134,11,.16)}
 #v-memo .note .nt-top{display:flex;align-items:baseline;gap:8px;margin-bottom:3px}
 #v-memo .note h3{font:700 16px var(--serif);color:var(--txt);margin:0}
@@ -536,7 +537,7 @@ table.tk th.c{text-align:center}
 #v-memo .note .nt-act{display:flex;gap:4px;margin-top:10px}
 #v-memo .note .nt-act button{font:600 12px var(--serif);border:0;background:transparent;color:var(--faint);cursor:pointer;padding:3px 7px;border-radius:6px;transition:.12s}
 #v-memo .note .nt-act button:hover{background:var(--panel2);color:var(--txt)}
-#v-memo .m-empty{color:var(--faint);font-size:14px;text-align:center;padding:42px 0}
+#v-memo .m-empty{grid-column:1/-1;color:var(--faint);font-size:14px;text-align:center;padding:42px 0}
 .m-lightbox{position:fixed;inset:0;background:rgba(0,0,0,.82);display:flex;align-items:center;justify-content:center;z-index:200;cursor:zoom-out}
 .m-lightbox[hidden]{display:none}
 .m-lightbox img{max-width:92vw;max-height:92vh;border-radius:8px}
