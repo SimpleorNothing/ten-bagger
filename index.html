@@ -1277,7 +1277,6 @@ table.tk th.c{text-align:center}
 <section class="view" id="v-memo">
   <div class="vhead">
     <h1 class="vtitle">메모 — <em>순간</em>의 생각과 캡쳐</h1>
-    <p class="vsub">떠오르는 아이디어·느낌을 즉시 적고, 뉴스 기사 캡쳐를 붙여넣어(<b>Ctrl/⌘+V</b>·드래그·＋이미지) 보관합니다. 이 브라우저에 저장되며(localStorage), <b>내보내기/복사</b>로 백업·리포 커밋이 가능합니다. <b>Ctrl/⌘+Enter</b>로 빠른 저장.</p>
   </div>
 
   <div class="composer" id="mComposer">
@@ -1286,18 +1285,12 @@ table.tk th.c{text-align:center}
     <div class="m-thumbs" id="mThumbs"></div>
     <div class="m-toolbar">
       <input class="m-tags" id="mTags" placeholder="#태그 (공백·쉼표 구분 — 예: MU L3 매크로 아이디어)" />
-      <input type="file" id="mFile" accept="image/*" multiple hidden />
-      <button class="m-btn" id="mAddImg" title="이미지 추가">＋ 이미지</button>
       <button class="m-btn primary" id="mSave">저장</button>
     </div>
   </div>
 
   <div class="m-controls">
     <input class="m-search" id="mSearch" placeholder="검색 (제목·본문·태그)" />
-    <button class="m-btn" id="mExport" title="JSON 파일로 내보내기(백업)">내보내기</button>
-    <button class="m-btn" id="mCopy" title="JSON을 클립보드로 복사(리포 커밋용)">복사</button>
-    <button class="m-btn" id="mImport" title="JSON 가져오기(병합)">가져오기</button>
-    <input type="file" id="mImportFile" accept="application/json,.json" hidden />
     <span class="m-sync" id="mSync"></span>
     <span class="m-count" id="mCount"></span>
   </div>
@@ -2027,7 +2020,9 @@ async function loadPrices(){try{const r=await fetch('./prices.json',{cache:'no-s
 /* ===== TABS ===== */
 document.getElementById('nav').addEventListener('click',e=>{const b=e.target.closest('.tab');if(!b)return;
  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));document.querySelectorAll('.view').forEach(v=>v.classList.remove('on'));
- b.classList.add('on');document.getElementById('v-'+b.dataset.v).classList.add('on');if(b.dataset.v==='thread'){drawSCurve();drawRiverCurves();}});
+ b.classList.add('on');document.getElementById('v-'+b.dataset.v).classList.add('on');
+ var _ab=document.getElementById('asofBox');if(_ab)_ab.style.display=(b.dataset.v==='memo')?'none':'';
+ if(b.dataset.v==='thread'){drawSCurve();drawRiverCurves();}});
 /* 다른 페이지/로그에서 8레이어 스택으로 점프 (단일 페이지 통합) */
 function gotoStack(layerId){
  const tab=document.querySelector('.tab[data-v="thread"]');if(tab&&!tab.classList.contains('on'))tab.click();
@@ -3751,37 +3746,10 @@ buildChips(); buildBands(); renderAll();
     if(!view.length){var e=document.createElement('div');e.className='m-empty';e.textContent=notes.length?'검색·필터에 해당하는 메모가 없습니다.':'아직 메모가 없습니다. 위에 첫 생각을 적어보세요.';list.appendChild(e);return;}
     view.forEach(function(n){list.appendChild(noteCard(n));});
   }
-  function exportJSON(){
-    var blob=new Blob([JSON.stringify(notes,null,2)],{type:'application/json'});
-    var a=document.createElement('a'),d=new Date(),p=function(x){return String(x).padStart(2,'0');};
-    a.href=URL.createObjectURL(blob);
-    a.download='alpha_memo_'+d.getFullYear()+p(d.getMonth()+1)+p(d.getDate())+'_'+p(d.getHours())+p(d.getMinutes())+'.json';
-    a.click();URL.revokeObjectURL(a.href);
-  }
-  async function copyJSON(){
-    try{await navigator.clipboard.writeText(JSON.stringify(notes,null,2));$('mCopy').textContent='복사됨';setTimeout(function(){$('mCopy').textContent='복사';},1200);}
-    catch(e){alert('클립보드 복사에 실패했습니다 — [내보내기]를 사용하세요.');}
-  }
-  function importJSON(file){
-    var fr=new FileReader();
-    fr.onload=function(){
-      try{var arr=JSON.parse(fr.result);if(!Array.isArray(arr))throw 0;
-        var ids=new Set(notes.map(function(n){return n.id;})),added=0;
-        arr.forEach(function(n){if(n&&n.id&&!ids.has(n.id)){notes.push(n);ids.add(n.id);added++;}});
-        persist();render();alert(added+'건을 가져왔습니다(중복 제외).');
-      }catch(e){alert('JSON 형식이 올바르지 않습니다.');}
-    };
-    fr.readAsText(file);
-  }
   function bind(){
     var comp=$('mComposer');
     $('mSave').onclick=save;
-    $('mAddImg').onclick=function(){$('mFile').click();};
-    $('mFile').onchange=function(e){addImages(Array.prototype.slice.call(e.target.files||[]));e.target.value='';};
     $('mSearch').oninput=function(e){q=e.target.value.trim().toLowerCase();render();};
-    $('mExport').onclick=exportJSON;$('mCopy').onclick=copyJSON;
-    $('mImport').onclick=function(){$('mImportFile').click();};
-    $('mImportFile').onchange=function(e){if(e.target.files[0])importJSON(e.target.files[0]);e.target.value='';};
     comp.addEventListener('paste',function(e){
       var items=(e.clipboardData||{}).items||[],imgs=[];
       for(var i=0;i<items.length;i++){if(items[i].type&&items[i].type.indexOf('image')===0){var f=items[i].getAsFile();if(f)imgs.push(f);}}
