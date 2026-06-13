@@ -188,6 +188,38 @@ async function handleEstimate(request, env) {
   return json(data, 200);
 }
 
+// ===== 메모 저장 — Cloudflare KV (MEMO_KV) =====
+function memoJson(obj, status) {
+  return new Response(JSON.stringify(obj), {
+    status,
+    headers: { "content-type": "application/json", "cache-control": "no-store" },
+  });
+}
+
+async function handleMemoGet(env) {
+  if (!env.MEMO_KV) return memoJson({ error: "MEMO_KV not configured" }, 503);
+  const v = await env.MEMO_KV.get("notes");
+  return new Response(v && v.trim() ? v : "[]", {
+    status: 200,
+    headers: { "content-type": "application/json", "cache-control": "no-store" },
+  });
+}
+
+async function handleMemoPut(request, env) {
+  if (!env.MEMO_KV) return memoJson({ error: "MEMO_KV not configured" }, 503);
+  let raw;
+  try { raw = await request.text(); }
+  catch { return memoJson({ error: "read failed" }, 400); }
+  let arr;
+  try { arr = JSON.parse(raw); }
+  catch { return memoJson({ error: "invalid json" }, 400); }
+  if (!Array.isArray(arr)) return memoJson({ error: "expected array" }, 400);
+  // KV 단일 값 한도(25MiB) 보호 — 여유분 24MiB에서 컷.
+  if (raw.length > 24 * 1024 * 1024) return memoJson({ error: "too large", bytes: raw.length }, 413);
+  await env.MEMO_KV.put("notes", JSON.stringify(arr));
+  return memoJson({ ok: true, count: arr.length }, 200);
+}
+
 export default {
   async fetch(request, env) {
     const password = env.SITE_PASSWORD;
@@ -225,6 +257,12 @@ export default {
       // σ·μ AI 추정 프록시 (인증된 디바이스만 도달)
       if (request.method === "POST" && url.pathname === "/api/estimate") {
         return handleEstimate(request, env);
+      }
+      // 메모 저장/조회 (Cloudflare KV) — 인증된 디바이스만 도달
+      if (url.pathname === "/api/memo") {
+        if (request.method === "GET") return handleMemoGet(env);
+        if (request.method === "PUT") return handleMemoPut(request, env);
+        return memoJson({ error: "method not allowed" }, 405);
       }
       const res = await env.ASSETS.fetch(request);
       // HTML 응답에 1Y 호버 차트 모듈 주입 (index.html 본문은 그대로 유지하기 위한 worker-side 주입).
