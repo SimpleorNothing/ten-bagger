@@ -7,16 +7,10 @@
     "binding": "ASSETS",
     // Run worker.js before serving any asset so the password gate also covers the .json data files.
     "run_worker_first": true
-  }
-  // ── 메모 저장용 R2 (DA Space 방식) ───────────────────────────────────
-  // 활성화하면 메모가 Cloudflare R2 오브젝트(notes.json)에 저장돼 기기 간 동기화됩니다.
-  //   1) npx wrangler r2 bucket create ten-bagger-memo
-  //   2) 아래 r2_buckets 블록 주석을 풀기 (bucket_name 은 위에서 만든 이름과 동일)
-  //   3) 커밋하면 배포 시 MEMO_BUCKET 바인딩이 붙습니다.
-  // 또는 Actions → "Setup MEMO R2" 워크플로를 1회 실행하면 1~3을 자동 처리합니다.
-  // 미설정 시(현재 기본값): worker /api/memo 는 503을 반환하고,
-  // 메모는 브라우저 localStorage 로만 동작합니다(graceful degrade — 배포는 정상).
-  // "r2_buckets": [
-  //   { "binding": "MEMO_BUCKET", "bucket_name": "ten-bagger-memo" }
-  // ]
+  },
+  // 메모 저장용 R2 (DA Space 방식) — Setup MEMO R2 워크플로가 버킷을 생성/연결.
+  // 비활성화하려면 아래 r2_buckets 블록을 주석 처리(메모는 localStorage 로 graceful degrade).
+  "r2_buckets": [
+    { "binding": "MEMO_BUCKET", "bucket_name": "ten-bagger-memo" }
+  ]
 }
