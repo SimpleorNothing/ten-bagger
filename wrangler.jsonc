@@ -7,5 +7,10 @@
     "binding": "ASSETS",
     // Run worker.js before serving any asset so the password gate also covers the .json data files.
     "run_worker_first": true
-  }
+  },
+  // 메모 저장용 KV. 아래 id를 본인 네임스페이스 id로 교체하세요.
+  //   npx wrangler kv namespace create MEMO_KV   →  출력된 id 붙여넣기
+  "kv_namespaces": [
+    { "binding": "MEMO_KV", "id": "PASTE_KV_NAMESPACE_ID_HERE" }
+  ]
 }
