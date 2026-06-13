@@ -7,10 +7,15 @@
     "binding": "ASSETS",
     // Run worker.js before serving any asset so the password gate also covers the .json data files.
     "run_worker_first": true
-  },
-  // 메모 저장용 KV. 아래 id를 본인 네임스페이스 id로 교체하세요.
-  //   npx wrangler kv namespace create MEMO_KV   →  출력된 id 붙여넣기
-  "kv_namespaces": [
-    { "binding": "MEMO_KV", "id": "PASTE_KV_NAMESPACE_ID_HERE" }
-  ]
+  }
+  // ── 메모 저장용 KV (선택) ─────────────────────────────────────────────
+  // 활성화하면 메모가 Cloudflare KV에 저장돼 기기 간 동기화됩니다.
+  //   1) npx wrangler kv namespace create MEMO_KV   →  출력된 id 복사
+  //   2) 아래 kv_namespaces 블록 주석을 풀고 그 id를 붙여넣기
+  //   3) 커밋하면 배포 시 MEMO_KV 바인딩이 붙습니다.
+  // 미설정 시(현재 기본값): worker /api/memo 는 503을 반환하고,
+  // 메모는 브라우저 localStorage 로만 동작합니다(graceful degrade — 배포는 정상).
+  // "kv_namespaces": [
+  //   { "binding": "MEMO_KV", "id": "PASTE_KV_NAMESPACE_ID_HERE" }
+  // ]
 }
