@@ -254,6 +254,57 @@ async function handleUs10y() {
     { status: 502, headers: { "content-type": "application/json" } });
 }
 
+// WTI 일별 시계열(2020~현재) 프록시 — Yahoo Finance(CL=F) 우선, Stooq CSV 폴백.
+// 서버사이드 fetch 라 브라우저 CORS 무관. 정규화 출력: {source, points:[["YYYY-MM-DD", close], ...]}
+async function handleWti() {
+  const okJson = (obj) => new Response(JSON.stringify(obj), {
+    status: 200,
+    headers: { "content-type": "application/json; charset=utf-8", "cache-control": "public, max-age=3600" },
+  });
+  const P1 = 1577836800; // 2020-01-01 UTC
+  const now = Math.floor(Date.now() / 1000);
+
+  // 1) Yahoo Finance v8 chart
+  for (const host of ["query1.finance.yahoo.com", "query2.finance.yahoo.com"]) {
+    try {
+      const u = `https://${host}/v8/finance/chart/CL=F?period1=${P1}&period2=${now}&interval=1d`;
+      const r = await fetch(u, { headers: { "user-agent": "Mozilla/5.0 (compatible; alphamap/1.0)" }, cf: { cacheTtl: 3600, cacheEverything: true } });
+      if (r.ok) {
+        const j = await r.json();
+        const res = j && j.chart && j.chart.result && j.chart.result[0];
+        const ts = res && res.timestamp;
+        const cl = res && res.indicators && res.indicators.quote && res.indicators.quote[0] && res.indicators.quote[0].close;
+        if (ts && cl && ts.length) {
+          const out = [];
+          for (let i = 0; i < ts.length; i++) {
+            if (cl[i] == null) continue;
+            out.push([new Date(ts[i] * 1000).toISOString().slice(0, 10), Math.round(cl[i] * 100) / 100]);
+          }
+          if (out.length) return okJson({ source: "yahoo", points: out });
+        }
+      }
+    } catch (_) { /* 다음 소스 */ }
+  }
+
+  // 2) Stooq CSV 폴백 (Date,Open,High,Low,Close,Volume)
+  try {
+    const r = await fetch("https://stooq.com/q/d/l/?s=cl.f&i=d&d1=20200101", { cf: { cacheTtl: 3600, cacheEverything: true } });
+    if (r.ok) {
+      const t = await r.text();
+      const lines = t.trim().split("\n");
+      const out = [];
+      for (let i = 1; i < lines.length; i++) {
+        const c = lines[i].split(",");
+        if (c.length >= 5 && c[4] && !isNaN(+c[4])) out.push([c[0], Math.round(+c[4] * 100) / 100]);
+      }
+      if (out.length) return okJson({ source: "stooq", points: out });
+    }
+  } catch (_) { /* 폴백 실패 */ }
+
+  return new Response(JSON.stringify({ error: "wti upstream unavailable" }),
+    { status: 502, headers: { "content-type": "application/json" } });
+}
+
 export default {
   async fetch(request, env) {
     const password = env.SITE_PASSWORD;
@@ -295,6 +346,10 @@ export default {
       // US10Y 데이터 프록시 (인증된 디바이스만 도달) — 매일 자동 갱신 원본 중계
       if (request.method === "GET" && url.pathname === "/api/us10y") {
         return handleUs10y();
+      }
+      // WTI 일별 시계열(2020~현재) 프록시 (인증된 디바이스만 도달)
+      if (request.method === "GET" && url.pathname === "/api/wti") {
+        return handleWti();
       }
       // 메모 저장/조회 (Cloudflare KV) — 인증된 디바이스만 도달
       if (url.pathname === "/api/memo") {
