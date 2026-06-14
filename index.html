@@ -2333,15 +2333,20 @@ window.US10Y=(function(){
   ser.forEach(s=>s._pts.forEach(p=>{const x=Date.parse(p[0]); if(x<xmin)xmin=x; if(x>xmax)xmax=x;}));
   // 명시적 계단 포인트: 각 결정일에 (직전 금리)→(신규 금리) 두 점을 찍어, 그 날짜에 정확히
   // 결정 금리로 떨어지는 직각 계단을 보장(라이브러리 stepped 옵션 비의존). info=호버용 결정정보.
-  function stepData(pts){var out=[];for(var i=0;i<pts.length;i++){var d=Date.parse(pts[i][0]),v=pts[i][1],t=pts[i][2],pv=i>0?pts[i-1][1]:null;
+  function stepData(pts){var out=[];var lastChg={date:null,delta:null};
+   for(var i=0;i<pts.length;i++){var d=Date.parse(pts[i][0]),v=pts[i][1],t=pts[i][2],flag=pts[i][3],pv=i>0?pts[i-1][1]:null;
     var info={date:d,val:v,delta:pv==null?null:Math.round((v-pv)*100)/100};
-    if(i>0){var ppv=i>1?pts[i-2][1]:null;out.push({x:d,y:pv,info:{date:Date.parse(pts[i-1][0]),val:pv,delta:ppv==null?null:Math.round((pv-ppv)*100)/100}});}
-    out.push({x:d,y:v,t:t,info:info});}
+    // 레벨이 실제로 바뀌는 결정에만 직각 라이저(수직단)를 찍는다. 동결('_h')·오늘연장('_c') 등 평탄 구간은 생략 → 가짜 0bp 호버 제거.
+    if(i>0&&pv!==v){out.push({x:d,y:pv,info:{date:Date.parse(pts[i-1][0]),val:pv,delta:lastChg.delta}});}
+    if(pv!==v){lastChg={date:d,delta:info.delta};}
+    // 오늘까지 수평 연장점('_c')은 6/14 같은 0bp 결정으로 표기하지 않고 직전 '실제 결정'을 보여준다.
+    if(flag==='_c'&&lastChg.date!=null){info={date:lastChg.date,val:v,delta:lastChg.delta};}
+    out.push({x:d,y:v,t:t,info:info,hold:flag==='_h'});}
    return out;}
   const datasets=ser.map(function(s){var la=s._la;
     var dat=o.stepped?stepData(s._pts):s._pts.map(p=>({x:Date.parse(p[0]),y:p[1],t:p[2]}));
     return {label:s.label,data:dat,borderColor:s.color,backgroundColor:s.color,borderWidth:1.7,tension:0,stepped:false,
-    pointRadius:(s.fc&&s.fc.length)?dat.map(p=>p.t?3.2:0):0,pointHoverRadius:3,spanGaps:true,
+    pointRadius:(s.fc&&s.fc.length)?dat.map(p=>p.hold?2.6:(p.t?3.2:0)):0,pointHoverRadius:3,spanGaps:true,
     segment:{borderDash:function(ctx){return ctx.p1.parsed.x>la?[6,4]:undefined;}}};});
   function fitY(){const xs=chart.scales.x,a=xs.min,b=xs.max;let lo=Infinity,hi=-Infinity;
    ser.forEach(s=>{if(chart.isDatasetVisible(ser.indexOf(s)))s._pts.forEach(p=>{const x=Date.parse(p[0]);if(x>=a&&x<=b){const v=p[1];if(v<lo)lo=v;if(v>hi)hi=v;}});});
@@ -2423,24 +2428,38 @@ window.US10Y=(function(){
   bok:[['2020-01-01',1.25],['2020-03-17',0.75],['2020-05-28',0.50],['2021-08-26',0.75],['2021-11-25',1.00],['2022-01-14',1.25],['2022-04-14',1.50],['2022-05-26',1.75],['2022-07-13',2.25],['2022-08-25',2.50],['2022-10-12',3.00],['2022-11-24',3.25],['2023-01-13',3.50],['2024-10-11',3.25],['2024-11-28',3.00],['2025-02-25',2.75],['2025-05-29',2.50]],
   boj:[['2020-01-01',-0.10],['2024-03-19',0.10],['2024-07-31',0.25],['2025-01-24',0.50],['2025-12-19',0.75]]
  };
+ // 동결(금리 변경 없이 '유지'로 끝난) 회의일 — 동결 구간에도 몇 번 동결했는지 점으로 표시·집계용.
+ // 각 날짜엔 그 시점 적용금리(직전 결정값)로 점을 찍고, 같은 레벨에서 'N차 동결'로 카운트한다(레벨 바뀌면 1차로 리셋).
+ const CBK_HOLD={
+  fed:['2023-06-14','2023-09-20','2023-11-01','2023-12-13','2024-01-31','2024-03-20','2024-05-01','2024-06-12','2024-07-31','2025-01-29','2025-03-19','2025-05-07','2025-06-18','2025-07-30','2026-01-28','2026-03-18','2026-04-29'],
+  ecb:['2023-10-26','2023-12-14','2024-01-25','2024-03-07','2024-04-11','2024-07-18','2025-07-24','2025-09-11','2025-10-30','2025-12-18','2026-02-05','2026-03-19','2026-04-30'],
+  bok:['2023-02-23','2023-04-11','2023-05-25','2023-07-13','2023-08-24','2023-10-19','2023-11-30','2024-01-11','2024-02-22','2024-04-12','2024-05-23','2024-07-11','2024-08-22','2025-07-10','2025-08-28','2025-10-23','2025-11-27','2026-01-15','2026-02-25','2026-04-16'],
+  boj:['2023-01-18','2023-03-10','2023-04-28','2023-06-16','2023-07-28','2023-09-22','2023-10-31','2023-12-19','2024-01-23','2024-04-26','2024-06-14','2024-09-20','2024-10-31','2024-12-19','2025-03-19','2025-05-01','2025-06-17','2025-07-31','2025-09-19','2025-10-30','2026-01-23','2026-03-19','2026-04-30']
+ };
  function renderCbk(){
   if(!cbkCfg.series){
    const TODAY=new Date().toISOString().slice(0,10);
    // 정책금리는 각국 중앙은행 '결정값'(큐레이션·검증)만 사용 — FRED 라이브는 누락/시행일 지연으로
    // 결정 계단이 안 그려지는 문제가 있어 제외. 마지막 결정값을 오늘까지 수평 연장(실선), 이후는 전망(점선).
-   const carry=(bak)=>{const a=bak.slice();const e=a[a.length-1];if(e[0]<TODAY)a.push([TODAY,e[1]]);return a;};
+   const carry=(bak)=>{const a=bak.slice();const e=a[a.length-1];if(e[0]<TODAY)a.push([TODAY,e[1],null,'_c']);return a;};
+   // 결정값(변경) 계단에 '동결 회의일' 점을 끼워 넣는다 — 같은 레벨 내 누적 'N차 동결'. 오늘 이전·첫 결정 이후만.
+   const withHolds=(bak,holds)=>{const out=bak.map(c=>c.slice());const cnt={};
+    (holds||[]).slice().sort().forEach(function(hd){if(hd>=TODAY)return;
+     var v=null,key=null;for(var i=0;i<bak.length;i++){if(bak[i][0]<=hd){v=bak[i][1];key=bak[i][0];}else break;}
+     if(v==null)return;cnt[key]=(cnt[key]||0)+1;out.push([hd,v,cnt[key]+'차 동결','_h']);});
+    out.sort(function(a,b){return a[0]<b[0]?-1:a[0]>b[0]?1:0;});return out;};
    // fc=향후 인상/인하 컨센서스 일정 [날짜, 금리, 내용] (오늘 이후만, 점선·계단형, 시장 컨센서스 추정)
    cbkCfg.series=[
-    {key:'fed',label:'美',color:'#185FA5',flag:'us',nx:{d:'2026-06-17',s:'동결 우세 ~97% → 3.75%'},points:carry(CBK_BAK.fed),fc:[
+    {key:'fed',label:'美',color:'#185FA5',flag:'us',nx:{d:'2026-06-17',s:'동결 우세 ~97% → 3.75%'},points:carry(withHolds(CBK_BAK.fed,CBK_HOLD.fed)),fc:[
       ['2026-06-17',3.75,'다음 FOMC ’26.6.16~17 → 동결 ~97~99.5% (현 3.50–3.75%·인플레·견조한 노동으로 연내 인하 기대 소멸)'],
       ['2026-12-09',3.75,'전망 연말 3.75% 동결 유지']]},
-    {key:'ecb',label:'유로존',color:'#BA7517',flag:'eu',nx:{d:'2026-07-23',s:'동결 우세 ~76% → 2.25%'},points:carry(CBK_BAK.ecb),fc:[
+    {key:'ecb',label:'유로존',color:'#BA7517',flag:'eu',nx:{d:'2026-07-23',s:'동결 우세 ~76% → 2.25%'},points:carry(withHolds(CBK_BAK.ecb,CBK_HOLD.ecb)),fc:[
       ['2026-07-23',2.25,'다음 회의 ’26.7.23 → 동결 ~76% (현 2.25%, 6/11 첫 인상 후 관망)'],
       ['2026-12-17',2.50,'전망 연내 +25bp → 2.50% 1회 선반영']]},
-    {key:'bok',label:'韓',color:'#0F6E56',flag:'kr',nx:{d:'2026-07-16',s:'인상 우세 69% → 2.75%'},points:carry(CBK_BAK.bok),fc:[
+    {key:'bok',label:'韓',color:'#0F6E56',flag:'kr',nx:{d:'2026-07-16',s:'인상 우세 69% → 2.75%'},points:carry(withHolds(CBK_BAK.bok,CBK_HOLD.bok)),fc:[
       ['2026-07-16',2.75,'다음 금통위 ’26.7.16 → 인상 우세 69% +25bp 2.75% (5월 5-2 매파 분열·신현송 총재 매파·인플레 전망 2.7% 상향)'],
       ['2026-10-31',3.00,'추정 ’26.4Q +25bp → 3.00% (연말 3.00% 전망·韓 12월 회의 없음)']]},
-    {key:'boj',label:'日',color:'#A32D2D',flag:'jp',nx:{d:'2026-06-16',s:'인상 거의확실 ~97% → 1.00%'},points:carry(CBK_BAK.boj),fc:[
+    {key:'boj',label:'日',color:'#A32D2D',flag:'jp',nx:{d:'2026-06-16',s:'인상 거의확실 ~97% → 1.00%'},points:carry(withHolds(CBK_BAK.boj,CBK_HOLD.boj)),fc:[
       ['2026-06-16',1.00,'다음 회의 ’26.6.15~16 → +25bp 1.00% (~97%, ’95년 이후 첫 도달·우에다 매파)'],
       ['2026-12-18',1.25,'전망 4Q 추가 +25bp → 1.25% (블룸버그 폴 연말 1.25%)']]}
    ];
