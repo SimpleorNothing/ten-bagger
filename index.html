@@ -1324,7 +1324,7 @@ table.tk th.c{text-align:center}
       <div id="cpiWrap" style="position:relative;width:100%;height:340px"><canvas id="cpiChart" role="img" aria-label="2020년부터 현재까지 미국·한국·유로존·일본 소비자물가 전년동월비 추이 (FRED)"></canvas><div id="cpiFlags" style="position:absolute;inset:0;pointer-events:none"></div></div>
       <div class="u10-tf" id="cpiTf"><button data-d="30">1M</button><button data-d="365" class="on">1Y</button><button data-d="1825">5Y</button></div>
       <div id="cpiLegend" style="display:flex;flex-wrap:wrap;gap:12px;margin:12px 0 0;font-size:12px"></div>
-      <div class="readout">출처: <a href="https://fred.stlouisfed.org" target="_blank" rel="noopener">FRED</a> (OECD MEI, CPI 전년동월비) — <b>월별 자동 갱신</b>. 美·韓·日·유로존 소비자물가 전년비. 기간 버튼·마우스 휠/드래그로 구간 조정.</div>
+      <div class="readout">출처: <a href="https://fred.stlouisfed.org" target="_blank" rel="noopener">FRED</a> — 美 BLS·韓/日 OECD MEI·유로존 Eurostat HICP 소비자물가지수에서 <b>전년동월비 산출</b>. <b>월별 자동 갱신</b>. 美·韓·日·유로존 4개국 비교. 기간 버튼·마우스 휠/드래그로 구간 조정.</div>
     </div>
 
     <!-- 국제유가 WTI -->
@@ -2373,12 +2373,21 @@ window.US10Y=(function(){
     lg.appendChild(el);});}
   setRange(o.defaultDays);
  }
- async function fredSeries(ids){
-  try{const r=await fetch('/api/fred?ids='+ids,{credentials:'same-origin'}); if(r.ok){const j=await r.json(); return j.series||{};}}catch(_){}
+ async function fredSeries(ids,from){
+  try{const r=await fetch('/api/fred?ids='+ids+(from?'&from='+from:''),{credentials:'same-origin'}); if(r.ok){const j=await r.json(); return j.series||{};}}catch(_){}
   return {};
  }
  function zipMid(a,b){if(!a||!a.length)return b||[];if(!b||!b.length)return a;const m={};b.forEach(p=>m[p[0]]=p[1]);
   return a.map(p=>[p[0], m[p[0]]!=null?(p[1]+m[p[0]])/2:p[1]]);}
+ // 지수(월별) → 전년동월비(%). 같은 달 −12개월 대비. base year 무관(비율). 2020-01부터만 출력.
+ function yoyFromIndex(points){if(!points||!points.length)return [];
+  const m={};points.forEach(p=>{m[p[0].slice(0,7)]=p[1];});const out=[];
+  points.forEach(function(p){const ym=p[0].slice(0,7);const prev=(+ym.slice(0,4)-1)+ym.slice(4);const pv=m[prev];
+   if(pv!=null&&pv!==0&&p[0]>='2020-01-01')out.push([p[0],(p[1]/pv-1)*100]);});
+  return out;}
+ // 후보 ID 중 가장 최신 데이터를 가진 비어있지 않은 시리즈 선택(신/구 OECD 코드 폴백).
+ function pickFresh(S,ids){let best=null,bd='';ids.forEach(function(id){const a=S[id];
+  if(a&&a.length){const ld=a[a.length-1][0];if(ld>bd){bd=ld;best=a;}}});return best||[];}
  const cbkCfg={cv:'cbkChart',tf:'cbkTf',legendId:'cbkLegend',flagsId:'cbkFlags',yTitle:'정책금리',yFmt:v=>Math.round(v)+'%',valFmt:v=>(v==null?'–':v.toFixed(2)+'%'),defaultDays:365};
  const cpiCfg={cv:'cpiChart',tf:'cpiTf',legendId:'cpiLegend',flagsId:'cpiFlags',yTitle:'전년동월비',yFmt:v=>Math.round(v)+'%',valFmt:v=>(v==null?'–':v.toFixed(1)+'%'),defaultDays:365};
  async function renderCbk(){
@@ -2393,12 +2402,16 @@ window.US10Y=(function(){
   zoomLineChart(cbkCfg);
  }
  async function renderCpi(){
-  if(!cpiCfg.series){const S=await fredSeries('CPALTT01USM659N,CPALTT01KRM659N,CPALTT01JPM659N,CPALTT01EZM659N');
+  if(!cpiCfg.series){
+   // 旧 OECD COICOP-1999 전년동월비 시리즈(CPALTT01*M659N)는 전부 갱신 중단(美 '22·日 '21·韓 '23, 유로존 부재).
+   // → 갱신 중인 지수 시리즈로 교체하고 전년동월비를 클라이언트에서 산출. 美=BLS / 韓·日=OECD MEI / 유로존=Eurostat HICP.
+   // YoY 산출에 −12개월 데이터가 필요해 from=2019-01-01 로 받는다.
+   const S=await fredSeries('CPIAUCNS,KORCPALTT01IXNBM,KORCPIALLMINMEI,JPNCPALTT01IXNBM,JPNCPIALLMINMEI,CP0000EZ19M086NEST','2019-01-01');
    cpiCfg.series=[
-    {key:'us',label:'美 CPI',color:'#185FA5',flag:'us',points:S.CPALTT01USM659N||[]},
-    {key:'kr',label:'韓 CPI',color:'#0F6E56',flag:'kr',points:S.CPALTT01KRM659N||[]},
-    {key:'jp',label:'日 CPI',color:'#A32D2D',flag:'jp',points:S.CPALTT01JPM659N||[]},
-    {key:'ez',label:'유로존 CPI',color:'#BA7517',flag:'eu',points:S.CPALTT01EZM659N||[]}
+    {key:'us',label:'美 CPI',color:'#185FA5',flag:'us',points:yoyFromIndex(S.CPIAUCNS||[])},
+    {key:'kr',label:'韓 CPI',color:'#0F6E56',flag:'kr',points:yoyFromIndex(pickFresh(S,['KORCPALTT01IXNBM','KORCPIALLMINMEI']))},
+    {key:'jp',label:'日 CPI',color:'#A32D2D',flag:'jp',points:yoyFromIndex(pickFresh(S,['JPNCPALTT01IXNBM','JPNCPIALLMINMEI']))},
+    {key:'ez',label:'유로존 CPI',color:'#BA7517',flag:'eu',points:yoyFromIndex(S.CP0000EZ19M086NEST||[])}
    ];}
   zoomLineChart(cpiCfg);
  }
