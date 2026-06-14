@@ -1270,7 +1270,7 @@ table.tk th.c{text-align:center}
   <div class="vhead">
     <div class="vkick">US10Y · 미 10년물 금리</div>
     <h1 class="vtitle">미 <em>10년물</em> 금리 모니터</h1>
-    <p class="vsub">시나리오 확률·조건부 레벨을 직접 조정하면 가중 기대치와 팬차트가 실시간 재계산됩니다. 매크로 게이트 토글로 연말 시나리오 가중치를 일괄 재편향할 수 있습니다. 현재 10Y·연말 시나리오 확률은 data.json 시드값을 사용합니다.</p></div>
+    <p class="vsub">매크로 게이트 토글로 연말 시나리오 가중치(Bull/Base/Bear)를 재편향하면 가중 기대치·팬차트가 실시간 재계산됩니다. 현재 10Y·연말 시나리오 확률은 data.json 시드값을 사용하며, 아래 "확률 추이"는 최근 시나리오 확률 변화를 추적합니다.</p></div>
 
   <div class="us10y">
     <!-- 현황 요약 -->
@@ -1302,7 +1302,7 @@ table.tk th.c{text-align:center}
             <button class="btn primary" id="u10_rebias">이 게이트로 시나리오 가중치 재편향</button>
             <button class="btn" id="u10_reset">기본값 복원</button>
           </div>
-          <p class="hint">게이트 배지는 토글에 따라 즉시 갱신됩니다. <b>재편향</b> 버튼을 누르면 hawkish↔dovish 확률 질량을 이동(최대 ±18%p)시켜 아래 표·차트에 반영합니다.</p>
+          <p class="hint">게이트 배지는 토글에 따라 즉시 갱신됩니다. <b>재편향</b> 버튼을 누르면 hawkish↔dovish 확률 질량을 이동(최대 ±18%p)시켜 위 요약·팬차트에 반영합니다.</p>
         </div>
       </div>
     </div>
@@ -1320,14 +1320,16 @@ table.tk th.c{text-align:center}
       <div class="readout" id="u10_readout"></div>
     </div>
 
-    <!-- 시나리오 표 -->
+    <!-- 확률 추이 -->
     <div class="panel">
-      <div class="panel-h"><h3>연말(12월) 시나리오 · 확률·조건부 레벨</h3><span class="stamp">확률 합 = <span id="u10_psum">100</span>%</span></div>
-      <table>
-        <thead><tr><th>시나리오</th><th>연말 10Y (%)</th><th style="width:220px">확률 (%)</th></tr></thead>
-        <tbody id="u10_rows"></tbody>
-      </table>
-      <p class="hint">레벨·확률을 조정하면 확률은 자동으로 100%로 정규화되어 위 요약·팬차트에 즉시 반영됩니다. <b>숫자칸</b>은 연말 금리 레벨, <b>슬라이더</b>는 확률입니다.</p>
+      <div class="panel-h"><h3>확률 추이</h3><span class="stamp">최근 연말 시나리오 확률 변화 (일별)</span></div>
+      <div class="fan"><svg id="u10_trend" viewBox="0 0 760 360" preserveAspectRatio="xMidYMid meet" role="img" aria-label="US10Y 연말 시나리오 확률 추이"></svg></div>
+      <div class="legend">
+        <span><i style="background:#0ca678"></i>Bull (하방 · 금리 하락)</span>
+        <span><i style="background:#9aa6b0"></i>Base (기준)</span>
+        <span><i style="background:#b8860b"></i>Bear (상방 · 금리 상승)</span>
+      </div>
+      <div class="readout" id="u10_trendout"></div>
     </div>
 
     <div class="disclaimer">이 모니터는 입력한 시나리오 가정에 따른 계산기입니다. 실제 금리 경로를 예측·보장하지 않으며 투자 자문이 아닙니다. 시드값(현재 10Y·시나리오 확률)은 data.json 기준이며, 의사결정은 본인의 판단으로 하십시오.</div>
@@ -2272,35 +2274,32 @@ window.US10Y=(function(){
  }
 
  /* ---- 렌더: 시나리오 표 (1회 빌드 후 값만 동기화) ---- */
- function buildRows(){
-  $('u10_rows').innerHTML=scen.map((x,i)=>{
-   const tg=x.tone==='haw'?'<span class="tone haw">상방</span>':x.tone==='dov'?'<span class="tone dov">하방</span>':'';
-   return `<tr>
-    <td>${x.name}${tg}</td>
-    <td><input type="number" class="u10-lvl" data-i="${i}" step="0.05" min="2" max="8" value="${x.y.toFixed(2)}"></td>
-    <td><div class="prow"><input type="range" class="u10-prob" data-i="${i}" min="0" max="100" step="1" value="${Math.round(x.p)}"><span class="pval" id="u10_pv${i}">${npct(x.p)}%</span></div></td>
-   </tr>`;}).join('');
-  $('u10_rows').querySelectorAll('.u10-lvl').forEach(el=>el.addEventListener('input',e=>{
-   const i=+e.target.dataset.i, v=parseFloat(e.target.value);
-   if(!isNaN(v)){scen[i].y=v;renderCards();renderFan();}
-  }));
-  $('u10_rows').querySelectorAll('.u10-prob').forEach(el=>el.addEventListener('input',e=>{
-   const i=+e.target.dataset.i; let nv=Math.max(0,Math.min(100,+e.target.value));
-   const others=psum()-scen[i].p;
-   if(others>0){const d=nv-scen[i].p;scen.forEach((s,j)=>{if(j!==i)s.p=Math.max(0,s.p-d*(s.p/others));});}
-   scen[i].p=nv; lastShift=0;
-   syncRows(); renderCards(); renderBadge(); renderFan();
-  }));
- }
- function syncRows(){
-  scen.forEach((x,i)=>{
-   const lv=$('u10_rows').querySelector('.u10-lvl[data-i="'+i+'"]');
-   const pr=$('u10_rows').querySelector('.u10-prob[data-i="'+i+'"]');
-   if(lv&&document.activeElement!==lv)lv.value=x.y.toFixed(2);
-   if(pr&&document.activeElement!==pr)pr.value=Math.round(x.p);
-   const pv=$('u10_pv'+i); if(pv)pv.textContent=npct(x.p)+'%';
-  });
-  $('u10_psum').textContent=Math.round(psum());
+ /* ---- 렌더: 확률 추이 (일별 Bull/Base/Bear, data.json 시드) ---- */
+ /* 각 행은 [날짜, Bull%, Bear%]; Base = 100 − Bull − Bear. 마지막 점이 현재 시드(32/43/25). */
+ const HIST=[
+  ['5/13',20,50],['5/14',16,58],['5/15',12,64],['5/16',9,70],['5/19',13,60],
+  ['5/20',18,52],['5/21',19,50],['5/22',25,42],['5/23',30,35],['5/26',36,28],
+  ['5/27',41,22],['5/28',45,18],['5/29',44,17],['5/30',43,16],['6/2',40,18],
+  ['6/3',38,20],['6/4',34,24],['6/5',30,30],['6/6',24,38],['6/9',14,56],
+  ['6/10',11,64],['6/11',14,60],['6/12',20,48],['6/13',27,38],['6/14',32,25]
+ ].map(r=>({d:r[0],bull:r[1],bear:r[2],base:100-r[1]-r[2]}));
+ function renderTrend(){
+  const M=HIST.length, W=760,H=360,L=40,R=18,Tm=16,Bm=40, iw=W-L-R, ih=H-Tm-Bm, YMAX=80;
+  const xF=k=>L+iw*k/(M-1), yF=v=>Tm+ih*(YMAX-v)/YMAX;
+  const line=key=>HIST.map((d,k)=>(k?'L':'M')+xF(k).toFixed(1)+' '+yF(d[key]).toFixed(1)).join(' ');
+  const dots=(key,col)=>HIST.map((d,k)=>`<circle cx="${xF(k).toFixed(1)}" cy="${yF(d[key]).toFixed(1)}" r="2.4" fill="${col}"/>`).join('');
+  let grid='';
+  for(let v=0;v<=YMAX;v+=20){const y=yF(v).toFixed(1);
+   grid+=`<line x1="${L}" y1="${y}" x2="${W-R}" y2="${y}" stroke="var(--line)" stroke-width="1"/>`+
+    `<text x="${L-8}" y="${(+y+4)}" text-anchor="end" font-size="11" fill="var(--faint)" font-family="var(--mono)">${v}%</text>`;}
+  let xlab=''; const step=Math.ceil(M/9);
+  for(let k=0;k<M;k+=step)xlab+=`<text x="${xF(k).toFixed(1)}" y="${H-14}" text-anchor="middle" font-size="11" fill="var(--faint)" font-family="var(--mono)">${HIST[k].d}</text>`;
+  const series=[['bull','#0ca678'],['base','#9aa6b0'],['bear','#b8860b']];
+  const paths=series.map(([k,c])=>`<path d="${line(k)}" fill="none" stroke="${c}" stroke-width="2.2"/>${dots(k,c)}`).join('');
+  $('u10_trend').innerHTML=`${grid}${paths}${xlab}`;
+  const last=HIST[M-1], first=HIST[0];
+  const arrow=(a,b)=>{const d=b-a;return d>0?`▲${d}`:d<0?`▼${-d}`:'±0';};
+  $('u10_trendout').innerHTML=`최근 ${HIST.length}거래일 — Bull <b>${last.bull}%</b>(${arrow(first.bull,last.bull)}p) · Base <b>${last.base}%</b>(${arrow(first.base,last.base)}p) · Bear <b>${last.bear}%</b>(${arrow(first.bear,last.bear)}p). 6월 들어 Bear(상방) 질량이 정점 뒤 되돌려지며 Bull(하방)이 재유입되는 흐름.`;
  }
 
  /* ---- 렌더: 팬차트 ---- */
@@ -2337,11 +2336,10 @@ window.US10Y=(function(){
  }
 
  function segSet(id,v){$(id).querySelectorAll('button').forEach(btn=>btn.classList.toggle('on',btn.dataset.v===v));}
- function render(){renderCards();renderBadge();syncRows();renderFan();}
+ function render(){renderCards();renderBadge();renderFan();renderTrend();}
 
  function init(){
   if(inited)return; inited=true;
-  buildRows();
   $('u10_hormuz').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;hormuz=b.dataset.v;segSet('u10_hormuz',hormuz);renderBadge();});
   $('u10_fomc').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;fomc=b.dataset.v;segSet('u10_fomc',fomc);renderBadge();});
   $('u10_rebias').addEventListener('click',rebias);
