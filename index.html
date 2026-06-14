@@ -1315,7 +1315,7 @@ table.tk th.c{text-align:center}
       <div id="cbkWrap" style="position:relative;width:100%;height:340px"><canvas id="cbkChart" role="img" aria-label="2020년부터 현재까지 미 연준·ECB·한국·일본 정책금리 계단형 추이와 2026년 12월까지 인상/동결 전망 점선 (중앙은행 공식 발표, 마우스 휠 줌)"></canvas><div id="cbkFlags" style="position:absolute;inset:0;pointer-events:none"></div></div>
       <div class="u10-tf" id="cbkTf"><button data-d="30">1M</button><button data-d="365" class="on">1Y</button><button data-d="1095">3Y</button><button data-d="1825">5Y</button></div>
       <div id="cbkLegend" style="display:flex;flex-wrap:wrap;gap:12px;margin:12px 0 0;font-size:12px"></div>
-      <div class="readout">출처: 각국 중앙은행 공식 발표(Fed·ECB·BOK·BOJ, 결정값 큐레이션) — <b>중앙은행이 결정한 정책금리</b> 기준(단기/콜금리 아님). 美=Fed 목표금리 <b>상단</b>·유로존=ECB <b>예치금리(DFR)</b>·韓=한국은행 기준금리·日=BOJ 정책금리. <b>계단형=결정 시점에 직각 변동</b>, 호버 시 해당 시점에 적용 중인 <b>최근 금리변경(일자·±bp)</b> 표시. 최근 결정: 美 ’25.12.10 −25bp→3.75%(상단)·ECB ’26.6.11 +25bp→2.25%(예치)·日 ’25.12.19 +25bp→0.75%·韓 ’25.5.29 −25bp→2.50%. <b>실선=실제 / 점선=하반기 컨센서스 전망</b>(6월 기준: 日 6/16 +25bp→1.00%·4Q 1.25%, 美 동결(연내 인하 소멸), ECB 7/23 동결→연내 +25bp 2.50%, 韓 동결(11/26 마지막) — 전망 점 호버 시 근거, 실제와 다를 수 있음). 기간 버튼·마우스 휠/드래그로 구간 조정.</div>
+      <div class="readout">출처(과거 결정 / 하반기 전망) — 美 Fed / CME FedWatch·Polymarket · 유로존 ECB / 시장 컨센서스(OIS) · 韓 한국은행 / 시장 전망 · 日 BOJ / 블룸버그 폴. <b>실선=실제 결정, 점선=컨센서스 전망(추정)</b>.</div>
     </div>
 
     <!-- 글로벌 CPI(YoY) -->
@@ -2430,14 +2430,14 @@ window.US10Y=(function(){
    const carry=(bak)=>{const a=bak.slice();const e=a[a.length-1];if(e[0]<TODAY)a.push([TODAY,e[1]]);return a;};
    // fc=향후 인상/인하 컨센서스 일정 [날짜, 금리, 내용] (오늘 이후만, 점선·계단형, 시장 컨센서스 추정)
    cbkCfg.series=[
-    {key:'fed',label:'美 연준 FFR(상단)',color:'#185FA5',flag:'us',points:carry(CBK_BAK.fed),fc:[
+    {key:'fed',label:'美',color:'#185FA5',flag:'us',points:carry(CBK_BAK.fed),fc:[
       ['2026-12-09',3.75,'전망 동결 — 6/17 동결 ~97~99.5%, 연내 인하 기대 소멸(인플레·견조한 노동)']]},
-    {key:'ecb',label:'유로존 ECB(예치·DFR)',color:'#BA7517',flag:'eu',points:carry(CBK_BAK.ecb),fc:[
+    {key:'ecb',label:'유로존',color:'#BA7517',flag:'eu',points:carry(CBK_BAK.ecb),fc:[
       ['2026-07-23',2.25,'전망 7/23 동결 ~76% (현 2.25%)'],
       ['2026-12-17',2.50,'전망 연내 +25bp → 2.50% 1회 선반영']]},
-    {key:'bok',label:'韓 한국은행 기준금리',color:'#0F6E56',flag:'kr',points:carry(CBK_BAK.bok),fc:[
+    {key:'bok',label:'韓',color:'#0F6E56',flag:'kr',points:carry(CBK_BAK.bok),fc:[
       ['2026-11-26',2.50,'전망 동결 — 인하 사이클 종료(중립 수준·수출 호조). 韓 12월 회의 없음 → 11/26 마지막']]},
-    {key:'boj',label:'日 BOJ 정책금리',color:'#A32D2D',flag:'jp',points:carry(CBK_BAK.boj),fc:[
+    {key:'boj',label:'日',color:'#A32D2D',flag:'jp',points:carry(CBK_BAK.boj),fc:[
       ['2026-06-16',1.00,'전망 6/16 +25bp → 1.00% (~97%, ’95년 이후 첫 도달)'],
       ['2026-12-18',1.25,'전망 4Q 추가 +25bp → 1.25% (블룸버그 폴 연말 1.25%)']]}
    ];}
@@ -2452,10 +2452,10 @@ window.US10Y=(function(){
    const S=await fredSeries('CPIAUCNS,KORCPALTT01IXNBM,KORCPIALLMINMEI,JPNCPALTT01IXNBM,JPNCPIALLMINMEI,CP0000EZ19M086NEST','2019-01-01');
    const pick=(k,fred)=>(M[k]&&M[k].length)?M[k]:yoyFromIndex(fred);
    cpiCfg.series=[
-    {key:'us',label:'美 CPI',color:'#185FA5',flag:'us',points:pick('us',S.CPIAUCNS||[])},
-    {key:'ez',label:'유로존 CPI',color:'#BA7517',flag:'eu',points:pick('ez',S.CP0000EZ19M086NEST||[])},
-    {key:'kr',label:'韓 CPI',color:'#0F6E56',flag:'kr',points:pick('kr',pickFresh(S,['KORCPALTT01IXNBM','KORCPIALLMINMEI']))},
-    {key:'jp',label:'日 CPI',color:'#A32D2D',flag:'jp',points:pick('jp',pickFresh(S,['JPNCPALTT01IXNBM','JPNCPIALLMINMEI']))}
+    {key:'us',label:'美',color:'#185FA5',flag:'us',points:pick('us',S.CPIAUCNS||[])},
+    {key:'ez',label:'유로존',color:'#BA7517',flag:'eu',points:pick('ez',S.CP0000EZ19M086NEST||[])},
+    {key:'kr',label:'韓',color:'#0F6E56',flag:'kr',points:pick('kr',pickFresh(S,['KORCPALTT01IXNBM','KORCPIALLMINMEI']))},
+    {key:'jp',label:'日',color:'#A32D2D',flag:'jp',points:pick('jp',pickFresh(S,['JPNCPALTT01IXNBM','JPNCPIALLMINMEI']))}
    ];}
   zoomLineChart(cpiCfg);
  }
