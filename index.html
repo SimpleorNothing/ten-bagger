@@ -2364,7 +2364,7 @@ window.US10Y=(function(){
     cx.fillStyle=WTICK;cx.font='10px system-ui';cx.fillText('오늘',px+3,ar.top+10);cx.restore();}};
   var chart=new Chart(cv,{type:'line',data:{datasets:datasets},plugins:[todayPlugin],
    options:{responsive:true,maintainAspectRatio:false,animation:false,layout:{padding:{right:28,top:8}},onResize:function(){setTimeout(placeFlags,30);},
-    interaction:{mode:'nearest',intersect:false,axis:'x'},
+    interaction:{mode:'nearest',intersect:false,axis:'xy'},
     scales:{x:{type:'linear',min:xmin,max:xmax,ticks:{color:WTICK,font:{size:11},maxTicksLimit:8,callback:fmtTick},grid:{color:WGRID}},
      y:{ticks:{color:WTICK,font:{size:11},precision:0,callback:o.yFmt},grid:{color:WGRID},title:{display:!!o.yTitle,text:o.yTitle||'',color:WTICK,font:{size:11}}}},
     plugins:{legend:{display:false},
