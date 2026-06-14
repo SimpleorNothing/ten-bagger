@@ -1315,7 +1315,7 @@ table.tk th.c{text-align:center}
       <div id="cbkWrap" style="position:relative;width:100%;height:340px"><canvas id="cbkChart" role="img" aria-label="2020년부터 현재까지 미 연준·ECB·영국·한국·일본 정책금리 추이 (FRED, 마우스 휠 줌)"></canvas></div>
       <div class="u10-tf" id="cbkTf"><button data-d="30">1M</button><button data-d="365">1Y</button><button data-d="1825">5Y</button><button data-d="99999" class="on">전체</button></div>
       <div id="cbkLegend" style="display:flex;flex-wrap:wrap;gap:12px;margin:12px 0 0;font-size:12px"></div>
-      <div class="readout">출처: <a href="https://fred.stlouisfed.org" target="_blank" rel="noopener">FRED</a> — <b>일별 자동 갱신</b>. 美=Fed 목표금리 중앙값(DFEDTARU/L)·유로존=ECB 예치금리(ECBDFR)는 실제 정책금리, <b>英·韓·日은 FRED 단기(콜)금리 근사</b>. 기간 버튼·마우스 휠/드래그로 구간 조정.</div>
+      <div class="readout">출처: <a href="https://fred.stlouisfed.org" target="_blank" rel="noopener">FRED</a> — <b>일별 자동 갱신</b>. 美=Fed 목표금리 중앙값(DFEDTARU/L)·유로존=ECB 예치금리(ECBDFR)·英=BOE 정책금리(BOERUKM)는 실제 정책금리, <b>韓·日은 FRED 단기(콜)금리 근사</b>. 기간 버튼·마우스 휠/드래그로 구간 조정.</div>
     </div>
 
     <!-- 글로벌 CPI(YoY) -->
@@ -2317,7 +2317,8 @@ window.US10Y=(function(){
  /* ---- 범용 줌/팬 라인차트 (정책금리·CPI) — FRED 라이브, x=epoch ms, 보이는 구간 y 자동 ---- */
  function fmtTick(v){var d=new Date(v);return "’"+String(d.getUTCFullYear()).slice(2)+"."+(d.getUTCMonth()+1);}
  function fmtFull(v){return new Date(v).toISOString().slice(0,10);}
- function zoomLineChart(o){
+ function zoomLineChart(o){try{zoomLineChartImpl(o);}catch(err){const lg=$(o.legendId);if(lg)lg.innerHTML='<span style="color:var(--faint);font-size:12px">차트 렌더 오류: '+(err&&err.message?err.message:err)+'</span>';}}
+ function zoomLineChartImpl(o){
   if(typeof Chart==='undefined'){return setTimeout(function(){zoomLineChart(o);},80);}
   const cv=$(o.cv); if(!cv)return;
   if(window.ChartZoom&&Chart.registry&&!Chart.registry.plugins.get('zoom')){try{Chart.register(window.ChartZoom);}catch(_){}}
@@ -2366,11 +2367,11 @@ window.US10Y=(function(){
  const cbkCfg={cv:'cbkChart',tf:'cbkTf',legendId:'cbkLegend',yTitle:'정책금리',yFmt:v=>v+'%',valFmt:v=>(v==null?'–':v.toFixed(2)+'%'),defaultDays:99999};
  const cpiCfg={cv:'cpiChart',tf:'cpiTf',legendId:'cpiLegend',yTitle:'전년동월비',yFmt:v=>v+'%',valFmt:v=>(v==null?'–':v.toFixed(1)+'%'),defaultDays:99999};
  async function renderCbk(){
-  if(!cbkCfg.series){const S=await fredSeries('DFEDTARU,DFEDTARL,ECBDFR,IRSTCI01GBM156N,IRSTCI01KRM156N,IRSTCI01JPM156N');
+  if(!cbkCfg.series){const S=await fredSeries('DFEDTARU,DFEDTARL,ECBDFR,BOERUKM,IRSTCI01KRM156N,IRSTCI01JPM156N');
    cbkCfg.series=[
     {key:'fed',label:'美 연준 FFR(중간값)',color:'#185FA5',flag:'us',points:zipMid(S.DFEDTARU,S.DFEDTARL)},
     {key:'ecb',label:'유로존 ECB(예치)',color:'#BA7517',flag:'eu',points:S.ECBDFR||[]},
-    {key:'boe',label:'英 BOE(단기금리)',color:'#534AB7',flag:'gb',points:S.IRSTCI01GBM156N||[]},
+    {key:'boe',label:'英 BOE 정책금리',color:'#534AB7',flag:'gb',points:S.BOERUKM||[]},
     {key:'bok',label:'韓 한국은행(단기금리)',color:'#0F6E56',flag:'kr',points:S.IRSTCI01KRM156N||[]},
     {key:'boj',label:'日 BOJ(단기금리)',color:'#A32D2D',flag:'jp',points:S.IRSTCI01JPM156N||[]}
    ];}

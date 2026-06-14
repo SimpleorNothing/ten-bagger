@@ -307,17 +307,15 @@ async function handleWti() {
 
 // FRED 시계열 프록시 — fredgraph.csv (무키). ?ids=ID1,ID2,... (영숫자_, 최대 12개)
 // 2020-01-01 이후만 반환. 출력: {series:{ID:[["YYYY-MM-DD", value], ...]}}
-async function handleFred(url) {
-  const ids = (url.searchParams.get("ids") || "").split(",")
-    .map((s) => s.trim()).filter((s) => /^[A-Za-z0-9_]{1,32}$/.test(s)).slice(0, 12);
-  if (!ids.length) {
-    return new Response(JSON.stringify({ error: "ids required" }), { status: 400, headers: { "content-type": "application/json" } });
-  }
-  const series = {};
-  await Promise.all(ids.map(async (id) => {
-    series[id] = [];
+// 한 시리즈 다운로드: 성공 시 포인트 배열, 항구적 빈값([]) 구분, 실패(네트워크/비200) 시 null.
+async function fredOne(id) {
+  for (let attempt = 0; attempt < 2; attempt++) {
     try {
-      const r = await fetch("https://fred.stlouisfed.org/graph/fredgraph.csv?id=" + id, { cf: { cacheTtl: 21600, cacheEverything: true } });
+      const r = await fetch("https://fred.stlouisfed.org/graph/fredgraph.csv?id=" + encodeURIComponent(id), {
+        headers: { "User-Agent": "Mozilla/5.0 (compatible; ten-bagger/1.0)", "Accept": "text/csv,*/*" },
+        // 성공 응답만 엣지 캐시(6h). 4xx/5xx(예: 일시적 403/429)는 캐시하지 않아 자가 복구.
+        cf: { cacheTtlByStatus: { "200-299": 21600, "300-599": 0 }, cacheEverything: true },
+      });
       if (r.ok) {
         const lines = (await r.text()).trim().split("\n");
         const out = [];
@@ -326,13 +324,29 @@ async function handleFred(url) {
           const d = c[0], v = c[1];
           if (d && d >= "2020-01-01" && v && v !== "." && !isNaN(+v)) out.push([d, +v]);
         }
-        series[id] = out;
+        return out; // 성공(빈 배열일 수도 있음 — 정상 처리)
       }
-    } catch (_) { /* 해당 시리즈만 빈 배열 */ }
+    } catch (_) { /* 재시도 */ }
+  }
+  return null; // 실패 신호
+}
+async function handleFred(url) {
+  const ids = (url.searchParams.get("ids") || "").split(",")
+    .map((s) => s.trim()).filter((s) => /^[A-Za-z0-9_]{1,32}$/.test(s)).slice(0, 12);
+  if (!ids.length) {
+    return new Response(JSON.stringify({ error: "ids required" }), { status: 400, headers: { "content-type": "application/json" } });
+  }
+  const series = {};
+  let anyFail = false;
+  await Promise.all(ids.map(async (id) => {
+    const r = await fredOne(id);
+    if (r === null) { anyFail = true; series[id] = []; } else { series[id] = r; }
   }));
+  // 일부라도 실패하면 짧게(2분)만 캐시해 자가 복구, 전부 성공 시 6h 캐시.
+  const ttl = anyFail ? 120 : 21600;
   return new Response(JSON.stringify({ series }), {
     status: 200,
-    headers: { "content-type": "application/json; charset=utf-8", "cache-control": "public, max-age=21600" },
+    headers: { "content-type": "application/json; charset=utf-8", "cache-control": "public, max-age=" + ttl },
   });
 }
 
