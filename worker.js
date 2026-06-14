@@ -311,7 +311,7 @@ async function handleWti() {
 async function fredOne(id) {
   for (let attempt = 0; attempt < 2; attempt++) {
     try {
-      const r = await fetch("https://fred.stlouisfed.org/graph/fredgraph.csv?id=" + encodeURIComponent(id), {
+      const r = await fetch("https://fred.stlouisfed.org/graph/fredgraph.csv?id=" + encodeURIComponent(id) + "&cosd=2020-01-01", {
         headers: { "User-Agent": "Mozilla/5.0 (compatible; ten-bagger/1.0)", "Accept": "text/csv,*/*" },
         // 성공 응답만 엣지 캐시(6h). 4xx/5xx(예: 일시적 403/429)는 캐시하지 않아 자가 복구.
         cf: { cacheTtlByStatus: { "200-299": 21600, "300-599": 0 }, cacheEverything: true },
