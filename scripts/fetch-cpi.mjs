@@ -1,12 +1,12 @@
 // Monthly CPI (전년동월비) fetcher for the global CPI chart.
-// Runs in GitHub Actions (인터넷 가능). 이 리포 샌드박스는 egress 차단이고, 런타임의
-// Cloudflare /api/fred 프록시는 6개 시리즈 순차+재시도 중 FRED 스로틀이 겹치면 응답이
-// 통째로 비어 차트가 사라진다(사용자 캡처). 그래서 CI에서 직접 받아 정적 cpi.json 으로 떨군다.
+// Runs in GitHub Actions (인터넷 가능). 런타임 Cloudflare /api/fred 프록시가 불안정해 차트가
+// 통째로 비는 사례가 있어, CI에서 직접 받아 정적 cpi.json 으로 떨군다.
 //
-// 데이터 경로(국가별로 최신 시점 우선):
-//   1) FRED 지수 시리즈 직접 다운로드 → 전년동월비 산출 (信頼성 높음, base 가 쓰는 코드 동일)
-//   2) OECD SDMX 헤드라인 전년비(GY)가 더 최신이면 그걸로 덮어씀 (FRED 미러가 끊긴 구간 보강)
-// 둘 다 실패 시 직전 cpi.json 값 보존(차트가 비지 않게).
+// 국가별로 여러 소스를 모아 "가장 최신까지 있는" 시리즈를 채택:
+//   - FRED 지수 → 전년동월비 산출 (신뢰성↑, 단 OECD-미러가 끊긴 韓 '23·日 '21 에서 멈춤)
+//   - DBnomics(OECD DF_PRICES_ALL · IMF CPI) 전년비 — 무키 JSON, 원천이 현재까지 갱신됨.
+//     (OECD SDMX 직접 호출은 간헐 500 이라 안정적인 DBnomics 미러를 쓴다.)
+// 모두 실패 시 직전 cpi.json 보존(차트가 비지 않게).
 //
 // 출력: cpi.json = { asOf, series: { us, ez, kr, jp: [["YYYY-MM-01", 전년비%], ...] } }
 
@@ -14,119 +14,91 @@ import fs from 'node:fs';
 
 const OUT = 'cpi.json';
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-const UA = { 'User-Agent': 'Mozilla/5.0 (compatible; ten-bagger/1.0)', 'Accept': 'text/csv,*/*' };
+const UA = { 'User-Agent': 'Mozilla/5.0 (compatible; ten-bagger/1.0)', 'Accept': '*/*' };
+const lastDate = (a) => (a && a.length ? a[a.length - 1][0] : '');
 
-// 국가별 FRED 지수 시리즈(신 코드 우선, 구 코드 폴백). index.html renderCpi 와 동일.
-const FRED = {
-  us: ['CPIAUCNS'],
-  ez: ['CP0000EZ19M086NEST'],
-  kr: ['KORCPALTT01IXNBM', 'KORCPIALLMINMEI'],
-  jp: ['JPNCPALTT01IXNBM', 'JPNCPIALLMINMEI'],
-};
-// OECD SDMX REF_AREA → 키 (헤드라인 CPI 전년비). 보강용.
-const OECD_AREAS = { USA: 'us', EA20: 'ez', KOR: 'kr', JPN: 'jp' };
-
-async function getText(url) {
+async function get(url, type) {
   for (let i = 0; i < 3; i++) {
     try {
       const r = await fetch(url, { headers: UA });
-      if (r.ok) return await r.text();
-      if (r.status < 500) return null;          // 4xx = 영구 실패
+      if (r.ok) return type === 'json' ? await r.json() : await r.text();
+      if (r.status < 500) return null;
     } catch (_) { /* 재시도 */ }
-    await sleep(800 * (i + 1));                  // 5xx/네트워크 백오프(OECD 500 잦음)
+    await sleep(700 * (i + 1));
   }
   return null;
 }
 
-// FRED CSV(지수, 월별) → [["YYYY-MM-01", index], ...] (2019-01~, YoY 산출용 −12개월 포함)
-async function fredIndex(id) {
-  const t = await getText('https://fred.stlouisfed.org/graph/fredgraph.csv?id=' + encodeURIComponent(id) + '&cosd=2019-01-01');
+// FRED CSV(지수, 월별) → 전년동월비[["YYYY-MM-01",%]]. 2019-01~ 받아 −12개월 확보.
+async function fredYoy(id) {
+  const t = await get('https://fred.stlouisfed.org/graph/fredgraph.csv?id=' + encodeURIComponent(id) + '&cosd=2019-01-01', 'text');
   if (!t) return [];
-  const out = [];
+  const idx = [];
   for (const line of t.trim().split('\n').slice(1)) {
     const [d, v] = line.split(',');
-    if (d && v && v !== '.' && !isNaN(+v)) out.push([d.slice(0, 7) + '-01', +v]);
+    if (d && v && v !== '.' && !isNaN(+v)) idx.push([d.slice(0, 7), +v]);
   }
-  return out;
-}
-
-// 지수 → 전년동월비(%). 같은 달 −12개월 대비. 2020-01부터만 출력.
-function yoy(points) {
-  const m = {}; points.forEach((p) => { m[p[0].slice(0, 7)] = p[1]; });
+  const m = {}; idx.forEach(([ym, v]) => { m[ym] = v; });
   const out = [];
-  for (const p of points) {
-    const ym = p[0].slice(0, 7);
+  for (const [ym, v] of idx) {
     const prev = (+ym.slice(0, 4) - 1) + ym.slice(4);
-    const pv = m[prev];
-    if (pv != null && pv !== 0 && p[0] >= '2020-01-01') out.push([p[0], +((p[1] / pv - 1) * 100).toFixed(1)]);
+    if (m[prev] && m[prev] !== 0 && ym >= '2020-01') out.push([ym + '-01', +((v / m[prev] - 1) * 100).toFixed(1)]);
   }
   return out;
 }
 
-function parseCsvLine(line) {
-  const out = []; let cur = '', q = false;
-  for (let i = 0; i < line.length; i++) {
-    const ch = line[i];
-    if (q) { if (ch === '"') { if (line[i + 1] === '"') { cur += '"'; i++; } else q = false; } else cur += ch; }
-    else if (ch === '"') q = true;
-    else if (ch === ',') { out.push(cur); cur = ''; }
-    else cur += ch;
-  }
-  out.push(cur);
-  return out;
-}
-
-// OECD SDMX 헤드라인 CPI 전년비(GY) — 보강용. 실패하면 {}.
-async function fetchOecd() {
-  const url = 'https://sdmx.oecd.org/public/rest/data/OECD.SDD.TPS,DSD_PRICES@DF_PRICES_ALL,1.0/'
-    + Object.keys(OECD_AREAS).join('+') + '.M.N.CPI.PA._T.N.GY'
-    + '?startPeriod=2020-01&dimensionAtObservation=AllDimensions&format=csvfilewithlabels';
-  const text = await getText(url);
-  if (!text) return {};
-  const lines = text.split(/\r?\n/).filter((l) => l.length);
-  if (lines.length < 2) return {};
-  const head = parseCsvLine(lines[0]);
-  const iA = head.indexOf('REF_AREA'), iT = head.indexOf('TIME_PERIOD'), iV = head.indexOf('OBS_VALUE');
-  if (iA < 0 || iT < 0 || iV < 0) return {};
-  const acc = {};
-  for (let i = 1; i < lines.length; i++) {
-    const c = parseCsvLine(lines[i]);
-    const k = OECD_AREAS[c[iA]], tp = c[iT], v = c[iV];
-    if (!k || !tp || v === '' || isNaN(+v)) continue;
-    (acc[k] ||= {})[tp] = +v;
-  }
-  const out = {};
-  for (const k of Object.values(OECD_AREAS)) {
-    if (!acc[k]) continue;
-    out[k] = Object.keys(acc[k]).sort().map((tp) => [tp + '-01', +acc[k][tp].toFixed(1)]);
+// DBnomics 단일 시리즈 → [["YYYY-MM-01",%]] (이미 전년비 % 인 시리즈만 사용).
+async function dbnomics(provider, dataset, code) {
+  const url = 'https://api.db.nomics.world/v22/series/'
+    + encodeURIComponent(provider) + '/' + encodeURIComponent(dataset) + '/' + encodeURIComponent(code)
+    + '?observations=1';
+  const j = await get(url, 'json');
+  const doc = j && j.series && j.series.docs && j.series.docs[0];
+  if (!doc || !Array.isArray(doc.period) || !Array.isArray(doc.value)) return [];
+  const out = [];
+  for (let i = 0; i < doc.period.length; i++) {
+    const p = doc.period[i], v = doc.value[i];
+    if (/^\d{4}-\d{2}$/.test(p) && typeof v === 'number' && isFinite(v) && p >= '2020-01') out.push([p + '-01', +v.toFixed(1)]);
   }
   return out;
 }
 
-const lastDate = (a) => (a && a.length ? a[a.length - 1][0] : '');
+// 후보들 중 가장 최신까지 있는(그리고 비어있지 않은) 시리즈 채택.
+function freshest(cands) {
+  return cands.filter((a) => a && a.length).sort((a, b) => (lastDate(a) < lastDate(b) ? 1 : -1))[0] || [];
+}
 
 async function main() {
   let prev = { asOf: null, series: {} };
   try { prev = JSON.parse(fs.readFileSync(OUT, 'utf8')); } catch (e) { /* first run */ }
   const out = { asOf: prev.asOf, series: { ...(prev.series || {}) } };
 
-  // 1) FRED 지수 → YoY
-  const fred = {};
-  for (const [k, ids] of Object.entries(FRED)) {
-    let best = [];
-    for (const id of ids) { const s = yoy(await fredIndex(id)); if (lastDate(s) > lastDate(best)) best = s; }
-    if (best.length) fred[k] = best;
-  }
-  // 2) OECD 로 보강(더 최신이면 교체)
-  const oecd = await fetchOecd();
+  const sources = {
+    us: async () => [await fredYoy('CPIAUCNS')],
+    ez: async () => [
+      await fredYoy('CP0000EZ19M086NEST'),
+      await dbnomics('OECD', 'DSD_PRICES@DF_PRICES_ALL', 'EA20.M.N.CPI.PA._T.N.GY'),
+    ],
+    kr: async () => [
+      await fredYoy('KORCPALTT01IXNBM'), await fredYoy('KORCPIALLMINMEI'),
+      await dbnomics('OECD', 'DSD_PRICES@DF_PRICES_ALL', 'KOR.M.N.CPI.PA._T.N.GY'),
+      await dbnomics('IMF', 'CPI', 'M.KR.PCPI_PC_CP_A_PT'),
+    ],
+    jp: async () => [
+      await fredYoy('JPNCPALTT01IXNBM'), await fredYoy('JPNCPIALLMINMEI'),
+      await dbnomics('OECD', 'DSD_PRICES@DF_PRICES_ALL', 'JPN.M.N.CPI.PA._T.N.GY'),
+      await dbnomics('IMF', 'CPI', 'M.JP.PCPI_PC_CP_A_PT'),
+    ],
+  };
 
   let ok = 0;
-  for (const k of Object.keys(FRED)) {
-    const cand = [fred[k], oecd[k]].filter((a) => a && a.length).sort((a, b) => (lastDate(a) < lastDate(b) ? 1 : -1));
-    if (cand.length) {
-      out.series[k] = cand[0];
-      ok++;
-      console.log(`OK   ${k} ${cand[0].length}pts last ${cand[0][cand[0].length - 1].join('=')} (fred:${lastDate(fred[k] || [])} oecd:${lastDate(oecd[k] || [])})`);
+  for (const [k, fn] of Object.entries(sources)) {
+    let cands = [];
+    try { cands = await fn(); } catch (e) { console.log(`WARN ${k}: ${e.message}`); }
+    const best = freshest(cands);
+    if (best.length) {
+      out.series[k] = best; ok++;
+      console.log(`OK   ${k} ${best.length}pts → last ${best[best.length - 1].join('=')}`);
     } else {
       console.log(`MISS ${k} (keeping last known ${lastDate(out.series[k] || [])})`);
     }
