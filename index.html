@@ -1315,6 +1315,7 @@ table.tk th.c{text-align:center}
       <div id="cbkWrap" style="position:relative;width:100%;height:340px"><canvas id="cbkChart" role="img" aria-label="2020년부터 현재까지 미 연준·ECB·한국·일본 정책금리 계단형 추이와 2026년 12월까지 인상/동결 전망 점선 (중앙은행 공식 발표, 마우스 휠 줌)"></canvas><div id="cbkFlags" style="position:absolute;inset:0;pointer-events:none"></div></div>
       <div class="u10-tf" id="cbkTf"><button data-d="30">1M</button><button data-d="365" class="on">1Y</button><button data-d="1095">3Y</button><button data-d="1825">5Y</button></div>
       <div id="cbkLegend" style="display:flex;flex-wrap:wrap;gap:12px;margin:12px 0 0;font-size:12px"></div>
+      <div id="cbkNext" style="margin:10px 0 2px;font-size:12px;line-height:1.9"></div>
       <div class="readout">출처(과거 결정 / 하반기 전망) — 美 Fed / CME FedWatch·Polymarket · 유로존 ECB / 시장 컨센서스(OIS) · 韓 한국은행 / 시장 전망 · 日 BOJ / 블룸버그 폴. <b>실선=실제 결정, 점선=컨센서스 전망(추정)</b>.</div>
     </div>
 
@@ -2430,18 +2431,27 @@ window.US10Y=(function(){
    const carry=(bak)=>{const a=bak.slice();const e=a[a.length-1];if(e[0]<TODAY)a.push([TODAY,e[1]]);return a;};
    // fc=향후 인상/인하 컨센서스 일정 [날짜, 금리, 내용] (오늘 이후만, 점선·계단형, 시장 컨센서스 추정)
    cbkCfg.series=[
-    {key:'fed',label:'美',color:'#185FA5',flag:'us',points:carry(CBK_BAK.fed),fc:[
-      ['2026-12-09',3.75,'전망 동결 — 6/17 동결 ~97~99.5%, 연내 인하 기대 소멸(인플레·견조한 노동)']]},
-    {key:'ecb',label:'유로존',color:'#BA7517',flag:'eu',points:carry(CBK_BAK.ecb),fc:[
-      ['2026-07-23',2.25,'전망 7/23 동결 ~76% (현 2.25%)'],
+    {key:'fed',label:'美',color:'#185FA5',flag:'us',nx:{d:'2026-06-17',s:'동결 우세 ~97% → 3.75%'},points:carry(CBK_BAK.fed),fc:[
+      ['2026-06-17',3.75,'다음 FOMC ’26.6.16~17 → 동결 ~97~99.5% (현 3.50–3.75%·인플레·견조한 노동으로 연내 인하 기대 소멸)'],
+      ['2026-12-09',3.75,'전망 연말 3.75% 동결 유지']]},
+    {key:'ecb',label:'유로존',color:'#BA7517',flag:'eu',nx:{d:'2026-07-23',s:'동결 우세 ~76% → 2.25%'},points:carry(CBK_BAK.ecb),fc:[
+      ['2026-07-23',2.25,'다음 회의 ’26.7.23 → 동결 ~76% (현 2.25%, 6/11 첫 인상 후 관망)'],
       ['2026-12-17',2.50,'전망 연내 +25bp → 2.50% 1회 선반영']]},
-    {key:'bok',label:'韓',color:'#0F6E56',flag:'kr',points:carry(CBK_BAK.bok),fc:[
-      ['2026-11-26',2.50,'전망 동결 — 인하 사이클 종료(중립 수준·수출 호조). 韓 12월 회의 없음 → 11/26 마지막']]},
-    {key:'boj',label:'日',color:'#A32D2D',flag:'jp',points:carry(CBK_BAK.boj),fc:[
-      ['2026-06-16',1.00,'전망 6/16 +25bp → 1.00% (~97%, ’95년 이후 첫 도달)'],
+    {key:'bok',label:'韓',color:'#0F6E56',flag:'kr',nx:{d:'2026-07-16',s:'인상 우세 69% → 2.75%'},points:carry(CBK_BAK.bok),fc:[
+      ['2026-07-16',2.75,'다음 금통위 ’26.7.16 → 인상 우세 69% +25bp 2.75% (5월 5-2 매파 분열·신현송 총재 매파·인플레 전망 2.7% 상향)'],
+      ['2026-10-31',3.00,'추정 ’26.4Q +25bp → 3.00% (연말 3.00% 전망·韓 12월 회의 없음)']]},
+    {key:'boj',label:'日',color:'#A32D2D',flag:'jp',nx:{d:'2026-06-16',s:'인상 거의확실 ~97% → 1.00%'},points:carry(CBK_BAK.boj),fc:[
+      ['2026-06-16',1.00,'다음 회의 ’26.6.15~16 → +25bp 1.00% (~97%, ’95년 이후 첫 도달·우에다 매파)'],
       ['2026-12-18',1.25,'전망 4Q 추가 +25bp → 1.25% (블룸버그 폴 연말 1.25%)']]}
-   ];}
+   ];
+   const TD=new Date().toISOString().slice(0,10);
+   cbkCfg.series.forEach(s=>{if(s.fc)s.fc=s.fc.filter(f=>f[0]>=TD);});}
   zoomLineChart(cbkCfg);
+  // 항상 보이는 '다음 금리 결정' 요약(차트 동그라미=다음 회의일, 여기에 날짜+컨센서스). 회의일 지난 항목은 자동 숨김.
+  const nxEl=$('cbkNext'); if(nxEl){const TD2=new Date().toISOString().slice(0,10);
+   const md=d=>{const p=d.split('-');return (+p[1])+'/'+(+p[2]);};
+   const rows=(cbkCfg.series||[]).filter(s=>s.nx&&s.nx.d>=TD2);
+   nxEl.innerHTML=rows.length?('<span style="color:var(--faint);margin-right:2px">다음 금리 결정 컨센서스</span>'+rows.map(s=>'<span style="display:inline-flex;align-items:center;gap:5px;margin-left:13px;white-space:nowrap"><span class="fi fi-'+s.flag+'" style="width:16px;height:12px;border-radius:2px;background-size:cover;display:inline-block;box-shadow:0 0 0 1px rgba(0,0,0,.1)"></span><b style="color:'+s.color+';font-weight:600">'+md(s.nx.d)+'</b> '+s.nx.s+'</span>').join('')):'';}
  }
  async function renderCpi(){
   if(!cpiCfg.series){
