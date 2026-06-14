@@ -10,6 +10,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-annotation/3.0.1/chartjs-plugin-annotation.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-zoom/2.0.1/chartjs-plugin-zoom.min.js" defer></script>
 <style>
 :root{
   --ink:#ffffff; --ink2:#fafbfc; --panel:#ffffff; --panel2:#f3f5f7;
@@ -1200,6 +1201,11 @@ table.tk th.c{text-align:center}
 .us10y code{font-family:var(--mono);background:var(--panel2);padding:1px 6px;border-radius:5px;color:var(--txt);font-size:12px}
 .us10y .u10-err{border:1px solid var(--st-hot);background:var(--panel);color:var(--st-hot);border-radius:12px;padding:14px 16px;font-size:13px;margin-top:18px;line-height:1.6}
 .us10y canvas{display:block;max-width:100%}
+.us10y .u10-tf{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden;margin:12px 0 0}
+.us10y .u10-tf button{font-family:var(--serif);font-size:12px;font-weight:600;padding:6px 15px;background:var(--panel);color:var(--dim);border:0;border-right:1px solid var(--line);cursor:pointer;transition:.15s}
+.us10y .u10-tf button:last-child{border-right:0}
+.us10y .u10-tf button:hover{color:var(--dawn)}
+.us10y .u10-tf button.on{background:var(--dawn);color:var(--onacc)}
 </style>
 <section class="view" id="v-prob">
   <div class="vhead">
@@ -1319,9 +1325,10 @@ table.tk th.c{text-align:center}
 
     <!-- 국제유가 WTI -->
     <div class="panel">
-      <div class="panel-h"><h3>국제유가 WTI(서부텍사스산) · 일별</h3><span class="stamp">라인=일별 $/배럴 (data.json) · 호버 상세</span></div>
-      <div id="wtiWrap" style="position:relative;width:100%;height:300px"><canvas id="wtiChart" role="img" aria-label="data.json 기반 WTI 국제유가 일별 추이"></canvas><div id="wtiFlags" style="position:absolute;inset:0;pointer-events:none"></div></div>
-      <div class="readout">출처: yfinance(<code>data.json</code> markets.wti) — <b>매일 자동 갱신</b>. 배경: ’26.2.28 이란 개전·호르무즈 봉쇄로 3월 $91·4월 $103 급등 후, 美·이란 평화협상·호르무즈 재개 기대로 되돌림. 협상 결렬 시 재급등 위험.</div>
+      <div class="panel-h"><h3>국제유가 WTI(서부텍사스산) · 일별 (’20~현재)</h3><span class="stamp" id="wtiStamp">마우스 휠=기간 확대/축소 · 호버 상세</span></div>
+      <div id="wtiWrap" style="position:relative;width:100%;height:320px"><canvas id="wtiChart" role="img" aria-label="2020년부터 현재까지 WTI 국제유가 일별 추이 (마우스 휠 줌)"></canvas></div>
+      <div class="u10-tf" id="wtiTf"><button data-d="1">1D</button><button data-d="7">1W</button><button data-d="30">1M</button><button data-d="365" class="on">1Y</button><button data-d="1825">5Y</button></div>
+      <div class="readout">출처: Yahoo Finance(CL=F) · Stooq 폴백 — <b>일별 자동 갱신</b>. 기간 버튼(1D/1W/1M/1Y/5Y) 또는 <b>마우스 휠</b>로 구간 조정. 배경: ’26.2.28 이란 개전·호르무즈 봉쇄로 3월 $91·4월 $103 급등 후, 美·이란 평화협상 기대로 되돌림. 협상 결렬 시 재급등 위험.</div>
     </div>
 
     <div class="disclaimer">데이터 출처: <a href="https://us10y.simpleornothing.com" target="_blank" rel="noopener">us10y.simpleornothing.com</a> · <code>data.json</code> — 현황 요약·확률 추이는 매일 KST 06:13 자동 갱신. 글로벌 중앙은행·CPI·WTI 차트는 큐레이션 매크로 시계열(공식 발표 시 갱신). 본 분석은 의사결정 지원용이며 매수·매도 권유가 아닙니다.</div>
@@ -2247,31 +2254,60 @@ window.US10Y=(function(){
   $('u10_trendout').innerHTML=`최근 ${M}일 — Bull <b>${l.bull}%</b>(${arr(f.bull,l.bull)}p) · Base <b>${l.base}%</b>(${arr(f.base,l.base)}p) · Bear <b>${l.bear}%</b>(${arr(f.bear,l.bear)}p).`;
  }
 
- /* ---- 국제유가 WTI · 일별 (data.json markets.wti, 매일 자동 갱신) ---- */
- function renderWti(){
+ /* ---- 국제유가 WTI · 일별 (’20~현재) — /api/wti(Yahoo·Stooq), data.json 폴백 ----
+    기간 버튼(1D/1W/1M/1Y/5Y) + 마우스 휠 줌. y축은 보이는 구간에 맞춰 자동. */
+ let wtiPts=null, wtiTfBound=false, wtiRange=365;
+ const WCOL='#9A6B1F', WTICK='#5F5E5A', WGRID='rgba(0,0,0,0.08)';
+ async function renderWti(){
   const cv=$('wtiChart'); if(!cv)return;
   if(typeof Chart==='undefined'){return setTimeout(renderWti,80);}
-  const H=DATA.history.filter(h=>h.markets&&h.markets.wti!=null);
-  if(!H.length)return;
-  const labels=H.map(h=>h.date.slice(5).replace('-','/'));
-  const data=H.map((h,i)=>({x:i,y:h.markets.wti,t:h.date+' · $'+num(h.markets.wti)}));
-  const lastV=H[H.length-1].markets.wti;
-  const ys=data.map(d=>d.y); let lo=Math.min.apply(null,ys), hi=Math.max.apply(null,ys);
-  const pad=Math.max(2,(hi-lo)*0.18); lo=Math.floor((lo-pad)/5)*5; hi=Math.ceil((hi+pad)/5)*5;
-  const COL='#9A6B1F', TICK='#5F5E5A', GRID='rgba(0,0,0,0.08)';
-  if(wtiChart){wtiChart.destroy();wtiChart=null;}
+  if(!wtiPts){
+   try{const r=await fetch('/api/wti',{credentials:'same-origin'});
+    if(r.ok){const j=await r.json(); if(j&&Array.isArray(j.points)&&j.points.length)wtiPts=j.points;}}catch(_){}
+   if(!wtiPts){ // 폴백: data.json 일별 (최근 ~1개월)
+    wtiPts=(DATA.history||[]).filter(h=>h.markets&&h.markets.wti!=null).map(h=>[h.date,h.markets.wti]);
+   }
+  }
+  if(!wtiPts.length)return;
+  buildWti();
+  if(!wtiTfBound){wtiTfBound=true;const tf=$('wtiTf');
+   if(tf)tf.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;setWtiRange(+b.dataset.d);});}
+ }
+ function wtiFitY(){
+  if(!wtiChart)return; const xs=wtiChart.scales.x;
+  let a=Math.max(0,Math.floor(xs.min)), b=Math.min(wtiPts.length-1,Math.ceil(xs.max));
+  let lo=Infinity,hi=-Infinity; for(let i=a;i<=b;i++){const v=wtiPts[i][1]; if(v<lo)lo=v; if(v>hi)hi=v;}
+  if(lo===Infinity)return; const pad=Math.max(1,(hi-lo)*0.12);
+  wtiChart.options.scales.y.min=Math.floor(lo-pad); wtiChart.options.scales.y.max=Math.ceil(hi+pad);
+  wtiChart.update('none');
+ }
+ function setWtiRange(days){
+  wtiRange=days; const last=wtiPts.length-1, td=days<=1?1:Math.round(days*5/7), min=Math.max(0,last-td);
+  wtiChart.options.scales.x.min=min; wtiChart.options.scales.x.max=last;
+  wtiChart.update('none');           // x 윈도우 커밋 후 y 자동 맞춤
+  const tf=$('wtiTf'); if(tf)tf.querySelectorAll('button').forEach(btn=>btn.classList.toggle('on',+btn.dataset.d===days));
+  wtiFitY();
+ }
+ function buildWti(){
+  const cv=$('wtiChart'); if(wtiChart){wtiChart.destroy();wtiChart=null;}
+  if(window.ChartZoom&&Chart.registry&&!Chart.registry.plugins.get('zoom')){try{Chart.register(window.ChartZoom);}catch(_){}}
+  const n=wtiPts.length, data=wtiPts.map((p,i)=>({x:i,y:p[1]}));
+  const lastV=wtiPts[n-1][1];
   wtiChart=new Chart(cv,{type:'line',
-   data:{datasets:[{label:'WTI ($/배럴)',data:data,borderColor:COL,backgroundColor:COL,borderWidth:2.4,tension:0.25,
-     pointRadius:data.map((d,i)=>i===data.length-1?4:0),pointHoverRadius:4,pointBackgroundColor:COL,pointBorderColor:COL,fill:false}]},
+   data:{datasets:[{label:'WTI',data:data,borderColor:WCOL,backgroundColor:WCOL,borderWidth:1.8,tension:0,pointRadius:0,pointHoverRadius:3,pointBackgroundColor:WCOL,fill:false}]},
    plugins:[{id:'wtip',afterDraw:function(c){if(!c.chartArea)return;var ctx=c.ctx,y=c.scales.y.getPixelForValue(lastV);
-     ctx.save();ctx.fillStyle=COL;ctx.font='700 12px Pretendard,system-ui,sans-serif';ctx.textBaseline='middle';ctx.fillText('$'+num(lastV,0),c.chartArea.right+6,y);ctx.restore();}}],
-   options:{responsive:true,maintainAspectRatio:false,animation:false,layout:{padding:{right:44,top:8}},
-    interaction:{mode:'nearest',intersect:false},
-    scales:{x:{type:'linear',min:0,max:data.length-1,ticks:{color:TICK,font:{size:11},maxTicksLimit:9,callback:function(v){return labels[Math.round(v)]||'';}},grid:{color:GRID}},
-     y:{min:lo,max:hi,ticks:{color:TICK,font:{size:11},callback:function(v){return '$'+v;}},grid:{color:GRID},title:{display:true,text:'$/배럴',color:TICK,font:{size:11}}}},
+     ctx.save();ctx.fillStyle=WCOL;ctx.font='700 12px Pretendard,system-ui,sans-serif';ctx.textBaseline='middle';ctx.fillText('$'+num(lastV,0),c.chartArea.right-2,y);ctx.restore();}}],
+   options:{responsive:true,maintainAspectRatio:false,animation:false,layout:{padding:{right:8,top:8}},
+    interaction:{mode:'index',intersect:false},
+    scales:{x:{type:'linear',min:0,max:n-1,ticks:{color:WTICK,font:{size:11},maxTicksLimit:8,callback:function(v){var p=wtiPts[Math.round(v)];return p?p[0]:'';}},grid:{color:WGRID}},
+     y:{ticks:{color:WTICK,font:{size:11},callback:function(v){return '$'+v;}},grid:{color:WGRID},title:{display:true,text:'$/배럴',color:WTICK,font:{size:11}}}},
     plugins:{legend:{display:false},
-     tooltip:{enabled:true,backgroundColor:'rgba(255,255,255,0.97)',titleColor:'#2C2C2A',bodyColor:'#444441',borderColor:GRID,borderWidth:1,padding:9,
-       callbacks:{title:function(){return 'WTI 국제유가';},label:function(c){return '  '+c.raw.t;}}}}}});
+     tooltip:{enabled:true,backgroundColor:'rgba(255,255,255,0.97)',titleColor:'#2C2C2A',bodyColor:'#444441',borderColor:WGRID,borderWidth:1,padding:9,
+       callbacks:{title:function(it){var p=wtiPts[it[0].dataIndex];return p?p[0]:'';},label:function(c){return '  WTI $'+num(c.raw.y);}}},
+     zoom:{limits:{x:{min:0,max:n-1}},
+       pan:{enabled:true,mode:'x',onPanComplete:wtiFitY},
+       zoom:{wheel:{enabled:true},pinch:{enabled:true},mode:'x',onZoomComplete:wtiFitY}}}}});
+  setWtiRange(wtiRange);
  }
 
  function renderAll(){renderSummary();renderTrend();renderWti();}
