@@ -1311,18 +1311,20 @@ table.tk th.c{text-align:center}
 
     <!-- 글로벌 중앙은행 정책금리 -->
     <div class="panel">
-      <div class="panel-h"><h3>글로벌 중앙은행 정책금리 · ’25.1~’26.12</h3><span class="stamp">실선=실제 결정 · 점선=오늘 이후 추정 · 호버 상세 · 범례 토글</span></div>
-      <div id="cbkWrap" style="position:relative;width:100%;height:340px"><canvas id="cbkChart" role="img" aria-label="2025년 1월부터 2026년 12월까지 미 연준·영국 BOE·한국은행·유로존 ECB·일본 BOJ 정책금리 계단형 추이와 연말 추정. 오늘 6월 14일 이후는 점선 추정."></canvas><div id="cbkFlags" style="position:absolute;inset:0;pointer-events:none"></div></div>
+      <div class="panel-h"><h3>글로벌 중앙은행 정책금리 · ’20~현재</h3><span class="stamp">마우스 휠=확대/축소 · 드래그=이동 · 범례 클릭 토글</span></div>
+      <div id="cbkWrap" style="position:relative;width:100%;height:340px"><canvas id="cbkChart" role="img" aria-label="2020년부터 현재까지 미 연준·ECB·영국·한국·일본 정책금리 추이 (FRED, 마우스 휠 줌)"></canvas></div>
+      <div class="u10-tf" id="cbkTf"><button data-d="30">1M</button><button data-d="365">1Y</button><button data-d="1825">5Y</button><button data-d="99999" class="on">전체</button></div>
       <div id="cbkLegend" style="display:flex;flex-wrap:wrap;gap:12px;margin:12px 0 0;font-size:12px"></div>
-      <div class="readout"><b>실선=실제 결정 / 점선=오늘(6/14) 이후 추정.</b> 추정 연말: Fed 3.75–4.00%·BOJ 1.25%·BOE 4.25%·ECB 2.25%·한국 2.50%. 근거: Fed 선물 ~3.8%(12월 인상 우위, Goldman은 동결)·BOJ 로이터폴 ~1.25%·BOE Fidelity 1~2회·ECB 7/23 76% 동결·BOK 원화·가계부채 동결. 시장가격·컨센서스 기준이라 실제와 다를 수 있음. 다음 주 BOJ 6/16·Fed 6/17·BOE 6/18 결과로 갱신 필요.</div>
+      <div class="readout">출처: <a href="https://fred.stlouisfed.org" target="_blank" rel="noopener">FRED</a> — <b>일별 자동 갱신</b>. 美=Fed 목표금리 중앙값(DFEDTARU/L)·유로존=ECB 예치금리(ECBDFR)는 실제 정책금리, <b>英·韓·日은 FRED 단기(콜)금리 근사</b>. 기간 버튼·마우스 휠/드래그로 구간 조정.</div>
     </div>
 
     <!-- 글로벌 CPI(YoY) -->
     <div class="panel">
-      <div class="panel-h"><h3>글로벌 소비자물가 CPI(전년비) · ’25.1~ 현재</h3><span class="stamp">라인=월별 YoY · 호버 상세 · 범례 클릭 토글</span></div>
-      <div id="cpiWrap" style="position:relative;width:100%;height:340px"><canvas id="cpiChart" role="img" aria-label="2025년 1월부터 2026년 5월까지 미국·영국·한국·유로존·일본 소비자물가 전년동월비 추이"></canvas><div id="cpiFlags" style="position:absolute;inset:0;pointer-events:none"></div></div>
+      <div class="panel-h"><h3>글로벌 소비자물가 CPI(전년비) · ’20~현재</h3><span class="stamp">마우스 휠=확대/축소 · 드래그=이동 · 범례 클릭 토글</span></div>
+      <div id="cpiWrap" style="position:relative;width:100%;height:340px"><canvas id="cpiChart" role="img" aria-label="2020년부터 현재까지 미국·영국·한국·유로존·일본 소비자물가 전년동월비 추이 (FRED)"></canvas></div>
+      <div class="u10-tf" id="cpiTf"><button data-d="365">1Y</button><button data-d="1825">5Y</button><button data-d="99999" class="on">전체</button></div>
       <div id="cpiLegend" style="display:flex;flex-wrap:wrap;gap:12px;margin:12px 0 0;font-size:12px"></div>
-      <div class="readout">출처: BLS·Eurostat·ONS·통계청·총무성 / Trading Economics. <b>’26.2.28 이란전 → 에너지 쇼크로 5개국 동반 반등</b>(美 4.2%·3년래 최고, 유로존 3.2%·한국 3.1%). 일본은 보조금 효과로 1%대 유지·반등 시작. <b>최근 수치는 공식 발표값, ’25년 월별은 추세 근사치, 英·日 ’26.5월분은 발표 전 추정</b> — 발표 시 갱신 필요.</div>
+      <div class="readout">출처: <a href="https://fred.stlouisfed.org" target="_blank" rel="noopener">FRED</a> (OECD MEI, CPI 전년동월비) — <b>월별 자동 갱신</b>. 美·英·韓·日·유로존 소비자물가 전년비. 기간 버튼·마우스 휠/드래그로 구간 조정.</div>
     </div>
 
     <!-- 국제유가 WTI -->
@@ -2176,7 +2178,7 @@ document.getElementById('nav').addEventListener('click',e=>{const b=e.target.clo
  b.classList.add('on');document.getElementById('v-'+b.dataset.v).classList.add('on');
  var _ab=document.getElementById('asofBox');if(_ab)_ab.style.display=(b.dataset.v==='memo')?'none':'';
  if(b.dataset.v==='thread'){drawSCurve();drawRiverCurves();}
- if(b.dataset.v==='us10y'){if(window.US10Y)window.US10Y.render();if(window.initMacroCharts)window.initMacroCharts();}});
+ if(b.dataset.v==='us10y'){if(window.US10Y)window.US10Y.render();}});
 /* 다른 페이지/로그에서 8레이어 스택으로 점프 (단일 페이지 통합) */
 function gotoStack(layerId){
  const tab=document.querySelector('.tab[data-v="thread"]');if(tab&&!tab.classList.contains('on'))tab.click();
@@ -2312,112 +2314,84 @@ window.US10Y=(function(){
   setWtiRange(wtiRange);
  }
 
- function renderAll(){renderSummary();renderTrend();renderWti();}
+ /* ---- 범용 줌/팬 라인차트 (정책금리·CPI) — FRED 라이브, x=epoch ms, 보이는 구간 y 자동 ---- */
+ function fmtTick(v){var d=new Date(v);return "’"+String(d.getUTCFullYear()).slice(2)+"."+(d.getUTCMonth()+1);}
+ function fmtFull(v){return new Date(v).toISOString().slice(0,10);}
+ function zoomLineChart(o){
+  if(typeof Chart==='undefined'){return setTimeout(function(){zoomLineChart(o);},80);}
+  const cv=$(o.cv); if(!cv)return;
+  if(window.ChartZoom&&Chart.registry&&!Chart.registry.plugins.get('zoom')){try{Chart.register(window.ChartZoom);}catch(_){}}
+  if(o._chart){o._chart.destroy();o._chart=null;}
+  const ser=(o.series||[]).filter(s=>s.points&&s.points.length);
+  if(!ser.length){const lg=$(o.legendId);if(lg)lg.innerHTML='<span style="color:var(--faint);font-size:12px">데이터를 불러오지 못했습니다 (FRED).</span>';return;}
+  let xmin=Infinity,xmax=-Infinity;
+  ser.forEach(s=>s.points.forEach(p=>{const x=Date.parse(p[0]); if(x<xmin)xmin=x; if(x>xmax)xmax=x;}));
+  const datasets=ser.map(s=>({label:s.label,data:s.points.map(p=>({x:Date.parse(p[0]),y:p[1]})),
+    borderColor:s.color,backgroundColor:s.color,borderWidth:1.7,tension:0,pointRadius:0,pointHoverRadius:3,spanGaps:true}));
+  function fitY(){const xs=chart.scales.x,a=xs.min,b=xs.max;let lo=Infinity,hi=-Infinity;
+   ser.forEach(s=>{if(chart.isDatasetVisible(ser.indexOf(s)))s.points.forEach(p=>{const x=Date.parse(p[0]);if(x>=a&&x<=b){const v=p[1];if(v<lo)lo=v;if(v>hi)hi=v;}});});
+   if(lo===Infinity)return;const pad=Math.max((hi-lo)*0.1,0.1);
+   chart.options.scales.y.min=lo-pad;chart.options.scales.y.max=hi+pad;chart.update('none');}
+  var chart=new Chart(cv,{type:'line',data:{datasets:datasets},
+   options:{responsive:true,maintainAspectRatio:false,animation:false,layout:{padding:{right:12,top:8}},
+    interaction:{mode:'nearest',intersect:false,axis:'x'},
+    scales:{x:{type:'linear',min:xmin,max:xmax,ticks:{color:WTICK,font:{size:11},maxTicksLimit:8,callback:fmtTick},grid:{color:WGRID}},
+     y:{ticks:{color:WTICK,font:{size:11},callback:o.yFmt},grid:{color:WGRID},title:{display:!!o.yTitle,text:o.yTitle||'',color:WTICK,font:{size:11}}}},
+    plugins:{legend:{display:false},
+     tooltip:{enabled:true,backgroundColor:'rgba(255,255,255,0.97)',titleColor:'#2C2C2A',bodyColor:'#444441',borderColor:WGRID,borderWidth:1,padding:9,
+       callbacks:{title:function(it){return fmtFull(it[0].parsed.x);},label:function(c){return '  '+c.dataset.label+' '+o.valFmt(c.parsed.y);}}},
+     zoom:{limits:{x:{min:xmin,max:xmax}},pan:{enabled:true,mode:'x',onPanComplete:fitY},
+       zoom:{wheel:{enabled:true},pinch:{enabled:true},mode:'x',onZoomComplete:fitY}}}}});
+  o._chart=chart;
+  function setRange(days){const min=(!days||days>=99999)?xmin:Math.max(xmin,xmax-days*86400000);
+   chart.options.scales.x.min=min;chart.options.scales.x.max=xmax;chart.update('none');
+   const tf=$(o.tf);if(tf)tf.querySelectorAll('button').forEach(b=>b.classList.toggle('on',(+b.dataset.d===(days||99999))));
+   fitY();}
+  const tf=$(o.tf);
+  if(tf&&!o._bound){o._bound=true;tf.addEventListener('click',function(e){const b=e.target.closest('button');if(!b)return;setRange(+b.dataset.d);});}
+  const lg=$(o.legendId);
+  if(lg){lg.innerHTML='';ser.forEach(function(s,i){const last=s.points[s.points.length-1][1];
+    const el=document.createElement('span');el.style.cssText='display:flex;align-items:center;gap:6px;color:'+WTICK+';cursor:pointer;user-select:none;transition:opacity .15s;';
+    el.innerHTML=(s.flag?'<span class="fi fi-'+s.flag+'" style="width:18px;height:13px;border-radius:2px;background-size:cover;display:inline-block"></span>':'')+'<span style="width:14px;border-top:2px solid '+s.color+';display:inline-block"></span>'+s.label+' <b style="color:'+s.color+';font-weight:600">'+o.valFmt(last)+'</b>';
+    el.onclick=function(){const vis=chart.isDatasetVisible(i);chart.setDatasetVisibility(i,!vis);chart.update();fitY();el.style.opacity=vis?'0.32':'1';el.style.textDecoration=vis?'line-through':'none';};
+    lg.appendChild(el);});}
+  setRange(o.defaultDays);
+ }
+ async function fredSeries(ids){
+  try{const r=await fetch('/api/fred?ids='+ids,{credentials:'same-origin'}); if(r.ok){const j=await r.json(); return j.series||{};}}catch(_){}
+  return {};
+ }
+ function zipMid(a,b){if(!a||!a.length)return b||[];if(!b||!b.length)return a;const m={};b.forEach(p=>m[p[0]]=p[1]);
+  return a.map(p=>[p[0], m[p[0]]!=null?(p[1]+m[p[0]])/2:p[1]]);}
+ const cbkCfg={cv:'cbkChart',tf:'cbkTf',legendId:'cbkLegend',yTitle:'정책금리',yFmt:v=>v+'%',valFmt:v=>(v==null?'–':v.toFixed(2)+'%'),defaultDays:99999};
+ const cpiCfg={cv:'cpiChart',tf:'cpiTf',legendId:'cpiLegend',yTitle:'전년동월비',yFmt:v=>v+'%',valFmt:v=>(v==null?'–':v.toFixed(1)+'%'),defaultDays:99999};
+ async function renderCbk(){
+  if(!cbkCfg.series){const S=await fredSeries('DFEDTARU,DFEDTARL,ECBDFR,IRSTCI01GBM156N,IRSTCI01KRM156N,IRSTCI01JPM156N');
+   cbkCfg.series=[
+    {key:'fed',label:'美 연준 FFR(중간값)',color:'#185FA5',flag:'us',points:zipMid(S.DFEDTARU,S.DFEDTARL)},
+    {key:'ecb',label:'유로존 ECB(예치)',color:'#BA7517',flag:'eu',points:S.ECBDFR||[]},
+    {key:'boe',label:'英 BOE(단기금리)',color:'#534AB7',flag:'gb',points:S.IRSTCI01GBM156N||[]},
+    {key:'bok',label:'韓 한국은행(단기금리)',color:'#0F6E56',flag:'kr',points:S.IRSTCI01KRM156N||[]},
+    {key:'boj',label:'日 BOJ(단기금리)',color:'#A32D2D',flag:'jp',points:S.IRSTCI01JPM156N||[]}
+   ];}
+  zoomLineChart(cbkCfg);
+ }
+ async function renderCpi(){
+  if(!cpiCfg.series){const S=await fredSeries('CPALTT01USM659N,CPALTT01GBM659N,CPALTT01KRM659N,CPALTT01JPM659N,CPALTT01EZM659N');
+   cpiCfg.series=[
+    {key:'us',label:'美 CPI',color:'#185FA5',flag:'us',points:S.CPALTT01USM659N||[]},
+    {key:'gb',label:'英 CPI',color:'#534AB7',flag:'gb',points:S.CPALTT01GBM659N||[]},
+    {key:'kr',label:'韓 CPI',color:'#0F6E56',flag:'kr',points:S.CPALTT01KRM659N||[]},
+    {key:'jp',label:'日 CPI',color:'#A32D2D',flag:'jp',points:S.CPALTT01JPM659N||[]},
+    {key:'ez',label:'유로존 CPI',color:'#BA7517',flag:'eu',points:S.CPALTT01EZM659N||[]}
+   ];}
+  zoomLineChart(cpiCfg);
+ }
+
+ function renderAll(){renderSummary();renderTrend();renderWti();renderCbk();renderCpi();}
  return{render:load, reload:function(){lastTs=0;load();}};
 })();
 
-/* ===== US10Y 매크로 차트 (중앙은행 정책금리 · CPI YoY · WTI) — Chart.js, 큐레이션 정적 데이터 =====
-   탭 최초 진입 시 1회 초기화(캔버스가 보이는 상태여야 사이징됨). 라이트 팔레트 고정. */
-window.initMacroCharts=(function(){
- var done=false;
- function build(){
-  if(done)return; if(typeof Chart==='undefined'){return setTimeout(build,80);} done=true;
-  if(window['chartjs-plugin-annotation'])Chart.register(window['chartjs-plugin-annotation']);
-  var PAL={fed:'#185FA5',ecb:'#BA7517',boj:'#A32D2D',boe:'#534AB7',bok:'#0F6E56',wti:'#9A6B1F'};
-  var GRID='rgba(0,0,0,0.08)', TICK='#5F5E5A';
-  var XL={0:"’25.1",3:"’25.4",6:"’25.7",9:"’25.10",12:"’26.1",15:"’26.4",18:"’26.7",21:"’26.10"};
-  var IRAN={type:'line',xMin:13.9,xMax:13.9,borderColor:TICK,borderWidth:1.2,borderDash:[4,4],
-    label:{display:true,content:'이란전 ’26.2.28',position:'start',color:TICK,backgroundColor:'rgba(255,255,255,0.78)',font:{size:10},padding:3}};
-  var TT=function(){return{enabled:true,backgroundColor:'rgba(255,255,255,0.97)',titleColor:'#2C2C2A',bodyColor:'#444441',borderColor:GRID,borderWidth:1,padding:9};};
-  function ml(i){var y=2025+Math.floor(i/12),m=(i%12)+1;return "’"+String(y).slice(2)+"."+m;}
-  function makeFlags(box,specs){var els={};specs.forEach(function(s){var el=document.createElement('span');el.className='fi fi-'+s.flag;
-    el.style.cssText='position:absolute;width:21px;height:15px;border-radius:2px;border:0.5px solid rgba(0,0,0,0.2);transform:translateY(-50%);background-size:cover;';
-    box.appendChild(el);els[s.key]=el;});return els;}
-  function placeFlags(chart,specs,ends,els){if(!chart.chartArea)return;
-    var arr=specs.map(function(s){return{key:s.key,y:chart.scales.y.getPixelForValue(ends[s.key])};});
-    var sorted=arr.slice().sort(function(a,b){return a.y-b.y;});
-    for(var i=1;i<sorted.length;i++){if(sorted[i].y-sorted[i-1].y<17)sorted[i].y=sorted[i-1].y+17;}
-    var ym={};sorted.forEach(function(o){ym[o.key]=o.y;});var x=chart.chartArea.right+8;
-    specs.forEach(function(s){var e=els[s.key];e.style.left=x+'px';e.style.top=ym[s.key]+'px';});}
-
-  /* --- 카드 1: 중앙은행 정책금리(계단형 + ’26.12 추정) — 실선=실제 · 점선=오늘 이후 추정 --- */
-  (function(){
-   if(!document.getElementById('cbkChart'))return;
-   var TODAY=17.43;
-   var raw=[
-    {key:'fed',flag:'us',label:'美 연준 FFR(중간값)',cur:'3.50–3.75%',dash:[],seq:[
-      {x:0,r:4.375,t:'’25.1~8 동결 4.25–4.50%'},{x:8.53,r:4.125,t:'’25.9.17 −25bp → 4.00–4.25%'},{x:9.93,r:3.875,t:'’25.10.29 −25bp → 3.75–4.00%'},{x:11.30,r:3.625,t:'’25.12.10 −25bp → 3.50–3.75%'},{x:TODAY,r:3.625,t:'오늘 6/14 · 3.50–3.75%',today:true},{x:23.27,r:3.875,t:'추정 ’26.12 +25bp → 3.75–4.00% (선물 ~3.8%·Goldman은 동결)'}]},
-    {key:'boe',flag:'gb',label:'英 BOE',cur:'3.75%',dash:[10,4],seq:[
-      {x:0,r:4.75,t:'’25.1 시작 4.75%'},{x:1.17,r:4.50,t:'’25.2.6 −25bp → 4.50%'},{x:4.23,r:4.25,t:'’25.5.8 −25bp → 4.25%'},{x:7.20,r:4.00,t:'’25.8.7 −25bp → 4.00%'},{x:11.57,r:3.75,t:'’25.12.18 −25bp → 3.75%'},{x:TODAY,r:3.75,t:'오늘 6/14 · 3.75% (6/18 동결 우세)',today:true},{x:19.17,r:4.00,t:'추정 ’26.8 +25bp → 4.00%'},{x:23.53,r:4.25,t:'추정 ’26.4Q +25bp → 4.25% (Fidelity 1~2회 인상)'}]},
-    {key:'bok',flag:'kr',label:'韓 한국은행',cur:'2.50%',dash:[8,3,2,3],seq:[
-      {x:0,r:3.00,t:'’25.1 시작 3.00%'},{x:1.80,r:2.75,t:'’25.2.25 −25bp → 2.75%'},{x:4.93,r:2.50,t:'’25.5.29 −25bp → 2.50%'},{x:TODAY,r:2.50,t:'오늘 6/14 · 2.50%',today:true},{x:23.5,r:2.50,t:'추정 ’26 동결 유지 2.50% (원화 약세·가계부채)'}]},
-    {key:'ecb',flag:'eu',label:'유로존 ECB(예치)',cur:'2.25%',dash:[6,4],seq:[
-      {x:0,r:3.00,t:'’25.1 시작 3.00%'},{x:0.97,r:2.75,t:'’25.1.30 −25bp → 2.75%'},{x:2.17,r:2.50,t:'’25.3.6 −25bp → 2.50%'},{x:3.53,r:2.25,t:'’25.4.17 −25bp → 2.25%'},{x:5.13,r:2.00,t:'’25.6.5 −25bp → 2.00% (이후 1년 유지)'},{x:17.33,r:2.25,t:'’26.6.11 +25bp → 2.25% (인상 전환)'},{x:TODAY,r:2.25,t:'오늘 6/14 · 2.25%',today:true},{x:23.53,r:2.25,t:'추정 ’26 동결 유지 2.25% (7/23 76% 동결)'}]},
-    {key:'boj',flag:'jp',label:'日 BOJ',cur:'0.75%',dash:[2,3],seq:[
-      {x:0,r:0.25,t:'’25.1 시작 0.25%'},{x:0.77,r:0.50,t:'’25.1.24 +25bp → 0.50% (이후 11개월 유지)'},{x:11.60,r:0.75,t:'’25.12.19 +25bp → 0.75% (30년 최고)'},{x:TODAY,r:0.75,t:'오늘 6/14 · 0.75%',today:true},{x:17.5,r:1.00,t:'추정 ’26.6.16 +25bp → 1.00%'},{x:21.97,r:1.25,t:'추정 ’26.4Q +25bp → 1.25% (로이터폴 연말 ~1.25%)'}]}
-   ];
-   function bld(s){var p=s.seq,data=[],rad=[];data.push({x:p[0].x,y:p[0].r,t:p[0].t});rad.push(0);
-    for(var i=1;i<p.length;i++){data.push({x:p[i].x,y:p[i-1].r,t:p[i-1].t});rad.push(0);data.push({x:p[i].x,y:p[i].r,t:p[i].t});rad.push(p[i].today?0:3);}
-    return{data:data,rad:rad,end:p[p.length-1].r};}
-   var ends={};
-   var datasets=raw.map(function(s){var b=bld(s);ends[s.key]=b.end;
-    return{label:s.label,data:b.data,borderColor:PAL[s.key],backgroundColor:PAL[s.key],borderWidth:2,borderDash:s.dash,tension:0,
-     segment:{borderDash:function(ctx){return ctx.p0.parsed.x>=TODAY-0.05?[2,4]:undefined;}},
-     pointRadius:b.rad,pointHoverRadius:4,pointBackgroundColor:PAL[s.key],pointBorderColor:PAL[s.key]};});
-   var els=makeFlags(document.getElementById('cbkFlags'),raw);
-   var ch=new Chart(document.getElementById('cbkChart'),{type:'line',data:{datasets:datasets},
-    plugins:[{id:'f',afterDraw:function(c){placeFlags(c,raw,ends,els);}}],
-    options:{responsive:true,maintainAspectRatio:false,animation:false,layout:{padding:{right:36,top:8}},
-     interaction:{mode:'nearest',intersect:false},
-     scales:{x:{type:'linear',min:0,max:23.7,ticks:{stepSize:3,color:TICK,font:{size:11},callback:function(v){return XL[v]||'';}},grid:{color:GRID}},
-      y:{min:0,max:5,ticks:{stepSize:1,color:TICK,font:{size:11},callback:function(v){return v+'%';}},grid:{color:GRID},title:{display:true,text:'정책금리',color:TICK,font:{size:11}}}},
-     plugins:{legend:{display:false},
-      tooltip:Object.assign(TT(),{callbacks:{title:function(it){return it[0].dataset.label;},label:function(c){return '  '+c.raw.t;}}}),
-      annotation:{annotations:{today:{type:'line',xMin:TODAY,xMax:TODAY,borderColor:TICK,borderWidth:1.2,borderDash:[4,4],label:{display:true,content:'오늘 6/14',position:'start',color:TICK,backgroundColor:'rgba(255,255,255,0.78)',font:{size:10},padding:3}}}}}}});
-   var lg=document.getElementById('cbkLegend');
-   raw.forEach(function(s,i){var dash=s.dash.length?('border-top:2px dashed '+PAL[s.key]):('border-top:2px solid '+PAL[s.key]);
-    var el=document.createElement('span');el.style.cssText='display:flex;align-items:center;gap:6px;color:'+TICK+';cursor:pointer;user-select:none;transition:opacity .15s;';
-    el.innerHTML='<span class="fi fi-'+s.flag+'" style="width:18px;height:13px;border-radius:2px;background-size:cover;display:inline-block"></span><span style="width:14px;'+dash+';display:inline-block"></span>'+s.label+' <b style="color:'+PAL[s.key]+';font-weight:600">'+s.cur+'</b>';
-    el.onclick=function(){var vis=ch.isDatasetVisible(i);ch.setDatasetVisibility(i,!vis);ch.update();var f=els[s.key];if(f)f.style.display=vis?'none':'block';el.style.opacity=vis?'0.32':'1';el.style.textDecoration=vis?'line-through':'none';};
-    lg.appendChild(el);});
-  })();
-
-  /* --- 카드 2: 글로벌 CPI(YoY) — 월별 라인, 인덱스 0=’25.1 … 16=’26.5 --- */
-  (function(){
-   if(!document.getElementById('cpiChart'))return;
-   var raw=[
-    {key:'fed',flag:'us',label:'美 CPI',v:[3.0,2.8,2.4,2.3,2.4,2.7,2.7,2.9,3.0,3.0,2.8,2.8,2.9,2.9,3.2,3.8,4.2]},
-    {key:'boe',flag:'gb',label:'英 CPI',v:[3.0,2.8,2.6,3.5,3.4,3.6,3.8,3.8,3.8,3.6,3.5,3.5,3.0,3.0,3.3,2.8,3.4]},
-    {key:'bok',flag:'kr',label:'韓 CPI',v:[2.2,2.0,2.1,2.1,1.9,2.2,2.1,1.7,1.9,1.7,2.0,2.1,2.2,2.1,2.2,2.6,3.1]},
-    {key:'ecb',flag:'eu',label:'유로존 HICP',v:[2.5,2.3,2.2,2.2,1.9,2.0,2.0,2.1,2.2,2.1,2.1,2.0,1.7,1.9,2.6,3.0,3.2]},
-    {key:'boj',flag:'jp',label:'日 CPI',v:[4.0,3.7,3.6,3.6,3.5,3.3,3.1,2.7,2.5,2.3,2.0,1.9,1.5,1.3,1.5,1.4,1.9]}
-   ];
-   var CUR={fed:'4.2%',boe:'2.8%',bok:'3.1%',ecb:'3.2%',boj:'1.4%'};
-   var ends={};
-   var datasets=raw.map(function(s){ends[s.key]=s.v[s.v.length-1];
-    var data=s.v.map(function(y,i){return{x:i,y:y,t:ml(i)+' · '+y.toFixed(1)+'%'};});
-    return{label:s.label,data:data,borderColor:PAL[s.key],backgroundColor:PAL[s.key],borderWidth:2,tension:0.25,pointRadius:0,pointHoverRadius:4,pointBackgroundColor:PAL[s.key],pointBorderColor:PAL[s.key]};});
-   var els=makeFlags(document.getElementById('cpiFlags'),raw);
-   var ch=new Chart(document.getElementById('cpiChart'),{type:'line',data:{datasets:datasets},
-    plugins:[{id:'f',afterDraw:function(c){placeFlags(c,raw,ends,els);}}],
-    options:{responsive:true,maintainAspectRatio:false,animation:false,layout:{padding:{right:36,top:8}},
-     interaction:{mode:'nearest',intersect:false},
-     scales:{x:{type:'linear',min:0,max:16.8,ticks:{stepSize:3,color:TICK,font:{size:11},callback:function(v){return XL[v]||'';}},grid:{color:GRID}},
-      y:{min:0,max:5,ticks:{stepSize:1,color:TICK,font:{size:11},callback:function(v){return v+'%';}},grid:{color:GRID},title:{display:true,text:'전년동월비',color:TICK,font:{size:11}}}},
-     plugins:{legend:{display:false},
-      tooltip:Object.assign(TT(),{callbacks:{title:function(it){return it[0].dataset.label;},label:function(c){return '  '+c.raw.t;}}}),
-      annotation:{annotations:{iran:IRAN,target:{type:'line',yMin:2,yMax:2,borderColor:TICK,borderWidth:1,borderDash:[2,4],label:{display:true,content:'목표 2%',position:'end',color:TICK,backgroundColor:'rgba(255,255,255,0.7)',font:{size:9},padding:2}}}}}}});
-   var lg=document.getElementById('cpiLegend');
-   raw.forEach(function(s,i){var el=document.createElement('span');el.style.cssText='display:flex;align-items:center;gap:6px;color:'+TICK+';cursor:pointer;user-select:none;transition:opacity .15s;';
-    el.innerHTML='<span class="fi fi-'+s.flag+'" style="width:18px;height:13px;border-radius:2px;background-size:cover;display:inline-block"></span><span style="width:14px;border-top:2px solid '+PAL[s.key]+';display:inline-block"></span>'+s.label+' <b style="color:'+PAL[s.key]+';font-weight:600">'+CUR[s.key]+'</b>';
-    el.onclick=function(){var vis=ch.isDatasetVisible(i);ch.setDatasetVisibility(i,!vis);ch.update();var f=els[s.key];if(f)f.style.display=vis?'none':'block';el.style.opacity=vis?'0.32':'1';el.style.textDecoration=vis?'line-through':'none';};
-    lg.appendChild(el);});
-  })();
-
-  /* 카드 3(WTI)는 data.json 일별로 US10Y 모듈(renderWti)에서 라이브 렌더 */
- }
- return build;
-})();
 
 /* ===== SIGNAL LOG (실적 콜 등 신규 시그널 → value-chain 반영, 누적 가능) ===== */
 let SIGNAL_LOG=[
