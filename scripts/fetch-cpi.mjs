@@ -95,7 +95,9 @@ async function main() {
   for (const [k, fn] of Object.entries(sources)) {
     let cands = [];
     try { cands = await fn(); } catch (e) { console.log(`WARN ${k}: ${e.message}`); }
-    const best = freshest(cands);
+    // 직전 커밋(prev)을 후보 맨 앞에 둔다 → 자동 소스가 더 '최신 월'을 줄 때만 갱신하고,
+    // 그렇지 않으면(특히 韓·日의 수기 공식치) 커밋된 값을 절대 staler 한 소스로 되돌리지 않는다.
+    const best = freshest([prev.series && prev.series[k], ...cands]);
     if (best.length) {
       out.series[k] = best; ok++;
       console.log(`OK   ${k} ${best.length}pts → last ${best[best.length - 1].join('=')}`);
