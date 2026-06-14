@@ -2389,6 +2389,12 @@ window.US10Y=(function(){
   try{const r=await fetch('/api/fred?ids='+ids+(from?'&from='+from:''),{credentials:'same-origin'}); if(r.ok){const j=await r.json(); return j.series||{};}}catch(_){}
   return {};
  }
+ // CPI 정적 캐시 — 크론(update-cpi)이 OECD 전년비를 ./cpi.json {series:{us,ez,kr,jp:[["YYYY-MM-DD",%],...]}} 로 떨군다.
+ // FRED 프록시가 불안정해도(워커 타임아웃 등) 정적 파일이라 차트가 비지 않게 1순위로 쓴다.
+ let _cpiLocal;
+ async function cpiLocal(){ if(_cpiLocal)return _cpiLocal;
+  try{const r=await fetch('./cpi.json',{cache:'no-store'}); if(r.ok){const j=await r.json(); _cpiLocal=(j&&j.series)||{}; return _cpiLocal;}}catch(_){}
+  _cpiLocal={}; return _cpiLocal; }
  function zipMid(a,b){if(!a||!a.length)return b||[];if(!b||!b.length)return a;const m={};b.forEach(p=>m[p[0]]=p[1]);
   return a.map(p=>[p[0], m[p[0]]!=null?(p[1]+m[p[0]])/2:p[1]]);}
  // 지수(월별) → 전년동월비(%). 같은 달 −12개월 대비. base year 무관(비율). 2020-01부터만 출력.
@@ -2433,15 +2439,17 @@ window.US10Y=(function(){
  }
  async function renderCpi(){
   if(!cpiCfg.series){
-   // 旧 OECD COICOP-1999 전년동월비 시리즈(CPALTT01*M659N)는 전부 갱신 중단(美 '22·日 '21·韓 '23, 유로존 부재).
-   // → 갱신 중인 지수 시리즈로 교체하고 전년동월비를 클라이언트에서 산출. 美=BLS / 유로존=Eurostat HICP / 韓·日=OECD MEI(신 IXNB 포맷, 구코드 폴백).
+   // 1순위: OECD(각국 통계청 집계) 전년비를 크론(update-cpi)이 ./cpi.json 으로 떨군다 — 정적 파일이라 항상 표시.
+   // 폴백: 갱신 중인 지수 시리즈를 FRED 에서 받아 전년동월비를 클라이언트 산출(美=BLS / 유로존=Eurostat HICP / 韓·日=OECD MEI).
    // YoY 산출에 −12개월 데이터가 필요해 from=2019-01-01 로 받는다.
+   const M=await cpiLocal();
    const S=await fredSeries('CPIAUCNS,KORCPALTT01IXNBM,KORCPIALLMINMEI,JPNCPALTT01IXNBM,JPNCPIALLMINMEI,CP0000EZ19M086NEST','2019-01-01');
+   const pick=(k,fred)=>(M[k]&&M[k].length)?M[k]:yoyFromIndex(fred);
    cpiCfg.series=[
-    {key:'us',label:'美 CPI',color:'#185FA5',flag:'us',points:yoyFromIndex(S.CPIAUCNS||[])},
-    {key:'kr',label:'韓 CPI',color:'#0F6E56',flag:'kr',points:yoyFromIndex(pickFresh(S,['KORCPALTT01IXNBM','KORCPIALLMINMEI']))},
-    {key:'jp',label:'日 CPI',color:'#A32D2D',flag:'jp',points:yoyFromIndex(pickFresh(S,['JPNCPALTT01IXNBM','JPNCPIALLMINMEI']))},
-    {key:'ez',label:'유로존 CPI',color:'#BA7517',flag:'eu',points:yoyFromIndex(S.CP0000EZ19M086NEST||[])}
+    {key:'us',label:'美 CPI',color:'#185FA5',flag:'us',points:pick('us',S.CPIAUCNS||[])},
+    {key:'ez',label:'유로존 CPI',color:'#BA7517',flag:'eu',points:pick('ez',S.CP0000EZ19M086NEST||[])},
+    {key:'kr',label:'韓 CPI',color:'#0F6E56',flag:'kr',points:pick('kr',pickFresh(S,['KORCPALTT01IXNBM','KORCPIALLMINMEI']))},
+    {key:'jp',label:'日 CPI',color:'#A32D2D',flag:'jp',points:pick('jp',pickFresh(S,['JPNCPALTT01IXNBM','JPNCPIALLMINMEI']))}
    ];}
   zoomLineChart(cpiCfg);
  }

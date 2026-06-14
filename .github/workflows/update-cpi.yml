@@ -1,0 +1,46 @@
+name: Update global CPI
+
+on:
+  schedule:
+    - cron: '23 22 3,18 * *'   # 매월 3·18일 07:23 KST — OECD 월 갱신 반영(여유분 2회)
+  workflow_dispatch: {}        # allow manual run from the Actions tab
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-cpi
+  cancel-in-progress: false
+
+jobs:
+  cpi:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: claude/wizardly-rubin-SubA1
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Fetch latest CPI (OECD)
+        run: node scripts/fetch-cpi.mjs
+      - name: Commit & push if changed (rebase-safe)
+        run: |
+          FILES="cpi.json"
+          if [ -z "$(git status --porcelain $FILES)" ]; then
+            echo "No change in $FILES."; exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add $FILES
+          git commit -m "chore: update global CPI (OECD)"
+          for i in 1 2 3 4 5; do
+            if git pull --rebase --autostash origin claude/wizardly-rubin-SubA1 \
+               && git push origin HEAD:claude/wizardly-rubin-SubA1; then
+              echo "pushed on attempt $i"; exit 0
+            fi
+            git rebase --abort 2>/dev/null || true
+            echo "push attempt $i lost the race; backing off"; sleep $(( RANDOM % 6 + 3 ))
+          done
+          echo "::error::push failed after 5 attempts"; exit 1
