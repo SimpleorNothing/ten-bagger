@@ -1331,8 +1331,8 @@ table.tk th.c{text-align:center}
     <div class="panel">
       <div class="panel-h"><h3>국제유가 WTI(서부텍사스산) · 일별 (’20~현재)</h3><span class="stamp" id="wtiStamp">마우스 휠=기간 확대/축소 · 호버 상세</span></div>
       <div id="wtiWrap" style="position:relative;width:100%;height:320px"><canvas id="wtiChart" role="img" aria-label="2020년부터 현재까지 WTI 국제유가 일별 추이 (마우스 휠 줌)"></canvas></div>
-      <div class="u10-tf" id="wtiTf"><button data-d="1">1D</button><button data-d="7">1W</button><button data-d="30">1M</button><button data-d="365" class="on">1Y</button><button data-d="1825">5Y</button></div>
-      <div class="readout">출처: Yahoo Finance(CL=F) · Stooq 폴백 — <b>일별 자동 갱신</b>. 기간 버튼(1D/1W/1M/1Y/5Y) 또는 <b>마우스 휠</b>로 구간 조정. 배경: ’26.2.28 이란 개전·호르무즈 봉쇄로 3월 $91·4월 $103 급등 후, 美·이란 평화협상 기대로 되돌림. 협상 결렬 시 재급등 위험.</div>
+      <div class="u10-tf" id="wtiTf"><button data-d="30">1M</button><button data-d="365" class="on">1Y</button><button data-d="1825">5Y</button></div>
+      <div class="readout">출처: Yahoo Finance(CL=F) · Stooq 폴백 — <b>일별 자동 갱신</b>. 기간 버튼(1M/1Y/5Y) 또는 <b>마우스 휠</b>로 구간 조정. 배경: ’26.2.28 이란 개전·호르무즈 봉쇄로 3월 $91·4월 $103 급등 후, 美·이란 평화협상 기대로 되돌림. 협상 결렬 시 재급등 위험.</div>
     </div>
 
     <div class="disclaimer">데이터 출처: <a href="https://us10y.simpleornothing.com" target="_blank" rel="noopener">us10y.simpleornothing.com</a> · <code>data.json</code> — 현황 요약·확률 추이는 매일 KST 06:13 자동 갱신. 글로벌 중앙은행·CPI·WTI 차트는 큐레이션 매크로 시계열(공식 발표 시 갱신). 본 분석은 의사결정 지원용이며 매수·매도 권유가 아닙니다.</div>
@@ -2259,7 +2259,7 @@ window.US10Y=(function(){
  }
 
  /* ---- 국제유가 WTI · 일별 (’20~현재) — /api/wti(Yahoo·Stooq), data.json 폴백 ----
-    기간 버튼(1D/1W/1M/1Y/5Y) + 마우스 휠 줌. y축은 보이는 구간에 맞춰 자동. */
+    기간 버튼(1M/1Y/5Y) + 마우스 휠 줌. y축은 보이는 구간에 맞춰 자동. */
  let wtiPts=null, wtiTfBound=false, wtiRange=365;
  const WCOL='#9A6B1F', WTICK='#5F5E5A', WGRID='rgba(0,0,0,0.08)';
  async function renderWti(){
