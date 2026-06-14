@@ -305,6 +305,37 @@ async function handleWti() {
     { status: 502, headers: { "content-type": "application/json" } });
 }
 
+// FRED 시계열 프록시 — fredgraph.csv (무키). ?ids=ID1,ID2,... (영숫자_, 최대 12개)
+// 2020-01-01 이후만 반환. 출력: {series:{ID:[["YYYY-MM-DD", value], ...]}}
+async function handleFred(url) {
+  const ids = (url.searchParams.get("ids") || "").split(",")
+    .map((s) => s.trim()).filter((s) => /^[A-Za-z0-9_]{1,32}$/.test(s)).slice(0, 12);
+  if (!ids.length) {
+    return new Response(JSON.stringify({ error: "ids required" }), { status: 400, headers: { "content-type": "application/json" } });
+  }
+  const series = {};
+  await Promise.all(ids.map(async (id) => {
+    series[id] = [];
+    try {
+      const r = await fetch("https://fred.stlouisfed.org/graph/fredgraph.csv?id=" + id, { cf: { cacheTtl: 21600, cacheEverything: true } });
+      if (r.ok) {
+        const lines = (await r.text()).trim().split("\n");
+        const out = [];
+        for (let i = 1; i < lines.length; i++) {
+          const c = lines[i].split(",");
+          const d = c[0], v = c[1];
+          if (d && d >= "2020-01-01" && v && v !== "." && !isNaN(+v)) out.push([d, +v]);
+        }
+        series[id] = out;
+      }
+    } catch (_) { /* 해당 시리즈만 빈 배열 */ }
+  }));
+  return new Response(JSON.stringify({ series }), {
+    status: 200,
+    headers: { "content-type": "application/json; charset=utf-8", "cache-control": "public, max-age=21600" },
+  });
+}
+
 export default {
   async fetch(request, env) {
     const password = env.SITE_PASSWORD;
@@ -350,6 +381,10 @@ export default {
       // WTI 일별 시계열(2020~현재) 프록시 (인증된 디바이스만 도달)
       if (request.method === "GET" && url.pathname === "/api/wti") {
         return handleWti();
+      }
+      // FRED 시계열 프록시(정책금리·CPI 2020+) (인증된 디바이스만 도달)
+      if (request.method === "GET" && url.pathname === "/api/fred") {
+        return handleFred(url);
       }
       // 메모 저장/조회 (Cloudflare KV) — 인증된 디바이스만 도달
       if (url.pathname === "/api/memo") {
