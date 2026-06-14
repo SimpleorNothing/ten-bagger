@@ -1312,10 +1312,10 @@ table.tk th.c{text-align:center}
     <!-- 글로벌 중앙은행 정책금리 -->
     <div class="panel">
       <div class="panel-h"><h3>글로벌 중앙은행 정책금리 · ’20~현재</h3><span class="stamp">마우스 휠=확대/축소 · 드래그=이동 · 범례 클릭 토글</span></div>
-      <div id="cbkWrap" style="position:relative;width:100%;height:340px"><canvas id="cbkChart" role="img" aria-label="2020년부터 현재까지 미 연준·ECB·한국·일본 정책금리 계단형 추이와 2026년 12월까지 인상/동결 전망 점선 (FRED, 마우스 휠 줌)"></canvas><div id="cbkFlags" style="position:absolute;inset:0;pointer-events:none"></div></div>
+      <div id="cbkWrap" style="position:relative;width:100%;height:340px"><canvas id="cbkChart" role="img" aria-label="2020년부터 현재까지 미 연준·ECB·한국·일본 정책금리 계단형 추이와 2026년 12월까지 인상/동결 전망 점선 (중앙은행 공식 발표, 마우스 휠 줌)"></canvas><div id="cbkFlags" style="position:absolute;inset:0;pointer-events:none"></div></div>
       <div class="u10-tf" id="cbkTf"><button data-d="30">1M</button><button data-d="365" class="on">1Y</button><button data-d="1825">5Y</button></div>
       <div id="cbkLegend" style="display:flex;flex-wrap:wrap;gap:12px;margin:12px 0 0;font-size:12px"></div>
-      <div class="readout">출처: <a href="https://fred.stlouisfed.org" target="_blank" rel="noopener">FRED</a> — <b>중앙은행이 결정한 정책금리</b> 기준(단기/콜금리 아님). 美=Fed 목표금리 <b>상단</b>·유로존=ECB <b>예치금리(DFR)</b>·韓=한국은행 기준금리·日=BOJ 정책금리. <b>계단형=결정 시점에 직각 변동</b>, 호버 시 해당 시점에 적용 중인 <b>최근 금리변경(일자·±bp)</b> 표시. FRED 라이브, 미수신 시 최근 결정값 보정(항상 4개국). 최근: 美 ’25.12 −25bp→3.75%(상단)·ECB ’26.6.11 +25bp→2.25%(예치)·日 ’25.12 0.75%·韓 ’25.5 2.50%. <b>실선=실제 / 점선=향후 컨센서스 전망</b>(추정 ’26말: Fed 동결~1회 인하·BOJ 1.00→1.25%·ECB 2.25%·韓 2.50% — 전망 점 호버 시 근거, 실제와 다를 수 있음). 기간 버튼·마우스 휠/드래그로 구간 조정.</div>
+      <div class="readout">출처: 각국 중앙은행 공식 발표(Fed·ECB·BOK·BOJ, 결정값 큐레이션) — <b>중앙은행이 결정한 정책금리</b> 기준(단기/콜금리 아님). 美=Fed 목표금리 <b>상단</b>·유로존=ECB <b>예치금리(DFR)</b>·韓=한국은행 기준금리·日=BOJ 정책금리. <b>계단형=결정 시점에 직각 변동</b>, 호버 시 해당 시점에 적용 중인 <b>최근 금리변경(일자·±bp)</b> 표시. 최근 결정: 美 ’25.12.10 −25bp→3.75%(상단)·ECB ’26.6.11 +25bp→2.25%(예치)·日 ’25.12.19 +25bp→0.75%·韓 ’25.5.29 −25bp→2.50%. <b>실선=실제 / 점선=향후 컨센서스 전망</b>(추정: 日 6/16 +25bp→1.00%·4Q 1.25%, Fed 동결~1회 인하, ECB·韓 동결 — 전망 점 호버 시 근거, 실제와 다를 수 있음). 기간 버튼·마우스 휠/드래그로 구간 조정.</div>
     </div>
 
     <!-- 글로벌 CPI(YoY) -->
@@ -2409,24 +2409,22 @@ window.US10Y=(function(){
   bok:[['2020-01-01',1.25],['2020-03-17',0.75],['2020-05-28',0.50],['2021-08-26',0.75],['2021-11-25',1.00],['2022-01-14',1.25],['2022-04-14',1.50],['2022-05-26',1.75],['2022-07-13',2.25],['2022-08-25',2.50],['2022-10-12',3.00],['2022-11-24',3.25],['2023-01-13',3.50],['2024-10-11',3.25],['2024-11-28',3.00],['2025-02-25',2.75],['2025-05-29',2.50]],
   boj:[['2020-01-01',-0.10],['2024-03-19',0.10],['2024-07-31',0.25],['2025-01-24',0.50],['2025-12-19',0.75]]
  };
- async function renderCbk(){
-  if(!cbkCfg.series){const S=await fredSeries('DFEDTARU,ECBDFR,ECBMRRFR,ECBMLFR,IRSTCB01JPM156N,IRSTCB01KRM156N');
-   const pick=(...keys)=>{for(const k of keys){if(S[k]&&S[k].length)return S[k];}return null;};
+ function renderCbk(){
+  if(!cbkCfg.series){
    const TODAY=new Date().toISOString().slice(0,10);
-   // 라이브 우선. 백업의 최신 결정(라이브가 못 따라온 것)만 덧붙이고, 마지막 값을 오늘까지 수평 연장.
-   const use=(live,bak)=>{let a=(live&&live.length)?live.slice():bak.slice();
-     const last=a[a.length-1][0];bak.forEach(p=>{if(p[0]>last)a.push(p);});
-     const e=a[a.length-1];if(e[0]<TODAY)a.push([TODAY,e[1]]);return a;};
+   // 정책금리는 각국 중앙은행 '결정값'(큐레이션·검증)만 사용 — FRED 라이브는 누락/시행일 지연으로
+   // 결정 계단이 안 그려지는 문제가 있어 제외. 마지막 결정값을 오늘까지 수평 연장(실선), 이후는 전망(점선).
+   const carry=(bak)=>{const a=bak.slice();const e=a[a.length-1];if(e[0]<TODAY)a.push([TODAY,e[1]]);return a;};
    // fc=향후 인상/인하 컨센서스 일정 [날짜, 금리, 내용] (오늘 이후만, 점선·계단형, 시장 컨센서스 추정)
    cbkCfg.series=[
-    {key:'fed',label:'美 연준 FFR(상단)',color:'#185FA5',flag:'us',points:use(S.DFEDTARU,CBK_BAK.fed),fc:[
+    {key:'fed',label:'美 연준 FFR(상단)',color:'#185FA5',flag:'us',points:carry(CBK_BAK.fed),fc:[
       ['2026-12-31',3.75,'추정 ’26 동결 우세 — 점도표 1회 인하 vs 인플레 반등(6/17 FOMC 주목)']]},
-    {key:'ecb',label:'유로존 ECB(예치·DFR)',color:'#BA7517',flag:'eu',points:use(pick('ECBDFR','ECBMRRFR','ECBMLFR'),CBK_BAK.ecb),fc:[
+    {key:'ecb',label:'유로존 ECB(예치·DFR)',color:'#BA7517',flag:'eu',points:carry(CBK_BAK.ecb),fc:[
       ['2026-12-31',2.25,'추정 ’26 동결 유지 2.25% (6/11 첫 인상 후 관망, 인플레 시 추가 여지)']]},
-    {key:'bok',label:'韓 한국은행 기준금리',color:'#0F6E56',flag:'kr',points:use(pick('IRSTCB01KRM156N'),CBK_BAK.bok),fc:[
+    {key:'bok',label:'韓 한국은행 기준금리',color:'#0F6E56',flag:'kr',points:carry(CBK_BAK.bok),fc:[
       ['2026-12-31',2.50,'추정 ’26 동결 유지 2.50% (원화 약세·가계부채)']]},
-    {key:'boj',label:'日 BOJ 정책금리',color:'#A32D2D',flag:'jp',points:use(pick('IRSTCB01JPM156N'),CBK_BAK.boj),fc:[
-      ['2026-06-16',1.00,'전망 ’26.6.16 회의 → +25bp 1.00% (발표 전 예측)'],
+    {key:'boj',label:'日 BOJ 정책금리',color:'#A32D2D',flag:'jp',points:carry(CBK_BAK.boj),fc:[
+      ['2026-06-16',1.00,'전망 ’26.6.16 회의 → 현 0.75%에서 +25bp 인상 1.00% (발표 전 예측)'],
       ['2026-10-30',1.25,'추정 ’26.4Q +25bp → 1.25% (로이터폴 연말 ~1.25%)']]}
    ];}
   zoomLineChart(cbkCfg);
