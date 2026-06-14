@@ -1303,10 +1303,10 @@ table.tk th.c{text-align:center}
 
     <!-- 글로벌 중앙은행 정책금리 -->
     <div class="panel">
-      <div class="panel-h"><h3>글로벌 중앙은행 정책금리 · ’25.1~ 현재</h3><span class="stamp">계단=실제 결정 · 호버 상세 · 범례 클릭 토글</span></div>
-      <div id="cbkWrap" style="position:relative;width:100%;height:340px"><canvas id="cbkChart" role="img" aria-label="2025년 1월부터 2026년 6월까지 미 연준·영국 BOE·한국은행·유로존 ECB·일본 BOJ 정책금리 계단형 추이"></canvas><div id="cbkFlags" style="position:absolute;inset:0;pointer-events:none"></div></div>
+      <div class="panel-h"><h3>글로벌 중앙은행 정책금리 · ’25.1~’26.12</h3><span class="stamp">실선=실제 결정 · 점선=오늘 이후 추정 · 호버 상세 · 범례 토글</span></div>
+      <div id="cbkWrap" style="position:relative;width:100%;height:340px"><canvas id="cbkChart" role="img" aria-label="2025년 1월부터 2026년 12월까지 미 연준·영국 BOE·한국은행·유로존 ECB·일본 BOJ 정책금리 계단형 추이와 연말 추정. 오늘 6월 14일 이후는 점선 추정."></canvas><div id="cbkFlags" style="position:absolute;inset:0;pointer-events:none"></div></div>
       <div id="cbkLegend" style="display:flex;flex-wrap:wrap;gap:12px;margin:12px 0 0;font-size:12px"></div>
-      <div class="readout">출처: Fed·ECB·BOJ·BOE·한국은행 결정문 / Trading Economics·Commons Library. <b>’25년 동조적 완화(일본만 인상) → ’26년 이란發 인플레로 완화 종료</b>(ECB 6/11 인상·BOJ 인상지속·Fed 인하베팅 소멸·BOE 매파동결).</div>
+      <div class="readout"><b>실선=실제 결정 / 점선=오늘(6/14) 이후 추정.</b> 추정 연말: Fed 3.75–4.00%·BOJ 1.25%·BOE 4.25%·ECB 2.25%·한국 2.50%. 근거: Fed 선물 ~3.8%(12월 인상 우위, Goldman은 동결)·BOJ 로이터폴 ~1.25%·BOE Fidelity 1~2회·ECB 7/23 76% 동결·BOK 원화·가계부채 동결. 시장가격·컨센서스 기준이라 실제와 다를 수 있음. 다음 주 BOJ 6/16·Fed 6/17·BOE 6/18 결과로 갱신 필요.</div>
     </div>
 
     <!-- 글로벌 CPI(YoY) -->
@@ -1319,9 +1319,9 @@ table.tk th.c{text-align:center}
 
     <!-- 국제유가 WTI -->
     <div class="panel">
-      <div class="panel-h"><h3>국제유가 WTI(서부텍사스산) · ’25.1~ 현재</h3><span class="stamp">라인=월별 평균 $/배럴 · 호버 상세</span></div>
-      <div id="wtiWrap" style="position:relative;width:100%;height:300px"><canvas id="wtiChart" role="img" aria-label="2025년 1월부터 2026년 6월까지 WTI 국제유가 추이"></canvas><div id="wtiFlags" style="position:absolute;inset:0;pointer-events:none"></div></div>
-      <div class="readout">출처: NYMEX·EIA / Trading Economics·Dallas Fed·CNBC. <b>’25년 $60~73 박스권 → ’26.2.28 개전 → 3월 평균 $91·4월 $103로 급등</b>(호르무즈 봉쇄, 역대 최대 지정학 공급충격). 현재 美·이란 평화협상·호르무즈 재개 기대로 ~$85·8주 저점. 협상 결렬 시 재급등 위험.</div>
+      <div class="panel-h"><h3>국제유가 WTI(서부텍사스산) · 일별</h3><span class="stamp">라인=일별 $/배럴 (data.json) · 호버 상세</span></div>
+      <div id="wtiWrap" style="position:relative;width:100%;height:300px"><canvas id="wtiChart" role="img" aria-label="data.json 기반 WTI 국제유가 일별 추이"></canvas><div id="wtiFlags" style="position:absolute;inset:0;pointer-events:none"></div></div>
+      <div class="readout">출처: yfinance(<code>data.json</code> markets.wti) — <b>매일 자동 갱신</b>. 배경: ’26.2.28 이란 개전·호르무즈 봉쇄로 3월 $91·4월 $103 급등 후, 美·이란 평화협상·호르무즈 재개 기대로 되돌림. 협상 결렬 시 재급등 위험.</div>
     </div>
 
     <div class="disclaimer">데이터 출처: <a href="https://us10y.simpleornothing.com" target="_blank" rel="noopener">us10y.simpleornothing.com</a> · <code>data.json</code> — 현황 요약·확률 추이는 매일 KST 06:13 자동 갱신. 글로벌 중앙은행·CPI·WTI 차트는 큐레이션 매크로 시계열(공식 발표 시 갱신). 본 분석은 의사결정 지원용이며 매수·매도 권유가 아닙니다.</div>
@@ -2181,7 +2181,7 @@ window.US10Y=(function(){
  const $=id=>document.getElementById(id);
  const esc=s=>String(s==null?'':s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
  const num=(x,d=2)=>x==null||isNaN(x)?'–':Number(x).toFixed(d);
- let DATA=null, loading=false, lastTs=0;
+ let DATA=null, loading=false, lastTs=0, wtiChart=null;
 
  async function load(){
   if(loading)return;
@@ -2247,7 +2247,34 @@ window.US10Y=(function(){
   $('u10_trendout').innerHTML=`최근 ${M}일 — Bull <b>${l.bull}%</b>(${arr(f.bull,l.bull)}p) · Base <b>${l.base}%</b>(${arr(f.base,l.base)}p) · Bear <b>${l.bear}%</b>(${arr(f.bear,l.bear)}p).`;
  }
 
- function renderAll(){renderSummary();renderTrend();}
+ /* ---- 국제유가 WTI · 일별 (data.json markets.wti, 매일 자동 갱신) ---- */
+ function renderWti(){
+  const cv=$('wtiChart'); if(!cv)return;
+  if(typeof Chart==='undefined'){return setTimeout(renderWti,80);}
+  const H=DATA.history.filter(h=>h.markets&&h.markets.wti!=null);
+  if(!H.length)return;
+  const labels=H.map(h=>h.date.slice(5).replace('-','/'));
+  const data=H.map((h,i)=>({x:i,y:h.markets.wti,t:h.date+' · $'+num(h.markets.wti)}));
+  const lastV=H[H.length-1].markets.wti;
+  const ys=data.map(d=>d.y); let lo=Math.min.apply(null,ys), hi=Math.max.apply(null,ys);
+  const pad=Math.max(2,(hi-lo)*0.18); lo=Math.floor((lo-pad)/5)*5; hi=Math.ceil((hi+pad)/5)*5;
+  const COL='#9A6B1F', TICK='#5F5E5A', GRID='rgba(0,0,0,0.08)';
+  if(wtiChart){wtiChart.destroy();wtiChart=null;}
+  wtiChart=new Chart(cv,{type:'line',
+   data:{datasets:[{label:'WTI ($/배럴)',data:data,borderColor:COL,backgroundColor:COL,borderWidth:2.4,tension:0.25,
+     pointRadius:data.map((d,i)=>i===data.length-1?4:0),pointHoverRadius:4,pointBackgroundColor:COL,pointBorderColor:COL,fill:false}]},
+   plugins:[{id:'wtip',afterDraw:function(c){if(!c.chartArea)return;var ctx=c.ctx,y=c.scales.y.getPixelForValue(lastV);
+     ctx.save();ctx.fillStyle=COL;ctx.font='700 12px Pretendard,system-ui,sans-serif';ctx.textBaseline='middle';ctx.fillText('$'+num(lastV,0),c.chartArea.right+6,y);ctx.restore();}}],
+   options:{responsive:true,maintainAspectRatio:false,animation:false,layout:{padding:{right:44,top:8}},
+    interaction:{mode:'nearest',intersect:false},
+    scales:{x:{type:'linear',min:0,max:data.length-1,ticks:{color:TICK,font:{size:11},maxTicksLimit:9,callback:function(v){return labels[Math.round(v)]||'';}},grid:{color:GRID}},
+     y:{min:lo,max:hi,ticks:{color:TICK,font:{size:11},callback:function(v){return '$'+v;}},grid:{color:GRID},title:{display:true,text:'$/배럴',color:TICK,font:{size:11}}}},
+    plugins:{legend:{display:false},
+     tooltip:{enabled:true,backgroundColor:'rgba(255,255,255,0.97)',titleColor:'#2C2C2A',bodyColor:'#444441',borderColor:GRID,borderWidth:1,padding:9,
+       callbacks:{title:function(){return 'WTI 국제유가';},label:function(c){return '  '+c.raw.t;}}}}}});
+ }
+
+ function renderAll(){renderSummary();renderTrend();renderWti();}
  return{render:load, reload:function(){lastTs=0;load();}};
 })();
 
@@ -2260,7 +2287,7 @@ window.initMacroCharts=(function(){
   if(window['chartjs-plugin-annotation'])Chart.register(window['chartjs-plugin-annotation']);
   var PAL={fed:'#185FA5',ecb:'#BA7517',boj:'#A32D2D',boe:'#534AB7',bok:'#0F6E56',wti:'#9A6B1F'};
   var GRID='rgba(0,0,0,0.08)', TICK='#5F5E5A';
-  var XL={0:"’25.1",3:"’25.4",6:"’25.7",9:"’25.10",12:"’26.1",15:"’26.4"};
+  var XL={0:"’25.1",3:"’25.4",6:"’25.7",9:"’25.10",12:"’26.1",15:"’26.4",18:"’26.7",21:"’26.10"};
   var IRAN={type:'line',xMin:13.9,xMax:13.9,borderColor:TICK,borderWidth:1.2,borderDash:[4,4],
     label:{display:true,content:'이란전 ’26.2.28',position:'start',color:TICK,backgroundColor:'rgba(255,255,255,0.78)',font:{size:10},padding:3}};
   var TT=function(){return{enabled:true,backgroundColor:'rgba(255,255,255,0.97)',titleColor:'#2C2C2A',bodyColor:'#444441',borderColor:GRID,borderWidth:1,padding:9};};
@@ -2275,37 +2302,40 @@ window.initMacroCharts=(function(){
     var ym={};sorted.forEach(function(o){ym[o.key]=o.y;});var x=chart.chartArea.right+8;
     specs.forEach(function(s){var e=els[s.key];e.style.left=x+'px';e.style.top=ym[s.key]+'px';});}
 
-  /* --- 카드 1: 중앙은행 정책금리(계단형) --- */
+  /* --- 카드 1: 중앙은행 정책금리(계단형 + ’26.12 추정) — 실선=실제 · 점선=오늘 이후 추정 --- */
   (function(){
    if(!document.getElementById('cbkChart'))return;
+   var TODAY=17.43;
    var raw=[
-    {key:'fed',flag:'us',label:'美 연준 FFR(중간값)',cur:'3.50–3.75%',dash:[],now:'현재 3.50–3.75% · 6/17 FOMC 대기',pts:[
-      {x:0,r:4.375,t:'’25.1~8 동결 4.25–4.50%'},{x:8.53,r:4.125,t:'’25.9.17 −25bp → 4.00–4.25%'},{x:9.93,r:3.875,t:'’25.10.29 −25bp → 3.75–4.00%'},{x:11.30,r:3.625,t:'’25.12.10 −25bp → 3.50–3.75%'}]},
-    {key:'boe',flag:'gb',label:'英 BOE',cur:'3.75%',dash:[10,4],now:'현재 3.75% · 4/30 8-1 매파동결 · 6/18 대기',pts:[
-      {x:0,r:4.75,t:'’25.1 시작 4.75%'},{x:1.17,r:4.50,t:'’25.2.6 −25bp → 4.50%'},{x:4.23,r:4.25,t:'’25.5.8 −25bp → 4.25%'},{x:7.20,r:4.00,t:'’25.8.7 −25bp → 4.00%'},{x:11.57,r:3.75,t:'’25.12.18 −25bp → 3.75%'}]},
-    {key:'bok',flag:'kr',label:'韓 한국은행',cur:'2.50%',dash:[8,3,2,3],now:'현재 2.50% · 동결 기조',pts:[
-      {x:0,r:3.00,t:'’25.1 시작 3.00%'},{x:1.80,r:2.75,t:'’25.2.25 −25bp → 2.75%'},{x:4.93,r:2.50,t:'’25.5.29 −25bp → 2.50%'}]},
-    {key:'ecb',flag:'eu',label:'유로존 ECB(예치)',cur:'2.25%',dash:[6,4],now:'현재 2.25% (’26.6.11 인상)',pts:[
-      {x:0,r:3.00,t:'’25.1 시작 3.00%'},{x:0.97,r:2.75,t:'’25.1.30 −25bp → 2.75%'},{x:2.17,r:2.50,t:'’25.3.6 −25bp → 2.50%'},{x:3.53,r:2.25,t:'’25.4.17 −25bp → 2.25%'},{x:5.13,r:2.00,t:'’25.6.5 −25bp → 2.00% (이후 1년 유지)'},{x:17.33,r:2.25,t:'’26.6.11 +25bp → 2.25% (인상 전환)'}]},
-    {key:'boj',flag:'jp',label:'日 BOJ',cur:'0.75%',dash:[2,3],now:'현재 0.75% · 6/16 1.0% 인상 예상',pts:[
-      {x:0,r:0.25,t:'’25.1 시작 0.25%'},{x:0.77,r:0.50,t:'’25.1.24 +25bp → 0.50% (이후 11개월 유지)'},{x:11.60,r:0.75,t:'’25.12.19 +25bp → 0.75% (30년 최고)'}]}
+    {key:'fed',flag:'us',label:'美 연준 FFR(중간값)',cur:'3.50–3.75%',dash:[],seq:[
+      {x:0,r:4.375,t:'’25.1~8 동결 4.25–4.50%'},{x:8.53,r:4.125,t:'’25.9.17 −25bp → 4.00–4.25%'},{x:9.93,r:3.875,t:'’25.10.29 −25bp → 3.75–4.00%'},{x:11.30,r:3.625,t:'’25.12.10 −25bp → 3.50–3.75%'},{x:TODAY,r:3.625,t:'오늘 6/14 · 3.50–3.75%',today:true},{x:23.27,r:3.875,t:'추정 ’26.12 +25bp → 3.75–4.00% (선물 ~3.8%·Goldman은 동결)'}]},
+    {key:'boe',flag:'gb',label:'英 BOE',cur:'3.75%',dash:[10,4],seq:[
+      {x:0,r:4.75,t:'’25.1 시작 4.75%'},{x:1.17,r:4.50,t:'’25.2.6 −25bp → 4.50%'},{x:4.23,r:4.25,t:'’25.5.8 −25bp → 4.25%'},{x:7.20,r:4.00,t:'’25.8.7 −25bp → 4.00%'},{x:11.57,r:3.75,t:'’25.12.18 −25bp → 3.75%'},{x:TODAY,r:3.75,t:'오늘 6/14 · 3.75% (6/18 동결 우세)',today:true},{x:19.17,r:4.00,t:'추정 ’26.8 +25bp → 4.00%'},{x:23.53,r:4.25,t:'추정 ’26.4Q +25bp → 4.25% (Fidelity 1~2회 인상)'}]},
+    {key:'bok',flag:'kr',label:'韓 한국은행',cur:'2.50%',dash:[8,3,2,3],seq:[
+      {x:0,r:3.00,t:'’25.1 시작 3.00%'},{x:1.80,r:2.75,t:'’25.2.25 −25bp → 2.75%'},{x:4.93,r:2.50,t:'’25.5.29 −25bp → 2.50%'},{x:TODAY,r:2.50,t:'오늘 6/14 · 2.50%',today:true},{x:23.5,r:2.50,t:'추정 ’26 동결 유지 2.50% (원화 약세·가계부채)'}]},
+    {key:'ecb',flag:'eu',label:'유로존 ECB(예치)',cur:'2.25%',dash:[6,4],seq:[
+      {x:0,r:3.00,t:'’25.1 시작 3.00%'},{x:0.97,r:2.75,t:'’25.1.30 −25bp → 2.75%'},{x:2.17,r:2.50,t:'’25.3.6 −25bp → 2.50%'},{x:3.53,r:2.25,t:'’25.4.17 −25bp → 2.25%'},{x:5.13,r:2.00,t:'’25.6.5 −25bp → 2.00% (이후 1년 유지)'},{x:17.33,r:2.25,t:'’26.6.11 +25bp → 2.25% (인상 전환)'},{x:TODAY,r:2.25,t:'오늘 6/14 · 2.25%',today:true},{x:23.53,r:2.25,t:'추정 ’26 동결 유지 2.25% (7/23 76% 동결)'}]},
+    {key:'boj',flag:'jp',label:'日 BOJ',cur:'0.75%',dash:[2,3],seq:[
+      {x:0,r:0.25,t:'’25.1 시작 0.25%'},{x:0.77,r:0.50,t:'’25.1.24 +25bp → 0.50% (이후 11개월 유지)'},{x:11.60,r:0.75,t:'’25.12.19 +25bp → 0.75% (30년 최고)'},{x:TODAY,r:0.75,t:'오늘 6/14 · 0.75%',today:true},{x:17.5,r:1.00,t:'추정 ’26.6.16 +25bp → 1.00%'},{x:21.97,r:1.25,t:'추정 ’26.4Q +25bp → 1.25% (로이터폴 연말 ~1.25%)'}]}
    ];
-   function bld(s){var p=s.pts,data=[],rad=[];data.push({x:p[0].x,y:p[0].r,t:p[0].t});rad.push(0);
-    for(var i=1;i<p.length;i++){data.push({x:p[i].x,y:p[i-1].r,t:p[i-1].t});rad.push(0);data.push({x:p[i].x,y:p[i].r,t:p[i].t});rad.push(3);}
-    data.push({x:17.5,y:p[p.length-1].r,t:s.now});rad.push(0);return{data:data,rad:rad,end:p[p.length-1].r};}
+   function bld(s){var p=s.seq,data=[],rad=[];data.push({x:p[0].x,y:p[0].r,t:p[0].t});rad.push(0);
+    for(var i=1;i<p.length;i++){data.push({x:p[i].x,y:p[i-1].r,t:p[i-1].t});rad.push(0);data.push({x:p[i].x,y:p[i].r,t:p[i].t});rad.push(p[i].today?0:3);}
+    return{data:data,rad:rad,end:p[p.length-1].r};}
    var ends={};
    var datasets=raw.map(function(s){var b=bld(s);ends[s.key]=b.end;
-    return{label:s.label,data:b.data,borderColor:PAL[s.key],backgroundColor:PAL[s.key],borderWidth:2,borderDash:s.dash,tension:0,pointRadius:b.rad,pointHoverRadius:4,pointBackgroundColor:PAL[s.key],pointBorderColor:PAL[s.key]};});
+    return{label:s.label,data:b.data,borderColor:PAL[s.key],backgroundColor:PAL[s.key],borderWidth:2,borderDash:s.dash,tension:0,
+     segment:{borderDash:function(ctx){return ctx.p0.parsed.x>=TODAY-0.05?[2,4]:undefined;}},
+     pointRadius:b.rad,pointHoverRadius:4,pointBackgroundColor:PAL[s.key],pointBorderColor:PAL[s.key]};});
    var els=makeFlags(document.getElementById('cbkFlags'),raw);
    var ch=new Chart(document.getElementById('cbkChart'),{type:'line',data:{datasets:datasets},
     plugins:[{id:'f',afterDraw:function(c){placeFlags(c,raw,ends,els);}}],
     options:{responsive:true,maintainAspectRatio:false,animation:false,layout:{padding:{right:36,top:8}},
      interaction:{mode:'nearest',intersect:false},
-     scales:{x:{type:'linear',min:0,max:17.7,ticks:{stepSize:3,color:TICK,font:{size:11},callback:function(v){return XL[v]||'';}},grid:{color:GRID}},
+     scales:{x:{type:'linear',min:0,max:23.7,ticks:{stepSize:3,color:TICK,font:{size:11},callback:function(v){return XL[v]||'';}},grid:{color:GRID}},
       y:{min:0,max:5,ticks:{stepSize:1,color:TICK,font:{size:11},callback:function(v){return v+'%';}},grid:{color:GRID},title:{display:true,text:'정책금리',color:TICK,font:{size:11}}}},
      plugins:{legend:{display:false},
       tooltip:Object.assign(TT(),{callbacks:{title:function(it){return it[0].dataset.label;},label:function(c){return '  '+c.raw.t;}}}),
-      annotation:{annotations:{iran:IRAN}}}}});
+      annotation:{annotations:{today:{type:'line',xMin:TODAY,xMax:TODAY,borderColor:TICK,borderWidth:1.2,borderDash:[4,4],label:{display:true,content:'오늘 6/14',position:'start',color:TICK,backgroundColor:'rgba(255,255,255,0.78)',font:{size:10},padding:3}}}}}}});
    var lg=document.getElementById('cbkLegend');
    raw.forEach(function(s,i){var dash=s.dash.length?('border-top:2px dashed '+PAL[s.key]):('border-top:2px solid '+PAL[s.key]);
     var el=document.createElement('span');el.style.cssText='display:flex;align-items:center;gap:6px;color:'+TICK+';cursor:pointer;user-select:none;transition:opacity .15s;';
@@ -2346,29 +2376,7 @@ window.initMacroCharts=(function(){
     lg.appendChild(el);});
   })();
 
-  /* --- 카드 3: WTI 국제유가 — 월별 평균 + 현재가 --- */
-  (function(){
-   if(!document.getElementById('wtiChart'))return;
-   var v=[73,70,68,64,62,67,67,64,62,61,60,60,60,66,91,103,100];
-   var note=['’25.1 $73','’25.2 $70','’25.3 $68','’25.4 $64','’25.5 $62','’25.6 $67','’25.7 $67','’25.8 $64','’25.9 $62','’25.10 $61','’25.11 $60','’25.12 $60','’26.1 $60·개전 직전','’26.2 $66·2/28 개전','’26.3 평균 $91','’26.4 $103','’26.5 $100'];
-   var data=v.map(function(y,i){return{x:i,y:y,t:note[i]};});
-   data.push({x:16.9,y:85,t:'현재 ~$85 · 평화협상 기대 8주 저점'});
-   var ds=[{label:'WTI ($/배럴)',data:data,borderColor:PAL.wti,backgroundColor:PAL.wti,borderWidth:2.4,tension:0.2,
-     pointRadius:data.map(function(d,i){return i===data.length-1?4:0;}),pointHoverRadius:4,pointBackgroundColor:PAL.wti,pointBorderColor:PAL.wti,fill:false}];
-   var ends={wti:85};
-   var box=document.getElementById('wtiFlags'); var price=document.createElement('span');
-   price.textContent='$85'; price.style.cssText='position:absolute;transform:translateY(-50%);font-size:12px;font-weight:700;color:'+PAL.wti+';'; box.appendChild(price);
-   function placePrice(c){if(!c.chartArea)return;price.style.left=(c.chartArea.right+6)+'px';price.style.top=c.scales.y.getPixelForValue(ends.wti)+'px';}
-   new Chart(document.getElementById('wtiChart'),{type:'line',data:{datasets:ds},
-    plugins:[{id:'p',afterDraw:function(c){placePrice(c);}}],
-    options:{responsive:true,maintainAspectRatio:false,animation:false,layout:{padding:{right:40,top:8}},
-     interaction:{mode:'nearest',intersect:false},
-     scales:{x:{type:'linear',min:0,max:17.0,ticks:{stepSize:3,color:TICK,font:{size:11},callback:function(v){return XL[v]||'';}},grid:{color:GRID}},
-      y:{min:40,max:120,ticks:{stepSize:20,color:TICK,font:{size:11},callback:function(v){return '$'+v;}},grid:{color:GRID},title:{display:true,text:'$/배럴',color:TICK,font:{size:11}}}},
-     plugins:{legend:{display:false},
-      tooltip:Object.assign(TT(),{callbacks:{title:function(){return 'WTI 국제유가';},label:function(c){return '  '+c.raw.t;}}}),
-      annotation:{annotations:{iran:IRAN}}}}});
-  })();
+  /* 카드 3(WTI)는 data.json 일별로 US10Y 모듈(renderWti)에서 라이브 렌더 */
  }
  return build;
 })();
