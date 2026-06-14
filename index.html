@@ -1192,6 +1192,24 @@ table.tk th.c{text-align:center}
 .us10y .readout{font-size:13px;color:var(--dim);margin-top:14px;line-height:1.7}
 .us10y .readout b{color:var(--txt);font-weight:600}
 .us10y .disclaimer{border-left:2px solid var(--line);padding-left:16px;margin-top:22px;font-size:13px;color:var(--dim);line-height:1.7;max-width:80ch}
+.us10y a{color:var(--dawn);text-decoration:none} .us10y a:hover{text-decoration:underline}
+.us10y code{font-family:var(--mono);background:var(--panel2);padding:1px 6px;border-radius:5px;color:var(--txt);font-size:12px}
+.us10y .u10-err{border:1px solid var(--st-hot);background:var(--panel);color:var(--st-hot);border-radius:12px;padding:14px 16px;font-size:13px;margin-top:18px;line-height:1.6}
+.us10y .stat .d{font-size:12px;font-weight:700;margin-top:6px}
+.us10y .stat .d.pos{color:var(--st-hot)} .us10y .stat .d.neg{color:var(--st-dawn)} .us10y .stat .d.flat{color:var(--faint)}
+.us10y .stat .rng{font-size:11px;color:var(--faint);margin-top:7px}
+.us10y .u10-cols{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:14px}
+@media(max-width:760px){.us10y .u10-cols{grid-template-columns:1fr}}
+.us10y .u10-h4{font-size:11px;font-weight:700;letter-spacing:.04em;color:var(--faint);margin:0 0 8px}
+.us10y .driver{display:flex;gap:12px;align-items:flex-start;padding:11px 0;border-bottom:1px solid var(--line);font-size:13px;line-height:1.55}
+.us10y .driver:last-child{border-bottom:0}
+.us10y .driver .dnm{flex:0 0 130px;font-weight:700;color:var(--txt)}
+.us10y .driver .dvl{flex:1;color:var(--dim)}
+.us10y .driver .dtag{flex:0 0 auto;font-size:10px;font-weight:700;padding:2px 9px;border-radius:9999px;letter-spacing:.04em}
+.us10y .driver .dtag.bull{color:#0ca678;border:1px solid #0ca678}
+.us10y .driver .dtag.base{color:#8a939b;border:1px solid #c4ccd2}
+.us10y .driver .dtag.bear{color:#b8860b;border:1px solid #b8860b}
+@media(max-width:560px){.us10y .driver{flex-wrap:wrap}.us10y .driver .dnm{flex-basis:100%}}
 </style>
 <section class="view" id="v-prob">
   <div class="vhead">
@@ -1270,69 +1288,55 @@ table.tk th.c{text-align:center}
   <div class="vhead">
     <div class="vkick">US10Y · 미 10년물 금리</div>
     <h1 class="vtitle">미 <em>10년물</em> 금리 모니터</h1>
-    <p class="vsub">매크로 게이트 토글로 연말 시나리오 가중치(Bull/Base/Bear)를 재편향하면 가중 기대치·팬차트가 실시간 재계산됩니다. 현재 10Y·연말 시나리오 확률은 data.json 시드값을 사용하며, 아래 "확률 추이"는 최근 시나리오 확률 변화를 추적합니다.</p></div>
+    <p class="vsub">미 10년물 국채금리 연말 시나리오 확률을 매일 추적한다. 모든 수치는 <a href="https://us10y.simpleornothing.com" target="_blank" rel="noopener">us10y.simpleornothing.com</a>의 <code>data.json</code>에서 실시간으로 불러오며, 매일 KST 06:13 자동 갱신된다.</p></div>
 
   <div class="us10y">
-    <!-- 현황 요약 -->
+    <div id="u10_err" class="u10-err" style="display:none"></div>
+
+    <!-- 시장 데이터 -->
     <div class="panel">
-      <div class="panel-h"><h3>현황 요약 (연말 기준)</h3><span class="stamp" id="u10_stamp"></span></div>
-      <div class="cards" id="u10_cards"></div>
+      <div class="panel-h"><h3>시장 데이터</h3><span class="stamp" id="u10_stamp">불러오는 중…</span></div>
+      <div class="cards" id="u10_markets"></div>
     </div>
 
-    <!-- 매크로 게이트 -->
+    <!-- 연말 시나리오 확률 -->
     <div class="panel">
-      <div class="panel-h"><h3>매크로 게이트 · 두 토글</h3></div>
-      <div class="gate-grid">
-        <div>
-          <p class="toglab">① 이란 / Hormuz 휴전 상태</p>
-          <div class="seg" id="u10_hormuz">
-            <button data-v="calm">정착</button><button data-v="unstable" class="on">불안정</button><button data-v="collapse">붕괴</button>
-          </div>
-          <p class="toglab" style="margin-top:18px">② 12월 FOMC 인상 가격</p>
-          <div class="seg" id="u10_fomc">
-            <button data-v="low">&lt;30%</button><button data-v="mid" class="on">30–70%</button><button data-v="high">&gt;70%</button>
-          </div>
-        </div>
-        <div>
-          <div class="badge neu" id="u10_badge">
-            <div class="bt"><span class="dot"></span><span id="u10_badge_t"></span></div>
-            <div class="bd" id="u10_badge_d"></div>
-          </div>
-          <div class="btnrow">
-            <button class="btn primary" id="u10_rebias">이 게이트로 시나리오 가중치 재편향</button>
-            <button class="btn" id="u10_reset">기본값 복원</button>
-          </div>
-          <p class="hint">게이트 배지는 토글에 따라 즉시 갱신됩니다. <b>재편향</b> 버튼을 누르면 hawkish↔dovish 확률 질량을 이동(최대 ±18%p)시켜 위 요약·팬차트에 반영합니다.</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- 팬차트 -->
-    <div class="panel">
-      <div class="panel-h"><h3>확률가중 경로 &amp; 분포 (팬차트)</h3><span class="stamp">현재 → 2026-12 연말</span></div>
-      <div class="fan"><svg id="u10_fan" viewBox="0 0 760 380" preserveAspectRatio="xMidYMid meet" role="img" aria-label="US10Y 확률가중 팬차트"></svg></div>
-      <div class="legend">
-        <span><i style="background:rgba(22,36,45,.10)"></i>80% 구간 (p10–p90)</span>
-        <span><i style="background:rgba(22,36,45,.20)"></i>50% 구간 (p25–p75)</span>
-        <span><i style="background:var(--dawn);height:3px;border-radius:2px"></i>중앙값 경로</span>
-        <span><i style="background:var(--st-accel);height:3px;border-radius:2px"></i>확률가중 기대치</span>
-      </div>
-      <div class="readout" id="u10_readout"></div>
+      <div class="panel-h"><h3>연말 10Y 시나리오 확률</h3><span class="stamp" id="u10_scendate"></span></div>
+      <div class="cards" id="u10_scen"></div>
     </div>
 
     <!-- 확률 추이 -->
     <div class="panel">
-      <div class="panel-h"><h3>확률 추이</h3><span class="stamp">최근 연말 시나리오 확률 변화 (일별)</span></div>
-      <div class="fan"><svg id="u10_trend" viewBox="0 0 760 360" preserveAspectRatio="xMidYMid meet" role="img" aria-label="US10Y 연말 시나리오 확률 추이"></svg></div>
+      <div class="panel-h"><h3>확률 추이</h3><span class="stamp">일별 Bull / Base / Bear</span></div>
+      <div class="fan"><svg id="u10_trend" viewBox="0 0 760 360" preserveAspectRatio="xMidYMid meet" role="img" aria-label="연말 시나리오 확률 추이"></svg></div>
       <div class="legend">
-        <span><i style="background:#0ca678"></i>Bull (하방 · 금리 하락)</span>
+        <span><i style="background:#0ca678"></i>Bull (금리 하락)</span>
         <span><i style="background:#9aa6b0"></i>Base (기준)</span>
-        <span><i style="background:#b8860b"></i>Bear (상방 · 금리 상승)</span>
+        <span><i style="background:#b8860b"></i>Bear (금리 상승)</span>
       </div>
       <div class="readout" id="u10_trendout"></div>
     </div>
 
-    <div class="disclaimer">이 모니터는 입력한 시나리오 가정에 따른 계산기입니다. 실제 금리 경로를 예측·보장하지 않으며 투자 자문이 아닙니다. 시드값(현재 10Y·시나리오 확률)은 data.json 기준이며, 의사결정은 본인의 판단으로 하십시오.</div>
+    <!-- 오늘의 판단 -->
+    <div class="panel">
+      <div class="panel-h"><h3>오늘의 판단</h3><span class="stamp" id="u10_naddate"></span></div>
+      <div class="readout" id="u10_summary"></div>
+      <div class="u10-cols">
+        <div><h4 class="u10-h4">트리거</h4><div class="readout" id="u10_trigger"></div></div>
+        <div><h4 class="u10-h4">반대 시각 (Bear Steelman)</h4><div class="readout" id="u10_steel"></div></div>
+      </div>
+      <h4 class="u10-h4" style="margin-top:20px">핵심 드라이버</h4>
+      <div id="u10_drivers"></div>
+    </div>
+
+    <!-- FedWatch 경로 -->
+    <div class="panel">
+      <div class="panel-h"><h3>월별 경로 추정 엔진 · FedWatch 함의금리</h3><span class="stamp">CME FedWatch implied path</span></div>
+      <div class="fan"><svg id="u10_fed" viewBox="0 0 760 320" preserveAspectRatio="xMidYMid meet" role="img" aria-label="FedWatch 함의금리 경로"></svg></div>
+      <div class="readout" id="u10_fedout"></div>
+    </div>
+
+    <div class="disclaimer">데이터 출처: <a href="https://us10y.simpleornothing.com" target="_blank" rel="noopener">us10y.simpleornothing.com</a> · <code>data.json</code> (매일 KST 06:13 자동 갱신 · yfinance 시장데이터 + Claude 확률 추정). 본 분석은 의사결정 지원용이며 매수·매도 권유가 아닙니다.</div>
   </div>
 </section>
 
@@ -2183,171 +2187,120 @@ function gotoStack(layerId){
  if(c){c.classList.remove('collapsed');c.scrollIntoView({behavior:'smooth',block:'center'});}
 }
 
-/* ===== US10Y · 미 10년물 금리 모니터 (iframe 제거, 인라인 렌더) ===== */
+/* ===== US10Y · 미 10년물 금리 모니터 — us10y.simpleornothing.com/data.json 라이브 (매일 자동 갱신) ===== */
 window.US10Y=(function(){
- const CUR=4.49, ASOF='2026-06-14', N=7;
- const XLAB=['6월(현재)','7월','8월','9월','10월','11월','12월'];
- const SEED=[
-  {key:'dov2',name:'급락 (딥컷·침체)',tone:'dov',y:4.15,p:13},
-  {key:'dov1',name:'하방 (Dovish 완화)',tone:'dov',y:4.35,p:19},
-  {key:'base',name:'기준 (현 레짐 유지)',tone:'',y:4.71,p:43},
-  {key:'haw1',name:'상방 (Hawkish 재가격)',tone:'haw',y:4.95,p:17},
-  {key:'haw2',name:'급등 (재가속·텀프리미엄)',tone:'haw',y:5.20,p:8}
- ];
- const clone=a=>a.map(o=>Object.assign({},o));
- let scen=clone(SEED), hormuz='unstable', fomc='mid', lastShift=0, inited=false;
+ const API='/api/us10y';
  const $=id=>document.getElementById(id);
- const psum=()=>scen.reduce((s,x)=>s+x.p,0);
- const bucket=t=>scen.filter(x=>x.tone===t).reduce((s,x)=>s+x.p,0);
- const byKey=k=>scen.find(x=>x.key===k);
- const fmt=x=>x.toFixed(2);
- const tot=()=>psum()||1;
- const weighted=()=>scen.reduce((s,x)=>s+x.y*x.p,0)/tot();
- const npct=p=>Math.round(p/tot()*100);
+ const esc=s=>String(s==null?'':s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+ const num=(x,d=2)=>x==null||isNaN(x)?'–':Number(x).toFixed(d);
+ let DATA=null, loading=false, lastTs=0;
 
- function tilt(){
-  const h={calm:-1,unstable:0,collapse:1}[hormuz];
-  const f={low:-1,mid:0,high:1}[fomc];
-  return h+f;
- }
- function badge(){
-  const t=tilt();
-  if(t<=-2)return{cls:'dov',t:'강한 비둘기 (Dovish)',d:'유가 안정·인상 미반영 — 하방(금리 하락) 질량 우위. 듀레이션 확대 우호.'};
-  if(t===-1)return{cls:'dov',t:'비둘기 우위 (Dovish-lean)',d:'완화 쪽으로 소폭 기울어짐 — 눌림에서 듀레이션 추가 검토.'};
-  if(t===0)return{cls:'neu',t:'중립 (현재)',d:'양방향 균형 — 신규 듀레이션 추가 보류.'};
-  if(t===1)return{cls:'haw',t:'매파 우위 (Hawkish-lean)',d:'긴축·인플레 쪽으로 소폭 기울어짐 — 금리 상방 경계.'};
-  return{cls:'haw',t:'강한 매파 (Hawkish)',d:'유가 충격·인상 가격 동반 — 상방(금리 상승) 질량 우위. 듀레이션 축소.'};
- }
- /* 게이트로 hawkish↔dovish 질량 이동 (시드 기준, 최대 ±18%p) */
- function rebias(){
-  scen=clone(SEED);
-  const shift=Math.max(-18,Math.min(18,tilt()*9));
-  lastShift=shift;
-  if(shift!==0){
-   const from=shift>0?'dov':'haw', to=shift>0?'haw':'dov', amt=Math.abs(shift);
-   const fSum=scen.filter(x=>x.tone===from).reduce((s,x)=>s+x.p,0);
-   const tSum=scen.filter(x=>x.tone===to).reduce((s,x)=>s+x.p,0);
-   scen.forEach(x=>{
-    if(x.tone===from&&fSum>0)x.p-=amt*(x.p/fSum);
-    if(x.tone===to&&tSum>0)x.p+=amt*(x.p/tSum);
-   });
-  }
-  render();
- }
- function reset(){scen=clone(SEED);hormuz='unstable';fomc='mid';lastShift=0;
-  segSet('u10_hormuz','unstable');segSet('u10_fomc','mid');render();}
-
- /* ---- 분포/분위수 ---- */
- function quantile(pts,q){
-  const C=pts.slice().sort((a,b)=>a.v-b.v);
-  let cum=0; const cc=C.map(o=>{const lo=cum;cum+=o.pn;return{v:o.v,c:lo+o.pn/2};});
-  if(q<=cc[0].c)return cc[0].v;
-  if(q>=cc[cc.length-1].c)return cc[cc.length-1].v;
-  for(let i=1;i<cc.length;i++){if(q<=cc[i].c){const t=(q-cc[i-1].c)/(cc[i].c-cc[i-1].c);return cc[i-1].v+t*(cc[i].v-cc[i-1].v);}}
-  return cc[cc.length-1].v;
- }
- function distAt(f){
-  const T=tot();
-  const pts=scen.map(x=>({v:CUR+f*(x.y-CUR),pn:x.p/T}));
-  return{mean:pts.reduce((s,x)=>s+x.v*x.pn,0),
-   p10:quantile(pts,.10),p25:quantile(pts,.25),p50:quantile(pts,.50),p75:quantile(pts,.75),p90:quantile(pts,.90)};
+ /* ---- 데이터 로드 (탭 열 때마다, 최근 60초내면 재요청 생략) ---- */
+ async function load(){
+  if(loading)return;
+  if(DATA&&Date.now()-lastTs<60000){renderAll();return;}
+  loading=true;
+  try{
+   const r=await fetch(API,{credentials:'same-origin',cache:'no-store'});
+   if(!r.ok)throw new Error('HTTP '+r.status);
+   const j=await r.json();
+   if(!j||!Array.isArray(j.history)||!j.history.length)throw new Error('빈 데이터');
+   DATA=j; lastTs=Date.now(); $('u10_err').style.display='none';
+   renderAll();
+  }catch(e){
+   const el=$('u10_err'); if(el){el.style.display='';el.textContent='US10Y 데이터를 불러오지 못했습니다 ('+(e&&e.message||e)+'). 잠시 후 06 US10Y 탭을 다시 열어 주세요.';}
+  }finally{loading=false;}
  }
 
- /* ---- 렌더: 카드 ---- */
- function renderCards(){
-  const w=weighted(), up=w>=CUR;
-  const c=[
-   {k:'현재 10Y',v:CUR,s:'data.json '+ASOF,cls:''},
-   {k:'연말(12월) 가중',v:w,s:'확률가중 기대치',cls:up?'up':'down'},
-   {k:'12월 상방 (Hawkish)',v:byKey('haw1').y,s:'p='+npct(bucket('haw'))+'%',cls:'up'},
-   {k:'12월 하방 (Dovish)',v:byKey('dov1').y,s:'p='+npct(bucket('dov'))+'%',cls:'down'}
+ /* ---- 시장 데이터 카드 ---- */
+ function renderMarkets(){
+  const H=DATA.history, last=H[H.length-1], prev=H.length>1?H[H.length-2]:null;
+  const m=last.markets||{}, pm=(prev&&prev.markets)||{};
+  const bp=(a,b)=>(a==null||b==null)?null:Math.round((a-b)*100);
+  const dd=(a,b)=>(a==null||b==null)?null:(a-b);
+  const delBp=v=>v==null?'<span class="d flat">–</span>':v===0?'<span class="d flat">변동 없음</span>':`<span class="d ${v>0?'pos':'neg'}">${v>0?'+':''}${v}bp</span>`;
+  const delUSD=v=>v==null?'<span class="d flat">–</span>':Math.abs(v)<0.005?'<span class="d flat">변동 없음</span>':`<span class="d ${v>0?'pos':'neg'}">${v>0?'+':''}${v.toFixed(2)}</span>`;
+  const cards=[
+   {k:'美 10Y',v:num(m.ten_year)+'%',d:delBp(bp(m.ten_year,pm.ten_year))},
+   {k:'美 30Y',v:num(m.thirty_year)+'%',d:delBp(bp(m.thirty_year,pm.thirty_year))},
+   {k:'Brent',v:'$'+num(m.brent),d:delUSD(dd(m.brent,pm.brent))},
+   {k:'WTI',v:'$'+num(m.wti),d:delUSD(dd(m.wti,pm.wti))},
+   {k:'Fed Funds (함의)',v:num(m.fed_funds_implied)+'%',d:delBp(bp(m.fed_funds_implied,pm.fed_funds_implied))}
   ];
-  $('u10_cards').innerHTML=c.map(o=>
-   `<div class="stat ${o.cls}"><div class="k">${o.k}</div><div class="v">${fmt(o.v)}<small>%</small></div><div class="s">${o.s}</div></div>`).join('');
-  $('u10_stamp').textContent='data.json '+ASOF+' · 현재10Y·연말확률 시드';
- }
- function renderBadge(){
-  const b=badge(), el=$('u10_badge');
-  el.className='badge '+b.cls;
-  $('u10_badge_t').textContent=b.t;
-  $('u10_badge_d').textContent=b.d;
+  $('u10_markets').innerHTML=cards.map(c=>`<div class="stat"><div class="k">${c.k}</div><div class="v">${c.v}</div>${c.d}</div>`).join('');
+  const upd=DATA.last_updated?(' · 업데이트 '+esc(DATA.last_updated.replace('T',' ').replace('Z',' UTC'))):'';
+  $('u10_stamp').textContent='기준일 '+last.date+upd;
  }
 
- /* ---- 렌더: 시나리오 표 (1회 빌드 후 값만 동기화) ---- */
- /* ---- 렌더: 확률 추이 (일별 Bull/Base/Bear, data.json 시드) ---- */
- /* 각 행은 [날짜, Bull%, Bear%]; Base = 100 − Bull − Bear. 마지막 점이 현재 시드(32/43/25). */
- const HIST=[
-  ['5/13',20,50],['5/14',16,58],['5/15',12,64],['5/16',9,70],['5/19',13,60],
-  ['5/20',18,52],['5/21',19,50],['5/22',25,42],['5/23',30,35],['5/26',36,28],
-  ['5/27',41,22],['5/28',45,18],['5/29',44,17],['5/30',43,16],['6/2',40,18],
-  ['6/3',38,20],['6/4',34,24],['6/5',30,30],['6/6',24,38],['6/9',14,56],
-  ['6/10',11,64],['6/11',14,60],['6/12',20,48],['6/13',27,38],['6/14',32,25]
- ].map(r=>({d:r[0],bull:r[1],bear:r[2],base:100-r[1]-r[2]}));
+ /* ---- 연말 시나리오 확률 카드 ---- */
+ function renderScenarios(){
+  const H=DATA.history, last=H[H.length-1], p=last.probabilities||{}, sc=DATA.scenarios||{};
+  const col={bull:'#0ca678',base:'#8a939b',bear:'#b8860b'};
+  $('u10_scen').innerHTML=['bull','base','bear'].map(k=>{
+   const s=sc[k]||{}, lbl=s.label||k.toUpperCase();
+   return `<div class="stat"><div class="k">${esc(lbl)}</div><div class="v" style="color:${col[k]}">${p[k]==null?'–':p[k]}<small>%</small></div><div class="rng">${esc(s.range||'')}</div><div class="s">${esc(s.description||'')}</div></div>`;
+  }).join('');
+  $('u10_scendate').textContent='기준일 '+last.date;
+ }
+
+ /* ---- 확률 추이 (history bull/base/bear) ---- */
  function renderTrend(){
-  const M=HIST.length, W=760,H=360,L=40,R=18,Tm=16,Bm=40, iw=W-L-R, ih=H-Tm-Bm, YMAX=80;
-  const xF=k=>L+iw*k/(M-1), yF=v=>Tm+ih*(YMAX-v)/YMAX;
-  const line=key=>HIST.map((d,k)=>(k?'L':'M')+xF(k).toFixed(1)+' '+yF(d[key]).toFixed(1)).join(' ');
-  const dots=(key,col)=>HIST.map((d,k)=>`<circle cx="${xF(k).toFixed(1)}" cy="${yF(d[key]).toFixed(1)}" r="2.4" fill="${col}"/>`).join('');
+  const H=DATA.history, M=H.length;
+  const W=760,VH=360,L=40,R=18,Tm=16,Bm=40, iw=W-L-R, ih=VH-Tm-Bm;
+  let mx=0; H.forEach(h=>{const p=h.probabilities||{};mx=Math.max(mx,p.bull||0,p.base||0,p.bear||0);});
+  const YMAX=Math.min(100,Math.max(60,Math.ceil(mx/10)*10));
+  const xF=k=>M<2?L+iw/2:L+iw*k/(M-1), yF=v=>Tm+ih*(YMAX-v)/YMAX;
+  const series=[['bull','#0ca678'],['base','#8a939b'],['bear','#b8860b']];
+  const line=key=>H.map((h,k)=>(k?'L':'M')+xF(k).toFixed(1)+' '+yF((h.probabilities||{})[key]||0).toFixed(1)).join(' ');
+  const dots=(key,c)=>H.map((h,k)=>`<circle cx="${xF(k).toFixed(1)}" cy="${yF((h.probabilities||{})[key]||0).toFixed(1)}" r="2.3" fill="${c}"/>`).join('');
   let grid='';
-  for(let v=0;v<=YMAX;v+=20){const y=yF(v).toFixed(1);
-   grid+=`<line x1="${L}" y1="${y}" x2="${W-R}" y2="${y}" stroke="var(--line)" stroke-width="1"/>`+
-    `<text x="${L-8}" y="${(+y+4)}" text-anchor="end" font-size="11" fill="var(--faint)" font-family="var(--mono)">${v}%</text>`;}
-  let xlab=''; const step=Math.ceil(M/9);
-  for(let k=0;k<M;k+=step)xlab+=`<text x="${xF(k).toFixed(1)}" y="${H-14}" text-anchor="middle" font-size="11" fill="var(--faint)" font-family="var(--mono)">${HIST[k].d}</text>`;
-  const series=[['bull','#0ca678'],['base','#9aa6b0'],['bear','#b8860b']];
+  for(let v=0;v<=YMAX;v+=20){const y=yF(v).toFixed(1);grid+=`<line x1="${L}" y1="${y}" x2="${W-R}" y2="${y}" stroke="var(--line)"/><text x="${L-8}" y="${+y+4}" text-anchor="end" font-size="11" fill="var(--faint)" font-family="var(--mono)">${v}%</text>`;}
+  let xlab=''; const step=Math.max(1,Math.ceil(M/9));
+  for(let k=0;k<M;k+=step){const d=H[k].date.slice(5).replace('-','/');xlab+=`<text x="${xF(k).toFixed(1)}" y="${VH-14}" text-anchor="middle" font-size="11" fill="var(--faint)" font-family="var(--mono)">${d}</text>`;}
   const paths=series.map(([k,c])=>`<path d="${line(k)}" fill="none" stroke="${c}" stroke-width="2.2"/>${dots(k,c)}`).join('');
-  $('u10_trend').innerHTML=`${grid}${paths}${xlab}`;
-  const last=HIST[M-1], first=HIST[0];
-  const arrow=(a,b)=>{const d=b-a;return d>0?`▲${d}`:d<0?`▼${-d}`:'±0';};
-  $('u10_trendout').innerHTML=`최근 ${HIST.length}거래일 — Bull <b>${last.bull}%</b>(${arrow(first.bull,last.bull)}p) · Base <b>${last.base}%</b>(${arrow(first.base,last.base)}p) · Bear <b>${last.bear}%</b>(${arrow(first.bear,last.bear)}p). 6월 들어 Bear(상방) 질량이 정점 뒤 되돌려지며 Bull(하방)이 재유입되는 흐름.`;
+  $('u10_trend').innerHTML=grid+paths+xlab;
+  const f=H[0].probabilities||{}, l=H[M-1].probabilities||{};
+  const arr=(a,b)=>{const d=(b||0)-(a||0);return d>0?`▲${d}`:d<0?`▼${-d}`:'±0';};
+  $('u10_trendout').innerHTML=`최근 ${M}일 — Bull <b>${l.bull}%</b>(${arr(f.bull,l.bull)}p) · Base <b>${l.base}%</b>(${arr(f.base,l.base)}p) · Bear <b>${l.bear}%</b>(${arr(f.bear,l.bear)}p).`;
  }
 
- /* ---- 렌더: 팬차트 ---- */
- function renderFan(){
-  const D=[]; for(let k=0;k<N;k++)D.push(distAt(k/(N-1)));
-  let yMin=CUR,yMax=CUR;
-  D.forEach(d=>{yMin=Math.min(yMin,d.p10);yMax=Math.max(yMax,d.p90);});
-  const pad=Math.max(.12,(yMax-yMin)*.14); yMin-=pad; yMax+=pad;
-  const W=760,H=380,L=46,R=18,Tm=16,Bm=36, iw=W-L-R, ih=H-Tm-Bm;
-  const xF=k=>L+iw*k/(N-1), yF=v=>Tm+ih*(yMax-v)/(yMax-yMin);
-  const line=key=>D.map((d,k)=>(k?'L':'M')+xF(k).toFixed(1)+' '+yF(d[key]).toFixed(1)).join(' ');
-  const band=(hi,lo)=>{let p='';D.forEach((d,k)=>{p+=(k?'L':'M')+xF(k).toFixed(1)+' '+yF(d[hi]).toFixed(1)+' ';});
-   for(let k=N-1;k>=0;k--)p+='L'+xF(k).toFixed(1)+' '+yF(D[k][lo]).toFixed(1)+' ';return p+'Z';};
+ /* ---- 오늘의 판단 ---- */
+ function renderNarrative(){
+  const H=DATA.history, last=H[H.length-1];
+  $('u10_naddate').textContent='기준일 '+last.date;
+  $('u10_summary').innerHTML='<b>'+esc(last.summary||'')+'</b>';
+  $('u10_trigger').textContent=last.trigger_today||'–';
+  $('u10_steel').textContent=last.bear_steelman||'–';
+  const dr=Array.isArray(last.key_drivers)?last.key_drivers:[];
+  $('u10_drivers').innerHTML=dr.length?dr.map(d=>{
+   const t=(d.direction||'base').toLowerCase(), tag=t==='bull'?'bull':t==='bear'?'bear':'base';
+   return `<div class="driver"><span class="dtag ${tag}">${tag.toUpperCase()}</span><span class="dnm">${esc(d.name)}</span><span class="dvl">${esc(d.value)}</span></div>`;
+  }).join(''):'<div class="readout">드라이버 정보 없음</div>';
+ }
+
+ /* ---- FedWatch 함의금리 경로 ---- */
+ function renderFed(){
+  const H=DATA.history, last=H[H.length-1], path=last.fedwatch_path||{};
+  const keys=Object.keys(path);
+  if(!keys.length){$('u10_fed').innerHTML='';$('u10_fedout').textContent='FedWatch 경로 데이터 없음';return;}
+  const pts=keys.map(k=>({lab:k,v:+path[k]}));
+  const M=pts.length, W=760,VH=320,L=44,R=18,Tm=16,Bm=40, iw=W-L-R, ih=VH-Tm-Bm;
+  let lo=Math.min(...pts.map(p=>p.v)), hi=Math.max(...pts.map(p=>p.v));
+  const pad=Math.max(.05,(hi-lo)*.18); lo-=pad; hi+=pad;
+  const xF=k=>M<2?L+iw/2:L+iw*k/(M-1), yF=v=>Tm+ih*(hi-v)/(hi-lo);
   let grid='';
-  for(let i=0;i<=4;i++){const v=yMin+(yMax-yMin)*i/4,y=yF(v).toFixed(1);
-   grid+=`<line x1="${L}" y1="${y}" x2="${W-R}" y2="${y}" stroke="var(--line)" stroke-width="1"/>`+
-    `<text x="${L-8}" y="${(+y+4)}" text-anchor="end" font-size="11" fill="var(--faint)" font-family="var(--mono)">${v.toFixed(2)}</text>`;}
-  let xlab='';
-  for(let k=0;k<N;k++)xlab+=`<text x="${xF(k).toFixed(1)}" y="${H-12}" text-anchor="middle" font-size="11" fill="var(--faint)" font-family="var(--mono)">${XLAB[k]}</text>`;
-  const last=D[N-1];
-  const svg=`${grid}
-   <path d="${band('p10','p90')}" fill="rgba(22,36,45,.10)"/>
-   <path d="${band('p25','p75')}" fill="rgba(22,36,45,.20)"/>
-   <path d="${line('mean')}" fill="none" stroke="var(--st-accel)" stroke-width="2" stroke-dasharray="5 4"/>
-   <path d="${line('p50')}" fill="none" stroke="var(--dawn)" stroke-width="2.6"/>
-   <circle cx="${xF(0).toFixed(1)}" cy="${yF(CUR).toFixed(1)}" r="4" fill="var(--dawn)"/>
-   <text x="${(xF(N-1)-4).toFixed(1)}" y="${(yF(last.p50)-8).toFixed(1)}" text-anchor="end" font-size="12" font-weight="700" fill="var(--dawn)" font-family="var(--serif)">${fmt(last.p50)}%</text>
-   ${xlab}`;
-  $('u10_fan').innerHTML=svg;
-  const b=badge();
-  $('u10_readout').innerHTML=`현재 <b>${fmt(CUR)}%</b> → 연말 중앙값 <b>${fmt(last.p50)}%</b>, 확률가중 기대치 <b>${fmt(last.mean)}%</b>. `+
-   `80% 신뢰구간 <b>${fmt(last.p10)}–${fmt(last.p90)}%</b>. 매크로 게이트: <b>${b.t}</b>`+
-   (lastShift?` · 재편향 ${lastShift>0?'+':''}${lastShift}%p(${lastShift>0?'hawkish':'dovish'}) 적용됨`:'')+`.`;
+  for(let i=0;i<=4;i++){const v=lo+(hi-lo)*i/4,y=yF(v).toFixed(1);grid+=`<line x1="${L}" y1="${y}" x2="${W-R}" y2="${y}" stroke="var(--line)"/><text x="${L-8}" y="${+y+4}" text-anchor="end" font-size="11" fill="var(--faint)" font-family="var(--mono)">${v.toFixed(2)}</text>`;}
+  let xlab=''; const step=Math.max(1,Math.ceil(M/9));
+  for(let k=0;k<M;k+=step)xlab+=`<text x="${xF(k).toFixed(1)}" y="${VH-14}" text-anchor="middle" font-size="11" fill="var(--faint)" font-family="var(--mono)">${esc(pts[k].lab)}</text>`;
+  const line=pts.map((p,k)=>(k?'L':'M')+xF(k).toFixed(1)+' '+yF(p.v).toFixed(1)).join(' ');
+  const dots=pts.map((p,k)=>`<circle cx="${xF(k).toFixed(1)}" cy="${yF(p.v).toFixed(1)}" r="2.6" fill="var(--dawn)"/>`).join('');
+  $('u10_fed').innerHTML=grid+`<path d="${line}" fill="none" stroke="var(--st-accel)" stroke-width="2.4"/>`+dots+xlab;
+  const a=pts[0].v, b=pts[M-1].v, d=Math.round((b-a)*100);
+  $('u10_fedout').innerHTML=`함의 정책금리 경로: ${esc(pts[0].lab)} <b>${a.toFixed(2)}%</b> → ${esc(pts[M-1].lab)} <b>${b.toFixed(2)}%</b> (${d>0?'+':''}${d}bp). CME FedWatch 시장 내재 기대.`;
  }
 
- function segSet(id,v){$(id).querySelectorAll('button').forEach(btn=>btn.classList.toggle('on',btn.dataset.v===v));}
- function render(){renderCards();renderBadge();renderFan();renderTrend();}
-
- function init(){
-  if(inited)return; inited=true;
-  $('u10_hormuz').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;hormuz=b.dataset.v;segSet('u10_hormuz',hormuz);renderBadge();});
-  $('u10_fomc').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;fomc=b.dataset.v;segSet('u10_fomc',fomc);renderBadge();});
-  $('u10_rebias').addEventListener('click',rebias);
-  $('u10_reset').addEventListener('click',reset);
-  render();
- }
- if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
- return{render:function(){if(!inited)init();else render();},init:init};
+ function renderAll(){renderMarkets();renderScenarios();renderTrend();renderNarrative();renderFed();}
+ return{render:load, reload:function(){lastTs=0;load();}};
 })();
 
 /* ===== SIGNAL LOG (실적 콜 등 신규 시그널 → value-chain 반영, 누적 가능) ===== */
