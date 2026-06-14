@@ -227,6 +227,33 @@ async function handleMemoPut(request, env) {
   return memoJson({ ok: true, count: arr.length }, 200);
 }
 
+// US10Y 데이터 프록시 — us10y.simpleornothing.com/data.json(Railway) 우선,
+// GitHub raw(public repo) 폴백. 서버사이드 fetch 라 CORS·구독 게이트 영향 없음.
+// 매일 KST 06:13 갱신되는 원본을 그대로 중계(짧은 엣지 캐시).
+async function handleUs10y() {
+  const SOURCES = [
+    "https://us10y.simpleornothing.com/data.json",
+    "https://raw.githubusercontent.com/SimpleorNothing/us10y/master/data.json",
+  ];
+  for (const u of SOURCES) {
+    try {
+      const r = await fetch(u, { cf: { cacheTtl: 1800, cacheEverything: true } });
+      if (r.ok) {
+        const body = await r.text();
+        return new Response(body, {
+          status: 200,
+          headers: {
+            "content-type": "application/json; charset=utf-8",
+            "cache-control": "public, max-age=900",
+          },
+        });
+      }
+    } catch (_) { /* 다음 소스로 폴백 */ }
+  }
+  return new Response(JSON.stringify({ error: "us10y upstream unavailable" }),
+    { status: 502, headers: { "content-type": "application/json" } });
+}
+
 export default {
   async fetch(request, env) {
     const password = env.SITE_PASSWORD;
@@ -264,6 +291,10 @@ export default {
       // σ·μ AI 추정 프록시 (인증된 디바이스만 도달)
       if (request.method === "POST" && url.pathname === "/api/estimate") {
         return handleEstimate(request, env);
+      }
+      // US10Y 데이터 프록시 (인증된 디바이스만 도달) — 매일 자동 갱신 원본 중계
+      if (request.method === "GET" && url.pathname === "/api/us10y") {
+        return handleUs10y();
       }
       // 메모 저장/조회 (Cloudflare KV) — 인증된 디바이스만 도달
       if (url.pathname === "/api/memo") {
