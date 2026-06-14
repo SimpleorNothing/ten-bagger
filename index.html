@@ -1312,8 +1312,8 @@ table.tk th.c{text-align:center}
     <!-- 글로벌 중앙은행 정책금리 -->
     <div class="panel">
       <div class="panel-h"><h3>글로벌 중앙은행 정책금리 · ’20~현재</h3><span class="stamp">마우스 휠=확대/축소 · 드래그=이동 · 범례 클릭 토글</span></div>
-      <div id="cbkWrap" style="position:relative;width:100%;height:340px"><canvas id="cbkChart" role="img" aria-label="2020년부터 현재까지 미 연준·ECB·한국·일본 정책금리 추이와 2026년 12월 전망 점선 (FRED, 마우스 휠 줌)"></canvas></div>
-      <div class="u10-tf" id="cbkTf"><button data-d="30">1M</button><button data-d="365">1Y</button><button data-d="1825">5Y</button><button data-d="99999" class="on">전체</button></div>
+      <div id="cbkWrap" style="position:relative;width:100%;height:340px"><canvas id="cbkChart" role="img" aria-label="2020년부터 현재까지 미 연준·ECB·한국·일본 정책금리 추이와 2026년 12월 전망 점선 (FRED, 마우스 휠 줌)"></canvas><div id="cbkFlags" style="position:absolute;inset:0;pointer-events:none"></div></div>
+      <div class="u10-tf" id="cbkTf"><button data-d="30">1M</button><button data-d="365" class="on">1Y</button><button data-d="1825">5Y</button></div>
       <div id="cbkLegend" style="display:flex;flex-wrap:wrap;gap:12px;margin:12px 0 0;font-size:12px"></div>
       <div class="readout">출처: <a href="https://fred.stlouisfed.org" target="_blank" rel="noopener">FRED</a> — <b>일별 자동 갱신</b>. 美=Fed 목표금리 중앙값(DFEDTARU/L)·유로존=ECB 예치금리(ECBDFR)는 실제, <b>韓·日은 FRED 단기(콜)금리 근사</b>. <b>점선=’26.12월 전망</b>(Fed 3.25·ECB 2.00·韓 2.25·日 1.00 — 시장 컨센서스 추정이라 실제와 다를 수 있음). 기간 버튼·마우스 휠/드래그로 구간 조정.</div>
     </div>
@@ -1321,8 +1321,8 @@ table.tk th.c{text-align:center}
     <!-- 글로벌 CPI(YoY) -->
     <div class="panel">
       <div class="panel-h"><h3>글로벌 소비자물가 CPI(전년비) · ’20~현재</h3><span class="stamp">마우스 휠=확대/축소 · 드래그=이동 · 범례 클릭 토글</span></div>
-      <div id="cpiWrap" style="position:relative;width:100%;height:340px"><canvas id="cpiChart" role="img" aria-label="2020년부터 현재까지 미국·한국·유로존·일본 소비자물가 전년동월비 추이 (FRED)"></canvas></div>
-      <div class="u10-tf" id="cpiTf"><button data-d="365">1Y</button><button data-d="1825">5Y</button><button data-d="99999" class="on">전체</button></div>
+      <div id="cpiWrap" style="position:relative;width:100%;height:340px"><canvas id="cpiChart" role="img" aria-label="2020년부터 현재까지 미국·한국·유로존·일본 소비자물가 전년동월비 추이 (FRED)"></canvas><div id="cpiFlags" style="position:absolute;inset:0;pointer-events:none"></div></div>
+      <div class="u10-tf" id="cpiTf"><button data-d="30">1M</button><button data-d="365" class="on">1Y</button><button data-d="1825">5Y</button></div>
       <div id="cpiLegend" style="display:flex;flex-wrap:wrap;gap:12px;margin:12px 0 0;font-size:12px"></div>
       <div class="readout">출처: <a href="https://fred.stlouisfed.org" target="_blank" rel="noopener">FRED</a> (OECD MEI, CPI 전년동월비) — <b>월별 자동 갱신</b>. 美·韓·日·유로존 소비자물가 전년비. 기간 버튼·마우스 휠/드래그로 구간 조정.</div>
     </div>
@@ -2335,13 +2335,24 @@ window.US10Y=(function(){
     segment:{borderDash:function(ctx){return ctx.p1.parsed.x>la?[6,4]:undefined;}}};});
   function fitY(){const xs=chart.scales.x,a=xs.min,b=xs.max;let lo=Infinity,hi=-Infinity;
    ser.forEach(s=>{if(chart.isDatasetVisible(ser.indexOf(s)))s._pts.forEach(p=>{const x=Date.parse(p[0]);if(x>=a&&x<=b){const v=p[1];if(v<lo)lo=v;if(v>hi)hi=v;}});});
-   if(lo===Infinity)return;const pad=Math.max((hi-lo)*0.1,0.1);
-   chart.options.scales.y.min=lo-pad;chart.options.scales.y.max=hi+pad;chart.update('none');}
+   if(lo===Infinity){placeFlags();return;}const pad=Math.max((hi-lo)*0.1,0.1);
+   chart.options.scales.y.min=lo-pad;chart.options.scales.y.max=hi+pad;chart.update('none');placeFlags();}
+  // 각 라인의 (현재 보이는 구간) 맨 오른쪽 끝에 국기 아이콘 배치.
+  function placeFlags(){const fl=$(o.flagsId);if(!fl)return;
+   if(fl._n!==ser.length){fl.innerHTML='';ser.forEach(function(s){const sp=document.createElement('span');sp.className=s.flag?('fi fi-'+s.flag):'';sp.style.cssText='position:absolute;width:20px;height:15px;border-radius:2px;background-size:cover;transform:translate(3px,-50%);box-shadow:0 0 0 1.5px #fff;display:none';fl.appendChild(sp);});fl._n=ser.length;}
+   const dmin=chart.scales.x.min,dmax=chart.scales.x.max;
+   ser.forEach(function(s,i){const sp=fl.children[i];if(!sp)return;
+    if(!chart.isDatasetVisible(i)){sp.style.display='none';return;}
+    const data=chart.data.datasets[i].data;let idx=-1;
+    for(let k=data.length-1;k>=0;k--){if(data[k].x<=dmax&&data[k].x>=dmin){idx=k;break;}}
+    const meta=chart.getDatasetMeta(i),el=idx>=0&&meta.data?meta.data[idx]:null;
+    if(!el){sp.style.display='none';return;}
+    sp.style.display='block';sp.style.left=el.x+'px';sp.style.top=el.y+'px';});}
   var chart=new Chart(cv,{type:'line',data:{datasets:datasets},
-   options:{responsive:true,maintainAspectRatio:false,animation:false,layout:{padding:{right:12,top:8}},
+   options:{responsive:true,maintainAspectRatio:false,animation:false,layout:{padding:{right:28,top:8}},onResize:function(){setTimeout(placeFlags,30);},
     interaction:{mode:'nearest',intersect:false,axis:'x'},
     scales:{x:{type:'linear',min:xmin,max:xmax,ticks:{color:WTICK,font:{size:11},maxTicksLimit:8,callback:fmtTick},grid:{color:WGRID}},
-     y:{ticks:{color:WTICK,font:{size:11},callback:o.yFmt},grid:{color:WGRID},title:{display:!!o.yTitle,text:o.yTitle||'',color:WTICK,font:{size:11}}}},
+     y:{ticks:{color:WTICK,font:{size:11},precision:0,callback:o.yFmt},grid:{color:WGRID},title:{display:!!o.yTitle,text:o.yTitle||'',color:WTICK,font:{size:11}}}},
     plugins:{legend:{display:false},
      tooltip:{enabled:true,backgroundColor:'rgba(255,255,255,0.97)',titleColor:'#2C2C2A',bodyColor:'#444441',borderColor:WGRID,borderWidth:1,padding:9,
        callbacks:{title:function(it){return fmtFull(it[0].parsed.x);},label:function(c){var s=ser[c.datasetIndex];var suf=(s&&c.parsed.x>s._la)?' (추정)':'';return '  '+c.dataset.label+' '+o.valFmt(c.parsed.y)+suf;}}},
@@ -2368,8 +2379,8 @@ window.US10Y=(function(){
  }
  function zipMid(a,b){if(!a||!a.length)return b||[];if(!b||!b.length)return a;const m={};b.forEach(p=>m[p[0]]=p[1]);
   return a.map(p=>[p[0], m[p[0]]!=null?(p[1]+m[p[0]])/2:p[1]]);}
- const cbkCfg={cv:'cbkChart',tf:'cbkTf',legendId:'cbkLegend',yTitle:'정책금리',yFmt:v=>v+'%',valFmt:v=>(v==null?'–':v.toFixed(2)+'%'),defaultDays:99999};
- const cpiCfg={cv:'cpiChart',tf:'cpiTf',legendId:'cpiLegend',yTitle:'전년동월비',yFmt:v=>v+'%',valFmt:v=>(v==null?'–':v.toFixed(1)+'%'),defaultDays:99999};
+ const cbkCfg={cv:'cbkChart',tf:'cbkTf',legendId:'cbkLegend',flagsId:'cbkFlags',yTitle:'정책금리',yFmt:v=>Math.round(v)+'%',valFmt:v=>(v==null?'–':v.toFixed(2)+'%'),defaultDays:365};
+ const cpiCfg={cv:'cpiChart',tf:'cpiTf',legendId:'cpiLegend',flagsId:'cpiFlags',yTitle:'전년동월비',yFmt:v=>Math.round(v)+'%',valFmt:v=>(v==null?'–':v.toFixed(1)+'%'),defaultDays:365};
  async function renderCbk(){
   if(!cbkCfg.series){const S=await fredSeries('DFEDTARU,DFEDTARL,ECBDFR,IRSTCI01KRM156N,IRSTCI01JPM156N');
    const FD='2026-12-01'; // '26.12 전망(시장 컨센서스 추정)

@@ -308,27 +308,39 @@ async function handleWti() {
 // FRED 시계열 프록시 — fredgraph.csv (무키). ?ids=ID1,ID2,... (영숫자_, 최대 12개)
 // 2020-01-01 이후만 반환. 출력: {series:{ID:[["YYYY-MM-DD", value], ...]}}
 // 한 시리즈 다운로드: 성공 시 포인트 배열, 항구적 빈값([]) 구분, 실패(네트워크/비200) 시 null.
-async function fredOne(id) {
+// cosd=2020-01-01 로 2020년부터 강제 시도하되, 실패하면 cosd 없이(시리즈 기본 구간) 폴백.
+function parseFred(text) {
+  const lines = text.trim().split("\n");
+  const out = [];
+  for (let i = 1; i < lines.length; i++) {
+    const c = lines[i].split(",");
+    const d = c[0], v = c[1];
+    if (d && d >= "2020-01-01" && v && v !== "." && !isNaN(+v)) out.push([d, +v]);
+  }
+  return out;
+}
+async function fredFetch(qs) {
   for (let attempt = 0; attempt < 2; attempt++) {
     try {
-      const r = await fetch("https://fred.stlouisfed.org/graph/fredgraph.csv?id=" + encodeURIComponent(id) + "&cosd=2020-01-01", {
+      const r = await fetch("https://fred.stlouisfed.org/graph/fredgraph.csv?" + qs, {
         headers: { "User-Agent": "Mozilla/5.0 (compatible; ten-bagger/1.0)", "Accept": "text/csv,*/*" },
         // 성공 응답만 엣지 캐시(6h). 4xx/5xx(예: 일시적 403/429)는 캐시하지 않아 자가 복구.
         cf: { cacheTtlByStatus: { "200-299": 21600, "300-599": 0 }, cacheEverything: true },
       });
-      if (r.ok) {
-        const lines = (await r.text()).trim().split("\n");
-        const out = [];
-        for (let i = 1; i < lines.length; i++) {
-          const c = lines[i].split(",");
-          const d = c[0], v = c[1];
-          if (d && d >= "2020-01-01" && v && v !== "." && !isNaN(+v)) out.push([d, +v]);
-        }
-        return out; // 성공(빈 배열일 수도 있음 — 정상 처리)
-      }
+      if (r.ok) return parseFred(await r.text());
     } catch (_) { /* 재시도 */ }
+    await new Promise((res) => setTimeout(res, 250 * (attempt + 1))); // 백오프
   }
-  return null; // 실패 신호
+  return null;
+}
+async function fredOne(id) {
+  const eid = encodeURIComponent(id);
+  // 1순위: 2020부터. 빈/실패면 2순위: cosd 없이 기본 구간.
+  let r = await fredFetch("id=" + eid + "&cosd=2020-01-01");
+  if (r && r.length) return r;
+  const r2 = await fredFetch("id=" + eid);
+  if (r2 && r2.length) return r2;
+  return (r === null && r2 === null) ? null : (r2 || r || []);
 }
 async function handleFred(url) {
   const ids = (url.searchParams.get("ids") || "").split(",")
@@ -338,10 +350,11 @@ async function handleFred(url) {
   }
   const series = {};
   let anyFail = false;
-  await Promise.all(ids.map(async (id) => {
+  // 순차 처리 — FRED 동시요청 버스트(throttle) 회피.
+  for (const id of ids) {
     const r = await fredOne(id);
     if (r === null) { anyFail = true; series[id] = []; } else { series[id] = r; }
-  }));
+  }
   // 일부라도 실패하면 짧게(2분)만 캐시해 자가 복구, 전부 성공 시 6h 캐시.
   const ttl = anyFail ? 120 : 21600;
   return new Response(JSON.stringify({ series }), {
