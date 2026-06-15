@@ -170,6 +170,11 @@ async function handleEstimate(request, env) {
       body: JSON.stringify({
         model: "claude-opus-4-8",
         max_tokens: 1500,
+        // 스트리밍 — Opus + web_search(서버툴)는 비스트리밍 시 첫 바이트까지
+        // 오래 걸려 api.anthropic.com(Cloudflare) 의 ~100s 한도를 넘기면 524 가 떴다
+        // (워커는 이를 502 "anthropic api failed" 로 전달). 스트리밍은 ping/델타로
+        // 연결을 유지해 타임아웃을 막는다. 서버측에서 텍스트를 재조립해 동일 형태로 반환.
+        stream: true,
         messages: [{ role: "user", content: prompt }],
         tools: [{ type: "web_search_20260209", name: "web_search" }],
       }),
@@ -178,14 +183,47 @@ async function handleEstimate(request, env) {
     return json({ error: "anthropic fetch failed", detail: String(e && e.message ? e.message : e) }, 502);
   }
 
-  if (!upstream.ok) {
-    const t = await upstream.text();
+  if (!upstream.ok || !upstream.body) {
+    const t = await upstream.text().catch(() => "");
     return json({ error: "anthropic api failed", status: upstream.status, detail: t.slice(0, 400) }, 502);
   }
 
-  // 응답 본문(content 블록 배열)을 그대로 전달 — 클라이언트가 text 블록을 추출·파싱.
-  const data = await upstream.json();
-  return json(data, 200);
+  // SSE 스트림을 서버측에서 수집해 text 블록을 재조립 — 클라이언트 계약(data.content[].text) 유지.
+  let text = "", stopReason = null, errDetail = null;
+  try {
+    const reader = upstream.body.getReader();
+    const dec = new TextDecoder();
+    let buf = "";
+    for (;;) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      buf += dec.decode(value, { stream: true });
+      let nl;
+      while ((nl = buf.indexOf("\n")) >= 0) {
+        const line = buf.slice(0, nl).trim();
+        buf = buf.slice(nl + 1);
+        if (!line.startsWith("data:")) continue;
+        const payload = line.slice(5).trim();
+        if (!payload || payload === "[DONE]") continue;
+        let ev;
+        try { ev = JSON.parse(payload); } catch { continue; }
+        if (ev.type === "content_block_delta" && ev.delta && ev.delta.type === "text_delta") {
+          text += ev.delta.text;
+        } else if (ev.type === "message_delta" && ev.delta && ev.delta.stop_reason) {
+          stopReason = ev.delta.stop_reason;
+        } else if (ev.type === "error") {
+          errDetail = (ev.error && ev.error.message) || "stream error";
+        }
+      }
+    }
+  } catch (e) {
+    return json({ error: "anthropic stream failed", detail: String(e && e.message ? e.message : e) }, 502);
+  }
+
+  if (errDetail) return json({ error: "anthropic api failed", detail: errDetail.slice(0, 400) }, 502);
+
+  // 클라이언트는 data.content 의 text 블록만 사용 → 동일한 형태로 반환.
+  return json({ content: [{ type: "text", text: text }], stop_reason: stopReason }, 200);
 }
 
 // ===== 메모 저장 — Cloudflare R2 (MEMO_BUCKET) · DA Space 방식 =====
