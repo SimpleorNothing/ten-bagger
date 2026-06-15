@@ -228,6 +228,9 @@ main{padding:36px 0 90px;position:relative}
 .wlabel{font:600 10px var(--mono);color:var(--dim);letter-spacing:1px;margin-bottom:6px}
 .wchip{display:inline-flex;align-items:center;gap:6px;margin:0 6px 6px 0;padding:4px 9px;border-radius:8px;border:1px dashed var(--dim);font-size:12px;cursor:help}
 .wnm{font-weight:600}.wst{font:500 10px var(--mono);color:var(--dawn)}
+.wchip.haspx{cursor:pointer;border-style:solid;border-color:var(--line2)}
+.wchip.haspx:hover{background:var(--line);border-color:var(--dim)}
+.wpx{font:700 10px var(--mono);color:var(--dawn);margin-left:1px}
 /* 통합 트리: 레이어 카드 내부 2·3차 가치사슬 드릴다운 */
 .lbody .lchain-wrap{flex-basis:100%;width:100%;margin-top:10px;padding-top:8px;border-top:1px dashed var(--line2)}
 .lbody .dexp{font-family:var(--mono);font-size:11px;color:var(--dawn);letter-spacing:.04em;cursor:pointer;padding:3px 0;display:inline-block}
@@ -1651,6 +1654,7 @@ const RV_PX=[
  {t:'TSLA', id:'tsla', inC:1},
  {t:'PLTR', id:'pltr', inC:1},
  /* 신규 티커 — 크론이 시세를 받아 채움 */
+ {t:'SPCX', id:'spcx', name:'SpaceX / xAI',   mkt:'NASDAQ', stage:'태동'},
  {t:'AVGO', id:'avgo', name:'브로드컴',        mkt:'NASDAQ', stage:'가속'},
  {t:'AAPL', id:'aapl', name:'애플',           mkt:'NASDAQ', stage:'성숙'},
  {t:'ARM',  id:'arm',  name:'ARM',           mkt:'NASDAQ', stage:'가속'},
@@ -1782,14 +1786,14 @@ const SIGNALS=[
 const WATCH=[
  {id:'anthropic',name:'Anthropic',layer:'L1',status:'비상장·IPO추진',note:"Claude. '26.10 IPO 목표(슬립가능)·Series G $380B→$50B 라운드 $850~900B. SpaceX Colossus 임차 $1.25B/월(~2029).",src:'Bloomberg·SpaceX S-1'},
  {id:'openai',name:'OpenAI',layer:'L1',status:'비상장·S-1제출',note:"ChatGPT. '26.5.22 컨피덴셜 S-1, Q4 상장 목표. CoreWeave $11.9B·Stargate(SoftBank·Oracle).",src:'보도'},
- {id:'xai',name:'xAI / SpaceX',layer:'L1',status:'IPO확정·6/12 NASDAQ(SPCX)',note:'Grok+SpaceX 합병. NASDAQ 상장 확정 — 티커 SPCX·상장일 6/12(로드쇼 6/4·공모가 6/11). 상장 후 밸류 $1.75~2T(글로벌 시총 최상위권)·5:1 액면분할·머스크 의결권 85.1% 유지. Colossus 1(22만+GPU·300MW)를 앤쓰로픽에 임대·궤도DC 추진. 인프라(L5·L7·L8)까지 겸영. (상장 후 매수가능 → 후보 승격 검토)',src:'SpaceX S-1·SEC'},
+ {id:'xai',name:'xAI / SpaceX',layer:'L1',status:'상장·SPCX NASDAQ',px:'spcx',note:'Grok+SpaceX 합병. NASDAQ 상장 확정 — 티커 SPCX·상장일 6/12(로드쇼 6/4·공모가 6/11). 상장 후 밸류 $1.75~2T(글로벌 시총 최상위권)·5:1 액면분할·머스크 의결권 85.1% 유지. Colossus 1(22만+GPU·300MW)를 앤쓰로픽에 임대·궤도DC 추진. 인프라(L5·L7·L8)까지 겸영. (상장 후 매수가능 → 후보 승격 검토)',src:'SpaceX S-1·SEC'},
  {id:'lambda',name:'Lambda',layer:'L5',status:'비상장·IPO추진',note:'GPU 클라우드 ~$5.9~7.5B, H2 2026 IPO 거론. CoreWeave 대안.',src:'보도'},
  {id:'photonics',name:'실리콘포토닉스·CPO 광결합 (Ayar·Lightmatter·Senko·US Conec 비상장)',layer:'L6',status:'비상장 코어 + POET 상장(태동)',note:'L6 광커넥터·도파로 노드 검증(26.5). 순수주 POET은 상장이나 매출~0·집단소송·증자희석으로 사실상 투자부적격(태동). 실펀더멘털 통로 Corning GLW·Fabrinet FN·Sumitomo 5802·Fujikura 5803는 전부 ATH권 성숙=추격금지. 코어 광결합은 여전히 비상장.',src:'Investing·SEC·TradingView 26.5'},
  {id:'fusion',name:'핵융합·첨단원전 (Helion·TerraPower·X-energy 등)',layer:'L8',status:'비상장·태동',note:'L8 진짜 다음 병목 후보 — 리서치 영역, 수치 미검증.',src:'(검증 필요)'},
 ];
 function watchChips(lid){const ws=WATCH.filter(w=>w.layer===lid);if(!ws.length)return '';
  return `<div class="wgroup"><div class="wlabel">◷ 비상장·워치 (트리거 / 매수불가 / 점수제외)</div>`+
-  ws.map(w=>`<div class="wchip" title="${w.note} · 출처:${w.src}"><span class="wnm">${w.name}</span><span class="wst">${w.status}</span></div>`).join('')+`</div>`;}
+  ws.map(w=>`<div class="wchip${w.px?' haspx':''}"${w.px?` data-id="${w.px}"`:''} title="${w.note} · 출처:${w.src}"><span class="wnm">${w.name}</span><span class="wst">${w.status}</span>${w.px?'<span class="wpx">＄</span>':''}</div>`).join('')+`</div>`;}
 
 /* ===== HOLDINGS (6/6 동기 · 자산현황_260606, 테마버킷→레이어 · 실잔고 일치) ===== */
 let HOLDINGS=[
