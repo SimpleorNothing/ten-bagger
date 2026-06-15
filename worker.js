@@ -467,7 +467,10 @@ export default {
       const ct = res.headers.get("content-type") || "";
       if (ct.includes("text/html")) {
         return new HTMLRewriter()
-          .on("body", { element(el) { el.append('<script src="/hover-chart.js" defer></scr' + 'ipt>', { html: true }); } })
+          .on("body", { element(el) {
+            el.append('<script src="/hover-chart.js" defer></scr' + 'ipt>', { html: true });
+            el.append('<script src="/flags.js" defer></scr' + 'ipt>', { html: true });
+          } })
           .transform(res);
       }
       return res;
