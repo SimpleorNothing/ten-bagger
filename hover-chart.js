@@ -117,13 +117,13 @@
   function hide() { pop.classList.remove('on'); curId = null; }
 
   document.addEventListener('mouseover', function (e) {
-    var ch = e.target.closest && e.target.closest('.chip[data-id]');
+    var ch = e.target.closest && e.target.closest('.chip[data-id],.wchip[data-id]');
     if (!ch) return;
     clearTimeout(hideT);
     if (curId !== ch.dataset.id) show(ch);
   });
   document.addEventListener('mouseout', function (e) {
-    var ch = e.target.closest && e.target.closest('.chip[data-id]');
+    var ch = e.target.closest && e.target.closest('.chip[data-id],.wchip[data-id]');
     if (!ch) return;
     hideT = setTimeout(hide, 150);
   });
