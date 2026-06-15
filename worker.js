@@ -265,6 +265,36 @@ async function handleMemoPut(request, env) {
   return memoJson({ ok: true, count: arr.length }, 200);
 }
 
+// ===== 캘린더 플래그 저장 — R2(MEMO_BUCKET) 재사용 · 키 calflags.json =====
+// 투자 캘린더 행 플래그를 {행키:색} 맵으로 R2 에 보관 → 모든 인증 기기 공유.
+const CALFLAGS_KEY = "calflags.json";
+
+async function handleCalflagsGet(env) {
+  if (!env.MEMO_BUCKET) return memoJson({ error: "MEMO_BUCKET not configured" }, 503);
+  const obj = await env.MEMO_BUCKET.get(CALFLAGS_KEY);
+  const v = obj ? await obj.text() : "";
+  return new Response(v && v.trim() ? v : "{}", {
+    status: 200,
+    headers: { "content-type": "application/json", "cache-control": "no-store" },
+  });
+}
+
+async function handleCalflagsPut(request, env) {
+  if (!env.MEMO_BUCKET) return memoJson({ error: "MEMO_BUCKET not configured" }, 503);
+  let raw;
+  try { raw = await request.text(); }
+  catch { return memoJson({ error: "read failed" }, 400); }
+  let obj;
+  try { obj = JSON.parse(raw); }
+  catch { return memoJson({ error: "invalid json" }, 400); }
+  if (obj === null || typeof obj !== "object" || Array.isArray(obj)) return memoJson({ error: "expected object" }, 400);
+  if (raw.length > 1024 * 1024) return memoJson({ error: "too large", bytes: raw.length }, 413);
+  await env.MEMO_BUCKET.put(CALFLAGS_KEY, JSON.stringify(obj), {
+    httpMetadata: { contentType: "application/json" },
+  });
+  return memoJson({ ok: true, count: Object.keys(obj).length }, 200);
+}
+
 // US10Y 데이터 프록시 — us10y.simpleornothing.com/data.json(Railway) 우선,
 // GitHub raw(public repo) 폴백. 서버사이드 fetch 라 CORS·구독 게이트 영향 없음.
 // 매일 KST 06:13 갱신되는 원본을 그대로 중계(짧은 엣지 캐시).
@@ -460,6 +490,12 @@ export default {
       if (url.pathname === "/api/memo") {
         if (request.method === "GET") return handleMemoGet(env);
         if (request.method === "PUT") return handleMemoPut(request, env);
+        return memoJson({ error: "method not allowed" }, 405);
+      }
+      // 캘린더 플래그 저장/조회 (R2 · 모든 기기 공유) — 인증된 디바이스만 도달
+      if (url.pathname === "/api/calflags") {
+        if (request.method === "GET") return handleCalflagsGet(env);
+        if (request.method === "PUT") return handleCalflagsPut(request, env);
         return memoJson({ error: "method not allowed" }, 405);
       }
       const res = await env.ASSETS.fetch(request);

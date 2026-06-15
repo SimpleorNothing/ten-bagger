@@ -1,21 +1,41 @@
 /* flags.js — 투자 캘린더 아젠다(#v-cal .cal-row) 행별 색상 플래그.
    index.html 은 건드리지 않고 worker.js 가 <script defer> 로 주입한다.
-   행에 고유 id 가 없으므로 키 = djb2(날짜칩 + 제목텍스트). 날짜/제목 수정 시 해당 플래그는 초기화됨. */
+   행에 고유 id 가 없으므로 키 = djb2(날짜칩 + 제목텍스트). 날짜/제목 수정 시 해당 플래그는 초기화됨.
+   저장: 서버 R2(/api/calflags)가 권위 — 모든 기기 공유. localStorage 는 즉시 페인트·오프라인 캐시. */
 (function () {
   "use strict";
   if (window.__calFlags) return;
   window.__calFlags = true;
 
   var COLORS = ["#f23645", "#2962ff", "#22ab94", "#ff9800", "#9c27b0", "#00bcd4", "#ec407a"];
-  var LS_KEY = "tb.calflags";
+  var LS_KEY = "tb.calflags";   // 로컬 캐시(즉시 페인트·오프라인 폴백)
+  var API = "/api/calflags";    // R2 서버(기기 간 공유·권위)
 
-  /* 안전 저장소: localStorage 실패 시 in-memory 폴백 */
   var mem = {};
-  var store = {
-    load: function () { try { var v = localStorage.getItem(LS_KEY); return v ? JSON.parse(v) : {}; } catch (e) { return mem; } },
-    save: function (o) { mem = o; try { localStorage.setItem(LS_KEY, JSON.stringify(o)); } catch (e) {} }
-  };
-  var flags = store.load();
+  function lsLoad() { try { var v = localStorage.getItem(LS_KEY); return v ? JSON.parse(v) : {}; } catch (e) { return mem; } }
+  function lsSave(o) { mem = o; try { localStorage.setItem(LS_KEY, JSON.stringify(o)); } catch (e) {} }
+
+  var flags = lsLoad();
+  var dirty = false;            // 로컬에서 변경이 일어나면 true → 진행 중인 서버 pull 이 덮어쓰지 않게
+
+  function pushToServer() {
+    try {
+      fetch(API, { method: "PUT", headers: { "content-type": "application/json" }, body: JSON.stringify(flags) })
+        .catch(function () {});
+    } catch (e) {}
+  }
+  function pullFromServer(done) {
+    try {
+      fetch(API, { headers: { "accept": "application/json" } })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (data) {
+          if (!dirty && data && typeof data === "object" && !Array.isArray(data)) {
+            flags = data; lsSave(flags); if (done) done();
+          }
+        })
+        .catch(function () {});
+    } catch (e) {}
+  }
 
   function hashKey(s) {
     var h = 5381;
@@ -77,14 +97,21 @@
   var openPop = null;
   function closePop() { if (openPop) { openPop.remove(); openPop = null; } }
 
-  function applyRow(row, key) {
-    var c = flags[key];
+  function applyRow(row) {
+    var c = flags[row._cfKey];
     if (c) { row.classList.add("cf-on"); row.style.setProperty("--cf", c); }
     else { row.classList.remove("cf-on"); row.style.removeProperty("--cf"); }
   }
+  function applyAll() {
+    var rows = document.querySelectorAll("#v-cal .cal-row");
+    for (var i = 0; i < rows.length; i++) if (rows[i]._cfKey) applyRow(rows[i]);
+  }
 
-  function openPicker(btn, row, key) {
+  function commit() { dirty = true; lsSave(flags); pushToServer(); }
+
+  function openPicker(btn, row) {
     closePop();
+    var key = row._cfKey;
     var cur = flags[key] || null;
     var pop = document.createElement("div");
     pop.className = "cf-pop";
@@ -103,14 +130,11 @@
       picks[j].addEventListener("click", function () {
         var c = this.getAttribute("data-c");
         if (flags[key] === c) delete flags[key]; else flags[key] = c;
-        store.save(flags); applyRow(row, key); closePop();
+        commit(); applyRow(row); closePop();
       });
     }
     pop.querySelector(".cf-clr").addEventListener("click", function () {
-      flags = {}; store.save(flags);
-      var on = document.querySelectorAll("#v-cal .cal-row.cf-on");
-      for (var k = 0; k < on.length; k++) { on[k].classList.remove("cf-on"); on[k].style.removeProperty("--cf"); }
-      closePop();
+      flags = {}; commit(); applyAll(); closePop();
     });
 
     document.body.appendChild(pop);
@@ -129,7 +153,7 @@
     for (var i = 0; i < rows.length; i++) {
       (function (row) {
         if (row.querySelector(".cf-flag")) return;
-        var key = rowKey(row);
+        row._cfKey = rowKey(row);
         var btn = document.createElement("button");
         btn.className = "cf-flag";
         btn.type = "button";
@@ -138,12 +162,14 @@
         btn.addEventListener("click", function (e) {
           e.stopPropagation();
           if (openPop) { closePop(); return; }
-          openPicker(btn, row, key);
+          openPicker(btn, row);
         });
         row.insertBefore(btn, row.firstChild);
-        applyRow(row, key);
+        applyRow(row);
       })(rows[i]);
     }
+    // 캐시로 즉시 페인트한 뒤, 서버(R2) 권위 데이터로 동기화.
+    pullFromServer(applyAll);
     document.addEventListener("click", closePop);
     document.addEventListener("keydown", function (e) { if (e.key === "Escape") closePop(); });
     window.addEventListener("scroll", closePop, true);
