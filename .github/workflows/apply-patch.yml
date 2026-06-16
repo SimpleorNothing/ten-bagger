@@ -35,10 +35,13 @@ jobs:
         run: |
           set -e
           mkdir -p patches/applied
-          CHANGED=$(git diff --name-only HEAD^ HEAD -- 'patches/*.b64' 2>/dev/null || true)
+          # git pathspec 의 '*' 는 '/' 도 매칭하므로 'patches/*.b64' 가 이미 적용·보관된
+          # patches/applied/*.b64 까지 잡는다. applied/ 는 재처리 대상이 아니므로 제외한다.
+          CHANGED=$(git diff --name-only HEAD^ HEAD -- 'patches/*.b64' ':(exclude)patches/applied/*' 2>/dev/null || true)
           if [ -z "$CHANGED" ]; then CHANGED=$(ls patches/*.b64 2>/dev/null || true); fi
           if [ -z "$CHANGED" ]; then echo "no new patch"; exit 0; fi
           for B in $CHANGED; do
+            case "$B" in patches/applied/*) continue;; esac  # 보관 패치는 재적용 금지
             [ -f "$B" ] || continue
             echo "== applying $B =="
             base64 -d "$B" > /tmp/p.patch
