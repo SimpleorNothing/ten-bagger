@@ -1006,6 +1006,8 @@ table.tk th.c{text-align:center}
   <div class="cal-row key"><div class="date-chip">07.28~29</div><div class="cat-dot" style="background:var(--cat-macro)"></div><div class="cal-body"><div class="ti">FOMC <span class="mbadge" style="background:#1c7ed622;color:#1c7ed6">금리결정</span></div><div class="mt">현 3.50~3.75%. <b>FedWatch 7/29 동결 89.3%</b>(인상 8.3% &gt; 인하 2.3% — 위쪽 비대칭). 인플레·견조한 노동으로 인하 경로 소멸, <b>12/9 +25bp 1회 인상이 모달 경로</b>(인상 59.4%). 점도표 없는 회의.</div></div></div>
   <div class="cal-row"><div class="date-chip">07.30~31</div><div class="cat-dot" style="background:var(--cat-macro)"></div><div class="cal-body"><div class="ti">일본은행 금정위 <span class="tk">BOJ</span> <span class="mbadge" style="background:#1c7ed622;color:#1c7ed6">금리결정</span></div><div class="mt">6/16 +25bp <b>1.00% 인상 확정</b>(7-1 표결·’95년 이후 첫 1%대) 이후 회의. 7/30~31은 연속 인상보다 동결·다음 인상 가늠이 base, 연내 1.25% 추가 1회 전망(블룸버그 폴). JPY·글로벌 듀레이션 변수.</div></div></div>
   <div class="cal-row"><div class="date-chip">07.29</div><div class="cat-dot" style="background:var(--cat-earn)"></div><div class="cal-body"><div class="ti">버티브 <span class="tk">VRT</span> <span class="tag-est">추정</span></div></div></div>
+  <div class="cal-row"><div class="date-chip">~07.24</div><div class="cat-dot" style="background:var(--cat-earn)"></div><div class="cal-body"><div class="ti">SK하이닉스 2Q26 실적 <span class="tk">000660</span> <span class="tag-est">IR 미확정·추정</span></div><div class="mt">전년 2Q 7/24 기준 추정(IR 미확정, D-7 확정). 2Q 영업이익 컨센 60~65조(QoQ +72%). <b>미보유 — PLUS 글로벌HBM ETF 간접노출</b>, L3 메모리 슈퍼사이클 forward 리드스루(채점 아님).</div></div></div>
+  <div class="cal-row key"><div class="date-chip">~07.24</div><div class="cat-dot" style="background:var(--cat-event)"></div><div class="cal-body"><div class="ti">SK하이닉스 美 ADR 나스닥 상장 <span class="tk">000660</span> <span class="mbadge" style="background:#e8590c22;color:#e8590c">메가 이벤트</span> <span class="tag-est">예상</span></div><div class="mt">IB 관측 = 2Q 실적 콘퍼런스 전후(7월 중순~말, SEC 최종승인 대기). 신주 ~2.5%(최대 $27B·약 40조) 발행 = 본주 단기 희석 오버행 + 코리아 디스카운트 해소 리레이팅 양면. <b>price clock 카탈리스트(thesis 무변) — 숫자 확정 전 log-only.</b> ADR가는 본주×환윰×교환비율 종속(독립 예측 아님).</div></div></div>
   <div class="cal-row"><div class="date-chip">07.31</div><div class="cat-dot" style="background:var(--cat-earn)"></div><div class="cal-body"><div class="ti">삼성전자 <span class="tk">005930</span> <span class="tag-est">추정</span></div><div class="mt">HBM4 점유율 회복 비대칭 상방 미반영(y1 7). <b>5/28 HBM4E 12단 세계 첫 샘플 출하</b>(20%↑·vs 하이닉스)로 해자 회복 데이터포인트 점등 — 샘플≠양산, 실적이 게이트.</div></div></div>
 
   <div class="cal-month">8월</div>
@@ -2114,7 +2116,7 @@ function infoAsof(){if(!SIGNAL_LOG||!SIGNAL_LOG.length)return null;let best=null
    document.lastModified는 CSS·JS·문구 등 정보와 무관한 수정·재배포에도 튀므로 쓰지 않고,
    "정보를 실제로 고칠 때만" 손으로 갱신하는 아래 상수에 연동한다.
    형식: ISO8601(+09:00 권장). 정보 변경 없는 배포에서는 절대 건드리지 말 것. */
-const VIEW_UPDATED='2026-06-18T21:00:00+09:00';
+const VIEW_UPDATED='2026-06-18T23:50:00+09:00';
 function fmtUpd(v){if(!v)return null;
  if(/KST$/.test(v))return v;                         // 이미 포맷된 상수
  if(/^\d{4}-\d{2}-\d{2}$/.test(v))return v+' KST';    // 날짜만(예: signals.json asOf)
