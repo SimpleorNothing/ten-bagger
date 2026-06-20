@@ -1,0 +1,52 @@
+name: Sync holdings from Drive
+
+# 매주 토요일 자산현황 업데이트 후 자동 동기화(22:00 KST) + Actions 탭 수동 실행.
+# holdings.json을 OPS §9-2(수동) → §9-1(자동 cron)로 승격.
+on:
+  schedule:
+    - cron: '0 13 * * 6'    # 토 22:00 KST (토 13:00 UTC) · 주 1회
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-holdings
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: claude/wizardly-rubin-SubA1
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install deps
+        run: npm i googleapis xlsx --no-save
+      - name: Build holdings.json from 자산현황
+        run: node scripts/sync-holdings.mjs
+        env:
+          GDRIVE_SA_KEY: ${{ secrets.GDRIVE_SA_KEY }}   # 서비스계정 JSON 전체
+      - name: Commit & push if changed (rebase-safe)
+        run: |
+          FILE="holdings.json"
+          if [ -z "$(git status --porcelain "$FILE")" ]; then
+            echo "No change in $FILE."; exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$FILE"
+          git commit -m "chore: sync holdings.json from 자산현황 (auto)"
+          for i in 1 2 3 4 5; do
+            if git pull --rebase --autostash origin claude/wizardly-rubin-SubA1 \
+               && git push origin HEAD:claude/wizardly-rubin-SubA1; then
+              echo "pushed on attempt $i"; exit 0
+            fi
+            git rebase --abort 2>/dev/null || true
+            echo "push attempt $i lost the race; backing off"; sleep $(( RANDOM % 6 + 3 ))
+          done
+          echo "::error::push failed after 5 attempts"; exit 1
