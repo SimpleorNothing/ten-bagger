@@ -3793,7 +3793,7 @@ Promise.all([getJSON('alpha.json'),getJSON('earnings.json'),getJSON('judgment.js
  if(e&&e.moves){EM=e.moves;window.CAL_EARN_MOVES=e.moves;} if(e&&Array.isArray(e.playbook))EPLAY=e.playbook;
  // 3) 판단(judgment.json) — 자동 위에 마지막으로 덮어씀, null은 자동 유지
  const ov=g&&g.overrides;if(ov)D.forEach(d=>{const o=ov[d.t];if(o){if(Array.isArray(o.aN))o.aN.forEach((v,k)=>{if(v!=null)d.aN[k]=v;});}});
- const gmm=gm&&gm.gamma;if(gmm)D.forEach(d=>{const x=gmm[d.t];if(x&&x.g)d.g=x.g;});
+ const gmm=gm&&gm.gamma;if(gmm)D.forEach(d=>{const x=gmm[d.t];if(x){if(x.g)d.g=x.g;if(x.stage)d.stage=x.stage;}});
  if(gm&&gm.asOf){window.GAMMA_ASOF=gm.asOf;window.GAMMA_FLAGGED=Object.entries(gmm||{}).filter(([k,v])=>v&&v.flagged).map(([k])=>k);}
  // 4) 시점 스냅샷(snapshots.json) — 라이브 머지 후 현재 배치를 보존하고 셀렉터 구성.
  captureLive();SNAPS=(sn&&Array.isArray(sn.snapshots))?sn.snapshots:[];initSnapSel();
