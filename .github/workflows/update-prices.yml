@@ -25,9 +25,11 @@ jobs:
           node-version: '20'
       - name: Fetch latest prices
         run: node scripts/fetch-prices.mjs
+      - name: Update gamma (γ)
+        run: node scripts/fetch-gamma.mjs
       - name: Commit & push if changed (rebase-safe)
         run: |
-          FILES="prices.json charts.json"
+          FILES="prices.json charts.json gamma.json"
           if [ -z "$(git status --porcelain $FILES)" ]; then
             echo "No change in $FILES."; exit 0
           fi
