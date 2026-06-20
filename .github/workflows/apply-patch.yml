@@ -38,14 +38,28 @@ jobs:
           # git pathspec 의 '*' 는 '/' 도 매칭하므로 'patches/*.b64' 가 이미 적용·보관된
           # patches/applied/*.b64 까지 잡는다. applied/ 는 재처리 대상이 아니므로 제외한다.
           CHANGED=$(git diff --name-only HEAD^ HEAD -- 'patches/*.b64' ':(exclude)patches/applied/*' 2>/dev/null || true)
-          if [ -z "$CHANGED" ]; then CHANGED=$(ls patches/*.b64 2>/dev/null || true); fi
+          # FALLBACK=1 은 push diff 로 새 패치를 못 찾아 patches/*.b64 전체를 훑는 경우(주로 수동 dispatch).
+          # 이때 잡히는 건 이미 적용됐으나 applied/ 로 옮겨지지 않은 '잔여 패치'일 수 있으므로,
+          # 적용 불가 패치를 실패시키지 않고 applied/ 로 보관만 해 재리스트를 막는다.
+          FALLBACK=0
+          if [ -z "$CHANGED" ]; then CHANGED=$(ls patches/*.b64 2>/dev/null || true); FALLBACK=1; fi
           if [ -z "$CHANGED" ]; then echo "no new patch"; exit 0; fi
           for B in $CHANGED; do
             case "$B" in patches/applied/*) continue;; esac  # 보관 패치는 재적용 금지
             [ -f "$B" ] || continue
-            echo "== applying $B =="
+            echo "== checking $B =="
             base64 -d "$B" > /tmp/p.patch
-            git apply --check /tmp/p.patch
+            if ! git apply --check /tmp/p.patch 2>/dev/null; then
+              if [ "$FALLBACK" = "1" ]; then
+                # 수동 dispatch 의 폴백에서 잡힌 적용 불가/기적용 잔여 패치 → 실패 대신 보관 후 계속
+                echo "skip stale (does not apply), archiving: $B"
+                git mv "$B" "patches/applied/$(basename "$B")"
+                continue
+              fi
+              # push 로 새로 들어온 패치가 적용 안 되면 원자적으로 중단(손상 없음)
+              echo "::error::patch does not apply: $B"; exit 1
+            fi
+            echo "== applying $B =="
             git apply /tmp/p.patch
             git mv "$B" "patches/applied/$(basename "$B")"
           done
