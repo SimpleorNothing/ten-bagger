@@ -510,7 +510,7 @@ table.tk th.c{text-align:center}
 </style>
 <style id="memo-css">
 /* ===== 09 메모 뷰 ===== */
-#v-memo .composer{border:1.5px solid var(--line2);border-radius:14px;background:var(--panel);padding:15px 16px 11px;margin-bottom:120px;transition:.15s}
+#v-memo .composer{border:1.5px solid var(--line2);border-radius:14px;background:var(--panel);padding:15px 16px 11px;margin-bottom:60px;transition:.15s}
 #v-memo .composer.drag{border-color:var(--st-dawn);background:rgba(12,166,120,.05)}
 #v-memo .composer .m-title{width:100%;border:0;outline:0;font:700 17px var(--serif);color:var(--txt);background:transparent;margin-bottom:5px}
 #v-memo .composer .m-body{width:100%;border:0;outline:0;resize:vertical;font:400 14px/1.7 var(--serif);color:var(--txt);background:transparent;min-height:72px}
@@ -529,6 +529,15 @@ table.tk th.c{text-align:center}
 #v-memo .m-btn{font:600 13px var(--serif);border:1px solid var(--line2);background:var(--panel);color:var(--dim);border-radius:9px;padding:7px 12px;cursor:pointer;transition:.15s;white-space:nowrap}
 #v-memo .m-btn:hover{border-color:var(--dawn);color:var(--txt)}
 #v-memo .m-btn.primary{background:var(--dawn);color:var(--onacc);border-color:var(--dawn)}
+/* QuickShare식 파일 업로드 드롭존 */
+#v-memo .m-dropzone{margin-top:12px;border:1.5px dashed var(--line2);border-radius:12px;padding:20px 14px;text-align:center;color:var(--faint);font:400 13px var(--serif);cursor:pointer;transition:.15s;background:var(--panel)}
+#v-memo .m-dropzone:hover{border-color:var(--dawn);color:var(--dim);background:var(--panel2)}
+#v-memo .m-dropzone:focus-visible{outline:2px solid var(--dawn);outline-offset:2px}
+#v-memo .composer.drag .m-dropzone{border-color:var(--st-dawn);color:var(--st-dawn);background:rgba(12,166,120,.06)}
+/* QuickShare식 "저장한 메모" 섹션 헤더 */
+#v-memo .m-saved-head{margin:0 0 16px}
+#v-memo .m-saved-head h2{font:800 20px var(--serif);color:var(--txt);margin:0 0 4px;letter-spacing:-.01em}
+#v-memo .m-saved-head p{font:400 13px var(--serif);color:var(--faint);margin:0;line-height:1.55}
 #v-memo .m-controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px}
 #v-memo .m-search{flex:1;min-width:170px;border:1.5px solid var(--line2);border-radius:10px;padding:9px 12px;font:400 14px var(--serif);color:var(--txt);background:var(--panel);outline:0}
 #v-memo .m-search:focus{border-color:var(--dawn)}
@@ -1450,19 +1459,23 @@ table.tk th.c{text-align:center}
 <section class="view" id="v-memo">
   <div class="vhead">
     <h1 class="vtitle">메모 — <em>순간</em>의 생각과 캡쳐</h1>
-    <div style="display:inline-block;margin:4px 0 2px;padding:4px 11px;border-radius:999px;background:#0ca678;color:#fff;font:700 12px var(--mono,monospace);letter-spacing:.02em">배포확인 ✓ BUILD-A2 · style태그 수정 → 간격 적용</div>
   </div>
 
   <div class="composer" id="mComposer">
     <input class="m-title" id="mTitle" placeholder="제목" />
     <textarea class="m-body" id="mBody" placeholder="여기에 생각을 적거나, 캡쳐 이미지를 붙여넣으세요."></textarea>
     <div class="m-thumbs" id="mThumbs"></div>
+    <input type="file" id="mFile" accept="image/*" multiple hidden />
+    <div class="m-dropzone" id="mDrop" role="button" tabindex="0">이 영역에 이미지를 끌어다 놓거나, 여기를 클릭해 선택하세요</div>
     <div class="m-toolbar">
       <input class="m-tags" id="mTags" placeholder="#태그" />
-      <input type="file" id="mFile" accept="image/*" multiple hidden />
-      <button class="m-btn" id="mUpload" type="button">🖼 이미지</button>
       <button class="m-btn primary" id="mSave">저장</button>
     </div>
+  </div>
+
+  <div class="m-saved-head">
+    <h2>저장한 메모</h2>
+    <p>최근에 작성한 메모와 캡쳐예요. 카드를 누르면 내용을 보고 수정할 수 있어요.</p>
   </div>
 
   <div class="m-controls">
@@ -4375,7 +4388,8 @@ buildChips(); buildBands(); renderAll();
   function bind(){
     var comp=$('mComposer');
     $('mSave').onclick=save;
-    $('mUpload').onclick=function(){$('mFile').click();};
+    $('mDrop').onclick=function(){$('mFile').click();};
+    $('mDrop').addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();$('mFile').click();}});
     $('mFile').addEventListener('change',function(e){addImages(Array.prototype.slice.call(e.target.files||[]));e.target.value='';});
     $('mSearch').oninput=function(e){q=e.target.value.trim().toLowerCase();render();};
     comp.addEventListener('paste',function(e){
