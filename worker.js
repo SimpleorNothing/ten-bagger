@@ -502,12 +502,18 @@ export default {
       // HTML 응답에 1Y 호버 차트 모듈 주입 (index.html 본문은 그대로 유지하기 위한 worker-side 주입).
       const ct = res.headers.get("content-type") || "";
       if (ct.includes("text/html")) {
-        return new HTMLRewriter()
+        const transformed = new HTMLRewriter()
           .on("body", { element(el) {
             el.append('<script src="/hover-chart.js" defer></scr' + 'ipt>', { html: true });
             el.append('<script src="/flags.js" defer></scr' + 'ipt>', { html: true });
           } })
           .transform(res);
+        // 대시보드 HTML 은 캐시 금지 — Workers Assets 기본 캐시 헤더 때문에 새 배포가
+        // 엣지/브라우저에 안 잡히는 문제(배포는 성공하는데 화면은 옛날 그대로)를 막는다.
+        // 로그인 페이지(htmlHeaders)와 동일하게 항상 최신 index.html 을 받게 한다.
+        const headers = new Headers(transformed.headers);
+        headers.set("cache-control", "no-store");
+        return new Response(transformed.body, { status: transformed.status, headers });
       }
       return res;
     }
