@@ -1833,7 +1833,7 @@ let HOLD_DETAIL=[
  {layer:'L3', name:'삼성·SK 채권혼합',         ticker:'ETF',    kind:'ETF',  w:8.73, tlo:8,  thi:10, dir:'hold', note:'메모리 방어자산(채권혼합) — 변동성 대비 유지·보강'},
  {layer:'L3', name:'◷ 램버스 (미보유 후보)',       ticker:'RMBS',   kind:'종목', w:0,    tlo:0,  thi:1,  dir:'add',  note:'미보유 — L3 인터페이스IP 프로브: $140 눌림 + 7/27 Q2 확인 AND, 점등 전 정찰 상한 ~1%'},
  {layer:'L4', name:'KODEX AI반도체핵심장비',   ticker:'471990', kind:'ETF',  w:2.15, tlo:7,  thi:9,  dir:'add',  note:'다음 병목(패키징)·YTD−58% 소외 = 1y 상방 최대 — 백엔드 비중 검증 후 증액'},
- {layer:'L4', name:'◷ 테크윙 (미보유 후보)',       ticker:'089030', kind:'종목', w:0,    tlo:0,  thi:1.5,dir:'add',  note:'미보유 — 초입 8/10·HBM 다이검사 독점·γ open. FOMC 6/16~17·MU 6/24 게이트 후 / 대안: ASMPT 0522.HK(6/10)'},
+ {layer:'L4', name:'◷ 테크윙 (미보유 후보)',       ticker:'089030', kind:'종목', w:0,    tlo:0,  thi:1.5,dir:'add',  note:'미보유 — 초입 8/10·HBM 다이검사 독점·γ open. MU 6/24 게이트 후(FOMC 6/17 종료·매크로 0/3 동결) / 대안: ASMPT 0522.HK'},
  {layer:'L6', name:'루멘텀',                   ticker:'LITE',   kind:'종목', w:6.75, tlo:4,  thi:6,  dir:'trim', note:'성숙·트림 앰버 — 이미 70→50주 실행(평단 683 리셋), 잔여는 밴드 상단 소폭 트림만'},
  {layer:'L6', name:'KODEX 미국AI광통신네트워크',ticker:'0173Y0',kind:'ETF',  w:5.36, tlo:4,  thi:6,  dir:'hold', note:'CPO 전환 잔여 상방 — 광 구조 노출 유지'},
  {layer:'L7', name:'버티브',                   ticker:'VRT',    kind:'종목', w:3.77, tlo:7,  thi:9,  dir:'add',  note:'밴드 증액분은 미보유 800V HVDC(NVTS 등) 신규명 대상 — VRT 단독 추격금지(성숙)'},
@@ -1847,10 +1847,10 @@ let HOLD_DETAIL=[
  {layer:'기타',name:'코스피200 채권혼합',      ticker:'ETF',    kind:'ETF',  w:4.37, tlo:3,  thi:4,  dir:'hold', note:'방어자산(채권혼합) — 유지'},
  {layer:'현금',name:'현금',                    ticker:'—',      kind:'현금', w:8.30, tlo:9,  thi:12, dir:'hold', note:'⚑ 밴드 하단 이탈(8.3%<9) — 반등 트림 1차 용도는 현금 9%+ 복원'},
 ];
-/* ===== TARGETS — 적정 비중 밴드(프레임 도출, 2026-05-30) =====
+/* ===== TARGETS — 적정 비중 밴드(프레임 도출 · 2026-06-21 시황 재점검: 메모리 타이트·L4 패키징 binding 다음 병목·전력 빌드아웃 지속 → 구조 불변, 밴드 유지) =====
    lo~hi = 밴드, dir = 회전방향(trim/add/hold), gate = AND 선결조건.
    강등규칙: 'add/trim'은 가격이 아니라 단계·γ·게이트로 정당화. 매매권유 아님. */
-let TARGETS_ASOF='2026-05-30';  /* 적정밴드 판단 기준일 — 매주 holdings.json 동기 시 시황 전망 반영해 수동 갱신 */
+let TARGETS_ASOF='2026-06-21';  /* 적정밴드 판단 기준일 — 매주 holdings.json 동기 시 시황 전망 반영해 수동 갱신 */
 let TARGETS=[
  {layer:'L2',lo:8, hi:9,  dir:'hold', gate:'ASIC 런웨이(m3·y1) 유지 시'},
  {layer:'L3',lo:30,hi:32, dir:'trim', gate:'γ 재확인 + MU 6/24 실적 게이트(추정상향>가격이면 보류)'},
