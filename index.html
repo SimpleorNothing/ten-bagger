@@ -1817,6 +1817,7 @@ let HOLDINGS=[
 /* 원본 총자산(M) = 968,195,026원(260606). holdings.json.total로 갱신. */
 let HOLD_TOTAL=968;
 let HOLD_ASOF='2026-06-06';  /* holdings.json.asOf 로 런타임 갱신(보유 기준일) */
+let DETAIL_ASOF='2026-06-06';  /* 종목표 전용 — detail[] 실제 머지 시에만 hh.asOf 채택(오표기 방지) */
 /* ===== HOLD_DETAIL — 개별 종목/ETF 현보유 vs 적정 비중(6/6 계좌 기준) =====
    w = 실잔고 비중(자산현황_260606, 968M 기준 · 레이어 합은 HOLDINGS와 일치).
    적정(tlo~thi) = 레이어 밴드(TARGETS)를 그 안에서 '향후 상승가능성'으로 배분한 운영자 조언.
@@ -3388,7 +3389,7 @@ function renderPortfolio(){
  // ── 개별 종목/ETF 현보유 vs 적정 비중 ──
  const detOrd=['L2','L3','L4','L6','L7','L8','기타','현금'];
  const detByL={};HOLD_DETAIL.forEach(h=>{(detByL[h.layer]=detByL[h.layer]||[]).push(h);});
- let detHTML=`<div class="gap-secttl">종목별 현보유 vs 적정 비중 <span class="gap-secsub">개별종목 · ETF 기준 (보유 holdings.json ${HOLD_ASOF} 자동 · 적정 프레임 ${TARGETS_ASOF}) — 레이어 밴드를 향후 상승가능성으로 배분 · ◷=미보유 후보(게이트 통과 전 0%, 리밸런싱 참고)</span></div>`+
+ let detHTML=`<div class="gap-secttl">종목별 현보유 vs 적정 비중 <span class="gap-secsub">개별종목 · ETF 기준 (보유 holdings.json ${DETAIL_ASOF} 자동 · 적정 프레임 ${TARGETS_ASOF}) — 레이어 밴드를 향후 상승가능성으로 배분 · ◷=미보유 후보(게이트 통과 전 0%, 리밸런싱 참고)</span></div>`+
   `<div class="gap-row" style="color:var(--txt);font-weight:700;border-bottom:1px solid var(--line)">
      <div class="gap-lab">종목 / ETF</div><div class="gap-cur">현재</div><div class="gap-arr">회전</div>
      <div class="gap-tgt">적정밴드</div><div class="gap-gate">상방 근거 (레이어 내)</div></div>`;
@@ -3412,7 +3413,7 @@ function renderPortfolio(){
      <div class="gap-gate">${h.note}</div></div>`;
   });
  });
- detHTML+=`<div class="foot" style="margin-top:8px">현재=계좌 실잔고(<b>holdings.json ${HOLD_ASOF}</b> 자동 동기, 총 ${tot}M). 적정밴드(<b>프레임 ${TARGETS_ASOF}</b> · 매주 동기 시 시황 전망 반영 갱신)=해당 레이어 밴드를 <b>레이어 내 향후 상승가능성</b>(단계·forward γ·상대가치)으로 배분한 운영자 조언 — 종목 밴드 합 ≈ 레이어 밴드. <b>▼트림 ▲증액 ■유지</b>. 단일종목 레이어(L4·L7)는 레이어 밴드를 그대로 적용하되, L7 증액분은 미보유 800V 신규명 대상(VRT 단독 추격금지). <b>매매 권유 아님 · 최종 사이징은 운영자 판단.</b></div>`;
+ detHTML+=`<div class="foot" style="margin-top:8px">현재=계좌 실잔고(<b>holdings.json ${DETAIL_ASOF}</b> 자동 동기, 총 ${tot}M). 적정밴드(<b>프레임 ${TARGETS_ASOF}</b> · 매주 동기 시 시황 전망 반영 갱신)=해당 레이어 밴드를 <b>레이어 내 향후 상승가능성</b>(단계·forward γ·상대가치)으로 배분한 운영자 조언 — 종목 밴드 합 ≈ 레이어 밴드. <b>▼트림 ▲증액 ■유지</b>. 단일종목 레이어(L4·L7)는 레이어 밴드를 그대로 적용하되, L7 증액분은 미보유 800V 신규명 대상(VRT 단독 추격금지). <b>매매 권유 아님 · 최종 사이징은 운영자 판단.</b></div>`;
  document.getElementById('portGapDetail').innerHTML=detHTML;
 }
 
@@ -3793,7 +3794,7 @@ Promise.all([getJSON('alpha.json'),getJSON('earnings.json'),getJSON('judgment.js
  if(hh&&Array.isArray(hh.holdings))HOLDINGS=hh.holdings;
  if(hh&&Number.isFinite(hh.total))HOLD_TOTAL=hh.total;
  if(hh&&typeof hh.asOf==='string')HOLD_ASOF=hh.asOf;
- if(hh&&Array.isArray(hh.detail))hh.detail.forEach(d=>{const _t=HOLD_DETAIL.find(h=>h.name===d.name);if(_t){_t.w=d.w;_t.amt=d.amt;}});
+ if(hh&&Array.isArray(hh.detail)&&hh.detail.length){DETAIL_ASOF=hh.asOf;hh.detail.forEach(d=>{const _t=HOLD_DETAIL.find(h=>h.name===d.name);if(_t){_t.w=d.w;_t.amt=d.amt;}});}
  if(sl&&Array.isArray(sl.log)&&sl.log.length)SIGNAL_LOG=SIGNAL_LOG.concat(sl.log);
  // 1) 자동(alpha.json) — 모멘텀 휴리스틱
  if(j&&j.asOf)setStamp('updAlpha',j.asOf);
