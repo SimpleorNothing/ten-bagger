@@ -1,5 +1,5 @@
 {
-  "asOf": "2026-06-20T22:45:46.045Z",
+  "asOf": "2026-06-21T22:46:08.046Z",
   "source": "auto(price-vs-target)+judgment",
   "note": "γ 단일 소스. index.html D배열 g·judgment.json g는 이 파일이 대체(인라인 g는 폴백). stage도 이 파일이 단일소스(인라인 폴백). stage는 판단값이라 cron은 g만 자동, stage는 수동. 룰: pct=(target-price)/price. pct>=+10% → open / pct<=-5% AND trend in(flat,falling) → spent / 그 외(모호밴드·trend rising·unknown) → flagged+직전값 hold. lock=true는 운영자 수동 고정(auto 미적용). US는 Yahoo quoteSummary 자동, KR(005930)·EU(BESI)는 커버리지 갭으로 수기 보정 가능. checkedAt이 N일 초과면 스테일.",
   "rules": {
@@ -9,7 +9,7 @@
   },
   "gamma": {
     "MRVL": {
-      "g": "open",
+      "g": "spent",
       "stage": "가속",
       "mkt": "US",
       "lock": false,
@@ -17,15 +17,19 @@
       "price": 310.58,
       "target": 238.75,
       "pct": -23.1,
-      "trend": "unknown",
+      "trend": "flat",
       "targetHist": [
         {
           "d": "2026-06-20",
           "t": 238.75
+        },
+        {
+          "d": "2026-06-21",
+          "t": 238.75
         }
       ],
-      "checkedAt": "2026-06-20",
-      "flagged": true
+      "checkedAt": "2026-06-21",
+      "flagged": false
     },
     "005930": {
       "g": "open",
@@ -36,18 +40,22 @@
       "price": 354000,
       "target": 428075.53,
       "pct": 20.9,
-      "trend": "unknown",
+      "trend": "flat",
       "targetHist": [
         {
           "d": "2026-06-20",
           "t": 428075.53
+        },
+        {
+          "d": "2026-06-21",
+          "t": 428075.53
         }
       ],
-      "checkedAt": "2026-06-20",
+      "checkedAt": "2026-06-21",
       "flagged": false
     },
     "MU": {
-      "g": "open",
+      "g": "spent",
       "stage": "성숙",
       "mkt": "US",
       "lock": false,
@@ -55,15 +63,19 @@
       "price": 1133.99,
       "target": 945.6,
       "pct": -16.6,
-      "trend": "unknown",
+      "trend": "flat",
       "targetHist": [
         {
           "d": "2026-06-20",
           "t": 945.6
+        },
+        {
+          "d": "2026-06-21",
+          "t": 945.6
         }
       ],
-      "checkedAt": "2026-06-20",
-      "flagged": true
+      "checkedAt": "2026-06-21",
+      "flagged": false
     },
     "LITE": {
       "g": "open",
@@ -74,14 +86,18 @@
       "price": 850,
       "target": 1111.29,
       "pct": 30.7,
-      "trend": "unknown",
+      "trend": "flat",
       "targetHist": [
         {
           "d": "2026-06-20",
           "t": 1111.29
+        },
+        {
+          "d": "2026-06-21",
+          "t": 1111.29
         }
       ],
-      "checkedAt": "2026-06-20",
+      "checkedAt": "2026-06-21",
       "flagged": false
     },
     "VRT": {
@@ -93,18 +109,22 @@
       "price": 333.05,
       "target": 378.31,
       "pct": 13.6,
-      "trend": "unknown",
+      "trend": "flat",
       "targetHist": [
         {
           "d": "2026-06-20",
           "t": 378.31
+        },
+        {
+          "d": "2026-06-21",
+          "t": 378.31
         }
       ],
-      "checkedAt": "2026-06-20",
+      "checkedAt": "2026-06-21",
       "flagged": false
     },
     "BE": {
-      "g": "open",
+      "g": "spent",
       "stage": "과열",
       "mkt": "US",
       "lock": false,
@@ -112,18 +132,22 @@
       "price": 328.91,
       "target": 263.65,
       "pct": -19.8,
-      "trend": "unknown",
+      "trend": "flat",
       "targetHist": [
         {
           "d": "2026-06-20",
           "t": 263.65
+        },
+        {
+          "d": "2026-06-21",
+          "t": 263.65
         }
       ],
-      "checkedAt": "2026-06-20",
-      "flagged": true
+      "checkedAt": "2026-06-21",
+      "flagged": false
     },
     "AMD": {
-      "g": "open",
+      "g": "spent",
       "stage": "가속",
       "mkt": "US",
       "lock": false,
@@ -131,15 +155,19 @@
       "price": 537.37,
       "target": 487.9,
       "pct": -9.2,
-      "trend": "unknown",
+      "trend": "flat",
       "targetHist": [
         {
           "d": "2026-06-20",
           "t": 487.9
+        },
+        {
+          "d": "2026-06-21",
+          "t": 487.9
         }
       ],
-      "checkedAt": "2026-06-20",
-      "flagged": true
+      "checkedAt": "2026-06-21",
+      "flagged": false
     },
     "RMBS": {
       "g": "open",
@@ -150,14 +178,18 @@
       "price": 141.17,
       "target": 144.57,
       "pct": 2.4,
-      "trend": "unknown",
+      "trend": "flat",
       "targetHist": [
         {
           "d": "2026-06-20",
           "t": 144.57
+        },
+        {
+          "d": "2026-06-21",
+          "t": 144.57
         }
       ],
-      "checkedAt": "2026-06-20",
+      "checkedAt": "2026-06-21",
       "flagged": true
     },
     "CEG": {
@@ -169,14 +201,18 @@
       "price": 274.06,
       "target": 360,
       "pct": 31.4,
-      "trend": "unknown",
+      "trend": "flat",
       "targetHist": [
         {
           "d": "2026-06-20",
           "t": 360
+        },
+        {
+          "d": "2026-06-21",
+          "t": 360
         }
       ],
-      "checkedAt": "2026-06-20",
+      "checkedAt": "2026-06-21",
       "flagged": false
     },
     "QCOM": {
@@ -188,15 +224,19 @@
       "price": 226.11,
       "target": 183.83,
       "pct": -18.7,
-      "trend": "unknown",
+      "trend": "flat",
       "targetHist": [
         {
           "d": "2026-06-20",
           "t": 183.83
+        },
+        {
+          "d": "2026-06-21",
+          "t": 183.83
         }
       ],
-      "checkedAt": "2026-06-20",
-      "flagged": true
+      "checkedAt": "2026-06-21",
+      "flagged": false
     },
     "APH": {
       "g": "open",
@@ -207,34 +247,42 @@
       "price": 163.96,
       "target": 183.28,
       "pct": 11.8,
-      "trend": "unknown",
+      "trend": "flat",
       "targetHist": [
         {
           "d": "2026-06-20",
           "t": 183.28
+        },
+        {
+          "d": "2026-06-21",
+          "t": 183.28
         }
       ],
-      "checkedAt": "2026-06-20",
+      "checkedAt": "2026-06-21",
       "flagged": false
     },
     "BESI": {
-      "g": "open",
+      "g": "spent",
       "stage": "가속",
       "mkt": "EU",
       "lock": false,
       "why": "6/18 인베스터데이 LT매출 €1.7-2.2B 상향·수주+104%·beat-and-raise = 테제입증 → 초입→가속. 현가€311>평균목표€278(상향중) = γ narrowing flag",
       "price": 309.8,
-      "target": 281.57,
-      "pct": -9.1,
-      "trend": "unknown",
+      "target": 282.65,
+      "pct": -8.8,
+      "trend": "flat",
       "targetHist": [
         {
           "d": "2026-06-20",
           "t": 281.57
+        },
+        {
+          "d": "2026-06-21",
+          "t": 282.65
         }
       ],
-      "checkedAt": "2026-06-20",
-      "flagged": true
+      "checkedAt": "2026-06-21",
+      "flagged": false
     }
   }
 }
