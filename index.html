@@ -49,6 +49,17 @@ main{padding:36px 0 90px;position:relative}
 .asof{margin:40px 0 8px;font-family:var(--mono);text-align:left;line-height:1.55;border-top:1px solid var(--line);padding-top:14px}
 .asof-row{display:flex;gap:8px;justify-content:flex-start;align-items:baseline}
 #v-port.on ~ #asofBox{display:none}  /* 06 리밸런싱: 시세/정보 스탬프 숨김 — 기준일은 자산현황 줄에 단일 표기 */
+.digest{margin:14px 0 18px;border:1px solid var(--line);border-radius:10px;background:rgba(28,126,214,.045);padding:12px 14px;font-family:var(--mono)}
+.digest .dg-h{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;font-weight:700;font-size:13px;color:var(--txt)}
+.digest .dg-in{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:#1c7ed6;border:1px solid #1c7ed6;border-radius:4px;padding:0 5px}
+.digest .dg-meta{margin-left:auto;font-weight:500;font-size:11px;color:var(--dim)}
+.digest .dg-rows{margin-top:10px;display:flex;flex-direction:column;gap:5px}
+.digest .dg-row{display:flex;gap:8px;align-items:baseline;font-size:12px;line-height:1.4}
+.digest .dg-l{flex:0 0 26px;font-weight:800}
+.digest .dg-tag{flex:0 0 auto;color:var(--dim);font-size:11px;white-space:nowrap}
+.digest .dg-tx{flex:1;color:var(--txt);min-width:0;overflow:hidden;text-overflow:ellipsis}
+.digest .dg-d{flex:0 0 auto;color:var(--faint);font-size:10.5px;white-space:nowrap}
+.digest .dg-foot{margin-top:10px;padding-top:8px;border-top:1px solid var(--line);font-size:10.5px;color:var(--faint);line-height:1.5}
 .asof-k{font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--dawn);min-width:30px;text-align:left}
 .asof-v{font-size:13px;color:var(--dim);font-variant-numeric:tabular-nums;white-space:nowrap}
 .view{display:none;animation:rise .5s cubic-bezier(.2,.7,.2,1)}
@@ -1353,6 +1364,7 @@ table.tk th.c{text-align:center}
   <div class="vhead" style="position:relative"><span class="updstamp abs" id="updPort"></span><div class="vkick">Portfolio X-ray · thesis vs book</div>
     <h1 class="vtitle">자본은 <em>현재 병목</em>에 80% — 다음 병목엔?</h1>
     <p class="vsub" id="portSub">자산현황 기준 보유를 8레이어에 투영. 핵심 질문: 당신이 "다음 병목"이라 지목한 곳에 자본이 가 있는가.</p></div>
+  <div class="digest" id="portDigest"></div>
   <div class="xray-hero" id="xrayHero"></div>
   <div id="portBars"></div>
   <div class="pclass" id="portClass"></div>
@@ -2113,6 +2125,8 @@ const scoreCol=s=>s>=8?STAGE_HEX.초입:s>=5?STAGE_HEX.가속:s>=3?STAGE_HEX.성
 
 /* ===== PRICE DISPLAY ===== */
 let PRICES={},PRICES_ASOF=null;
+let NEWS_ASOF=null,NEWS_COUNT=0;
+const DIGEST_GATE='MU 6/24 실적';  /* 다음 밴드 검토 게이트 — 실적 게이트마다 수동 갱신 */
 function fmtMoney(v,cur){if(v==null)return '';if(cur==='KRW')return '₩'+Math.round(v).toLocaleString();if(cur==='JPY')return '¥'+Math.round(v).toLocaleString();if(cur==='TWD')return 'NT$'+Math.round(v).toLocaleString();return '$'+Math.round(v).toLocaleString();}
 function priceHTML(c){const q=PRICES[c.id];if(!q||q.price==null)return '';const ch=q.changePct;const col=ch==null?'var(--dim)':ch>=0?'var(--dawn)':'var(--hot)';const sg=ch==null?'':(' '+(ch>=0?'▲':'▼')+Math.round(Math.abs(ch))+'%');return `<span style="font-family:var(--mono);font-weight:600;white-space:nowrap;color:${col}">${fmtMoney(q.price,q.currency)}${sg}</span>`;}
 function pricePill(c){const h=priceHTML(c);return h?`<span class="pill">${h}</span>`:'';}
@@ -3339,6 +3353,23 @@ function drawSCurve(){
 }
 
 /* ===== 04 PORTFOLIO X-RAY ===== */
+function digestStrip(h){return String(h||'').replace(/<[^>]*>/g,'').replace(/\s+/g,' ').trim();}
+function renderDigest(){
+ const box=document.getElementById('portDigest'); if(!box) return;
+ const order=['L2','L3','L4','L6','L7','L8'];
+ const seen={}, slDate=(SIGNAL_LOG&&SIGNAL_LOG.length)?(SIGNAL_LOG[SIGNAL_LOG.length-1].date||''):'';
+ for(let i=SIGNAL_LOG.length-1;i>=0;i--){const e=SIGNAL_LOG[i];if(!e||!e.items)continue;
+  for(const it of e.items){if(it&&order.indexOf(it.layer)>=0&&!seen[it.layer])seen[it.layer]={tag:it.tag,col:it.col,tx:digestStrip(it.html),date:e.date};}}
+ const rows=order.map(L=>{const d=seen[L];const lm=LMAP[L]||{};const c=(d&&d.col)||lm.color||'#7048e8';
+  if(!d)return `<div class="dg-row"><span class="dg-l" style="color:${c}">${L}</span><span class="dg-tx" style="color:var(--faint)">최근 레이어 시그널 없음</span></div>`;
+  const tx=d.tx.length>120?d.tx.slice(0,120)+'…':d.tx;
+  return `<div class="dg-row"><span class="dg-l" style="color:${c}">${L}</span><span class="dg-tag">${d.tag||''}</span><span class="dg-tx">${tx}</span><span class="dg-d">${d.date||''}</span></div>`;}).join('');
+ const news=NEWS_ASOF?`뉴스 ${fmtKST(NEWS_ASOF)} (${NEWS_COUNT})`:'뉴스 —';
+ box.innerHTML=`<div class="dg-h">시황 다이제스트 <span class="dg-in">input</span><span class="dg-meta">밴드는 토요일 sync + 실적 게이트 갱신 · 다음 게이트 <b>${DIGEST_GATE}</b> · 신선도 signal ${slDate} / ${news}</span></div>`+
+  `<div class="dg-rows">${rows}</div>`+
+  `<div class="dg-foot">자동 수집(news.json 데일리 · 레이어 시그널 로그)을 <b>input</b>으로 표시 — 원시 피드는 신호 후보일 뿐, 적정밴드 수치는 게이트에서 수동 반영(<b>narrative≠numbers</b>). 각 줄은 해당 레이어 최신 큐레이션 시그널.</div>`;
+}
+function loadDigest(){fetch('./news.json',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(n=>{if(n){NEWS_ASOF=n.asOf||null;NEWS_COUNT=n.count||(n.items?n.items.length:0);}renderDigest();}).catch(()=>{renderDigest();});}
 function renderPortfolio(){
  const order=['L1','L2','L3','L4','L5','L6','L7','L8','기타','현금'];
  const byL={};HOLDINGS.forEach(h=>{byL[h.layer]=byL[h.layer]||{amt:0,w:0,labels:[]};byL[h.layer].amt+=h.amt;byL[h.layer].w+=h.w;byL[h.layer].labels.push(h.label);});
@@ -3416,6 +3447,7 @@ function renderPortfolio(){
  });
  detHTML+=`<div class="foot" style="margin-top:8px">현재=계좌 실잔고(<b>holdings.json ${DETAIL_ASOF}</b> 자동 동기, 총 ${tot}M). 적정밴드(<b>프레임 ${TARGETS_ASOF}</b> · 매주 동기 시 시황 전망 반영 갱신)=해당 레이어 밴드를 <b>레이어 내 향후 상승가능성</b>(단계·forward γ·상대가치)으로 배분한 운영자 조언 — 종목 밴드 합 ≈ 레이어 밴드. <b>▼트림 ▲증액 ■유지</b>. 단일종목 레이어(L4·L7)는 레이어 밴드를 그대로 적용하되, L7 증액분은 미보유 800V 신규명 대상(VRT 단독 추격금지). <b>매매 권유 아님 · 최종 사이징은 운영자 판단.</b></div>`;
  document.getElementById('portGapDetail').innerHTML=detHTML;
+ renderDigest();
 }
 
 /* ===== 05 TRACKER ===== */
@@ -3808,7 +3840,7 @@ Promise.all([getJSON('alpha.json'),getJSON('earnings.json'),getJSON('judgment.js
  if(gm&&gm.asOf){window.GAMMA_ASOF=gm.asOf;window.GAMMA_FLAGGED=Object.entries(gmm||{}).filter(([k,v])=>v&&v.flagged).map(([k])=>k);}
  // 4) 시점 스냅샷(snapshots.json) — 라이브 머지 후 현재 배치를 보존하고 셀렉터 구성.
  captureLive();SNAPS=(sn&&Array.isArray(sn.snapshots))?sn.snapshots:[];initSnapSel();
-}).finally(()=>{paint(); if(typeof renderSignalLog==='function')renderSignalLog(); if(typeof renderStack==='function')renderStack(); if(typeof renderPortfolio==='function')renderPortfolio(); if(typeof updateAsof==='function')updateAsof(); if(typeof renderCalNow==='function')renderCalNow();});
+}).finally(()=>{paint(); if(typeof renderSignalLog==='function')renderSignalLog(); if(typeof renderStack==='function')renderStack(); if(typeof renderPortfolio==='function')renderPortfolio(); if(typeof updateAsof==='function')updateAsof(); if(typeof renderCalNow==='function')renderCalNow(); if(typeof loadDigest==='function')loadDigest();});
 })();
 </script>
 <script>
