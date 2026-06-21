@@ -48,6 +48,7 @@ nav{display:flex;gap:3px;margin-left:auto;flex-wrap:wrap}
 main{padding:36px 0 90px;position:relative}
 .asof{margin:40px 0 8px;font-family:var(--mono);text-align:left;line-height:1.55;border-top:1px solid var(--line);padding-top:14px}
 .asof-row{display:flex;gap:8px;justify-content:flex-start;align-items:baseline}
+#v-port.on ~ #asofBox{display:none}  /* 06 리밸런싱: 시세/정보 스탬프 숨김 — 기준일은 자산현황 줄에 단일 표기 */
 .asof-k{font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--dawn);min-width:30px;text-align:left}
 .asof-v{font-size:13px;color:var(--dim);font-variant-numeric:tabular-nums;white-space:nowrap}
 .view{display:none;animation:rise .5s cubic-bezier(.2,.7,.2,1)}
@@ -2129,7 +2130,7 @@ function fmtUpd(v){if(!v)return null;
  const k=fmtKST(v);return k==='—'?null:k;}            // ISO 타임스탬프
 function stampText(v){const f=fmtUpd(v);return f?'update : '+f:'';}
 function setStamp(id,v){const e=document.getElementById(id);if(e)e.textContent=stampText(v);}
-function stampStatics(){setStamp('updCal',VIEW_UPDATED);setStamp('updThread',VIEW_UPDATED);setStamp('updPort',VIEW_UPDATED);}
+function stampStatics(){setStamp('updCal',VIEW_UPDATED);setStamp('updThread',VIEW_UPDATED);}  /* updPort(06 상단 스탬프) 제거 — 기준일은 자산현황 줄에 단일 표기 */
 /* ===== 임박 이벤트: 데이터 구동 자동 큐레이션 (2026-06-13 개편) =====
    매 접속 시 오늘(KST) 기준으로 ① 지난 이벤트 자동 제거 ② 날짜순 정렬
    ③ 가장 임박한 N개만 카드 렌더 ④ D-카운트 동적 계산.
@@ -3347,7 +3348,7 @@ function renderPortfolio(){
  const cash=byL.현금?.w||0,etc=byL.기타?.w||0;
  const wL=l=>(byL[l]?.w||0).toFixed(1);
  const tot=HOLD_TOTAL||HOLDINGS.reduce((s,h)=>s+(h.amt||0),0);
- const sub=document.getElementById('portSub');if(sub)sub.innerHTML=`자산현황(총 ${tot}M) 기준 보유를 8레이어에 투영. 핵심 질문: 당신이 "다음 병목"이라 지목한 곳에 자본이 가 있는가.`;
+ const sub=document.getElementById('portSub');if(sub)sub.innerHTML=`자산현황(<b>${HOLD_ASOF}</b> 기준 · 총 ${tot}M) 보유를 8레이어에 투영. 핵심 질문: 당신이 "다음 병목"이라 지목한 곳에 자본이 가 있는가.`;
  const tgtOverlay=lid=>{const t=TMAP[lid];if(!t)return '';
   const sc=v=>Math.min(v*2.6,100);
   const lo=sc(t.lo),hi=sc(t.hi),mid=sc((t.lo+t.hi)/2);
