@@ -37,6 +37,28 @@ const LAYERS = [
   ['현금','현금',                                            ['pCash','dcCash']],
 ];
 
+// 종목 단위 분해 (index.html HOLD_DETAIL 머지 키 = name, 정확히 일치시킬 것)
+// [name, ticker, layer, [ROW 키…]] — IRP+DC 동일 instrument는 합산.
+const DETAIL = [
+  ['마벨','MRVL','L2',['marvell']],
+  ['KODEX 미국AI반도체TOP3+','ETF','L2',['dcTop3']],
+  ['마이크론','MU','L3',['micron']],
+  ['글로벌HBM반도체','ETF','L3',['irpHBM','dcHBM']],
+  ['삼성전자','005930','L3',['samsung']],
+  ['삼성·SK 채권혼합','ETF','L3',['irpSSK','dcSSK']],
+  ['KODEX AI반도체핵심장비','471990','L4',['dcEquip']],
+  ['루멘텀','LITE','L6',['lumentum']],
+  ['KODEX 미국AI광통신네트워크','0173Y0','L6',['dcOptic']],
+  ['버티브','VRT','L7',['vertiv']],
+  ['KODEX AI전력핵심설비','ETF','L8',['dcPower']],
+  ['SOL 미국AI전력인프라','ETF','L8',['dcSolPower']],
+  ['블룸에너지','BE','L8',['bloom']],
+  ['테슬라','TSLA','기타',['tesla']],
+  ['코스피50','ETF','기타',['irpKospi']],
+  ['코스피200 채권혼합','ETF','기타',['irpBond','dcBond']],
+  ['현금','—','현금',['pCash','dcCash']],
+];
+
 const num = v => {
   if (v == null || v === '') return 0;
   if (typeof v === 'number') return v;
@@ -93,7 +115,12 @@ function build({ asOf, cell }) {
     throw new Error(`스키마 드리프트 의심: NH합계 ${totalNH.toLocaleString()} vs 레이어합 ${layerSum.toLocaleString()} ` +
                     `(차 ${drift.toLocaleString()}원). ROW/LAYERS 맵과 시트 추적종목을 대조하라.`);
 
-  return { asOf, total: Math.round(totalNH / 1e6), holdings, totalNH };
+  const detail = DETAIL.map(([name, ticker, layer, keys]) => {
+    const amt = keys.reduce((a, k) => a + cell(k), 0);
+    return { name, ticker, layer, amt: Math.round(amt / 1e6), w: +((amt / totalNH) * 100).toFixed(2) };
+  });
+
+  return { asOf, total: Math.round(totalNH / 1e6), holdings, detail, totalNH };
 }
 
 const next = build(parse(await downloadXlsx()));
@@ -108,8 +135,9 @@ const out = {
   total: next.total,
   note: `자산현황 ${next.asOf} 자동 동기화 · total ${next.total}M` +
         (wow !== null ? ` (WoW ${wow >= 0 ? '+' : ''}${wow}%)` : '') +
-        `. 레이어 비중은 holdings[].w 참조. ※ 괴리율·이벤트 등 편집성 메모는 수동 보강.`,
+        `. 레이어 비중은 holdings[].w·종목 비중은 detail[].w 참조. ※ 괴리율·이벤트 등 편집성 메모는 수동 보강.`,
   holdings: next.holdings,
+  detail: next.detail,
 };
 fs.writeFileSync(OUT, JSON.stringify(out, null, 1) + '\n');
 console.log(`holdings.json 갱신: asOf=${out.asOf} total=${out.total}M ` +
