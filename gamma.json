@@ -1,5 +1,5 @@
 {
-  "asOf": "2026-06-21T22:46:08.046Z",
+  "asOf": "2026-06-22T23:04:38.750Z",
   "source": "auto(price-vs-target)+judgment",
   "note": "γ 단일 소스. index.html D배열 g·judgment.json g는 이 파일이 대체(인라인 g는 폴백). stage도 이 파일이 단일소스(인라인 폴백). stage는 판단값이라 cron은 g만 자동, stage는 수동. 룰: pct=(target-price)/price. pct>=+10% → open / pct<=-5% AND trend in(flat,falling) → spent / 그 외(모호밴드·trend rising·unknown) → flagged+직전값 hold. lock=true는 운영자 수동 고정(auto 미적용). US는 Yahoo quoteSummary 자동, KR(005930)·EU(BESI)는 커버리지 갭으로 수기 보정 가능. checkedAt이 N일 초과면 스테일.",
   "rules": {
@@ -14,9 +14,9 @@
       "mkt": "US",
       "lock": false,
       "why": null,
-      "price": 310.58,
+      "price": 307.86,
       "target": 238.75,
-      "pct": -23.1,
+      "pct": -22.4,
       "trend": "flat",
       "targetHist": [
         {
@@ -26,9 +26,13 @@
         {
           "d": "2026-06-21",
           "t": 238.75
+        },
+        {
+          "d": "2026-06-22",
+          "t": 238.75
         }
       ],
-      "checkedAt": "2026-06-21",
+      "checkedAt": "2026-06-22",
       "flagged": false
     },
     "005930": {
@@ -37,9 +41,9 @@
       "mkt": "KR",
       "lock": false,
       "why": "HBM4 점유 회복 미반영",
-      "price": 354000,
+      "price": 353500,
       "target": 428075.53,
-      "pct": 20.9,
+      "pct": 21.1,
       "trend": "flat",
       "targetHist": [
         {
@@ -49,9 +53,13 @@
         {
           "d": "2026-06-21",
           "t": 428075.53
+        },
+        {
+          "d": "2026-06-22",
+          "t": 428075.53
         }
       ],
-      "checkedAt": "2026-06-21",
+      "checkedAt": "2026-06-22",
       "flagged": false
     },
     "MU": {
@@ -60,9 +68,9 @@
       "mkt": "US",
       "lock": false,
       "why": "주가<상향중 목표(6/19 감사 spent→open)·stage는 6/24 실적 후 재평가",
-      "price": 1133.99,
+      "price": 1211.38,
       "target": 945.6,
-      "pct": -16.6,
+      "pct": -21.9,
       "trend": "flat",
       "targetHist": [
         {
@@ -72,9 +80,13 @@
         {
           "d": "2026-06-21",
           "t": 945.6
+        },
+        {
+          "d": "2026-06-22",
+          "t": 945.6
         }
       ],
-      "checkedAt": "2026-06-21",
+      "checkedAt": "2026-06-22",
       "flagged": false
     },
     "LITE": {
@@ -83,9 +95,9 @@
       "mkt": "US",
       "lock": false,
       "why": "EPS $2.42→$4.20·매출+65%·Q2빅비트=성숙→가속. 현가$870<<목표$1,111. wk트림과 독립",
-      "price": 850,
+      "price": 893.93,
       "target": 1111.29,
-      "pct": 30.7,
+      "pct": 24.3,
       "trend": "flat",
       "targetHist": [
         {
@@ -95,9 +107,13 @@
         {
           "d": "2026-06-21",
           "t": 1111.29
+        },
+        {
+          "d": "2026-06-22",
+          "t": 1111.29
         }
       ],
-      "checkedAt": "2026-06-21",
+      "checkedAt": "2026-06-22",
       "flagged": false
     },
     "VRT": {
@@ -106,9 +122,9 @@
       "mkt": "US",
       "lock": false,
       "why": "Q1 EPS+80%·백로그+109%·B2B 2.9x·EPS가이드+42~45%=성숙→가속. 현가$281<목표$377(상향중)",
-      "price": 333.05,
+      "price": 357.96,
       "target": 378.31,
-      "pct": 13.6,
+      "pct": 5.7,
       "trend": "flat",
       "targetHist": [
         {
@@ -118,10 +134,14 @@
         {
           "d": "2026-06-21",
           "t": 378.31
+        },
+        {
+          "d": "2026-06-22",
+          "t": 378.31
         }
       ],
-      "checkedAt": "2026-06-21",
-      "flagged": false
+      "checkedAt": "2026-06-22",
+      "flagged": true
     },
     "BE": {
       "g": "spent",
@@ -129,9 +149,9 @@
       "mkt": "US",
       "lock": false,
       "why": "블룸에너지(L8)·+1,098%/1년·현가≈컨센$276·peak valuation→과열 유지. γ는 price≈target flag",
-      "price": 328.91,
+      "price": 345.85,
       "target": 263.65,
-      "pct": -19.8,
+      "pct": -23.8,
       "trend": "flat",
       "targetHist": [
         {
@@ -141,9 +161,13 @@
         {
           "d": "2026-06-21",
           "t": 263.65
+        },
+        {
+          "d": "2026-06-22",
+          "t": 263.65
         }
       ],
-      "checkedAt": "2026-06-21",
+      "checkedAt": "2026-06-22",
       "flagged": false
     },
     "AMD": {
@@ -152,9 +176,9 @@
       "mkt": "US",
       "lock": false,
       "why": "Q1빅비트·MI400램프·OpenAI/Meta 12GW=가속 유지. 단 현가$415>컨센$300~340 → γ narrowing flag",
-      "price": 537.37,
+      "price": 551.63,
       "target": 487.9,
-      "pct": -9.2,
+      "pct": -11.6,
       "trend": "flat",
       "targetHist": [
         {
@@ -164,9 +188,13 @@
         {
           "d": "2026-06-21",
           "t": 487.9
+        },
+        {
+          "d": "2026-06-22",
+          "t": 487.9
         }
       ],
-      "checkedAt": "2026-06-21",
+      "checkedAt": "2026-06-22",
       "flagged": false
     },
     "RMBS": {
@@ -175,9 +203,9 @@
       "mkt": "US",
       "lock": false,
       "why": "제품매출+41%·EPS+19~20%=가속 유지. 연방 대배심 소환장(-25% 급락)은 가격시계 리스크 flag",
-      "price": 141.17,
+      "price": 140.35,
       "target": 144.57,
-      "pct": 2.4,
+      "pct": 3,
       "trend": "flat",
       "targetHist": [
         {
@@ -187,9 +215,13 @@
         {
           "d": "2026-06-21",
           "t": 144.57
+        },
+        {
+          "d": "2026-06-22",
+          "t": 144.57
         }
       ],
-      "checkedAt": "2026-06-21",
+      "checkedAt": "2026-06-22",
       "flagged": true
     },
     "CEG": {
@@ -198,9 +230,9 @@
       "mkt": "US",
       "lock": false,
       "why": "목표 하향($330→$293)·EPS+13%/yr 유틸형·DC PPA(2027가이드 미반영) 미실현 → 가속→성숙. γ open(PPA 촉매 시 재가속)",
-      "price": 274.06,
+      "price": 275.53,
       "target": 360,
-      "pct": 31.4,
+      "pct": 30.7,
       "trend": "flat",
       "targetHist": [
         {
@@ -210,9 +242,13 @@
         {
           "d": "2026-06-21",
           "t": 360
+        },
+        {
+          "d": "2026-06-22",
+          "t": 360
         }
       ],
-      "checkedAt": "2026-06-21",
+      "checkedAt": "2026-06-22",
       "flagged": false
     },
     "QCOM": {
@@ -221,9 +257,9 @@
       "mkt": "US",
       "lock": false,
       "why": "현가$214>컨센$178·Hold·Apple모뎀절벽·EPS플랫 → 성숙·spent 확인",
-      "price": 226.11,
+      "price": 221.9,
       "target": 183.83,
-      "pct": -18.7,
+      "pct": -17.2,
       "trend": "flat",
       "targetHist": [
         {
@@ -233,9 +269,13 @@
         {
           "d": "2026-06-21",
           "t": 183.83
+        },
+        {
+          "d": "2026-06-22",
+          "t": 183.83
         }
       ],
-      "checkedAt": "2026-06-21",
+      "checkedAt": "2026-06-22",
       "flagged": false
     },
     "APH": {
@@ -244,9 +284,9 @@
       "mkt": "US",
       "lock": false,
       "why": null,
-      "price": 163.96,
+      "price": 165.96,
       "target": 183.28,
-      "pct": 11.8,
+      "pct": 10.4,
       "trend": "flat",
       "targetHist": [
         {
@@ -256,9 +296,13 @@
         {
           "d": "2026-06-21",
           "t": 183.28
+        },
+        {
+          "d": "2026-06-22",
+          "t": 183.28
         }
       ],
-      "checkedAt": "2026-06-21",
+      "checkedAt": "2026-06-22",
       "flagged": false
     },
     "BESI": {
@@ -267,9 +311,9 @@
       "mkt": "EU",
       "lock": false,
       "why": "6/18 인베스터데이 LT매출 €1.7-2.2B 상향·수주+104%·beat-and-raise = 테제입증 → 초입→가속. 현가€311>평균목표€278(상향중) = γ narrowing flag",
-      "price": 309.8,
+      "price": 320.3,
       "target": 282.65,
-      "pct": -8.8,
+      "pct": -11.8,
       "trend": "flat",
       "targetHist": [
         {
@@ -279,9 +323,13 @@
         {
           "d": "2026-06-21",
           "t": 282.65
+        },
+        {
+          "d": "2026-06-22",
+          "t": 282.65
         }
       ],
-      "checkedAt": "2026-06-21",
+      "checkedAt": "2026-06-22",
       "flagged": false
     }
   }
