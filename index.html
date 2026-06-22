@@ -1316,23 +1316,50 @@ table.tk th.c{text-align:center}
   <div style="font-size:12px;color:#868e96;margin-bottom:8px">수요 선행(D) → 가격(C) → 추정 γ(E) → 재고(B) → 장비(A) 순으로 고점 신호가 점등. 판단층(cycle.json) — 운영자·Claude 갱신.</div>
   <div id="cycBoard" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-bottom:8px"></div>
   <div class="verdict" id="cycVerdict" style="margin-bottom:14px">cycle.json 로딩…</div>
+
+  <div class="mc-sec">D · 수요 — 주요 하이퍼스케일러 합산 CAPEX ($B, 연도별)</div>
+  <div style="font-size:11.5px;color:#868e96;margin-bottom:6px"><span style="display:inline-block;width:10px;height:10px;background:#1c7ed6;border-radius:2px;margin-right:4px"></span>실적(23~25)<span style="display:inline-block;width:10px;height:10px;background:#f0a020;border-radius:2px;margin:0 4px 0 12px"></span>추정(26E~28E)</div>
+  <div style="position:relative;width:100%;height:210px;margin-bottom:16px"><canvas id="cycDChart"></canvas></div>
+
   <div class="mc-sec">C · 가격 — DDR5 16Gb 현물 vs 계약 (USD/칩, 재구성)</div>
-  <div style="position:relative;width:100%;height:230px;margin-bottom:16px"><canvas id="cycCChart"></canvas></div>
+  <div style="font-size:11.5px;color:#868e96;margin-bottom:6px"><span style="display:inline-block;width:16px;border-top:2px solid #1c7ed6;vertical-align:middle;margin-right:4px"></span>계약<span style="display:inline-block;width:16px;border-top:2px dashed #f08c00;vertical-align:middle;margin:0 4px 0 12px"></span>현물</div>
+  <div style="position:relative;width:100%;height:210px;margin-bottom:16px"><canvas id="cycCChart"></canvas></div>
+
+  <div class="mc-sec">E · 추정 γ — 메모리 3사 주가÷평균목표가−1 (%)</div>
+  <div style="font-size:11.5px;color:#868e96;margin-bottom:6px">음수=목표가가 주가 위(γ open 🟢) · 0=전환 · 양수=주가가 목표가 추월(γ spent 🔴)</div>
+  <div style="position:relative;width:100%;height:190px;margin-bottom:16px"><canvas id="cycEChart"></canvas></div>
+
+  <div class="mc-sec">B · 재고 — 메모리 3사 DIO(재고일수, 연도별)</div>
+  <div style="font-size:11.5px;color:#868e96;margin-bottom:6px"><span style="display:inline-block;width:16px;border-top:2px solid #1c7ed6;vertical-align:middle;margin-right:4px"></span>마이크론(FY)<span style="display:inline-block;width:16px;border-top:2px dashed #f08c00;vertical-align:middle;margin:0 4px 0 12px"></span>SK하이닉스<span style="display:inline-block;width:16px;border-top:2px dotted #0ca678;vertical-align:middle;margin:0 4px 0 12px"></span>삼성전자</div>
+  <div style="position:relative;width:100%;height:210px;margin-bottom:16px"><canvas id="cycBChart"></canvas></div>
+
   <div class="mc-sec">A · 장비 — SEMI 글로벌 장비 빌링 YoY% (분기)</div>
   <div style="position:relative;width:100%;height:210px;margin-bottom:16px"><canvas id="cycAChart"></canvas></div>
+
   <div class="mc-sec">현재값 · 임계값 신호 요약</div>
   <div id="cycTable" style="margin-bottom:8px"></div>
-  <div class="foot">C=앵커 기반 재구성치(tick 아님) · A=SEMI 확정 분기값(Q4·25 미보유=공백) · D=4사 capex 연간 가이드 · B=마이크론 DIO LTM. D·E·B 월별 시계열은 데이터 소스(TrendForce DataTrack·SEMI EMDS·FnGuide) 연동 시 cycle.json에 append.</div>
+  <div class="foot">D=주요 4사(MSFT·GOOGL·AMZN·META) 합산 capex, 23~25 실적·26E 가이던스·27E~28E 애널 추정(5사 기준 MS 27E ~$1.1조)·C=앵커 재구성치(tick 아님)·E=주가÷평균목표가 괴리율(투자자문 아님)·B=DIO(마이크론 8월 결산 FY, 한국 12월 결산 — 분기 단위 차이)·A=SEMI 확정 분기값(Q4·25 미보유=공백). 출처: FT·Goldman·Morgan Stanley·TrendForce·SEC·DART·FnGuide.</div>
 </section>
 <script>
 window.CYCLE=(function(){
-  var DATA=null,done=false,cC=null,cA=null;
+  var DATA=null,done=false,cD=null,cC=null,cE=null,cB=null,cA=null;
   var COL={green:'#0ca678',amber:'#f08c00',red:'#e03131'};
   function el(id){return document.getElementById(id);}
   function dot(s){return '<span style="width:11px;height:11px;border-radius:50%;display:inline-block;background:'+(COL[s]||'#adb5bd')+'"></span>';}
   function find(cs,id){for(var i=0;i<cs.length;i++){if(cs[i].id===id)return cs[i];}return null;}
   function board(cs){var h='';cs.forEach(function(c){h+='<div style="border:1px solid #e9ecef;border-radius:8px;padding:10px"><div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:11px;color:#868e96">'+c.id+'</span>'+dot(c.lamp)+'</div><div style="font-size:13px;font-weight:600;margin-top:4px">'+c.name+'</div><div style="font-size:11px;color:#495057;margin-top:3px;line-height:1.45">'+(c.now||'')+'</div></div>';});return h;}
   function table(cs){var h='<table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr style="text-align:left;color:#868e96"><th style="padding:4px 6px">군집</th><th style="padding:4px 6px">현재값</th><th style="padding:4px 6px">고점 ON 임계값</th><th style="padding:4px 6px">신호</th></tr></thead><tbody>';cs.forEach(function(c){h+='<tr style="border-top:1px solid #f1f3f5"><td style="padding:5px 6px;font-weight:600">'+c.id+' '+c.name+'</td><td style="padding:5px 6px;color:#495057">'+(c.now||'')+'</td><td style="padding:5px 6px;color:#868e96">'+(c.on||'')+'</td><td style="padding:5px 6px">'+dot(c.lamp)+'</td></tr>';});return h+'</tbody></table>';}
+  function drawD(c){
+    if(!c||!c.series)return;var s=c.series,cv=el('cycDChart');if(!cv)return;if(cD)cD.destroy();
+    var ac=s.actualCount||0;var bg=s.points.map(function(_,i){return i<ac?'#1c7ed6':'#f0a020';});
+    cD=new Chart(cv,{
+      type:'bar',
+      data:{labels:s.labels,datasets:[{label:'capex',data:s.points,backgroundColor:bg}]},
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:false},tooltip:{callbacks:{label:function(x){return '$'+x.parsed.y+'B'+(x.dataIndex<ac?' (실적)':' (추정)');}}}},
+        scales:{x:{ticks:{font:{size:10}},grid:{display:false}},y:{ticks:{callback:function(v){return '$'+v+'B';},font:{size:9}}}}}
+    });
+  }
   function drawC(c){
     if(!c||!c.series)return;var s=c.series,cv=el('cycCChart');if(!cv)return;if(cC)cC.destroy();
     cC=new Chart(cv,{
@@ -1346,6 +1373,31 @@ window.CYCLE=(function(){
         scales:{x:{ticks:{maxRotation:0,font:{size:9}},grid:{display:false}},y:{ticks:{callback:function(v){return '$'+v;},font:{size:9}}}}}
     });
   }
+  function drawE(c){
+    if(!c||!c.series)return;var s=c.series,cv=el('cycEChart');if(!cv)return;if(cE)cE.destroy();
+    var bg=s.points.map(function(v){return v>=5?'#e03131':(v<=-5?'#0ca678':'#adb5bd');});
+    cE=new Chart(cv,{
+      type:'bar',
+      data:{labels:s.labels,datasets:[{label:'괴리율',data:s.points,backgroundColor:bg}]},
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:false},tooltip:{callbacks:{label:function(x){return (x.parsed.y>0?'+':'')+x.parsed.y+'% '+(x.parsed.y>=5?'(γ spent)':(x.parsed.y<=-5?'(γ open)':'(전환)'));}}}},
+        scales:{x:{ticks:{font:{size:11}},grid:{display:false}},y:{ticks:{callback:function(v){return (v>0?'+':'')+v+'%';},font:{size:9}}}}}
+    });
+  }
+  function drawB(c){
+    if(!c||!c.series)return;var s=c.series,cv=el('cycBChart');if(!cv)return;if(cB)cB.destroy();
+    cB=new Chart(cv,{
+      type:'line',
+      data:{labels:s.labels,datasets:[
+        {label:'마이크론',data:s.mu,borderColor:'#1c7ed6',borderWidth:2,tension:.2,spanGaps:true},
+        {label:'SK하이닉스',data:s.sk,borderColor:'#f08c00',borderWidth:2,borderDash:[5,4],tension:.2,spanGaps:true},
+        {label:'삼성전자',data:s.ss,borderColor:'#0ca678',borderWidth:2,borderDash:[2,3],tension:.2,spanGaps:true}
+      ]},
+      options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+        plugins:{legend:{display:false},tooltip:{callbacks:{label:function(x){return x.dataset.label+': '+x.parsed.y+'일';}}}},
+        scales:{x:{ticks:{font:{size:10}},grid:{display:false}},y:{ticks:{callback:function(v){return v+'일';},font:{size:9}}}}}
+    });
+  }
   function drawA(c){
     if(!c||!c.series)return;var s=c.series,cv=el('cycAChart');if(!cv)return;if(cA)cA.destroy();
     cA=new Chart(cv,{
@@ -1356,7 +1408,7 @@ window.CYCLE=(function(){
         scales:{x:{ticks:{font:{size:10}},grid:{display:false}},y:{ticks:{callback:function(v){return v+'%';},font:{size:9}}}}}
     });
   }
-  function paint(){if(!DATA)return;var cs=DATA.clusters||[];var b=el('cycBoard');if(b)b.innerHTML=board(cs);var t=el('cycTable');if(t)t.innerHTML=table(cs);var g=cs.filter(function(c){return c.lamp==='green';}).length;var y=cs.filter(function(c){return c.lamp==='amber';}).length;var r=cs.filter(function(c){return c.lamp==='red';}).length;var v=el('cycVerdict');if(v)v.textContent='종합 — '+g+'🟢 / '+y+'🟡 / '+r+'🔴 · '+(r>0?'고점 신호 점등':'thesis-clock 롤오버 없음 · 사이클 후반')+' (asOf '+(DATA.asOf||'')+')';drawC(find(cs,'C'));drawA(find(cs,'A'));}
+  function paint(){if(!DATA)return;var cs=DATA.clusters||[];var b=el('cycBoard');if(b)b.innerHTML=board(cs);var t=el('cycTable');if(t)t.innerHTML=table(cs);var g=cs.filter(function(c){return c.lamp==='green';}).length;var y=cs.filter(function(c){return c.lamp==='amber';}).length;var r=cs.filter(function(c){return c.lamp==='red';}).length;var v=el('cycVerdict');if(v)v.textContent='종합 — '+g+'🟢 / '+y+'🟡 / '+r+'🔴 · '+(r>0?'고점 신호 점등':'thesis-clock 롤오버 없음 · 사이클 후반')+' (asOf '+(DATA.asOf||'')+')';drawD(find(cs,'D'));drawC(find(cs,'C'));drawE(find(cs,'E'));drawB(find(cs,'B'));drawA(find(cs,'A'));}
   function render(){if(done){paint();return;}done=true;fetch('./cycle.json',{cache:'no-store'}).then(function(r){return r.json();}).then(function(j){DATA=j;paint();}).catch(function(e){var v=el('cycVerdict');if(v)v.textContent='cycle.json 로드 실패: '+(e&&e.message||e);});}
   return {render:render};
 })();
