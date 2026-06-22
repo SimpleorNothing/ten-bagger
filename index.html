@@ -731,11 +731,12 @@ table.tk th.c{text-align:center}
     <button class="tab" data-v="siglog"><span class="n">02</span>시그널 로그</button>
     <button class="tab" data-v="thread"><span class="n">03</span>알파 찾기</button>
     <button class="tab" data-v="alpha"><span class="n">04</span>알파 맵</button>
+    <button class="tab" data-v="cycle"><span class="n">05</span>반도체 고점파악</button>
     <button class="tab" data-v="prob" style="display:none"><span class="n">05</span>확률 추정</button>
-    <button class="tab" data-v="us10y"><span class="n">05</span>US10Y</button>
+    <button class="tab" data-v="us10y"><span class="n">06</span>US10Y</button>
     <button class="tab" data-v="macro" style="display:none"><span class="n">07</span>매크로 매매</button>
-    <button class="tab" data-v="port"><span class="n">06</span>리밸런싱</button>
-    <button class="tab" data-v="memo"><span class="n">07</span>메모</button>
+    <button class="tab" data-v="port"><span class="n">07</span>리밸런싱</button>
+    <button class="tab" data-v="memo"><span class="n">08</span>메모</button>
   </nav>
 </div></header>
 
@@ -1309,6 +1310,57 @@ table.tk th.c{text-align:center}
   </div>
 </section>
 
+<!-- 05 반도체 고점파악 -->
+<section class="view" id="v-cycle">
+  <div class="mc-sec" style="margin-top:6px">05 반도체 고점파악 · 사이클 신호등 (D→C→E→B→A)</div>
+  <div style="font-size:12px;color:#868e96;margin-bottom:8px">수요 선행(D) → 가격(C) → 추정 γ(E) → 재고(B) → 장비(A) 순으로 고점 신호가 점등. 판단층(cycle.json) — 운영자·Claude 갱신.</div>
+  <div id="cycBoard" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-bottom:8px"></div>
+  <div class="verdict" id="cycVerdict" style="margin-bottom:14px">cycle.json 로딩…</div>
+  <div class="mc-sec">C · 가격 — DDR5 16Gb 현물 vs 계약 (USD/칩, 재구성)</div>
+  <div style="position:relative;width:100%;height:230px;margin-bottom:16px"><canvas id="cycCChart"></canvas></div>
+  <div class="mc-sec">A · 장비 — SEMI 글로벌 장비 빌링 YoY% (분기)</div>
+  <div style="position:relative;width:100%;height:210px;margin-bottom:16px"><canvas id="cycAChart"></canvas></div>
+  <div class="mc-sec">현재값 · 임계값 신호 요약</div>
+  <div id="cycTable" style="margin-bottom:8px"></div>
+  <div class="foot">C=앵커 기반 재구성치(tick 아님) · A=SEMI 확정 분기값(Q4·25 미보유=공백) · D=4사 capex 연간 가이드 · B=마이크론 DIO LTM. D·E·B 월별 시계열은 데이터 소스(TrendForce DataTrack·SEMI EMDS·FnGuide) 연동 시 cycle.json에 append.</div>
+</section>
+<script>
+window.CYCLE=(function(){
+  var DATA=null,done=false,cC=null,cA=null;
+  var COL={green:'#0ca678',amber:'#f08c00',red:'#e03131'};
+  function el(id){return document.getElementById(id);}
+  function dot(s){return '<span style="width:11px;height:11px;border-radius:50%;display:inline-block;background:'+(COL[s]||'#adb5bd')+'"></span>';}
+  function find(cs,id){for(var i=0;i<cs.length;i++){if(cs[i].id===id)return cs[i];}return null;}
+  function board(cs){var h='';cs.forEach(function(c){h+='<div style="border:1px solid #e9ecef;border-radius:8px;padding:10px"><div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:11px;color:#868e96">'+c.id+'</span>'+dot(c.lamp)+'</div><div style="font-size:13px;font-weight:600;margin-top:4px">'+c.name+'</div><div style="font-size:11px;color:#495057;margin-top:3px;line-height:1.45">'+(c.now||'')+'</div></div>';});return h;}
+  function table(cs){var h='<table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr style="text-align:left;color:#868e96"><th style="padding:4px 6px">군집</th><th style="padding:4px 6px">현재값</th><th style="padding:4px 6px">고점 ON 임계값</th><th style="padding:4px 6px">신호</th></tr></thead><tbody>';cs.forEach(function(c){h+='<tr style="border-top:1px solid #f1f3f5"><td style="padding:5px 6px;font-weight:600">'+c.id+' '+c.name+'</td><td style="padding:5px 6px;color:#495057">'+(c.now||'')+'</td><td style="padding:5px 6px;color:#868e96">'+(c.on||'')+'</td><td style="padding:5px 6px">'+dot(c.lamp)+'</td></tr>';});return h+'</tbody></table>';}
+  function drawC(c){
+    if(!c||!c.series)return;var s=c.series,cv=el('cycCChart');if(!cv)return;if(cC)cC.destroy();
+    cC=new Chart(cv,{
+      type:'line',
+      data:{labels:s.labels,datasets:[
+        {label:'계약',data:s.contract,borderColor:'#1c7ed6',borderWidth:2,tension:.25,pointRadius:0},
+        {label:'현물',data:s.spot,borderColor:'#f08c00',borderWidth:2,borderDash:[6,4],tension:.25,pointRadius:0}
+      ]},
+      options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+        plugins:{legend:{display:false},tooltip:{callbacks:{label:function(x){return x.dataset.label+': $'+Number(x.parsed.y).toFixed(2);}}}},
+        scales:{x:{ticks:{maxRotation:0,font:{size:9}},grid:{display:false}},y:{ticks:{callback:function(v){return '$'+v;},font:{size:9}}}}}
+    });
+  }
+  function drawA(c){
+    if(!c||!c.series)return;var s=c.series,cv=el('cycAChart');if(!cv)return;if(cA)cA.destroy();
+    cA=new Chart(cv,{
+      type:'bar',
+      data:{labels:s.labels,datasets:[{label:'빌링 YoY%',data:s.points,backgroundColor:['#74c0fc','#74c0fc','#4dabf7','#dee2e6','#f08c00']}]},
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:false},tooltip:{callbacks:{label:function(x){return x.parsed.y==null?'미보유':'+'+x.parsed.y+'% YoY';}}}},
+        scales:{x:{ticks:{font:{size:10}},grid:{display:false}},y:{ticks:{callback:function(v){return v+'%';},font:{size:9}}}}}
+    });
+  }
+  function paint(){if(!DATA)return;var cs=DATA.clusters||[];var b=el('cycBoard');if(b)b.innerHTML=board(cs);var t=el('cycTable');if(t)t.innerHTML=table(cs);var g=cs.filter(function(c){return c.lamp==='green';}).length;var y=cs.filter(function(c){return c.lamp==='amber';}).length;var r=cs.filter(function(c){return c.lamp==='red';}).length;var v=el('cycVerdict');if(v)v.textContent='종합 — '+g+'🟢 / '+y+'🟡 / '+r+'🔴 · '+(r>0?'고점 신호 점등':'thesis-clock 롤오버 없음 · 사이클 후반')+' (asOf '+(DATA.asOf||'')+')';drawC(find(cs,'C'));drawA(find(cs,'A'));}
+  function render(){if(done){paint();return;}done=true;fetch('./cycle.json',{cache:'no-store'}).then(function(r){return r.json();}).then(function(j){DATA=j;paint();}).catch(function(e){var v=el('cycVerdict');if(v)v.textContent='cycle.json 로드 실패: '+(e&&e.message||e);});}
+  return {render:render};
+})();
+</script>
 <!-- 06 US10Y -->
 <section class="view" id="v-us10y">
   <div class="vhead">
@@ -2229,7 +2281,8 @@ document.getElementById('nav').addEventListener('click',e=>{const b=e.target.clo
  b.classList.add('on');document.getElementById('v-'+b.dataset.v).classList.add('on');
  var _ab=document.getElementById('asofBox');if(_ab)_ab.style.display=(b.dataset.v==='memo')?'none':'';
  if(b.dataset.v==='thread'){drawSCurve();drawRiverCurves();}
- if(b.dataset.v==='us10y'){if(window.US10Y)window.US10Y.render();}});
+ if(b.dataset.v==='us10y'){if(window.US10Y)window.US10Y.render();}
+ if(b.dataset.v==='cycle'){if(window.CYCLE)window.CYCLE.render();}});
 /* 다른 페이지/로그에서 8레이어 스택으로 점프 (단일 페이지 통합) */
 function gotoStack(layerId){
  const tab=document.querySelector('.tab[data-v="thread"]');if(tab&&!tab.classList.contains('on'))tab.click();
