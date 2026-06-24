@@ -865,7 +865,7 @@ table.tk th.c{text-align:center}
     <tbody>
       <tr><td>1</td><td>블룸에너지</td><td>BE</td><td>L8</td><td>★2.3%</td><td class="c"><span class="mbadge" style="background:#e0313122;color:#e03131">과열</span></td><td class="c">2.0~2.5</td><td>+1,820%</td><td>y1 4 수주실재·추격금지</td><td><b>충격=첫 눌림 기회</b>. 증액 1순위</td></tr>
       <tr><td>2</td><td>루멘텀</td><td>LITE</td><td>L6</td><td>★(L6 12.1%)</td><td class="c"><span class="mbadge" style="background:#b8860b22;color:#b8860b">성숙</span></td><td class="c">1.8~2.2</td><td>+1,000%+</td><td>wk −1 트림앰버</td><td>충격 <i>전</i> 트림, 후 과매도 재매수</td></tr>
-      <tr><td>3</td><td>마이크론</td><td>MU</td><td>L3</td><td>★(L3 38.8%)</td><td class="c"><span class="mbadge" style="background:#b8860b22;color:#b8860b">성숙</span></td><td class="c">1.8~2.0</td><td>+660%</td><td>y1 3·6/24 게이트</td><td>분할매수, <b>6/24 실적 게이트</b></td></tr>
+      <tr><td>3</td><td>마이크론</td><td>MU</td><td>L3</td><td>★(L3 38.8%)</td><td class="c"><span class="mbadge" style="background:#b8860b22;color:#b8860b">성숙</span></td><td class="c">1.8~2.0</td><td>+660%</td><td>y1 3·γ open</td><td><b>트림 보류</b>(게이트·γ open), γ 닫힐 때 감축</td></tr>
       <tr><td>4</td><td>삼성전자</td><td>005930</td><td>L3</td><td>★(L3)</td><td class="c"><span class="mbadge" style="background:#b8860b22;color:#b8860b">성숙</span></td><td class="c">1.2~1.5</td><td>+125%(연)</td><td>y1 7 HBM4 미반영</td><td>충격 시 매수(상대 저평가)</td></tr>
       <tr><td>5</td><td>마벨</td><td>MRVL</td><td>L2/L6</td><td>★단독 8.4% (L2 11.1%)</td><td class="c"><span class="mbadge" style="background:#1c7ed622;color:#1c7ed6">가속</span></td><td class="c">2.0~2.2</td><td>+220%</td><td>wk −0.5·ASIC 런웨이</td><td>충격 시 <b>5분할</b>(회복 느림)</td></tr>
       <tr><td>6</td><td>램버스</td><td>RMBS</td><td>L3 IF</td><td>probe ~1%</td><td class="c"><span class="mbadge" style="background:#1c7ed622;color:#1c7ed6">가속</span></td><td class="c">1.5~1.8</td><td>+200~300%</td><td>Q2 7/27 게이트</td><td>충격+$140 눌림+Q2 확인 후</td></tr>
@@ -1957,7 +1957,7 @@ let HOLD_DETAIL=[
  {layer:'L2', name:'마벨',                     ticker:'MRVL',   kind:'종목', w:8.38, tlo:5,  thi:6,  dir:'hold', note:'가속·ASIC+광 양다리, 1y 상방 최상 — ⚑ 밴드 초과(8.4%>6): γ(추정상향 vs 주가 +82%) 점검 후 사이징'},
  {layer:'L2', name:'KODEX 미국AI반도체TOP3+',  ticker:'ETF',    kind:'ETF',  w:2.74, tlo:2.5,thi:3.5,dir:'hold', note:'성숙 대형주 바스켓 — 한계 상방 제한, 유지'},
  {layer:'L2', name:'◷ 퀄컴 (미보유 후보)',        ticker:'QCOM',   kind:'종목', w:0,    tlo:0,  thi:2,  dir:'add',  note:'미보유 — 3중 AND: A $205~220 눌림(진입 중 ✓)+B 7/29 실적(DC매출 정량·2nd고객·EPS상향)+C 매크로. A만으론 행동 없음'},
- {layer:'L3', name:'마이크론',                 ticker:'MU',     kind:'종목', w:10.77,tlo:6,  thi:8,  dir:'trim', note:'성숙·+660%/트림 1순위, 1y 상방 소진 — 6/24 실적 후 감축'},
+ {layer:'L3', name:'마이크론',                 ticker:'MU',     kind:'종목', w:10.77,tlo:6,  thi:8,  dir:'trim', note:'+660%/6/24 블로아웃·γ open 확정 → 트림 보류(게이트), γ 닫힐 때(가격>추정) 감축'},
  {layer:'L3', name:'글로벌HBM반도체',          ticker:'ETF',    kind:'ETF',  w:15.71,tlo:10, thi:12, dir:'trim', note:'국내 HBM 바스켓 +66%·과열 해소 — 1순위 트림 통로'},
  {layer:'L3', name:'삼성전자',                 ticker:'005930', kind:'종목', w:3.60, tlo:3,  thi:5,  dir:'hold', note:'성숙이나 상대 저평가·HBM4 회복 미반영(비대칭 상방) — 유지/충격 시 매수'},
  {layer:'L3', name:'삼성·SK 채권혼합',         ticker:'ETF',    kind:'ETF',  w:8.73, tlo:8,  thi:10, dir:'hold', note:'메모리 방어자산(채권혼합) — 변동성 대비 유지·보강'},
@@ -1983,7 +1983,7 @@ let HOLD_DETAIL=[
 let TARGETS_ASOF='2026-06-21';  /* 적정밴드 판단 기준일 — 매주 holdings.json 동기 시 시황 전망 반영해 수동 갱신 */
 let TARGETS=[
  {layer:'L2',lo:8, hi:9,  dir:'hold', gate:'ASIC 런웨이(m3·y1) 유지 시'},
- {layer:'L3',lo:30,hi:32, dir:'trim', gate:'γ 재확인 + MU 6/24 실적 게이트(추정상향>가격이면 보류)'},
+ {layer:'L3',lo:30,hi:32, dir:'trim', gate:'6/24 해소: γ open 확정(추정>가격) → 트림 보류, γ 닫힐 때(가격이 추정 추월) 재개'},
  {layer:'L4',lo:7, hi:9,  dir:'add',  gate:'구성 검증 통과(6/4·백엔드+테스트+기판 ≈60~75%, 시그널 로그) — 잔여 AND: S5 베이스 재형성 + 매크로 게이트 + 증액 D-1 PDF 최종확인 / 유의: 한미반도체 ~26~29% 집중·FC-BGA 과열노드 포함'},
  {layer:'L6',lo:9, hi:11, dir:'trim', gate:'LITE 트림 앰버(내부자매도·베어풋) — 광 구조 노출은 유지'},
  {layer:'L7',lo:7, hi:9,  dir:'add',  gate:'재분류 후 in-rack 실질 얇음(VRT 단독 ~3.9%) — 추가는 800V HVDC(SiC/GaN) 초입에 한정 / VRT·액체냉각 성숙 추격금지 / 한국 grid ETF는 L7 아님'},
