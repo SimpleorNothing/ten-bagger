@@ -1012,7 +1012,7 @@ table.tk th.c{text-align:center}
   </div></div>
   <div class="cal-row key"><div class="date-chip">06.17</div><div class="cat-dot" style="background:var(--cat-watch)"></div><div class="cal-body"><div class="ti">美-이란 이슬라마바드 MOU 서명·발효 <span class="mbadge" style="background:#5b647022;color:#5b6470">지정학·완화</span></div><div class="mt">14개항 정상 서명(트럼프·페제시키안) — 전 전선 휴전(레바논)·호르무즈 재개통·美 해상봉쇄 30일내 해제·원유수출 면제 즉시·$300B 재건. <b>최종딜 60일창·양측 이탈 가능 = 잠정.</b> 유가↓ 재료지만 6/17 FOMC 매파 확정으로 금리경로 미반영 → 매수 게이트 0/3 불변(로그 전용). 6/19 제네바 기술협상.</div></div></div>
   <div class="cal-row key"><div class="date-chip">06.22</div><div class="cat-dot" style="background:var(--cat-event)"></div><div class="cal-body"><div class="ti">S&amp;P500 편입 효력 <span class="tk">MRVL·FLEX</span> <span class="mbadge" style="background:#e8590c22;color:#e8590c">지수 편입</span></div><div class="mt">장전 효력. <b>관찰 로그(mechanical)</b> — 채점·단계 변경 아님. 편입 범프 미지속 → 보유 MRVL(L2/L6 과중) 트림 윈도로만 활용. AVGO ASIC 다운그레이드 트리거와 시계 분리, 매크로 게이트 0/3이라 신규 매수와 무관.</div></div></div>
-  <div class="cal-row key"><div class="date-chip">~06.24</div><div class="cat-dot" style="background:var(--cat-earn)"></div><div class="cal-body"><div class="ti">마이크론 <span class="tk">MU · AMC</span> <span class="tag-est">IR 확정 전 추정</span></div><div class="mt">메모리(L3 ~40%) 성숙 강등 게이트. y1 3 · 7월 지수드래그보다 <b>선행·우선</b> 이벤트.</div></div></div>
+  <div class="cal-row key"><div class="date-chip">06.24</div><div class="cat-dot" style="background:var(--cat-earn)"></div><div class="cal-body"><div class="ti">마이크론 <span class="tk">MU · AMC</span> <span class="mbadge" style="background:#0ca67822;color:#0ca678">D+1 ✓ γ open·강등 기각</span></div><div class="mt"><b>블로아웃 비트앤레이즈</b> — Rev $41.46B(컨센 ~$35.8B)·EPS $25.11(~$20.2)·GM 84.9%, <b>FQ4 $50B·EPS $30~32</b> 컨센 상회. 성숙 강등 도전 <b>기각·γ open</b>(추정 상향&gt;가격=fwd 멀티플 압축). <b>L3 트림 게이트 '추정&gt;가격이면 보류' 발동</b> → 집중도(43.6%) 정리와 충돌, 보류/신중. 차기 9/22.</div></div></div>
   <div class="cal-row"><div class="date-chip">06월말</div><div class="cat-dot" style="background:var(--cat-infl)"></div><div class="cal-body"><div class="ti">美 PCE (5월분) <span class="tag-est">BEA 확정</span></div><div class="mt">Fed 선호 지표. CPI와 함께 6/16 FOMC 직후 인플레 재확인.</div></div></div>
 
   <div class="cal-month">7월 <span class="mo-sub">— 실적 러시 + SPCX 지수편입이 겹치는 최대 분기점</span></div>
@@ -2244,7 +2244,7 @@ const scoreCol=s=>s>=8?STAGE_HEX.초입:s>=5?STAGE_HEX.가속:s>=3?STAGE_HEX.성
 /* ===== PRICE DISPLAY ===== */
 let PRICES={},PRICES_ASOF=null;
 let NEWS_ASOF=null,NEWS_COUNT=0;
-const DIGEST_GATE='MU 6/24 실적';  /* 다음 밴드 검토 게이트 — 실적 게이트마다 수동 갱신 */
+const DIGEST_GATE='GOOGL 7/22 capex';  /* 다음 밴드 검토 게이트 — 실적 게이트마다 수동 갱신 (MU 6/24 경과·블로아웃·γ open) */
 function fmtMoney(v,cur){if(v==null)return '';if(cur==='KRW')return '₩'+Math.round(v).toLocaleString();if(cur==='JPY')return '¥'+Math.round(v).toLocaleString();if(cur==='TWD')return 'NT$'+Math.round(v).toLocaleString();return '$'+Math.round(v).toLocaleString();}
 function priceHTML(c){const q=PRICES[c.id];if(!q||q.price==null)return '';const ch=q.changePct;const col=ch==null?'var(--dim)':ch>=0?'var(--dawn)':'var(--hot)';const sg=ch==null?'':(' '+(ch>=0?'▲':'▼')+Math.round(Math.abs(ch))+'%');return `<span style="font-family:var(--mono);font-weight:600;white-space:nowrap;color:${col}">${fmtMoney(q.price,q.currency)}${sg}</span>`;}
 function pricePill(c){const h=priceHTML(c);return h?`<span class="pill">${h}</span>`:'';}
@@ -2255,7 +2255,7 @@ function infoAsof(){if(!SIGNAL_LOG||!SIGNAL_LOG.length)return null;let best=null
    document.lastModified는 CSS·JS·문구 등 정보와 무관한 수정·재배포에도 튀므로 쓰지 않고,
    "정보를 실제로 고칠 때만" 손으로 갱신하는 아래 상수에 연동한다.
    형식: ISO8601(+09:00 권장). 정보 변경 없는 배포에서는 절대 건드리지 말 것. */
-const VIEW_UPDATED='2026-06-18T23:50:00+09:00';
+const VIEW_UPDATED='2026-06-25T09:30:00+09:00';
 function fmtUpd(v){if(!v)return null;
  if(/KST$/.test(v))return v;                         // 이미 포맷된 상수
  if(/^\d{4}-\d{2}-\d{2}$/.test(v))return v+' KST';    // 날짜만(예: signals.json asOf)
