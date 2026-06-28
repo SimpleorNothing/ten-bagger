@@ -27,9 +27,11 @@ jobs:
         run: node scripts/fetch-prices.mjs
       - name: Update gamma (γ)
         run: node scripts/fetch-gamma.mjs
+      - name: Derive cycle E-cluster
+        run: node scripts/derive-cycle-e.mjs        
       - name: Commit & push if changed (rebase-safe)
         run: |
-          FILES="prices.json charts.json gamma.json"
+          FILES="prices.json charts.json gamma.json cycle.json"
           if [ -z "$(git status --porcelain $FILES)" ]; then
             echo "No change in $FILES."; exit 0
           fi
