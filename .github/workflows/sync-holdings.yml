@@ -4,8 +4,10 @@ name: Sync holdings from Drive
 # holdings.json을 OPS §9-2(수동) → §9-1(자동 cron)로 승격.
 on:
   schedule:
-    - cron: '0 13 * * 6'    # 토 22:00 KST (토 13:00 UTC) · 주 1회
+    - cron: '0 13 * * 6'              # 토 22:00 KST 안전망(유지)
   workflow_dispatch: {}
+  repository_dispatch:
+    types: [drive-holdings-updated]   # ← Apps Script가 쏘는 이벤트
 
 permissions:
   contents: write
