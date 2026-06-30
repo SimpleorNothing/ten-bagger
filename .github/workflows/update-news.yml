@@ -2,8 +2,11 @@ name: Update news feed
 
 on:
   schedule:
-    - cron: '42 21 * * *'   # 06:42 KST · 1일 1회 (시세 06:37과 분산 — 같은 브랜치 push 충돌 방지)
-  workflow_dispatch: {}      # 수동 실행도 가능 (첫 실행 권장)
+    # GitHub Actions 스케줄러는 정시(0분) 부하로 누락이 잦음 → 정시 회피 + 짧은 창에 다중 트리거.
+    # 가드 스텝이 "최근 6h 내 이미 갱신됐으면 스킵"하므로 하루 1회 성격은 유지(중복 수집 없음).
+    - cron: '12,42 21 * * *'   # 06:12·06:42 KST (주 트리거; 시세 06:37과 분산)
+    - cron: '12 22 * * *'      # 07:12 KST (앞 트리거 누락 시 흡수용 백업)
+  workflow_dispatch: {}      # 수동 실행 (가드 우회 — 첫 실행/강제 재수집용)
 
 permissions:
   contents: write
@@ -20,12 +23,33 @@ jobs:
         with:
           ref: claude/wizardly-rubin-SubA1
           fetch-depth: 0
+      - name: Guard - 최근에 이미 갱신됐으면 스킵 (수동 실행은 우회)
+        id: guard
+        env:
+          MANUAL: ${{ github.event_name == 'workflow_dispatch' }}
+        run: |
+          if [ "$MANUAL" = "true" ]; then
+            echo "수동 실행 → 가드 우회, 진행"
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          DECISION=$(node -e "try{const d=require('./news.json');const ageH=(Date.now()-new Date(d.asOf).getTime())/3600000;process.stderr.write('asOf='+d.asOf+' age='+ageH.toFixed(2)+'h\n');process.stdout.write(ageH<6?'skip':'run')}catch(e){process.stderr.write('no valid asOf: '+e.message+'\n');process.stdout.write('run')}")
+          if [ "$DECISION" = "skip" ]; then
+            echo "이번 사이클(6h 이내) 이미 갱신됨 → 후속 트리거 스킵"
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "미갱신(또는 asOf 없음) → 진행"
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
       - uses: actions/setup-node@v4
+        if: steps.guard.outputs.skip != 'true'
         with:
           node-version: '20'
       - name: Fetch latest news
+        if: steps.guard.outputs.skip != 'true'
         run: node scripts/fetch-news.mjs
       - name: Commit & push if changed (rebase-safe)
+        if: steps.guard.outputs.skip != 'true'
         run: |
           FILE="news.json"
           if [ -z "$(git status --porcelain "$FILE")" ]; then
