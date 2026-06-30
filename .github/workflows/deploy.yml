@@ -2,7 +2,7 @@ name: Deploy to Cloudflare Workers
 
 on:
   push:
-    branches: [claude/wizardly-rubin-SubA1]
+    branches: [main]
     paths-ignore:
       - 'prices.json'        # 시세 크론 커밋은 배포 불필요
       - 'news.json'          # 뉴스 크론 커밋은 배포 불필요(리포 전용)
@@ -19,7 +19,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: claude/wizardly-rubin-SubA1
+          ref: main
 
       - uses: actions/setup-node@v4
         with:
