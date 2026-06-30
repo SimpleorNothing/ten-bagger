@@ -22,7 +22,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: claude/wizardly-rubin-SubA1
+          ref: main
           fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
@@ -44,8 +44,8 @@ jobs:
           git add "$FILE"
           git commit -m "chore: sync holdings.json from 자산현황 (auto)"
           for i in 1 2 3 4 5; do
-            if git pull --rebase --autostash origin claude/wizardly-rubin-SubA1 \
-               && git push origin HEAD:claude/wizardly-rubin-SubA1; then
+            if git pull --rebase --autostash origin main \
+               && git push origin HEAD:main; then
               echo "pushed on attempt $i"; exit 0
             fi
             git rebase --abort 2>/dev/null || true

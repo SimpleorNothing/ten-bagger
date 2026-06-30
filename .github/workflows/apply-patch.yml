@@ -7,7 +7,7 @@ name: Apply index.html patch
 
 on:
   push:
-    branches: [claude/wizardly-rubin-SubA1]
+    branches: [main]
     paths: ['patches/*.b64']
   workflow_dispatch: {}
 
@@ -24,7 +24,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: claude/wizardly-rubin-SubA1
+          ref: main
           fetch-depth: 0
 
       - uses: actions/setup-node@v4
@@ -77,7 +77,7 @@ jobs:
           if git diff --cached --quiet; then echo "nothing to commit"; exit 0; fi
           git commit -m "chore: apply index.html patch via patches/*.b64 (≤200KB MCP 파이프라인)"
           for i in 1 2 3 4 5; do
-            if git pull --rebase --autostash origin claude/wizardly-rubin-SubA1 && git push origin HEAD:claude/wizardly-rubin-SubA1; then
+            if git pull --rebase --autostash origin main && git push origin HEAD:main; then
               echo "pushed on attempt $i"; exit 0
             fi
             git rebase --abort 2>/dev/null || true

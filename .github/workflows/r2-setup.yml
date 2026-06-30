@@ -22,7 +22,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: claude/wizardly-rubin-SubA1
+          ref: main
           # PAT 로 체크아웃해야 push/PR 권한이 붙는다(기본 GITHUB_TOKEN 은 contents:read 라 403).
           token: ${{ secrets.AUTO_MERGE_TOKEN }}
 
@@ -61,6 +61,6 @@ jobs:
           git commit -m "feat(memo): MEMO_BUCKET(R2) 바인딩 활성화 — R2 클라우드 저장 켜기"
           # 원격 인증은 checkout 이 PAT(AUTO_MERGE_TOKEN)로 이미 구성. push 는 그 자격으로 나간다.
           git push -u origin "$BR"
-          gh pr create --base claude/wizardly-rubin-SubA1 --head "$BR" \
+          gh pr create --base main --head "$BR" \
             --title "메모 Cloudflare R2 활성화 (MEMO_BUCKET 연결)" \
             --body "Setup MEMO R2 워크플로가 생성/확인한 R2 버킷을 wrangler.jsonc 의 MEMO_BUCKET 바인딩에 연결합니다. 머지·배포되면 메모가 Cloudflare R2(notes.json)에 저장돼 기기 간 동기화됩니다."
