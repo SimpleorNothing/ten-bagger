@@ -12,4 +12,5 @@ jobs:
         with: { node-version: '20' }
       - run: node scripts/daily-brief-slack.mjs
         env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          SLACK_DM_CHANNEL: U0XXXXXXX
