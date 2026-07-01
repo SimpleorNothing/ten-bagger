@@ -2,14 +2,15 @@
 # ──────────────────────────────────────────────────────────────────────────
 # 알파맵 — 테슬라 분기 인도 보고 자동 센싱 (위성 포지션 / narrative≠numbers)
 #
-# ⚠️ 운영자 수동 교체 필수:
-#   GitHub App에는 .github/workflows/ 쓰기 권한이 없어 MCP 푸시 시 403.
-#   → 이 파일은 SimpleorNothing이 직접 리포에 커밋해야 합니다.
+# ⚠️ 배치 규칙 (기존 크론과 동일):
+#   이 워크플로·스크립트는 default 브랜치 main 에 둬야 좌측 목록/cron/수동실행 인식.
+#   claude/... 브랜치에만 두면 GitHub이 스케줄을 등록하지 않음.
+#   → main 에 fetch-tsla-deliveries.yml(.github/workflows/) + fetch-tsla-deliveries.mjs(scripts/) 커밋.
 #
 # 동작:
 #   분기 2일(1·4·7·10월) KST 밤~익일 아침에 Tesla IR 인도 보도자료를 fetch,
 #   인도량·에너지 GWh를 파싱 → 컨센(IR 페이지) 대비 비트/미스 1차 태깅 →
-#   signal_log.json에 엔트리 append(누적 판단 컨텍스트) → Telegram 푸시(선택).
+#   signal_log.json에 엔트리 append(누적 판단 컨텍스트) → Slack 푸시(선택).
 #
 #   ※ 자동은 '숫자 적재 + 1차 태깅'까지만. 트림 실행 판정은 호출 세션에서.
 # ──────────────────────────────────────────────────────────────────────────
@@ -36,10 +37,11 @@ jobs:
   fetch:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout (branch)
+      - name: Checkout (main)
         uses: actions/checkout@v4
         with:
-          ref: claude/wizardly-rubin-SubA1
+          ref: main
+          fetch-depth: 0
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -53,17 +55,24 @@ jobs:
           # 컨센 자동 파싱 실패 시 폴백 상수(매 분기 갱신 권장)
           TSLA_CONSENSUS_FALLBACK: "406024"
 
-      - name: Commit signal_log (변경 있을 때만)
+      - name: Commit & push signal_log (변경 있을 때만·rebase-safe)
         run: |
-          if [[ -n "$(git status --porcelain signal_log.json)" ]]; then
-            git config user.name  "alpha-map-bot"
-            git config user.email "bot@simpleornothing.com"
-            git add signal_log.json
-            git commit -m "tsla: 분기 인도 보고 자동 적재 (auto)"
-            git push origin claude/wizardly-rubin-SubA1
-          else
-            echo "변경 없음 — 이미 적재됐거나 보도자료 미게시. skip."
+          if [ -z "$(git status --porcelain signal_log.json)" ]; then
+            echo "변경 없음 — 이미 적재됐거나 보도자료 미게시. skip."; exit 0
           fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add signal_log.json
+          git commit -m "tsla: 분기 인도 보고 자동 적재 (auto)"
+          for i in 1 2 3 4 5; do
+            if git pull --rebase --autostash origin main \
+               && git push origin HEAD:main; then
+              echo "pushed on attempt $i"; exit 0
+            fi
+            git rebase --abort 2>/dev/null || true
+            echo "push attempt $i lost the race; backing off"; sleep $(( RANDOM % 6 + 3 ))
+          done
+          echo "::error::push failed after 5 attempts"; exit 1
 
       # ── 알림: Slack Incoming Webhook → 채널 푸시 ─────────────────────────
       #   SLACK_WEBHOOK_URL secret 필요. 미설정 시 자동 skip.
