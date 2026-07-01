@@ -36,26 +36,34 @@ function candidateUrls(qi, year) {
 
 async function fetchText(url) {
   try {
-    const r = await fetch(url, { headers: { "user-agent": "alpha-map-bot/1.0" } });
+    const r = await fetch(url, { headers: {
+      // Tesla IR은 봇 UA를 차단 → 일반 브라우저 UA로 우회
+      "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+      "accept-language": "en-US,en;q=0.9",
+    } });
     if (!r.ok) return null;
     return await r.text();
   } catch { return null; }
 }
 
-// 보도자료 본문에서 인도/생산/에너지 파싱
+// 보도자료에서 인도/생산/에너지 파싱
+// 1순위: 표 'Total <생산> <인도>' 정확값(408,386/358,023) — 태그·마크다운 모두 대응
+// 2순위: 본문 'over N vehicles' 반올림값(408,000/358,000) 폴백
 function parseReport(text) {
   if (!text) return null;
-  const norm = text.replace(/&nbsp;/g, " ").replace(/\s+/g, " ");
-  const del = norm.match(/delivered over ([\d,]+) vehicles/i);
-  const prod = norm.match(/produced over ([\d,]+) vehicles/i);
-  const gwh = norm.match(/deployed ([\d.]+) GWh/i);
-  if (!del) return null;
-  const toNum = (s) => Number(s.replace(/,/g, ""));
-  return {
-    deliveries: toNum(del[1]),
-    production: prod ? toNum(prod[1]) : null,
-    energyGWh: gwh ? Number(gwh[1]) : null,
-  };
+  const norm = text.replace(/<[^>]+>/g, " ").replace(/&nbsp;/g, " ")
+                   .replace(/&amp;/g, "&").replace(/\s+/g, " ");
+  const toNum = (s) => Number(String(s).replace(/,/g, ""));
+  const total   = norm.match(/Total[^\d]{0,20}([\d,]{5,})[^\d]{1,20}([\d,]{5,})/i);
+  const delOver = norm.match(/delivered\s+over\s+([\d,]+)\s+vehicles/i);
+  const prodOver= norm.match(/produced\s+over\s+([\d,]+)\s+vehicles/i);
+  const gwh     = norm.match(/deployed\s+([\d.]+)\s*GWh/i);
+
+  let production = null, deliveries = null, exact = false;
+  if (total) { production = toNum(total[1]); deliveries = toNum(total[2]); exact = true; }
+  else if (delOver) { deliveries = toNum(delOver[1]); production = prodOver ? toNum(prodOver[1]) : null; }
+  if (deliveries == null) return null;   // 파싱 실패 → 상위에서 skip(가짜값 절대 안 보냄)
+  return { deliveries, production, energyGWh: gwh ? Number(gwh[1]) : null, exact };
 }
 
 // IR 컨센 페이지에서 해당 분기 Total 컨센 파싱(폴백: env 상수)
@@ -137,7 +145,7 @@ async function main() {
   const summary =
     `🚗 TSLA ${qLabel} 인도 보고\n`
   + `인도 ${fmt(report.deliveries)} / 컨센 ${fmt(consensus)} → *${c.tag} ${pctStr}*\n`
-  + `생산 ${fmt(report.production)} · 에너지 ${report.energyGWh ?? "—"}GWh\n`
+  + `생산 ${fmt(report.production)} · 에너지 ${report.energyGWh ?? "—"}GWh${report.exact ? "" : " (본문 근사값)"}\n`
   + `※ 1차 태깅. 매물벽·거래량 반응은 알파맵 호출로 확정.`;
   const out = process.env.GITHUB_OUTPUT;
   if (out) fs.appendFileSync(out, `summary<<EOF\n${summary}\nEOF\n`);
