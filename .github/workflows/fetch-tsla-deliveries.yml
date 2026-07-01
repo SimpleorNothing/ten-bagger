@@ -1,0 +1,82 @@
+# .github/workflows/fetch-tsla-deliveries.yml
+# ──────────────────────────────────────────────────────────────────────────
+# 알파맵 — 테슬라 분기 인도 보고 자동 센싱 (위성 포지션 / narrative≠numbers)
+#
+# ⚠️ 운영자 수동 교체 필수:
+#   GitHub App에는 .github/workflows/ 쓰기 권한이 없어 MCP 푸시 시 403.
+#   → 이 파일은 SimpleorNothing이 직접 리포에 커밋해야 합니다.
+#
+# 동작:
+#   분기 2일(1·4·7·10월) KST 밤~익일 아침에 Tesla IR 인도 보도자료를 fetch,
+#   인도량·에너지 GWh를 파싱 → 컨센(IR 페이지) 대비 비트/미스 1차 태깅 →
+#   signal_log.json에 엔트리 append(누적 판단 컨텍스트) → Telegram 푸시(선택).
+#
+#   ※ 자동은 '숫자 적재 + 1차 태깅'까지만. 트림 실행 판정은 호출 세션에서.
+# ──────────────────────────────────────────────────────────────────────────
+name: fetch-tsla-deliveries
+
+on:
+  schedule:
+    # cron은 UTC. KST = UTC+9.
+    # 1차: 분기 2일 23:50 KST = 같은 날 14:50 UTC (발표 윈도 마감 직후)
+    - cron: "50 14 2 1,4,7,10 *"
+    # 2차(발표 지연 대비): 분기 3일 09:00 KST = 같은 날 00:00 UTC
+    #   스크립트가 idempotent라 이미 적재됐으면 자동 skip
+    - cron: "0 0 3 1,4,7,10 *"
+  workflow_dispatch: {}   # 수동 트리거(테스트용)
+
+permissions:
+  contents: write          # signal_log.json 커밋용
+
+concurrency:
+  group: tsla-deliveries
+  cancel-in-progress: false
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout (branch)
+        uses: actions/checkout@v4
+        with:
+          ref: claude/wizardly-rubin-SubA1
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Fetch & tag TSLA deliveries
+        id: run
+        run: node scripts/fetch-tsla-deliveries.mjs
+        env:
+          # 컨센 자동 파싱 실패 시 폴백 상수(매 분기 갱신 권장)
+          TSLA_CONSENSUS_FALLBACK: "406024"
+
+      - name: Commit signal_log (변경 있을 때만)
+        run: |
+          if [[ -n "$(git status --porcelain signal_log.json)" ]]; then
+            git config user.name  "alpha-map-bot"
+            git config user.email "bot@simpleornothing.com"
+            git add signal_log.json
+            git commit -m "tsla: 분기 인도 보고 자동 적재 (auto)"
+            git push origin claude/wizardly-rubin-SubA1
+          else
+            echo "변경 없음 — 이미 적재됐거나 보도자료 미게시. skip."
+          fi
+
+      # ── 알림: Slack Incoming Webhook → 채널 푸시 ─────────────────────────
+      #   SLACK_WEBHOOK_URL secret 필요. 미설정 시 자동 skip.
+      #   jq로 개행 포함 텍스트를 안전하게 JSON 인코딩(mrkdwn *bold* 렌더).
+      - name: Notify (Slack)
+        if: ${{ steps.run.outputs.summary != '' }}
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SUMMARY:       ${{ steps.run.outputs.summary }}
+        run: |
+          if [[ -z "$SLACK_WEBHOOK" ]]; then
+            echo "SLACK_WEBHOOK_URL 미설정 — 알림 skip"; exit 0
+          fi
+          jq -n --arg t "$SUMMARY" '{text:$t}' \
+            | curl -sS -X POST -H 'Content-type: application/json' \
+                   --data @- "$SLACK_WEBHOOK" >/dev/null
