@@ -1,0 +1,15 @@
+name: daily-brief-slack
+on:
+  schedule:
+    - cron: '0 22 * * 1-5'   # 22:00 UTC = 07:00 KST(익일), 월~금 US마감
+  workflow_dispatch:
+jobs:
+  brief:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: node scripts/daily-brief-slack.mjs
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
