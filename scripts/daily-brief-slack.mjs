@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+
 const TOKEN = process.env.SLACK_BOT_TOKEN;
 const DM = process.env.SLACK_DM_CHANNEL;
 const UA = { headers: { "User-Agent": "Mozilla/5.0" } };
@@ -7,10 +9,16 @@ async function yahoo(sym) {
   const m = (await (await fetch(u, UA)).json()).chart.result[0].meta;
   return { price: m.regularMarketPrice, prev: m.chartPreviousClose };
 }
-async function fng() {
-  const d = new Date().toISOString().slice(0, 10);
-  const j = await (await fetch(`https://production.dataviz.cnn.io/index/fearandgreed/graphdata/${d}`, UA)).json();
-  return { score: Math.round(j.fear_and_greed.score), rating: j.fear_and_greed.rating };
+// CNN 라이브 엔드포인트는 GitHub Actions IP를 봇 차단(418) → 로컬 signals.json(크론 갱신) 사용
+function fng() {
+  try {
+    const v = JSON.parse(readFileSync("signals.json", "utf8")).fearGreed;
+    if (typeof v !== "number") return { score: "—", rating: "" };
+    const label = v < 25 ? "극단적 공포" : v < 45 ? "공포" : v <= 55 ? "중립" : v <= 75 ? "탐욕" : "극단적 탐욕";
+    return { score: v, rating: label };
+  } catch {
+    return { score: "—", rating: "" };
+  }
 }
 const GRADE_W = { "긴급": 3, "주요": 2, "주시": 1, "참고": 0 };
 async function applianceNews() {
@@ -26,9 +34,10 @@ async function applianceNews() {
 }
 const pct = (n, p) => `${n >= p ? "▲" : "▼"}${Math.abs((n - p) / p * 100).toFixed(2)}%`;
 
-const [ndx, tnx, wti, ks, fg, news] = await Promise.all(
-  [yahoo("^IXIC"), yahoo("^TNX"), yahoo("CL=F"), yahoo("^KS11"), fng(), applianceNews()]
+const [ndx, tnx, wti, ks, news] = await Promise.all(
+  [yahoo("^IXIC"), yahoo("^TNX"), yahoo("CL=F"), yahoo("^KS11"), applianceNews()]
 );
+const fg = fng();
 
 const text =
   `*📊 알파맵 데일리 · ${new Date().toLocaleDateString("ko-KR")}*\n` +
@@ -36,7 +45,7 @@ const text =
   `• 美 10Y: *${tnx.price.toFixed(2)}%*\n` +
   `• WTI: *$${wti.price.toFixed(2)}* (${pct(wti.price, wti.prev)})\n` +
   `• 코스피(전일): *${ks.price.toLocaleString()}* (${pct(ks.price, ks.prev)})\n` +
-  `• CNN F&G: *${fg.score}* (${fg.rating})\n\n` +
+  `• CNN F&G: *${fg.score}*${fg.rating ? ` (${fg.rating})` : ""}\n\n` +
   `*🏠 가전 주요뉴스*  _(mi.samsungda.net)_\n${news}`;
 
 const r = await fetch("https://slack.com/api/chat.postMessage", {
