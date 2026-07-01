@@ -4358,6 +4358,39 @@ buildChips(); buildBands(); renderAll();
   function readFileAsDataURL(file){
     return new Promise(function(res,rej){var fr=new FileReader();fr.onload=function(){res(fr.result);};fr.onerror=function(){rej(fr.error);};fr.readAsDataURL(file);});
   }
+  // pdf.js 지연 로드 — PDF 첨부 시에만 CDN에서 불러온다(초기 로딩 부담 없음)
+  var _pdfjsP=null;
+  function loadPdfjs(){
+    if(window.pdfjsLib)return Promise.resolve(window.pdfjsLib);
+    if(_pdfjsP)return _pdfjsP;
+    _pdfjsP=new Promise(function(res,rej){
+      var s=document.createElement('script');
+      s.src='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+      s.onload=function(){try{window.pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';}catch(e){}res(window.pdfjsLib);};
+      s.onerror=function(){_pdfjsP=null;rej(new Error('pdfjs load failed'));};
+      document.head.appendChild(s);
+    });
+    return _pdfjsP;
+  }
+  function dataUrlToBytes(dataUrl){
+    var base64=(dataUrl||'').split(',')[1]||'';var bin=atob(base64);var len=bin.length;var bytes=new Uint8Array(len);
+    for(var i=0;i<len;i++)bytes[i]=bin.charCodeAt(i);return bytes;
+  }
+  // PDF 첫 페이지를 JPEG 데이터URL 미리보기로 렌더
+  async function pdfFirstPagePoster(dataUrl){
+    try{
+      var lib=await loadPdfjs();
+      var pdf=await lib.getDocument({data:dataUrlToBytes(dataUrl)}).promise;
+      var page=await pdf.getPage(1);
+      var vp0=page.getViewport({scale:1});
+      var scale=Math.min(2.5,Math.max(0.5,720/(vp0.width||720)));
+      var vp=page.getViewport({scale:scale});
+      var c=document.createElement('canvas');c.width=Math.round(vp.width);c.height=Math.round(vp.height);
+      await page.render({canvasContext:c.getContext('2d'),viewport:vp}).promise;
+      try{return c.toDataURL('image/jpeg',0.82);}catch(e){return null;}
+    }catch(e){return null;}
+  }
+  function isPdfMeta(meta,name){return (meta&&meta.type==='application/pdf')||/\.pdf$/i.test(name||(meta&&meta.name)||'');}
   async function addFiles(files){
     for(var i=0;i<files.length;i++){
       var f=files[i];
@@ -4365,8 +4398,13 @@ buildChips(); buildBands(); renderAll();
       var d=isImg?await compress(f):await readFileAsDataURL(f);
       if(d){
         draft.push(d);draftw.push(320);
-        draftmeta.push({name:f.name,type:f.type||'',isImg:isImg});
+        var meta={name:f.name,type:f.type||'',isImg:isImg};
+        draftmeta.push(meta);
         insertImgToken(draft.length);
+        if(!isImg&&isPdfMeta(meta,f.name)){
+          var _idx=draft.length-1,_data=d;
+          pdfFirstPagePoster(_data).then(function(idx,poster){if(poster&&draftmeta[idx]){draftmeta[idx].poster=poster;renderThumbs();}}.bind(null,_idx));
+        }
       }
     }
     renderThumbs();
@@ -4387,6 +4425,8 @@ buildChips(); buildBands(); renderAll();
       var wrap=document.createElement('div');wrap.className='m-thumb';
       if(meta.isImg!==false){
         var im=document.createElement('img');im.src=d;wrap.appendChild(im);
+      } else if(meta.poster){
+        var imp=document.createElement('img');imp.src=meta.poster;imp.title=meta.name||'파일';wrap.appendChild(imp);
       } else {
         var fc=document.createElement('div');fc.className='m-thumb-file';
         var ic=document.createElement('span');ic.className='m-tf-icon';ic.textContent=fileIcon(meta.type);
@@ -4470,6 +4510,22 @@ buildChips(); buildBands(); renderAll();
       attachResize(h,im,wrap,n,i);
       wrap.appendChild(im);wrap.appendChild(h);
     } else {
+      if(meta.poster){
+        var imp=document.createElement('img');imp.src=meta.poster;imp.loading='lazy';imp.title='첫 페이지 미리보기';
+        imp.style.cssText='display:block;max-width:320px;width:100%;border:1px solid var(--line2);border-radius:10px;margin:4px 0;cursor:zoom-in;';
+        imp.onclick=function(){lightbox(meta.poster);};
+        wrap.appendChild(imp);
+      } else if(isPdfMeta(meta)){
+        // 이미 저장된 PDF도 첫 페이지 미리보기를 지연 생성해 채워준다
+        pdfFirstPagePoster(src).then(function(poster){
+          if(!poster)return;meta.poster=poster;
+          if(Array.isArray(n.imgmeta)&&n.imgmeta[i])n.imgmeta[i].poster=poster;persist();
+          var imp2=document.createElement('img');imp2.src=poster;imp2.loading='lazy';imp2.title='첫 페이지 미리보기';
+          imp2.style.cssText='display:block;max-width:320px;width:100%;border:1px solid var(--line2);border-radius:10px;margin:4px 0;cursor:zoom-in;';
+          imp2.onclick=function(){lightbox(poster);};
+          wrap.insertBefore(imp2,wrap.firstChild);
+        });
+      }
       var a=document.createElement('a');a.href=src;a.download=meta.name||'파일';
       a.className='nt-file-link';a.style.cssText='display:flex;align-items:center;gap:8px;padding:10px 14px;border:1px solid var(--line2);border-radius:10px;background:var(--panel2);color:var(--dim);text-decoration:none;font:400 13px var(--serif);max-width:320px;margin:4px 0;word-break:break-all;';
       var ic=document.createElement('span');ic.textContent=fileIcon(meta.type);ic.style.fontSize='20px';
@@ -4514,10 +4570,22 @@ buildChips(); buildBands(); renderAll();
     if((n.imgs||[]).length){
       var firstImgIdx=-1;(n.imgs||[]).forEach(function(s,idx){if(firstImgIdx<0&&((n.imgmeta||[])[idx]||{}).isImg!==false)firstImgIdx=idx;});
       var cov=document.createElement('div');cov.className='mc-cover';
+      var posterIdx=-1;(n.imgmeta||[]).forEach(function(m,idx){if(posterIdx<0&&m&&m.poster)posterIdx=idx;});
       if(firstImgIdx>=0){
         var im=document.createElement('img');im.src=n.imgs[firstImgIdx];im.loading='lazy';cov.appendChild(im);
+      } else if(posterIdx>=0){
+        var imp=document.createElement('img');imp.src=(n.imgmeta[posterIdx].poster);imp.loading='lazy';cov.appendChild(imp);
       } else {
         var fc2=document.createElement('div');fc2.style.cssText='width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:32px;background:var(--panel2);';fc2.textContent=fileIcon(((n.imgmeta||[])[0]||{}).type);cov.appendChild(fc2);
+        // 저장된 PDF면 첫 페이지 미리보기를 지연 생성해 아이콘을 대체
+        var pIdx=-1;(n.imgmeta||[]).forEach(function(m,idx){if(pIdx<0&&isPdfMeta(m))pIdx=idx;});
+        if(pIdx>=0&&n.imgs&&n.imgs[pIdx]){
+          pdfFirstPagePoster(n.imgs[pIdx]).then(function(poster){
+            if(!poster)return;if(n.imgmeta[pIdx])n.imgmeta[pIdx].poster=poster;persist();
+            cov.innerHTML='';var im2=document.createElement('img');im2.src=poster;im2.loading='lazy';cov.appendChild(im2);
+            if(n.imgs.length>1){var b2=document.createElement('span');b2.className='mc-imgn';b2.textContent='+'+(n.imgs.length-1);cov.appendChild(b2);}
+          });
+        }
       }
       if(n.imgs.length>1){var b=document.createElement('span');b.className='mc-imgn';b.textContent='+'+(n.imgs.length-1);cov.appendChild(b);}
       el.appendChild(cov);
