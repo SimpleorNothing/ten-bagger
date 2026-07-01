@@ -1,4 +1,5 @@
-const SLACK = process.env.SLACK_WEBHOOK_URL;
+const TOKEN = process.env.SLACK_BOT_TOKEN;
+const DM = process.env.SLACK_DM_CHANNEL;
 const UA = { headers: { "User-Agent": "Mozilla/5.0" } };
 
 async function yahoo(sym) {
@@ -32,16 +33,20 @@ const [ndx, tnx, wti, ks, fg, news] = await Promise.all(
 const text =
   `*📊 알파맵 데일리 · ${new Date().toLocaleDateString("ko-KR")}*\n` +
   `• 나스닥: *${ndx.price.toLocaleString()}* (${pct(ndx.price, ndx.prev)})\n` +
-  `• 美 10Y: *${tnx.price.toFixed(3)}* ← 스케일 검증\n` +
+  `• 美 10Y: *${tnx.price.toFixed(2)}%*\n` +
   `• WTI: *$${wti.price.toFixed(2)}* (${pct(wti.price, wti.prev)})\n` +
   `• 코스피(전일): *${ks.price.toLocaleString()}* (${pct(ks.price, ks.prev)})\n` +
   `• CNN F&G: *${fg.score}* (${fg.rating})\n\n` +
   `*🏠 가전 주요뉴스*  _(mi.samsungda.net)_\n${news}`;
 
-const r = await fetch(SLACK, {
+const r = await fetch("https://slack.com/api/chat.postMessage", {
   method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ text }),
+  headers: {
+    "Content-Type": "application/json; charset=utf-8",
+    "Authorization": `Bearer ${TOKEN}`,
+  },
+  body: JSON.stringify({ channel: DM, text }),
 });
-if (!r.ok) throw new Error(`Slack ${r.status}`);
-console.log("sent");
+const j = await r.json();
+if (!j.ok) throw new Error(`Slack ${j.error}`);
+console.log("sent", j.ts);
