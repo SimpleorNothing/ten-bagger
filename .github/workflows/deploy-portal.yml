@@ -1,0 +1,68 @@
+name: Deploy samsungda-portal
+
+# samsungda-portal 워커는 wrangler.jsonc 의 version_metadata 바인딩 때문에
+# Cloudflare 대시보드 git 자동배포에서 제외된다. 포털 레포에는 워크플로 파일을
+# 직접 넣을 수 없어(GitHub App workflow 권한 403), 이 리포가 대신
+# 포털 main 을 주기적으로 확인해 새 커밋이 있으면 wrangler deploy 를 실행한다.
+# 같은 SHA 는 cache 마커로 스킵하므로 변경 없을 땐 배포가 일어나지 않는다.
+# 수동 즉시 배포: Actions 탭 → Deploy samsungda-portal → Run workflow.
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-portal
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout samsungda-portal (public repo)
+        uses: actions/checkout@v4
+        with:
+          repository: SimpleorNothing/samsungda-portal
+          ref: main
+
+      - name: 포털 main HEAD 확인
+        id: head
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: 이미 배포한 SHA 인지 검사
+        id: guard
+        uses: actions/cache/restore@v4
+        with:
+          path: .deployed
+          key: portal-deployed-${{ steps.head.outputs.sha }}
+
+      - uses: actions/setup-node@v4
+        if: steps.guard.outputs.cache-hit != 'true' || github.event_name == 'workflow_dispatch'
+        with:
+          node-version: '20'
+
+      - name: Install Wrangler v4
+        if: steps.guard.outputs.cache-hit != 'true' || github.event_name == 'workflow_dispatch'
+        run: npm install -g wrangler@4
+
+      - name: Deploy
+        if: steps.guard.outputs.cache-hit != 'true' || github.event_name == 'workflow_dispatch'
+        run: wrangler deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+      # 배포 성공 시에만 마커 저장 → 실패하면 다음 크론에서 자동 재시도
+      - name: 배포 마커 저장
+        if: steps.guard.outputs.cache-hit != 'true'
+        run: echo "${{ steps.head.outputs.sha }}" > .deployed
+
+      - uses: actions/cache/save@v4
+        if: steps.guard.outputs.cache-hit != 'true'
+        with:
+          path: .deployed
+          key: portal-deployed-${{ steps.head.outputs.sha }}
