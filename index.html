@@ -506,6 +506,22 @@ table.tk th.c{text-align:center}
 #v-cal .shelf-lab{font-family:var(--mono);font-size:11.5px;color:var(--faint);display:flex;justify-content:space-between;margin-bottom:4px}
 #v-cal .shelf-bar{height:6px;border-radius:6px;background:var(--panel2);overflow:hidden}
 #v-cal .shelf-fill{height:100%;border-radius:6px}
+/* 과거 아젠다 접기 + 상단 워치 요약 (2026-07 추가) */
+#v-cal .watch-mini{display:flex;flex-wrap:wrap;gap:7px;margin:14px 0 2px;align-items:center}
+#v-cal .watch-mini .wm-lab{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--faint);margin-right:1px}
+#v-cal .watch-mini .wm{display:inline-flex;align-items:center;gap:6px;cursor:pointer;padding:5px 11px;border:1px solid var(--line);border-radius:20px;background:var(--panel);font-size:12px;color:var(--dim);transition:border-color .12s,background .12s}
+#v-cal .watch-mini .wm:hover{border-color:var(--dawn);background:var(--panel2)}
+#v-cal .watch-mini .wm .wd{width:7px;height:7px;border-radius:50%;background:var(--c,#e03131);flex:none}
+#v-cal .watch-mini .wm .ws{font-family:var(--mono);font-size:10.5px;font-weight:700;color:var(--faint)}
+#v-cal .cal-fold-bar{display:flex;align-items:center;gap:9px;cursor:pointer;user-select:none;margin:10px 0 6px;padding:9px 13px;border:1px solid var(--line);border-radius:10px;background:var(--panel);font-family:var(--mono);font-size:12.5px;color:var(--dim);transition:background .12s,border-color .12s}
+#v-cal .cal-fold-bar:hover{background:var(--panel2);border-color:var(--line2)}
+#v-cal .cal-fold-bar .caret{display:inline-block;transition:transform .15s;color:var(--faint);font-size:11px}
+#v-cal.cal-open .cal-fold-bar .caret{transform:rotate(90deg)}
+#v-cal .cal-fold-bar b{color:var(--txt);font-weight:700}
+#v-cal .cal-fold-bar .fx{margin-left:auto;color:var(--faint);font-size:11.5px}
+#v-cal .cal-past{display:none}
+#v-cal.cal-open .cal-row.cal-past{display:grid}
+#v-cal.cal-open .cal-month.cal-past{display:flex}
 @media(max-width:760px){#v-cal .cal-now{grid-template-columns:1fr 1fr}#v-cal .watch-grid{grid-template-columns:1fr}#v-cal .cal-row{grid-template-columns:70px 12px 1fr;gap:9px}}
 </style>
 <style id="memo-css">
@@ -2310,6 +2326,71 @@ function calToday(){const t=new Date(Date.now()+9*3600000);t.setUTCHours(0,0,0,0
 function calDDiff(d,today){return Math.round((new Date(d+'T00:00:00Z')-today)/864e5);}
 function calDNText(n){return n>0?'D-'+n:n===0?'D-Day':'D+'+(-n);}
 function calEsc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+/* 아젠다 date-chip → 범위 종료일(YYYY-MM-DD). 무날짜(수시·└체크)면 null */
+function calChipEnd(raw){
+ var s=String(raw||'').replace(/└/g,'').trim().replace(/^~\s*/,'');
+ var end=s;
+ if(s.indexOf('~')>=0){
+  var pt=s.split('~'),a=pt[0].trim(),b=pt[1].trim();
+  if(/^\d{1,2}\.\d{1,2}$/.test(b))end=b;
+  else if(/^\d{1,2}$/.test(b)){var mm=a.match(/^(\d{1,2})\./);end=(mm?mm[1]:'')+'.'+b;}
+  else end=a;
+ }
+ var m=end.match(/^(\d{1,2})\.(\d{1,2})$/);
+ if(!m)return null;
+ return '2026-'+String(m[1]).padStart(2,'0')+'-'+String(m[2]).padStart(2,'0');
+}
+/* 지나간 아젠다 행 접기(기본 접힘·클릭 펼침) + 상단 워치 요약 바(하단 상세카드 파생) */
+function foldPastCal(){
+ var sec=document.getElementById('v-cal');if(!sec)return;
+ if(sec.querySelector('.cal-fold-bar')||sec.querySelector('.watch-mini'))return; /* 멱등 */
+ var today=calToday();
+ var kids=sec.querySelectorAll('.cal-month, .cal-row');
+ var lastPast=false,pastN=0,groups=[],cur=null;
+ kids.forEach(function(el){
+  if(el.classList.contains('cal-month')){cur={head:el,rows:[]};groups.push(cur);return;}
+  var chip=el.querySelector('.date-chip'),raw=chip?chip.textContent:'';
+  var d=calChipEnd(raw),past;
+  if(d==null){past=lastPast;}else{past=calDDiff(d,today)<0;lastPast=past;}
+  if(past){el.classList.add('cal-past');pastN++;}
+  if(cur)cur.rows.push(past);
+ });
+ groups.forEach(function(g){
+  if(g.rows.length&&g.rows.every(function(p){return p;}))g.head.classList.add('cal-past');
+ });
+ var uc=document.getElementById('updCal');
+ var hdr=uc?uc.closest('.cal-sec'):null;if(!hdr)return;
+ /* 워치 요약 바 — 하단 .watch-card 에서 자동 파생(단일 소스) */
+ var cards=sec.querySelectorAll('.watch-grid .watch-card');
+ if(cards.length){
+  var mini=document.createElement('div');mini.className='watch-mini';
+  var html='<span class="wm-lab">워치 ▸</span>';
+  Array.prototype.forEach.call(cards,function(c,i){
+   var col=(c.style.getPropertyValue('--c')||'#e03131').trim();
+   var h4=c.querySelector('h4');
+   var name=h4&&h4.childNodes[0]?h4.childNodes[0].textContent:(h4?h4.textContent:'');
+   name=name.replace(/\s+/g,' ').trim();
+   var st=h4?h4.querySelector('.st'):null,sTxt=st?st.textContent.trim():'';
+   html+='<span class="wm" data-i="'+i+'"><span class="wd" style="--c:'+col+'"></span>'+calEsc(name)+(sTxt?'<span class="ws">'+calEsc(sTxt)+'</span>':'')+'</span>';
+  });
+  mini.innerHTML=html;
+  hdr.insertAdjacentElement('afterend',mini);
+  mini.addEventListener('click',function(e){
+   var w=e.target.closest('.wm');if(!w)return;
+   var tc=cards[+w.getAttribute('data-i')];if(tc)tc.scrollIntoView({behavior:'smooth',block:'center'});
+  });
+ }
+ /* 접기 토글 바 — 요약 바 아래(=지나간 블록 위) */
+ if(pastN>0){
+  var bar=document.createElement('div');bar.className='cal-fold-bar';
+  var refresh=function(){var open=sec.classList.contains('cal-open');
+   bar.innerHTML='<span class="caret">▸</span><span>지나간 일정 <b>'+pastN+'건</b> · '+(open?'접기':'펼치기')+'</span><span class="fx">'+(open?'▲ 접기':'오늘 이후만 표시 중')+'</span>';};
+  var ref=sec.querySelector('.watch-mini')||hdr;
+  ref.insertAdjacentElement('afterend',bar);
+  bar.addEventListener('click',function(){sec.classList.toggle('cal-open');refresh();});
+  refresh();
+ }
+}
 function renderCalNow(){
  const today=calToday();
  const p=n=>String(n).padStart(2,'0');
@@ -3605,7 +3686,7 @@ document.getElementById('filterSel').addEventListener('change',renderTracker);
 
 /* ===== INIT ===== */
 function renderAll(){renderSignalLog();renderThread();renderStack();renderPortfolio();renderTracker();}
-renderLegends();loadStore().then(renderAll);renderAll();updateAsof();loadPrices();stampStatics();renderCalNow();
+renderLegends();loadStore().then(renderAll);renderAll();updateAsof();loadPrices();stampStatics();renderCalNow();foldPastCal();
 
 /* ===== 출력(인쇄/PDF) — 페이지별 버튼: 이 페이지만 / 전체 ===== */
 (function initPrint(){
