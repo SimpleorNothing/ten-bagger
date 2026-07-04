@@ -513,6 +513,11 @@ table.tk th.c{text-align:center}
 #v-cal .watch-mini .wm:hover{border-color:var(--dawn);background:var(--panel2)}
 #v-cal .watch-mini .wm .wd{width:7px;height:7px;border-radius:50%;background:var(--c,#e03131);flex:none}
 #v-cal .watch-mini .wm .ws{font-family:var(--mono);font-size:10.5px;font-weight:700;color:var(--faint)}
+#v-cal .watch-mini .wm.active{border-color:var(--dawn);background:var(--panel2);box-shadow:0 0 0 1px var(--dawn) inset;color:var(--txt)}
+#v-cal .wm-detail{display:none;margin:8px 0 4px;animation:wmFade .16s ease}
+#v-cal .wm-detail.open{display:block}
+#v-cal .wm-detail .watch-card{margin:0}
+@keyframes wmFade{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:none}}
 #v-cal .cal-fold-bar{display:flex;align-items:center;gap:9px;cursor:pointer;user-select:none;margin:10px 0 6px;padding:9px 13px;border:1px solid var(--line);border-radius:10px;background:var(--panel);font-family:var(--mono);font-size:12.5px;color:var(--dim);transition:background .12s,border-color .12s}
 #v-cal .cal-fold-bar:hover{background:var(--panel2);border-color:var(--line2)}
 #v-cal .cal-fold-bar .caret{display:inline-block;transition:transform .15s;color:var(--faint);font-size:11px}
@@ -2409,9 +2414,18 @@ function foldPastCal(){
   });
   mini.innerHTML=html;
   hdr.insertAdjacentElement('afterend',mini);
+  var detail=document.createElement('div');detail.className='wm-detail';
+  mini.insertAdjacentElement('afterend',detail);
   mini.addEventListener('click',function(e){
    var w=e.target.closest('.wm');if(!w)return;
-   var tc=cards[+w.getAttribute('data-i')];if(tc)tc.scrollIntoView({behavior:'smooth',block:'center'});
+   var tc=cards[+w.getAttribute('data-i')];if(!tc)return;
+   var wasActive=w.classList.contains('active');
+   Array.prototype.forEach.call(mini.querySelectorAll('.wm.active'),function(x){x.classList.remove('active');});
+   if(wasActive){detail.classList.remove('open');detail.innerHTML='';return;}
+   w.classList.add('active');
+   var col=(tc.style.getPropertyValue('--c')||'#e03131').trim();
+   detail.innerHTML='<div class="watch-card" style="--c:'+col+'">'+tc.innerHTML+'</div>';
+   detail.classList.add('open');
   });
  }
  /* 접기 토글 바 — 요약 바 아래(=지나간 블록 위) */
@@ -2419,7 +2433,7 @@ function foldPastCal(){
   var bar=document.createElement('div');bar.className='cal-fold-bar';
   var refresh=function(){var open=sec.classList.contains('cal-open');
    bar.innerHTML='<span class="caret">▸</span><span>지나간 일정 <b>'+pastN+'건</b> · '+(open?'접기':'펼치기')+'</span><span class="fx">'+(open?'▲ 접기':'오늘 이후만 표시 중')+'</span>';};
-  var ref=sec.querySelector('.watch-mini')||hdr;
+  var ref=sec.querySelector('.wm-detail')||sec.querySelector('.watch-mini')||hdr;
   ref.insertAdjacentElement('afterend',bar);
   bar.addEventListener('click',function(){sec.classList.toggle('cal-open');refresh();});
   refresh();
