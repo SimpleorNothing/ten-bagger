@@ -519,8 +519,10 @@ table.tk th.c{text-align:center}
 #v-cal .wm-detail .watch-card{margin:0}
 @keyframes wmFade{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:none}}
 /* 변동 하이라이트 — 지난 방문 대비 바뀐 워치 항목 (2026-07 추가) */
-#v-cal .watch-mini .wm.wm-chg{border-color:var(--c,#e03131);color:var(--txt);animation:wmPulse 1.25s ease-out infinite}
-#v-cal .watch-mini .wm .wm-new{font-family:var(--mono);font-size:9px;font-weight:800;letter-spacing:.4px;line-height:1;padding:2px 5px;border-radius:20px;background:var(--c,#e03131);color:#fff;flex:none}
+#v-cal .watch-mini .wm.wm-chg{border-color:var(--c,#e03131);background:var(--fill,rgba(224,49,49,.13));color:var(--txt);font-weight:700;animation:wmPulse 1.25s ease-out infinite}
+#v-cal .watch-mini .wm.wm-chg .wd{box-shadow:0 0 0 3px var(--fill,rgba(224,49,49,.22))}
+#v-cal .watch-mini .wm.wm-chg .ws{color:var(--c,#e03131);font-weight:800}
+#v-cal .watch-mini .wm .wm-new{font-family:var(--mono);font-size:9.5px;font-weight:800;letter-spacing:.3px;line-height:1;padding:2px 6px;border-radius:20px;background:var(--c,#e03131);color:#fff;flex:none;box-shadow:0 1px 3px rgba(0,0,0,.18)}
 #v-cal .watch-mini .wm-cnt{display:inline-flex;align-items:center;font-family:var(--mono);font-size:10px;font-weight:800;color:#fff;background:#e03131;padding:3px 9px;border-radius:20px;margin-left:2px;--ring:rgba(224,49,49,.5);animation:wmPulse 1.25s ease-out infinite}
 @keyframes wmPulse{0%{box-shadow:0 0 0 0 var(--ring,rgba(224,49,49,.5))}70%{box-shadow:0 0 0 6px transparent}100%{box-shadow:0 0 0 0 transparent}}
 @media(prefers-reduced-motion:reduce){#v-cal .watch-mini .wm.wm-chg,#v-cal .watch-mini .wm-cnt{animation:none;box-shadow:0 0 0 1.5px var(--c,#e03131) inset}}
@@ -2411,7 +2413,7 @@ function foldPastCal(){
  var cards=sec.querySelectorAll('.watch-grid .watch-card');
  if(cards.length){
   var mini=document.createElement('div');mini.className='watch-mini';
-  var wmChgN=0;
+  var wmChgN=0,wmChgNames=[];
   var html='';var lastH='';
   Array.prototype.forEach.call(cards,function(c,i){
    var h=(c.getAttribute('data-h')||'상시').trim();
@@ -2420,6 +2422,7 @@ function foldPastCal(){
    var rgb=col;try{rgb=getComputedStyle(c).borderLeftColor||col;}catch(e){}
    var rm=String(rgb).match(/(\d+)\D+(\d+)\D+(\d+)/);
    var ring=rm?('rgba('+rm[1]+','+rm[2]+','+rm[3]+',.5)'):'rgba(224,49,49,.5)';
+   var fill=rm?('rgba('+rm[1]+','+rm[2]+','+rm[3]+',.13)'):'rgba(224,49,49,.13)';
    var h4=c.querySelector('h4');
    var name=h4&&h4.childNodes[0]?h4.childNodes[0].textContent:(h4?h4.textContent:'');
    name=name.replace(/\s+/g,' ').trim();
@@ -2427,12 +2430,12 @@ function foldPastCal(){
    /* ── 변동 판정: data-upd 편집일이 오늘 기준 GRACE일 이내면 표시(기기 무관·결정론) ── */
    var upd=(c.getAttribute('data-upd')||'').trim(),dA=wmDaysAgo(upd);
    var chg=!!upd&&dA>=0&&dA<=WM_GRACE;
-   if(chg)wmChgN++;
-   var cls='wm'+(chg?' wm-chg':''),sty=chg?(' style="--c:'+rgb+';--ring:'+ring+'"'):'';
+   if(chg){wmChgN++;wmChgNames.push(name);}
+   var cls='wm'+(chg?' wm-chg':''),sty=chg?(' style="--c:'+rgb+';--ring:'+ring+';--fill:'+fill+'"'):'';
    var badge=chg?('<span class="wm-new">'+(dA<=0?'오늘':'변동')+'</span>'):'';
    html+='<span class="'+cls+'" data-i="'+i+'"'+sty+'><span class="wd" style="--c:'+col+'"></span>'+calEsc(name)+(sTxt?'<span class="ws">'+calEsc(sTxt)+'</span>':'')+badge+'</span>';
   });
-  if(wmChgN>0)html+='<span class="wm-cnt" title="최근 편집(오늘 기준 3일 내)">● 변동 '+wmChgN+'</span>';
+  if(wmChgN>0){var cntTxt=wmChgN===1?('● 변동: '+calEsc(wmChgNames[0])):('● 변동 '+wmChgN+'건');html+='<span class="wm-cnt" title="'+calEsc('최근 편집(오늘 기준 3일 내): '+wmChgNames.join(' · '))+'">'+cntTxt+'</span>';}
   mini.innerHTML=html;
   hdr.insertAdjacentElement('afterend',mini);
   var detail=document.createElement('div');detail.className='wm-detail';
@@ -2440,7 +2443,7 @@ function foldPastCal(){
   mini.addEventListener('click',function(e){
    var w=e.target.closest('.wm');if(!w)return;
    var tc=cards[+w.getAttribute('data-i')];if(!tc)return;
-   if(w.classList.contains('wm-chg')){w.classList.remove('wm-chg');var nb=w.querySelector('.wm-new');if(nb)nb.remove();var cc=mini.querySelector('.wm-cnt'),rem=mini.querySelectorAll('.wm.wm-chg').length;if(cc){if(rem>0)cc.textContent='● 변동 '+rem;else cc.remove();}}
+   if(w.classList.contains('wm-chg')){w.classList.remove('wm-chg');var nb=w.querySelector('.wm-new');if(nb)nb.remove();var cc=mini.querySelector('.wm-cnt'),rem=mini.querySelectorAll('.wm.wm-chg').length;if(cc){if(rem>0)cc.textContent='● 변동 '+rem+'건';else cc.remove();}}
    var wasActive=w.classList.contains('active');
    Array.prototype.forEach.call(mini.querySelectorAll('.wm.active'),function(x){x.classList.remove('active');});
    if(wasActive){detail.classList.remove('open');detail.innerHTML='';return;}
