@@ -2483,6 +2483,8 @@ function gotoStack(layerId){
  const c=document.getElementById('lay-'+layerId);
  if(c){c.classList.remove('collapsed');c.scrollIntoView({behavior:'smooth',block:'center'});}
 }
+/* 새탭 딥링크 — #stack-{레이어}로 열리면 해당 스택 카드로 착지 */
+function applyStackDeepLink(){var m=(location.hash||'').match(/^#stack-(.+)$/);if(m&&typeof gotoStack==='function'){requestAnimationFrame(function(){gotoStack(decodeURIComponent(m[1]));});}}
 
 /* ===== US10Y · 미 10년물 금리 모니터 — us10y.simpleornothing.com/data.json 라이브 (매일 자동 갱신) ===== */
 window.US10Y=(function(){
@@ -2998,7 +3000,7 @@ function renderSignalLog(){
         <div class="sigtxt">${it.html}${it.src?` <span class="srctxt">— ${it.src}</span>`:''}</div></div>`).join('')}
    </div>`).join('');
  el.querySelectorAll('.sigtag.jump').forEach(t=>t.addEventListener('click',()=>{
-   gotoStack(t.dataset.l);}));
+   window.open(location.pathname+location.search+'#stack-'+t.dataset.l,'_blank','noopener');}));
  vcDecorate(el);
 }
 
@@ -4101,7 +4103,7 @@ Promise.all([getJSON('alpha.json'),getJSON('earnings.json'),getJSON('judgment.js
  if(gm&&gm.asOf){window.GAMMA_ASOF=gm.asOf;window.GAMMA_FLAGGED=Object.entries(gmm||{}).filter(([k,v])=>v&&v.flagged).map(([k])=>k);}
  // 4) 시점 스냅샷(snapshots.json) — 라이브 머지 후 현재 배치를 보존하고 셀렉터 구성.
  captureLive();SNAPS=(sn&&Array.isArray(sn.snapshots))?sn.snapshots:[];initSnapSel();
-}).finally(()=>{paint(); if(typeof renderSignalLog==='function')renderSignalLog(); if(typeof renderStack==='function')renderStack(); if(typeof renderPortfolio==='function')renderPortfolio(); if(typeof updateAsof==='function')updateAsof(); if(typeof renderCalNow==='function')renderCalNow(); if(typeof loadDigest==='function')loadDigest();});
+}).finally(()=>{paint(); if(typeof renderSignalLog==='function')renderSignalLog(); if(typeof renderStack==='function')renderStack(); if(typeof renderPortfolio==='function')renderPortfolio(); if(typeof updateAsof==='function')updateAsof(); if(typeof renderCalNow==='function')renderCalNow(); if(typeof loadDigest==='function')loadDigest(); if(typeof applyStackDeepLink==='function')applyStackDeepLink();});
 })();
 </script>
 <script>
