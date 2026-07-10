@@ -1501,7 +1501,7 @@ window.CYCLE=(function(){
       <div class="legend">
         <span><i style="background:#0ca678"></i>Bull (하방 · 금리 하락)</span>
         <span><i style="background:#9aa6b0"></i>Base (기준)</span>
-        <span><i style="background:#b8860b"></i>Bear (상방 · 금리 상승)</span>
+        <span><i style="background:#e03131"></i>Bear (상방 · 금리 상승)</span>
       </div>
       <div class="readout" id="u10_trendout"></div>
     </div>
@@ -2542,7 +2542,7 @@ window.US10Y=(function(){
   let mx=0; H.forEach(h=>{const p=h.probabilities||{};mx=Math.max(mx,p.bull||0,p.base||0,p.bear||0);});
   const YMAX=Math.min(100,Math.max(60,Math.ceil(mx/10)*10));
   const xF=k=>M<2?L+iw/2:L+iw*k/(M-1), yF=v=>Tm+ih*(YMAX-v)/YMAX;
-  const series=[['bull','#0ca678'],['base','#9aa6b0'],['bear','#b8860b']];
+  const series=[['bull','#0ca678'],['base','#9aa6b0'],['bear','#e03131']];
   const line=key=>H.map((h,k)=>(k?'L':'M')+xF(k).toFixed(1)+' '+yF((h.probabilities||{})[key]||0).toFixed(1)).join(' ');
   const dots=(key,c)=>H.map((h,k)=>`<circle cx="${xF(k).toFixed(1)}" cy="${yF((h.probabilities||{})[key]||0).toFixed(1)}" r="2.3" fill="${c}"/>`).join('');
   let grid='';
