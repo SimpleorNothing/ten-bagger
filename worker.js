@@ -295,28 +295,47 @@ async function handleCalflagsPut(request, env) {
   return memoJson({ ok: true, count: Object.keys(obj).length }, 200);
 }
 
-// US10Y 데이터 프록시 — us10y.simpleornothing.com/data.json(Railway) 우선,
-// GitHub raw(public repo) 폴백. 서버사이드 fetch 라 CORS·구독 게이트 영향 없음.
-// 매일 KST 06:13 갱신되는 원본을 그대로 중계(짧은 엣지 캐시).
+// US10Y 데이터 프록시 — 데이터 생성은 us10y 리포의 GitHub Actions(daily-update.yml)가
+// 매일 data.json 을 기본 브랜치에 커밋한다. Railway(구 us10y.simpleornothing.com)는
+// 배달 전용이었고 트라이얼 만료로 폐기 → GitHub 을 직접 SoT 로 사용.
+// 기본 브랜치명은 하드코딩하지 않고 라이브 해소(개명 자기치유), 해소 실패 시 폴백 상수.
+// suspended/HTML 페이지를 JSON 으로 착각하지 않도록 본문이 JSON 오브젝트일 때만 통과.
 async function handleUs10y() {
-  const SOURCES = [
-    "https://us10y.simpleornothing.com/data.json",
-    "https://raw.githubusercontent.com/SimpleorNothing/us10y/master/data.json",
-  ];
-  for (const u of SOURCES) {
+  const OWNER = "SimpleorNothing", REPO = "us10y";
+  const FALLBACK_BRANCH = "claude/init-samsungda-repo-shgrq";
+  const rawUrl = (br) => `https://raw.githubusercontent.com/${OWNER}/${REPO}/${br}/data.json`;
+
+  // 1) 기본 브랜치 라이브 해소 — 브랜치는 거의 안 바뀌므로 엣지 캐시 강하게(6h).
+  let branch = FALLBACK_BRANCH;
+  try {
+    const meta = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}`, {
+      headers: { "user-agent": "alphamap-worker", "accept": "application/vnd.github+json" },
+      cf: { cacheTtl: 21600, cacheEverything: true },
+    });
+    if (meta.ok) {
+      const j = await meta.json();
+      if (j && j.default_branch) branch = j.default_branch;
+    }
+  } catch (_) { /* 해소 실패 → 폴백 상수 사용 */ }
+
+  // 2) data.json 페치 — 해소된 기본 브랜치 우선, 폴백 브랜치 차선.
+  const cands = branch === FALLBACK_BRANCH ? [FALLBACK_BRANCH] : [branch, FALLBACK_BRANCH];
+  for (const br of cands) {
     try {
-      const r = await fetch(u, { cf: { cacheTtl: 1800, cacheEverything: true } });
+      const r = await fetch(rawUrl(br), { cf: { cacheTtl: 900, cacheEverything: true } });
       if (r.ok) {
         const body = await r.text();
-        return new Response(body, {
-          status: 200,
-          headers: {
-            "content-type": "application/json; charset=utf-8",
-            "cache-control": "public, max-age=900",
-          },
-        });
+        if (body && body.trimStart().startsWith("{")) {
+          return new Response(body, {
+            status: 200,
+            headers: {
+              "content-type": "application/json; charset=utf-8",
+              "cache-control": "public, max-age=900",
+            },
+          });
+        }
       }
-    } catch (_) { /* 다음 소스로 폴백 */ }
+    } catch (_) { /* 다음 후보로 폴백 */ }
   }
   return new Response(JSON.stringify({ error: "us10y upstream unavailable" }),
     { status: 502, headers: { "content-type": "application/json" } });
