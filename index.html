@@ -518,6 +518,12 @@ table.tk th.c{text-align:center}
 #v-cal .wm-detail.open{display:block}
 #v-cal .wm-detail .watch-card{margin:0}
 @keyframes wmFade{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:none}}
+/* 변동 하이라이트 — 지난 방문 대비 바뀐 워치 항목 (2026-07 추가) */
+#v-cal .watch-mini .wm.wm-chg{border-color:var(--c,#e03131);color:var(--txt);animation:wmPulse 1.25s ease-out infinite}
+#v-cal .watch-mini .wm .wm-new{font-family:var(--mono);font-size:9px;font-weight:800;letter-spacing:.4px;line-height:1;padding:2px 5px;border-radius:20px;background:var(--c,#e03131);color:#fff;flex:none}
+#v-cal .watch-mini .wm-cnt{display:inline-flex;align-items:center;font-family:var(--mono);font-size:10px;font-weight:800;color:#fff;background:#e03131;padding:3px 9px;border-radius:20px;margin-left:2px;--ring:rgba(224,49,49,.5);animation:wmPulse 1.25s ease-out infinite}
+@keyframes wmPulse{0%{box-shadow:0 0 0 0 var(--ring,rgba(224,49,49,.5))}70%{box-shadow:0 0 0 6px transparent}100%{box-shadow:0 0 0 0 transparent}}
+@media(prefers-reduced-motion:reduce){#v-cal .watch-mini .wm.wm-chg,#v-cal .watch-mini .wm-cnt{animation:none;box-shadow:0 0 0 1.5px var(--c,#e03131) inset}}
 #v-cal .cal-fold-bar{display:flex;align-items:center;gap:9px;cursor:pointer;user-select:none;margin:10px 0 6px;padding:9px 13px;border:1px solid var(--line);border-radius:10px;background:var(--panel);font-family:var(--mono);font-size:12.5px;color:var(--dim);transition:background .12s,border-color .12s}
 #v-cal .cal-fold-bar:hover{background:var(--panel2);border-color:var(--line2)}
 #v-cal .cal-fold-bar .caret{display:inline-block;transition:transform .15s;color:var(--faint);font-size:11px}
@@ -2377,6 +2383,15 @@ function calChipEnd(raw){
  if(!m)return null;
  return '2026-'+String(m[1]).padStart(2,'0')+'-'+String(m[2]).padStart(2,'0');
 }
+/* ── 워치 변동 감지 (지난 방문 대비 · localStorage 지문 대조) ── */
+var WM_LS='amWatchFp_v1',WM_GRACE=2; /* 변동 표시 지속: 오늘 포함 최대 GRACE+1일, 이후 자동 소멸 */
+function wmToday(){return new Date(Date.now()+9*36e5).toISOString().slice(0,10);}
+function wmDaysAgo(ymd){if(!ymd)return 1e9;var a=new Date(ymd+'T00:00:00Z'),b=new Date(wmToday()+'T00:00:00Z');return Math.round((b-a)/864e5);}
+function wmHash(s){var h=5381;for(var i=0;i<s.length;i++)h=((h<<5)+h+s.charCodeAt(i))>>>0;return h.toString(36);}
+function wmName(card){var h4=card.querySelector('h4');var n=h4&&h4.childNodes[0]?h4.childNodes[0].textContent:(h4?h4.textContent:'');return n.replace(/\s+/g,' ').trim();}
+function wmFp(card){var h4=card.querySelector('h4'),st=h4?h4.querySelector('.st'):null,body='';Array.prototype.forEach.call(card.querySelectorAll('p'),function(p){body+='¶'+p.textContent;});return wmHash([wmName(card),st?st.textContent.trim():'',(card.style.getPropertyValue('--c')||'').trim(),body.replace(/\s+/g,' ').trim()].join('¦'));}
+function wmLoad(){try{return JSON.parse(localStorage.getItem(WM_LS)||'null')||null;}catch(e){return null;}}
+function wmSave(s){try{localStorage.setItem(WM_LS,JSON.stringify(s));}catch(e){}}
 /* 지나간 아젠다 행 접기(기본 접힘·클릭 펼침) + 상단 워치 요약 바(하단 상세카드 파생) */
 function foldPastCal(){
  var sec=document.getElementById('v-cal');if(!sec)return;
@@ -2401,24 +2416,40 @@ function foldPastCal(){
  var cards=sec.querySelectorAll('.watch-grid .watch-card');
  if(cards.length){
   var mini=document.createElement('div');mini.className='watch-mini';
+  var wmStore=wmLoad(),wmCold=!wmStore;if(!wmStore)wmStore={};var wmNow=wmToday(),wmChgN=0;
   var html='';var lastH='';
   Array.prototype.forEach.call(cards,function(c,i){
    var h=(c.getAttribute('data-h')||'상시').trim();
    if(h!==lastH){html+='<span class="wm-lab">'+calEsc(h)+' ▸</span>';lastH=h;}
    var col=(c.style.getPropertyValue('--c')||'#e03131').trim();
+   var rgb=col;try{rgb=getComputedStyle(c).borderLeftColor||col;}catch(e){}
+   var rm=String(rgb).match(/(\d+)\D+(\d+)\D+(\d+)/);
+   var ring=rm?('rgba('+rm[1]+','+rm[2]+','+rm[3]+',.5)'):'rgba(224,49,49,.5)';
    var h4=c.querySelector('h4');
    var name=h4&&h4.childNodes[0]?h4.childNodes[0].textContent:(h4?h4.textContent:'');
    name=name.replace(/\s+/g,' ').trim();
    var st=h4?h4.querySelector('.st'):null,sTxt=st?st.textContent.trim():'';
-   html+='<span class="wm" data-i="'+i+'"><span class="wd" style="--c:'+col+'"></span>'+calEsc(name)+(sTxt?'<span class="ws">'+calEsc(sTxt)+'</span>':'')+'</span>';
+   /* ── 변동 판정: 지문 대조 ── */
+   var wKey=name,fp=wmFp(c),prev=wmStore[wKey],isNew=false,chg=false;
+   if(wmCold){wmStore[wKey]={fp:fp,changedAt:'2000-01-01'};}
+   else if(!prev){wmStore[wKey]={fp:fp,changedAt:wmNow};isNew=true;chg=true;}
+   else if(prev.fp!==fp){wmStore[wKey]={fp:fp,changedAt:wmNow};chg=true;}
+   else{wmStore[wKey]=prev;chg=wmDaysAgo(prev.changedAt)<=WM_GRACE;}
+   if(chg)wmChgN++;
+   var cls='wm'+(chg?' wm-chg':''),sty=chg?(' style="--c:'+rgb+';--ring:'+ring+'"'):'';
+   var badge=chg?('<span class="wm-new">'+(isNew?'NEW':'변동')+'</span>'):'';
+   html+='<span class="'+cls+'" data-i="'+i+'" data-k="'+calEsc(wKey)+'"'+sty+'><span class="wd" style="--c:'+col+'"></span>'+calEsc(name)+(sTxt?'<span class="ws">'+calEsc(sTxt)+'</span>':'')+badge+'</span>';
   });
+  if(wmChgN>0)html+='<span class="wm-cnt" title="지난 방문 대비 변동">● 변동 '+wmChgN+'</span>';
   mini.innerHTML=html;
+  wmSave(wmStore);
   hdr.insertAdjacentElement('afterend',mini);
   var detail=document.createElement('div');detail.className='wm-detail';
   mini.insertAdjacentElement('afterend',detail);
   mini.addEventListener('click',function(e){
    var w=e.target.closest('.wm');if(!w)return;
    var tc=cards[+w.getAttribute('data-i')];if(!tc)return;
+   if(w.classList.contains('wm-chg')){var ak=w.getAttribute('data-k'),as=wmLoad()||{};if(as[ak]){as[ak].changedAt='2000-01-01';wmSave(as);}w.classList.remove('wm-chg');var nb=w.querySelector('.wm-new');if(nb)nb.remove();var cc=mini.querySelector('.wm-cnt'),rem=mini.querySelectorAll('.wm.wm-chg').length;if(cc){if(rem>0)cc.textContent='● 변동 '+rem;else cc.remove();}}
    var wasActive=w.classList.contains('active');
    Array.prototype.forEach.call(mini.querySelectorAll('.wm.active'),function(x){x.classList.remove('active');});
    if(wasActive){detail.classList.remove('open');detail.innerHTML='';return;}
