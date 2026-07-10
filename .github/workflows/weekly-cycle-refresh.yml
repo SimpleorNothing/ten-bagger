@@ -1,0 +1,71 @@
+name: Weekly Cycle Refresh (D·C·B·A)
+
+# 매주 토요일 09:00 KST에 Claude가 cycle.json의 D·C·B·A 신호등을 갱신한다.
+# E(추정 γ)는 update-prices.yml의 derive-cycle-e.mjs가 매일 자동 파생하므로 건드리지 않는다.
+#
+# 커밋 방식: main 직접 커밋 금지(CLAUDE.md 규율). claude/cycle-* 브랜치에 커밋·PR 생성만 하고,
+# 실제 머지는 기존 claude-pr-gate.yml(validate → squash auto-merge + 브랜치 삭제)에 위임한다.
+on:
+  schedule:
+    - cron: '0 0 * * 6'   # 토 00:00 UTC = 토 09:00 KST · 주 1회
+  workflow_dispatch: {}    # 수동 테스트용
+
+permissions:
+  contents: write
+  pull-requests: write
+  id-token: write
+
+concurrency:
+  group: weekly-cycle-refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          claude_args: |
+            --model claude-opus-4-8
+            --max-turns 30
+            --allowedTools "Edit,Read,Write,WebSearch,WebFetch,Bash(git:*),Bash(gh:*),Bash(python3:*)"
+          prompt: |
+            역할: 알파맵 운영 파트너. 오늘은 토요일 주간 사이클 리프레시다.
+            목표: 리포 루트의 cycle.json에서 D·C·B·A 4개 신호등만 최신 데이터로 갱신하고,
+            그 변경을 새 브랜치에 커밋·푸시한 뒤 main 으로 PR 을 연다. (main 직접 커밋 금지)
+
+            불변 규율(반드시 준수):
+            - E(추정 γ)는 매일 크론이 자동 파생한다. cycle.json의 id=="E" 군집은 절대 수정 금지.
+            - narrative ≠ numbers: 발표·키노트 같은 내러티브는 값 변경 트리거가 아니다.
+              확정 수치(실적 프린트·가이던스·계약가·빌링·재고일수)만 값·series를 바꾼다.
+            - 커밋 게이트: 어떤 지표든 실제 신규 데이터가 없으면 값·series·lamp를 바꾸지 마라.
+              무변동이면 그 군집은 그대로 두고, 파일 최상위 asOf만 오늘(KST) 날짜로 갱신한다.
+            - 확신이 안 서는 수치는 바꾸지 말고 직전값을 유지한다(스테일 외삽 금지).
+
+            갱신 대상(각 군집의 now 문자열·series·lamp·on 임계는 유지, 값만 최신화):
+            - D 수요 선행: 하이퍼스케일러(Microsoft·Google·Amazon·Meta) 합산 capex 가이던스(연도별).
+              가이던스 컷 여부·리드타임 정상화 여부를 확인. 없으면 무변동.
+            - C 가격: DDR5 16Gb 현물 vs 계약 ASP 최신 월값(TrendForce·DRAMeXchange 등).
+              현물<계약 데드크로스·ASP 2분기 연속 역성장 시 lamp 하향 검토.
+            - B 재고: 마이크론·SK하이닉스·삼성 DIO(재고일수) 최신 분기값.
+              고객 재고일수 상승·채널 적체 시 lamp 하향 검토.
+            - A 장비: SEMI 빌링·book-to-bill 최신 분기값. b2b<1.0·빌링 QoQ 역성장 시 lamp 하향.
+
+            절차:
+            1) 현재 cycle.json을 읽는다(구조: clusters 배열, 각 원소 id/name/lamp/now/on/series).
+            2) 각 지표를 WebSearch/WebFetch로 최신 확정 데이터만 확인한다.
+            3) 신규 데이터가 있는 군집만 now·series·lamp를 갱신한다(E 제외).
+            4) python3 -c "import json;json.load(open('cycle.json'))"로 JSON 유효성 검증.
+            5) asOf를 오늘 날짜로 갱신.
+            6) 새 브랜치를 만들어 커밋·푸시한다(main 직접 커밋 금지).
+               브랜치명: claude/cycle-refresh-<YYYY-MM-DD>
+               커밋 메시지: "chore(cycle): weekly D·C·B·A refresh <YYYY-MM-DD>"
+               본문에 어느 군집이 왜 바뀌었는지(또는 전부 무변동인지)를 한 줄씩 요약.
+            7) gh pr create --base main --head <위 브랜치> --fill 로 PR을 연다.
+               PR 제목/본문에 갱신 요약을 한국어로 적는다. (머지는 claude-pr-gate가 자동 처리)
+            8) 변경이 asOf뿐이어도 커밋·PR 한다(신선도 표시). 하지만 실제 데이터가 없으면 값은 절대 손대지 마라.
