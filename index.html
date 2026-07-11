@@ -2731,8 +2731,7 @@ window.MARKET=(function(){
  }
  function card(name,val,p,vals,ref){
   var up=p>=0,cls=up?'up':'dn',sign=up?'+':'';
-  var avg=(ref!=null&&isFinite(ref))?' · <span style="color:var(--dim)">평단 $'+ref.toFixed(2)+'</span>':'';
-  return '<div class="mkt-nm">'+esc(name)+'</div><div class="mkt-val">'+val+' <span class="mkt-chg '+cls+'">'+sign+p.toFixed(1)+'%</span></div>'+spark(vals,ref)+'<div class="mkt-span">6개월'+avg+'</div>';
+  return '<div class="mkt-nm">'+esc(name)+'</div><div class="mkt-val">'+val+' <span class="mkt-chg '+cls+'">'+sign+p.toFixed(1)+'%</span></div>'+spark(vals,ref)+'<div class="mkt-span">6개월</div>';
  }
  async function loadWti(){
   var el=document.getElementById('mkt_wti');
