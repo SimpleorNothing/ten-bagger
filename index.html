@@ -628,6 +628,7 @@ table.tk th.c{text-align:center}
 .stk-hd .nm{font-size:13px;font-weight:700;color:var(--txt)}
 .stk-sum{padding:10px 14px;font-size:12.5px;color:var(--txt);line-height:1.55;border-top:1px solid var(--line)}
 .stk-blk .nlist{border:0;border-top:1px solid var(--line);border-radius:0}
+.nan{padding:0 14px 10px 68px;font-size:11.5px;color:var(--dim);line-height:1.5;background:var(--panel)}
 
 </style>
 <style id="memo-css">
@@ -2773,8 +2774,9 @@ window.MARKET=(function(){
    var byTk={};
    (((nw||{}).items)||[]).forEach(function(it){if(it.ticker==='MACRO')return;var k=String(it.ticker||'').toUpperCase();(byTk[k]=byTk[k]||[]).push(it);});
    Object.keys(byTk).forEach(function(k){byTk[k].sort(function(a,b){return new Date(b.published||0)-new Date(a.published||0);});});
+   var artBy={};(((dg||{}).arts)||[]).forEach(function(x){if(x&&x.link&&x.a)artBy[x.link]=x.a;});
    function newsRows(k){var lst=byTk[k]||[];if(!lst.length)return '';
-    return '<div class="nlist">'+lst.map(function(it){return '<a class="nrow" href="'+esc(it.link||'#')+'" target="_blank" rel="noopener"><span class="ndt">'+esc((it.published||'').slice(5,10))+'</span><span class="ntt">'+esc(it.title||'')+'</span></a>';}).join('')+'</div>';}
+    return '<div class="nlist">'+lst.map(function(it){var an=artBy[it.link];return '<a class="nrow" href="'+esc(it.link||'#')+'" target="_blank" rel="noopener"><span class="ndt">'+esc((it.published||'').slice(5,10))+'</span><span class="ntt">'+esc(it.title||'')+'</span></a>'+(an?'<div class="nan">'+esc(an)+'</div>':'');}).join('')+'</div>';}
    var d=document.getElementById('mktDigestAsof');if(d&&dg&&dg.asOf)d.textContent='자동 요약 · '+dg.asOf.slice(0,10);
    var html='',used={};
    if(dg){

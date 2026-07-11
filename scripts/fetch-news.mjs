@@ -110,6 +110,11 @@ async function buildDigest(items) {
     .filter((it) => it.ticker === 'MACRO')
     .map((it) => `${it.id}|${it.name}|${(it.published || '').slice(0, 10)}|${it.title}`)
     .join('\n');
+  const holdSet = new Set(holdings);
+  const holdItems = items.filter((it) => holdSet.has(it.ticker));
+  const holdLines = holdItems
+    .map((it, i) => `${i}|${it.ticker}|${(it.published || '').slice(0, 10)}|${it.title}`)
+    .join('\n');
   const prompt = `너는 AI 인프라 투자 관측소의 애널리스트다. 아래는 종목별 최근 뉴스 헤드라인이다(티커|이름|날짜|제목).
 
 보유 종목: ${holdings.join(', ')} (나머지는 워치리스트)
@@ -122,19 +127,23 @@ async function buildDigest(items) {
            {"title":"워치리스트 · L3/L4 메모리·장비","items":[...]},
            {"title":"워치리스트 · L5~L8 서버·옵티컬·전력","items":[...]}],
  "watch":["실적 발표 임박 등 일정 주의 항목(있으면, 최대 4개)"],
- "macro":[{"id":"macro_iran","s":"해당 매크로 토픽의 핵심 흐름 1~2문장 한글 요약"}]}
+ "macro":[{"id":"macro_iran","s":"해당 매크로 토픽의 핵심 흐름 1~2문장 한글 요약"}],
+ "arts":[{"n":0,"a":"해당 기사의 내용→의미→영향을 한 문장(80~140자)으로. 확정 실적/수주와 단순 관측·내러티브를 구분해 서술. 회사 무관 기사는 '회사 무관 노이즈'로 표기"}]}
 
-규칙: 보유 종목은 전부 포함(뉴스 없으면 생략 가능), 워치리스트는 의미 있는 것만. macro는 아래 매크로 헤드라인의 토픽id별 1개씩. 요약은 사실만, 과장 금지, 헤드라인에 없는 내용 추가 금지.
+규칙: 보유 종목은 전부 포함(뉴스 없으면 생략 가능), 워치리스트는 의미 있는 것만. macro는 아래 매크로 헤드라인의 토픽id별 1개씩. arts는 아래 [보유 기사] 번호 전건에 대해 작성. 요약은 사실만, 과장 금지, 헤드라인에 없는 내용 추가 금지.
 
 ${lines}
 
 [매크로 토픽 헤드라인 (토픽id|토픽명|날짜|제목)]
-${macroLines}`;
+${macroLines}
+
+[보유 기사 (번호|티커|날짜|제목)]
+${holdLines}`;
   try {
     const r = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: { 'content-type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01' },
-      body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 3000, messages: [{ role: 'user', content: prompt }] }),
+      body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 6000, messages: [{ role: 'user', content: prompt }] }),
     });
     if (!r.ok) throw new Error('anthropic HTTP ' + r.status);
     const j = await r.json();
@@ -142,6 +151,11 @@ ${macroLines}`;
     const clean = text.replace(/```json|```/g, '').trim();
     const digest = JSON.parse(clean);
     if (!digest.headline || !Array.isArray(digest.groups)) throw new Error('digest shape invalid');
+    if (Array.isArray(digest.arts)) {
+      digest.arts = digest.arts
+        .filter((x) => x && Number.isInteger(x.n) && holdItems[x.n] && x.a)
+        .map((x) => ({ link: holdItems[x.n].link, a: x.a }));
+    }
     const out = { asOf: new Date().toISOString(), model: 'claude-sonnet-4-6', ...digest };
     fs.writeFileSync(DIGEST_OUT, JSON.stringify(out, null, 2) + '\n');
     console.log(`digest: ${DIGEST_OUT} 작성 (groups=${digest.groups.length})`);
