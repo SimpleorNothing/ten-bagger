@@ -93,7 +93,12 @@ async function fetchFeed(c) {
 }
 
 async function main() {
-  const candidates = readCandidates().filter((c) => !SKIP(c));
+  const MACRO_TOPICS = [
+    { id: 'macro_iran', ticker: 'MACRO', name: '이란 호르무즈 해협', mkt: 'KOSPI' },
+    { id: 'macro_fomc', ticker: 'MACRO', name: 'FOMC 연준 기준금리', mkt: 'KOSPI' },
+    { id: 'macro_tariff', ticker: 'MACRO', name: '미국 관세 무역협상', mkt: 'KOSPI' },
+  ];
+  const candidates = [...readCandidates().filter((c) => !SKIP(c)), ...MACRO_TOPICS];
 
   let prev = { items: [] };
   try { prev = JSON.parse(fs.readFileSync(OUT, 'utf8')); } catch (e) { /* first run */ }
