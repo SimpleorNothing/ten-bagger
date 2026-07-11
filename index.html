@@ -412,6 +412,33 @@ table.tk th.c{text-align:center}
   border-left:1px dashed rgba(12,166,120,.5);border-right:1px dashed rgba(12,166,120,.5);
   pointer-events:none;z-index:1}
 .tgt-mid{position:absolute;top:-2px;bottom:-2px;width:2px;background:#0ca678;z-index:2;pointer-events:none}
+/* ===== 주차별 점검 아코디언(reviews.json · renderReviews) ===== */
+.rvw-wrap{margin-top:30px;border-top:1px solid var(--line,#e6e9ee);padding-top:18px}
+.rvw{border:1px solid var(--line,#e6e9ee);border-radius:12px;background:var(--surface,#f6f7f9);margin:8px 0;overflow:hidden}
+.rvw>summary{list-style:none;cursor:pointer;padding:12px 14px;display:flex;align-items:center;gap:10px;font:13px/1.4 var(--mono,monospace)}
+.rvw>summary::-webkit-details-marker{display:none}
+.rvw>summary::before{content:'\25B8';color:var(--dim,#5b6470);transition:transform .15s;flex:0 0 auto}
+.rvw[open]>summary::before{transform:rotate(90deg)}
+.rvw-date{flex:0 0 auto;font-weight:700;color:var(--txt,#1a1d21)}
+.rvw-one{flex:1;color:var(--dim,#5b6470);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rvw-badge{flex:0 0 auto;font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px}
+.rvw-badge.dir-trim{background:#b8860b22;color:#b8860b}
+.rvw-badge.dir-add{background:#0ca67822;color:#0ca678}
+.rvw-badge.dir-hold{background:#64748b22;color:#64748b}
+.rvw-body{padding:2px 16px 16px;border-top:1px solid var(--line,#e6e9ee)}
+.rvw-gates{font:12px/1.5 var(--mono,monospace);color:var(--faint,#8a93a0);margin:10px 0}
+.rvw-sec{margin:14px 0}
+.rvw-sec h4{margin:0 0 6px;font:700 14px/1.3 var(--serif,inherit);color:var(--txt,#1a1d21)}
+.rvw-sec p{margin:4px 0;font-size:13px;line-height:1.6;color:var(--dim,#5b6470)}
+.rvw-sec ul{margin:4px 0;padding-left:18px;font-size:13px;line-height:1.6;color:var(--dim,#5b6470)}
+.rvw-sec li{margin:3px 0}
+.rvw-sec table{width:100%;border-collapse:collapse;font-size:12px;margin:6px 0}
+.rvw-sec th,.rvw-sec td{border-bottom:1px solid var(--line,#e6e9ee);padding:4px 6px;text-align:left;vertical-align:top}
+.rvw-sec th{color:var(--faint,#8a93a0);font-weight:600}
+.rvw-prop .pitem{display:flex;gap:8px;margin:6px 0;font-size:13px;line-height:1.55;color:var(--dim,#5b6470)}
+.rvw-tag{flex:0 0 auto;font-size:11px;font-weight:700;padding:2px 7px;border-radius:6px;height:fit-content;white-space:nowrap}
+.rvw-src{margin-top:12px;font-size:11px;color:var(--faint,#8a93a0)}
+.rvw-src a{color:var(--brand,#1257d6);text-decoration:none}
 .gap-table{margin-top:18px}
 .gap-row{display:flex;align-items:center;gap:8px;font:13px/1.4 var(--mono,monospace);
   padding:5px 0;border-bottom:1px solid var(--line)}
@@ -1616,6 +1643,7 @@ window.CYCLE=(function(){
   <div class="pclass" id="portClass"></div>
   <div class="gap-table" id="portGap"></div>
   <div class="gap-table" id="portGapDetail"></div>
+  <div class="rvw-wrap" id="reviewLog"></div>
 </section>
 
 <!-- 05 TRACKER -->
@@ -3074,6 +3102,20 @@ let SIGNAL_LOG=[
   ]},
  /* ▼ 신규 시그널은 여기에 같은 형식으로 추가 (date·source·srcs[{label,url}] 출처 필수) */
 ];
+function renderReviews(){
+ const el=document.getElementById('reviewLog');if(!el)return;
+ const R=(window.REVIEWS||[]);const asof=window.REVIEWS_ASOF||'';
+ const head=`<div class="sh"><span class="live">REVIEW</span><span class="ttl">주차별 점검 결과</span><span class="meta">매주 추가 · 기본 접힘 · 클릭 펼침 · 판단=게이트+뉴스 종합</span><span class="updstamp" style="margin-left:auto">${(typeof stampText==='function'&&asof)?stampText(asof):asof}</span></div>`;
+ if(!R.length){el.innerHTML=head+`<div class="rvw-gates">아직 점검 기록이 없습니다.</div>`;return;}
+ const body=R.slice().sort((a,b)=>new Date(a.date)-new Date(b.date)).reverse().map(r=>{
+  const dir=(r.dir||'hold');
+  const secs=(r.sections||[]).map(sc=>`<div class="rvw-sec"><h4>${sc.h}</h4>${sc.html}</div>`).join('');
+  const props=(r.proposal&&r.proposal.length)?`<div class="rvw-sec rvw-prop"><h4>향후 제안 (다른 메뉴 + 뉴스 종합)</h4>${r.proposal.map(pp=>`<div class="pitem"><span class="rvw-tag" style="background:${(pp.col||'#64748b')}22;color:${pp.col||'#64748b'}">${pp.tag}</span><span>${pp.html}</span></div>`).join('')}</div>`:'';
+  const srcs=(r.srcs&&r.srcs.length)?`<div class="rvw-src">판단 출처: ${r.srcs.map(sr=>sr.url?`<a href="${sr.url}" target="_blank" rel="noopener">${sr.label}</a>`:sr.label).join(' · ')}</div>`:'';
+  return `<details class="rvw"><summary><span class="rvw-date">${r.date}</span><span class="rvw-one">${r.oneLine||''}</span><span class="rvw-badge dir-${dir}">${dir}</span></summary><div class="rvw-body"><div class="rvw-gates">${r.gates||''}</div>${secs}${props}${srcs}</div></details>`;
+ }).join('');
+ el.innerHTML=head+body;
+}
 function renderSignalLog(){
  const el=document.getElementById('signalLog');if(!el)return;
  el.innerHTML=`<div class="sh"><span class="live">LOG</span><span class="ttl">시그널 로그</span><span class="meta">신규 시그널 → value-chain 반영 · 출처 표기</span><span class="updstamp" style="margin-left:auto">${stampText(infoAsof())}</span></div>`
@@ -4170,13 +4212,14 @@ document.addEventListener('click',e=>{if(!e.target.closest('.bub')&&!e.target.cl
 // 3층 병합: 자동(alpha.json) → 실적(earnings.json) → 판단(judgment.json, 마지막에 덮어씀). 없으면 폴백.
 function paint(){renderLegend();draw();renderEarnOps();}
 const getJSON=u=>fetch(u,{cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null);
-Promise.all([getJSON('alpha.json'),getJSON('earnings.json'),getJSON('judgment.json'),getJSON('snapshots.json'),getJSON('holdings.json'),getJSON('signal_log.json'),getJSON('gamma.json')]).then(([j,e,g,sn,hh,sl,gm])=>{
+Promise.all([getJSON('alpha.json'),getJSON('earnings.json'),getJSON('judgment.json'),getJSON('snapshots.json'),getJSON('holdings.json'),getJSON('signal_log.json'),getJSON('gamma.json'),getJSON('reviews.json')]).then(([j,e,g,sn,hh,sl,gm,rv])=>{
  // 5) 외부화 데이터 — 비중은 holdings.json이 있으면 교체, 시그널 로그는 signal_log.json 신규분을 인라인 히스토리 뒤에 누적
  if(hh&&Array.isArray(hh.holdings))HOLDINGS=hh.holdings;
  if(hh&&Number.isFinite(hh.total))HOLD_TOTAL=hh.total;
  if(hh&&typeof hh.asOf==='string')HOLD_ASOF=hh.asOf;
  if(hh&&Array.isArray(hh.detail)&&hh.detail.length){DETAIL_ASOF=hh.asOf;hh.detail.forEach(d=>{const _t=HOLD_DETAIL.find(h=>h.name===d.name);if(_t){_t.w=d.w;_t.amt=d.amt;}});}
  if(sl&&Array.isArray(sl.log)&&sl.log.length)SIGNAL_LOG=SIGNAL_LOG.concat(sl.log);
+ if(rv&&Array.isArray(rv.reviews)){window.REVIEWS=rv.reviews;window.REVIEWS_ASOF=rv.asOf||'';}
  // 1) 자동(alpha.json) — 모멘텀 휴리스틱
  if(j&&j.asOf)setStamp('updAlpha',j.asOf);
  const q=j&&j.quotes;if(q)D.forEach(d=>{const a=q[d.t];if(a){if(Array.isArray(a.aN))d.aN=a.aN;if(Array.isArray(a.aK))d.aK=a.aK;}});
@@ -4188,7 +4231,7 @@ Promise.all([getJSON('alpha.json'),getJSON('earnings.json'),getJSON('judgment.js
  if(gm&&gm.asOf){window.GAMMA_ASOF=gm.asOf;window.GAMMA_FLAGGED=Object.entries(gmm||{}).filter(([k,v])=>v&&v.flagged).map(([k])=>k);}
  // 4) 시점 스냅샷(snapshots.json) — 라이브 머지 후 현재 배치를 보존하고 셀렉터 구성.
  captureLive();SNAPS=(sn&&Array.isArray(sn.snapshots))?sn.snapshots:[];initSnapSel();
-}).finally(()=>{paint(); if(typeof renderSignalLog==='function')renderSignalLog(); if(typeof renderStack==='function')renderStack(); if(typeof renderPortfolio==='function')renderPortfolio(); if(typeof updateAsof==='function')updateAsof(); if(typeof renderCalNow==='function')renderCalNow(); if(typeof loadDigest==='function')loadDigest(); if(typeof applyStackDeepLink==='function')applyStackDeepLink();});
+}).finally(()=>{paint(); if(typeof renderSignalLog==='function')renderSignalLog(); if(typeof renderReviews==='function')renderReviews(); if(typeof renderStack==='function')renderStack(); if(typeof renderPortfolio==='function')renderPortfolio(); if(typeof updateAsof==='function')updateAsof(); if(typeof renderCalNow==='function')renderCalNow(); if(typeof loadDigest==='function')loadDigest(); if(typeof applyStackDeepLink==='function')applyStackDeepLink();});
 })();
 </script>
 <script>
