@@ -1188,11 +1188,11 @@ table.tk th.c{text-align:center}
       <p>L4 471990 <b>2.0%</b>(타깃 7~9% 심각 언더)·L3 <b>44.4%</b> 오버·현금 5.7%(밴드 9~12% 하회). Ackman 상대가치상 비싼 L3 → 공포 눌린 L4 회전 후보이나 실행 트리거 미도래.</p>
       <p><b>트리거 ▸</b> MU γ 닫힘 <b>AND</b> 매크로 게이트 ≥2/3 <b>동시</b> 해제 시 회전. 한쪽만 풀리면 트림분은 회전 아닌 <b>현금 적재</b>(밴드 플로어 우선).</p>
     </div>
-    <div class="watch-card" style="--c:var(--cat-watch)">
-      <h4>이란 협상 / 휴전 <span class="st" style="background:#b8860b">잠정 낙관</span></h4>
-      <p>현재(5/24): <b>60일 휴전 연장 프레임워크</b> + 호르무즈 제거·재개통 협의. 유가↓·증시↑로 반응했으나 Trump "완전 타결 아님". 4/8 휴전은 "life support"였던 이력.</p>
-      <p><b>트리거 ▸</b> 최종딜 전환 → 유가 추가 하락(L7 한국전력 역풍 완화). <b>결렬·재점화</b> → 호르무즈·유가 스파이크 → 매크로 룰북 '지정학 장기·유가' 🟢 단계매수 + 한국비중 축소.</p>
-      <div class="shelf"><div class="shelf-lab"><span>유효기간 (≈60일 프레임)</span><span>~7월 말 만료</span></div><div class="shelf-bar"><div class="shelf-fill" style="width:18%;background:var(--cat-watch)"></div></div></div>
+    <div class="watch-card" data-upd="2026-07-11" style="--c:var(--cat-watch)">
+      <h4>이란 재전쟁 / 휴전 붕괴 <span class="st" style="background:#e03131">재점화</span></h4>
+      <p>현재(7/11): <b>6/17 이슬라마바드 MOU 기반 잠정휴전 7/8 붕괴</b> — 美 이틀 연속 재타격(~80~90표적)·이란산 원유 제재 재부과, 이란 IRGC 쿠웨이트·바레인 미군기지 보복. 호르무즈 통행 급감·GPS 스푸핑 재개.</p>
+      <p><b>트리거 ▸</b> <b>시장 무시 국면</b>(주식↑·유가 소폭)이라 매크로 게이트 미점등. 새 점등은 ① 브렌트 $100+ 2주+ 지속 ② 민간·에너지 인프라 타격에서만 → '지정학 장기·유가' 🟢 단계매수 + 한국비중 축소. 트럼프 'MOU 끝' 선언하나 全면전 회피·파키스탄·카타르 중재. 헤드라인≠게이트.</p>
+      <div class="shelf"><div class="shelf-lab"><span>상태 · 재전쟁(교전 중)</span><span>휴전 붕괴 7/8</span></div><div class="shelf-bar"><div class="shelf-fill" style="width:100%;background:#e03131"></div></div></div>
     </div>
     <div class="watch-card" data-upd="2026-07-10" style="--c:var(--cat-event)">
       <h4>SpaceX 지수 편입 <span class="st" style="background:#e8590c">7/7 확정</span></h4>
@@ -2480,13 +2480,14 @@ function infoAsof(){if(!SIGNAL_LOG||!SIGNAL_LOG.length)return null;let best=null
    "정보를 실제로 고칠 때만" 손으로 갱신하는 아래 상수에 연동한다.
    형식: ISO8601(+09:00 권장). 정보 변경 없는 배포에서는 절대 건드리지 말 것. */
 const VIEW_UPDATED='2026-06-28T21:30:00+09:00';
+let CAL_ASOF=null; /* calendar.json asOf → updCal 배지 자동연동(폴백 VIEW_UPDATED) */
 function fmtUpd(v){if(!v)return null;
  if(/KST$/.test(v))return v;                         // 이미 포맷된 상수
  if(/^\d{4}-\d{2}-\d{2}$/.test(v))return v+' KST';    // 날짜만(예: signals.json asOf)
  const k=fmtKST(v);return k==='—'?null:k;}            // ISO 타임스탬프
 function stampText(v){const f=fmtUpd(v);return f?'update : '+f:'';}
 function setStamp(id,v){const e=document.getElementById(id);if(e)e.textContent=stampText(v);}
-function stampStatics(){setStamp('updCal',VIEW_UPDATED);setStamp('updThread',VIEW_UPDATED);}  /* updPort(06 상단 스탬프) 제거 — 기준일은 자산현황 줄에 단일 표기 */
+function stampStatics(){setStamp('updCal',CAL_ASOF||VIEW_UPDATED);setStamp('updThread',VIEW_UPDATED);}  /* updPort(06 상단 스탬프) 제거 — 기준일은 자산현황 줄에 단일 표기 */
 /* ===== 임박 이벤트: 데이터 구동 자동 큐레이션 (2026-06-13 개편) =====
    매 접속 시 오늘(KST) 기준으로 ① 지난 이벤트 자동 제거 ② 날짜순 정렬
    ③ 가장 임박한 N개만 카드 렌더 ④ D-카운트 동적 계산.
@@ -2494,7 +2495,7 @@ function stampStatics(){setStamp('updCal',VIEW_UPDATED);setStamp('updThread',VIE
    실적 = earnings.json moves에서 자동 병합(크론/운영자 단일 소스 → 이중관리 제거). */
 const CAL_NOW_MAX=8;     // 임박 카드 최대 표시 수
 const CAL_NOW_GRACE=0;   // D+grace일까지 유지(0 = D-Day까지만, 익일 자동 제거)
-const CAL_NOW=[
+let CAL_NOW=[
  {d:'2026-06-29',cat:'pol',lbl:'삼성 ~1000조 투자 발표 (국민보고회)',tk:'005930',meta:'★★ 청와대 국민보고회 · L3 메모리·L4 소부장·L8 전력 리드스루(발표=내러티브, 채점·숫자 무변)',when:'06-29 (월)'},
  {d:'2026-06-30',cat:'event',lbl:'SK 호남 반도체 클러스터 조성 계획',tk:'000660',meta:'L4 후공정·소부장 수요 리드스루 · CB 소비자기대·JOLTS 동반 · 발표=내러티브',when:'06-30 (화)'},
  {d:'2026-06-30',cat:'infl',lbl:'美 PCE · 5월분 (결과)',meta:'헤드라인 +4.1%·근원 +3.4% YoY · 3년래 최고·4개월 연속 가속 · 9월 인상 프라이싱 유지 · 게이트 0/3 불변',when:'06.25 결과'},
@@ -4276,7 +4277,7 @@ document.addEventListener('click',e=>{if(!e.target.closest('.bub')&&!e.target.cl
 // 3층 병합: 자동(alpha.json) → 실적(earnings.json) → 판단(judgment.json, 마지막에 덮어씀). 없으면 폴백.
 function paint(){renderLegend();draw();renderEarnOps();}
 const getJSON=u=>fetch(u,{cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null);
-Promise.all([getJSON('alpha.json'),getJSON('earnings.json'),getJSON('judgment.json'),getJSON('snapshots.json'),getJSON('holdings.json'),getJSON('signal_log.json'),getJSON('gamma.json'),getJSON('reviews.json')]).then(([j,e,g,sn,hh,sl,gm,rv])=>{
+Promise.all([getJSON('alpha.json'),getJSON('earnings.json'),getJSON('judgment.json'),getJSON('snapshots.json'),getJSON('holdings.json'),getJSON('signal_log.json'),getJSON('gamma.json'),getJSON('reviews.json'),getJSON('calendar.json')]).then(([j,e,g,sn,hh,sl,gm,rv,cal])=>{
  // 5) 외부화 데이터 — 비중은 holdings.json이 있으면 교체, 시그널 로그는 signal_log.json 신규분을 인라인 히스토리 뒤에 누적
  if(hh&&Array.isArray(hh.holdings))HOLDINGS=hh.holdings;
  if(hh&&Number.isFinite(hh.total))HOLD_TOTAL=hh.total;
@@ -4284,6 +4285,7 @@ Promise.all([getJSON('alpha.json'),getJSON('earnings.json'),getJSON('judgment.js
  if(hh&&Array.isArray(hh.detail)&&hh.detail.length){DETAIL_ASOF=hh.asOf;hh.detail.forEach(d=>{const _t=HOLD_DETAIL.find(h=>h.name===d.name);if(_t){_t.w=d.w;_t.amt=d.amt;}});}
  if(sl&&Array.isArray(sl.log)&&sl.log.length)SIGNAL_LOG=SIGNAL_LOG.concat(sl.log);
  if(rv&&Array.isArray(rv.reviews)){window.REVIEWS=rv.reviews;window.REVIEWS_ASOF=rv.asOf||'';}
+ if(cal&&Array.isArray(cal.events)){CAL_NOW=cal.events;CAL_ASOF=cal.asOf||null;if(typeof stampStatics==='function')stampStatics();}
  // 1) 자동(alpha.json) — 모멘텀 휴리스틱
  if(j&&j.asOf)setStamp('updAlpha',j.asOf);
  const q=j&&j.quotes;if(q)D.forEach(d=>{const a=q[d.t];if(a){if(Array.isArray(a.aN))d.aN=a.aN;if(Array.isArray(a.aK))d.aK=a.aK;}});
