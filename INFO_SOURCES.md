@@ -13,11 +13,11 @@
 | 메뉴 | 정보명 | 자동/수동 | 업데이트 주기 | 정보 소스 |
 |---|---|---|---|---|
 | 시장 모니터링 | 코스피·S&P·나스닥 지수 | 자동 | 매일 06:37 KST | `charts.json` (`fetch-prices.mjs`, `^KS11·^GSPC·^IXIC` Yahoo 1Y · **첫 데이터는 다음 크론 후**) |
-| 시장 모니터링 | 미 10년물 금리 | 자동 | 런타임 | worker `/api/us10y` (프록시 → us10y 리포 `daily-update.yml`) *스파크라인 스키마 확정 대기* |
+| 시장 모니터링 | 미 10년물 금리 | 자동 | 런타임 | worker `/api/us10y` → `history[].markets.ten_year` 스파크라인 (us10y 리포 `daily-update.yml`) |
 | 시장 모니터링 | WTI 유가 | 자동 | 런타임 | worker `/api/wti` (Yahoo upstream) |
 | 시장 모니터링 | 보유 종목 스파크라인 (MRVL·MU·LITE·VRT·BE·TSLA) | 자동 | 매일 06:37 KST | `charts.json` (`fetch-prices.mjs`, Yahoo 1Y 일봉 t/c) |
-| 시장 모니터링 | 종목 뉴스 피드 | 자동 | 매일 06:37 KST | `news.json` (`fetch-news.mjs`, Google News RSS · **사이트 노출됨** — `.assetsignore`에서 제외) |
-| 시장 모니터링 | 관련 기사 (매크로·이란) | 자동 *(예정)* | 매일 | 구글뉴스 RSS 키워드(이란·호르무즈·FOMC·관세) 수집 예정 |
+| 시장 모니터링 | 종목 뉴스 피드 | 자동 | 매일 06:37 KST | `news.json` (`fetch-news.mjs`, Google News RSS · 종목별 · 사이트 노출됨) |
+| 시장 모니터링 | 관련 기사 (매크로·이란) | 자동 | 매일 06:37 KST | `news.json` `MACRO` 항목 (`fetch-news.mjs` `MACRO_TOPICS`: 이란·호르무즈·FOMC·관세 · **첫 데이터는 다음 크론 후**) |
 
 ---
 
@@ -57,7 +57,7 @@
 
 | 메뉴 | 정보명 | 자동/수동 | 업데이트 주기 | 정보 소스 |
 |---|---|---|---|---|
-| 메모 | 개인 메모 | 수동 | 작성 시 | localStorage (`alphamap_notes_v1`) + GitHub 동기화 (worker `/api/memo`) |
+| 메모 | 개인 메모 | 수동 | 작성 시 | localStorage (`alphamap_notes_v1`) + GitHub 동기화 (worker `/api/memo`, R2) |
 
 ---
 
@@ -76,13 +76,14 @@
 
 1. ~~`news.json` 사이트 미배포~~ → **해결(2026-07-11)**: `.assetsignore`에서 news.json 제외. 매일 signals 배포에 편승해 최신 뉴스가 사이트에 반영됨.
 2. ~~지수 수집~~ → **완료(2026-07-11)**: `fetch-prices.mjs`에 `^KS11·^GSPC·^IXIC` 추가, v-market 지수 카드 배선 완료. **첫 데이터는 다음 06:37 크론 후** charts.json에 생성 → 자동 표시.
-3. **10년물 스파크라인** — `/api/us10y` history의 값 필드 확정 후 연결.
-4. **매크로 뉴스** — 구글뉴스 RSS 키워드 수집 파이프라인 신설 예정.
-5. **watching list** — 뉴스 행 버튼 → watching 추가(GitHub 동기화) 미구현.
+3. ~~10년물 스파크라인~~ → **완료(2026-07-11)**: `/api/us10y` `history[].markets.ten_year` 확정, v-market `loadUs10y` 배선(현재 4.57%).
+4. ~~매크로 뉴스~~ → **완료(2026-07-11)**: `fetch-news.mjs` `MACRO_TOPICS`(이란·FOMC·관세) 추가, v-market 관련 기사 `loadMacroNews` 배선. **첫 데이터는 다음 크론 후**.
+5. **watching list** — 뉴스 행 버튼 → watching 추가(worker `/api/watching` R2 + 02 궁금한 것 리스트) 미구현. (다음 작업)
 
 ---
 
 ## 갱신 이력
 
 - 2026-07-11 · 최초 작성 (5탭 Phase 2a 기준). 01 시장 모니터링 신설 반영, news.json 배포 이슈 기록.
-- 2026-07-11 · Phase 2b: 지수 3종(코스피·S&P·나스닥) 데일리 자동 수집 추가(fetch-prices `INDEX` mkt + v-market `loadIndices` 배선), news.json 사이트 노출(`.assetsignore` 제외). 이슈 1·2 해결.
+- 2026-07-11 · Phase 2b: 지수 3종(코스피·S&P·나스닥) 데일리 자동 수집 추가, news.json 사이트 노출. 이슈 1·2 해결.
+- 2026-07-11 · Phase 2b: 미 10년물 스파크라인(`/api/us10y` ten_year) + 매크로뉴스(`fetch-news` MACRO_TOPICS) 배선. 이슈 3·4 해결. 남은 것 = watching(5).
