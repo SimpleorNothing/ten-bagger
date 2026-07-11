@@ -92,6 +92,56 @@ async function fetchFeed(c) {
   return parseRSS(xml).slice(0, PER_TICKER);
 }
 
+
+// ---- Korean daily digest (news_digest.json) ----
+// ANTHROPIC_API_KEY 가 env 에 있으면 위 items 를 한글 레이어별 요약으로 변환해 저장.
+// 키가 없으면 조용히 스킵(뉴스 수집 자체는 영향 없음). 실패해도 이전 digest 유지.
+const DIGEST_OUT = 'news_digest.json';
+
+async function buildDigest(items) {
+  const key = process.env.ANTHROPIC_API_KEY;
+  if (!key) { console.log('digest: ANTHROPIC_API_KEY 없음 → 스킵'); return; }
+  const holdings = ['MRVL', 'MU', 'LITE', 'VRT', 'BE', 'TSLA', 'RMBS', '005930'];
+  const lines = items
+    .filter((it) => it.ticker !== 'MACRO')
+    .map((it) => `${it.ticker}|${it.name}|${(it.published || '').slice(0, 10)}|${it.title}`)
+    .join('\n');
+  const prompt = `너는 AI 인프라 투자 관측소의 애널리스트다. 아래는 종목별 최근 뉴스 헤드라인이다(티커|이름|날짜|제목).
+
+보유 종목: ${holdings.join(', ')} (나머지는 워치리스트)
+레이어: L2 컴퓨트(GPU/ASIC) L3 메모리 L4 패키징/장비 L5 서버 L6 옵티컬 L7 전력/냉각 L8 발전/그리드
+
+다음 JSON 만 출력하라(마크다운·설명 금지):
+{"headline":"이번 피드의 축을 ①②③ 형식으로 요약한 결론 한 문장(한글)",
+ "groups":[{"title":"보유 종목","items":[{"tk":"MU","nm":"마이크론","s":"핵심 내용 1~2문장 한글 요약"}]},
+           {"title":"워치리스트 · L2 컴퓨트","items":[...]},
+           {"title":"워치리스트 · L3/L4 메모리·장비","items":[...]},
+           {"title":"워치리스트 · L5~L8 서버·옵티컬·전력","items":[...]}],
+ "watch":["실적 발표 임박 등 일정 주의 항목(있으면, 최대 4개)"]}
+
+규칙: 보유 종목은 전부 포함(뉴스 없으면 생략 가능), 워치리스트는 의미 있는 것만. 요약은 사실만, 과장 금지, 헤드라인에 없는 내용 추가 금지.
+
+${lines}`;
+  try {
+    const r = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01' },
+      body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 3000, messages: [{ role: 'user', content: prompt }] }),
+    });
+    if (!r.ok) throw new Error('anthropic HTTP ' + r.status);
+    const j = await r.json();
+    const text = (j.content || []).filter((b) => b.type === 'text').map((b) => b.text).join('');
+    const clean = text.replace(/```json|```/g, '').trim();
+    const digest = JSON.parse(clean);
+    if (!digest.headline || !Array.isArray(digest.groups)) throw new Error('digest shape invalid');
+    const out = { asOf: new Date().toISOString(), model: 'claude-sonnet-4-6', ...digest };
+    fs.writeFileSync(DIGEST_OUT, JSON.stringify(out, null, 2) + '\n');
+    console.log(`digest: ${DIGEST_OUT} 작성 (groups=${digest.groups.length})`);
+  } catch (e) {
+    console.log('digest 실패(이전 파일 유지):', e.message);
+  }
+}
+
 async function main() {
   const MACRO_TOPICS = [
     { id: 'macro_iran', ticker: 'MACRO', name: '이란 호르무즈 해협', mkt: 'KOSPI' },
@@ -148,6 +198,7 @@ async function main() {
   };
   fs.writeFileSync(OUT, JSON.stringify(payload, null, 2) + '\n');
   console.log(`\nDone: ${ok} ok, ${fail} failed, ${items.length} items in ${OUT}.`);
+  await buildDigest(items);
 }
 
 main().catch((e) => { console.error(e); process.exit(1); });

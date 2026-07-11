@@ -615,6 +615,11 @@ table.tk th.c{text-align:center}
 .nrow .ntk{flex:0 0 54px;font:700 11px var(--mono);color:var(--dawn)}
 .nrow .ntt{font-size:13px;color:var(--txt);line-height:1.4;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 @media(max-width:600px){.mkt-grid{grid-template-columns:repeat(2,1fr)}}
+.dg-head{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:13px 15px;font-size:13px;color:var(--txt);line-height:1.55;margin-bottom:12px}
+.dg-grp{margin:14px 0 6px;font-size:13px;font-weight:700;color:var(--dim)}
+.dg-watch{margin-top:12px;font-size:12px;color:var(--dim)}
+.dg-watch b{color:var(--st-hot);font-weight:700}
+.nrow .nsm{font-size:12.5px;color:var(--txt);line-height:1.5;white-space:normal}
 
 </style>
 <style id="memo-css">
@@ -1676,7 +1681,9 @@ window.CYCLE=(function(){
   <div class="mkt-grid" id="mktHoldings"><div class="mkt-ph" style="grid-column:1/-1">로딩…</div></div>
   <h2 class="msec">관련 기사</h2>
   <div id="mktMacroNews" class="nlist"><div class="mkt-ph">수집 대기 (구글뉴스 RSS)</div></div>
-  <h2 class="msec">종목 뉴스 <span class="mnote">데일리</span></h2>
+  <h2 class="msec">종목 뉴스 요약 <span class="mnote" id="mktDigestAsof">데일리 자동</span></h2>
+  <div id="mktDigest"><div class="mkt-ph">요약 준비 중…</div></div>
+  <h2 class="msec">종목 뉴스 <span class="mnote">데일리 · 원문</span></h2>
   <div id="mktStockNews" class="nlist"><div class="mkt-ph">로딩…</div></div>
 </section>
 
@@ -2758,7 +2765,20 @@ window.MARKET=(function(){
    host.innerHTML=items.map(function(it){return '<a class="nrow" href="'+esc(it.link||'#')+'" target="_blank" rel="noopener"><span class="ntk">'+esc((it.name||'매크로').slice(0,6))+'</span><span class="ntt">'+esc(it.title||'')+'</span></a>';}).join('')||'<div class="mkt-ph">수집 대기 (다음 크론)</div>';}
   catch(e){host.innerHTML='<div class="mkt-ph">수집 대기</div>';}
  }
- function render(){loadWti();loadUs10y();loadIndices();loadHoldings();loadMacroNews();loadNews();}
+ async function loadDigest(){
+  var host=document.getElementById('mktDigest');if(!host)return;
+  try{var r=await fetch('news_digest.json?t='+Date.now(),{cache:'no-store'});if(!r.ok)throw 0;var j=await r.json();
+   var d=document.getElementById('mktDigestAsof');if(d&&j.asOf)d.textContent='자동 요약 · '+j.asOf.slice(0,10);
+   var html='<div class="dg-head">'+esc(j.headline||'')+'</div>';
+   (j.groups||[]).forEach(function(g){
+    html+='<div class="dg-grp">'+esc(g.title||'')+'</div><div class="nlist">';
+    (g.items||[]).forEach(function(it){html+='<div class="nrow"><span class="ntk">'+esc(it.tk||'')+'</span><span class="nsm">'+esc(it.s||'')+'</span></div>';});
+    html+='</div>';});
+   if(j.watch&&j.watch.length)html+='<div class="dg-watch"><b>일정 주의</b> · '+j.watch.map(esc).join(' · ')+'</div>';
+   host.innerHTML=html;}
+  catch(e){host.innerHTML='<div class="mkt-ph">요약 대기 (다음 크론)</div>';}
+ }
+ function render(){loadWti();loadUs10y();loadIndices();loadHoldings();loadDigest();loadMacroNews();loadNews();}
  return {render:render};
 })();
 
