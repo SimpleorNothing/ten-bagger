@@ -21,8 +21,9 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const PER_TICKER = 4;     // keep newest N headlines per name
 // news.json = 사이트가 매 로딩마다 통째로 받는 파일 → 반드시 상한을 둔다(모바일 페이로드).
 // 삭제가 아니라 '창(window)'일 뿐이고, 잘려나간 기사는 news_archive.json 에 영구 보존된다.
-const PRUNE_DAYS = 95;    // 사이트 표시 창(약 3개월)
-const MAX_ITEMS = 2000;   // 사이트 파일 하드캡
+const PRUNE_DAYS = 95;         // 사이트 표시 창(약 3개월)
+const SITE_PER_TICKER = 5;    // 사이트 표시 상한: 종목당 최신 5건 (카드 렌더와 동일)
+const MAX_ITEMS = 2000;       // 사이트 파일 하드캡
 const ARCHIVE_OUT = 'news_archive.json';  // 영구 보존(프루닝 없음·사이트 미배포)
 
 // ETF baskets have low single-name news value → skip.
@@ -285,18 +286,26 @@ async function main() {
   console.log(`archive: ${ARCHIVE_OUT} ${all.length}건 (누적·무삭제)`);
 
   // ── 사이트 표시 창(news.json) ──────────────────────────────────────
+  // 카드는 종목당 5건까지만 보여주므로 파일에도 그만큼만 싣는다
+  // → 아카이브가 몇 년치로 불어나도 사이트 페이로드는 상수로 유지된다.
   const cutoff = now.getTime() - PRUNE_DAYS * 864e5;
+  const perTk = new Map();
   const items = all
     .filter((it) => {
       const t = it.published ? new Date(it.published).getTime() : 0;
-      return !t || t >= cutoff;
+      if (t && t < cutoff) return false;
+      const k = it.ticker || '?';
+      const n = (perTk.get(k) || 0) + 1;
+      if (n > SITE_PER_TICKER) return false;   // all 은 최신순 정렬 → 앞 5건만 통과
+      perTk.set(k, n);
+      return true;
     })
     .slice(0, MAX_ITEMS);
 
   const payload = {
     asOf: now.toISOString(),
     source: 'Google News RSS · 보유/후보 종목별 (원시 피드 + 기사별 한 줄 요약)',
-    note: `사이트 종목 카드의 "일자 + 요약" 행 소스. 최근 ${PRUNE_DAYS}일 창(모바일 페이로드 상한). 잘려나간 과거 기사는 삭제된 것이 아니라 ${ARCHIVE_OUT} 에 영구 보존된다. 신호/소음 판단과 SIGNAL_LOG 반영은 사람/Claude의 몫 — 채점·차트에는 쓰이지 않는다.`,
+    note: `사이트 종목 카드의 "일자 + 요약" 행 소스. 최근 ${PRUNE_DAYS}일 창 · 종목당 최신 ${SITE_PER_TICKER}건(모바일 페이로드 상한). 잘려나간 과거 기사는 삭제된 것이 아니라 ${ARCHIVE_OUT} 에 영구 보존된다. 신호/소음 판단과 SIGNAL_LOG 반영은 사람/Claude의 몫 — 채점·차트에는 쓰이지 않는다.`,
     count: items.length,
     archive: ARCHIVE_OUT,
     archiveCount: all.length,

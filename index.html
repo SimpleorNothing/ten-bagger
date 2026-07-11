@@ -2813,9 +2813,9 @@ window.MARKET=(function(){
    (((nw||{}).items)||[]).forEach(function(it){if(it.ticker==='MACRO')return;var k=String(it.ticker||'').toUpperCase();(byTk[k]=byTk[k]||[]).push(it);});
    Object.keys(byTk).forEach(function(k){byTk[k].sort(function(a,b){return new Date(b.published||0)-new Date(a.published||0);});});
    var artBy={};(((dg||{}).arts)||[]).forEach(function(x){if(x&&x.link&&x.a)artBy[x.link]=x.a;});
-   var WIN_D=92,cutT=Date.now()-WIN_D*864e5;
+   var WIN_D=92,MAX_ROWS=5,cutT=Date.now()-WIN_D*864e5;
    function artRows(k){var lst=(byTk[k]||[]).filter(function(it){
-     var t=it.published?new Date(it.published).getTime():0;return !t||t>=cutT;});
+     var t=it.published?new Date(it.published).getTime():0;return !t||t>=cutT;}).slice(0,MAX_ROWS);
     if(!lst.length)return '<div class="aempty">최근 3개월 기사 없음</div>';
     return lst.map(function(it){
      var a=String(it.a||artBy[it.link]||'').trim();
