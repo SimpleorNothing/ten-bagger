@@ -629,6 +629,11 @@ table.tk th.c{text-align:center}
 .stk-sum{padding:10px 14px;font-size:12.5px;color:var(--txt);line-height:1.55;border-top:1px solid var(--line)}
 .stk-blk .nlist{border:0;border-top:1px solid var(--line);border-radius:0}
 .nan{padding:0 14px 10px 68px;font-size:11.5px;color:var(--dim);line-height:1.5;background:var(--panel)}
+.stk-body{display:flex}.stk-left{flex:1 1 62%;min-width:0}
+.stk-chart{flex:0 0 36%;border-left:1px solid var(--line);border-top:1px solid var(--line);padding:10px 10px 6px;display:flex;flex-direction:column;background:var(--panel)}
+.stk-cv{width:100%;height:190px;flex:1;display:block;cursor:crosshair}
+.stk-zn{font-size:10px;color:var(--faint);text-align:right;margin-top:4px}
+@media(max-width:700px){.stk-body{flex-direction:column}.stk-chart{border-left:0;flex-basis:auto}.stk-cv{height:150px}}
 
 </style>
 <style id="memo-css">
@@ -2776,9 +2781,13 @@ window.MARKET=(function(){
   try{
    var rs=await Promise.all([
     fetch('news_digest.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;}),
-    fetch('news.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;})
+    fetch('news.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;}),
+    fetch('charts.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;})
    ]);
-   var dg=rs[0],nw=rs[1];
+   var dg=rs[0],nw=rs[1],CH=((rs[2]||{}).series)||{};
+   var KM={'005930':'sec','009150':'sem','353200':'ddk','089030':'twng'};
+   function cK(t){t=String(t||'');return KM[t]||t.toLowerCase();}
+   function cCol(t){var s=CH[cK(t)];if(!s||!s.c||s.c.length<10)return '';return '<div class="stk-chart"><canvas class="stk-cv" data-ck="'+esc(cK(t))+'"></canvas><div class="stk-zn">Ctrl+휠: 기간 조절</div></div>';}
    var byTk={};
    (((nw||{}).items)||[]).forEach(function(it){if(it.ticker==='MACRO')return;var k=String(it.ticker||'').toUpperCase();(byTk[k]=byTk[k]||[]).push(it);});
    Object.keys(byTk).forEach(function(k){byTk[k].sort(function(a,b){return new Date(b.published||0)-new Date(a.published||0);});});
@@ -2792,19 +2801,44 @@ window.MARKET=(function(){
     (dg.groups||[]).forEach(function(g){
      html+='<div class="dg-grp">'+esc(g.title||'')+'</div>';
      (g.items||[]).forEach(function(it){var k=String(it.tk||'').toUpperCase();used[k]=1;
-      html+='<div class="stk-blk"><div class="stk-hd"><span class="tk">'+esc(it.tk||'')+'</span><span class="nm">'+esc(it.nm||'')+'</span></div><div class="stk-sum">'+esc(it.s||'')+'</div>'+newsRows(k)+'</div>';});
+      html+='<div class="stk-blk"><div class="stk-hd"><span class="tk">'+esc(it.tk||'')+'</span><span class="nm">'+esc(it.nm||'')+'</span></div><div class="stk-body"><div class="stk-left"><div class="stk-sum">'+esc(it.s||'')+'</div>'+newsRows(k)+'</div>'+cCol(it.tk)+'</div></div>';});
     });
    }
    var rest=Object.keys(byTk).filter(function(k){return !used[k];}).sort();
    if(rest.length){
     html+='<div class="dg-grp">기타 종목</div>';
     rest.forEach(function(k){var nm=(byTk[k][0]||{}).name||k;
-     html+='<div class="stk-blk"><div class="stk-hd"><span class="tk">'+esc(k)+'</span><span class="nm">'+esc(nm)+'</span></div>'+newsRows(k)+'</div>';});
+     html+='<div class="stk-blk"><div class="stk-hd"><span class="tk">'+esc(k)+'</span><span class="nm">'+esc(nm)+'</span></div><div class="stk-body"><div class="stk-left">'+newsRows(k)+'</div>'+cCol(k)+'</div></div>';});
    }
    if(dg&&dg.watch&&dg.watch.length)html+='<div class="dg-watch"><b>일정 주의</b> · '+dg.watch.map(esc).join(' · ')+'</div>';
-   host.innerHTML=html||'<div class="mkt-ph">뉴스 없음</div>';}
+   host.innerHTML=html||'<div class="mkt-ph">뉴스 없음</div>';iSC(CH);}
   catch(e){host.innerHTML='<div class="mkt-ph">뉴스 대기</div>';}
  }
+ function iSC(CH){document.querySelectorAll('canvas.stk-cv').forEach(function(cv){if(cv._i)return;cv._i=1;
+  var s=CH[cv.getAttribute('data-ck')];if(!s||!s.c){cv.parentElement.style.display='none';return;}
+  var st={sp:Math.min(126,s.c.length),hv:-1};
+  function fd(x){if(x==null)return '';var n=Number(x);if(isFinite(n))return new Date(n*(n<1e6?86400000:n<1e12?1000:1)).toISOString().slice(5,10);return String(x).slice(5,10);}
+  function vw(){var n=s.c.length,k=Math.max(20,Math.min(n,Math.round(st.sp)));return{k:k,v:s.c.slice(n-k),t:(s.t||[]).slice(n-k)};}
+  function dr(){var d=window.devicePixelRatio||1,w=cv.clientWidth,H=cv.clientHeight;if(!w||!H)return;
+   if(cv.width!==Math.round(w*d)){cv.width=Math.round(w*d);cv.height=Math.round(H*d);}
+   var c=cv.getContext('2d');c.setTransform(d,0,0,d,0,0);c.clearRect(0,0,w,H);
+   var o=vw(),v=o.v,t=o.t,k=o.k,mn=Math.min.apply(null,v),mx=Math.max.apply(null,v);if(mx===mn)mx=mn+1;
+   function X(i){return 6+(w-12)*i/(k-1);}function Y(x){return 18+(H-34)*(1-(x-mn)/(mx-mn));}
+   var cs=getComputedStyle(document.documentElement),up=v[k-1]>=v[0];
+   var cl=(up?cs.getPropertyValue('--st-hot'):cs.getPropertyValue('--st-accel')).trim()||(up?'#e03131':'#1971c2');
+   c.beginPath();for(var i=0;i<k;i++)i?c.lineTo(X(i),Y(v[i])):c.moveTo(X(0),Y(v[0]));
+   c.strokeStyle=cl;c.lineWidth=1.6;c.stroke();
+   c.font='10px sans-serif';c.fillStyle='#868e96';c.fillText(fd(t[0]),6,H-4);
+   var le=fd(t[k-1]);c.fillText(le,w-6-c.measureText(le).width,H-4);
+   var p=((v[k-1]/v[0]-1)*100).toFixed(1);c.fillStyle=cl;c.fillText(v[k-1].toLocaleString()+' ('+(p>=0?'+':'')+p+'% / '+k+'D)',6,12);
+   if(st.hv>=0&&st.hv<k){var i2=st.hv;c.strokeStyle='#adb5bd';c.lineWidth=1;c.beginPath();c.moveTo(X(i2),18);c.lineTo(X(i2),H-16);c.stroke();
+    c.fillStyle=cl;c.beginPath();c.arc(X(i2),Y(v[i2]),2.6,0,6.3);c.fill();
+    var tp=fd(t[i2])+' '+v[i2].toLocaleString();c.fillStyle='#495057';var tw=c.measureText(tp).width;
+    c.fillText(tp,Math.min(Math.max(X(i2)-tw/2,6),w-6-tw),28);}}
+  cv.addEventListener('wheel',function(e){if(!e.ctrlKey)return;e.preventDefault();st.sp=Math.max(20,Math.min(s.c.length,st.sp*(e.deltaY>0?1.25:0.8)));st.hv=-1;dr();},{passive:false});
+  cv.addEventListener('mousemove',function(e){var r=cv.getBoundingClientRect(),o=vw();st.hv=Math.max(0,Math.min(o.k-1,Math.round((e.clientX-r.left-6)*(o.k-1)/(r.width-12))));dr();});
+  cv.addEventListener('mouseleave',function(){st.hv=-1;dr();});
+  window.addEventListener('resize',dr);dr();});}
  function render(){loadWti();loadUs10y();loadIndices();loadHoldings();loadMacroNews();loadStockNews();}
  return {render:render};
 })();
