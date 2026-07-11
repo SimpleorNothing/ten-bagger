@@ -1,0 +1,30 @@
+# ── 운영자 수동 이동 필요 ──
+# GitHub App은 .github/workflows/ 쓰기 권한이 없어(403) Claude가 직접 못 넣음.
+# 이 파일을 웹UI에서 .github/workflows/update-calendar.yml 로 복사·생성하면 데일리 크론 활성.
+name: Update calendar
+on:
+  schedule:
+    - cron: '40 21 * * *'   # 21:40 UTC = 06:40 KST (prices/news 06:37 직후)
+  workflow_dispatch: {}
+permissions:
+  contents: write
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+      - name: Refresh calendar.json
+        run: node scripts/derive-calendar.mjs
+      - name: Commit if changed
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if ! git diff --quiet -- calendar.json; then
+            git add calendar.json
+            git commit -m "chore(cal): daily refresh calendar.json (asOf·prune·geo 후보)"
+            git push
+          else
+            echo "no change"
+          fi
