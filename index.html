@@ -607,6 +607,13 @@ table.tk th.c{text-align:center}
 .mkt-chg.up{color:var(--st-hot)}.mkt-chg.dn{color:var(--st-accel)}
 .mkt-card .spark{width:100%;height:36px;display:block}
 .mkt-span{font:500 10px var(--mono);color:var(--faint);margin-top:4px}
+.mkt-card-lk{cursor:pointer}
+.mkt-card-lk:hover{border-color:var(--line2);box-shadow:0 4px 14px rgba(22,36,45,.10)}
+.mkt-card-lk:active{transform:translateY(1px)}
+.mkt-card-lk:focus-visible{outline:2px solid var(--st-accel);outline-offset:2px}
+.mkt-card-lk .mkt-span::after{content:' · 기사 →';color:var(--st-accel);font-weight:700}
+@keyframes stkFlash{0%,55%{box-shadow:0 0 0 2px var(--st-accel) inset}100%{box-shadow:0 0 0 0 rgba(0,0,0,0) inset}}
+.stk-flash{animation:stkFlash 1.5s ease}
 .mkt-ph{font-size:12px;color:var(--faint);padding:16px 0;text-align:center}
 .mkt-ph-box{background:var(--panel2);border:1px dashed var(--line2);border-radius:14px;padding:18px;text-align:center;font-size:13px;color:var(--dim)}
 .nlist{display:flex;flex-direction:column;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden}
@@ -2732,10 +2739,11 @@ window.MARKET=(function(){
  async function loadHoldings(){
   var host=document.getElementById('mktHoldings');if(!host)return;
   try{var r=await fetch('charts.json?t='+Date.now(),{cache:'no-store'});var j=await r.json();var S=j.series||{};
-   var list=[['mrvl','Marvell'],['mu','Micron'],['lite','Lumentum'],['vrt','Vertiv'],['be','Bloom Energy'],['tsla','Tesla']];
+   var list=[['mrvl','Marvell','MRVL'],['mu','Micron','MU'],['lite','Lumentum','LITE'],['vrt','Vertiv','VRT'],['be','Bloom Energy','BE'],['tsla','Tesla','TSLA']];
    var html=list.map(function(o){var d=S[o[0]];if(!d||!d.c||!d.c.length)return '';var vals=slice6(d.c);
-    return '<div class="mkt-card">'+card(o[1],'$'+vals[vals.length-1].toFixed(2),pct(vals),vals)+'</div>';}).join('');
-   host.innerHTML=html||'<div class="mkt-ph" style="grid-column:1/-1">데이터 없음</div>';}
+    return '<div class="mkt-card mkt-card-lk" data-tk="'+o[2]+'" role="button" tabindex="0" title="'+esc(o[1])+' 기사 보기">'+card(o[1],'$'+vals[vals.length-1].toFixed(2),pct(vals),vals)+'</div>';}).join('');
+   host.innerHTML=html||'<div class="mkt-ph" style="grid-column:1/-1">데이터 없음</div>';
+   host.querySelectorAll('.mkt-card-lk').forEach(function(cd){function go(){gotoStockNews(cd.getAttribute('data-tk'));}cd.addEventListener('click',go);cd.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();go();}});});}
   catch(e){host.innerHTML='<div class="mkt-ph" style="grid-column:1/-1">데이터 대기</div>';}
  }
  async function loadIndices(){
@@ -2801,14 +2809,14 @@ window.MARKET=(function(){
     (dg.groups||[]).forEach(function(g){
      html+='<div class="dg-grp">'+esc(g.title||'')+'</div>';
      (g.items||[]).forEach(function(it){var k=String(it.tk||'').toUpperCase();used[k]=1;
-      html+='<div class="stk-blk"><div class="stk-hd"><span class="tk">'+esc(it.tk||'')+'</span><span class="nm">'+esc(it.nm||'')+'</span></div><div class="stk-body"><div class="stk-left"><div class="stk-sum">'+esc(it.s||'')+'</div>'+newsRows(k)+'</div>'+cCol(it.tk)+'</div></div>';});
+      html+='<div class="stk-blk" id="stknews-'+esc(k)+'"><div class="stk-hd"><span class="tk">'+esc(it.tk||'')+'</span><span class="nm">'+esc(it.nm||'')+'</span></div><div class="stk-body"><div class="stk-left"><div class="stk-sum">'+esc(it.s||'')+'</div>'+newsRows(k)+'</div>'+cCol(it.tk)+'</div></div>';});
     });
    }
    var rest=Object.keys(byTk).filter(function(k){return !used[k];}).sort();
    if(rest.length){
     html+='<div class="dg-grp">기타 종목</div>';
     rest.forEach(function(k){var nm=(byTk[k][0]||{}).name||k;
-     html+='<div class="stk-blk"><div class="stk-hd"><span class="tk">'+esc(k)+'</span><span class="nm">'+esc(nm)+'</span></div><div class="stk-body"><div class="stk-left">'+newsRows(k)+'</div>'+cCol(k)+'</div></div>';});
+     html+='<div class="stk-blk" id="stknews-'+esc(k)+'"><div class="stk-hd"><span class="tk">'+esc(k)+'</span><span class="nm">'+esc(nm)+'</span></div><div class="stk-body"><div class="stk-left">'+newsRows(k)+'</div>'+cCol(k)+'</div></div>';});
    }
    if(dg&&dg.watch&&dg.watch.length)html+='<div class="dg-watch"><b>일정 주의</b> · '+dg.watch.map(esc).join(' · ')+'</div>';
    host.innerHTML=html||'<div class="mkt-ph">뉴스 없음</div>';iSC(CH);}
@@ -2839,6 +2847,14 @@ window.MARKET=(function(){
   cv.addEventListener('mousemove',function(e){var r=cv.getBoundingClientRect(),o=vw();st.hv=Math.max(0,Math.min(o.k-1,Math.round((e.clientX-r.left-6)*(o.k-1)/(r.width-12))));dr();});
   cv.addEventListener('mouseleave',function(){st.hv=-1;dr();});
   window.addEventListener('resize',dr);dr();});}
+ function gotoStockNews(tk){
+  tk=String(tk||'').toUpperCase();
+  var t=document.getElementById('stknews-'+tk);
+  if(!t){var h=document.getElementById('mktDigest');if(h)h.scrollIntoView({behavior:'smooth',block:'start'});return;}
+  t.scrollIntoView({behavior:'smooth',block:'center'});
+  t.classList.remove('stk-flash');void t.offsetWidth;t.classList.add('stk-flash');
+  setTimeout(function(){t.classList.remove('stk-flash');},1600);
+ }
  function render(){loadWti();loadUs10y();loadIndices();loadHoldings();loadMacroNews();loadStockNews();}
  return {render:render};
 })();
