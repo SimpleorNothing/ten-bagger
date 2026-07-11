@@ -2,7 +2,7 @@
 
 > `simpleornothing.com`이 메뉴별로 수집·표시하는 전체 정보의 소스·갱신 방식 대장.
 > **이 문서는 지속 업데이트한다** — 정보/소스/주기가 바뀌면 해당 행을 갱신하고 하단 이력에 한 줄 남긴다.
-> 최종 갱신: 2026-07-11 · 기준 메뉴: 5탭 (Phase 2e)
+> 최종 갱신: 2026-07-11 · 기준 메뉴: 5탭 (Phase 2g)
 
 범례 — **자동**: cron 워크플로 or worker 런타임 API. **수동**: 편집→push→deploy(운영자/Claude). **혼합**: 자동값 위에 판단이 덮어씀. **날짜연동**: 클라이언트가 날짜 기준 자동 표시.
 
@@ -16,7 +16,7 @@
 | 시장 모니터링 | 미 10년물 금리 | 자동 | 런타임 | worker `/api/us10y` → `history[].markets.ten_year` 스파크라인 (us10y 리포 `daily-update.yml`) |
 | 시장 모니터링 | WTI 유가 | 자동 | 런타임 | worker `/api/wti` (Yahoo upstream) |
 | 시장 모니터링 | 보유 종목 스파크라인 (MRVL·MU·LITE·VRT·BE·TSLA) | 자동 | 매일 06:37 KST | `charts.json` (`fetch-prices.mjs`, Yahoo 1Y 일봉 t/c) |
-| 시장 모니터링 | 종목 뉴스 (**종목 블록형**: 상단 자동 Summary + 일자별 기사 · 결론/그룹/일정주의 포함) | 자동 | 매일 06:12 KST | `news_digest.json`(Claude API digest, claude-sonnet-4-6) + `news.json`(Google News RSS) 클라이언트 병합 렌더 |
+| 시장 모니터링 | 종목 뉴스 (**종목 블록형**: 상단 Summary + 일자별 기사 + **보유 기사별 내용·의미·영향 한줄 분석**(arts) + **우측 인터랙티브 주가 차트**(호버·Ctrl+휠 기간) · 결론/그룹/일정주의) | 자동 | 매일 06:12 KST(뉴스·digest) / 06:37(차트) | `news_digest.json`(digest+arts, claude-sonnet-4-6) + `news.json` + `charts.json`(1Y 일봉, 한국종목 별칭 sec·sem·ddk·twng) 클라이언트 병합 렌더 |
 | 시장 모니터링 | 관련 기사 (매크로 · **토픽 블록형**: 상단 자동 Summary + 일자별 기사, id 기준 그룹) | 자동 | 매일 06:12 KST | `news_digest.json` `macro`(Claude API digest) + `news.json` `MACRO` 항목 병합 렌더 |
 
 ---
@@ -82,7 +82,7 @@
 4. ~~매크로 뉴스~~ → **완료(2026-07-11)**: `MACRO_TOPICS` + 수동 시드 6건.
 5. **watching list** — 뉴스 행 버튼 → watching 추가(worker `/api/watching` R2 + 02 리스트) 미구현.
 6. ~~digest 자동화 활성 대기~~ → **해결(2026-07-11)**: 운영자가 update-news.yml에 ANTHROPIC_API_KEY env·커밋 대상(news_digest.json) 추가, 수동 dispatch로 첫 자동 digest 생성 확인(model=claude-sonnet-4-6, groups=4). 이후 매일 06:12 KST 완전 자동.
-7. **b64 파이프라인 손상 재발(2026-07-11)**: 17KB patch에서 2바이트 묵시 손상 → 신규 JSON에 유입. 대응: 적용 후 콘텐츠 레벨 검증(UTF-8 decode + 로컬 비교) 의무화, 손상 파일은 직접 커밋으로 교체.
+7. **b64 파이프라인 손상 재발(2026-07-11)**: 17KB patch에서 2바이트 묵시 손상 → 신규 JSON에 유입. 대응: 적용 후 콘텐츠 레벨 검증(UTF-8 decode + 로컬 비교) 의무화, 손상 파일은 직접 커밋으로 교체. Phase 2g에서 전사 손상 2회 추가 관측 → **미니파이 + 한줄 b64(base64 -w0) + 푸시 직후 디코드 md5 검증**을 표준 절차로 확립.
 
 ---
 
@@ -95,6 +95,8 @@
 - 2026-07-11 · digest 자동화 활성 완료 — 운영자 update-news.yml 수정 + 수동 실행으로 첫 자동 요약 생성·배포 확인(claude-sonnet-4-6). 이슈 6 해결. 이후 매일 06:12 KST 완전 자동.
 - 2026-07-11 · Phase 2d: 01 뉴스 그룹형 재구성 — 관련 기사 토픽별 일자 정렬, 종목 뉴스 종목 블록화(상단 Summary + 일자별 기사, 요약/원문 섹션 통합).
 - 2026-07-11 · Phase 2e: 관련 기사 토픽 상단 요약 — digest에 macro 요약 생성 추가(fetch-news), 토픽 블록형(id 기준 그룹으로 이란 중복 그룹 해소).
+- 2026-07-11 · Phase 2f: 보유 기사별 내용→의미→영향 한줄 분석(arts) — digest 프롬프트에 보유 기사 번호 목록 추가, n→link 매핑, 기사 행 아래 회색 소자 렌더. max_tokens 6000.
+- 2026-07-11 · Phase 2g: 종목 블록 우측 인터랙티브 주가 차트 — charts.json 3중 병합, 캔버스 직접 렌더(DPR·호버 크로스헤어·Ctrl+휠 20일~1Y 줌), 모바일 세로 스택. b64 전사 손상 2회 → 미니파이+한줄 b64로 해소, 디코드 md5·콘텐츠 바이트 일치 확인(apply e2c1987).
 - 2026-07-11 · 02 궁금한 것 **답-먼저 재편**: 즉답 요약 카드 신설(gamma·holdings·TARGETS·signal_log 런타임 6행 — 전선·단계분포·상대가치·트림게이트γ·다음재채점·오늘시그널), 강물·스택 탐색 인트로는 '더 파보기'로 하단 강등. `window.GAMMA`·`window.MACRO_GRADE` 노출. 전선·다음재채점만 `IA_CFG` 수동판단.
 - 2026-07-11 · 03 리밸런싱 **결정 보드 신설**: 최상단에 브리핑 3문(자산구성·게이트·타이밍) 상시 패널. `#decisionBoard` 자기완결 IIFE가 holdings/gamma/signals/cycle 재페치+TARGETS로 렌더 → holdings 주간 동기 시 **자동 재파악**. MU γ 3트리거(①목표가소진 ②P/E재확장 ③사이클텔) 점등 보드, γ는 gamma.json 단일소스(open/spent 자동전환). b64 패치 `decision-board-20260711.b64`→apply-patch 적용, 무결성 md5 왕복 통과.
 - 2026-07-11 · 03 리밸런싱 **재편**: `v-decision` 전용 섹션 신설(결정보드 이동) + **시장 모멘텀 전망**(미 signals 레짐·한 삼성 프록시) + **방향 확률 추정**(GBM: σ 프리셋·μ 프리셋+charts 모멘텀 블렌드, 다음주/1달/3개월 P상승·유지·하락). 그룹 `port:['decision']`으로 매크로룰북·X레이·트래커 뷰서 제외(코드 잔존). 결정보드 ①엔 적정밴드 오버레이 추가. 소스 `charts.json`·`prices.json` 03 신규 소비. b64 `decision-board-momprob-20260711.b64`→apply-patch 적용, 초회 인라인 손상(1B 공백)→교체 재푸시 후 md5 왕복 통과(commit 63a1da97).
