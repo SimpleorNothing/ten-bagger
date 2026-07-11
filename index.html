@@ -944,6 +944,7 @@ table.tk th.c{text-align:center}
 
 <!-- 01 MACRO -->
 <section class="view" id="v-macro">
+  <div class="decboard" id="decisionBoard" style="margin:2px 0 20px"></div>
   <div class="vhead">
     <div class="vkick">Macro Beta · 충격 매매 룰북</div>
     <h1 class="vtitle">매크로는 <em>타이밍</em>, 펀더멘털은 선택</h1>
@@ -4543,6 +4544,120 @@ function renderInstantAnswer(){
  renderSignals();
  fetch('./signals.json',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{SIGNALS=j;renderSignals();}).catch(()=>renderSignals());
 })();
+</script>
+
+<script>
+/* ===== 결정 보드 (Decision Board) — 03 리밸런싱 최상단 · 라이브 JSON 자동 파악 =====
+   3문: ① 자산 구성 ② 지금 상황(게이트) ③ 뭘·언제. holdings/gamma/signals/cycle 재페치 + TARGETS 전역.
+   holdings.json 주간 갱신 시 자동 재파악. narrative≠numbers — γ는 gamma.json 단일소스. */
+(function(){
+  var J=function(u){return fetch(u,{cache:'no-store'}).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;});};
+  var pct=function(n){return (n==null?'—':(Math.round(n*10)/10)+'%');};
+  var dot=function(state){
+    var c={lit:'var(--st-hot)',ok:'var(--st-dawn)',amber:'var(--st-mature)',off:'var(--faint)'}[state]||'var(--faint)';
+    return '<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:'+c+';margin-right:6px;vertical-align:middle"></span>';
+  };
+  function css(){
+    if(document.getElementById('decboard-css'))return;
+    var s=document.createElement('style');s.id='decboard-css';
+    s.textContent='#decisionBoard .db{border:1px solid var(--line2);border-radius:14px;background:var(--panel);overflow:hidden}'
+    +'#decisionBoard .db-hd{padding:13px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}'
+    +'#decisionBoard .db-hd b{font-size:15px;color:var(--txt)}'
+    +'#decisionBoard .db-hd .as{font-size:12px;color:var(--faint);font-family:var(--mono)}'
+    +'#decisionBoard .db-verdict{padding:12px 16px;background:var(--panel2);border-bottom:1px solid var(--line);font-size:13.5px;line-height:1.6;color:var(--txt)}'
+    +'#decisionBoard .db-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0}'
+    +'#decisionBoard .db-col{padding:13px 16px;border-right:1px solid var(--line)}'
+    +'#decisionBoard .db-col:last-child{border-right:none}'
+    +'#decisionBoard .db-ct{font-size:11.5px;font-family:var(--mono);color:var(--dim);text-transform:uppercase;letter-spacing:.04em;margin-bottom:9px}'
+    +'#decisionBoard .db-row{display:flex;justify-content:space-between;gap:8px;font-size:13px;padding:3px 0;color:var(--txt)}'
+    +'#decisionBoard .db-row .l{color:var(--dim)}'
+    +'#decisionBoard .db-row .v{font-variant-numeric:tabular-nums;font-weight:600}'
+    +'#decisionBoard .db-bar{height:6px;border-radius:3px;background:var(--line);overflow:hidden;margin:2px 0 4px}'
+    +'#decisionBoard .db-bar>i{display:block;height:100%;background:var(--dim)}'
+    +'#decisionBoard .db-note{font-size:11.5px;color:var(--faint);line-height:1.5;margin-top:8px}'
+    +'#decisionBoard .db-act{font-size:12.5px;padding:4px 0;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:8px}'
+    +'@media(max-width:720px){#decisionBoard .db-grid{grid-template-columns:1fr}#decisionBoard .db-col{border-right:none;border-bottom:1px solid var(--line)}#decisionBoard .db-col:last-child{border-bottom:none}}';
+    document.head.appendChild(s);
+  }
+  function shortLabel(lbl){ if(!lbl)return''; return lbl.split(' (')[0]; }
+  function render(H,G,S,C){
+    css();
+    var el=document.getElementById('decisionBoard');if(!el)return;
+    var T=[];try{if(typeof TARGETS!=='undefined'&&Array.isArray(TARGETS))T=TARGETS;}catch(e){}
+    function band(layer){return T.filter(function(x){return x.layer===layer;})[0]||null;}
+    function gapOf(r){var t=band(r.layer);if(!t)return null;var mid=(t.lo+t.hi)/2;return {d:(r.w-mid),lo:t.lo,hi:t.hi,dir:t.dir,gate:t.gate};}
+    function gapTxt(r){if(!r)return '';var g=gapOf(r);if(!g)return '';var s=g.d>0?'+':'';return s+Math.round(g.d)+'%p vs '+g.lo+'–'+g.hi+'%';}
+    // ① 자산 구성
+    var hs=(H&&H.holdings)||[];try{if((!hs||!hs.length)&&typeof HOLDINGS!=='undefined')hs=HOLDINGS;}catch(e){}
+    var total=(H&&H.total)!=null?H.total:null;
+    var asOf=(H&&H.asOf)||'';
+    var maxw=Math.max.apply(null,hs.map(function(r){return r.w||0;}).concat([1]));
+    var compHTML=hs.map(function(r){
+      return '<div class="db-row"><span class="l">'+(r.layer||'')+' <span style="color:var(--faint)">'+shortLabel(r.label)+'</span></span><span class="v">'+pct(r.w)+'</span></div>'
+      +'<div class="db-bar"><i style="width:'+((r.w||0)/maxw*100).toFixed(0)+'%"></i></div>';
+    }).join('');
+    // ② 매크로 게이트
+    var dd=S?S.nasdaqDrawdownPct:null, vix=S?S.vix:null, fg=S?S.fearGreed:null;
+    var gDD=dd!=null&&dd<=-8, gVIX=vix!=null&&vix>=20, gFG=fg!=null&&fg<=25;
+    var nLit=[gDD,gVIX,gFG].filter(Boolean).length;
+    var velo=!!(S&&S.circuitKR===true&&S.sidecarDate&&S.sidecarDate===S.asOf);
+    var macroHTML=''
+      +'<div class="db-row"><span class="l">'+dot(gDD?'lit':'off')+'나스닥 DD</span><span class="v">'+pct(dd)+' <span style="color:var(--faint);font-weight:400">/ ≤−8</span></span></div>'
+      +'<div class="db-row"><span class="l">'+dot(gVIX?'lit':'off')+'VIX</span><span class="v">'+(vix==null?'—':vix)+' <span style="color:var(--faint);font-weight:400">/ ≥20</span></span></div>'
+      +'<div class="db-row"><span class="l">'+dot(gFG?'lit':'off')+'F&G</span><span class="v">'+(fg==null?'—':fg)+' <span style="color:var(--faint);font-weight:400">/ ≤25</span></span></div>'
+      +'<div class="db-note"><b>매크로 '+nLit+'/3</b> — '+(nLit>=3?'해제 방향':'잠김 · 신규매수 금지')+(velo?'<br>🇰🇷 <b>속도 정찰 점등</b> — 정찰 1.5% 별도렌즈':'')+'</div>';
+    // ② MU γ 3트리거 (gamma 단일소스)
+    var mu=(G&&G.gamma&&G.gamma.MU)||{};
+    var gs=mu.g||'?';
+    var th=mu.targetHist||[]; var tRise=th.length>=2&&th[th.length-1].t>th[0].t;
+    var t1=(mu.price!=null&&mu.target!=null)&&!tRise&&mu.price>=mu.target;
+    var cC=(C&&C.clusters||[]).filter(function(x){return x.id==='C';})[0];
+    var t3=!!(cC&&cC.lamp&&cC.lamp!=='green');
+    var t2=mu.trig2===true;
+    var muHTML=''
+      +'<div class="db-row"><span class="l">'+dot(t1?'lit':'off')+'① 목표가 소진</span><span class="v" style="font-weight:400;color:var(--dim);font-size:12px">'+(mu.pct!=null?'−'+pct(mu.pct)+' 하회':'—')+'</span></div>'
+      +'<div class="db-row"><span class="l">'+dot(t2?'lit':'off')+'② P/E 재확장</span><span class="v" style="font-weight:400;color:var(--dim);font-size:12px">추정&gt;가격</span></div>'
+      +'<div class="db-row"><span class="l">'+dot(t3?'lit':'off')+'③ 사이클 텔</span><span class="v" style="font-weight:400;color:var(--dim);font-size:12px">C='+(cC?cC.lamp:'—')+'</span></div>'
+      +'<div class="db-note">γ = <b>'+String(gs).toUpperCase()+'</b>'+(gs==='open'?' → L3 트림 <b>보류</b>':(gs==='spent'?' → 트림 <b>재개 검토</b>':''))+' · '+(mu.stage||'—')+'</div>';
+    // ③ 뭘·언제
+    var l3=hs.filter(function(r){return r.layer==='L3';})[0];
+    var l4=hs.filter(function(r){return r.layer==='L4';})[0];
+    var cash=hs.filter(function(r){return r.layer==='현금';})[0];
+    var macroOpen=nLit>=3, gammaSpent=(gs==='spent');
+    function mark(ok){return ok?'<span style="color:var(--st-dawn)">✅</span>':'<span style="color:var(--st-hot)">❌</span>';}
+    var actHTML=''
+      +'<div class="db-act"><span>L3→L4 회전</span><span>'+((macroOpen&&gammaSpent)?mark(true):mark(false))+' 매크로+γ닫힘</span></div>'
+      +'<div class="db-act"><span>KR 정찰 1.5%</span><span>'+(velo?'<span style="color:var(--st-mature)">⚠️ 가능</span>':mark(false))+' 서킷·추세</span></div>'
+      +'<div class="db-note">L3 트림=γ 닫힘(다음 MU 실적 재채점) 필요 · L4 회전=매크로까지 <b>동시</b>. 한쪽만 풀리면 트림분=현금.</div>';
+    var over=l3?('L3 <b>'+Math.round(l3.w)+'%</b>('+gapTxt(l3)+')'):'';
+    var under=l4?('L4 <b>'+Math.round(l4.w)+'%</b>('+gapTxt(l4)+')'):'';
+    var verdict='자산은 '+over+' 오버 · '+under+' 언더. 게이트 <b>'+nLit+'/3</b>'
+      +(gs==='open'?' + MU γ <b>open</b>':'')+' → <b>'+((macroOpen&&gammaSpent)?'회전 실행 가능':'대기 · L3 트림·L4 회전 불가')+'</b>. '
+      +(velo?'단 🇰🇷 서킷發 <b>정찰 1.5%</b>만 열림.':'열린 창 없음.');
+    el.innerHTML='<div class="db">'
+      +'<div class="db-hd"><b>결정 보드 — 지금 무엇을·언제</b><span class="as">holdings '+asOf+(total!=null?' · '+total+'M':'')+'</span></div>'
+      +'<div class="db-verdict">'+verdict+'</div>'
+      +'<div class="db-grid">'
+        +'<div class="db-col"><div class="db-ct">① 자산 구성</div>'+compHTML+'</div>'
+        +'<div class="db-col"><div class="db-ct">② 지금 상황 · 게이트</div>'+macroHTML+'<div style="height:10px"></div>'+muHTML+'</div>'
+        +'<div class="db-col"><div class="db-ct">③ 뭘 · 언제</div>'
+          +'<div class="db-row"><span class="l">L3 메모리</span><span class="v">'+(l3?pct(l3.w):'—')+' <span style="color:var(--st-hot);font-weight:400;font-size:11px">'+gapTxt(l3)+'</span></span></div>'
+          +'<div class="db-row"><span class="l">L4 소부장</span><span class="v">'+(l4?pct(l4.w):'—')+' <span style="color:var(--st-accel);font-weight:400;font-size:11px">'+gapTxt(l4)+'</span></span></div>'
+          +'<div class="db-row"><span class="l">현금</span><span class="v">'+(cash?pct(cash.w):'—')+' <span style="color:var(--faint);font-weight:400;font-size:11px">'+gapTxt(cash)+'</span></span></div>'
+          +'<div style="height:8px"></div>'+actHTML
+        +'</div>'
+      +'</div></div>';
+  }
+  function boot(){
+    var el=document.getElementById('decisionBoard'); if(!el)return;
+    el.innerHTML='<div style="color:var(--faint);font-size:13px;padding:14px">결정 보드 로딩…</div>';
+    Promise.all([J('holdings.json?t='+Date.now()),J('gamma.json?t='+Date.now()),J('signals.json?t='+Date.now()),J('cycle.json?t='+Date.now())])
+      .then(function(a){render(a[0],a[1],a[2],a[3]);})
+      .catch(function(){el.innerHTML='<div style="color:var(--st-hot);font-size:13px;padding:14px">결정 보드 데이터 로드 실패</div>';});
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
+})();
+
 </script>
 
 <!-- 05 확률 추정 (Probability Lab) — prob.html 인라인화, IIFE 로 전역 격리 -->
