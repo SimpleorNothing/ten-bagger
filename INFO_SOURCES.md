@@ -2,7 +2,7 @@
 
 > `simpleornothing.com`이 메뉴별로 수집·표시하는 전체 정보의 소스·갱신 방식 대장.
 > **이 문서는 지속 업데이트한다** — 정보/소스/주기가 바뀌면 해당 행을 갱신하고 하단 이력에 한 줄 남긴다.
-> 최종 갱신: 2026-07-11 · 기준 메뉴: 5탭 (Phase 2c)
+> 최종 갱신: 2026-07-11 · 기준 메뉴: 5탭 (Phase 2e)
 
 범례 — **자동**: cron 워크플로 or worker 런타임 API. **수동**: 편집→push→deploy(운영자/Claude). **혼합**: 자동값 위에 판단이 덮어씀. **날짜연동**: 클라이언트가 날짜 기준 자동 표시.
 
@@ -16,9 +16,8 @@
 | 시장 모니터링 | 미 10년물 금리 | 자동 | 런타임 | worker `/api/us10y` → `history[].markets.ten_year` 스파크라인 (us10y 리포 `daily-update.yml`) |
 | 시장 모니터링 | WTI 유가 | 자동 | 런타임 | worker `/api/wti` (Yahoo upstream) |
 | 시장 모니터링 | 보유 종목 스파크라인 (MRVL·MU·LITE·VRT·BE·TSLA) | 자동 | 매일 06:37 KST | `charts.json` (`fetch-prices.mjs`, Yahoo 1Y 일봉 t/c) |
-| 시장 모니터링 | 종목 뉴스 요약 (한글 digest: 결론·보유/레이어별·일정주의) | 자동 | 매일 06:12 KST | `news_digest.json` (`fetch-news.mjs` 내장 Claude API digest, claude-sonnet-4-6 · update-news.yml env 설정 완료 2026-07-11) |
-| 시장 모니터링 | 종목 뉴스 피드 (원문) | 자동 | 매일 06:12 KST | `news.json` (`fetch-news.mjs`, Google News RSS · 종목별) |
-| 시장 모니터링 | 관련 기사 (매크로: 이란·FOMC·관세) | 자동 | 매일 06:12 KST | `news.json` `MACRO` 항목 (`fetch-news.mjs` `MACRO_TOPICS` · 2026-07-11 수동 시드 6건 반영, 크론과 dedupe 공존) |
+| 시장 모니터링 | 종목 뉴스 (**종목 블록형**: 상단 자동 Summary + 일자별 기사 · 결론/그룹/일정주의 포함) | 자동 | 매일 06:12 KST | `news_digest.json`(Claude API digest, claude-sonnet-4-6) + `news.json`(Google News RSS) 클라이언트 병합 렌더 |
+| 시장 모니터링 | 관련 기사 (매크로 · **토픽 블록형**: 상단 자동 Summary + 일자별 기사, id 기준 그룹) | 자동 | 매일 06:12 KST | `news_digest.json` `macro`(Claude API digest) + `news.json` `MACRO` 항목 병합 렌더 |
 
 ---
 
@@ -94,5 +93,7 @@
 - 2026-07-11 · Phase 2b: 미 10년물 스파크라인 + 매크로뉴스 배선. 이슈 3·4 해결.
 - 2026-07-11 · Phase 2c: 종목 뉴스 한글 데일리 요약(digest) — fetch-news에 Claude API 단계 내장, news_digest.json 시드, 01 요약 섹션 렌더. b64 손상 1건 복구(이슈 7).
 - 2026-07-11 · digest 자동화 활성 완료 — 운영자 update-news.yml 수정 + 수동 실행으로 첫 자동 요약 생성·배포 확인(claude-sonnet-4-6). 이슈 6 해결. 이후 매일 06:12 KST 완전 자동.
+- 2026-07-11 · Phase 2d: 01 뉴스 그룹형 재구성 — 관련 기사 토픽별 일자 정렬, 종목 뉴스 종목 블록화(상단 Summary + 일자별 기사, 요약/원문 섹션 통합).
+- 2026-07-11 · Phase 2e: 관련 기사 토픽 상단 요약 — digest에 macro 요약 생성 추가(fetch-news), 토픽 블록형(id 기준 그룹으로 이란 중복 그룹 해소).
 - 2026-07-11 · 02 궁금한 것 **답-먼저 재편**: 즉답 요약 카드 신설(gamma·holdings·TARGETS·signal_log 런타임 6행 — 전선·단계분포·상대가치·트림게이트γ·다음재채점·오늘시그널), 강물·스택 탐색 인트로는 '더 파보기'로 하단 강등. `window.GAMMA`·`window.MACRO_GRADE` 노출. 전선·다음재채점만 `IA_CFG` 수동판단.
 - 2026-07-11 · 03 리밸런싱 **결정 보드 신설**: 최상단에 브리핑 3문(자산구성·게이트·타이밍) 상시 패널. `#decisionBoard` 자기완결 IIFE가 holdings/gamma/signals/cycle 재페치+TARGETS로 렌더 → holdings 주간 동기 시 **자동 재파악**. MU γ 3트리거(①목표가소진 ②P/E재확장 ③사이클텔) 점등 보드, γ는 gamma.json 단일소스(open/spent 자동전환). b64 패치 `decision-board-20260711.b64`→apply-patch 적용, 무결성 md5 왕복 통과.
