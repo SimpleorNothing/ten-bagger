@@ -16,7 +16,7 @@
 | 시장 모니터링 | 미 10년물 금리 | 자동 | 런타임 | worker `/api/us10y` → `history[].markets.ten_year` 스파크라인 (us10y 리포 `daily-update.yml`) |
 | 시장 모니터링 | WTI 유가 | 자동 | 런타임 | worker `/api/wti` (Yahoo upstream) |
 | 시장 모니터링 | 보유 종목 스파크라인 (MRVL·MU·LITE·VRT·BE·TSLA) | 자동 | 매일 06:37 KST | `charts.json` (`fetch-prices.mjs`, Yahoo 1Y 일봉 t/c) |
-| 시장 모니터링 | 종목 뉴스 요약 (한글 digest: 결론·보유/레이어별·일정주의) | 자동 *(운영자 1회 설정 필요)* | 매일 06:12 KST | `news_digest.json` (`fetch-news.mjs` 내장 Claude API digest · **update-news.yml에 ANTHROPIC_API_KEY env + 커밋 대상 추가 필요, 아래 이슈 6**) · 현재는 수동 시드 표시 중 |
+| 시장 모니터링 | 종목 뉴스 요약 (한글 digest: 결론·보유/레이어별·일정주의) | 자동 | 매일 06:12 KST | `news_digest.json` (`fetch-news.mjs` 내장 Claude API digest, claude-sonnet-4-6 · update-news.yml env 설정 완료 2026-07-11) |
 | 시장 모니터링 | 종목 뉴스 피드 (원문) | 자동 | 매일 06:12 KST | `news.json` (`fetch-news.mjs`, Google News RSS · 종목별) |
 | 시장 모니터링 | 관련 기사 (매크로: 이란·FOMC·관세) | 자동 | 매일 06:12 KST | `news.json` `MACRO` 항목 (`fetch-news.mjs` `MACRO_TOPICS` · 2026-07-11 수동 시드 6건 반영, 크론과 dedupe 공존) |
 
@@ -80,7 +80,7 @@
 3. ~~10년물 스파크라인~~ → **완료(2026-07-11)**: `/api/us10y` `ten_year` 배선.
 4. ~~매크로 뉴스~~ → **완료(2026-07-11)**: `MACRO_TOPICS` + 수동 시드 6건.
 5. **watching list** — 뉴스 행 버튼 → watching 추가(worker `/api/watching` R2 + 02 리스트) 미구현.
-6. **digest 자동화 활성 대기 (운영자 수동 1회)** — `fetch-news.mjs`에 Claude API digest 단계가 내장됐으나, `.github/workflows/update-news.yml`이 시크릿을 안 넘겨 현재는 스킵됨(수동 시드 표시 중). GitHub 웹에서 update-news.yml 2곳 수정 필요: ① "Fetch latest news" 스텝에 `env: ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}` 추가, ② 커밋 스텝 `FILE="news.json"` → `FILE="news.json news_digest.json"` + `git status --porcelain $FILES` 및 `git add` 인용부호 제거(복수 파일). 시크릿 자체는 리포에 이미 존재(claude.yml 사용 중).
+6. ~~digest 자동화 활성 대기~~ → **해결(2026-07-11)**: 운영자가 update-news.yml에 ANTHROPIC_API_KEY env·커밋 대상(news_digest.json) 추가, 수동 dispatch로 첫 자동 digest 생성 확인(model=claude-sonnet-4-6, groups=4). 이후 매일 06:12 KST 완전 자동.
 7. **b64 파이프라인 손상 재발(2026-07-11)**: 17KB patch에서 2바이트 묵시 손상 → 신규 JSON에 유입. 대응: 적용 후 콘텐츠 레벨 검증(UTF-8 decode + 로컬 비교) 의무화, 손상 파일은 직접 커밋으로 교체.
 
 ---
@@ -90,4 +90,5 @@
 - 2026-07-11 · 최초 작성 (5탭 Phase 2a 기준). 01 시장 모니터링 신설, news.json 배포 이슈 기록.
 - 2026-07-11 · Phase 2b: 지수 3종 데일리 자동 수집, news.json 사이트 노출. 이슈 1·2 해결.
 - 2026-07-11 · Phase 2b: 미 10년물 스파크라인 + 매크로뉴스 배선. 이슈 3·4 해결.
-- 2026-07-11 · Phase 2c: 종목 뉴스 한글 데일리 요약(digest) — fetch-news에 Claude API 단계 내장, news_digest.json 시드, 01 요약 섹션 렌더. 자동화 활성은 운영자 워크플로 수정 대기(이슈 6). b64 손상 1건 복구(이슈 7).
+- 2026-07-11 · Phase 2c: 종목 뉴스 한글 데일리 요약(digest) — fetch-news에 Claude API 단계 내장, news_digest.json 시드, 01 요약 섹션 렌더. b64 손상 1건 복구(이슈 7).
+- 2026-07-11 · digest 자동화 활성 완료 — 운영자 update-news.yml 수정 + 수동 실행으로 첫 자동 요약 생성·배포 확인(claude-sonnet-4-6). 이슈 6 해결. 이후 매일 06:12 KST 완전 자동.
