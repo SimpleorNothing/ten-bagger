@@ -4612,10 +4612,15 @@ function renderInstantAnswer(){
     var hs=(H&&H.holdings)||[];try{if((!hs||!hs.length)&&typeof HOLDINGS!=='undefined')hs=HOLDINGS;}catch(e){}
     var total=(H&&H.total)!=null?H.total:null;
     var asOf=(H&&H.asOf)||'';
-    var maxw=Math.max.apply(null,hs.map(function(r){return r.w||0;}).concat([1]));
+    var sc=function(v){return Math.min((v||0)*2.6,100);};
     var compHTML=hs.map(function(r){
-      return '<div class="db-row"><span class="l">'+(r.layer||'')+' <span style="color:var(--faint)">'+shortLabel(r.label)+'</span></span><span class="v">'+pct(r.w)+'</span></div>'
-      +'<div class="db-bar"><i style="width:'+((r.w||0)/maxw*100).toFixed(0)+'%"></i></div>';
+      var t=band(r.layer);
+      var bd='';
+      if(t){var lo=sc(t.lo),hi=sc(t.hi),md=sc((t.lo+t.hi)/2);
+        bd='<span style="position:absolute;top:0;bottom:0;left:'+lo.toFixed(1)+'%;width:'+Math.max(hi-lo,0.6).toFixed(1)+'%;background:rgba(12,166,120,.14);border-left:1px dashed rgba(12,166,120,.5);border-right:1px dashed rgba(12,166,120,.5)"></span><span style="position:absolute;top:-1px;bottom:-1px;left:'+md.toFixed(1)+'%;width:2px;background:#0ca678"></span>';}
+      var tg=t?(' <span style="color:var(--faint);font-weight:400;font-size:11px">· 적정 '+t.lo+'–'+t.hi+'%</span>'):'';
+      return '<div class="db-row"><span class="l">'+(r.layer||'')+' <span style="color:var(--faint)">'+shortLabel(r.label)+'</span></span><span class="v">'+pct(r.w)+tg+'</span></div>'
+      +'<div class="db-bar" style="position:relative;height:13px">'+bd+'<i style="position:relative;z-index:1;width:'+sc(r.w).toFixed(1)+'%"></i></div>';
     }).join('');
     // ② 매크로 게이트
     var dd=S?S.nasdaqDrawdownPct:null, vix=S?S.vix:null, fg=S?S.fearGreed:null;
