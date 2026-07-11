@@ -816,13 +816,11 @@ table.tk th.c{text-align:center}
 <header><div class="wrap bar">
   <div class="brand"><span class="mark">알파맵</span></div>
   <nav id="nav">
-    <button class="tab on" data-v="cal"><span class="n">01</span>투자 캘린더</button>
-    <button class="tab" data-v="siglog"><span class="n">02</span>시그널 로그</button>
-    <button class="tab" data-v="thread"><span class="n">03</span>알파 찾기</button>
-    <button class="tab" data-v="alpha"><span class="n">04</span>알파 맵</button>
-    <button class="tab" data-v="cycle"><span class="n">05</span>반도체 고점파악</button>
-    <button class="tab" data-v="us10y"><span class="n">06</span>매크로</button>
-    <button class="tab" data-v="memo"><span class="n">07</span>메모</button>
+    <button class="tab on" data-v="us10y"><span class="n">01</span>시장 모니터링</button>
+    <button class="tab" data-v="cycle"><span class="n">02</span>궁금한 것</button>
+    <button class="tab" data-v="port"><span class="n">03</span>리밸런싱</button>
+    <button class="tab" data-v="cal"><span class="n">04</span>캘린더</button>
+    <button class="tab" data-v="memo"><span class="n">05</span>메모</button>
   </nav>
 </div></header>
 
@@ -1046,7 +1044,7 @@ table.tk th.c{text-align:center}
 </section>
 
 <!-- 02 CALENDAR -->
-<section class="view on" id="v-cal">
+<section class="view" id="v-cal">
   <div class="vhead">
     <div class="vkick">Calendar · 투자 일정 관제</div>
     <h1 class="vtitle">타이밍을 <em>지도</em>로 — 거시·실적·이벤트 한 화면</h1>
@@ -1639,7 +1637,7 @@ window.CYCLE=(function(){
 })();
 </script>
 <!-- 06 US10Y -->
-<section class="view" id="v-us10y">
+<section class="view on" id="v-us10y">
   <div class="vhead">
     <div class="vkick">US10Y · 미 10년물 금리</div>
     <h1 class="vtitle">미 <em>10년물</em> 금리 모니터</h1>
@@ -2650,14 +2648,15 @@ async function loadPrices(){try{const r=await fetch('./prices.json',{cache:'no-s
 /* ===== TABS ===== */
 document.getElementById('nav').addEventListener('click',e=>{const b=e.target.closest('.tab');if(!b)return;
  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));document.querySelectorAll('.view').forEach(v=>v.classList.remove('on'));
- b.classList.add('on');(({alpha:['alpha','port','tracker'],us10y:['us10y','macro']})[b.dataset.v]||[b.dataset.v]).forEach(function(_i){var _e=document.getElementById('v-'+_i);if(_e)_e.classList.add('on');});
+ b.classList.add('on');(({us10y:['us10y','siglog'],cycle:['cycle','alpha','thread'],port:['port','tracker','macro']})[b.dataset.v]||[b.dataset.v]).forEach(function(_i){var _e=document.getElementById('v-'+_i);if(_e)_e.classList.add('on');});
  var _ab=document.getElementById('asofBox');if(_ab)_ab.style.display=(b.dataset.v==='memo')?'none':'';
  if(b.dataset.v==='thread'){drawSCurve();drawRiverCurves();}
  if(b.dataset.v==='us10y'){if(window.US10Y)window.US10Y.render();}
- if(b.dataset.v==='cycle'){if(window.CYCLE)window.CYCLE.render();}});
+ if(b.dataset.v==='cycle'){if(window.CYCLE)window.CYCLE.render();drawSCurve();drawRiverCurves();}});
+setTimeout(function(){var _t0=document.querySelector('#nav .tab.on');if(_t0)_t0.click();},0);
 /* 다른 페이지/로그에서 8레이어 스택으로 점프 (단일 페이지 통합) */
 function gotoStack(layerId){
- const tab=document.querySelector('.tab[data-v="thread"]');if(tab&&!tab.classList.contains('on'))tab.click();
+ const tab=document.querySelector('.tab[data-v="cycle"]');if(tab&&!tab.classList.contains('on'))tab.click();
  const c=document.getElementById('lay-'+layerId);
  if(c){c.classList.remove('collapsed');c.scrollIntoView({behavior:'smooth',block:'center'});}
 }
