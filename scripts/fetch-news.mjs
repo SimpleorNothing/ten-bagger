@@ -106,6 +106,10 @@ async function buildDigest(items) {
     .filter((it) => it.ticker !== 'MACRO')
     .map((it) => `${it.ticker}|${it.name}|${(it.published || '').slice(0, 10)}|${it.title}`)
     .join('\n');
+  const macroLines = items
+    .filter((it) => it.ticker === 'MACRO')
+    .map((it) => `${it.id}|${it.name}|${(it.published || '').slice(0, 10)}|${it.title}`)
+    .join('\n');
   const prompt = `너는 AI 인프라 투자 관측소의 애널리스트다. 아래는 종목별 최근 뉴스 헤드라인이다(티커|이름|날짜|제목).
 
 보유 종목: ${holdings.join(', ')} (나머지는 워치리스트)
@@ -117,11 +121,15 @@ async function buildDigest(items) {
            {"title":"워치리스트 · L2 컴퓨트","items":[...]},
            {"title":"워치리스트 · L3/L4 메모리·장비","items":[...]},
            {"title":"워치리스트 · L5~L8 서버·옵티컬·전력","items":[...]}],
- "watch":["실적 발표 임박 등 일정 주의 항목(있으면, 최대 4개)"]}
+ "watch":["실적 발표 임박 등 일정 주의 항목(있으면, 최대 4개)"],
+ "macro":[{"id":"macro_iran","s":"해당 매크로 토픽의 핵심 흐름 1~2문장 한글 요약"}]}
 
-규칙: 보유 종목은 전부 포함(뉴스 없으면 생략 가능), 워치리스트는 의미 있는 것만. 요약은 사실만, 과장 금지, 헤드라인에 없는 내용 추가 금지.
+규칙: 보유 종목은 전부 포함(뉴스 없으면 생략 가능), 워치리스트는 의미 있는 것만. macro는 아래 매크로 헤드라인의 토픽id별 1개씩. 요약은 사실만, 과장 금지, 헤드라인에 없는 내용 추가 금지.
 
-${lines}`;
+${lines}
+
+[매크로 토픽 헤드라인 (토픽id|토픽명|날짜|제목)]
+${macroLines}`;
   try {
     const r = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',

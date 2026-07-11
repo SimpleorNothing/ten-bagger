@@ -2747,17 +2747,27 @@ window.MARKET=(function(){
  }
  async function loadMacroNews(){
   var host=document.getElementById('mktMacroNews');if(!host)return;
-  try{var r=await fetch('news.json?t='+Date.now(),{cache:'no-store'});var j=await r.json();
-   var items=(j.items||[]).filter(function(x){return x.ticker==='MACRO';});
+  try{
+   var rs=await Promise.all([
+    fetch('news.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;}),
+    fetch('news_digest.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;})
+   ]);
+   var nw=rs[0],dg=rs[1];
+   var items=(((nw||{}).items)||[]).filter(function(x){return x.ticker==='MACRO';});
    if(!items.length){host.innerHTML='<div class="mkt-ph">수집 대기 (다음 크론)</div>';return;}
-   var byTopic={},order=[];
-   items.forEach(function(it){var k=it.name||'매크로';if(!byTopic[k]){byTopic[k]=[];order.push(k);}byTopic[k].push(it);});
+   var NM={macro_iran:'이란·호르무즈',macro_fomc:'FOMC 연준 기준금리',macro_tariff:'미국 관세 무역협상'};
+   var byT={},order=[];
+   items.forEach(function(it){var k=it.id||it.name||'macro';if(!byT[k]){byT[k]=[];order.push(k);}byT[k].push(it);});
+   var sums={};(((dg||{}).macro)||[]).forEach(function(m){if(m&&m.id)sums[m.id]=m.s;});
    var html='';
    order.forEach(function(k){
-    var lst=byTopic[k].slice().sort(function(a,b){return new Date(b.published||0)-new Date(a.published||0);});
-    html+='<div class="tp-grp">'+esc(k)+'</div><div class="nlist">';
+    var lst=byT[k].slice().sort(function(a,b){return new Date(b.published||0)-new Date(a.published||0);});
+    var title=NM[k]||(lst[0]&&lst[0].name)||k;
+    html+='<div class="stk-blk"><div class="stk-hd"><span class="nm">'+esc(title)+'</span></div>';
+    if(sums[k])html+='<div class="stk-sum">'+esc(sums[k])+'</div>';
+    html+='<div class="nlist">';
     lst.forEach(function(it){html+='<a class="nrow" href="'+esc(it.link||'#')+'" target="_blank" rel="noopener"><span class="ndt">'+esc((it.published||'').slice(5,10))+'</span><span class="ntt">'+esc(it.title||'')+'</span></a>';});
-    html+='</div>';});
+    html+='</div></div>';});
    host.innerHTML=html;}
   catch(e){host.innerHTML='<div class="mkt-ph">수집 대기</div>';}
  }
