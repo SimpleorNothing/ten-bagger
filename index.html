@@ -1435,9 +1435,14 @@ table.tk th.c{text-align:center}
   <div class="verdict" id="cycVerdict" style="margin-bottom:14px">cycle.json 로딩…</div>
 
   <div class="mc-sec">D · 수요 — 주요 하이퍼스케일러 합산 CAPEX ($B, 연도별)</div>
-  <div style="font-size:11.5px;color:#868e96;margin-bottom:6px"><span style="display:inline-block;width:10px;height:10px;background:#1c7ed6;border-radius:2px;margin-right:4px"></span>실적(23~25)<span style="display:inline-block;width:10px;height:10px;background:#f0a020;border-radius:2px;margin:0 4px 0 12px"></span>추정(26E~28E)</div>
+  <div style="font-size:11.5px;color:#868e96;margin-bottom:6px"><span style="display:inline-block;width:10px;height:10px;background:#1c7ed6;border-radius:2px;margin-right:4px"></span>실적(23~25)<span style="display:inline-block;width:10px;height:10px;background:#f0a020;border-radius:2px;margin:0 4px 0 12px"></span>추정(26E~28E)<span style="color:#adb5bd;margin-left:8px">29E~30E 컨센서스 부재(공백)</span></div>
   <div style="position:relative;width:100%;height:210px;margin-bottom:4px"><canvas id="cycDChart"></canvas></div>
   <div class="cyc-upd" data-cl="D" role="button" tabindex="0"></div>
+
+  <div class="mc-sec">D₂ · 메모리 시장 — DRAM+NAND 합산 매출 ($B, 연도별)</div>
+  <div style="font-size:11.5px;color:#868e96;margin-bottom:6px"><span style="display:inline-block;width:10px;height:10px;background:#1c7ed6;border-radius:2px;margin-right:4px"></span>실적(23~25)<span style="display:inline-block;width:10px;height:10px;background:#f0a020;border-radius:2px;margin:0 4px 0 12px"></span>추정(26E~27E · TrendForce)<span style="color:#adb5bd;margin-left:8px">28E~30E 컨센서스 부재(공백)</span></div>
+  <div style="position:relative;width:100%;height:210px;margin-bottom:4px"><canvas id="cycMChart"></canvas></div>
+  <div class="cyc-upd" data-cl="M" role="button" tabindex="0"></div>
 
   <div class="mc-sec">C · 가격 — DDR5 16Gb 현물 vs 계약 (USD/칩, 재구성)</div>
   <div style="font-size:11.5px;color:#868e96;margin-bottom:6px"><span style="display:inline-block;width:16px;border-top:2px solid #1c7ed6;vertical-align:middle;margin-right:4px"></span>계약<span style="display:inline-block;width:16px;border-top:2px dashed #f08c00;vertical-align:middle;margin:0 4px 0 12px"></span>현물</div>
@@ -1460,11 +1465,11 @@ table.tk th.c{text-align:center}
 
   <div class="mc-sec">현재값 · 임계값 신호 요약</div>
   <div id="cycTable" style="margin-bottom:8px"></div>
-  <div class="foot">D=주요 4사(MSFT·GOOGL·AMZN·META) 합산 capex, 23~25 실적·26E 가이던스·27E~28E 애널 추정(5사 기준 MS 27E ~$1.1조)·C=앵커 재구성치(tick 아님)·E=주가÷평균목표가 괴리율(투자자문 아님)·B=DIO(마이크론 8월 결산 FY, 한국 12월 결산 — 분기 단위 차이)·A=SEMI 확정 분기값(Q4·25 미보유=공백). 출처: FT·Goldman·Morgan Stanley·TrendForce·SEC·DART·FnGuide.</div>
+  <div class="foot">D=주요 4사(MSFT·GOOGL·AMZN·META) 합산 capex, 23~25 실적·26E 가이던스·27E~28E 애널 추정(5사 기준 MS 27E ~$1.1조)·C=앵커 재구성치(tick 아님)·E=주가÷평균목표가 괴리율(투자자문 아님)·B=DIO(마이크론 8월 결산 FY, 한국 12월 결산 — 분기 단위 차이)·A=SEMI 확정 분기값(Q4·25 미보유=공백). D₂=메모리 DRAM+NAND 합산 매출(TrendForce 26E $551.6B·27E $842.7B, HBM은 DRAM 내 포함, 28E~30E 연간 컨센서스 부재=공백)·capex 29E~30E는 동일 프레임 4사 합산 컨센서스 부재=공백. 출처: FT·Goldman·Morgan Stanley·TrendForce·Yole·SEC·DART·FnGuide.</div>
 </section>
 <script>
 window.CYCLE=(function(){
-  var DATA=null,done=false,cD=null,cC=null,cE=null,cB=null,cA=null;
+  var DATA=null,done=false,cD=null,cC=null,cE=null,cB=null,cA=null,cM=null;
   var COL={green:'#0ca678',amber:'#f08c00',red:'#e03131'};
   function el(id){return document.getElementById(id);}
   function dot(s){return '<span style="width:11px;height:11px;border-radius:50%;display:inline-block;background:'+(COL[s]||'#adb5bd')+'"></span>';}
@@ -1479,6 +1484,17 @@ window.CYCLE=(function(){
       data:{labels:s.labels,datasets:[{label:'capex',data:s.points,backgroundColor:bg}]},
       options:{responsive:true,maintainAspectRatio:false,
         plugins:{legend:{display:false},tooltip:{callbacks:{label:function(x){return '$'+x.parsed.y+'B'+(x.dataIndex<ac?' (실적)':' (추정)');}}}},
+        scales:{x:{ticks:{font:{size:10}},grid:{display:false}},y:{ticks:{callback:function(v){return '$'+v+'B';},font:{size:9}}}}}
+    });
+  }
+  function drawM(m){
+    if(!m||!m.labels)return;var cv=el('cycMChart');if(!cv)return;if(cM)cM.destroy();
+    var ac=m.actualCount||0;var bg=m.points.map(function(_,i){return i<ac?'#1c7ed6':'#f0a020';});
+    cM=new Chart(cv,{
+      type:'bar',
+      data:{labels:m.labels,datasets:[{label:'메모리 시장',data:m.points,backgroundColor:bg}]},
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:false},tooltip:{callbacks:{label:function(x){return x.parsed.y==null?'추정치 미정(공백)':'$'+x.parsed.y+'B'+(x.dataIndex<ac?' (실적)':' (추정)');}}}},
         scales:{x:{ticks:{font:{size:10}},grid:{display:false}},y:{ticks:{callback:function(v){return '$'+v+'B';},font:{size:9}}}}}
     });
   }
@@ -1530,12 +1546,13 @@ window.CYCLE=(function(){
         scales:{x:{ticks:{font:{size:10}},grid:{display:false}},y:{ticks:{callback:function(v){return v+'%';},font:{size:9}}}}}
     });
   }
-  function paint(){if(!DATA)return;var cs=DATA.clusters||[];var b=el('cycBoard');if(b)b.innerHTML=board(cs);var t=el('cycTable');if(t)t.innerHTML=table(cs);var g=cs.filter(function(c){return c.lamp==='green';}).length;var y=cs.filter(function(c){return c.lamp==='amber';}).length;var r=cs.filter(function(c){return c.lamp==='red';}).length;var v=el('cycVerdict');if(v)v.textContent='종합 — '+g+'🟢 / '+y+'🟡 / '+r+'🔴 · '+(r>0?'고점 신호 점등':'thesis-clock 롤오버 없음 · 사이클 후반')+' (asOf '+(DATA.asOf||'')+')';stamps(cs);drawD(find(cs,'D'));drawC(find(cs,'C'));drawE(find(cs,'E'));drawB(find(cs,'B'));drawA(find(cs,'A'));}
+  function paint(){if(!DATA)return;var cs=DATA.clusters||[];var b=el('cycBoard');if(b)b.innerHTML=board(cs);var t=el('cycTable');if(t)t.innerHTML=table(cs);var g=cs.filter(function(c){return c.lamp==='green';}).length;var y=cs.filter(function(c){return c.lamp==='amber';}).length;var r=cs.filter(function(c){return c.lamp==='red';}).length;var v=el('cycVerdict');if(v)v.textContent='종합 — '+g+'🟢 / '+y+'🟡 / '+r+'🔴 · '+(r>0?'고점 신호 점등':'thesis-clock 롤오버 없음 · 사이클 후반')+' (asOf '+(DATA.asOf||'')+')';stamps(cs);drawD(find(cs,'D'));drawC(find(cs,'C'));drawE(find(cs,'E'));drawB(find(cs,'B'));drawA(find(cs,'A'));drawM(DATA.memMarket);}
   function fmtDate(d){return d?String(d).replace(/-/g,'.'):'—';}
   function stamps(cs){
     var nodes=document.querySelectorAll('#v-cycle .cyc-upd');
     for(var i=0;i<nodes.length;i++){(function(n){
       var c=find(cs,n.getAttribute('data-cl'));
+      if(!c&&n.getAttribute('data-cl')==='M'&&DATA&&DATA.memMarket)c=DATA.memMarket;
       if(!c){n.textContent='';return;}
       var hist=(c.history&&c.history.length)?c.history:[];
       n.innerHTML='update : '+fmtDate(c.updated||DATA.asOf)+(hist.length?' · <span class="his">이력 '+hist.length+'</span>':'');
