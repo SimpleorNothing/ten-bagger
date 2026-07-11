@@ -641,6 +641,9 @@ table.tk th.c{text-align:center}
 .arow .atx{flex:1;min-width:0;font-size:12.5px;color:var(--txt);line-height:1.55;white-space:normal}
 .arow.is-noise .atx{color:var(--faint)}
 .aempty{padding:11px 14px;border-top:1px solid var(--line);font-size:12px;color:var(--faint)}
+.amore{display:block;width:100%;padding:9px 14px;border:0;border-top:1px solid var(--line);background:var(--panel2);color:var(--dawn);font:600 12px var(--mono);text-align:center;cursor:pointer;transition:.12s}
+.amore:hover{background:var(--panel);color:var(--txt)}
+.amore[disabled]{color:var(--faint);cursor:default}
 .stk-bul li{font-size:12.5px;color:var(--txt);line-height:1.55;margin:0 0 6px}
 .stk-bul li:last-child{margin-bottom:0}
 .stk-blk .nlist{border:0;border-top:1px solid var(--line);border-radius:0}
@@ -2814,15 +2817,34 @@ window.MARKET=(function(){
    Object.keys(byTk).forEach(function(k){byTk[k].sort(function(a,b){return new Date(b.published||0)-new Date(a.published||0);});});
    var artBy={};(((dg||{}).arts)||[]).forEach(function(x){if(x&&x.link&&x.a)artBy[x.link]=x.a;});
    var WIN_D=92,MAX_ROWS=5,cutT=Date.now()-WIN_D*864e5;
+   var SHARD=(nw&&nw.shardDir)||'archive',WCNT=(nw&&nw.winCounts)||{};
+   function rowHTML(dt,a,ttl,url){
+    var tx=String(a||'').trim()||String(ttl||'');
+    var noise=/무관|노이즈/.test(tx);
+    return '<a class="arow'+(noise?' is-noise':'')+'" href="'+esc(url||'#')+'" target="_blank" rel="noopener">'
+     +'<span class="adt">'+esc(String(dt||'').slice(5,10))+'</span>'
+     +'<span class="atx">'+esc(tx)+'</span></a>';}
    function artRows(k){var lst=(byTk[k]||[]).filter(function(it){
      var t=it.published?new Date(it.published).getTime():0;return !t||t>=cutT;}).slice(0,MAX_ROWS);
     if(!lst.length)return '<div class="aempty">최근 3개월 기사 없음</div>';
-    return lst.map(function(it){
-     var a=String(it.a||artBy[it.link]||'').trim();
-     var noise=/무관|노이즈/.test(a);
-     return '<a class="arow'+(noise?' is-noise':'')+'" href="'+esc(it.link||'#')+'" target="_blank" rel="noopener">'
-      +'<span class="adt">'+esc((it.published||'').slice(5,10))+'</span>'
-      +'<span class="atx">'+esc(a||it.title||'')+'</span></a>';}).join('');}
+    var h=lst.map(function(it){return rowHTML(it.published,it.a||artBy[it.link],it.title,it.link);}).join('');
+    var tot=WCNT[k]||lst.length;
+    if(tot>lst.length)h+='<button class="amore" data-more="'+esc(k)+'">더 보기 (+'+(tot-lst.length)+'건 · 최근 3개월)</button>';
+    return h;}
+   window.__moreNews=function(btn){
+    var k=btn.getAttribute('data-more');if(!k)return;
+    btn.disabled=true;btn.textContent='불러오는 중…';
+    fetch(SHARD+'/'+encodeURIComponent(k)+'.json?t='+Date.now(),{cache:'no-store'})
+     .then(function(r){if(!r.ok)throw 0;return r.json();})
+     .then(function(d){
+      var lst=(d.items||[]).filter(function(x){
+       var t=x.d?new Date(x.d).getTime():0;return !t||t>=cutT;});
+      if(!lst.length)throw 0;
+      var wrap=btn.parentNode;
+      btn.insertAdjacentHTML('beforebegin',lst.slice(MAX_ROWS).map(function(x){
+       return rowHTML(x.d,x.a,x.t,x.u);}).join(''));
+      btn.remove();})
+     .catch(function(){btn.disabled=false;btn.textContent='불러오지 못했습니다 · 다시 시도';});};
    var d=document.getElementById('mktDigestAsof');if(d&&dg&&dg.asOf)d.textContent='자동 요약 · '+dg.asOf.slice(0,10);
    var html='',used={};
    if(dg){
@@ -2840,7 +2862,12 @@ window.MARKET=(function(){
      html+='<div class="stk-blk" id="stknews-'+esc(k)+'"><div class="stk-hd"><span class="tk">'+esc(k)+'</span><span class="nm">'+esc(nm)+'</span></div><div class="stk-body"><div class="stk-left">'+artRows(k)+'</div>'+cCol(k)+'</div></div>';});
    }
    if(dg&&dg.watch&&dg.watch.length)html+='<div class="dg-watch"><b>일정 주의</b> · '+dg.watch.map(esc).join(' · ')+'</div>';
-   host.innerHTML=html||'<div class="mkt-ph">뉴스 없음</div>';iSC(CH);}
+   host.innerHTML=html||'<div class="mkt-ph">뉴스 없음</div>';
+   if(!host._moreBound){host._moreBound=1;
+    host.addEventListener('click',function(e){
+     var b=e.target.closest?e.target.closest('.amore'):null;
+     if(b){e.preventDefault();window.__moreNews(b);}});}
+   iSC(CH);}
   catch(e){host.innerHTML='<div class="mkt-ph">뉴스 대기</div>';}
  }
  function iSC(CH){document.querySelectorAll('canvas.stk-cv').forEach(function(cv){if(cv._i)return;cv._i=1;

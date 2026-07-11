@@ -25,6 +25,7 @@ const PRUNE_DAYS = 95;         // 사이트 표시 창(약 3개월)
 const SITE_PER_TICKER = 5;    // 사이트 표시 상한: 종목당 최신 5건 (카드 렌더와 동일)
 const MAX_ITEMS = 2000;       // 사이트 파일 하드캡
 const ARCHIVE_OUT = 'news_archive.json';  // 영구 보존(프루닝 없음·사이트 미배포)
+const SHARD_DIR = 'archive';              // 종목별 3개월 창 샤드('더 보기' 온디맨드 로드용·사이트 배포)
 
 // ETF baskets have low single-name news value → skip.
 const SKIP = (c) => /KODEX|ETF/i.test(c.name);
@@ -285,10 +286,40 @@ async function main() {
   }, null, 2) + '\n');
   console.log(`archive: ${ARCHIVE_OUT} ${all.length}건 (누적·무삭제)`);
 
+  // ── 종목별 3개월 창 샤드(archive/{TICKER}.json) ────────────────────
+  // 카드는 5건만 보이지만 '더 보기'로 나머지 3개월치를 볼 수 있어야 한다.
+  // 전체 아카이브(수 MB)를 통째로 받게 하면 안 되므로 종목별로 쪼갠다
+  // → 클릭한 종목의 파일 하나(수십 KB)만 온디맨드로 내려간다.
+  const cutoff = now.getTime() - PRUNE_DAYS * 864e5;
+  const inWin = all.filter((it) => {
+    const t = it.published ? new Date(it.published).getTime() : 0;
+    return (!t || t >= cutoff) && it.ticker !== 'MACRO';
+  });
+  const winByTk = new Map();
+  for (const it of inWin) {
+    const k = String(it.ticker || '?').toUpperCase();
+    if (!winByTk.has(k)) winByTk.set(k, []);
+    winByTk.get(k).push(it);
+  }
+  fs.mkdirSync(SHARD_DIR, { recursive: true });
+  const winCounts = {};
+  for (const [k, list] of winByTk) {
+    winCounts[k] = list.length;
+    fs.writeFileSync(`${SHARD_DIR}/${k}.json`, JSON.stringify({
+      ticker: k,
+      name: (list[0] || {}).name || k,
+      asOf: now.toISOString(),
+      windowDays: PRUNE_DAYS,
+      count: list.length,
+      // 렌더에 필요한 필드만(용량 절감): d=일자 a=요약 t=제목(폴백) u=링크
+      items: list.map((it) => ({ d: it.published, a: it.a || '', t: it.title || '', u: it.link })),
+    }, null, 2) + '\n');
+  }
+  console.log(`shards: ${SHARD_DIR}/ ${winByTk.size}개 종목 (3개월 창 전건)`);
+
   // ── 사이트 표시 창(news.json) ──────────────────────────────────────
   // 카드는 종목당 5건까지만 보여주므로 파일에도 그만큼만 싣는다
-  // → 아카이브가 몇 년치로 불어나도 사이트 페이로드는 상수로 유지된다.
-  const cutoff = now.getTime() - PRUNE_DAYS * 864e5;
+  // → 아카이브가 몇 년치로 불어나도 첫 로딩 페이로드는 상수로 유지된다.
   const perTk = new Map();
   const items = all
     .filter((it) => {
@@ -305,10 +336,12 @@ async function main() {
   const payload = {
     asOf: now.toISOString(),
     source: 'Google News RSS · 보유/후보 종목별 (원시 피드 + 기사별 한 줄 요약)',
-    note: `사이트 종목 카드의 "일자 + 요약" 행 소스. 최근 ${PRUNE_DAYS}일 창 · 종목당 최신 ${SITE_PER_TICKER}건(모바일 페이로드 상한). 잘려나간 과거 기사는 삭제된 것이 아니라 ${ARCHIVE_OUT} 에 영구 보존된다. 신호/소음 판단과 SIGNAL_LOG 반영은 사람/Claude의 몫 — 채점·차트에는 쓰이지 않는다.`,
+    note: `사이트 종목 카드의 "일자 + 요약" 행 소스. 최근 ${PRUNE_DAYS}일 창 · 종목당 최신 ${SITE_PER_TICKER}건(첫 로딩 페이로드 상한). 나머지 3개월치는 ${SHARD_DIR}/{티커}.json 을 '더 보기'로 온디맨드 로드. 창 밖 과거 기사는 삭제된 것이 아니라 ${ARCHIVE_OUT} 에 영구 보존된다. 신호/소음 판단과 SIGNAL_LOG 반영은 사람/Claude의 몫 — 채점·차트에는 쓰이지 않는다.`,
     count: items.length,
     archive: ARCHIVE_OUT,
     archiveCount: all.length,
+    shardDir: SHARD_DIR,
+    winCounts,          // 종목별 3개월 창 총건수 → '더 보기 (+N건)' 표기용
     items,
   };
   fs.writeFileSync(OUT, JSON.stringify(payload, null, 2) + '\n');
