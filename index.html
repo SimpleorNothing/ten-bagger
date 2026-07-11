@@ -1666,9 +1666,9 @@ window.CYCLE=(function(){
   </div>
   <h2 class="msec">지표 <span class="mnote">6개월</span></h2>
   <div class="mkt-grid">
-    <div class="mkt-card"><div class="mkt-nm">코스피</div><div class="mkt-ph">지수 수집 대기</div></div>
-    <div class="mkt-card"><div class="mkt-nm">S&amp;P 500</div><div class="mkt-ph">지수 수집 대기</div></div>
-    <div class="mkt-card"><div class="mkt-nm">나스닥</div><div class="mkt-ph">지수 수집 대기</div></div>
+    <div class="mkt-card" id="mkt_ks11"><div class="mkt-nm">코스피</div><div class="mkt-ph">지수 수집 대기</div></div>
+    <div class="mkt-card" id="mkt_gspc"><div class="mkt-nm">S&amp;P 500</div><div class="mkt-ph">지수 수집 대기</div></div>
+    <div class="mkt-card" id="mkt_ixic"><div class="mkt-nm">나스닥</div><div class="mkt-ph">지수 수집 대기</div></div>
     <div class="mkt-card"><div class="mkt-nm">미 10년물</div><div class="mkt-ph">스키마 확정 대기</div></div>
     <div class="mkt-card" id="mkt_wti"><div class="mkt-nm">WTI 유가</div><div class="mkt-ph">로딩…</div></div>
   </div>
@@ -2739,7 +2739,12 @@ window.MARKET=(function(){
    host.innerHTML=items.map(function(it){return '<a class="nrow" href="'+esc(it.link||'#')+'" target="_blank" rel="noopener"><span class="ntk">'+esc(it.ticker||'')+'</span><span class="ntt">'+esc(it.title||'')+'</span></a>';}).join('')||'<div class="mkt-ph">뉴스 없음</div>';}
   catch(e){host.innerHTML='<div class="mkt-ph">뉴스 대기</div>';}
  }
- function render(){loadWti();loadHoldings();loadNews();}
+ async function loadIndices(){
+  try{var r=await fetch('charts.json?t='+Date.now(),{cache:'no-store'});var j=await r.json();var S=j.series||{};
+   [['ks11','코스피','mkt_ks11'],['gspc','S&P 500','mkt_gspc'],['ixic','나스닥','mkt_ixic']].forEach(function(o){var el=document.getElementById(o[2]);if(!el)return;var d=S[o[0]];if(!d||!d.c||!d.c.length)return;var vals=slice6(d.c);el.innerHTML=card(o[1],Math.round(vals[vals.length-1]).toLocaleString(),pct(vals),vals);});}
+  catch(e){}
+ }
+ function render(){loadWti();loadIndices();loadHoldings();loadNews();}
  return {render:render};
 })();
 
