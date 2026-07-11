@@ -937,15 +937,6 @@ table.tk th.c{text-align:center}
     </div>
   </div><!-- /sub-adj -->
 
-  <!-- ④ Dawn Map · 주가 사이클 S-커브 -->
-  <div id="sub-map" style="margin-top:34px;border-top:1px solid var(--line);padding-top:30px">
-    <div class="vhead"><div class="vkick">④ Dawn Map · 주가 사이클 S-커브</div>
-      <h1 class="vtitle">지금 <em>여명</em> 구간에 선 후보는?</h1>
-      <p class="vsub">선택한 강물 후보의 <b>매칭 종목</b>을 성숙도 S-커브(좌:태동→우:과열)에 투영. 여명(초입) 밴드에 든 종목이 빛납니다. 점을 누르면 상세. ★ 보유는 테두리. 강물1은 스택 전체 투영, 강물 2~5는 그 강물에 매칭된 종목을 곡선에 얹습니다.</p></div>
-    <div class="legend" id="legendMap"></div>
-    <div class="map-card" id="mainMap"><div class="scurve-scroll"><svg id="scurve" viewBox="0 0 1180 620" preserveAspectRatio="xMidYMid meet"></svg></div></div>
-    <div id="mapRivers"></div>
-  </div><!-- /sub-map -->
 </section>
 
 
@@ -1484,34 +1475,24 @@ table.tk th.c{text-align:center}
   <div id="cycBoard" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-bottom:8px"></div>
   <div class="verdict" id="cycVerdict" style="margin-bottom:14px">cycle.json 로딩…</div>
 
-  <div class="mc-sec">D · 수요 — 주요 하이퍼스케일러 합산 CAPEX ($B, 연도별)</div>
-  <div style="font-size:11.5px;color:#868e96;margin-bottom:6px"><span style="display:inline-block;width:10px;height:10px;background:#1c7ed6;border-radius:2px;margin-right:4px"></span>실적(23~25)<span style="display:inline-block;width:10px;height:10px;background:#f0a020;border-radius:2px;margin:0 4px 0 12px"></span>추정(26E~28E)<span style="color:#adb5bd;margin-left:8px">29E~30E 컨센서스 부재(공백)</span><span style="color:#adb5bd;margin-left:8px">Δ=직전 전망 대비 · update 클릭 시 이력</span></div>
-  <div style="position:relative;width:100%;height:210px;margin-bottom:4px"><canvas id="cycDChart"></canvas></div>
-  <div class="cyc-upd" data-cl="D" role="button" tabindex="0"></div>
-
-  <div class="mc-sec">D₂ · 메모리 시장 — DRAM+NAND 합산 매출 ($B, 연도별)</div>
-  <div style="font-size:11.5px;color:#868e96;margin-bottom:6px"><span style="display:inline-block;width:10px;height:10px;background:#1c7ed6;border-radius:2px;margin-right:4px"></span>실적(23~25)<span style="display:inline-block;width:10px;height:10px;background:#f0a020;border-radius:2px;margin:0 4px 0 12px"></span>추정(26E~27E · TrendForce)<span style="color:#adb5bd;margin-left:8px">28E~30E 컨센서스 부재(공백)</span><span style="color:#adb5bd;margin-left:8px">Δ=직전 전망 대비 · update 클릭 시 이력</span></div>
-  <div style="position:relative;width:100%;height:210px;margin-bottom:4px"><canvas id="cycMChart"></canvas></div>
-  <div class="cyc-upd" data-cl="M" role="button" tabindex="0"></div>
-
-  <div class="mc-sec">C · 가격 — DDR5 16Gb 현물 vs 계약 (USD/칩, 재구성)</div>
-  <div style="font-size:11.5px;color:#868e96;margin-bottom:6px"><span style="display:inline-block;width:16px;border-top:2px solid #1c7ed6;vertical-align:middle;margin-right:4px"></span>계약<span style="display:inline-block;width:16px;border-top:2px dashed #f08c00;vertical-align:middle;margin:0 4px 0 12px"></span>현물</div>
-  <div style="position:relative;width:100%;height:210px;margin-bottom:4px"><canvas id="cycCChart"></canvas></div>
-  <div class="cyc-upd" data-cl="C" role="button" tabindex="0"></div>
-
-  <div class="mc-sec">E · 추정 γ — 메모리 3사 주가÷평균목표가−1 (%)</div>
-  <div style="font-size:11.5px;color:#868e96;margin-bottom:6px">음수=목표가가 주가 위(γ open 🟢) · 0=전환 · 양수=주가가 목표가 추월(γ spent 🔴)</div>
-  <div style="position:relative;width:100%;height:190px;margin-bottom:4px"><canvas id="cycEChart"></canvas></div>
-  <div class="cyc-upd" data-cl="E" role="button" tabindex="0"></div>
-
-  <div class="mc-sec">B · 재고 — 메모리 3사 DIO(재고일수, 연도별)</div>
-  <div style="font-size:11.5px;color:#868e96;margin-bottom:6px"><span style="display:inline-block;width:16px;border-top:2px solid #1c7ed6;vertical-align:middle;margin-right:4px"></span>마이크론(FY)<span style="display:inline-block;width:16px;border-top:2px dashed #f08c00;vertical-align:middle;margin:0 4px 0 12px"></span>SK하이닉스<span style="display:inline-block;width:16px;border-top:2px dotted #0ca678;vertical-align:middle;margin:0 4px 0 12px"></span>삼성전자</div>
-  <div style="position:relative;width:100%;height:210px;margin-bottom:4px"><canvas id="cycBChart"></canvas></div>
-  <div class="cyc-upd" data-cl="B" role="button" tabindex="0"></div>
-
-  <div class="mc-sec">A · 장비 — SEMI 글로벌 장비 빌링 YoY% (분기)</div>
-  <div style="position:relative;width:100%;height:210px;margin-bottom:4px"><canvas id="cycAChart"></canvas></div>
-  <div class="cyc-upd" data-cl="A" role="button" tabindex="0"></div>
+  <!-- 1·2·3 압축 3열 — CAPEX(D)·메모리 매출(D₂)·DDR5 가격(C). Chart.js responsive 자동 리핏. E·B·A 차트 제거(신호등 램프·요약표 유지) -->
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;margin-bottom:10px">
+    <div>
+      <div class="mc-sec" style="font-size:13px;margin-top:0">D · CAPEX <span style="color:#868e96;font-weight:400;font-size:11px">하이퍼스케일러 합산 ($B)</span></div>
+      <div style="position:relative;width:100%;height:150px;margin-bottom:2px"><canvas id="cycDChart"></canvas></div>
+      <div class="cyc-upd" data-cl="D" role="button" tabindex="0"></div>
+    </div>
+    <div>
+      <div class="mc-sec" style="font-size:13px;margin-top:0">D₂ · 메모리 매출 <span style="color:#868e96;font-weight:400;font-size:11px">DRAM+NAND ($B)</span></div>
+      <div style="position:relative;width:100%;height:150px;margin-bottom:2px"><canvas id="cycMChart"></canvas></div>
+      <div class="cyc-upd" data-cl="M" role="button" tabindex="0"></div>
+    </div>
+    <div>
+      <div class="mc-sec" style="font-size:13px;margin-top:0">C · DDR5 가격 <span style="color:#868e96;font-weight:400;font-size:11px">현물 vs 계약 (USD/칩)</span></div>
+      <div style="position:relative;width:100%;height:150px;margin-bottom:2px"><canvas id="cycCChart"></canvas></div>
+      <div class="cyc-upd" data-cl="C" role="button" tabindex="0"></div>
+    </div>
+  </div>
 
   <div class="mc-sec">현재값 · 임계값 신호 요약</div>
   <div id="cycTable" style="margin-bottom:8px"></div>
@@ -3786,7 +3767,7 @@ function renderLegends(){const h=Object.keys(STAGE_HEX).map(s=>`<span class="lg"
  const lr=document.getElementById('legendRiver');if(lr)lr.innerHTML=h;
  const allKeys=Object.keys(MAP_LAYER_HEX),allOn=mapFilter.size===allKeys.length;
  const lm=Object.entries(MAP_LAYER_HEX).map(([id,c])=>`<span class="lg lg-f${!mapFilter.has(id)?' off':''}" data-l="${id}"><span class="dot" style="background:${c}"></span>${id}</span>`).join('')+'<span class="lg" style="color:var(--mature)">★ 보유</span>'+`<button type="button" class="lg-all">${allOn?'전체 해제':'전체 선택'}</button>`;
- const lmEl=document.getElementById('legendMap');lmEl.innerHTML=lm;
+ const lmEl=document.getElementById('legendMap');if(!lmEl)return;lmEl.innerHTML=lm;
  lmEl.querySelectorAll('.lg-f').forEach(el=>el.addEventListener('click',()=>{const l=el.dataset.l;mapFilter.has(l)?mapFilter.delete(l):mapFilter.add(l);renderLegends();drawSCurve();}));
  lmEl.querySelector('.lg-all').addEventListener('click',()=>{if(mapFilter.size===allKeys.length)mapFilter.clear();else allKeys.forEach(k=>mapFilter.add(k));renderLegends();drawSCurve();});}
 function renderExplorer(){
@@ -3924,6 +3905,7 @@ function drawRiverCurves(){
   g.addEventListener('click',()=>{tip.classList.remove('on');openDrawer(c.id);});});
 }
 function drawSCurve(){
+ if(!document.getElementById('scurve'))return;
  const svg=document.getElementById('scurve'),W=1180,H=620;svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
  // 강물1(스택 기반)만 메인 S-커브에 종목 전체를 투영. 강물 2~5는 메인 차트를 숨기고
  // 아래 강물별 곡선(drawRiverCurves)에 그 강물의 매칭 종목을 직접 얹는다.
