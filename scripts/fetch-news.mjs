@@ -19,8 +19,11 @@ const UA = { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKi
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 const PER_TICKER = 4;     // keep newest N headlines per name
-const PRUNE_DAYS = 10;    // drop items older than this
-const MAX_ITEMS = 150;    // hard cap on the accumulated feed
+// news.json = 사이트가 매 로딩마다 통째로 받는 파일 → 반드시 상한을 둔다(모바일 페이로드).
+// 삭제가 아니라 '창(window)'일 뿐이고, 잘려나간 기사는 news_archive.json 에 영구 보존된다.
+const PRUNE_DAYS = 95;    // 사이트 표시 창(약 3개월)
+const MAX_ITEMS = 2000;   // 사이트 파일 하드캡
+const ARCHIVE_OUT = 'news_archive.json';  // 영구 보존(프루닝 없음·사이트 미배포)
 
 // ETF baskets have low single-name news value → skip.
 const SKIP = (c) => /KODEX|ETF/i.test(c.name);
@@ -92,6 +95,59 @@ async function fetchFeed(c) {
   return parseRSS(xml).slice(0, PER_TICKER);
 }
 
+
+// ---- 기사별 한 줄 요약 (items[].a) ----
+// 사이트 종목 카드는 "일자 + 요약" 행으로 렌더한다(기사 제목 미표시).
+// 요약은 아카이브에 영구 보존되고, a 가 없는 신규 기사만 증분 생성한다
+// → 과거치를 매일 재요약하지 않는다(토큰·비용 방어).
+const ART_BATCH = 60;      // 1회 호출당 기사 수
+const ART_MAX_NEW = 240;   // 1회 실행당 신규 요약 상한
+
+async function summarizeArticles(items) {
+  const key = process.env.ANTHROPIC_API_KEY;
+  if (!key) { console.log('arts: ANTHROPIC_API_KEY 없음 → 스킵'); return; }
+  const todo = items.filter((it) => it.ticker !== 'MACRO' && !it.a).slice(0, ART_MAX_NEW);
+  if (!todo.length) { console.log('arts: 신규 기사 없음'); return; }
+  let done = 0;
+  for (let i = 0; i < todo.length; i += ART_BATCH) {
+    const batch = todo.slice(i, i + ART_BATCH);
+    const lines = batch
+      .map((it, n) => `${n}|${it.ticker}|${it.name}|${(it.published || '').slice(0, 10)}|${it.title}`)
+      .join('\n');
+    const prompt = `아래는 AI 인프라 투자 관측소가 추적하는 종목의 뉴스 기사다(번호|티커|종목명|날짜|제목).
+각 기사를 한국어 한 문장으로 요약하라.
+
+규칙:
+- 제목을 그대로 번역·복사하지 말고, 내용의 핵심(무엇이 일어났는가)을 서술형 한 문장으로 압축한다.
+- 40~90자. 사실만. 제목에 없는 내용을 지어내지 않는다.
+- 확정 실적·수주·계약과 단순 관측·전망·내러티브를 구분해 서술한다(예: "~로 전망됐다", "~라는 분석이 나왔다").
+- 해당 종목과 무관한 기사는 "회사 무관 노이즈"로만 적는다.
+
+다음 JSON 배열만 출력하라(마크다운·설명 금지):
+[{"n":0,"a":"한 문장 요약"}]
+
+${lines}`;
+    try {
+      const r = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01' },
+        body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 8000, messages: [{ role: 'user', content: prompt }] }),
+      });
+      if (!r.ok) throw new Error('anthropic HTTP ' + r.status);
+      const j = await r.json();
+      const text = (j.content || []).filter((b) => b.type === 'text').map((b) => b.text).join('');
+      const arr = JSON.parse(text.replace(/```json|```/g, '').trim());
+      if (!Array.isArray(arr)) throw new Error('arts shape invalid');
+      for (const x of arr) {
+        if (x && Number.isInteger(x.n) && batch[x.n] && x.a) { batch[x.n].a = String(x.a).trim(); done++; }
+      }
+    } catch (e) {
+      console.log(`arts 배치 실패(건너뜀): ${e.message}`);
+    }
+    await sleep(600);
+  }
+  console.log(`arts: ${done}/${todo.length} 요약 생성`);
+}
 
 // ---- Korean daily digest (news_digest.json) ----
 // ANTHROPIC_API_KEY 가 env 에 있으면 위 items 를 한글 레이어별 요약으로 변환해 저장.
@@ -199,28 +255,55 @@ async function main() {
     await sleep(400);
   }
 
-  // merge prev + new, dedupe by link, prune old, sort newest-first, cap.
-  const cutoff = now.getTime() - PRUNE_DAYS * 864e5;
+  // ── 영구 아카이브(news_archive.json) ────────────────────────────────
+  // 기사는 시간이 지나도 삭제하지 않는다. 아카이브 = 단일 진실원천(전건 누적).
+  // news.json 은 여기서 잘라낸 '사이트 표시 창'일 뿐이다.
+  let arch = { items: [] };
+  try { arch = JSON.parse(fs.readFileSync(ARCHIVE_OUT, 'utf8')); } catch (e) { /* first run */ }
+
+  // archive + 기존 news.json + 신규 수집 → 링크 기준 dedupe.
+  // 먼저 들어온 쪽(아카이브)이 이기므로 기존 요약(a)이 재수집에 덮이지 않는다.
   const byLink = new Map();
-  for (const it of [...collected, ...(prev.items || [])]) {
+  for (const it of [...(arch.items || []), ...(prev.items || []), ...collected]) {
     if (!it || !it.link) continue;
-    const t = it.published ? new Date(it.published).getTime() : 0;
-    if (t && t < cutoff) continue;
-    if (!byLink.has(it.link)) byLink.set(it.link, it);
+    const cur = byLink.get(it.link);
+    if (!cur) { byLink.set(it.link, it); continue; }
+    if (!cur.a && it.a) cur.a = it.a;   // 요약은 어느 쪽에 있든 살린다
   }
-  const items = [...byLink.values()]
-    .sort((a, b) => new Date(b.published) - new Date(a.published))
+  const all = [...byLink.values()]
+    .sort((a, b) => new Date(b.published || 0) - new Date(a.published || 0));
+
+  await summarizeArticles(all);
+
+  fs.writeFileSync(ARCHIVE_OUT, JSON.stringify({
+    asOf: now.toISOString(),
+    source: 'Google News RSS · 보유/후보 종목별 영구 아카이브',
+    note: '기사 전건 누적 — 프루닝·삭제 없음. items[].a = 기사별 한 줄 요약(신규만 증분 생성·이후 영구 보존). news.json 은 이 파일에서 최근 구간만 잘라낸 사이트 표시용 창. 사이트에 배포되지 않는다(.assetsignore).',
+    count: all.length,
+    items: all,
+  }, null, 2) + '\n');
+  console.log(`archive: ${ARCHIVE_OUT} ${all.length}건 (누적·무삭제)`);
+
+  // ── 사이트 표시 창(news.json) ──────────────────────────────────────
+  const cutoff = now.getTime() - PRUNE_DAYS * 864e5;
+  const items = all
+    .filter((it) => {
+      const t = it.published ? new Date(it.published).getTime() : 0;
+      return !t || t >= cutoff;
+    })
     .slice(0, MAX_ITEMS);
 
   const payload = {
     asOf: now.toISOString(),
-    source: 'Google News RSS · 보유/후보 종목별 (원시 피드, 미선별)',
-    note: '신호/소음 판단과 SIGNAL_LOG 반영은 사람/Claude의 몫. 이 파일은 채점·차트에 쓰이지 않는 검토용 원시 헤드라인. 링크↑·종목별 최신 일부만 누적, 10일 경과·중복 자동 제거.',
+    source: 'Google News RSS · 보유/후보 종목별 (원시 피드 + 기사별 한 줄 요약)',
+    note: `사이트 종목 카드의 "일자 + 요약" 행 소스. 최근 ${PRUNE_DAYS}일 창(모바일 페이로드 상한). 잘려나간 과거 기사는 삭제된 것이 아니라 ${ARCHIVE_OUT} 에 영구 보존된다. 신호/소음 판단과 SIGNAL_LOG 반영은 사람/Claude의 몫 — 채점·차트에는 쓰이지 않는다.`,
     count: items.length,
+    archive: ARCHIVE_OUT,
+    archiveCount: all.length,
     items,
   };
   fs.writeFileSync(OUT, JSON.stringify(payload, null, 2) + '\n');
-  console.log(`\nDone: ${ok} ok, ${fail} failed, ${items.length} items in ${OUT}.`);
+  console.log(`\nDone: ${ok} ok, ${fail} failed, ${items.length}/${all.length} items in ${OUT}.`);
   await buildDigest(items);
 }
 
