@@ -129,6 +129,17 @@ main{padding:36px 0 90px;position:relative}
 .cyc-pop li .d{font-family:var(--mono);font-size:11.5px;color:var(--dawn);white-space:nowrap;flex:0 0 auto;font-weight:600}
 .cyc-pop li .n{font-size:12.5px;color:var(--dim);line-height:1.5}
 .cyc-pop-empty{font-size:12.5px;color:var(--faint);padding:6px 0}
+.cyc-rev{margin-top:14px;border-top:1px solid var(--line);padding-top:12px}
+.cyc-rev-t{font-size:12px;font-weight:600;color:var(--txt);margin-bottom:8px}
+.cyc-rev table{border-collapse:collapse;width:100%;font-family:var(--mono);font-size:11px}
+.cyc-rev th,.cyc-rev td{padding:5px 6px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+.cyc-rev th:first-child,.cyc-rev td:first-child{text-align:left;color:var(--dawn);font-weight:600;white-space:nowrap}
+.cyc-rev thead th{color:var(--faint);font-weight:600;border-bottom:1px solid var(--line2)}
+.cyc-rev td .dl{font-size:9.5px;margin-left:3px}
+.cyc-rev td .up{color:#d13b3b}
+.cyc-rev td .dn{color:#1257d6}
+.cyc-rev td .fl{color:var(--faint)}
+.cyc-rev-note{font-size:10.5px;color:var(--faint);margin-top:7px;line-height:1.5}
 .thread-sep{height:1px;border:0;margin:34px 0 26px;background:linear-gradient(90deg,transparent,var(--line) 12%,var(--line) 88%,transparent)}
 .sigitem{display:grid;grid-template-columns:78px 1fr;gap:11px;padding:9px 0;border-top:1px solid var(--line);align-items:start}
 .sigtag{font-family:var(--mono);font-size:13px;font-weight:700;padding:3px 6px;border-radius:7px;text-align:center}
@@ -1435,12 +1446,12 @@ table.tk th.c{text-align:center}
   <div class="verdict" id="cycVerdict" style="margin-bottom:14px">cycle.json 로딩…</div>
 
   <div class="mc-sec">D · 수요 — 주요 하이퍼스케일러 합산 CAPEX ($B, 연도별)</div>
-  <div style="font-size:11.5px;color:#868e96;margin-bottom:6px"><span style="display:inline-block;width:10px;height:10px;background:#1c7ed6;border-radius:2px;margin-right:4px"></span>실적(23~25)<span style="display:inline-block;width:10px;height:10px;background:#f0a020;border-radius:2px;margin:0 4px 0 12px"></span>추정(26E~28E)<span style="color:#adb5bd;margin-left:8px">29E~30E 컨센서스 부재(공백)</span></div>
+  <div style="font-size:11.5px;color:#868e96;margin-bottom:6px"><span style="display:inline-block;width:10px;height:10px;background:#1c7ed6;border-radius:2px;margin-right:4px"></span>실적(23~25)<span style="display:inline-block;width:10px;height:10px;background:#f0a020;border-radius:2px;margin:0 4px 0 12px"></span>추정(26E~28E)<span style="color:#adb5bd;margin-left:8px">29E~30E 컨센서스 부재(공백)</span><span style="color:#adb5bd;margin-left:8px">Δ=직전 전망 대비 · update 클릭 시 이력</span></div>
   <div style="position:relative;width:100%;height:210px;margin-bottom:4px"><canvas id="cycDChart"></canvas></div>
   <div class="cyc-upd" data-cl="D" role="button" tabindex="0"></div>
 
   <div class="mc-sec">D₂ · 메모리 시장 — DRAM+NAND 합산 매출 ($B, 연도별)</div>
-  <div style="font-size:11.5px;color:#868e96;margin-bottom:6px"><span style="display:inline-block;width:10px;height:10px;background:#1c7ed6;border-radius:2px;margin-right:4px"></span>실적(23~25)<span style="display:inline-block;width:10px;height:10px;background:#f0a020;border-radius:2px;margin:0 4px 0 12px"></span>추정(26E~27E · TrendForce)<span style="color:#adb5bd;margin-left:8px">28E~30E 컨센서스 부재(공백)</span></div>
+  <div style="font-size:11.5px;color:#868e96;margin-bottom:6px"><span style="display:inline-block;width:10px;height:10px;background:#1c7ed6;border-radius:2px;margin-right:4px"></span>실적(23~25)<span style="display:inline-block;width:10px;height:10px;background:#f0a020;border-radius:2px;margin:0 4px 0 12px"></span>추정(26E~27E · TrendForce)<span style="color:#adb5bd;margin-left:8px">28E~30E 컨센서스 부재(공백)</span><span style="color:#adb5bd;margin-left:8px">Δ=직전 전망 대비 · update 클릭 시 이력</span></div>
   <div style="position:relative;width:100%;height:210px;margin-bottom:4px"><canvas id="cycMChart"></canvas></div>
   <div class="cyc-upd" data-cl="M" role="button" tabindex="0"></div>
 
@@ -1476,12 +1487,29 @@ window.CYCLE=(function(){
   function find(cs,id){for(var i=0;i<cs.length;i++){if(cs[i].id===id)return cs[i];}return null;}
   function board(cs){var h='';cs.forEach(function(c){h+='<div style="border:1px solid #e9ecef;border-radius:8px;padding:10px"><div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:11px;color:#868e96">'+c.id+'</span>'+dot(c.lamp)+'</div><div style="font-size:13px;font-weight:600;margin-top:4px">'+c.name+'</div><div style="font-size:11px;color:#495057;margin-top:3px;line-height:1.45">'+(c.now||'')+'</div></div>';});return h;}
   function table(cs){var h='<table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr style="text-align:left;color:#868e96"><th style="padding:4px 6px">군집</th><th style="padding:4px 6px">현재값</th><th style="padding:4px 6px">고점 ON 임계값</th><th style="padding:4px 6px">신호</th></tr></thead><tbody>';cs.forEach(function(c){h+='<tr style="border-top:1px solid #f1f3f5"><td style="padding:5px 6px;font-weight:600">'+c.id+' '+c.name+'</td><td style="padding:5px 6px;color:#495057">'+(c.now||'')+'</td><td style="padding:5px 6px;color:#868e96">'+(c.on||'')+'</td><td style="padding:5px 6px">'+dot(c.lamp)+'</td></tr>';});return h+'</tbody></table>';}
+  function badgePlugin(rev){
+    return {id:'revbadge',afterDatasetsDraw:function(chart){
+      if(!rev||rev.length<2)return;
+      var rs=rev.slice().sort(function(a,b){return String(a.asOf).localeCompare(String(b.asOf));});
+      var last=rs[rs.length-1],prev=rs[rs.length-2];if(!last.fc||!prev.fc)return;
+      var meta=chart.getDatasetMeta(0),ctx=chart.ctx,labels=chart.data.labels;if(!meta)return;
+      ctx.save();ctx.font='700 9px '+(getComputedStyle(document.body).fontFamily||'sans-serif');ctx.textAlign='center';
+      labels.forEach(function(y,i){
+        var a=last.fc[y],b=prev.fc[y];if(a==null||b==null)return;var d=a-b;if(!d)return;
+        var bar=meta.data[i];if(!bar)return;
+        ctx.fillStyle=(d>0)?'#d13b3b':'#1257d6';
+        ctx.fillText((d>0?'▲+':'▼')+d,bar.x,bar.y-4);
+      });
+      ctx.restore();
+    }};
+  }
   function drawD(c){
     if(!c||!c.series)return;var s=c.series,cv=el('cycDChart');if(!cv)return;if(cD)cD.destroy();
     var ac=s.actualCount||0;var bg=s.points.map(function(_,i){return i<ac?'#1c7ed6':'#f0a020';});
     cD=new Chart(cv,{
       type:'bar',
       data:{labels:s.labels,datasets:[{label:'capex',data:s.points,backgroundColor:bg}]},
+      plugins:[badgePlugin(s.revisions)],
       options:{responsive:true,maintainAspectRatio:false,
         plugins:{legend:{display:false},tooltip:{callbacks:{label:function(x){return '$'+x.parsed.y+'B'+(x.dataIndex<ac?' (실적)':' (추정)');}}}},
         scales:{x:{ticks:{font:{size:10}},grid:{display:false}},y:{ticks:{callback:function(v){return '$'+v+'B';},font:{size:9}}}}}
@@ -1493,6 +1521,7 @@ window.CYCLE=(function(){
     cM=new Chart(cv,{
       type:'bar',
       data:{labels:m.labels,datasets:[{label:'메모리 시장',data:m.points,backgroundColor:bg}]},
+      plugins:[badgePlugin(m.revisions)],
       options:{responsive:true,maintainAspectRatio:false,
         plugins:{legend:{display:false},tooltip:{callbacks:{label:function(x){return x.parsed.y==null?'추정치 미정(공백)':'$'+x.parsed.y+'B'+(x.dataIndex<ac?' (실적)':' (추정)');}}}},
         scales:{x:{ticks:{font:{size:10}},grid:{display:false}},y:{ticks:{callback:function(v){return '$'+v+'B';},font:{size:9}}}}}
@@ -1573,12 +1602,34 @@ window.CYCLE=(function(){
   }
   function popHide(){var bg=el('cycPopBg'),p=el('cycPop');if(bg)bg.classList.remove('on');if(p)p.classList.remove('on');}
   function esc(s){return String(s==null?'':s).replace(/[&<>]/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[m];});}
+  function revOf(c){return (c&&c.series&&c.series.revisions)||(c&&c.revisions)||[];}
+  function revYears(rev){var set={},out=[];rev.forEach(function(r){Object.keys(r.fc||{}).forEach(function(y){if(!(y in set)){set[y]=1;out.push(y);}});});out.sort();return out;}
+  function fmtFc(v){return (v==null)?'—':(v>=1000?('$'+(v/1000).toFixed(2)+'조'):('$'+v+'B'));}
+  function revTable(c){
+    var rev=revOf(c);if(!rev.length)return '';
+    var rs=rev.slice().sort(function(a,b){return String(b.asOf).localeCompare(String(a.asOf));});
+    var years=revYears(rev);if(!years.length)return '';
+    var head='<tr><th>시점</th>'+years.map(function(y){return '<th>'+esc(y)+'</th>';}).join('')+'</tr>';
+    var body=rs.map(function(r,ri){
+      var older=rs[ri+1];
+      var cells=years.map(function(y){
+        var v=r.fc?r.fc[y]:null;var cell=fmtFc(v);
+        if(older&&older.fc&&v!=null&&older.fc[y]!=null){var d=v-older.fc[y];
+          if(d>0)cell+='<span class="dl up">▲+'+d+'</span>';
+          else if(d<0)cell+='<span class="dl dn">▼'+d+'</span>';
+          else cell+='<span class="dl fl">·</span>';}
+        return '<td>'+cell+'</td>';
+      }).join('');
+      return '<tr><td>'+fmtDate(r.asOf)+'</td>'+cells+'</tr>';
+    }).join('');
+    return '<div class="cyc-rev"><div class="cyc-rev-t">전망치 리비전 이력 (직전 스냅샷 대비 Δ)</div><table><thead>'+head+'</thead><tbody>'+body+'</tbody></table><div class="cyc-rev-note">▲ 상향(추정 상승) · ▼ 하향 · · 무변동 · — 값 없음. 전망치가 바뀔 때만 스냅샷을 추가한다 — 현재는 이력 축적 초기 단계.</div></div>';
+  }
   function popup(c){
     var e=popEls(),p=e.p;
     var hist=(c.history&&c.history.slice())||[];
     hist.sort(function(a,b){return String(b.date).localeCompare(String(a.date));});
     var rows=hist.length?hist.map(function(h){return '<li><span class="d">'+fmtDate(h.date)+'</span><span class="n">'+esc(h.note)+'</span></li>';}).join(''):'<div class="cyc-pop-empty">기록된 업데이트 이력이 없습니다.</div>';
-    p.innerHTML='<div class="cyc-pop-h"><b>'+esc(c.id+' · '+c.name)+'</b><span>update '+fmtDate(c.updated||DATA.asOf)+'</span><span class="cyc-pop-x" title="닫기">✕</span></div>'+(hist.length?'<ul>'+rows+'</ul>':rows);
+    p.innerHTML='<div class="cyc-pop-h"><b>'+esc(c.id+' · '+c.name)+'</b><span>update '+fmtDate(c.updated||DATA.asOf)+'</span><span class="cyc-pop-x" title="닫기">✕</span></div>'+(hist.length?'<ul>'+rows+'</ul>':rows)+revTable(c);
     p.querySelector('.cyc-pop-x').addEventListener('click',popHide);
     e.bg.classList.add('on');p.classList.add('on');
   }
