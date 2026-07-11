@@ -52,6 +52,7 @@ function yahooSymbol(ticker, mkt) {
     case 'TSE': return ticker + '.T';
     case 'KOSPI': return ticker + '.KS';
     case 'KOSDAQ': return ticker + '.KQ';
+    case 'INDEX': return ticker;
     default: return null;
   }
 }
@@ -145,7 +146,7 @@ async function quote(c) {
 }
 
 async function main() {
-  const candidates = readCandidates();
+  const candidates = [...readCandidates(), { id: 'ks11', ticker: '^KS11', mkt: 'INDEX' }, { id: 'gspc', ticker: '^GSPC', mkt: 'INDEX' }, { id: 'ixic', ticker: '^IXIC', mkt: 'INDEX' }];
   let prev = { asOf: null, quotes: {} };
   try { prev = JSON.parse(fs.readFileSync(OUT, 'utf8')); } catch (e) { /* first run */ }
   const out = { asOf: prev.asOf, quotes: { ...(prev.quotes || {}) } };
