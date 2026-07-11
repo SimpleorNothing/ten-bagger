@@ -594,6 +594,28 @@ table.tk th.c{text-align:center}
 #v-cal.cal-open .cal-row.cal-past{display:grid}
 #v-cal.cal-open .cal-month.cal-past{display:flex}
 @media(max-width:760px){#v-cal .cal-now{grid-template-columns:1fr 1fr}#v-cal .watch-grid{grid-template-columns:1fr}#v-cal .cal-row{grid-template-columns:70px 12px 1fr;gap:9px}}
+
+/* ===== MARKET (01 market) ===== */
+#v-market .msec{font-size:20px;font-weight:700;letter-spacing:-.3px;margin:26px 0 12px;display:flex;align-items:center;gap:8px}
+#v-market .msec .mnote{font:500 11px var(--mono);color:var(--faint);letter-spacing:.04em}
+.mkt-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px}
+.mkt-card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:15px 16px;transition:.15s;min-height:104px}
+.mkt-card:hover{border-color:var(--line2);box-shadow:0 4px 14px rgba(22,36,45,.06)}
+.mkt-nm{font-size:14px;font-weight:700;color:var(--txt);margin-bottom:6px}
+.mkt-val{font:700 15px var(--mono);color:var(--txt);margin-bottom:8px}
+.mkt-chg{font-size:12px;font-weight:600}
+.mkt-chg.up{color:var(--st-hot)}.mkt-chg.dn{color:var(--st-accel)}
+.mkt-card .spark{width:100%;height:36px;display:block}
+.mkt-span{font:500 10px var(--mono);color:var(--faint);margin-top:4px}
+.mkt-ph{font-size:12px;color:var(--faint);padding:16px 0;text-align:center}
+.mkt-ph-box{background:var(--panel2);border:1px dashed var(--line2);border-radius:14px;padding:18px;text-align:center;font-size:13px;color:var(--dim)}
+.nlist{display:flex;flex-direction:column;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.nrow{display:flex;align-items:center;gap:10px;padding:11px 14px;background:var(--panel);text-decoration:none;transition:.12s}
+.nrow:hover{background:var(--panel2)}
+.nrow .ntk{flex:0 0 54px;font:700 11px var(--mono);color:var(--dawn)}
+.nrow .ntt{font-size:13px;color:var(--txt);line-height:1.4;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media(max-width:600px){.mkt-grid{grid-template-columns:repeat(2,1fr)}}
+
 </style>
 <style id="memo-css">
 /* ===== 09 메모 뷰 ===== */
@@ -816,7 +838,7 @@ table.tk th.c{text-align:center}
 <header><div class="wrap bar">
   <div class="brand"><span class="mark">알파맵</span></div>
   <nav id="nav">
-    <button class="tab on" data-v="us10y"><span class="n">01</span>시장 모니터링</button>
+    <button class="tab on" data-v="market"><span class="n">01</span>시장 모니터링</button>
     <button class="tab" data-v="cycle"><span class="n">02</span>궁금한 것</button>
     <button class="tab" data-v="port"><span class="n">03</span>리밸런싱</button>
     <button class="tab" data-v="cal"><span class="n">04</span>캘린더</button>
@@ -1636,8 +1658,30 @@ window.CYCLE=(function(){
   return {render:render};
 })();
 </script>
+<!-- 01 MARKET -->
+<section class="view on" id="v-market">
+  <div class="vhead">
+    <div class="vkick">Market · 시장 모니터링</div>
+    <h1 class="vtitle">한눈에 보는 <em>시장</em> — 증시·금리·유가·뉴스</h1>
+  </div>
+  <h2 class="msec">지표 <span class="mnote">6개월</span></h2>
+  <div class="mkt-grid">
+    <div class="mkt-card"><div class="mkt-nm">코스피</div><div class="mkt-ph">지수 수집 대기</div></div>
+    <div class="mkt-card"><div class="mkt-nm">S&amp;P 500</div><div class="mkt-ph">지수 수집 대기</div></div>
+    <div class="mkt-card"><div class="mkt-nm">나스닥</div><div class="mkt-ph">지수 수집 대기</div></div>
+    <div class="mkt-card"><div class="mkt-nm">미 10년물</div><div class="mkt-ph">스키마 확정 대기</div></div>
+    <div class="mkt-card" id="mkt_wti"><div class="mkt-nm">WTI 유가</div><div class="mkt-ph">로딩…</div></div>
+  </div>
+  <h2 class="msec">보유 종목 <span class="mnote">6개월</span></h2>
+  <div class="mkt-grid" id="mktHoldings"><div class="mkt-ph" style="grid-column:1/-1">로딩…</div></div>
+  <h2 class="msec">관련 기사</h2>
+  <div class="mkt-ph-box">매크로·이란 뉴스 수집 대기 (구글뉴스 RSS)</div>
+  <h2 class="msec">종목 뉴스 <span class="mnote">데일리</span></h2>
+  <div id="mktStockNews" class="nlist"><div class="mkt-ph">로딩…</div></div>
+</section>
+
 <!-- 06 US10Y -->
-<section class="view on" id="v-us10y">
+<section class="view" id="v-us10y">
   <div class="vhead">
     <div class="vkick">US10Y · 미 10년물 금리</div>
     <h1 class="vtitle">미 <em>10년물</em> 금리 모니터</h1>
@@ -2649,12 +2693,56 @@ async function loadPrices(){try{const r=await fetch('./prices.json',{cache:'no-s
 /* ===== TABS ===== */
 document.getElementById('nav').addEventListener('click',e=>{const b=e.target.closest('.tab');if(!b)return;
  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));document.querySelectorAll('.view').forEach(v=>v.classList.remove('on'));
- b.classList.add('on');(({us10y:['us10y','siglog'],cycle:['cycle','alpha','thread'],port:['port','tracker','macro']})[b.dataset.v]||[b.dataset.v]).forEach(function(_i){var _e=document.getElementById('v-'+_i);if(_e)_e.classList.add('on');});
+ b.classList.add('on');(({cycle:['cycle','alpha','thread'],port:['port','tracker','macro']})[b.dataset.v]||[b.dataset.v]).forEach(function(_i){var _e=document.getElementById('v-'+_i);if(_e)_e.classList.add('on');});
  var _ab=document.getElementById('asofBox');if(_ab)_ab.style.display=(b.dataset.v==='memo')?'none':'';
  if(b.dataset.v==='thread'){drawSCurve();drawRiverCurves();}
  if(b.dataset.v==='us10y'){if(window.US10Y)window.US10Y.render();}
- if(b.dataset.v==='cycle'){if(window.CYCLE)window.CYCLE.render();drawSCurve();drawRiverCurves();}});
+ if(b.dataset.v==='cycle'){if(window.CYCLE)window.CYCLE.render();drawSCurve();drawRiverCurves();}
+ if(b.dataset.v==='market'){if(window.MARKET)window.MARKET.render();}});
 setTimeout(function(){var _t0=document.querySelector('#nav .tab.on');if(_t0)_t0.click();},0);
+
+/* ===== MARKET (01 market) ===== */
+window.MARKET=(function(){
+ function esc(s){return String(s==null?'':s).replace(/[&<>]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;'}[c];});}
+ function slice6(a){return a.slice(-126);}
+ function pct(v){return (!v||v.length<2)?0:(v[v.length-1]/v[0]-1)*100;}
+ function spark(vals){
+  if(!vals||vals.length<2)return '';
+  var w=120,hh=36,mn=Math.min.apply(null,vals),mx=Math.max.apply(null,vals),rg=(mx-mn)||1,n=vals.length;
+  var pts=vals.map(function(v,i){return ((i/(n-1))*w).toFixed(1)+','+(hh-((v-mn)/rg)*hh).toFixed(1);}).join(' ');
+  var up=vals[vals.length-1]>=vals[0];
+  var c=up?'var(--st-hot)':'var(--st-accel)';
+  return '<svg class="spark" viewBox="0 0 '+w+' '+hh+'" preserveAspectRatio="none"><polyline points="'+pts+'" fill="none" stroke="'+c+'" stroke-width="1.5" stroke-linejoin="round"/></svg>';
+ }
+ function card(name,val,p,vals){
+  var up=p>=0,cls=up?'up':'dn',sign=up?'+':'';
+  return '<div class="mkt-nm">'+esc(name)+'</div><div class="mkt-val">'+val+' <span class="mkt-chg '+cls+'">'+sign+p.toFixed(1)+'%</span></div>'+spark(vals)+'<div class="mkt-span">6개월</div>';
+ }
+ async function loadWti(){
+  var el=document.getElementById('mkt_wti');
+  try{var r=await fetch('/api/wti',{cache:'no-store'});var j=await r.json();var s=j.series||[];var vals=slice6(s.map(function(x){return x[1];}).filter(function(x){return x!=null;}));
+   if(el&&vals.length)el.innerHTML=card('WTI 유가','$'+vals[vals.length-1].toFixed(1),pct(vals),vals);}
+  catch(e){if(el)el.innerHTML='<div class="mkt-nm">WTI 유가</div><div class="mkt-ph">데이터 대기</div>';}
+ }
+ async function loadHoldings(){
+  var host=document.getElementById('mktHoldings');if(!host)return;
+  try{var r=await fetch('charts.json?t='+Date.now(),{cache:'no-store'});var j=await r.json();var S=j.series||{};
+   var list=[['mrvl','Marvell'],['mu','Micron'],['lite','Lumentum'],['vrt','Vertiv'],['be','Bloom Energy'],['tsla','Tesla']];
+   var html=list.map(function(o){var d=S[o[0]];if(!d||!d.c||!d.c.length)return '';var vals=slice6(d.c);
+    return '<div class="mkt-card">'+card(o[1],'$'+vals[vals.length-1].toFixed(2),pct(vals),vals)+'</div>';}).join('');
+   host.innerHTML=html||'<div class="mkt-ph" style="grid-column:1/-1">데이터 없음</div>';}
+  catch(e){host.innerHTML='<div class="mkt-ph" style="grid-column:1/-1">데이터 대기</div>';}
+ }
+ async function loadNews(){
+  var host=document.getElementById('mktStockNews');if(!host)return;
+  try{var r=await fetch('news.json?t='+Date.now(),{cache:'no-store'});var j=await r.json();var items=(j.items||[]).slice(0,30);
+   host.innerHTML=items.map(function(it){return '<a class="nrow" href="'+esc(it.link||'#')+'" target="_blank" rel="noopener"><span class="ntk">'+esc(it.ticker||'')+'</span><span class="ntt">'+esc(it.title||'')+'</span></a>';}).join('')||'<div class="mkt-ph">뉴스 없음</div>';}
+  catch(e){host.innerHTML='<div class="mkt-ph">뉴스 대기</div>';}
+ }
+ function render(){loadWti();loadHoldings();loadNews();}
+ return {render:render};
+})();
+
 /* 다른 페이지/로그에서 8레이어 스택으로 점프 (단일 페이지 통합) */
 function gotoStack(layerId){
  const tab=document.querySelector('.tab[data-v="cycle"]');if(tab&&!tab.classList.contains('on'))tab.click();
