@@ -2718,17 +2718,21 @@ window.MARKET=(function(){
  function esc(s){return String(s==null?'':s).replace(/[&<>]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;'}[c];});}
  function slice6(a){return a.slice(-126);}
  function pct(v){return (!v||v.length<2)?0:(v[v.length-1]/v[0]-1)*100;}
- function spark(vals){
+ function spark(vals,ref){
   if(!vals||vals.length<2)return '';
   var w=120,hh=36,mn=Math.min.apply(null,vals),mx=Math.max.apply(null,vals),rg=(mx-mn)||1,n=vals.length;
   var pts=vals.map(function(v,i){return ((i/(n-1))*w).toFixed(1)+','+(hh-((v-mn)/rg)*hh).toFixed(1);}).join(' ');
   var up=vals[vals.length-1]>=vals[0];
   var c=up?'var(--st-hot)':'var(--st-accel)';
-  return '<svg class="spark" viewBox="0 0 '+w+' '+hh+'" preserveAspectRatio="none"><polyline points="'+pts+'" fill="none" stroke="'+c+'" stroke-width="1.5" stroke-linejoin="round"/></svg>';
+  var refln='';
+  if(ref!=null&&isFinite(ref)){var yr=hh-((ref-mn)/rg)*hh;if(yr<1)yr=1;if(yr>hh-1)yr=hh-1;
+   refln='<line x1="0" y1="'+yr.toFixed(1)+'" x2="'+w+'" y2="'+yr.toFixed(1)+'" stroke="var(--dim)" stroke-width="1" stroke-dasharray="3 2" opacity=".75"/>';}
+  return '<svg class="spark" viewBox="0 0 '+w+' '+hh+'" preserveAspectRatio="none">'+refln+'<polyline points="'+pts+'" fill="none" stroke="'+c+'" stroke-width="1.5" stroke-linejoin="round"/></svg>';
  }
- function card(name,val,p,vals){
+ function card(name,val,p,vals,ref){
   var up=p>=0,cls=up?'up':'dn',sign=up?'+':'';
-  return '<div class="mkt-nm">'+esc(name)+'</div><div class="mkt-val">'+val+' <span class="mkt-chg '+cls+'">'+sign+p.toFixed(1)+'%</span></div>'+spark(vals)+'<div class="mkt-span">6개월</div>';
+  var avg=(ref!=null&&isFinite(ref))?' · <span style="color:var(--dim)">평단 $'+ref.toFixed(2)+'</span>':'';
+  return '<div class="mkt-nm">'+esc(name)+'</div><div class="mkt-val">'+val+' <span class="mkt-chg '+cls+'">'+sign+p.toFixed(1)+'%</span></div>'+spark(vals,ref)+'<div class="mkt-span">6개월'+avg+'</div>';
  }
  async function loadWti(){
   var el=document.getElementById('mkt_wti');
@@ -2739,9 +2743,10 @@ window.MARKET=(function(){
  async function loadHoldings(){
   var host=document.getElementById('mktHoldings');if(!host)return;
   try{var r=await fetch('charts.json?t='+Date.now(),{cache:'no-store'});var j=await r.json();var S=j.series||{};
+   var AVG={mrvl:152.12,mu:353.84,lite:682.92,vrt:289.23,be:236.83,tsla:352.36};
    var list=[['mrvl','Marvell','MRVL'],['mu','Micron','MU'],['lite','Lumentum','LITE'],['vrt','Vertiv','VRT'],['be','Bloom Energy','BE'],['tsla','Tesla','TSLA']];
    var html=list.map(function(o){var d=S[o[0]];if(!d||!d.c||!d.c.length)return '';var vals=slice6(d.c);
-    return '<div class="mkt-card mkt-card-lk" data-tk="'+o[2]+'" role="button" tabindex="0" title="'+esc(o[1])+' 기사 보기">'+card(o[1],'$'+vals[vals.length-1].toFixed(2),pct(vals),vals)+'</div>';}).join('');
+    return '<div class="mkt-card mkt-card-lk" data-tk="'+o[2]+'" role="button" tabindex="0" title="'+esc(o[1])+' 기사 보기">'+card(o[1],'$'+vals[vals.length-1].toFixed(2),pct(vals),vals,AVG[o[0]])+'</div>';}).join('');
    host.innerHTML=html||'<div class="mkt-ph" style="grid-column:1/-1">데이터 없음</div>';
    host.querySelectorAll('.mkt-card-lk').forEach(function(cd){function go(){gotoStockNews(cd.getAttribute('data-tk'));}cd.addEventListener('click',go);cd.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();go();}});});}
   catch(e){host.innerHTML='<div class="mkt-ph" style="grid-column:1/-1">데이터 대기</div>';}
