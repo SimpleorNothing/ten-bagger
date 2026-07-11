@@ -870,7 +870,7 @@ table.tk th.c{text-align:center}
 
   <div class="vhead" style="margin-top:36px;border-top:1px solid var(--line);padding-top:26px">
     <div class="vkick">더 파보기 · 강물 탐색</div>
-    <p class="vsub">아래 <b>강물 후보</b>를 선택하면, 그 후보에 대해 <b>① 강물 흐름·현재 전선</b> → <b>② 8레이어 스택</b> → <b>③ 인접 레이어 의존(§2-C)</b> → <b>④ Dawn Map</b>(여명 구간 후보)이 차례로 펼쳐집니다.</p></div>
+    <p class="vsub">아래 <b>강물 후보</b>를 선택하면, 그 후보에 대해 <b>① 강물 흐름·현재 전선</b> → <b>② 8레이어 스택</b>이 펼쳐집니다.</p></div>
 
   <aside class="rcand-panel">
       <div class="ph">새로운 강물 후보</div>
@@ -924,18 +924,6 @@ table.tk th.c{text-align:center}
   </div>
   <div id="stackList"></div>
 </div><!-- /sub-stack -->
-
-  <!-- ③ 인접 레이어 의존 흐름 (§2-C) -->
-  <div id="sub-adj" style="margin-top:34px;border-top:1px solid var(--line);padding-top:30px">
-    <div class="vhead"><div class="vkick">③ 인접 레이어 의존 흐름 (§2-C)</div></div>
-    <div class="sidecard" style="position:static">
-      <div class="flowline"><b>L1 모델</b><span class="ar">→</span>L2 가속기 수요</div>
-      <div class="flowline"><b>L2 GPU/ASIC</b><span class="ar">→</span>L3 HBM <span class="ar">+</span>L4 CoWoS <span class="ar">+</span>L6 광</div>
-      <div class="flowline"><b>L2·3·4</b><span class="ar">→</span>L7 전력·냉각 폭증</div>
-      <div class="flowline"><b>L7</b><span class="ar">→</span>L8 발전·그리드 제약</div>
-      <p>현재 시장 합의: 병목이 <b style="color:var(--mature)">L3 메모리·L7 전력</b>에 도달(선반영). Alpha 가설의 다음 전선은 <b style="color:var(--dawn)">L4 패키징 backend · L6 광(CPO) · L8 grid 전력</b>. 5종목(SNDK·MRVL·ALAB·LITE·QCOM)은 전부 한 층에서 수요폭발+공급병목이 동시에 터진 케이스.<br><br><b style="color:var(--accel)">NVDA Q1 FY27(5/20):</b> CFO가 공급 제약을 "모든 시스템 부품의 양산"이라 명시 → 다음 병목=components 확인. 네트워킹 +199%로 L6 가속, Vera($20B)로 CPU가 1차 매출축 합류, ACIE/Edge 세그먼트 신설로 수요 광역화.</p>
-    </div>
-  </div><!-- /sub-adj -->
 
 </section>
 
@@ -1470,9 +1458,12 @@ table.tk th.c{text-align:center}
 
 <!-- 05 반도체 고점파악 -->
 <section class="view" id="v-cycle">
-  <div class="mc-sec" style="margin-top:6px">05 반도체 고점파악 · 사이클 신호등 (D→C→E→B→A)</div>
-  <div style="font-size:12px;color:#868e96;margin-bottom:8px">수요 선행(D) → 가격(C) → 추정 γ(E) → 재고(B) → 장비(A) 순으로 고점 신호가 점등. 판단층(cycle.json) — 운영자·Claude 갱신.</div>
-  <div id="cycBoard" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-bottom:8px"></div>
+  <!-- 반도체 사이클 3지표 요약(CAPEX·메모리·가격) — 수동 판단, 아래 3차트 의미 정리 -->
+  <div class="mc-sec" style="margin-top:6px">반도체 사이클 — 3지표로 보는 위치</div>
+  <div style="background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:12px 15px;margin-bottom:10px;font-size:13px;color:var(--txt);line-height:1.6">
+    <div style="display:flex;gap:8px;margin-bottom:8px"><span style="color:var(--st-accel);font-weight:700;flex:none">•</span><div><b>CAPEX·메모리 매출 = 수요 선행.</b> 하이퍼스케일러 CAPEX가 메모리(DRAM+NAND) 수요·매출을 끌어올리는 최상류 신호 — 둘 다 우상향이면 수요 확장 지속(고점 미점등), 추정 리비전이 꺾이면 수요 피크 경보.</div></div>
+    <div style="display:flex;gap:8px"><span style="color:var(--st-accel);font-weight:700;flex:none">•</span><div><b>DDR5 현물 vs 계약 = 가격 사이클 위치.</b> 현물이 계약가 위면 공급 타이트·상승 국면, 현물이 계약 아래로 롤오버되면 가격 신호 점등 = 사이클 후반 전환 텔.</div></div>
+  </div>
   <div class="verdict" id="cycVerdict" style="margin-bottom:14px">cycle.json 로딩…</div>
 
   <!-- 1·2·3 압축 3열 — CAPEX(D)·메모리 매출(D₂)·DDR5 가격(C). Chart.js responsive 자동 리핏. E·B·A 차트 제거(신호등 램프·요약표 유지) -->
