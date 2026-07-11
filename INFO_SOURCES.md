@@ -33,14 +33,14 @@
 
 ---
 
-## 03 리밸런싱 (`v-port` + `v-tracker` + `v-macro`)
+## 03 리밸런싱 (`v-decision` — 결정보드 + 시장 모멘텀 전망 + 방향 확률 추정 · `v-port`/`v-tracker`/`v-macro`는 2026-07-11 재편으로 뷰서 제외·코드 잔존)
 
 | 메뉴 | 정보명 | 자동/수동 | 업데이트 주기 | 정보 소스 |
 |---|---|---|---|---|
-| 리밸런싱 | **결정 보드** (지금 무엇을·언제 — 자산구성+매크로게이트+MU γ 3트리거+회전/타이밍 종합) | 혼합 (데이터 자동 파생·판단 트리거는 소스 계승) | 런타임 (holdings 주간동기 + gamma/signals 일별에 자동 편승) | `index.html` `#decisionBoard` IIFE — `holdings.json`+`gamma.json`+`signals.json`+`cycle.json` 재페치 + `TARGETS` 전역 (03 최상단 상시 패널) |
-| 리밸런싱 | 자산 현황 (X-ray·레이어 비중) | 수동 | 체결 후 | `holdings.json` (`HOLDINGS`·`D`배열, 실잔고 일치) |
-| 리밸런싱 | 비중 조절 (적정밴드 갭) | 수동 | 분기 재평가 | `index.html` `TARGETS` (→ `targets.json` 신설 후보) |
-| 리밸런싱 | 5신호 트래커 (초입 점수) | 수동 | 재채점 시 | 트래커 Gist + `index.html` |
+| 리밸런싱 | **결정 보드** (지금 무엇을·언제 — 자산구성+**적정밴드 오버레이**+매크로게이트+MU γ 3트리거+회전/타이밍 종합) | 혼합 (데이터 자동 파생·판단 트리거는 소스 계승) | 런타임 (holdings 주간동기 + gamma/signals 일별에 자동 편승) | `index.html` `#decisionBoard` IIFE (`v-decision` 최상단) — `holdings.json`+`gamma.json`+`signals.json`+`cycle.json` 재페치 + `TARGETS` 전역 |
+| 리밸런싱 | **시장 모멘텀 전망** (미/한 레짐: 추세·변동성·심리 + 향후 조건부 판정) | 자동 | 런타임 | `index.html` `#momOutlook` IIFE — 미: `signals.json`(40주선·갭·DD·VIX·F&G) · 한: `charts.json`(삼성 프록시 추세)+`signals.json`(서킷/사이드카). 지수 시계열 미수집→삼성 근사 |
+| 리밸런싱 | **방향 확률 추정** (포지션·지수 다음주/1달/3개월 P(상승/유지/하락)) | 자동 (추정치·투자권유 아님) | 런타임 | `index.html` `#probEst` IIFE — GBM(로그정규): σ=프리셋(확률랩 계승)·μ=프리셋+`charts.json` 최근 모멘텀 50:50 블렌드. 추세부호는 `charts.json`(폴백 `prices.json`) |
+| 리밸런싱 | ~~자산 현황 (X-ray)~~ · ~~5신호 트래커~~ · ~~매크로 룰북~~ | — | **뷰서 제외(2026-07-11 재편)** | `v-port`/`v-tracker`/`v-macro` 코드 잔존·그룹서 분리(되돌리기 용이). 데이터(`holdings`/`signals`)는 계속 갱신되어 결정보드가 소비 |
 | 리밸런싱 | 매매 타이밍 (매크로 게이트 lamp) | 자동 | 매일 06:37 KST | `signals.json` (`fetch-signals.mjs`; VIX·S&P·CNN F&G·나스닥 드로다운·40주선) |
 | 리밸런싱 | γ · stage | 혼합 (g자동·stage수동) | g: 매일 / stage: 판단 시 | `gamma.json` (auto price-vs-target + judgment) |
 
@@ -97,3 +97,4 @@
 - 2026-07-11 · Phase 2e: 관련 기사 토픽 상단 요약 — digest에 macro 요약 생성 추가(fetch-news), 토픽 블록형(id 기준 그룹으로 이란 중복 그룹 해소).
 - 2026-07-11 · 02 궁금한 것 **답-먼저 재편**: 즉답 요약 카드 신설(gamma·holdings·TARGETS·signal_log 런타임 6행 — 전선·단계분포·상대가치·트림게이트γ·다음재채점·오늘시그널), 강물·스택 탐색 인트로는 '더 파보기'로 하단 강등. `window.GAMMA`·`window.MACRO_GRADE` 노출. 전선·다음재채점만 `IA_CFG` 수동판단.
 - 2026-07-11 · 03 리밸런싱 **결정 보드 신설**: 최상단에 브리핑 3문(자산구성·게이트·타이밍) 상시 패널. `#decisionBoard` 자기완결 IIFE가 holdings/gamma/signals/cycle 재페치+TARGETS로 렌더 → holdings 주간 동기 시 **자동 재파악**. MU γ 3트리거(①목표가소진 ②P/E재확장 ③사이클텔) 점등 보드, γ는 gamma.json 단일소스(open/spent 자동전환). b64 패치 `decision-board-20260711.b64`→apply-patch 적용, 무결성 md5 왕복 통과.
+- 2026-07-11 · 03 리밸런싱 **재편**: `v-decision` 전용 섹션 신설(결정보드 이동) + **시장 모멘텀 전망**(미 signals 레짐·한 삼성 프록시) + **방향 확률 추정**(GBM: σ 프리셋·μ 프리셋+charts 모멘텀 블렌드, 다음주/1달/3개월 P상승·유지·하락). 그룹 `port:['decision']`으로 매크로룰북·X레이·트래커 뷰서 제외(코드 잔존). 결정보드 ①엔 적정밴드 오버레이 추가. 소스 `charts.json`·`prices.json` 03 신규 소비. b64 `decision-board-momprob-20260711.b64`→apply-patch 적용, 초회 인라인 손상(1B 공백)→교체 재푸시 후 md5 왕복 통과(commit 63a1da97).
