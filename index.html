@@ -855,8 +855,13 @@ table.tk th.c{text-align:center}
 
 <!-- 03 THREAD (알파 찾기) -->
 <section class="view" id="v-thread">
-  <div class="vhead">
-    <h1 class="vtitle">병목은 <em>이동</em>한다 — 그 앞단에 알파가 있다</h1>
+  <!-- ★ 즉답 요약 (답-먼저 재편) — 값은 gamma/holdings/TARGETS/signal_log 런타임, 전선·다음재채점만 수동판단 IA_CFG -->
+  <div class="vhead" style="position:relative"><h1 class="vtitle">지금 궁금한 것 — <em>바로 보는 답</em></h1><span class="updstamp abs" id="updIA"></span>
+    <p class="vsub" style="margin-top:2px">클릭 없이 결론부터 — 값은 라이브(gamma·holdings·signal_log) 구동. 판단 도구는 아래 <b>더 파보기</b>로 내렸습니다.</p></div>
+  <div id="instantAnswer"><div class="ia-ph" style="color:var(--faint);font-size:13px;padding:12px 0">불러오는 중…</div></div>
+
+  <div class="vhead" style="margin-top:36px;border-top:1px solid var(--line);padding-top:26px">
+    <div class="vkick">더 파보기 · 강물 탐색</div>
     <p class="vsub">아래 <b>강물 후보</b>를 선택하면, 그 후보에 대해 <b>① 강물 흐름·현재 전선</b> → <b>② 8레이어 스택</b> → <b>③ 인접 레이어 의존(§2-C)</b> → <b>④ Dawn Map</b>(여명 구간 후보)이 차례로 펼쳐집니다.</p></div>
 
   <aside class="rcand-panel">
@@ -2704,7 +2709,7 @@ document.getElementById('nav').addEventListener('click',e=>{const b=e.target.clo
  var _ab=document.getElementById('asofBox');if(_ab)_ab.style.display=(b.dataset.v==='memo')?'none':'';
  if(b.dataset.v==='thread'){drawSCurve();drawRiverCurves();}
  if(b.dataset.v==='us10y'){if(window.US10Y)window.US10Y.render();}
- if(b.dataset.v==='cycle'){if(window.CYCLE)window.CYCLE.render();drawSCurve();drawRiverCurves();}
+ if(b.dataset.v==='cycle'){if(window.CYCLE)window.CYCLE.render();drawSCurve();drawRiverCurves();if(typeof renderInstantAnswer==='function')renderInstantAnswer();}
  if(b.dataset.v==='market'){if(window.MARKET)window.MARKET.render();}});
 setTimeout(function(){var _t0=document.querySelector('#nav .tab.on');if(_t0)_t0.click();},0);
 
@@ -4422,10 +4427,48 @@ Promise.all([getJSON('alpha.json'),getJSON('earnings.json'),getJSON('judgment.js
  const ov=g&&g.overrides;if(ov)D.forEach(d=>{const o=ov[d.t];if(o){if(Array.isArray(o.aN))o.aN.forEach((v,k)=>{if(v!=null)d.aN[k]=v;});}});
  const gmm=gm&&gm.gamma;if(gmm)D.forEach(d=>{const x=gmm[d.t];if(x){if(x.g)d.g=x.g;if(x.stage)d.stage=x.stage;}});
  if(gm&&gm.asOf){window.GAMMA_ASOF=gm.asOf;window.GAMMA_FLAGGED=Object.entries(gmm||{}).filter(([k,v])=>v&&v.flagged).map(([k])=>k);}
+ window.GAMMA=gmm||{};
  // 4) 시점 스냅샷(snapshots.json) — 라이브 머지 후 현재 배치를 보존하고 셀렉터 구성.
  captureLive();SNAPS=(sn&&Array.isArray(sn.snapshots))?sn.snapshots:[];initSnapSel();
-}).finally(()=>{paint(); if(typeof renderSignalLog==='function')renderSignalLog(); if(typeof renderReviews==='function')renderReviews(); if(typeof renderStack==='function')renderStack(); if(typeof renderPortfolio==='function')renderPortfolio(); if(typeof updateAsof==='function')updateAsof(); if(typeof renderCalNow==='function')renderCalNow(); if(typeof loadDigest==='function')loadDigest(); if(typeof applyStackDeepLink==='function')applyStackDeepLink();});
+}).finally(()=>{paint(); if(typeof renderSignalLog==='function')renderSignalLog(); if(typeof renderReviews==='function')renderReviews(); if(typeof renderStack==='function')renderStack(); if(typeof renderInstantAnswer==='function')renderInstantAnswer(); if(typeof renderPortfolio==='function')renderPortfolio(); if(typeof updateAsof==='function')updateAsof(); if(typeof renderCalNow==='function')renderCalNow(); if(typeof loadDigest==='function')loadDigest(); if(typeof applyStackDeepLink==='function')applyStackDeepLink();});
 })();
+</script>
+<script>
+/* renderInstantAnswer — 02 궁금한 것 즉답 요약(답-먼저). gamma/holdings/TARGETS/signal_log 런타임 파생 */
+function renderInstantAnswer(){
+ var host=document.getElementById('instantAnswer'); if(!host) return;
+ var IA_CFG={front:'L4 패키징 · L6 광 · L8 발전',frontNote:'컴퓨트·메모리(L1–L3)는 가격 반영(성숙) — 병목은 앞단으로 이동',next:'MU FQ4 실적 — D-7 IR 확정',updated:'2026-07-11'};
+ var G=window.GAMMA||{};
+ var ORDER=['초입','가속','성숙','과열'];
+ var cnt={'초입':0,'가속':0,'성숙':0,'과열':0,'태동':0},open=[],spent=[];
+ Object.keys(G).forEach(function(t){var d=G[t];if(!d)return;if(cnt[d.stage]!=null)cnt[d.stage]++;if(d.g==='open')open.push(t);else if(d.g==='spent')spent.push(t);});
+ var hot=Object.keys(G).filter(function(t){return G[t]&&G[t].stage==='과열';});
+ var badges=ORDER.map(function(s){var isH=s==='과열',ex=isH&&hot.length?' ('+hot.join('·')+')':'';var bg=isH&&cnt[s]?'#fdecec':'var(--panel2)',fg=isH&&cnt[s]?'var(--st-hot)':'var(--dim)';return '<span style="background:'+bg+';color:'+fg+';padding:2px 9px;border-radius:20px;font-size:12px;white-space:nowrap">'+s+' '+cnt[s]+ex+'</span>';}).join(' ');
+ var infra=['L2','L3','L4','L6','L7','L8'];
+ var rows=infra.map(function(L){var t=(typeof TMAP!=='undefined')?TMAP[L]:null,w=(typeof heldWeight==='function')?heldWeight(L):0;var st=t?(w<t.lo?'under':w>t.hi?'over':'in'):'in';return {L:L,w:w,band:t,st:st};});
+ var under=rows.filter(function(r){return r.st==='under';}).sort(function(a,b){return a.w-b.w;});
+ var over=rows.filter(function(r){return r.st==='over';}).sort(function(a,b){return b.w-a.w;});
+ var total=(typeof HOLD_TOTAL!=='undefined'&&HOLD_TOTAL)?HOLD_TOTAL:0;
+ var cashW=(typeof heldWeight==='function')?heldWeight('현금'):0;
+ var bar=rows.slice().sort(function(a,b){return b.w-a.w;}).map(function(r){var c=r.st==='under'?'var(--st-mature)':r.st==='over'?'#b5c9dd':'#c9d1d9';return '<div style="width:'+r.w.toFixed(1)+'%;background:'+c+'" title="'+r.L+' '+r.w.toFixed(1)+'%"></div>';}).join('');
+ var rel=(under.length&&over.length)?'<b style="color:var(--st-mature)">'+under[0].L+' '+under[0].w.toFixed(1)+'%</b> (언더 · '+(under[0].band?under[0].band.lo+'~'+under[0].band.hi+'%':'')+') ← <b>'+over[0].L+' '+over[0].w.toFixed(1)+'%</b> (오버) 상대가치 회전':'밴드 내 정렬 — 뚜렷한 언더/오버 없음';
+ var wsum=rows.slice().sort(function(a,b){return b.w-a.w;}).map(function(r){var c=r.st==='under'?'color:var(--st-mature)':(r.st==='over'?'color:var(--dim)':'');return '<span style="'+c+'">'+r.L+' '+r.w.toFixed(1)+'</span>';}).join(' · ');
+ var muO=G['MU']&&G['MU'].g==='open';
+ var trim=(muO?'<span style="background:#e5f6ef;color:var(--st-dawn);padding:2px 9px;border-radius:20px;font-size:12px;font-weight:600">MU open 유지</span> → L3 트림 보류':'<span style="background:#fdecec;color:var(--st-hot);padding:2px 9px;border-radius:20px;font-size:12px;font-weight:600">MU γ 재확인</span> → 트림게이트 점검')+(spent.length?' <span style="color:var(--faint)">· spent '+spent.join('·')+'</span>':'');
+ var gr=(typeof window.MACRO_GRADE==='number')?window.MACRO_GRADE:null;
+ var gate=gr==null?'매크로 게이트 → <b>03 리밸런싱</b>':(gr===0?'매크로 게이트 <b>G0 (잠김)</b> — 신규매수 금지':'매크로 게이트 <b>G'+gr+'</b> 점등');
+ var sig='';
+ if(typeof SIGNAL_LOG!=='undefined'&&SIGNAL_LOG&&SIGNAL_LOG.length){var last=SIGNAL_LOG.slice().sort(function(a,b){return (a.at||a.date||'')<(b.at||b.date||'')?1:-1;})[0];if(last){var it=(last.items&&last.items[0])||{};var raw=(it.html||last.source||'').replace(/<[^>]+>/g,'');if(raw.length>84)raw=raw.slice(0,82)+'…';sig=(last.date||'')+' · '+raw;}}
+ function row(q,a){return '<div style="display:grid;grid-template-columns:118px 1fr;gap:12px;padding:11px 0;border-top:1px solid var(--line)"><div style="font-size:13px;color:var(--dim)">'+q+'</div><div style="font-size:14px;color:var(--txt);line-height:1.5">'+a+'</div></div>';}
+ host.style.cssText='display:block;background:var(--panel);border:1.5px solid var(--line);border-radius:14px;padding:4px 22px 16px;margin-top:6px';
+ host.innerHTML=row('강물 머리 (전선)','<span style="color:var(--st-accel);font-weight:600">'+IA_CFG.front+'</span> — '+IA_CFG.frontNote)
+  +row('단계 분포',badges)
+  +row('한계자본 우선',rel+'<div style="display:flex;height:8px;border-radius:4px;overflow:hidden;background:var(--panel2);margin-top:7px">'+bar+'</div><div style="font-size:11px;color:var(--faint);margin-top:5px">'+wsum+' · 현금 '+cashW.toFixed(1)+' · 총 '+total+'억</div>')
+  +row('트림게이트 γ',trim)
+  +row('다음 재채점',IA_CFG.next+' · '+gate)
+  +row('오늘 시그널',sig?(sig+' <span style="color:var(--faint)">(→ 하단 로그)</span>'):'<span style="color:var(--faint)">최근 시그널 없음</span>');
+ var us=document.getElementById('updIA');if(us)us.textContent='update : '+((typeof fmtKST==='function'&&window.GAMMA_ASOF)?fmtKST(window.GAMMA_ASOF):(IA_CFG.updated));
+}
 </script>
 <script>
 /* ===== 01 MACRO — signals.json 연동 (통합 매수 게이트 3등급 · 2026-06-07) ===== */
@@ -4460,6 +4503,7 @@ Promise.all([getJSON('alpha.json'),getJSON('earnings.json'),getJSON('judgment.js
    else if((dd<=TH.ddG2||fear>=2)&&slopeUp===true)grade=2;
    else if(dd<=TH.ddG1&&trendG1)grade=1;
   }
+  window.MACRO_GRADE=grade;
   // 🇰🇷 속도 정찰 티어 — 코스피 사이드카/서킷 × 추세생존 (US 깊이 게이트와 별도)
   const circuit=S.circuitKR===true&&S.sidecarDate&&S.sidecarDate===S.asOf; // 서킷브레이커(현물 −8%) 당일
   const veloMarker=side||circuit;            // 매도 사이드카(선물 −5%/1분) 또는 서킷 = 속도 마커
