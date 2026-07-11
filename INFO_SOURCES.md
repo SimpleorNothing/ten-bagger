@@ -26,9 +26,10 @@
 
 | 메뉴 | 정보명 | 자동/수동 | 업데이트 주기 | 정보 소스 |
 |---|---|---|---|---|
+| 궁금한 것 | **즉답 요약** (답-먼저 카드: 전선·단계분포·상대가치·트림게이트γ·다음재채점·오늘시그널) | 혼합 (수치 런타임·전선/다음재채점 수동) | 런타임 파생 | `gamma.json`·`holdings.json`+`TARGETS`·`signal_log.json` 런타임(`renderInstantAnswer`) / 전선·다음재채점만 `IA_CFG` 수동 |
 | 궁금한 것 | 반도체 사이클 신호등 (D·C·E·B·A) | 혼합 (E자동·나머지 수동) | E: 런타임 / D·C·B·A: 판단 시 | `cycle.json` + worker `/api/fred`(E군집 파생) |
 | 궁금한 것 | 주도주 4사분면 (벤치 대비 알파) | 혼합 | alpha 주1회 + 판단 갱신 | `alpha.json` → `earnings.json` → `judgment.json` (판단이 덮음) |
-| 궁금한 것 | 강물(병목 이동)·8레이어 스택·24종목 매트릭스 | 수동 | 콘텐츠 변경 시 | `index.html` 인라인 (`RIVERS`·`C`배열·`CASCADES`) |
+| 궁금한 것 | 강물(병목 이동)·8레이어 스택·24종목 매트릭스 *(답-먼저 재편으로 '더 파보기'로 하단 강등)* | 수동 | 콘텐츠 변경 시 | `index.html` 인라인 (`RIVERS`·`C`배열·`CASCADES`) |
 | 궁금한 것 | 모멘텀 (미/한 벤치 대비) | 자동 | 주1회 토 08:30 KST | `alpha.json` (`compute-alpha.mjs`, momentum 휴리스틱 + 트래커 Gist) |
 
 ---
@@ -92,3 +93,4 @@
 - 2026-07-11 · Phase 2b: 미 10년물 스파크라인 + 매크로뉴스 배선. 이슈 3·4 해결.
 - 2026-07-11 · Phase 2c: 종목 뉴스 한글 데일리 요약(digest) — fetch-news에 Claude API 단계 내장, news_digest.json 시드, 01 요약 섹션 렌더. b64 손상 1건 복구(이슈 7).
 - 2026-07-11 · digest 자동화 활성 완료 — 운영자 update-news.yml 수정 + 수동 실행으로 첫 자동 요약 생성·배포 확인(claude-sonnet-4-6). 이슈 6 해결. 이후 매일 06:12 KST 완전 자동.
+- 2026-07-11 · 02 궁금한 것 **답-먼저 재편**: 즉답 요약 카드 신설(gamma·holdings·TARGETS·signal_log 런타임 6행 — 전선·단계분포·상대가치·트림게이트γ·다음재채점·오늘시그널), 강물·스택 탐색 인트로는 '더 파보기'로 하단 강등. `window.GAMMA`·`window.MACRO_GRADE` 노출. 전선·다음재채점만 `IA_CFG` 수동판단.
