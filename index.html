@@ -620,6 +620,14 @@ table.tk th.c{text-align:center}
 .dg-watch{margin-top:12px;font-size:12px;color:var(--dim)}
 .dg-watch b{color:var(--st-hot);font-weight:700}
 .nrow .nsm{font-size:12.5px;color:var(--txt);line-height:1.5;white-space:normal}
+.tp-grp{margin:14px 0 6px;font-size:13px;font-weight:700;color:var(--dim)}
+.nrow .ndt{flex:0 0 40px;font:600 11px var(--mono);color:var(--faint)}
+.stk-blk{border:1px solid var(--line);border-radius:12px;margin:10px 0;overflow:hidden;background:var(--panel)}
+.stk-hd{display:flex;align-items:baseline;gap:8px;padding:11px 14px;background:var(--panel2)}
+.stk-hd .tk{font:700 12px var(--mono);color:var(--dawn)}
+.stk-hd .nm{font-size:13px;font-weight:700;color:var(--txt)}
+.stk-sum{padding:10px 14px;font-size:12.5px;color:var(--txt);line-height:1.55;border-top:1px solid var(--line)}
+.stk-blk .nlist{border:0;border-top:1px solid var(--line);border-radius:0}
 
 </style>
 <style id="memo-css">
@@ -1685,12 +1693,10 @@ window.CYCLE=(function(){
   </div>
   <h2 class="msec">보유 종목 <span class="mnote">6개월</span></h2>
   <div class="mkt-grid" id="mktHoldings"><div class="mkt-ph" style="grid-column:1/-1">로딩…</div></div>
-  <h2 class="msec">관련 기사</h2>
-  <div id="mktMacroNews" class="nlist"><div class="mkt-ph">수집 대기 (구글뉴스 RSS)</div></div>
-  <h2 class="msec">종목 뉴스 요약 <span class="mnote" id="mktDigestAsof">데일리 자동</span></h2>
-  <div id="mktDigest"><div class="mkt-ph">요약 준비 중…</div></div>
-  <h2 class="msec">종목 뉴스 <span class="mnote">데일리 · 원문</span></h2>
-  <div id="mktStockNews" class="nlist"><div class="mkt-ph">로딩…</div></div>
+  <h2 class="msec">관련 기사 <span class="mnote">토픽 · 일자별</span></h2>
+  <div id="mktMacroNews"><div class="mkt-ph">수집 대기 (구글뉴스 RSS)</div></div>
+  <h2 class="msec">종목 뉴스 <span class="mnote" id="mktDigestAsof">요약 · 일자별</span></h2>
+  <div id="mktDigest"><div class="mkt-ph">로딩…</div></div>
 </section>
 
 <!-- 06 US10Y -->
@@ -2746,12 +2752,6 @@ window.MARKET=(function(){
    host.innerHTML=html||'<div class="mkt-ph" style="grid-column:1/-1">데이터 없음</div>';}
   catch(e){host.innerHTML='<div class="mkt-ph" style="grid-column:1/-1">데이터 대기</div>';}
  }
- async function loadNews(){
-  var host=document.getElementById('mktStockNews');if(!host)return;
-  try{var r=await fetch('news.json?t='+Date.now(),{cache:'no-store'});var j=await r.json();var items=(j.items||[]).filter(function(x){return x.ticker!=='MACRO';}).slice(0,30);
-   host.innerHTML=items.map(function(it){return '<a class="nrow" href="'+esc(it.link||'#')+'" target="_blank" rel="noopener"><span class="ntk">'+esc(it.ticker||'')+'</span><span class="ntt">'+esc(it.title||'')+'</span></a>';}).join('')||'<div class="mkt-ph">뉴스 없음</div>';}
-  catch(e){host.innerHTML='<div class="mkt-ph">뉴스 대기</div>';}
- }
  async function loadIndices(){
   try{var r=await fetch('charts.json?t='+Date.now(),{cache:'no-store'});var j=await r.json();var S=j.series||{};
    [['ks11','코스피','mkt_ks11'],['gspc','S&P 500','mkt_gspc'],['ixic','나스닥','mkt_ixic']].forEach(function(o){var el=document.getElementById(o[2]);if(!el)return;var d=S[o[0]];if(!d||!d.c||!d.c.length)return;var vals=slice6(d.c);el.innerHTML=card(o[1],Math.round(vals[vals.length-1]).toLocaleString(),pct(vals),vals);});}
@@ -2767,24 +2767,53 @@ window.MARKET=(function(){
  async function loadMacroNews(){
   var host=document.getElementById('mktMacroNews');if(!host)return;
   try{var r=await fetch('news.json?t='+Date.now(),{cache:'no-store'});var j=await r.json();
-   var items=(j.items||[]).filter(function(x){return x.ticker==='MACRO';}).slice(0,12);
-   host.innerHTML=items.map(function(it){return '<a class="nrow" href="'+esc(it.link||'#')+'" target="_blank" rel="noopener"><span class="ntk">'+esc((it.name||'매크로').slice(0,6))+'</span><span class="ntt">'+esc(it.title||'')+'</span></a>';}).join('')||'<div class="mkt-ph">수집 대기 (다음 크론)</div>';}
+   var items=(j.items||[]).filter(function(x){return x.ticker==='MACRO';});
+   if(!items.length){host.innerHTML='<div class="mkt-ph">수집 대기 (다음 크론)</div>';return;}
+   var byTopic={},order=[];
+   items.forEach(function(it){var k=it.name||'매크로';if(!byTopic[k]){byTopic[k]=[];order.push(k);}byTopic[k].push(it);});
+   var html='';
+   order.forEach(function(k){
+    var lst=byTopic[k].slice().sort(function(a,b){return new Date(b.published||0)-new Date(a.published||0);});
+    html+='<div class="tp-grp">'+esc(k)+'</div><div class="nlist">';
+    lst.forEach(function(it){html+='<a class="nrow" href="'+esc(it.link||'#')+'" target="_blank" rel="noopener"><span class="ndt">'+esc((it.published||'').slice(5,10))+'</span><span class="ntt">'+esc(it.title||'')+'</span></a>';});
+    html+='</div>';});
+   host.innerHTML=html;}
   catch(e){host.innerHTML='<div class="mkt-ph">수집 대기</div>';}
  }
- async function loadDigest(){
+ async function loadStockNews(){
   var host=document.getElementById('mktDigest');if(!host)return;
-  try{var r=await fetch('news_digest.json?t='+Date.now(),{cache:'no-store'});if(!r.ok)throw 0;var j=await r.json();
-   var d=document.getElementById('mktDigestAsof');if(d&&j.asOf)d.textContent='자동 요약 · '+j.asOf.slice(0,10);
-   var html='<div class="dg-head">'+esc(j.headline||'')+'</div>';
-   (j.groups||[]).forEach(function(g){
-    html+='<div class="dg-grp">'+esc(g.title||'')+'</div><div class="nlist">';
-    (g.items||[]).forEach(function(it){html+='<div class="nrow"><span class="ntk">'+esc(it.tk||'')+'</span><span class="nsm">'+esc(it.s||'')+'</span></div>';});
-    html+='</div>';});
-   if(j.watch&&j.watch.length)html+='<div class="dg-watch"><b>일정 주의</b> · '+j.watch.map(esc).join(' · ')+'</div>';
-   host.innerHTML=html;}
-  catch(e){host.innerHTML='<div class="mkt-ph">요약 대기 (다음 크론)</div>';}
+  try{
+   var rs=await Promise.all([
+    fetch('news_digest.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;}),
+    fetch('news.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;})
+   ]);
+   var dg=rs[0],nw=rs[1];
+   var byTk={};
+   (((nw||{}).items)||[]).forEach(function(it){if(it.ticker==='MACRO')return;var k=String(it.ticker||'').toUpperCase();(byTk[k]=byTk[k]||[]).push(it);});
+   Object.keys(byTk).forEach(function(k){byTk[k].sort(function(a,b){return new Date(b.published||0)-new Date(a.published||0);});});
+   function newsRows(k){var lst=byTk[k]||[];if(!lst.length)return '';
+    return '<div class="nlist">'+lst.map(function(it){return '<a class="nrow" href="'+esc(it.link||'#')+'" target="_blank" rel="noopener"><span class="ndt">'+esc((it.published||'').slice(5,10))+'</span><span class="ntt">'+esc(it.title||'')+'</span></a>';}).join('')+'</div>';}
+   var d=document.getElementById('mktDigestAsof');if(d&&dg&&dg.asOf)d.textContent='자동 요약 · '+dg.asOf.slice(0,10);
+   var html='',used={};
+   if(dg){
+    html+='<div class="dg-head">'+esc(dg.headline||'')+'</div>';
+    (dg.groups||[]).forEach(function(g){
+     html+='<div class="dg-grp">'+esc(g.title||'')+'</div>';
+     (g.items||[]).forEach(function(it){var k=String(it.tk||'').toUpperCase();used[k]=1;
+      html+='<div class="stk-blk"><div class="stk-hd"><span class="tk">'+esc(it.tk||'')+'</span><span class="nm">'+esc(it.nm||'')+'</span></div><div class="stk-sum">'+esc(it.s||'')+'</div>'+newsRows(k)+'</div>';});
+    });
+   }
+   var rest=Object.keys(byTk).filter(function(k){return !used[k];}).sort();
+   if(rest.length){
+    html+='<div class="dg-grp">기타 종목</div>';
+    rest.forEach(function(k){var nm=(byTk[k][0]||{}).name||k;
+     html+='<div class="stk-blk"><div class="stk-hd"><span class="tk">'+esc(k)+'</span><span class="nm">'+esc(nm)+'</span></div>'+newsRows(k)+'</div>';});
+   }
+   if(dg&&dg.watch&&dg.watch.length)html+='<div class="dg-watch"><b>일정 주의</b> · '+dg.watch.map(esc).join(' · ')+'</div>';
+   host.innerHTML=html||'<div class="mkt-ph">뉴스 없음</div>';}
+  catch(e){host.innerHTML='<div class="mkt-ph">뉴스 대기</div>';}
  }
- function render(){loadWti();loadUs10y();loadIndices();loadHoldings();loadDigest();loadMacroNews();loadNews();}
+ function render(){loadWti();loadUs10y();loadIndices();loadHoldings();loadMacroNews();loadStockNews();}
  return {render:render};
 })();
 
