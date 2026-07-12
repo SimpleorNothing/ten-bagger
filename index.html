@@ -3076,10 +3076,11 @@ window.MARKET=(function(){
     c.fillStyle='#868e96';c.fillText(al,w-6-aw,Math.max(ya-3,26));}
    c.fillStyle='#868e96';c.fillText(fd(t[0]),6,H-4);
    var le=fd(t[k-1]);c.fillText(le,w-6-c.measureText(le).width,H-4);
-   var p=((v[k-1]/v[0]-1)*100).toFixed(1);   // 처음·마지막 값 = 그래프 상단에 오버레이(캔버스 내부 상단 여백 y<18)
-   c.textAlign='left';c.fillStyle='#868e96';c.fillText(v[0].toLocaleString(),6,11);              // 처음값(좌·시작점 위)
-   c.textAlign='right';c.fillStyle=cl;c.fillText((p>=0?'+':'')+p+'% / '+k+'D',w-6,11);            // 등락%(우상단)
-   c.textAlign='center';c.font='bold 10px sans-serif';c.fillText(v[k-1].toLocaleString(),w/2,11);  // 마지막값(상단 중앙·강조)
+   var p=((v[k-1]/v[0]-1)*100).toFixed(1);   // 기간 증감률=좌상단 / 처음·마지막 값=각 끝점 y 위(그래프에 붙여)
+   c.textAlign='left';c.fillStyle=cl;c.fillText((p>=0?'+':'')+p+'% / '+k+'D',6,11);                              // 기간별 증감률(좌상단)
+   var ys=Math.min(Math.max(Y(v[0])-4,22),H-6),ye=Math.min(Math.max(Y(v[k-1])-4,11),H-6);                       // 끝점보다 위·캔버스/증감률과 겹침 방지 클램프
+   c.fillStyle='#868e96';c.fillText(v[0].toLocaleString(),6,ys);                                                // 처음값(시작점 위·좌)
+   c.textAlign='right';c.font='bold 10px sans-serif';c.fillStyle=cl;c.fillText(v[k-1].toLocaleString(),w-6,ye);  // 마지막값(끝점 위·우·강조)
    c.font='10px sans-serif';c.textAlign='left';
    if(st.hv>=0&&st.hv<k){var i2=st.hv;c.strokeStyle='#adb5bd';c.lineWidth=1;c.beginPath();c.moveTo(X(i2),18);c.lineTo(X(i2),H-16);c.stroke();
     c.fillStyle=cl;c.beginPath();c.arc(X(i2),Y(v[i2]),2.6,0,6.3);c.fill();
