@@ -5,7 +5,7 @@
 > 初入 Observatory · **운영 SoT = 이 파일(리포 `main`).**
 > **짝 문서 = `STYLE_GUIDE.md`(디자인).** 이 리포의 지속 갱신 문서는 **이 둘뿐**이다 — 화면을 어떻게 그리나=STYLE_GUIDE, 정보를 언제·어떻게 갱신하나=OPS.
 > `.assetsignore`에 `*.md` → 사이트 미배포·리포 전용.
-> 버전: **v3.1** (2문서 체계 확정 · `INFO_SOURCES.md` 흡수 · 6탭 현행화 · 상단 타임스탬프 규칙)
+> 버전: **v3.1** (2문서 체계 확정 · `INFO_SOURCES.md` 흡수 · 6탭 현행화 · 상단 타임스탬prule 규칙)
 > **문서 맨 위 「최종 갱신」은 연월일+시분(KST). 이 문서를 고치면 그 줄을 반드시 함께 갱신한다.**
 
 ---
@@ -15,7 +15,7 @@
 1. **이 파일 + `STYLE_GUIDE.md`를 `main`에서 재페치**해 읽는다. Project 캐시는 폴백일 뿐 — **충돌하면 라이브 리포가 이긴다.**
 2. **기본 브랜치 해소**(하드코딩 금지): `GET /repos/SimpleorNothing/ten-bagger` → `default_branch`. raw 404면 즉시 기본 브랜치로 폴백.
    raw 베이스 = `https://raw.githubusercontent.com/SimpleorNothing/ten-bagger/{기본브랜치}/{파일}?t=$(date +%s)`
-3. **분석·브리핑이면** 라이브 JSON 8종 재페치: `gamma`·`cycle`·`signals`·`judgment`·`holdings`·`earnings`·`prices`·`signal_log`. 스테일 캐프처 외삽 금지.
+3. **분석·브리핑이면** 라이브 JSON 8종 재페치: `gamma`·`cycle`·`signals`·`judgment`·`holdings`·`earnings`·`prices`·`signal_log`. 스테일 캅처 외삽 금지.
 4. `signal_log.json`을 먼저 훑는다 — 아카이브가 아니라 **누적 판단 컨텍스트**(어느 층이 싸졌나/비싸졌나).
 5. **작업이 끝나면 같은 PR에서 이 문서(및 필요 시 STYLE_GUIDE)를 갱신**한다(§7). 문서 갱신 없는 코드 변경 = 미완료.
 
@@ -24,14 +24,14 @@
 ## 1. 불변 규율 (절대 규칙 — 코드보다 위)
 
 - **narrative ≠ numbers.** 발표·키노트·M&A 논의·뉴스 → `signal_log.json` only. **실적 비트·가이던스 상향·확정 수주만** 단계/실적 파일 변경 트리거.
-- **두 시계 분리.** 논제 시계(펀더멘털·EPS 리비전) vs 가격 시계(센티멘트·플로우). 표시도 판단도 섞지 않는다(STYLE_GUIDE §6-4 렌즈 2줄).
+- **두 시계 분리.** 논제 시계(펀더멘털·EPS 리비전) vs 가격 시계(센티먼트·플로우). 표시도 판단도 섞지 않는다(STYLE_GUIDE §6-4 렌즈 2줄).
 - **단계 강등 트리거 = 가격 상승률 vs FY+1/+2 EPS 리비전 속도.** 「많이 올랐다」는 플래그일 뿐 트리거가 아니다. 추정이 더 빨리 오르면 γ open(유지), 가격이 낙관적 추정마저 추월하면 성숙.
 - **게이트는 전부 AND.** 하나라도 미충족이면 실행 불가. 매매 권유가 아니라 프레임 도출(`dir=trim/add/hold` · `gate=AND` 선결).
-- **첫 니림 규율(S5).** 이미 크게 오른 종목은 초입이 아니다. 낙하칼(베이스 미확인 급락) 추격 매수 금지.
+- **첫 누름 규율(S5).** 이미 크게 오른 종목은 초입이 아니다. 낙하칼(베이스 미확인 급락) 추격 매수 금지.
 - **D-1 중립화.** 실적 전날 신규 방향성 포지션 금지(`judgment` wk 중립 유지).
 - **`holdings.json`은 실제 체결 후에만 갱신.** 추정 비중 기입 금지.
-- **중앙은행 컨센서스는 스테일 외삽 금지.** 회의별 전용 쿼리(로이터/블룸버그 폴·선물·OIS 내재확률). **美 정책금리 = CME FedWatch 단일 SoT**(Polymarket 등은 ECB/韓 보조로만). 알파맵 패널 캐프처 수치는 권위값으로 재검증 없이 사용.
-- **침묵하는 오류가 유일한 진짜 리스크.** 자동층은 안 틀린다 — **판단층은 방치하면 썰는다.** `judgment.json`의 모든 override는 `why`(조건)에 묶인다 → **조건 소멸 즉시 폐기.**
+- **중앙은행 컨센서스는 스테일 외삽 금지.** 회의별 전용 쿼리(로이터/블룼버그 폴·선물·OIS 내재확률). **美 정책금리 = CME FedWatch 단일 SoT**(Polymarket 등은 ECB/韓 보조로만). 알파맵 패널 캅처 수치는 권위값으로 재검증 없이 사용.
+- **침묵하는 오류가 유일한 진짜 리스크.** 자동층은 안 틀린다 — **판단층은 방치하면 썩는다.** `judgment.json`의 모든 override는 `why`(조건)에 묶인다 → **조건 소멸 즉시 폐기.**
 
 ---
 
@@ -54,9 +54,10 @@
 ## 3. 정보 인벤토리 — 메뉴별 무엇을·언제·어디서 (구 INFO_SOURCES)
 
 > 범례 — **자동**: cron 워크플로 or worker 런타임 API · **수동**: 편집→PR→deploy · **혼합**: 자동값 위에 판단이 덮음 · **날짜연동**: 클라가 날짜 기준 자동 표시.
-> 메뉴·정보명·소스·주기가 바뀜면 **같은 PR에서 이 절을 갱신**한다(§7).
+> 메뉴·정보명·소스·주기가 바뀌면 **같은 PR에서 이 절을 갱신**한다(§7).
 
 ### 현행 메뉴 (6탭)
+
 `01 시장 모니터링(v-market)` · `02 궁금한 것(v-cycle/v-alpha/v-thread)` · `03 관점과 정보 얻기(insight.js 자가 마운트)` · `04 리밸런싱(v-decision)` · `05 캘린더(v-cal)` · `06 메모(v-memo)`
 ※ `nav`의 정적 버튼은 5개 + `insight.js`가 03을 주입. `v-port`·`v-tracker`·`v-macro`는 2026-07-11 재편으로 **뷰서 제외·코드 잔존**(데이터는 계속 갱신되어 결정보드가 소비).
 
@@ -66,7 +67,7 @@
 |---|---|---|---|
 | 코스피·S&P·나스닥 지수 | 자동 | 매일 06:37 KST | `charts.json` (`fetch-prices.mjs`, `^KS11·^GSPC·^IXIC` Yahoo 1Y) |
 | 미 10년물 금리 | 자동 | 런타임 | worker `/api/us10y` → `history[].markets.ten_year` |
-| WTI 유가 | 자동 | 런타임 | worker `/api/wti` → **`points`** 배열 (Yahoo). `series` 로 읽으면 0건 |
+| WTI 유가 | 자동 | 런타임 | worker `/api/wti` (Yahoo upstream) |
 | 보유 종목 스파크라인 | 자동 | 매일 06:37 KST | `charts.json` (Yahoo 1Y 일봉 t/c) |
 | **카드 렌즈 요약 2줄** (그래프마다 프레임→판정) | 자동(런타임 파생) | gamma·signals 일별 / holdings 주간에 편승 | `gamma.json`(γ·stage·flagged) + `signals.json`(**`window.macroEval` 단일소스 재사용**) + `holdings.json`(layer·평단) + `charts.json` |
 | 종목 뉴스 (종목 블록형 + 기사별 **일자 + 두 점**[명사형 요약 `a` / `→` 의미·주가영향 `w`] + 우측 주가 차트) | 자동 | **뉴스·digest 06:12·18:12 (1일 2회)** / 차트 06:37 | `news_digest.json`(claude-sonnet-4-6) + `news.json`(**물질성 m≥1만**) + `charts.json` |
@@ -74,7 +75,6 @@
 | 관련 기사 (매크로 · 토픽 블록형) | 자동 | **06:12·18:12 KST** | `news_digest.json` `macro` + `news.json` `MACRO` (LLM 채점 미적용 — 축 자체가 관측 대상. 단 **하드룰(콘텐츠팜·사후 등락 서술·추측)은 적용**) |
 | ↳ **매크로 축 = 고정 아님·매 실행 자동 발굴** | 자동 | 실행마다 | `discoverMacroTopics()` — 광역 헤드라인 스캔(증시·stock market·economy·BUSINESS) → LLM이 **지금 도는 매크로 축 3개** 선별(금리·지정학·관세·전력·환율·capex 중 서로 다른 축) → 그 검색어로 수집. 실패 시 직전 축 승계 → 시드 폴백. 채택 축 = `news.json` `macroTopics`. **토픽명 하드코딩 금지**(사이트는 `it.name` 사용) |
 | ↳ **병목축(고정 5축)** — L3 DRAM/HBM 가격·공급 · L4 패키징 캐파 · L6 옵티컬 리드타임 · L7·L8 전력 · 상류 하이퍼스케일러 capex | 자동 | 실행마다 | `BOTTLENECK_TOPICS`(`news-screen.mjs` 고정) → 매크로 레인(`ticker='MACRO'`)으로 렌더. **리밸런싱은 종목 뉴스가 아니라 '어느 레이어 병목이 조였나'에서 나온다** → 트렌딩 발굴에 맡기지 않고 상시 관측. digest가 **조임/완화 방향**을 명시 |
-| ↳ **축 정규화 `ax` — 같은 축은 한 블록** | 자동 | 실행마다 + 런타임 | 발굴이 매 실행이라 같은 축이 다른 이름·id로 들어온다(중동 3종·capex 2종 → 8블록). 키워드 규칙 7종(`capex`·`chip`·`power`·`energy`·`trade`·`rates`·`fx` / 미매칭=정규화 이름)으로 축 키 `ax` 파생 → `fetch-news.mjs`(축 중복 제거 · 직전 id·name 승계 · 5건 슬롯 축별 배정 · digest `macro[].id`=축) + `index.html loadMacroNews()`(축으로 블록 병합 · 링크 중복 제거 · 축당 5건 · 구 데이터도 즉시 병합). **축 키는 병합용 — 표시명은 라이브 `macroTopics[].name`** |
 
 **뉴스 수집 3축(`fetch-news.mjs`):** ①**종목축** = 종목명 검색 8건 · ②**시그널축** = 종목명 + 확정 사실 키워드(`실적·수주·계약·공급·증설` / `guidance·capex·contract·order·backlog·shipment·capacity`) 14일 창 4건 — *종목명 단독 검색은 SEO 콘텐츠팜을 부른다*("Why MU stock is down…") · ③**병목축** = 레이어 고정 5축(위 표).
 
@@ -85,7 +85,7 @@
 | 1 | 원문·통신사 — Reuters · Bloomberg · FT · WSJ · Nikkei · GlobeNewswire/Business Wire/Stock Titan(IR 원문) · 연합 · 한경 · 매경 · 조선 | 우선 |
 | 2 | 산업 전문지 — DigiTimes · TrendForce · SemiAnalysis · Counterpoint · Omdia · Yole · EE Times · The Register · DataCenter Dynamics · Utility Dive · Lightwave · Gazettabyte · 전자신문 · 디일렉 · ZDNet · 더구루 | 우선 |
 | 3 | 집계·해설 — Yahoo Finance · Investing.com · CNBC · Barron's | 통과 |
-| 9 | 콘텐츠팜 — Motley Fool · simplywall.st · 24/7 Wall St. · Kavout · Trefis · TIKR · MarketBeat · Stocktwits · Quiver · Benzinga · Zacks · AOL · TipRanks · Barchart · Moomoo/富途 · 씽크풀 · 팍스넷 | **확정 사건(`RE_EVENT`) 없으면 m=0** (실측 254건에서 이 매체군의 m=2 산출 **0건**. 특종 유실 방지용 안전판만 둔다) |
+| 9 | 콘텐츠팜 — Motley Fool · simplywall.st · 24/7 Wall St. · Kavout · Trefis · TIKR · MarketBeat · Stocktwits · Quiver · Benzinga · Zacks · AOL · TipRanks · Barchart · Moomoo/富途 · 씽크풀 · 팍스넷 | **확정 사건(`RE_EVENT`) 없으면 m=0** (실측 254건에서 이 매체군의 m=2 산출 **0건**. 특종 유실 방지용 안전판만 둠) |
 
 **물질성 스크리닝(`items[].m`) · 스크리너 세대 `items[].mv` = MV(현재 **2**):** 기준은 하나 — **앞으로의 등락에 영향을 줄 시그널인가.** 지나간 등락의 해설은 시그널이 아니다.
 
@@ -97,7 +97,7 @@
 
 핵심 구분: 주가 움직임 **자체를 보도**하면 원인이 사실이어도 m=0(「지수 편출 이후 22.6% 하락」). 그 원인을 **사건으로 보도**하면 살린다(「S&P500 편출 결정」 → m=1, 「Tower PIC 500만개 출하」 → m=2).
 
-**3층 판정:** ①하드룰(`RE_PR` 홍보 / `RE_SPEC` 추측·리스트 / `RE_MOVE`&&!`RE_KEEP` 사후 등락 서술 / st=9&&!`RE_EVENT`) → ②신규 요약 시 LLM이 `a`·`w`와 함께 `m` 생성 → ③`scoreLegacy` 백필·**MV 상향 시 전건 재채점**(요약 `a`·`w`는 재사용 → 토큰 낭비 없음). 사다리·정규식·티어의 **단일 소스 = `scripts/news-screen.mjs`**. `news.json`·`archive/{TK}.json`은 **m≥1만 적재**, m=0은 `news_archive.json`에 **전건 보존(삭제 아님)**.
+**3층 판정:** ①하드룰(`RE_PR` 홍보 / `RE_SPEC` 추측·리스트 / `RE_MOVE`&&!`RE_KEEP` 사후 등락 서술 / st=9&&!`RE_EVENT`) → ②신규 요약 시 LLM이 `a`·`w`와 함께 `m` 생성 → ③`scoreLegacy` 백필·**MV 상향 시 전건 재채점**(요약 `a`·`w`는 재사용 → 토큰 낭비 없음). 사다리·정규식·소스 티어 SoT = **`scripts/news-screen.mjs`**. `news.json`·`archive/{TK}.json`은 **m≥1만 적재**, m=0은 `news_archive.json`에 **전건 보존(삭제 아님)**.
 **규율:** 스크리닝은 **표시 대상만** 정한다. 판단·숫자 파일은 건드리지 않는다(narrative≠numbers).
 
 ### 02 궁금한 것 (`v-cycle` + `v-alpha` + `v-thread`)
@@ -106,20 +106,16 @@
 |---|---|---|---|
 | 즉답 요약 (전선·단계분포·상대가치·트림게이트γ·다음재채점·오늘시그널) | 혼합 | 런타임 파생 | `gamma`·`holdings`+`TARGETS`·`signal_log` (`renderInstantAnswer`) / 전선·다음재채점만 `IA_CFG` 수동 |
 | 반도체 사이클 3차트 (D CAPEX · D₂ 메모리매출 · C DDR5) + 종합 판정 1줄 | 혼합 (E 자동) | E: 런타임 / 나머지: 판단 시 | `cycle.json` + worker `/api/fred` (E군집 = `derive-cycle-e.mjs` 파생). ※ 「현재값·임계값 신호 요약」 표는 2026-07-12 제거 — E·B·A는 차트 없이 `cycVerdict` 램프 집계로만 반영 |
-| 주도주 4사분면 | 혼합 | alpha 주1회 + 판단 시 | `alpha` → `earnings` → `judgment` · 상단 렌즈 2줄(사분면 분포+`MACRO_GRADE`) · 크기 토글(비중↔적정밴드 갭 `TARGETS`) · **가로축 토글(예상 ↔ 실현 3M `charts.json` 63거래일 초과수익)** · **무게중심 토글(L1~L8 비중가중 평균 좌표 + 오버→언더 한계자본 회전 화살표)** · 각주 기준일 = `alpha.asOf` 자동연동 |
-| ↳ 판단 캘리브레이션 패널 | 자동(런타임 파생) | 로드 시 | `snapshots.json`(과거 예상 3M `aN[1]`) × `charts.json`(스냅샷일 이후 실현 경과) → 부호 적중률·편향(예상 과대/과소). 단일종목 시계열 보유분만 매핑(ETF·바스켓 제외) · 경과 <63거래일이면 부분 실현(방향 위주). OPS §1 「침묵하는 오류」 감시 |
+| 주도주 4사분면 | 혼합 | alpha 주1회 + 판단 시 | `alpha` → `earnings` → `judgment` |
 | 강물·8레이어 스택·24종목 매트릭스 | 수동 | 콘텐츠 변경 시 | `index.html` 인라인 (`RIVERS`·`C`배열·`CASCADES`) |
 
 ### 03 관점과 정보 얻기 (`insight.js` 자가 마운트)
 
 | 정보명 | 자동/수동 | 주기 | 소스 |
 |---|---|---|---|
-| 인테이크(**원문 저장**) → 선별(claims 체크·narrative clamp) → 반영(채택분만 스트립) | 수동 | 작성 시 | worker `/api/insight`·`/api/insights` (R2 배열, 레코드 `raw`=인테이크 원문 **20k자 캡**·`rawcut`=전체 길이) + `insight.js`/`insight.css` |
-| ↳ 원문 추적 (카드) | 수동 | 저장 시 | 저장 카드에 `src.url` **「원문 링크 ↗」** · `raw` **「원문 보기」** 토글(`renderList`). worker 무변경(임의 배열 그대로 R2, 16MB 상한). **기존 카드는 원문 미저장 → URL만** |
-| **관점 등급(승격)** = 관찰→후보→지지→확립→확신(g0~g4) | 자동(파생) | 렌더마다 | `insight.js` `recomputeGrades()` — 기본 점수(N·I·C≥5→+2·≥3→+1) + **유사 관점 보강 횟수**(min 3) → grade(0~4). 유사 판정 `similar()` = 종목 겹침+토큰 Jaccard≥0.16 또는 Jaccard≥0.5. **같은 자료(rec) 내부는 self-corroboration 제외.** 표시: 저장 목록·스트립 배지 + 등급 보드(집계·필터) + 선별 화면 「승격 예고」 |
+| 인테이크 → 선별(claims 체크·narrative clamp) → 반영(채택분만 스트립) | 수동 | 작성 시 | worker `/api/insight`·`/api/insights` (R2) + `insight.js`/`insight.css` |
 
-**규율:** 채택돼도 **숫자는 「반영 대기」**. 파일 변경은 §1 트리거를 통과해야 한다. **원문 저장은 추적용일 뿐 — narrative≠numbers 규율은 그대로**(원문에 숫자가 있어도 자동 반영 없음).
-**등급은 파생·표시 전용** — 유사한 내용이 다른 자료에서 반복 채택될수록 자동 승격될 뿐, 숫자 파일·라우트를 바꾸지 않는다(narrative ≠ numbers 무관).
+**규율:** 채택돼도 **숫자는 「반영 대기」**. 파일 변경은 §1 트리거를 통과해야 한다.
 
 ### 04 리밸런싱 (`v-decision`)
 
@@ -136,7 +132,7 @@
 | 정보명 | 자동/수동 | 주기 | 소스 |
 |---|---|---|---|
 | 거시·실적·이벤트 일정 (FOMC·CPI/PCE·금통위·메가이벤트·워치리스트) | 수동(정적) | 콘텐츠 변경 시 (`VIEW_UPDATED`) | `index.html` 인라인 (→ `calendar.json`·`derive-calendar.mjs` 동적화 진행) |
-| 실적 D-N 카운트다운·펌스링 | 날짜연동 | 실시간 표시 | `earnings.json` `playbook` (확정=굵게·추정=점선) |
+| 실적 D-N 카운트다운·펄스링 | 날짜연동 | 실시간 표시 | `earnings.json` `playbook` (확정=굵게·추정=점선) |
 
 ### 06 메모 (`v-memo`)
 
@@ -156,17 +152,17 @@
 | 호르무즈 물동량 | 자동 | 일별 | worker `/api/hormuz` · `hormuz.json` 폴백 |
 | 판단 스냅샷 | 수동 | 판단 갱신 시 | `snapshots.json` (`dumpSnap()` → append) |
 
-### 헤더·배지 타임스탬프
+### 헤더·배지 타임스탬prule
 
 | 표시 | 소스 | 갱신 |
 |---|---|---|
 | 시세 표시 | `prices.json` asOf | 자동(cron) |
 | 정보 표시 | `signal_log` 최신 `at` (`infoAsof()`) | 수동(시그널 기록 시) |
-| 정적 뷰 배지(`.updstamp`) | `VIEW_UPDATED` 상수 | **정보가 바뀔 때만** 수동. CSS·문구만 고친 배포에선 건드리지 않는다 |
+| 정적 뷰 배지(`.updstamp`) | `VIEW_UPDATED` 상수 | **정보가 바뀔 때만** 수동. CSS·문구만 고친 배포엔 건드리지 않는다 |
 | 자동 뷰 배지 | 해당 데이터 파일 asOf | 자동 |
 
 ### 스크립트 인벤토리 (`scripts/`)
-`fetch-prices` · `fetch-news` · **`news-screen`(뉴스 스크리너 SoT — 사다리·정규식·소스 티어·병목축)** · `fetch-signals` · `fetch-gamma` · `fetch-cpi` · `fetch-tsla-deliveries` · `compute-alpha` · `derive-cycle-e` · `derive-drafts` · `derive-calendar` · `sync-holdings` · `judgment-diff` · `daily-brief-slack` · `check-docs` · `enable-r2` · `proposed-workflows/`
+`fetch-prices` · `fetch-news` · **`news-screen`**(뉴스 물질성 스크리너 모듈 — 사다리·정규식·소스 티어 SoT) · `fetch-signals` · `fetch-gamma` · `fetch-cpi` · `fetch-tsla-deliveries` · `compute-alpha` · `derive-cycle-e` · `derive-drafts` · `derive-calendar` · `sync-holdings` · `judgment-diff` · `daily-brief-slack` · `check-docs` · `enable-r2` · `proposed-workflows/`
 ※ **cron 시각·워크플로 권한·`paths-ignore` 목록은 라이브 `.github/workflows/`가 SoT.** 위 주기는 관측값이며, 어긋나면 라이브가 이긴다.
 
 ---
@@ -214,10 +210,11 @@
 - 증상: **파일 크기는 일치하는데 1~2바이트가 조용히 치환**(CSS 중괄호·한글 1자·b64 문자 1개). 크기 검증은 방어가 안 된다.
 - 표준 절차: **미니파이 → b64 → 푸시 → 커밋-SHA 핀 raw로 재페치 → 디코드 후 md5/cmp 왕복 비교.**
 - **`base64 -w 76` 래핑을 기본으로 쓴다**(개행은 디코더가 무시 → 공백 삽입형에 내성). 불일치 시 diff 컨텍스트를 바꿔(**`-U1`/`-U2`**) 재생성. **`-U0`은 `git apply`가 거부**(`--unidiff-zero` 필요).
-- **손상은 페이로드가 클수록 잦다.** 2026-07-12 관측: pos 4321 `Z→Y`, char 2962, char 6941 — **11KB b64는 3회 연속 손상**, **41KB b64는 전송 중 절단**. 큰 파일은 **패치 대신 파일 직접 푸시 + 커밋-SHA 핀 raw md5 대조**가 낫다(2026-07-12 실측: 32KB 평문 푸시는 무손상 — b64는 1바이트 손상도 치명적이지만 평문은 md5로 잡히고 국소 수정이 된다).
+- **손상은 페이로드가 클수록 짮다.** 2026-07-12 관측: pos 4321 `Z→Y`, char 2962, char 6941 — **11KB b64는 3회 연속 손상**. 큰 문서(`*.md`)는 **패치 대신 파일 직접 푸시 + raw md5 대조**가 낫다(코드는 apply 실패로 드러나지만, 문서는 조용히 깨진다).
 - **손상 패치는 즉시 v2로 덮거나 삭제한다** — `patches/`에 남으면 apply가 계속 실패(파이프라인 스톨).
 - **stale base 방지:** 패치 직전 대상 파일을 **다시 페치**해서 diff 생성. 성공 신호 = `.b64`가 `patches/applied/`로 이동 + HEAD가 `chore: apply` 커밋으로 전진 + **신규 엔트리 고유 문자열**이 라이브에 존재(`asOf` 같은 공유 필드로 확인하지 말 것).
 - CDN은 apply 후 30~60초+ 지연 → **브랜치 HEAD raw가 아니라 커밋-SHA 핀 raw**로 검증.
+- **모듈 분리로 페이로드를 줄인다.** 신규 로직은 작은 모듈(예: `news-screen.mjs`)로 빼고 본파일은 import만 건드린다 → 전송량·손상률 동시 감소.
 
 ### 6-4. 배포·노출
 - push → `deploy.yml` 자동 wrangler. `paths-ignore` 대상(뉴스·시세류)만 커밋해도 배포는 안 뜼다 — **라이브 워크플로에서 목록 확인.**
@@ -234,7 +231,7 @@
 
 **작업이 끝날 때마다, 같은 PR에서 아래 매핑대로 문서를 갱신한다.** 문서 갱신 없는 코드 변경은 미완료로 간주한다.
 
-| 무엇이 바뀜면 | 어느 문서를 | 어떻게 |
+| 무엇이 바뀌면 | 어느 문서를 | 어떻게 |
 |---|---|---|
 | CSS 토큰·팔레트·폰트 | `STYLE_GUIDE.md` | `node scripts/check-docs.mjs --fix` (토큰 구역은 자동 생성 — 손대지 않는다) + 이력 1줄 |
 | 컴포넌트·레이아웃·신규 뷰 | `STYLE_GUIDE.md` | §4·§6 관행 갱신, 필요 시 §7 체크리스트 보완 + 이력 1줄 |
@@ -244,7 +241,7 @@
 | 미해결 이슈 발생·해소 | `OPS.md` §8 | 항목 추가/취소선 처리 |
 | **무엇이든 문서를 고쳤으면** | **두 문서 각각 맨 위** | **「최종 갱신: YYYY-MM-DD HH:MM (KST)」 갱신 (연월일시분)** |
 
-- **문서 맨 위 「최종 갱신: YYYY-MM-DD HH:MM (KST)」을 매번 갱신한다.** 이력 1줄만 남기고 상단 타임스탬프를 안 고치면 문서가 언제 것인지 알 수 없다 — 미완료로 간주.
+- **문서 맨 위 「최종 갱신: YYYY-MM-DD HH:MM (KST)」을 매번 갱신한다.** 이력 1줄만 남기고 상단 타임스탬prule를 안 고치면 문서가 언제 것인지 알 수 없다 — 미완료로 간주.
 - **UI/CSS를 건드린 PR은 `node scripts/check-docs.mjs` 통과 필수.** 실패 → `--fix` → 이력 1줄.
 - 이력은 **한 줄, 무엇을 왜**. 장문 회고 금지(문서가 로그로 변질되면 아무도 안 읽는다).
 - `INFO_SOURCES.md`는 **이 문서 §3으로 흡수·삭제**(2026-07-12). 어디선가 참조가 남아 있으면 §3으로 돌린다.
@@ -255,10 +252,10 @@
 
 1. **watching list 미구현** — 뉴스 행 버튼 → watching 추가(worker `/api/watching` R2 + 02 리스트). **다음 대기 작업.**
 2. **`.github/workflows/` 편집 403** — 신규 워크플로(예: `update-drafts.yml`)·env·커밋 대상 추가는 **운영자 수동**. `scripts/proposed-workflows/`에 제안본을 둔다.
-3. **b64 전사 손상 재발 위험** — §6-3 절차(**`base64 -w 76` 래핑** + 커밋SHA핀 디코드 md5 왕복)를 예외 없이 적용. **2026-07-12 하루에만 5건 재발**(11KB 페이로드는 3연속 · 41KB는 전송 절단). **대용량은 평문 직접 푸시로 우회**한다.
+3. **b64 전사 손상 재발 위험** — §6-3 절차(**`base64 -w 76` 래핑** + 커밋SHA핀 디코드 md5 왕복)를 예외 없이 적용. **2026-07-12 하루에만 5건 재발**(11KB 페이로드는 3연속, 41KB는 전송 중 절단). 대용량은 **직접 푸시 + 모듈 분리**로 우회.
 4. **뉴스 파이프라인 변경은 다음 cron(06:12/18:12)부터 데이터에 반영** — 즉시 반영하려면 Actions에서 `Update news feed` 수동 dispatch(가드 우회). 코드가 먼저 나가고 데이터가 늦으면 **화면이 옛 스키마로 보인다**(2026-07-12 실측: 워크플로 실행이 패치와 경합해 구 프롬프트 산출).
-5. **MV 상향 직후 1회차 실행은 재채점 부하가 크다** — `scoreLegacy`가 구세대 등급 전건을 다시 돌린다(제목+요약만 쓰는 경량 배치 · 60건/호출). 아카이브 250건 기준 1회성 ≈ $0.05. **요약(a·w)은 재생성하지 않는다.**
-6. **Google News RSS 503 스로틀링** — 2026-07-12 전 피드 503(러너 IP 차단 추정). `fetchFeed`에 지수 백오프 3회 적용. 재발 시 **신규 수집만** 멈추고 기존 요약·표시는 유지. 상시화되면 **RSS 소스 교체**(IR·뉴스와이어 피드 또는 유료 API).
+5. **MV 상향 직후 첫 실행은 재채점 부하가 큰다** — `scoreLegacy`가 구세대 등급 전건을 재채점(60건/배치, 제목+요약만 전송). 아카이브 254건 기준 ≈ 배치 3회·1회성 부가비용. 이후 실행은 `mv` 태그로 스킵된다.
+6. **Google News RSS 503 스로틀링** — 2026-07-12 전 피드 503(러너 IP 차단 추정). `fetchOne`에 지수 백오프 3회 적용. 재발 시 **신규 수집만** 멈추고 기존 요약·표시는 유지. 상시화되면 **RSS 소스 교체**(IR·뉴스와이어 피드 또는 유료 API).
 7. **다이제스트 증분 게이트의 사각** — 신규 기사 0건이면 다이제스트를 스킵하므로, **RSS가 며칠 죽으면 `headline`·`macro`가 낡은 채 고정**된다. 필요 시 「신규 0건이어도 N시간 이상 낡으면 강제 재생성」 OR 조건 추가(+월 $1.5).
 8. **캘린더 동적화** — `calendar.json`·`derive-calendar.mjs` 진행 중. 완료 시 §3의 05 행을 「수동(정적)」→「혼합」으로 갱신.
 
@@ -266,17 +263,10 @@
 
 ## 갱신 이력
 
-- 2026-07-12 22:10 · **뉴스 = 시그널 관측기로 재정의(MV=2).** ①**사후 등락 서술 m=0 강등**(「지수 편출 후 22.6% 하락」류 — 지나간 등락 해설은 시그널이 아니다), m=1은 **리비전·수급 실사건**(목표가·등급·지수·지분 = γ 트리거 ① 입력)만 잔류. ②**소스 티어(`st`)** 도입 — 콘텐츠팜(Motley Fool·simplywall.st·MarketBeat 등, 실측 m=2 산출 0건)은 확정 사건 없으면 컷. ③**수집 3축** — 종목축 + **시그널축**(확정 사실 키워드 결합) + **병목축**(L3 가격·L4 캐파·L6 리드타임·L7·L8 전력·상류 capex 고정 5축 = 리밸런싱 입력). ④`mv` 세대 도입 → 사다리 변경 시 과거분 자동 재채점(요약 재사용). 스크리너를 `scripts/news-screen.mjs`로 분리(SoT 단일화). 실측 254건 리플레이: 하드룰 컷 76건, m=2 오탈락 0건. 매크로 축도 하드룰 스크리닝 적용(`ax` 축 그룹핑과 병존).
-- 2026-07-12 17:46 · **03 관점 원문 저장·링크** — 뽑을 때 넣은 본문/스크립트를 레코드 `raw`(20k자 캡 + `rawcut` 전체 길이)로 R2에 저장. 저장 카드에 `src.url` **「원문 링크 ↗」**·`raw` **「원문 보기」** 토글 추가(`insight.js`·`insight.css`, `renderList`). worker 무변경(`handleInsightsPut`가 배열 그대로 통과·16MB 상한). **기존 카드는 원문 미저장이라 URL만**(복구 불가). §3 03행 갱신.
-- 2026-07-12 17:45 · WTI 카드 수리 — `/api/wti` 는 `points`, 카드는 `series` 를 읽어 「로딩…」 고착. 대기 중에도 렌즈 l1 유지.
-- 2026-07-12 17:40 · **03 관점 등급(승격)** — `insight.js`에 `recomputeGrades()`/`similar()`/`gradeOf()` 추가. 채택 관점에 등급(관찰→후보→지지→확립→확신) 부여, 다른 자료에서 유사 내용이 보강될수록 자동 승격. 저장 목록·스트립 배지, 등급 보드(집계·클릭 필터), 선별 화면 「승격 예고」, 등급 필터. 파생값이라 매 렌더 멱등 재계산 — 숫자 파일 무변경. `insight.css`에 배지·보드 규칙(`--st-*` 토큰 재사용, 신규 토큰 없음).
-- 2026-07-12 17:44 · **04 알파맵 활용도 제고 1차(E·G·D)** — 그래프 위 **렌즈 2줄**(§6-4: l1 프레임 / l2 사분면 분포 ①·③ 종목수·비중 + `MACRO_GRADE` 게이트→행동) · **크기 토글**(비중 ↔ 적정밴드 갭 `TARGETS` — 오버=amber·언더=green 링으로 트림/증액 후보 자동 하이라이트) · 각주 「기준일」 하드코딩 → `alpha.asOf` 자동연동. §3 02 행 갱신.
-- 2026-07-12 17:25 · **03 관점 뽑기 진행 표시** — `insight.js` `run()`에 단계(1/3 전송 → 2/3 분석 → 3/3 정리)와 경과초 카운터(1초 틱) 추가. `/api/insight`는 단일 비스트리밍이라 서버 내부 진척은 불가 → 클라 단계·타이머로 「멈춘 게 아님」 표시. URL 경로는 라벨·「최대 1~2분」 병기.
-- 2026-07-12 17:05 · **worker Anthropic 프록시 오류 가시화** — `/api/insight`·`/api/estimate`가 실패 시 무조건 "anthropic api failed"만 반환해 원인(크레딧·키·모델·레이트리밋·과부하) 판별 불가였음. `describeAnthropicError`로 상태코드·타입을 파싱해 조치 안내 붙인 한국어 메시지로 접어 넣음(프론트는 `error`만 표시). 03 관점 뽑기 실패 진단 가능.
-- 2026-07-12 16:20 · **매크로 토픽 축 정규화(`ax`)** — 매 실행 발굴로 같은 축이 다른 이름·id로 들어와 「관련 기사」가 8블록으로 쪼개짐. 파이프라인·렌더를 축 키 기준으로 통일 → **8→5블록**.
+- 2026-07-12 22:10 · **뉴스 = 시그널 관측기로 재정의(MV=2).** ①**사후 등락 서술 m=0 강등**(「지수 편출 후 22.6% 하락」류 — 지나간 등락 해설은 시그널이 아니다), m=1은 **리비전·수급 실사건**(목표가·등급·지수·지분 = γ 트리거 ① 입력)만 잔류. ②**소스 티어(`st`)** 도입 — 콘텐츠팜(Motley Fool·simplywall.st·MarketBeat 등, 실측 m=2 산출 0건)은 확정 사건 없으면 컷. ③**수집 3축** — 종목축 + **시그널축**(확정 사실 키워드 결합) + **병목축**(L3 가격·L4 캐파·L6 리드타임·L7·L8 전력·상류 capex 고정 5축 = 리밸런싱 입력). ④`mv` 세대 도입 → 사다리 변경 시 과거분 자동 재채점(요약 재사용). 스크리너를 `scripts/news-screen.mjs` 모듈로 분리(SoT 단일화 + 패치 페이로드 축소). 실측 254건 리플레이: 하드룰 컷 76건, m=2 오탈락 0건.
 - 2026-07-12 13:40 · **뉴스 1일 2회 전환**(06:12 미국 장 마감 / 18:12 한국 장 마감) · 기사 표시를 「일자 + 두 점(명사형 요약 / → 의미·주가영향)」으로 · 3개월 창·종목당 5건 + 「더 보기」 샤드 온디맨드 · **영구 아카이브**(`news_archive.json` 무삭제) · **매크로 축 고정 폐기 → 트렌딩 자동 발굴** · 다이제스트 중복 필드(s·b·arts) 제거 + 신규 0건 시 호출 스킵(월 비용 −40%).
 - 2026-07-12 13:27 · 05 반도체 사이클에서 「현재값·임계값 신호 요약」 표 제거(마크업 + `table()` 렌더러 + `paint()` 호출) — 3차트 + 종합 판정 1줄로 압축. §3 02 행 갱신.
-- 2026-07-12 13:05 · v3.1 — 문서 맨 위에 **연월일시분(KST) 최종 갱신 타임스탬프** 도입 + §7에 갱신 의무 명문화(STYLE_GUIDE 동일 적용).
+- 2026-07-12 13:05 · v3.1 — 문서 맨 위에 **연월일시분(KST) 최종 갱신 타임스탬prule** 도입 + §7에 갱신 의무 명문화(STYLE_GUIDE 동일 적용).
 - 2026-07-12 · **v3 — 2문서 체계 확정.** 지속 갱신 문서를 **`STYLE_GUIDE.md`(디자인) + `OPS.md`(운영)** 둘로 고정. `INFO_SOURCES.md`를 §3 「정보 인벤토리」로 **흡수·삭제**. 6월 구조(구 6탭 메뉴·`claude/wizardly-rubin-SubA1` 배포 브랜치·구 아키텍처 불변식)로 스테일했던 본문을 **현행 6탭**(01 시장 모니터링 / 02 궁금한 것 / 03 관점과 정보 얻기 / 04 리밸런싱 / 05 캘린더 / 06 메모)으로 전면 재작성. §0 세션 시작 프로토콜 · §1 불변 규율 · §6 GitHub 운영(PR-only·b64 손상 방어) · §7 **문서 자기갱신 매핑표** 신설.
 - 2026-07-12 · 뉴스 물질성 스크리닝(`items[].m`) 도입 — 하드룰+LLM+백필 3층, m≥1만 표시·m=0은 `news_archive.json` 전건 보존.
 - 2026-07-12 · 01 카드 렌즈 2줄 신설 + 게이트 판정 단일소스화(`window.macroEval`).
