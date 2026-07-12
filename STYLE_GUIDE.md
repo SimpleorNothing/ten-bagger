@@ -1,4 +1,4 @@
-**최종 갱신: 2026-07-12 15:45 (KST)**
+**최종 갱신: 2026-07-12 15:54 (KST)**
 
 # STYLE_GUIDE — 알파맵 디자인 시스템
 
@@ -72,7 +72,9 @@ pantone.css :root       ← 현행 팔레트 (팬튼 A안, index.html 하단 <li
 
 - **Pretendard 단일 패밀리.** 표제·데이터·본문 모두 같은 폰트 — 위계는 **굵기·자간·크기로만** 만든다.
 - `--mono`는 `--serif`의 별칭이다. 고정폭이 아니다. 숫자 정렬이 필요하면 `font-variant-numeric: tabular-nums`.
-- 크기 관행: 뷰 제목 30px/700(-.02em) · 섹션 제목 20px/700(-.3px) · 본문 13.5–14px/1.6–1.7 · 보조 12.5px · 최약 라벨 11–11.5px(`--mono`, letter-spacing .04em).
+- **크기 하한(절대):** **읽는 글(문장) = 14px 하한** · **메타 라벨(날짜·기간·칩·눈금, `--mono`) = 12px 하한.** 12px 미만은 쓰지 않는다.
+- 스케일: 뷰 제목 30px/700(-.02em) · 섹션 제목 20px/700(-.3px) · **블록 제목·카드명 15px/700** · **값(강조 수치) 17px/700** · **본문·기사·요약·렌즈 14px/1.5–1.6** · **메타 라벨 12px**(`--mono`, .04em).
+- 같은 14px 안에서 위계는 **굵기·색으로만** 만든다(제목 600/`--txt` · 부연 400–500/`--dim` · 최약 `--faint`). 크기를 12px로 낮춰 위계를 만들지 않는다.
 
 ---
 
@@ -150,8 +152,8 @@ pantone.css :root       ← 현행 팔레트 (팬튼 A안, index.html 하단 <li
 
 | 항목 | 값 |
 |---|---|
-| `.mkt-grid` | `repeat(auto-fill, minmax(180px, 1fr))` · gap 12px |
-| `.mkt-card` | `--panel` + `1px --line` · padding `15px 16px` · min-height 104px · 실효 radius 3px |
+| `.mkt-grid` | `repeat(auto-fill, minmax(224px, 1fr))` · gap 12px |
+| `.mkt-card` | `--panel` + `1px --line` · padding `15px 16px` · min-height 128px · 실효 radius 3px |
 | hover | `--line2` 테두리 + `0 4px 14px rgba(22,36,45,.06)` |
 | 클릭형 | `.mkt-card-lk` — cursor pointer · `:active{translateY(1px)}` · focus-visible outline · 기간 라벨 뒤 `· 기사 →` 자동 접미 |
 | 모바일 | `@media(max-width:600px)` → `repeat(2,1fr)` |
@@ -159,12 +161,12 @@ pantone.css :root       ← 현행 팔레트 (팬튼 A안, index.html 하단 <li
 ### 6-3. 카드 내부 순서 (고정)
 
 ```
-.mkt-nm    종목·지표명            14px/700 --txt
-.mkt-lens  렌즈 2줄 (핵심)        11px
-.mkt-val   값                    mono 15px/700
-.mkt-chg   등락                  12px/600 · up=--st-hot / dn=--st-accel
+.mkt-nm    종목·지표명            15px/700 --txt
+.mkt-lens  렌즈 2줄 (핵심)        14px  (칩 .l1 b = mono 12px)
+.mkt-val   값                    mono 17px/700
+.mkt-chg   등락                  14px/600 · up=--st-hot / dn=--st-accel
 .spark     스파크라인            height 36px, width 100%
-.mkt-span  기간 라벨             mono 10px --faint
+.mkt-span  기간 라벨             mono 12px --faint
 ```
 
 ### 6-4. **렌즈 2줄** — 알파맵의 정보 규약 (가장 중요)
@@ -217,6 +219,7 @@ pantone.css :root       ← 현행 팔레트 (팬튼 A안, index.html 하단 <li
 
 ## 갱신 이력
 
+- 2026-07-12 15:54 · **타이포 스케일 리베이스(01 시장 모니터링).** 읽는 글 **14px 하한** · 메타 라벨 **12px 하한** · 블록 제목·카드명 15px · 값 17px으로 통일(기존 10–12.5px 본문은 가독성 미달). 렌즈 14px 수용을 위해 `.mkt-grid` minmax 180→224px · `.mkt-card` min-height 104→128px. §2에 크기 하한을 절대 규칙으로 명문화.
 - 2026-07-12 15:45 · 01 「관련 기사」(매크로 토픽) 블록을 **2열 그리드**로 배치(`#mktMacroNews`) — 토픽별 기사 수가 적어 세로 스택 시 우측 절반이 계속 비었음. `.stk-blk` 재사용·모바일 700px 이하 1열(§6-5).
 - 2026-07-12 13:30 · 종목 뉴스 블록 우측 차트(`.stk-cv`) 높이를 **190px 고정**으로 통일 — 기존 `flex:1`이 좌측 기사 목록 높이만큼 늘어나 종목마다 그래프 크기가 달랐음. 긴 블록은 `.stk-chart{justify-content:center}`로 세로 중앙 정렬(§6-5).
 - 2026-07-12 13:05 · v3.1 — 문서 맨 위에 **연월일시분(KST) 최종 갱신 타임스탬프** 도입(OPS 동일 적용). §7 체크리스트 11항에 갱신 의무 반영.
