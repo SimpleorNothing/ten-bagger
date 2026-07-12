@@ -49,8 +49,7 @@ window.INSIGHT=(function(){
   var text=($('insText').value||'').trim(), url=($('insUrl').value||'').trim();
   if(!text&&!url){setMsg('본문이나 URL 중 하나는 있어야 합니다.');return;}
   busy=true;$('insRun').disabled=true;setMsg(text?'관점 뽑는 중…':'본문이 없어 URL을 웹검색으로 확인하는 중… (최대 1~2분)');
-  fetch(GEN,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({
-    kind:$('insKind').value, publisher:($('insPub').value||'').trim(), title:($('insTitle').value||'').trim(), url:url, text:text})})
+  fetch(GEN,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({url:url, text:text})})
    .then(function(r){return r.json().then(function(j){return {ok:r.ok,st:r.status,j:j};});})
    .then(function(o){
     if(!o.ok||o.j.error)throw new Error(o.j.error||('HTTP '+o.st));
@@ -58,8 +57,9 @@ window.INSIGHT=(function(){
     var i=raw.indexOf('{'), n=raw.lastIndexOf('}');
     if(i<0||n<0)throw new Error('응답 파싱 실패');
     var pj=JSON.parse(raw.slice(i,n+1));
+    var ps=pj.src||{};
     cur={id:uid(),t:Date.now(),
-     src:{kind:$('insKind').value,publisher:($('insPub').value||'').trim(),title:(($('insTitle').value||'').trim()||((pj.src||{}).title||'')),url:url,date:(pj.src||{}).date||''},
+     src:{kind:ps.kind||'',publisher:ps.publisher||'',title:ps.title||'',url:url||ps.url||'',date:ps.date||''},
      summary:pj.summary||'', steelman:pj.steelman||'', noise:Array.isArray(pj.noise)?pj.noise:[],
      claims:(Array.isArray(pj.claims)?pj.claims:[]).slice(0,8).map(function(c){c=clampClaim(c);c.id=uid();c.pick=recommend(c);return c;})};
     renderResult();
@@ -90,7 +90,9 @@ window.INSIGHT=(function(){
   if(!cur){box.hidden=true;box.innerHTML='';return;}
   box.hidden=false;
   var picked=cur.claims.filter(function(c){return c.pick;}).length;
-  box.innerHTML='<p class="ins-sum">'+esc(cur.summary||'(요약 없음)')+'</p>'+
+  var sm=[cur.src.kind,cur.src.publisher,cur.src.date].filter(Boolean).join(' · ');
+  box.innerHTML=(cur.src.title||sm?'<div class="ins-srcline"><b>'+esc(cur.src.title||'(제목 미판별)')+'</b>'+(sm?'<span> — '+esc(sm)+'</span>':'')+'</div>':'')+
+   '<p class="ins-sum">'+esc(cur.summary||'(요약 없음)')+'</p>'+
    (cur.claims.length?cur.claims.map(claimRow).join(''):'<div class="ins-noise">유의미한 관점 없음 — 전부 소음으로 분류됐습니다.</div>')+
    (cur.steelman?'<div class="ins-steel"><b>스틸맨</b> — '+esc(cur.steelman)+'</div>':'')+
    (cur.noise.length?'<div class="ins-noise"><b>버린 것</b><br>· '+cur.noise.map(esc).join('<br>· ')+'</div>':'')+
@@ -115,7 +117,7 @@ window.INSIGHT=(function(){
   if(!picked.length){setMsg('채택한 관점이 없습니다 — 하나 이상 체크하세요.');return;}
   recs.unshift({id:cur.id,t:cur.t,src:cur.src,summary:cur.summary,steelman:cur.steelman,claims:picked});
   cur=null;renderResult();persist();
-  ['insText','insUrl','insTitle','insPub'].forEach(function(id){var e=$(id);if(e)e.value='';});
+  ['insText','insUrl'].forEach(function(id){var e=$(id);if(e)e.value='';});
   setMsg('저장 완료 — 채택한 관점만 다른 메뉴에 반영됩니다.');
  }
 
@@ -221,8 +223,7 @@ window.INSIGHT=(function(){
     t=(t||'').trim();
     var ta=$('insText');
     ta.value=(ta.value?ta.value+'\n\n':'')+'--- '+f.name+' ---\n'+t;
-    if(!$('insTitle').value)$('insTitle').value=f.name.replace(/\.[^.]+$/,'');
-    setMsg(f.name+' — '+t.length.toLocaleString()+'자 추출');
+    setMsg(f.name+' — '+t.length.toLocaleString()+'자 추출 · 종류·출처·제목은 내용에서 판별합니다');
    }catch(e){setMsg(f.name+' 추출 실패: '+(e&&e.message?e.message:e));}
   }
  }
@@ -230,7 +231,7 @@ window.INSIGHT=(function(){
  /* --- 바인딩 --- */
  function bind(){
   $('insRun').onclick=run;
-  $('insClear').onclick=function(){['insText','insUrl','insTitle','insPub'].forEach(function(id){$(id).value='';});cur=null;renderResult();setMsg('');};
+  $('insClear').onclick=function(){['insText','insUrl'].forEach(function(id){$(id).value='';});cur=null;renderResult();setMsg('');};
   $('insDrop').onclick=function(){$('insFile').click();};
   $('insDrop').addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();$('insFile').click();}});
   $('insFile').addEventListener('change',function(e){addFiles(Array.prototype.slice.call(e.target.files||[]));e.target.value='';});
@@ -251,13 +252,8 @@ window.INSIGHT=(function(){
   '<b>뽑는 것과 반영하는 것은 분리한다</b> — 체크해 채택한 관점만 다른 메뉴에 뜬다. 숫자 파일(실적·판단·단계·비중)은 자동으로 바뀌지 않는다(narrative ≠ numbers).</p></div>'+
   '<div class="ins-wrap">'+
    '<div class="ins-card">'+
-    '<div class="ins-row">'+
-     '<select class="ins-sel" id="insKind"><option>증권사 리포트</option><option>기사</option><option>유튜브</option><option>기타</option></select>'+
-     '<input class="ins-in" id="insPub" placeholder="출처 (예: 미래에셋 · Reuters · 채널명)">'+
-     '<input class="ins-in" id="insTitle" placeholder="제목">'+
-    '</div>'+
-    '<div class="ins-row" style="margin-top:8px"><input class="ins-in" id="insUrl" placeholder="URL (선택 — 본문이 없으면 URL만으로 웹검색해 시도)"></div>'+
-    '<textarea class="ins-ta" id="insText" style="margin-top:8px" placeholder="본문·스크립트를 붙여넣으세요. 유튜브는 자막 스크립트를 넣는 편이 URL만 주는 것보다 정확합니다."></textarea>'+
+    '<div class="ins-row"><input class="ins-in" id="insUrl" placeholder="URL (선택 — 본문이 없으면 URL만으로 웹검색해 시도)"></div>'+
+    '<textarea class="ins-ta" id="insText" style="margin-top:8px" placeholder="본문·스크립트를 붙여넣으세요. 종류·출처·제목은 내용에서 자동 판별합니다. 유튜브는 자막 스크립트를 넣는 편이 URL만 주는 것보다 정확합니다."></textarea>'+
     '<input type="file" id="insFile" accept=".pdf,.txt,.md,.csv,.json" multiple hidden>'+
     '<div class="ins-drop" id="insDrop" role="button" tabindex="0">PDF·TXT 파일을 끌어다 놓거나 클릭해 선택 — 본문 텍스트만 추출해 위 칸에 채웁니다</div>'+
     '<div class="ins-bar">'+
