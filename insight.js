@@ -1,7 +1,7 @@
 /* ===== 03 관점과 정보 얻기 — 인테이크(Claude 추출) · 선별 · 반영 =====
    규율: 뽑기 ≠ 반영. 서버(/api/insight)는 '후보 정렬'까지만 하고, 채택은 사람이 체크한다.
    · narrative 는 숫자 라우트(earnings/judgment/stage/holdings)로 못 간다 → 클라에서 signal_log 로 강등(clamp).
-   · 채택돼도 숫자 파일은 자동 변경 없음 — '반영 대기'로만 04 리밸런싱에 뜬다(수기 검증 후 반영 완료 표시).
+   · 채택돼도 숫자 파일은 자동 변경 없음 — '반영 대기'로만 04 리밸런싱에 뜼다(수기 검증 후 반영 완료 표시).
    저장소: R2(/api/insights) + localStorage 캐시. 추출: /api/insight (worker → Claude, 본문 없으면 웹검색). */
 window.INSIGHT=(function(){
  var GEN='/api/insight', STORE='/api/insights', CK='ins_cache_v1';
@@ -52,7 +52,9 @@ window.INSIGHT=(function(){
   fetch(GEN,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({url:url, text:text})})
    .then(function(r){return r.json().then(function(j){return {ok:r.ok,st:r.status,j:j};});})
    .then(function(o){
-    if(!o.ok||o.j.error)throw new Error(o.j.error||('HTTP '+o.st));
+    /* 실패 사유를 삼키지 않는다 — 'anthropic api failed' 만 뜼면 원인(400 길이초과·429·키)을 알 수 없다. */
+    if(!o.ok||o.j.error){var j=o.j||{};
+     throw new Error([j.error||('HTTP '+o.st), j.status?('status '+j.status):'', j.detail||''].filter(Boolean).join(' · '));}
     var raw=((o.j.content||[]).map(function(b){return b.text||'';}).join('')||'').trim();
     var i=raw.indexOf('{'), n=raw.lastIndexOf('}');
     if(i<0||n<0)throw new Error('응답 파싱 실패');
@@ -63,7 +65,7 @@ window.INSIGHT=(function(){
      summary:pj.summary||'', steelman:pj.steelman||'', noise:Array.isArray(pj.noise)?pj.noise:[],
      claims:(Array.isArray(pj.claims)?pj.claims:[]).slice(0,8).map(function(c){c=clampClaim(c);c.id=uid();c.pick=recommend(c);return c;})};
     renderResult();
-    setMsg('추출 완료 — 체크한 관점만 저장·반영됩니다.');
+    setMsg('추출 완료 — 체크한 관점만 저장·반영됩니다.'+(o.j.cut_chars?(' · ⚠ 본문이 길어 뒤쪽 '+(+o.j.cut_chars).toLocaleString()+'자는 토큰 한도로 잘렸습니다'):''));
    })
    .catch(function(e){setMsg('실패: '+(e&&e.message?e.message:e));})
    .then(function(){busy=false;$('insRun').disabled=false;});
@@ -223,7 +225,8 @@ window.INSIGHT=(function(){
     t=(t||'').trim();
     var ta=$('insText');
     ta.value=(ta.value?ta.value+'\n\n':'')+'--- '+f.name+' ---\n'+t;
-    setMsg(f.name+' — '+t.length.toLocaleString()+'자 추출 · 종류·출처·제목은 내용에서 판별합니다');
+    var tot=(ta.value||'').length;
+    setMsg(f.name+' — '+t.length.toLocaleString()+'자 추출 · 종류·출처·제목은 내용에서 판별합니다'+(tot>80000?(' · ⚠ 누적 '+tot.toLocaleString()+'자 — 토큰 한도로 뒤쪽이 잘릴 수 있습니다'):''));
    }catch(e){setMsg(f.name+' 추출 실패: '+(e&&e.message?e.message:e));}
   }
  }
@@ -249,7 +252,7 @@ window.INSIGHT=(function(){
   '<h1 class="vtitle">자료에서 <em>유의미한 것</em>만 — 그리고 선별 반영</h1>'+
   '<span class="updstamp abs" id="updIns"></span>'+
   '<p class="vsub">증권사 리포트·기사·유튜브(링크 또는 스크립트)를 넣으면 8레이어·단계 프레임으로 관점과 정보를 구조화해 뽑는다. '+
-  '<b>뽑는 것과 반영하는 것은 분리한다</b> — 체크해 채택한 관점만 다른 메뉴에 뜬다. 숫자 파일(실적·판단·단계·비중)은 자동으로 바뀌지 않는다(narrative ≠ numbers).</p></div>'+
+  '<b>뽑는 것과 반영하는 것은 분리한다</b> — 체크해 채택한 관점만 다른 메뉴에 뜼다. 숫자 파일(실적·판단·단계·비중)은 자동으로 바뀌지 않는다(narrative ≠ numbers).</p></div>'+
   '<div class="ins-wrap">'+
    '<div class="ins-card">'+
     '<div class="ins-row"><input class="ins-in" id="insUrl" placeholder="URL (선택 — 본문이 없으면 URL만으로 웹검색해 시도)"></div>'+
