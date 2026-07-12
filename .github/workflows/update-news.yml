@@ -53,7 +53,7 @@ jobs:
       - name: Commit & push if changed (rebase-safe)
         if: steps.guard.outputs.skip != 'true'
         run: |
-          FILES="news.json news_digest.json"
+          FILES="news.json news_digest.json news_archive.json archive"
           if [ -z "$(git status --porcelain $FILES)" ]; then
             echo "No change in $FILES."; exit 0
           fi
