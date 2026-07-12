@@ -48,10 +48,24 @@ window.INSIGHT=(function(){
   if(busy)return;
   var text=($('insText').value||'').trim(), url=($('insUrl').value||'').trim();
   if(!text&&!url){setMsg('본문이나 URL 중 하나는 있어야 합니다.');return;}
-  busy=true;$('insRun').disabled=true;setMsg(text?'관점 뽑는 중…':'본문이 없어 URL을 웹검색으로 확인하는 중… (최대 1~2분)');
+  busy=true;$('insRun').disabled=true;
+  // 서버(/api/insight)는 단일 비스트리밍 호출이라 실제 서버 내부 진척은 알 수 없다.
+  // 사용자에게 "멈춘 게 아니다"를 알리려 클라 단계(전송→분석→정리) + 경과초 카운터를 돌린다.
+  var isUrl=!text;
+  var STG=isUrl?['URL 전송','웹검색·관점 분석','결과 정리']:['자료 전송','관점 분석','결과 정리'];
+  var t0=Date.now(), stage=0, progTimer=null, toAnalyze=null;
+  function tick(){
+   var s=Math.floor((Date.now()-t0)/1000);
+   setMsg('관점 뽑는 중… ('+(stage+1)+'/3 '+STG[stage]+' · '+s+'초'+(isUrl?' · 최대 1~2분':'')+')');
+  }
+  function setStage(i){stage=i;tick();}
+  function stopProg(){if(progTimer){clearInterval(progTimer);progTimer=null;}if(toAnalyze){clearTimeout(toAnalyze);toAnalyze=null;}}
+  progTimer=setInterval(tick,1000); setStage(0);
+  toAnalyze=setTimeout(function(){if(stage<1)setStage(1);},900); // 전송은 짧다 → 곧 분석 단계로
   fetch(GEN,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({url:url, text:text})})
    .then(function(r){return r.json().then(function(j){return {ok:r.ok,st:r.status,j:j};});})
    .then(function(o){
+    setStage(2); // 응답 수신 → 결과 정리
     if(!o.ok||o.j.error)throw new Error(o.j.error||('HTTP '+o.st));
     var raw=((o.j.content||[]).map(function(b){return b.text||'';}).join('')||'').trim();
     var i=raw.indexOf('{'), n=raw.lastIndexOf('}');
@@ -63,10 +77,11 @@ window.INSIGHT=(function(){
      summary:pj.summary||'', steelman:pj.steelman||'', noise:Array.isArray(pj.noise)?pj.noise:[],
      claims:(Array.isArray(pj.claims)?pj.claims:[]).slice(0,8).map(function(c){c=clampClaim(c);c.id=uid();c.pick=recommend(c);return c;})};
     renderResult();
+    stopProg();
     setMsg('추출 완료 — 체크한 관점만 저장·반영됩니다.');
    })
-   .catch(function(e){setMsg('실패: '+(e&&e.message?e.message:e));})
-   .then(function(){busy=false;$('insRun').disabled=false;});
+   .catch(function(e){stopProg();setMsg('실패: '+(e&&e.message?e.message:e));})
+   .then(function(){stopProg();busy=false;$('insRun').disabled=false;});
  }
 
  /* --- 결과(선별 화면) --- */
