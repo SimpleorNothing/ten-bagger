@@ -2865,9 +2865,16 @@ window.MARKET=(function(){
  async function loadHoldings(){
   var host=document.getElementById('mktHoldings');if(!host)return;
   try{var r=await fetch('charts.json?t='+Date.now(),{cache:'no-store'});var j=await r.json();var S=j.series||{};
-   var list=[['mrvl','Marvell','MRVL'],['mu','Micron','MU'],['lite','Lumentum','LITE'],['vrt','Vertiv','VRT'],['be','Bloom Energy','BE'],['tsla','Tesla','TSLA']];
-   var html=list.map(function(o){var d=S[o[0]];if(!d||!d.c||!d.c.length)return '';var vals=slice6(d.c);
-    return '<div class="mkt-card mkt-card-lk" data-tk="'+o[2]+'" role="button" tabindex="0" title="'+esc(o[1])+' 기사 보기">'+card(o[1],'$'+vals[vals.length-1].toFixed(2),pct(vals),vals,null,lensHold(o[2],o[0],vals))+'</div>';}).join('');
+   // 개별종목(kind:'종목' · 보유 w>0) 전부를 비중 큰 순으로 — HOLD_DETAIL 단일소스(ETF·미보유 후보·현금 제외)
+   var KM={'005930':'sec','009150':'sem','353200':'ddk','089030':'twng'};
+   function cK(t){t=String(t||'');return KM[t]||t.toLowerCase();}           // 티커 → charts.json 시리즈 키
+   var NM={MRVL:'Marvell',MU:'Micron',LITE:'Lumentum',VRT:'Vertiv',BE:'Bloom Energy',TSLA:'Tesla','005930':'삼성전자'};
+   function pxv(tk,v){return /^\d/.test(tk)?'₩'+Math.round(v).toLocaleString():'$'+v.toFixed(2);}  // 숫자 티커=원화(KRW)·그 외=달러
+   var list=(typeof HOLD_DETAIL!=='undefined'?HOLD_DETAIL:[]).filter(function(d){return d.kind==='종목'&&(+d.w)>0;})
+    .slice().sort(function(a,b){return (+b.w)-(+a.w);})
+    .map(function(d){var tk=String(d.ticker||'').toUpperCase();return {ck:cK(d.ticker),nm:NM[d.ticker]||d.name,tk:tk};});
+   var html=list.map(function(o){var d=S[o.ck];if(!d||!d.c||!d.c.length)return '';var vals=slice6(d.c);
+    return '<div class="mkt-card mkt-card-lk" data-tk="'+o.tk+'" role="button" tabindex="0" title="'+esc(o.nm)+' 기사 보기">'+card(o.nm,pxv(o.tk,vals[vals.length-1]),pct(vals),vals,null,lensHold(o.tk,o.ck,vals))+'</div>';}).join('');
    host.innerHTML=html||'<div class="mkt-ph" style="grid-column:1/-1">데이터 없음</div>';
    host.querySelectorAll('.mkt-card-lk').forEach(function(cd){function go(){gotoStockNews(cd.getAttribute('data-tk'));}cd.addEventListener('click',go);cd.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();go();}});});}
   catch(e){host.innerHTML='<div class="mkt-ph" style="grid-column:1/-1">데이터 대기</div>';}
