@@ -2925,8 +2925,8 @@ window.MARKET=(function(){
   var el=document.getElementById('mkt_us10y');
   try{var r=await fetch('/api/us10y',{cache:'no-store'});var j=await r.json();var hh=j.history||[];
    var pts=hh.filter(function(x){return x&&x.markets&&x.markets.ten_year!=null;});
-   var vals=pts.map(function(x){return x.markets.ten_year;});
-   var dts=pts.map(function(x){return x.date||x.day||x.d||x.timestamp||null;});
+   var vals=slice6(pts.map(function(x){return x.markets.ten_year;}));   // 기간버튼 창에 맞춰 슬라이스(us10y 히스토리는 외부 피드 → 확보분에 자동 클램프)
+   var dts=slice6(pts.map(function(x){return x.date||x.day||x.d||x.timestamp||null;}));
    if(el&&vals.length>=2)el.innerHTML=card('미 10년물',vals[vals.length-1].toFixed(2)+'%',pct(vals),vals,null,lensUs10y(vals),{dates:dts,fmtV:function(v){return v.toFixed(2)+'%';}});}
   catch(e){}
  }
