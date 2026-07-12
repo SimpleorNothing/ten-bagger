@@ -3079,11 +3079,13 @@ window.MARKET=(function(){
    c.beginPath();for(var i=0;i<k;i++)i?c.lineTo(X(i),Y(v[i])):c.moveTo(X(0),Y(v[0]));
    c.strokeStyle=cl;c.lineWidth=1.6;c.stroke();
    c.font='10px sans-serif';
+   // 라벨이 라인 위에 겹쳐도 읽히도록 흰색 헤일로(외곽선) 후 채움. 호출 전 font/textAlign 설정.
+   function halo(txt,x,y,fill){c.save();c.lineJoin='round';c.lineWidth=3;c.strokeStyle='rgba(255,255,255,.92)';c.strokeText(txt,x,y);c.fillStyle=fill;c.fillText(txt,x,y);c.restore();}
    if(av!=null&&st.hv>=0){var ya=Y(av);if(ya<18)ya=18;if(ya>H-16)ya=H-16;             // 평단 기준선 — 호버 중에만 표시(기본은 숨김 · 앵커링 방지). 창 밖이면 가장자리 클램프
     c.save();c.setLineDash([3,2]);c.strokeStyle='#868e96';c.lineWidth=1;
     c.beginPath();c.moveTo(6,ya);c.lineTo(w-6,ya);c.stroke();c.restore();
     var al='\ud3c9\ub2e8 '+fv(av),aw=c.measureText(al).width;
-    c.fillStyle='#868e96';c.fillText(al,w-6-aw,Math.max(ya-3,26));}
+    c.textAlign='left';halo(al,w-6-aw,Math.max(ya-3,26),'#868e96');}
    // 기간 증감률(좌상단)
    var p=((v[k-1]/v[0]-1)*100).toFixed(1);
    c.textAlign='left';c.font='10px sans-serif';c.fillStyle=cl;c.fillText((p>=0?'+':'')+p+'% / '+k+'D',6,11);
@@ -3093,14 +3095,14 @@ window.MARKET=(function(){
    c.textAlign='right';c.fillText(fd(t[k-1]),w-6,H-4);
    // 처음·마지막 값 = 각 끝점에 붙여 위/아래로. 상단 근접이면 아래(+12), 아니면 위(−5) — 라벨이 캔버스 위로 안 잘리게.
    function lblY(yp){return (yp-14<18)?yp+12:yp-5;}
-   c.font='bold 10px sans-serif';c.fillStyle=cl;
-   c.textAlign='left';c.fillText(fv(v[0]),6,lblY(Y(v[0])));                    // 처음값 = 시작점(좌)에 붙여
-   c.textAlign='right';c.fillText(fv(v[k-1]),w-6,lblY(Y(v[k-1])));            // 마지막값 = 끝점(우)에 붙여
+   c.font='bold 10px sans-serif';
+   c.textAlign='left';halo(fv(v[0]),6,lblY(Y(v[0])),cl);                      // 처음값 = 시작점(좌)에 붙여 · 흰 헤일로로 라인 위서도 가독
+   c.textAlign='right';halo(fv(v[k-1]),w-6,lblY(Y(v[k-1])),cl);              // 마지막값 = 끝점(우)에 붙여
    c.textAlign='left';c.font='10px sans-serif';
    if(st.hv>=0&&st.hv<k){var i2=st.hv;c.strokeStyle='#adb5bd';c.lineWidth=1;c.beginPath();c.moveTo(X(i2),18);c.lineTo(X(i2),H-16);c.stroke();
     c.fillStyle=cl;c.beginPath();c.arc(X(i2),Y(v[i2]),2.6,0,6.3);c.fill();
-    var tp=fd(t[i2])+' '+fv(v[i2]);c.fillStyle='#495057';var tw=c.measureText(tp).width;
-    c.fillText(tp,Math.min(Math.max(X(i2)-tw/2,6),w-6-tw),28);}}
+    var tp=fd(t[i2])+' '+fv(v[i2]);var tw=c.measureText(tp).width;
+    c.textAlign='left';halo(tp,Math.min(Math.max(X(i2)-tw/2,6),w-6-tw),28,'#495057');}}
   cv.addEventListener('wheel',function(e){if(!e.ctrlKey)return;e.preventDefault();st.sp=Math.max(20,Math.min(s.c.length,st.sp*(e.deltaY>0?1.25:0.8)));st.hv=-1;dr();},{passive:false});
   cv.addEventListener('mousemove',function(e){var r=cv.getBoundingClientRect(),o=vw();st.hv=Math.max(0,Math.min(o.k-1,Math.round((e.clientX-r.left-6)*(o.k-1)/(r.width-12))));dr();});
   cv.addEventListener('mouseleave',function(){st.hv=-1;dr();});
