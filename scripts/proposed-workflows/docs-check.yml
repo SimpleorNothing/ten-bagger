@@ -1,0 +1,81 @@
+name: Docs drift guard
+
+# 운영 문서(OPS.md · STYLE_GUIDE.md)가 조용히 썩는 것을 막는 가드.
+#  1) SoT 이중화 금지 — .github/workflows/OPS.md 같은 유령 사본이 있으면 실패.
+#  2) STYLE_GUIDE.md 토큰 표가 라이브 코드(index.html :root ← pantone.css :root)와
+#     어긋나면 자동 재생성(--fix) 후 커밋·푸시 → 문서가 스스로 최신을 유지한다.
+# 수동 실행: Actions 탭 → Docs drift guard → Run workflow.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - 'pantone.css'
+      - 'STYLE_GUIDE.md'
+      - 'scripts/check-docs.mjs'
+  schedule:
+    - cron: '50 21 * * 0'   # 일요일 06:50 KST · 주1회 정합 점검(다른 크론 37/42/47분과 분산)
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: docs-check
+  cancel-in-progress: false
+
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: SoT 중복 가드 (유령 OPS 사본 금지)
+        run: |
+          GHOST=0
+          for f in .github/workflows/OPS.md .github/OPS.md docs/OPS.md; do
+            if [ -f "$f" ]; then echo "::error::문서 SoT 이중화 — $f 는 존재하면 안 된다(루트 OPS.md 하나만)"; GHOST=1; fi
+          done
+          [ "$GHOST" -eq 0 ] || exit 1
+          test -f OPS.md || { echo "::error::루트 OPS.md 없음"; exit 1; }
+          test -f STYLE_GUIDE.md || { echo "::error::루트 STYLE_GUIDE.md 없음"; exit 1; }
+          echo "✔ 문서 SoT 단일 — OPS.md · STYLE_GUIDE.md (루트)"
+
+      - name: 토큰 드리프트 점검 · 어긋나면 자동 재생성
+        run: |
+          if node scripts/check-docs.mjs; then
+            echo "drift=0" >> "$GITHUB_ENV"; exit 0
+          fi
+          echo "드리프트 감지 → --fix 로 토큰 구역 재생성"
+          node scripts/check-docs.mjs --fix
+          node scripts/check-docs.mjs   # 재검증(여기서 또 실패하면 수동 복구 대상)
+          echo "drift=1" >> "$GITHUB_ENV"
+
+      - name: 재생성분 커밋·푸시 (rebase-safe)
+        if: env.drift == '1'
+        run: |
+          FILE="STYLE_GUIDE.md"
+          if [ -z "$(git status --porcelain "$FILE")" ]; then
+            echo "No change in $FILE."; exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$FILE"
+          git commit -m "docs: sync STYLE_GUIDE token table with live CSS (auto)"
+          for i in 1 2 3 4 5; do
+            if git pull --rebase --autostash origin main \
+               && git push origin HEAD:main; then
+              echo "pushed on attempt $i"; exit 0
+            fi
+            git rebase --abort 2>/dev/null || true
+            echo "push attempt $i lost the race; backing off"; sleep $(( RANDOM % 6 + 3 ))
+          done
+          echo "::error::push failed after 5 attempts"; exit 1
