@@ -622,6 +622,11 @@ table.tk th.c{text-align:center}
 @keyframes stkFlash{0%,55%{box-shadow:0 0 0 2px var(--st-accel) inset}100%{box-shadow:0 0 0 0 rgba(0,0,0,0) inset}}
 .stk-flash{animation:stkFlash 1.5s ease}
 .mkt-ph{font-size:12px;color:var(--faint);padding:16px 0;text-align:center}
+.mkt-lens{margin:2px 0 8px;font-size:11px;line-height:1.5;letter-spacing:-.1px}
+.mkt-lens .l1{color:var(--txt);font-weight:600;display:flex;align-items:baseline;gap:5px;flex-wrap:wrap}
+.mkt-lens .l1 b{font:700 10px var(--mono);background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:1px 5px;color:var(--dim);flex:0 0 auto}
+.mkt-lens .l2{color:var(--faint);margin-top:3px}
+.mkt-lens .ok{color:var(--st-dawn);font-weight:600}.mkt-lens .wnscolor:var(--st-hot);font-weight:600}.mkt-lens .nt{color:var(--st-mature);font-weight:600}
 .mkt-ph-box{background:var(--panel2);border:1px dashed var(--line2);border-radius:14px;padding:18px;text-align:center;font-size:13px;color:var(--dim)}
 .nlist{display:flex;flex-direction:column;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden}
 .nrow{display:flex;align-items:center;gap:10px;padding:11px 14px;background:var(--panel);text-decoration:none;transition:.12s}
@@ -2783,14 +2788,84 @@ window.MARKET=(function(){
    refln='<line x1="0" y1="'+yr.toFixed(1)+'" x2="'+w+'" y2="'+yr.toFixed(1)+'" stroke="var(--dim)" stroke-width="1" stroke-dasharray="3 2" opacity=".75"/>';}
   return '<svg class="spark" viewBox="0 0 '+w+' '+hh+'" preserveAspectRatio="none">'+refln+'<polyline points="'+pts+'" fill="none" stroke="'+c+'" stroke-width="1.5" stroke-linejoin="round"/></svg>';
  }
- function card(name,val,p,vals,ref){
+ function card(name,val,p,vals,ref,lns){
   var up=p>=0,cls=up?'up':'dn',sign=up?'+':'';
-  return '<div class="mkt-nm">'+esc(name)+'</div><div class="mkt-val">'+val+' <span class="mkt-chg '+cls+'">'+sign+p.toFixed(1)+'%</span></div>'+spark(vals,ref)+'<div class="mkt-span">6개월</div>';
+  return '<div class="mkt-nm">'+esc(name)+'</div><div class="mkt-val">'+val+' <span class="mkt-chg '+cls+'">'+sign+p.toFixed(1)+'%</span></div>'+(lns||'')+spark(vals,ref)+'<div class="mkt-span">6개월</div>';
+ }
+ /* ===== 렌즈(요약 2줄) — l1=이 그래프가 판정하는 것(프레임) · l2=라이브 수치 → 판정.
+    논제 시계(gamma.json γ·stage)와 가격 시계(고점·평단)를 분리해 붙인다. 게이트 판정은
+    window.macroEval(=v-macro TH 단일소스) 재사용 — 임계 중복 금지. */
+ var GM={},SG={},LAY={},AVGP={};
+ function fmtP(x,d){return (x>=0?'+':'')+x.toFixed(d==null?1:d);}
+ function lens(l1,l2){return '<div class="mkt-lens"><div class="l1">'+l1+'</div><div class="l2">'+l2+'</div></div>';}
+ function readPx(vals,avgP){
+  var n=vals.length,last=vals[n-1],hi=Math.max.apply(null,vals);
+  var dd=(last/hi-1)*100,seg='고점 '+dd.toFixed(0)+'%';
+  if(avgP!=null&&isFinite(avgP)&&avgP>0)seg+=' · 평단 '+fmtP((last/avgP-1)*100,0)+'%';
+  return {dd:dd,seg:seg};
+ }
+ async function loadCtx(){
+  try{
+   var rs=await Promise.all([
+    fetch('gamma.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;}),
+    fetch('signals.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;}),
+    fetch('holdings.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;})
+   ]);
+   GM=((rs[0]||{}).gamma)||{};SG=rs[1]||{};
+   var hd=rs[2]||{};AVGP=hd.avg||{};
+   (hd.detail||[]).forEach(function(d){if(d&&d.ticker)LAY[String(d.ticker).toUpperCase()]=d.layer;});
+  }catch(e){}
+ }
+ function EV(){return (typeof window.macroEval==='function')?window.macroEval(SG):null;}
+ function lensHold(tk,ck,vals){
+  var g=GM[tk],L=LAY[tk]||'기타',px=readPx(vals,AVGP[ck]);
+  if(!g)return lens('<b>'+esc(L)+'</b>γ 미추적 · 위성 포지션',px.seg+' → 게이트 밖 — 강물 익스포저용, 코어 자본과 분리');
+  var fl=(g.flagged===true);                    // 모호밴드 → gamma.json 규칙상 '직전값 홀드'
+  var gl=fl?'<span class="nt">γ 모호</span>':(g.g==='open'?'<span class="ok">γ open</span>':'<span class="wn">γ 소진</span>');
+  var tg=(g.pct!=null&&isFinite(g.pct))?' · 목표 '+fmtP(g.pct,0)+'%':'';
+  var vd=fl?'모호밴드 — 직전값('+(g.g==='open'?'open':'소진')+') 홀드, 리비전 재확인 전까진 액션 없음'
+        :g.g==='open'?(px.dd<=-10?'추정이 앞섬 — 눌림은 기회(S5 베이스 확인 후)':'가격이 올라도 추정이 더 빠름 — 단계 유지·트림 보류')
+        :(px.dd<=-10?'가격 소진 후 조정 — 리비전 재확인까지 관망':'가격이 목표가 추월 — 트림 후보');
+  return lens('<b>'+esc(L)+'·'+esc(g.stage||'')+'</b>'+gl+tg, px.seg+' → '+vd);
+ }
+ function lensIdx(k,vals){
+  var e=EV(),p=pct(vals);
+  if(k==='ixic'){
+   if(!e||e.dd==null)return lens('<b>게이트</b>깊이축 — 드로다운 G1 −8 / G2 −13 / G3 −20%','드로다운 미수집 → 등급 판정 불가');
+   var st=e.grade?'<span class="ok">G'+e.grade+' 점등</span> — 트랜치 권한(반전 트리거 후)':'<span class="wn">G0 잠김</span> — 신규매수 금지, 사전승인 트림만';
+   return lens('<b>게이트</b>깊이축 — 드로다운 G1 −8 / G2 −13 / G3 −20%',
+    '현재 '+e.dd+'% · 40주선 '+(e.slopeUp?'상승':'하락')+' 이격 '+fmtP(e.gap,1)+'% → '+st);
+  }
+  if(k==='gspc'){
+   if(!e)return lens('<b>게이트</b>공포축 — VIX·F&amp;G·일간·기간구조 4신호','신호 미수집');
+   var fs=e.fear>=2?'<span class="ok">공포 '+e.fear+'/4 — G2 트리거권</span>':'<span class="wn">공포 '+e.fear+'/4 — 미달</span>';
+   return lens('<b>게이트</b>공포축 — VIX·F&amp;G·일간·기간구조 4신호',
+    'VIX '+(e.vix==null?'--':e.vix)+' · F&amp;G '+(e.fg==null?'--':e.fg)+' → '+fs+' · 지수 강세 = 공포 없음 = 실탄 대기');
+  }
+  var kv=(e&&e.veloMarker)?'<span class="ok">사이드카/서킷 발동</span> → '+(e.velo?'정찰 1.5% 권한(충격유형 수동확인)':'추세이탈 = 거부(낙하칼)'):'<span class="wn">사이드카·서킷 미발동</span> → 정찰 권한 없음';
+  return lens('<b>KR</b>메모리(삼성·하이닉스) 프록시 · 속도 정찰 티어',
+   kv+' · 6M '+fmtP(p,0)+'%는 대부분 L3 재평가분 — 코스피 강세=내 L3 오버웨이트와 같은 축');
+ }
+ function lensUs10y(vals){
+  var last=vals[vals.length-1],p=pct(vals);
+  var v=last>=4.5?'고금리 고착 — L8 전력·롱듀레이션의 할인율 악박, 인하 기대 후퇴'
+       :last<=4.0?'금리 하향 — 롱듀레이션(L8·유틸) 멀티플 여유 확대'
+       :'중립대 — 방향 미확정, 다음 CPI/PCE가 분기점';
+  return lens('<b>할인율</b>AI 인프라 밸류에이션의 분모 · L8 감응도 최대',
+   last.toFixed(2)+'% · 6M '+fmtP(p,1)+'% → '+v);
+ }
+ function lensWti(vals){
+  var last=vals[vals.length-1],p=pct(vals);
+  var v=p>=15?'유가발 인플레 전가 → 인하 지연 = 게이트 점등(매수 기회) 지연 리스크'
+       :p<=-15?'유가 하락 → 인플레 완화 = 인하 경로 복원, 멀티플 우호'
+       :'박스권 — 호르무즈 프리미엄이 하단을 지지, 급등 시 PCE 재가속';
+  return lens('<b>인플레</b>호르무즈 프리미엄 → PCE → 연준 경로 → 게이트',
+   '$'+last.toFixed(1)+' · 6M '+fmtP(p,1)+'% → '+v);
  }
  async function loadWti(){
   var el=document.getElementById('mkt_wti');
   try{var r=await fetch('/api/wti',{cache:'no-store'});var j=await r.json();var s=j.series||[];var vals=slice6(s.map(function(x){return x[1];}).filter(function(x){return x!=null;}));
-   if(el&&vals.length)el.innerHTML=card('WTI 유가','$'+vals[vals.length-1].toFixed(1),pct(vals),vals);}
+   if(el&&vals.length)el.innerHTML=card('WTI 유가','$'+vals[vals.length-1].toFixed(1),pct(vals),vals,null,lensWti(vals));}
   catch(e){if(el)el.innerHTML='<div class="mkt-nm">WTI 유가</div><div class="mkt-ph">데이터 대기</div>';}
  }
  async function loadHoldings(){
@@ -2798,21 +2873,21 @@ window.MARKET=(function(){
   try{var r=await fetch('charts.json?t='+Date.now(),{cache:'no-store'});var j=await r.json();var S=j.series||{};
    var list=[['mrvl','Marvell','MRVL'],['mu','Micron','MU'],['lite','Lumentum','LITE'],['vrt','Vertiv','VRT'],['be','Bloom Energy','BE'],['tsla','Tesla','TSLA']];
    var html=list.map(function(o){var d=S[o[0]];if(!d||!d.c||!d.c.length)return '';var vals=slice6(d.c);
-    return '<div class="mkt-card mkt-card-lk" data-tk="'+o[2]+'" role="button" tabindex="0" title="'+esc(o[1])+' 기사 보기">'+card(o[1],'$'+vals[vals.length-1].toFixed(2),pct(vals),vals)+'</div>';}).join('');
+    return '<div class="mkt-card mkt-card-lk" data-tk="'+o[2]+'" role="button" tabindex="0" title="'+esc(o[1])+' 기사 보기">'+card(o[1],'$'+vals[vals.length-1].toFixed(2),pct(vals),vals,null,lensHold(o[2],o[0],vals))+'</div>';}).join('');
    host.innerHTML=html||'<div class="mkt-ph" style="grid-column:1/-1">데이터 없음</div>';
    host.querySelectorAll('.mkt-card-lk').forEach(function(cd){function go(){gotoStockNews(cd.getAttribute('data-tk'));}cd.addEventListener('click',go);cd.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();go();}});});}
   catch(e){host.innerHTML='<div class="mkt-ph" style="grid-column:1/-1">데이터 대기</div>';}
  }
  async function loadIndices(){
   try{var r=await fetch('charts.json?t='+Date.now(),{cache:'no-store'});var j=await r.json();var S=j.series||{};
-   [['ks11','코스피','mkt_ks11'],['gspc','S&P 500','mkt_gspc'],['ixic','나스닥','mkt_ixic']].forEach(function(o){var el=document.getElementById(o[2]);if(!el)return;var d=S[o[0]];if(!d||!d.c||!d.c.length)return;var vals=slice6(d.c);el.innerHTML=card(o[1],Math.round(vals[vals.length-1]).toLocaleString(),pct(vals),vals);});}
+   [['ks11','코스피','mkt_ks11'],['gspc','S&P 500','mkt_gspc'],['ixic','나스닥','mkt_ixic']].forEach(function(o){var el=document.getElementById(o[2]);if(!el)return;var d=S[o[0]];if(!d||!d.c||!d.c.length)return;var vals=slice6(d.c);el.innerHTML=card(o[1],Math.round(vals[vals.length-1]).toLocaleString(),pct(vals),vals,null,lensIdx(o[0],vals));});}
   catch(e){}
  }
  async function loadUs10y(){
   var el=document.getElementById('mkt_us10y');
   try{var r=await fetch('/api/us10y',{cache:'no-store'});var j=await r.json();var hh=j.history||[];
    var vals=hh.map(function(x){return x.markets&&x.markets.ten_year;}).filter(function(x){return x!=null;});
-   if(el&&vals.length>=2)el.innerHTML=card('미 10년물',vals[vals.length-1].toFixed(2)+'%',pct(vals),vals);}
+   if(el&&vals.length>=2)el.innerHTML=card('미 10년물',vals[vals.length-1].toFixed(2)+'%',pct(vals),vals,null,lensUs10y(vals));}
   catch(e){}
  }
  async function loadMacroNews(){
@@ -2957,7 +3032,7 @@ window.MARKET=(function(){
   t.classList.remove('stk-flash');void t.offsetWidth;t.classList.add('stk-flash');
   setTimeout(function(){t.classList.remove('stk-flash');},1600);
  }
- function render(){loadWti();loadUs10y();loadIndices();loadHoldings();loadMacroNews();loadStockNews();}
+ async function render(){await loadCtx();loadWti();loadUs10y();loadIndices();loadHoldings();loadMacroNews();loadStockNews();}
  return {render:render};
 })();
 
@@ -4650,6 +4725,32 @@ function renderInstantAnswer(){
 (function(){
  const TH={ddG1:-8,ddG2:-13,ddG3:-20,gapMin:-5,vixF:30,vixS:35,vixHighF:40,fgF:20,fgS:15,spF:-4,spS:-5,vixSell:14,fgSell:80,veloTranche:1.5};
  let SIGNALS=null;
+ /* 게이트 판정 단일 소스 — v-macro 신호등과 01 시장 렌즈(window.macroEval)가 공유. 임계 중복 정의 금지. */
+ function evalGate(S){
+  S=S||{};
+  const vix=S.vix,vixHigh=S.vixHigh,fg=S.fearGreed,sp=S.spDailyPct,v3=S.vix3m;
+  const dd=S.nasdaqDrawdownPct,slopeUp=S.wma40SlopeUp,gap=S.wma40GapPct;
+  const side=S.sidecarKR===true&&S.sidecarDate&&S.sidecarDate===S.asOf;   // 당일 입력만 점등(스테일 무효)
+  const circuit=S.circuitKR===true&&S.sidecarDate&&S.sidecarDate===S.asOf;
+  const f1=(vixHigh!=null&&vixHigh>=TH.vixHighF)||(vix!=null&&vix>=TH.vixF), s1=(vixHigh!=null&&vixHigh>=TH.vixHighF)||(vix!=null&&vix>=TH.vixS);
+  const f2=fg!=null&&fg<=TH.fgF, s2=fg!=null&&fg<=TH.fgS;
+  const f3=side||(sp!=null&&sp<=TH.spF), s3=(sp!=null&&sp<=TH.spS);
+  const f4=(vix!=null&&v3!=null&&vix>v3), s4=f4;
+  const fear=(f1?1:0)+(f2?1:0)+(f3?1:0)+(f4?1:0);
+  const strong=(s1?1:0)+(s2?1:0)+(s3?1:0)+(s4?1:0);
+  const trendG1=slopeUp===true&&gap!=null&&gap>=TH.gapMin;
+  let grade=0;
+  if(dd!=null){
+   if(dd<=TH.ddG3||strong>=3)grade=3;
+   else if((dd<=TH.ddG2||fear>=2)&&slopeUp===true)grade=2;
+   else if(dd<=TH.ddG1&&trendG1)grade=1;
+  }
+  const veloMarker=side||circuit, velo=veloMarker&&trendG1;
+  return {dd:dd,vix:vix,vixHigh:vixHigh,fg:fg,sp:sp,v3:v3,slopeUp:slopeUp,gap:gap,
+   side:side,circuit:circuit,veloMarker:veloMarker,velo:velo,trendG1:trendG1,
+   f1:f1,f2:f2,f3:f3,f4:f4,s1:s1,s2:s2,s3:s3,s4:s4,fear:fear,strong:strong,grade:grade,th:TH};
+ }
+ window.macroEval=evalGate;
  function set(id,txt){const e=document.getElementById(id);if(e)e.textContent=txt;}
  function lampSet(id,sym){const e=document.getElementById(id);if(e)e.textContent=sym;}
  function renderSignals(){
@@ -4663,27 +4764,12 @@ function renderInstantAnswer(){
   set('sigFG',fg==null?'--':fg);
   set('sigSide',side?'발동':(sp==null?'--':`S&P ${sp>0?'+':''}${sp}%`));
   set('sigTerm',(vix==null||v3==null)?'--':`${vix} vs ${v3} ${vix>v3?'역전':'콘탱고'}`);
-  // 공포 4신호 — fear(G2 강도) / strong(G3 강도)
-  const f1=(vixHigh!=null&&vixHigh>=TH.vixHighF)||(vix!=null&&vix>=TH.vixF), s1=(vixHigh!=null&&vixHigh>=TH.vixHighF)||(vix!=null&&vix>=TH.vixS);
-  const f2=fg!=null&&fg<=TH.fgF, s2=fg!=null&&fg<=TH.fgS;
-  const f3=side||(sp!=null&&sp<=TH.spF), s3=(sp!=null&&sp<=TH.spS);
-  const f4=(vix!=null&&v3!=null&&vix>v3), s4=f4;
-  const fear=(f1?1:0)+(f2?1:0)+(f3?1:0)+(f4?1:0);
-  const strong=(s1?1:0)+(s2?1:0)+(s3?1:0)+(s4?1:0);
-  const trendG1=slopeUp===true&&gap!=null&&gap>=TH.gapMin;
-  // 등급 판정 (D 레짐 거부권·반전 트리거는 수동 판단)
-  let grade=0;
-  if(dd!=null){
-   if(dd<=TH.ddG3||strong>=3)grade=3;
-   else if((dd<=TH.ddG2||fear>=2)&&slopeUp===true)grade=2;
-   else if(dd<=TH.ddG1&&trendG1)grade=1;
-  }
+  // 공포 4신호·등급·속도 티어 — evalGate 단일 소스(01 시장 렌즈와 공유)
+  const EV=evalGate(S);
+  const f1=EV.f1,f2=EV.f2,f3=EV.f3,f4=EV.f4,s1=EV.s1,s2=EV.s2,s3=EV.s3;
+  const fear=EV.fear,strong=EV.strong,grade=EV.grade;
   window.MACRO_GRADE=grade;
-  // 🇰🇷 속도 정찰 티어 — 코스피 사이드카/서킷 × 추세생존 (US 깊이 게이트와 별도)
-  const circuit=S.circuitKR===true&&S.sidecarDate&&S.sidecarDate===S.asOf; // 서킷브레이커(현물 −8%) 당일
-  const veloMarker=side||circuit;            // 매도 사이드카(선물 −5%/1분) 또는 서킷 = 속도 마커
-  const veloTrend=slopeUp===true&&gap!=null&&gap>=TH.gapMin; // 추세 생존(=trendG1)
-  const velo=veloMarker&&veloTrend;          // 충격유형(외생·기계적·반복) 거부권은 수동
+  const circuit=EV.circuit,veloMarker=EV.veloMarker,veloTrend=EV.trendG1,velo=EV.velo;
   set('sigVelo',veloMarker?((circuit?'서킷 발동':'매도 사이드카 발동')+(veloTrend?' · 추세생존':' · 추세이탈')):(dd!=null?'미발동':'--'));
   lampSet('lampVelo',velo?(circuit?'🔴':'🟡'):(veloMarker?'🟠':'⚪'));
   // 램프
