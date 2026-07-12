@@ -66,7 +66,7 @@
 |---|---|---|---|
 | 코스피·S&P·나스닥 지수 | 자동 | 매일 06:37 KST | `charts.json` (`fetch-prices.mjs`, `^KS11·^GSPC·^IXIC` Yahoo 1Y) |
 | 미 10년물 금리 | 자동 | 런타임 | worker `/api/us10y` → `history[].markets.ten_year` |
-| WTI 유가 | 자동 | 런타임 | worker `/api/wti` (Yahoo upstream) |
+| WTI 유가 | 자동 | 런타임 | worker `/api/wti` (Yahoo→Stooq) · 출력 `{source,points:[["YYYY-MM-DD",close]]}` (클라 `loadWti`는 `points` 필드로 읽는다) |
 | 보유 종목 스파크라인 | 자동 | 매일 06:37 KST | `charts.json` (Yahoo 1Y 일봉 t/c) |
 | **카드 렌즈 요약 2줄** (그래프마다 프레임→판정) | 자동(런타임 파생) | gamma·signals 일별 / holdings 주간에 편승 | `gamma.json`(γ·stage·flagged) + `signals.json`(**`window.macroEval` 단일소스 재사용**) + `holdings.json`(layer·평단) + `charts.json` |
 | 종목 뉴스 (종목 블록형 + 기사별 **일자 + 두 점**[명사형 요약 `a` / `→` 의미·주가영향 `w`] + 우측 주가 차트) | 자동 | **뉴스·digest 06:12·18:12 (1일 2회)** / 차트 06:37 | `news_digest.json`(claude-sonnet-4-6) + `news.json`(**물질성 m≥1만**) + `charts.json` |

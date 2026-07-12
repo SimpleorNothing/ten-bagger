@@ -2828,19 +2828,23 @@ window.MARKET=(function(){
   return lens('<b>할인율</b>AI 인프라 밸류에이션의 분모 · L8 감응도 최대',
    last.toFixed(2)+'% · 6M '+fmtP(p,1)+'% → '+v);
  }
+ var WTI_L1='<b>인플레</b>호르무즈 프리미엄 → PCE → 연준 경로 → 게이트';
  function lensWti(vals){
   var last=vals[vals.length-1],p=pct(vals);
   var v=p>=15?'유가발 인플레 전가 → 인하 지연 = 게이트 점등(매수 기회) 지연 리스크'
        :p<=-15?'유가 하락 → 인플레 완화 = 인하 경로 복원, 멀티플 우호'
        :'박스권 — 호르무즈 프리미엄이 하단을 지지, 급등 시 PCE 재가속';
-  return lens('<b>인플레</b>호르무즈 프리미엄 → PCE → 연준 경로 → 게이트',
-   '$'+last.toFixed(1)+' · 6M '+fmtP(p,1)+'% → '+v);
+  return lens(WTI_L1,'$'+last.toFixed(1)+' · 6M '+fmtP(p,1)+'% → '+v);
  }
+ function lensWtiWait(){return lens(WTI_L1,'수집 대기 → 판정 보류');}
  async function loadWti(){
-  var el=document.getElementById('mkt_wti');
-  try{var r=await fetch('/api/wti',{cache:'no-store'});var j=await r.json();var s=j.series||[];var vals=slice6(s.map(function(x){return x[1];}).filter(function(x){return x!=null;}));
-   if(el&&vals.length)el.innerHTML=card('WTI 유가','$'+vals[vals.length-1].toFixed(1),pct(vals),vals,null,lensWti(vals));}
-  catch(e){if(el)el.innerHTML='<div class="mkt-nm">WTI 유가</div><div class="mkt-ph">데이터 대기</div>';}
+  var el=document.getElementById('mkt_wti');if(!el)return;
+  var wait='<div class="mkt-nm">WTI 유가</div>'+lensWtiWait()+'<div class="mkt-ph">유가 수집 대기</div>';
+  try{var r=await fetch('/api/wti',{cache:'no-store'});var j=await r.json();
+   var s=j.points||j.series||[];   /* worker /api/wti 출력 = {source,points:[["YYYY-MM-DD",close]]} — series 로 읽으면 항상 0건 → 카드가 「로딩…」에 고착 */
+   var vals=slice6(s.map(function(x){return Array.isArray(x)?x[1]:x;}).filter(function(x){return x!=null&&isFinite(x);}));
+   el.innerHTML=vals.length>=2?card('WTI 유가','$'+vals[vals.length-1].toFixed(1),pct(vals),vals,null,lensWti(vals)):wait;}
+  catch(e){el.innerHTML=wait;}
  }
  async function loadHoldings(){
   var host=document.getElementById('mktHoldings');if(!host)return;
