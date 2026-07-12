@@ -6,10 +6,6 @@
 <title>알파맵</title>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
-<!-- 해도 테마: 표제용 명조. 로드 실패 시 시스템 명조(AppleMyungjo/Batang)로 폴백 -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700&display=swap">
 <!-- US10Y 매크로 차트(중앙은행·CPI·WTI)용 — Chart.js + flag-icons + annotation -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js" defer></script>
@@ -28,10 +24,9 @@
   /* functional market-stage hues — 해도 도판 톤으로 채도만 완화(의미·구분 불변) */
   --st-nascent:#6b5a9e; --st-dawn:#2f7d63; --st-accel:#2a6f97; --st-mature:#9a7b2f; --st-hot:#b4472f;
   --glow:none;
-  /* 표제=명조 · 데이터=모노(라틴/숫자만, 한글은 Pretendard 폴백) · 본문=Pretendard */
-  --serif:'Noto Serif KR','Nanum Myeongjo','AppleMyungjo','Batang',Georgia,'Times New Roman',serif;
-  --sans:'Pretendard Variable','Pretendard',system-ui,-apple-system,'Segoe UI',Roboto,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;
-  --mono:ui-monospace,'SFMono-Regular','JetBrains Mono',Menlo,Consolas,'Pretendard Variable','Pretendard','Apple SD Gothic Neo','Noto Sans KR',monospace;
+  /* 서체는 Pretendard 단일 — 표제·데이터·본문 모두 동일 패밀리(굵기·자간·크기로만 위계를 만든다) */
+  --serif:'Pretendard Variable','Pretendard',system-ui,-apple-system,'Segoe UI',Roboto,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;
+  --mono:var(--serif); --sans:var(--serif);
 }
 *{box-sizing:border-box;margin:0;padding:0}
 em{font-style:normal}
@@ -693,9 +688,6 @@ header::after{
 .pclass .pc,.rvw,.rcand,.mkt-card,.mkt-ph-box,.nlist,.dg-head,.stk-blk,.sync-modal,
 #v-macro .mc-card,#v-macro .mc-2col .col,#v-cal .now-card,#v-cal .fomc-tip,
 #v-cal .watch-card,#v-cal .cal-fold-bar,.tab{border-radius:3px}
-/* 표제 명조: 도판 제목처럼 자간을 좁힌다 */
-.mark{letter-spacing:-.035em}
-.vtitle{letter-spacing:-.012em}
 /* 측심값 정렬: 숫자 폭 고정 */
 .wpx,.pc .pct,.excell,.trow td,.lstage,.t-stage{font-variant-numeric:tabular-nums}
 /* 인쇄본은 백지 도판 */
