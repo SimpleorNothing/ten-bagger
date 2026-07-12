@@ -472,7 +472,7 @@ async function main() {
     .filter((it) => {
       const t = it.published ? new Date(it.published).getTime() : 0;
       if (t && t < cutoff) return false;
-      const k = it.ticker || '?';
+      const k = it.ticker === 'MACRO' ? (it.id || 'MACRO') : (it.ticker || '?');  // 매크로는 토픽별로 센다(합산되면 트렌딩 축이 통째로 잘림)
       const n = (perTk.get(k) || 0) + 1;
       if (n > SITE_PER_TICKER) return false;   // all 은 최신순 정렬 → 앞 5건만 통과
       perTk.set(k, n);

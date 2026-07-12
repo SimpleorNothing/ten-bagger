@@ -2892,7 +2892,7 @@ window.MARKET=(function(){
    var nw=rs[0],dg=rs[1];
    var items=(((nw||{}).items)||[]).filter(function(x){return x.ticker==='MACRO';});
    if(!items.length){host.innerHTML='<div class="mkt-ph">수집 대기 (다음 크론)</div>';return;}
-   var NM={macro_iran:'이란·호르무즈',macro_fomc:'FOMC 연준 기준금리',macro_tariff:'미국 관세 무역협상'};
+   var NM={};   // 매크로 주제는 매 실행 발굴되므로 고정 매핑 금지 — it.name 을 그대로 쓴다
    var byT={},order=[];
    items.forEach(function(it){var k=it.id||it.name||'macro';if(!byT[k]){byT[k]=[];order.push(k);}byT[k].push(it);});
    var sums={};(((dg||{}).macro)||[]).forEach(function(m){if(m&&m.id)sums[m.id]=m.s;});
