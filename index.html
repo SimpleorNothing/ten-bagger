@@ -1557,8 +1557,6 @@ header::after{
     </div>
   </div>
 
-  <div class="mc-sec">현재값 · 임계값 신호 요약</div>
-  <div id="cycTable" style="margin-bottom:8px"></div>
   <div class="foot">D=주요 4사(MSFT·GOOGL·AMZN·META) 합산 capex, 23~25 실적·26E 가이던스·27E~28E 애널 추정(5사 기준 MS 27E ~$1.1조)·C=앵커 재구성치(tick 아님)·E=주가÷평균목표가 괴리율(투자자문 아님)·B=DIO(마이크론 8월 결산 FY, 한국 12월 결산 — 분기 단위 차이)·A=SEMI 확정 분기값(Q4·25 미보유=공백). D₂=메모리 DRAM+NAND 합산 매출(TrendForce 26E $551.6B·27E $842.7B, HBM은 DRAM 내 포함, 28E~30E 연간 컨센서스 부재=공백)·capex 29E~30E는 동일 프레임 4사 합산 컨센서스 부재=공백. 출처: FT·Goldman·Morgan Stanley·TrendForce·Yole·SEC·DART·FnGuide.</div>
 </section>
 <script>
@@ -1569,7 +1567,6 @@ window.CYCLE=(function(){
   function dot(s){return '<span style="width:11px;height:11px;border-radius:50%;display:inline-block;background:'+(COL[s]||'#adb5bd')+'"></span>';}
   function find(cs,id){for(var i=0;i<cs.length;i++){if(cs[i].id===id)return cs[i];}return null;}
   function board(cs){var h='';cs.forEach(function(c){h+='<div style="border:1px solid #e9ecef;border-radius:8px;padding:10px"><div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:11px;color:#868e96">'+c.id+'</span>'+dot(c.lamp)+'</div><div style="font-size:13px;font-weight:600;margin-top:4px">'+c.name+'</div><div style="font-size:11px;color:#495057;margin-top:3px;line-height:1.45">'+(c.now||'')+'</div></div>';});return h;}
-  function table(cs){var h='<table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr style="text-align:left;color:#868e96"><th style="padding:4px 6px">군집</th><th style="padding:4px 6px">현재값</th><th style="padding:4px 6px">고점 ON 임계값</th><th style="padding:4px 6px">신호</th></tr></thead><tbody>';cs.forEach(function(c){h+='<tr style="border-top:1px solid #f1f3f5"><td style="padding:5px 6px;font-weight:600">'+c.id+' '+c.name+'</td><td style="padding:5px 6px;color:#495057">'+(c.now||'')+'</td><td style="padding:5px 6px;color:#868e96">'+(c.on||'')+'</td><td style="padding:5px 6px">'+dot(c.lamp)+'</td></tr>';});return h+'</tbody></table>';}
   function badgePlugin(rev){
     return {id:'revbadge',afterDatasetsDraw:function(chart){
       if(!rev||rev.length<2)return;
@@ -1658,7 +1655,7 @@ window.CYCLE=(function(){
         scales:{x:{ticks:{font:{size:10}},grid:{display:false}},y:{ticks:{callback:function(v){return v+'%';},font:{size:9}}}}}
     });
   }
-  function paint(){if(!DATA)return;var cs=DATA.clusters||[];var b=el('cycBoard');if(b)b.innerHTML=board(cs);var t=el('cycTable');if(t)t.innerHTML=table(cs);var g=cs.filter(function(c){return c.lamp==='green';}).length;var y=cs.filter(function(c){return c.lamp==='amber';}).length;var r=cs.filter(function(c){return c.lamp==='red';}).length;var v=el('cycVerdict');if(v)v.textContent='종합 — '+g+'🟢 / '+y+'🟡 / '+r+'🔴 · '+(r>0?'고점 신호 점등':'thesis-clock 롤오버 없음 · 사이클 후반')+' (asOf '+(DATA.asOf||'')+')';stamps(cs);drawD(find(cs,'D'));drawC(find(cs,'C'));drawE(find(cs,'E'));drawB(find(cs,'B'));drawA(find(cs,'A'));drawM(DATA.memMarket);}
+  function paint(){if(!DATA)return;var cs=DATA.clusters||[];var b=el('cycBoard');if(b)b.innerHTML=board(cs);var g=cs.filter(function(c){return c.lamp==='green';}).length;var y=cs.filter(function(c){return c.lamp==='amber';}).length;var r=cs.filter(function(c){return c.lamp==='red';}).length;var v=el('cycVerdict');if(v)v.textContent='종합 — '+g+'🟢 / '+y+'🟡 / '+r+'🔴 · '+(r>0?'고점 신호 점등':'thesis-clock 롤오버 없음 · 사이클 후반')+' (asOf '+(DATA.asOf||'')+')';stamps(cs);drawD(find(cs,'D'));drawC(find(cs,'C'));drawE(find(cs,'E'));drawB(find(cs,'B'));drawA(find(cs,'A'));drawM(DATA.memMarket);}
   function fmtDate(d){return d?String(d).replace(/-/g,'.'):'—';}
   function stamps(cs){
     var nodes=document.querySelectorAll('#v-cycle .cyc-upd');
