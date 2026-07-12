@@ -2894,7 +2894,7 @@ window.MARKET=(function(){
    c.beginPath();for(var i=0;i<k;i++)i?c.lineTo(X(i),Y(v[i])):c.moveTo(X(0),Y(v[0]));
    c.strokeStyle=cl;c.lineWidth=1.6;c.stroke();
    c.font='10px sans-serif';
-   if(av!=null){var ya=Y(av);if(ya<18)ya=18;if(ya>H-16)ya=H-16;                       // 평단 기준선(창 밖이면 가장자리 클램프)
+   if(av!=null&&st.hv>=0){var ya=Y(av);if(ya<18)ya=18;if(ya>H-16)ya=H-16;             // 평단 기준선 — 호버 중에만 표시(기본은 숨김 · 앵커링 방지). 창 밖이면 가장자리 클램프
     c.save();c.setLineDash([3,2]);c.strokeStyle='#868e96';c.lineWidth=1;
     c.beginPath();c.moveTo(6,ya);c.lineTo(w-6,ya);c.stroke();c.restore();
     var al='\ud3c9\ub2e8 '+av.toLocaleString(),aw=c.measureText(al).width;
