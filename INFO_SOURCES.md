@@ -2,7 +2,7 @@
 
 > `simpleornothing.com`이 메뉴별로 수집·표시하는 전체 정보의 소스·갱신 방식 대장.
 > **이 문서는 지속 업데이트한다** — 정보/소스/주기가 바뀌면 해당 행을 갱신하고 하단 이력에 한 줄 남긴다.
-> 최종 갱신: 2026-07-12 · 기준 메뉴: 5탭 (Phase 2g + 01 카드 렌즈)
+> 최종 갱신: 2026-07-12 · 기준 메뉴: 5탭 (Phase 2g + 01 카드 렌즈 + 뉴스 물질성 스크리닝)
 
 범례 — **자동**: cron 워크플로 or worker 런타임 API. **수동**: 편집→push→deploy(운영자/Claude). **혼합**: 자동값 위에 판단이 덮어씀. **날짜연동**: 클라이언트가 날짜 기준 자동 표시.
 
@@ -17,8 +17,8 @@
 | 시장 모니터링 | WTI 유가 | 자동 | 런타임 | worker `/api/wti` (Yahoo upstream) |
 | 시장 모니터링 | 보유 종목 스파크라인 (MRVL·MU·LITE·VRT·BE·TSLA) | 자동 | 매일 06:37 KST | `charts.json` (`fetch-prices.mjs`, Yahoo 1Y 일봉 t/c) |
 | 시장 모니터링 | **카드 렌즈 요약 2줄** (지표·보유 각 그래프 위 — l1=이 그래프가 판정하는 프레임 / l2=라이브 수치 → 판정. 보유=레이어·stage·γ·목표가 + 고점·평단 → 두 시계 판정 · 지수=게이트 깊이축(나스닥)·공포축(S&P)·KR 속도 정찰(코스피) · 10년물=할인율 · WTI=인플레→연준 경로) | 자동 (런타임 파생) | 런타임 (gamma·signals 일별 · holdings 주간에 자동 편승) | `gamma.json`(γ·stage·pct·flagged) + `signals.json`(게이트 — `window.macroEval` 단일소스 재사용) + `holdings.json`(layer·avg 평단) + `charts.json`(6M 시계열) 클라 파생 |
-| 시장 모니터링 | 종목 뉴스 (**종목 블록형**: 상단 Summary + 일자별 기사 + **보유 기사별 내용·의미·영향 한줄 분석**(arts) + **우측 인터랙티브 주가 차트**(호버·Ctrl+휠 기간) · 결론/그룹/일정주의) | 자동 | 매일 06:12 KST(뉴스·digest) / 06:37(차트) | `news_digest.json`(digest+arts, claude-sonnet-4-6) + `news.json` + `charts.json`(1Y 일봉, 한국종목 별칭 sec·sem·ddk·twng) 클라이언트 병합 렌더 |
-| 시장 모니터링 | 관련 기사 (매크로 · **토픽 블록형**: 상단 자동 Summary + 일자별 기사, id 기준 그룹) | 자동 | 매일 06:12 KST | `news_digest.json` `macro`(Claude API digest) + `news.json` `MACRO` 항목 병합 렌더 |
+| 시장 모니터링 | 종목 뉴스 (**종목 블록형**: 상단 Summary + 일자별 기사 + **보유 기사별 내용·의미·영향 한줄 분석**(arts) + **우측 인터랙티브 주가 차트**(호버·Ctrl+휠 기간) · 결론/그룹/일정주의) · **물질성 스크리닝 통과분만 표시**(items[].m≥1 — 2=논제/펀더멘털, 1=가격시계 실사건, 0=홍보·사후추측·리스트·무관 → 카드 슬롯 미부여) | 자동 | 매일 06:12 KST(뉴스·digest) / 06:37(차트) | `news_digest.json`(digest+arts, claude-sonnet-4-6) + `news.json`(m≥1 필터 적용) + `charts.json`(1Y 일봉, 한국종목 별칭 sec·sem·ddk·twng) 클라이언트 병합 렌더. 스크리닝 3층 = 하드룰(`RE_PR`·`RE_SPEC`) → 신규 요약 시 m 동시 생성 → 과거분 m 백필(`scoreLegacy`), 전건은 `news_archive.json` 보존 |
+| 시장 모니터링 | 관련 기사 (매크로 · **토픽 블록형**: 상단 자동 Summary + 일자별 기사, id 기준 그룹) | 자동 | 매일 06:12 KST | `news_digest.json` `macro`(Claude API digest) + `news.json` `MACRO` 항목 병합 렌더 (스크리닝 미적용 — 매크로는 축 전체가 관측 대상) |
 
 ---
 
@@ -69,6 +69,7 @@
 | 정보명 | 자동/수동 | 주기 | 소스 |
 |---|---|---|---|
 | 시그널 로그 (누적 판단 컨텍스트) | 수동 | 시그널 포착 시 | `signal_log.json` (Claude/운영자, EOF append) |
+| 뉴스 영구 아카이브 (스크리닝 탈락분 포함 전건) | 자동 | 매일 06:12 KST | `news_archive.json` (`fetch-news.mjs`, 프루닝·삭제 없음 · `.assetsignore` 리포 전용) |
 | CPI (전년비) | 자동 | 갱신 시 | `cpi.json` (FRED via worker `/api/fred`) |
 | 호르무즈 해협 물동량 | 자동 | 일별 | worker `/api/hormuz` (IMF PortWatch) · `hormuz.json`(폴백) |
 | 시세 (종목 현재가·지수) | 자동 | 매일 06:37 KST | `prices.json` (`fetch-prices.mjs`, Yahoo/Naver) |
@@ -84,6 +85,7 @@
 5. **watching list** — 뉴스 행 버튼 → watching 추가(worker `/api/watching` R2 + 02 리스트) 미구현.
 6. ~~digest 자동화 활성 대기~~ → **해결(2026-07-11)**: 운영자가 update-news.yml에 ANTHROPIC_API_KEY env·커밋 대상(news_digest.json) 추가, 수동 dispatch로 첫 자동 digest 생성 확인(model=claude-sonnet-4-6, groups=4). 이후 매일 06:12 KST 완전 자동.
 7. **b64 파이프라인 손상 재발(2026-07-11)**: 17KB patch에서 2바이트 묵시 손상 → 신규 JSON에 유입. 대응: 적용 후 콘텐츠 레벨 검증(UTF-8 decode + 로컬 비교) 의무화, 손상 파일은 직접 커밋으로 교체. Phase 2g에서 전사 손상 2회 추가 관측 → **미니파이 + 한줄 b64(base64 -w0) + 푸시 직후 디코드 md5 검증**을 표준 절차로 확립.
+8. **뉴스 스크리닝 반영 시점(2026-07-12)** — `fetch-news.mjs` 스크리닝은 다음 크론(매일 06:12 KST)부터 `news.json`·샤드에 반영된다. 즉시 정화하려면 Actions에서 `Update news feed` 수동 dispatch. 렌더(`index.html`)는 무수정 — 데이터 창이 정화되면 카드는 자동으로 실질 기사만 표시.
 
 ---
 
@@ -102,3 +104,4 @@
 - 2026-07-11 · 03 리밸런싱 **결정 보드 신설**: 최상단에 브리핑 3문(자산구성·게이트·타이밍) 상시 패널. `#decisionBoard` 자기완결 IIFE가 holdings/gamma/signals/cycle 재페치+TARGETS로 렌더 → holdings 주간 동기 시 **자동 재파악**. MU γ 3트리거(①목표가소진 ②P/E재확장 ③사이클텔) 점등 보드, γ는 gamma.json 단일소스(open/spent 자동전환). b64 패치 `decision-board-20260711.b64`→apply-patch 적용, 무결성 md5 왕복 통과.
 - 2026-07-11 · 03 리밸런싱 **재편**: `v-decision` 전용 섹션 신설(결정보드 이동) + **시장 모멘텀 전망**(미 signals 레짐·한 삼성 프록시) + **방향 확률 추정**(GBM: σ 프리셋·μ 프리셋+charts 모멘텀 블렌드, 다음주/1달/3개월 P상승·유지·하락). 그룹 `port:['decision']`으로 매크로룰북·X레이·트래커 뷰서 제외(코드 잔존). 결정보드 ①엔 적정밴드 오버레이 추가. 소스 `charts.json`·`prices.json` 03 신규 소비. b64 `decision-board-momprob-20260711.b64`→apply-patch 적용, 초회 인라인 손상(1B 공백)→교체 재푸시 후 md5 왕복 통과(commit 63a1da97).
 - 2026-07-12 · 01 시장 모니터링 **카드 렌즈 요약 2줄** 신설 — 각 그래프 위에 '논제 시계(γ·stage·목표가) / 가격 시계(고점 대비·평단 대비)' 분리 판정. 보유 6종은 `gamma.json` 단일소스(`flagged`=모호밴드→직전값 홀드를 문구로 명시), 지수 5종은 매크로 게이트 렌즈(나스닥 깊이축·S&P 공포축·코스피 속도 정찰·10년물 할인율·WTI 인플레). **게이트 판정 로직 단일소스화**: `v-macro` 내부 파생부를 `evalGate()`로 추출하고 `window.macroEval` 노출 → 01 렌즈가 재사용(임계 `TH` 중복 정의 제거 = 침묵하는 오류 차단). b64 전사 손상 2회(CSS 중괄호 1B·한글 1자) → 커밋SHA핀 md5 왕복으로 검출 후 교정 패치 적용(apply `2fb02cb`).
+- 2026-07-12 · **뉴스 물질성 스크리닝(items[].m)** — 카드 5칸을 홍보·사후추측 기사가 점거하던 문제 해소(MRVL 5건 중 3건이 노이즈였음). `fetch-news.mjs`에 3층 판정 도입: ①하드룰 `RE_PR`(수상·홍보·채용·블로그)·`RE_SPEC`("Why Is X Stock Falling"·"What A Real Crash"·"vs. Which Has More Upside"·추천 리스트) ②신규 요약 시 LLM이 a·w와 함께 m 생성 ③과거분 `scoreLegacy` 경량 배치 백필. `news.json`·`archive/{TK}.json`은 m≥1만 적재, m=0은 `news_archive.json`에 전건 보존(삭제 아님). `PER_TICKER` 4→8(스크리닝 후에도 5칸 확보). 하드룰 확정 노이즈는 요약 토큰 미소모. 드라이런 139건 중 19건(14%) 제외 · 지수 편출(−22.6%) 같은 **실사건은 보존**(오탐 1건 발견 후 룰 축소). 렌더 무수정 — 데이터 창만 정화(commit `de99a37`). 규율 불변: 스크리닝은 표시 대상만 정하고 판단·숫자 파일은 건드리지 않는다(narrative≠numbers).
