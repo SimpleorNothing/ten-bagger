@@ -644,6 +644,7 @@ table.tk th.c{text-align:center}
 .stk-hd .tk{font:700 13px var(--mono);color:var(--dawn)}
 .stk-hd .nm{font-size:15px;font-weight:700;color:var(--txt)}
 .stk-sum{padding:10px 14px;font-size:14px;color:var(--txt);line-height:1.55;border-top:1px solid var(--line)}
+.stk-sum.ph{color:var(--faint);font-size:12px}
 .stk-bul{margin:0;padding:11px 14px 11px 30px;border-top:1px solid var(--line);list-style:disc}
 .arow{display:flex;gap:10px;align-items:baseline;padding:9px 14px;background:var(--panel);text-decoration:none;border-top:1px solid var(--line);transition:.12s}
 .arow:hover{background:var(--panel2)}
@@ -2828,19 +2829,24 @@ window.MARKET=(function(){
   return lens('<b>할인율</b>AI 인프라 밸류에이션의 분모 · L8 감응도 최대',
    last.toFixed(2)+'% · 6M '+fmtP(p,1)+'% → '+v);
  }
+ var WTI_L1='<b>인플레</b>호르무즈 프리미엄 → PCE → 연준 경로 → 게이트';
  function lensWti(vals){
   var last=vals[vals.length-1],p=pct(vals);
   var v=p>=15?'유가발 인플레 전가 → 인하 지연 = 게이트 점등(매수 기회) 지연 리스크'
        :p<=-15?'유가 하락 → 인플레 완화 = 인하 경로 복원, 멀티플 우호'
        :'박스권 — 호르무즈 프리미엄이 하단을 지지, 급등 시 PCE 재가속';
-  return lens('<b>인플레</b>호르무즈 프리미엄 → PCE → 연준 경로 → 게이트',
+  return lens(WTI_L1,
    '$'+last.toFixed(1)+' · 6M '+fmtP(p,1)+'% → '+v);
  }
+ function lensWtiWait(){return lens(WTI_L1,'수집 대기 → 판정 보류');}
  async function loadWti(){
-  var el=document.getElementById('mkt_wti');
-  try{var r=await fetch('/api/wti',{cache:'no-store'});var j=await r.json();var s=j.series||[];var vals=slice6(s.map(function(x){return x[1];}).filter(function(x){return x!=null;}));
-   if(el&&vals.length)el.innerHTML=card('WTI 유가','$'+vals[vals.length-1].toFixed(1),pct(vals),vals,null,lensWti(vals));}
-  catch(e){if(el)el.innerHTML='<div class="mkt-nm">WTI 유가</div><div class="mkt-ph">데이터 대기</div>';}
+  var el=document.getElementById('mkt_wti');if(!el)return;
+  var wait='<div class="mkt-nm">WTI 유가</div>'+lensWtiWait()+'<div class="mkt-ph">유가 수집 대기</div>';
+  try{var r=await fetch('/api/wti',{cache:'no-store'});var j=await r.json();
+   var s=j.points||j.series||[];   /* worker /api/wti 출력 = {source,points:[["YYYY-MM-DD",close]]} — series 로 읽으면 항상 0건 */
+   var vals=slice6(s.map(function(x){return Array.isArray(x)?x[1]:x;}).filter(function(x){return x!=null&&isFinite(x);}));
+   el.innerHTML=vals.length>=2?card('WTI 유가','$'+vals[vals.length-1].toFixed(1),pct(vals),vals,null,lensWti(vals)):wait;}
+  catch(e){el.innerHTML=wait;}
  }
  async function loadHoldings(){
   var host=document.getElementById('mktHoldings');if(!host)return;
@@ -2917,7 +2923,8 @@ window.MARKET=(function(){
     var lst=byA[k].slice(0,MX);
     var title=NM[k]||(lst[0]&&lst[0].name)||k;
     html+='<div class="stk-blk"><div class="stk-hd"><span class="nm">'+esc(title)+'</span></div>';
-    if(sums[k])html+='<div class="stk-sum">'+esc(sums[k])+'</div>';
+    html+=sums[k]?'<div class="stk-sum">'+esc(sums[k])+'</div>'
+            :'<div class="stk-sum ph">요약 대기 — 다음 다이제스트(06:12·18:12)에서 생성</div>';
     html+='<div class="nlist">';
     lst.forEach(function(it){html+='<a class="nrow" href="'+esc(it.link||'#')+'" target="_blank" rel="noopener"><span class="ndt">'+esc((it.published||'').slice(5,10))+'</span><span class="ntt">'+esc(it.title||'')+'</span></a>';});
     html+='</div></div>';});

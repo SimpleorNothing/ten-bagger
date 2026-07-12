@@ -1,4 +1,4 @@
-**최종 갱신: 2026-07-12 17:25 (KST)**
+**최종 갱신: 2026-07-12 17:45 (KST)**
 
 # OPS — 알파맵 운영 가이드
 
@@ -66,7 +66,7 @@
 |---|---|---|---|
 | 코스피·S&P·나스닥 지수 | 자동 | 매일 06:37 KST | `charts.json` (`fetch-prices.mjs`, `^KS11·^GSPC·^IXIC` Yahoo 1Y) |
 | 미 10년물 금리 | 자동 | 런타임 | worker `/api/us10y` → `history[].markets.ten_year` |
-| WTI 유가 | 자동 | 런타임 | worker `/api/wti` (Yahoo upstream) |
+| WTI 유가 | 자동 | 런타임 | worker `/api/wti` → **`points`** 배열 (Yahoo). `series` 로 읽으면 0건 |
 | 보유 종목 스파크라인 | 자동 | 매일 06:37 KST | `charts.json` (Yahoo 1Y 일봉 t/c) |
 | **카드 렌즈 요약 2줄** (그래프마다 프레임→판정) | 자동(런타임 파생) | gamma·signals 일별 / holdings 주간에 편승 | `gamma.json`(γ·stage·flagged) + `signals.json`(**`window.macroEval` 단일소스 재사용**) + `holdings.json`(layer·평단) + `charts.json` |
 | 종목 뉴스 (종목 블록형 + 기사별 **일자 + 두 점**[명사형 요약 `a` / `→` 의미·주가영향 `w`] + 우측 주가 차트) | 자동 | **뉴스·digest 06:12·18:12 (1일 2회)** / 차트 06:37 | `news_digest.json`(claude-sonnet-4-6) + `news.json`(**물질성 m≥1만**) + `charts.json` |
@@ -239,6 +239,7 @@
 
 ## 갱신 이력
 
+- 2026-07-12 17:45 · WTI 카드 수리 — `/api/wti` 는 `points`, 카드는 `series` 를 읽어 「로딩…」 고착. 대기 중에도 렌즈 l1 유지.
 - 2026-07-12 17:25 · **03 관점 뽑기 진행 표시** — `insight.js` `run()`에 단계(1/3 전송 → 2/3 분석 → 3/3 정리)와 경과초 카운터(1초 틱) 추가. `/api/insight`는 단일 비스트리밍이라 서버 내부 진척은 불가 → 클라 단계·타이머로 「멈춘 게 아님」 표시. URL 경로는 라벨·「최대 1~2분」 병기.
 - 2026-07-12 17:05 · **worker Anthropic 프록시 오류 가시화** — `/api/insight`·`/api/estimate`가 실패 시 무조건 "anthropic api failed"만 반환해 원인(크레딧·키·모델·레이트리밋·과부하) 판별 불가였음. `describeAnthropicError`로 상태코드·타입을 파싱해 조치 안내 붙인 한국어 메시지로 접어 넣음(프론트는 `error`만 표시). 03 관점 뽑기 실패 진단 가능.
 - 2026-07-12 16:20 · **매크로 토픽 축 정규화(`ax`)** — 매 실행 발굴로 같은 축이 다른 이름·id로 들어와 「관련 기사」가 8블록으로 쪼개짐. 파이프라인·렌더를 축 키 기준으로 통일 → **8→5블록**.
