@@ -26,3 +26,9 @@
 - 보고에는 머지됨/안 됨을 분명히 적는다. 머지됐으면 squash 커밋 SHA(또는 (#PR번호) 커밋)와 head 브랜치 삭제 여부로 확정 짓는다.
 - auto-merge 가 곧바로 안 떴으면 게이트 잡 상태를 재확인한다(생성 직후엔 queued 일 수 있음 — 그 스냅샷만 보고 "안 됐다"고 단정하지 말 것).
 - 머지가 실패/대기로 끝났으면 그 사유(validate 실패 로그 등)를 보고한다.
+
+## 운영 문서 (SoT = main)
+- `OPS.md`(운영 매뉴얼) · `STYLE_GUIDE.md`(디자인 토큰) · `INFO_SOURCES.md`(정보 인벤토리) · 이 파일. **Claude Project 지식파일 캐시는 폴백** — 충돌하면 리포가 이긴다.
+- 코드를 바꿨으면 **같은 PR에서 해당 문서도 갱신**한다(토큰→STYLE_GUIDE, 메뉴·소스·주기→INFO_SOURCES, 워크플로·규율→OPS). 하단 갱신 이력에 한 줄 남긴다.
+- UI/CSS 를 건드린 PR은 반드시 `node scripts/check-docs.mjs` 통과. 실패 시 `--fix` 후 이력 한 줄.
+- `STYLE_GUIDE.md`의 `TOKENS:BEGIN~END`는 자동 생성 구역 — 손으로 고치지 않는다.
