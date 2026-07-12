@@ -601,7 +601,7 @@ table.tk th.c{text-align:center}
 #v-market .msec{font-size:20px;font-weight:700;letter-spacing:-.3px;margin:26px 0 12px;display:flex;align-items:center;gap:8px}
 #v-market .msec .mnote{font:500 12px var(--mono);color:var(--faint);letter-spacing:.04em}
 .mkt-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(224px,1fr));gap:12px}
-.mkt-card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:15px 16px;transition:.15s;min-height:128px}
+.mkt-card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:15px 16px;transition:.15s;min-height:128px;display:flex;flex-direction:column}
 .mkt-card:hover{border-color:var(--line2);box-shadow:0 4px 14px rgba(22,36,45,.06)}
 .mkt-nm{font-size:15px;font-weight:700;color:var(--txt);margin-bottom:6px}
 .mkt-val{font:700 17px var(--mono);color:var(--txt);margin-bottom:8px}
@@ -611,6 +611,9 @@ table.tk th.c{text-align:center}
 .mkt-dod::before{content:'전일 ';font-weight:500;color:var(--faint)}
 .mkt-dod.up{color:var(--st-hot)}.mkt-dod.dn{color:var(--st-accel)}
 .mkt-card .spark{width:100%;height:36px;display:block}
+.mkt-chart{position:relative;padding-top:16px;margin-top:auto}   /* margin-top:auto → 카드 간 그래프 하단 정렬(수평 위치 일치) */
+.spv{position:absolute;font:600 11px var(--mono);color:var(--dim);white-space:nowrap;transform:translateY(-100%);pointer-events:none;padding:0 3px;background:var(--panel);border-radius:3px;line-height:1.25;z-index:1}
+.spv-s{left:0}.spv-e{right:0}
 .mkt-axis{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font:500 11px var(--mono);color:var(--faint);margin-top:5px;letter-spacing:-.2px}
 .mkt-axis .ax-e{text-align:right}
 .mkt-axis .ax-dt{color:var(--dim);font-weight:600}
@@ -2780,19 +2783,24 @@ window.MARKET=(function(){
   if(typeof t==='number'||/^\d+$/.test(t)){var d=new Date(t*86400000);return (d.getUTCMonth()+1)+'/'+d.getUTCDate();}
   var m=String(t).match(/(\d{4})-(\d{1,2})-(\d{1,2})/);return m?(+m[2])+'/'+(+m[3]):String(t);
  }
- function axis(vals,dates,fmtV){
-  if(!vals||vals.length<2)return '';
+ // 스파크라인 + 끝점 수치를 그래프 위에 오버레이(X축 아님) + X축엔 시작·마지막 날짜만.
+ // 수치는 실제 끝점 y 위치에 붙여 그 위에 표기. 세로 정렬은 .mkt-card flex(끝을 아래 정렬)로 카드 간 일치.
+ function chart(vals,ref,dates,fmtV){
+  if(!vals||vals.length<2)return spark(vals,ref);
   var f=(typeof fmtV==='function')?fmtV:function(x){return (Math.round(x*100)/100).toLocaleString();};
-  var sd=(dates&&dates.length)?fmtDay(dates[0]):'',ed=(dates&&dates.length)?fmtDay(dates[dates.length-1]):'';
-  var L=(sd?'<span class="ax-dt">'+esc(sd)+'</span> ':'')+esc(f(vals[0]));
-  var R=esc(f(vals[vals.length-1]))+(ed?' <span class="ax-dt">'+esc(ed)+'</span>':'');
-  return '<div class="mkt-axis"><span class="ax-s">'+L+'</span><span class="ax-e">'+R+'</span></div>';
+  var mn=Math.min.apply(null,vals),mx=Math.max.apply(null,vals),rg=(mx-mn)||1,n=vals.length,HH=36,PT=16;
+  function topPx(v){return (PT+(1-(v-mn)/rg)*HH).toFixed(1);}   // PT=상단 라벨 여백 · HH=.spark 높이(px)
+  var sv='<span class="spv spv-s" style="top:'+topPx(vals[0])+'px">'+esc(f(vals[0]))+'</span>';
+  var ev='<span class="spv spv-e" style="top:'+topPx(vals[n-1])+'px">'+esc(f(vals[n-1]))+'</span>';
+  var ax='';
+  if(dates&&dates.length){ax='<div class="mkt-axis"><span class="ax-dt">'+esc(fmtDay(dates[0]))+'</span><span class="ax-dt ax-e">'+esc(fmtDay(dates[dates.length-1]))+'</span></div>';}
+  return '<div class="mkt-chart">'+spark(vals,ref)+sv+ev+'</div>'+ax;
  }
  function card(name,val,p,vals,ref,lns,opts){
   var up=p>=0,cls=up?'up':'dn',sign=up?'+':'';
   var dod=pctDoD(vals),dodHTML='',o=opts||{};
   if(dod!=null&&isFinite(dod)){var dcls=dod>=0?'up':'dn';dodHTML='<span class="mkt-dod '+dcls+'">'+(dod>=0?'+':'')+dod.toFixed(1)+'%</span>';}
-  return '<div class="mkt-nm">'+esc(name)+'</div><div class="mkt-val">'+val+' <span class="mkt-chg '+cls+'">'+sign+p.toFixed(1)+'%</span>'+dodHTML+'</div>'+(lns||'')+spark(vals,ref)+axis(vals,o.dates,o.fmtV)+'<div class="mkt-span">6개월</div>';
+  return '<div class="mkt-nm">'+esc(name)+'</div><div class="mkt-val">'+val+' <span class="mkt-chg '+cls+'">'+sign+p.toFixed(1)+'%</span>'+dodHTML+'</div>'+(lns||'')+chart(vals,ref,o.dates,o.fmtV)+'<div class="mkt-span">6개월</div>';
  }
  /* ===== 렌즈(요약 2줄) — l1=이 그래프가 판정하는 것(프레임) · l2=라이브 수치 → 판정.
     논제 시계(gamma.json γ·stage)와 가격 시계(고점·평단)를 분리해 붙인다. 게이트 판정은
