@@ -615,8 +615,8 @@ table.tk th.c{text-align:center}
 .mkt-dod::before{content:'전일 ';font-weight:500;color:var(--faint)}
 .mkt-dod.up{color:var(--st-hot)}.mkt-dod.dn{color:var(--st-accel)}
 .mkt-card .spark{width:100%;height:54px;display:block}
-.mkt-chart{position:relative;padding-top:20px;margin-top:auto}   /* margin-top:auto → 카드 간 그래프 하단 정렬(수평 위치 일치) · padding-top=끝점 라벨 상단 여백 */
-.spv{position:absolute;font:600 11px var(--mono);color:var(--dim);white-space:nowrap;transform:translateY(-100%);margin-top:-4px;pointer-events:none;line-height:1.25;z-index:1}   /* 배경 없음(투명) → 그래프 선을 가리지 않음 · margin-top:-4px → 끝점보다 조금 더 위 */
+.mkt-chart{position:relative;padding-top:28px;margin-top:auto}   /* margin-top:auto → 카드 간 그래프 하단 정렬(수평 위치 일치) · padding-top=끝점 라벨 상단 여백 */
+.spv{position:absolute;font:600 11px var(--mono);color:var(--dim);white-space:nowrap;transform:translateY(-100%);margin-top:-8px;pointer-events:none;line-height:1.25;z-index:1}   /* 배경 없음(투명) → 그래프 선을 가리지 않음 · margin-top:-4px → 끝점보다 조금 더 위 */
 .spv-s{left:0}.spv-e{right:0}
 .mkt-axis{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font:500 11px var(--mono);color:var(--faint);margin-top:5px;letter-spacing:-.2px}
 .mkt-axis .ax-e{text-align:right}
@@ -2799,10 +2799,11 @@ window.MARKET=(function(){
  }
  // 스파크라인 + 끝점 수치를 그래프 위에 오버레이(X축 아님) + X축엔 시작·마지막 날짜만.
  // 수치는 실제 끝점 y 위치에 붙여 그 위에 표기. 세로 정렬은 .mkt-card flex(끝을 아래 정렬)로 카드 간 일치.
+ function fmtNum(x){var n=Number(x);if(!isFinite(n))return String(x==null?'':x);return Math.abs(n)<10?n.toFixed(1):Math.round(n).toLocaleString();}   // 끝점 라벨 수치 포맷(종목 뉴스 fv와 동일): 10 미만=소수1자리 · 10 이상=정수(콤마)
  function chart(vals,ref,dates,fmtV){
   if(!vals||vals.length<2)return spark(vals,ref);
-  var f=(typeof fmtV==='function')?fmtV:function(x){return (Math.round(x*100)/100).toLocaleString();};
-  var mn=Math.min.apply(null,vals),mx=Math.max.apply(null,vals),rg=(mx-mn)||1,n=vals.length,HH=54,PT=20;
+  var f=(typeof fmtV==='function')?fmtV:fmtNum;
+  var mn=Math.min.apply(null,vals),mx=Math.max.apply(null,vals),rg=(mx-mn)||1,n=vals.length,HH=54,PT=28;
   function topPx(v){return (PT+(1-(v-mn)/rg)*HH).toFixed(1);}   // PT=.mkt-chart padding-top(px, CSS와 동기) · HH=.spark 높이(px)
   var sv='<span class="spv spv-s" style="top:'+topPx(vals[0])+'px">'+esc(f(vals[0]))+'</span>';
   var ev='<span class="spv spv-e" style="top:'+topPx(vals[n-1])+'px">'+esc(f(vals[n-1]))+'</span>';
@@ -2896,7 +2897,7 @@ window.MARKET=(function(){
    var sp=s.filter(function(x){var v=Array.isArray(x)?x[1]:x;return v!=null&&isFinite(v);});
    var vals=slice6(sp.map(function(x){return Array.isArray(x)?x[1]:x;}));
    var dts=slice6(sp.map(function(x){return Array.isArray(x)?x[0]:null;}));
-   el.innerHTML=vals.length>=2?card('WTI 유가','$'+vals[vals.length-1].toFixed(1),pct(vals),vals,null,lensWti(vals),{dates:dts,fmtV:function(x){return '$'+x.toFixed(1);}}):wait;}
+   el.innerHTML=vals.length>=2?card('WTI 유가','$'+vals[vals.length-1].toFixed(1),pct(vals),vals,null,lensWti(vals),{dates:dts,fmtV:function(x){return '$'+fmtNum(x);}}):wait;}
   catch(e){el.innerHTML=wait;}
  }
  async function loadHoldings(){
@@ -2911,7 +2912,7 @@ window.MARKET=(function(){
     .slice().sort(function(a,b){return (+b.w)-(+a.w);})
     .map(function(d){var tk=String(d.ticker||'').toUpperCase();return {ck:cK(d.ticker),nm:NM[d.ticker]||d.name,tk:tk};});
    var html=list.map(function(o){var d=S[o.ck];if(!d||!d.c||!d.c.length)return '';var vals=slice6(d.c),dts=slice6(d.t||[]);
-    return '<div class="mkt-card mkt-card-lk" data-tk="'+o.tk+'" role="button" tabindex="0" title="'+esc(o.nm)+' 기사 보기">'+card(o.nm,pxv(o.tk,vals[vals.length-1]),pct(vals),vals,null,lensHold(o.tk,o.ck,vals),{dates:dts,fmtV:function(v){return pxv(o.tk,v);}})+'</div>';}).join('');
+    return '<div class="mkt-card mkt-card-lk" data-tk="'+o.tk+'" role="button" tabindex="0" title="'+esc(o.nm)+' 기사 보기">'+card(o.nm,pxv(o.tk,vals[vals.length-1]),pct(vals),vals,null,lensHold(o.tk,o.ck,vals),{dates:dts,fmtV:function(v){return (/^\d/.test(o.tk)?'₩':'$')+fmtNum(v);}})+'</div>';}).join('');
    host.innerHTML=html||'<div class="mkt-ph" style="grid-column:1/-1">데이터 없음</div>';
    host.querySelectorAll('.mkt-card-lk').forEach(function(cd){function go(){gotoStockNews(cd.getAttribute('data-tk'));}cd.addEventListener('click',go);cd.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();go();}});});}
   catch(e){host.innerHTML='<div class="mkt-ph" style="grid-column:1/-1">데이터 대기</div>';}
@@ -2927,7 +2928,7 @@ window.MARKET=(function(){
    var pts=hh.filter(function(x){return x&&x.markets&&x.markets.ten_year!=null;});
    var vals=slice6(pts.map(function(x){return x.markets.ten_year;}));   // 기간버튼 창에 맞춰 슬라이스(us10y 히스토리는 외부 피드 → 확보분에 자동 클램프)
    var dts=slice6(pts.map(function(x){return x.date||x.day||x.d||x.timestamp||null;}));
-   if(el&&vals.length>=2)el.innerHTML=card('미 10년물',vals[vals.length-1].toFixed(2)+'%',pct(vals),vals,null,lensUs10y(vals),{dates:dts,fmtV:function(v){return v.toFixed(2)+'%';}});}
+   if(el&&vals.length>=2)el.innerHTML=card('미 10년물',vals[vals.length-1].toFixed(2)+'%',pct(vals),vals,null,lensUs10y(vals),{dates:dts,fmtV:function(v){return fmtNum(v)+'%';}});}
   catch(e){}
  }
  async function loadMacroNews(){

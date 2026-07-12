@@ -1,4 +1,4 @@
-**최종 갱신: 2026-07-12 23:45 (KST)**
+**최종 갱신: 2026-07-12 23:55 (KST)**
 
 # STYLE_GUIDE — 알파맵 디자인 시스템
 
@@ -167,9 +167,9 @@ pantone.css :root       ← 현행 팔레트 (팬튼 A안, index.html 하단 <li
 .mkt-val   값                    mono 17px/700
 .mkt-chg   등락(6개월)           14px/600 · up=--st-hot / dn=--st-accel
 .mkt-dod   전일대비              mono 12px/600 · `전일 ` 접두(--faint) · up=--st-hot / dn=--st-accel · 값 옆 병기
-.mkt-chart 그래프 래퍼           position:relative · padding-top:16px · **margin-top:auto**(카드 간 그래프 하단 정렬=수평 위치 일치)
+.mkt-chart 그래프 래퍼           position:relative · padding-top:28px · **margin-top:auto**(카드 간 그래프 하단 정렬=수평 위치 일치)
  └ .spark  스파크라인            height 54px, width 100%
- └ .spv    끝점 수치 오버레이     mono 11px/600 --dim · 실제 끝점 y에 붙여 그 **위**에 표기(X축 아님) · 좌=.spv-s / 우=.spv-e · **배경 투명**(선 안 가림) · margin-top:-4px로 끝점보다 살짝 위
+ └ .spv    끝점 수치 오버레이     mono 11px/600 --dim · 실제 끝점 y에 붙여 그 **위**에 표기(X축 아님) · 좌=.spv-s / 우=.spv-e · **배경 투명**(선 안 가림) · margin-top:-8px로 끝점에서 **더 띄움**(선 겹침 회피, halo 대신 여백) · 수치 포맷 = **fmtNum**(≥10 정수 콤마·<10 1자리, 종목 뉴스 fv와 동일). **헤더 .mkt-val 은 정밀값 유지**(그래프 라벨만 fmtNum)
 .mkt-axis  X축 날짜              mono 11px · 좌=시작일 / 우=마지막일 (.ax-dt=--dim/600) · space-between
 .mkt-span  기간 라벨             mono 12px --faint
 ```
@@ -234,6 +234,7 @@ pantone.css :root       ← 현행 팔레트 (팬튼 A안, index.html 하단 <li
 - 2026-07-12 22:55 · **기간 버튼 5Y 실데이터화 — `fetch-prices.mjs` 창 1Y→5Y 확대.** 07-12 19:55의 「charts.json ~1년 보유 → 3Y·5Y 클램프」 한계를 해소: Yahoo `range=1y→5y`, Naver `400일→1850일`(+상한 1300 캡). 매 실행 시리즈 전체를 교체하므로 `update-prices` 워크플로가 다음 실행에서 charts.json을 5Y로 백필 → 3Y·5Y 버튼이 실데이터 표시(신규 상장은 확보분까지 자동 클램프). 파일 크기 ~210KB→~1.1MB(gzip ~250KB). 프런트는 무변경(count 기반 `slice6`가 그대로 유효) — 단 `loadUs10y`가 기간버튼을 무시하던 것 `slice6` 적용해 라벨·창 일치. WTI(`/api/wti`)는 이미 2020~ 확보라 5Y 즉시 동작. index.html은 JS 1줄(슬라이스)만 → 신규 토큰·CSS 없음(check-docs 무영향).
 - 2026-07-12 22:25 · **01 헤더 변경-로그 배지 + 이력 팝업.** `update : YYYY.MM.DD 주요내용`(헤더 우상단 `.cyc-upd`+`.mkt-upd`) → 클릭 시 `.cyc-pop` 모달로 전체 이력. `changelog.js` 자가 마운트(insight.js 패턴)로 index.html은 `<script src>` 한 줄, 데이터 `MKT_CHANGELOG`. 기존 컴포넌트·CSS 재사용 → 신규 토큰·모달 없음(check-docs 무영향).
 - 2026-07-12 19:55 · **01 시장 모니터링 지표·보유 종목 헤더에 기간 선택 버튼(1M/6M/1Y/3Y/5Y) 추가.** 고정 `span.mnote`(「6개월」) 자리를 세그먼트 버튼군 `span.mrng`(`.rbtn`×5)으로 교체 — 지표·보유 두 그룹은 공통 상태 `RG`로 동기화(한쪽 클릭 시 두 배지+모든 카드 재슬라이스). `slice6()`를 `a.slice(-RG.days)`로 일반화(거래일 근사 1M 21·6M 126·1Y 252·3Y 756·5Y 1260, 기본 6M=기존 동작 보존), `card()`의 `.mkt-span`·렌즈 기간 라벨(`6M`)을 `RG.ko`/`RG.k`로 동적화. charts.json은 현재 ~1년치만 보유 → 3Y·5Y는 확보 전 구간(≈1년)까지 표시(가용분 자동 클램프). `.rbtn`/`.mrng` CSS는 `#v-market` 스코프, 신규 토큰 없음(check-docs 무영향). 차트 계열(loadWti·loadUs10y·loadIndices·loadHoldings)만 재요청, 뉴스 블록은 기간 무관이라 제외.
+- 2026-07-12 23:55 · **01 카드 그래프 끝점 라벨 — 소수점 통일(fmtNum) + 선에서 더 띄움.** 카드마다 제각각이던 끝점 라벨 소수점을 `fmtNum`(≥10 정수 콤마·<10 1자리, 종목 뉴스 `fv`와 동일)으로 전면 통일(보유 $979.30→$979 · WTI $71.4→$71 · 금리 4.57%→4.6% · 지수·₩는 정수 유지). **헤더 `.mkt-val`은 정밀값 유지** — 그래프 라벨만 반올림. 가독성은 halo 대신 **여백**: `.mkt-chart` padding-top 20→28 · `.spv` margin-top −4→−8(선 겹침 회피, PT 상수 동기). `chart()` 기본 포맷터도 fmtNum으로. 지수 카드는 이미 정수-콤마라 무변경 · 신규 토큰 없음(check-docs 무영향).
 - 2026-07-12 23:45 · **01 시장 모니터링 스파크라인 세로 50% 확대(36→54px).** 지표·보유 종목 카드 그래프 `.mkt-card .spark` height 36→54px · `chart()` 끝점 라벨 계산 `HH` 36→54 동기(끝점 수치 `.spv`가 실제 끝점 y에 계속 붙도록). `.mkt-chart` padding-top·flex 하단정렬 무변경 · 단일 `card()`/`chart()` 경로라 전 카드 자동 적용 · 신규 토큰 없음(check-docs 무영향). 종목 뉴스 차트(`.stk-cv`)는 범위 밖.
 - 2026-07-12 23:40 · **종목 뉴스 차트 끝점 값 가독성 — 흰 헤일로 추가.** 끝점 값이 같은 색 라인 위에 겹쳐(빨/청) 묻혀 안 보인다는 피드백 → `halo()`(흰 외곽선 `lineWidth 3` 후 채움)로 모든 캔버스 라벨(끝점 값·호버 툴팁·평단)을 그려 라인 위에서도 읽히게 함. 위치·포맷은 유지.
 - 2026-07-12 23:05 · **종목 뉴스 차트: 처음·마지막 값을 각 끝점에 붙여 위/아래 표기(사용자 첨부대로).** 직전엔 값을 하단 눈금줄로 뺐는데, 값을 라인 끝점에 붙여 달라는 요청 → `lblY()`로 끝점 위(−5)/상단 근접 시 아래(+12)에 배치, 처음=좌·마지막=우. 하단 눈금줄엔 날짜만 남김. `fv()` 포맷·라인 색·볼드 유지.
