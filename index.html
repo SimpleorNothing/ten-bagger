@@ -600,6 +600,10 @@ table.tk th.c{text-align:center}
 /* ===== MARKET (01 market) ===== */
 #v-market .msec{font-size:20px;font-weight:700;letter-spacing:-.3px;margin:26px 0 12px;display:flex;align-items:center;gap:8px}
 #v-market .msec .mnote{font:500 12px var(--mono);color:var(--faint);letter-spacing:.04em}
+#v-market .mrng{display:inline-flex;flex-wrap:wrap;gap:2px;background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:2px}
+#v-market .rbtn{font:600 11.5px var(--mono);color:var(--faint);background:transparent;border:0;padding:4px 9px;border-radius:7px;cursor:pointer;transition:.15s;letter-spacing:.02em;line-height:1.2}
+#v-market .rbtn:hover{color:var(--dim)}
+#v-market .rbtn.on{color:var(--txt);background:var(--panel);box-shadow:0 1px 3px rgba(22,36,45,.10);font-weight:700}
 .mkt-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(224px,1fr));gap:12px}
 .mkt-card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:15px 16px;transition:.15s;min-height:128px;display:flex;flex-direction:column}
 .mkt-card:hover{border-color:var(--line2);box-shadow:0 4px 14px rgba(22,36,45,.06)}
@@ -1716,7 +1720,7 @@ window.CYCLE=(function(){
     <div class="vkick">Market · 시장 모니터링</div>
     <h1 class="vtitle">한눈에 보는 <em>시장</em> — 증시·금리·유가·뉴스</h1>
   </div>
-  <h2 class="msec">지표 <span class="mnote">6개월</span></h2>
+  <h2 class="msec">지표 <span class="mrng" role="group" aria-label="기간 선택"><button type="button" class="rbtn" data-r="1M">1M</button><button type="button" class="rbtn" data-r="6M">6M</button><button type="button" class="rbtn" data-r="1Y">1Y</button><button type="button" class="rbtn" data-r="3Y">3Y</button><button type="button" class="rbtn" data-r="5Y">5Y</button></span></h2>
   <div class="mkt-grid">
     <div class="mkt-card" id="mkt_ks11"><div class="mkt-nm">코스피</div><div class="mkt-ph">지수 수집 대기</div></div>
     <div class="mkt-card" id="mkt_gspc"><div class="mkt-nm">S&amp;P 500</div><div class="mkt-ph">지수 수집 대기</div></div>
@@ -1724,7 +1728,7 @@ window.CYCLE=(function(){
     <div class="mkt-card" id="mkt_us10y"><div class="mkt-nm">미 10년물</div><div class="mkt-ph">스키마 확정 대기</div></div>
     <div class="mkt-card" id="mkt_wti"><div class="mkt-nm">WTI 유가</div><div class="mkt-ph">로딩…</div></div>
   </div>
-  <h2 class="msec">보유 종목 <span class="mnote">6개월</span></h2>
+  <h2 class="msec">보유 종목 <span class="mrng" role="group" aria-label="기간 선택"><button type="button" class="rbtn" data-r="1M">1M</button><button type="button" class="rbtn" data-r="6M">6M</button><button type="button" class="rbtn" data-r="1Y">1Y</button><button type="button" class="rbtn" data-r="3Y">3Y</button><button type="button" class="rbtn" data-r="5Y">5Y</button></span></h2>
   <div class="mkt-grid" id="mktHoldings"><div class="mkt-ph" style="grid-column:1/-1">로딩…</div></div>
   <h2 class="msec">관련 기사 <span class="mnote">토픽 · 일자별</span></h2>
   <div id="mktMacroNews"><div class="mkt-ph">수집 대기 (구글뉴스 RSS)</div></div>
@@ -2769,7 +2773,11 @@ setTimeout(function(){var _t0=document.querySelector('#nav .tab.on');if(_t0)_t0.
 /* ===== MARKET (01 market) ===== */
 window.MARKET=(function(){
  function esc(s){return String(s==null?'':s).replace(/[&<>]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;'}[c];});}
- function slice6(a){return a.slice(-126);}
+ // 기간 선택(지표·보유 종목 공통) — 거래일 근사: 1M≈21 · 6M≈126 · 1Y≈252 · 3Y≈756 · 5Y≈1260.
+ // charts.json 은 현재 ~1년치만 보유 → 3Y·5Y 는 확보된 전 구간(≈1년)까지 표시(가용분에 자동 클램프).
+ var RANGES=[{k:'1M',days:21,ko:'1개월'},{k:'6M',days:126,ko:'6개월'},{k:'1Y',days:252,ko:'1년'},{k:'3Y',days:756,ko:'3년'},{k:'5Y',days:1260,ko:'5년'}];
+ var RG=RANGES[1];   // 기본 6개월 — 기존 동작 보존
+ function slice6(a){return a.slice(-RG.days);}
  function pct(v){return (!v||v.length<2)?0:(v[v.length-1]/v[0]-1)*100;}
  function pctDoD(v){return (!v||v.length<2)?null:(v[v.length-1]/v[v.length-2]-1)*100;}
  function spark(vals,ref){
@@ -2806,7 +2814,7 @@ window.MARKET=(function(){
   var up=p>=0,cls=up?'up':'dn',sign=up?'+':'';
   var dod=pctDoD(vals),dodHTML='',o=opts||{};
   if(dod!=null&&isFinite(dod)){var dcls=dod>=0?'up':'dn';dodHTML='<span class="mkt-dod '+dcls+'">'+(dod>=0?'+':'')+dod.toFixed(1)+'%</span>';}
-  return '<div class="mkt-nm">'+esc(name)+'</div><div class="mkt-val">'+val+' <span class="mkt-chg '+cls+'">'+sign+p.toFixed(1)+'%</span>'+dodHTML+'</div>'+(lns||'')+chart(vals,ref,o.dates,o.fmtV)+'<div class="mkt-span">6개월</div>';
+  return '<div class="mkt-nm">'+esc(name)+'</div><div class="mkt-val">'+val+' <span class="mkt-chg '+cls+'">'+sign+p.toFixed(1)+'%</span>'+dodHTML+'</div>'+(lns||'')+chart(vals,ref,o.dates,o.fmtV)+'<div class="mkt-span">'+RG.ko+'</div>';
  }
  /* ===== 렌즈(요약 2줄) — l1=이 그래프가 판정하는 것(프레임) · l2=라이브 수치 → 판정.
     논제 시계(gamma.json γ·stage)와 가격 시계(고점·평단)를 분리해 붙인다. 게이트 판정은
@@ -2860,7 +2868,7 @@ window.MARKET=(function(){
   }
   var kv=(e&&e.veloMarker)?'<span class="ok">사이드카/서킷 발동</span> → '+(e.velo?'정찰 1.5% 권한(충격유형 수동확인)':'추세이탈 = 거부(낙하칼)'):'<span class="wn">사이드카·서킷 미발동</span> → 정찰 권한 없음';
   return lens('<b>KR</b>메모리(삼성·하이닉스) 프록시 · 속도 정찰 티어',
-   kv+' · 6M '+fmtP(p,0)+'%는 대부분 L3 재평가분 — 코스피 강세=내 L3 오버웨이트와 같은 축');
+   kv+' · '+RG.k+' '+fmtP(p,0)+'%는 대부분 L3 재평가분 — 코스피 강세=내 L3 오버웨이트와 같은 축');
  }
  function lensUs10y(vals){
   var last=vals[vals.length-1],p=pct(vals);
@@ -2868,7 +2876,7 @@ window.MARKET=(function(){
        :last<=4.0?'금리 하향 — 롱듀레이션(L8·유틸) 멀티플 여유 확대'
        :'중립대 — 방향 미확정, 다음 CPI/PCE가 분기점';
   return lens('<b>할인율</b>AI 인프라 밸류에이션의 분모 · L8 감응도 최대',
-   last.toFixed(2)+'% · 6M '+fmtP(p,1)+'% → '+v);
+   last.toFixed(2)+'% · '+RG.k+' '+fmtP(p,1)+'% → '+v);
  }
  var WTI_L1='<b>인플레</b>호르무즈 프리미엄 → PCE → 연준 경로 → 게이트';
  function lensWti(vals){
@@ -2877,7 +2885,7 @@ window.MARKET=(function(){
        :p<=-15?'유가 하락 → 인플레 완화 = 인하 경로 복원, 멀티플 우호'
        :'박스권 — 호르무즈 프리미엄이 하단을 지지, 급등 시 PCE 재가속';
   return lens(WTI_L1,
-   '$'+last.toFixed(1)+' · 6M '+fmtP(p,1)+'% → '+v);
+   '$'+last.toFixed(1)+' · '+RG.k+' '+fmtP(p,1)+'% → '+v);
  }
  function lensWtiWait(){return lens(WTI_L1,'수집 대기 → 판정 보류');}
  async function loadWti(){
@@ -3099,8 +3107,29 @@ window.MARKET=(function(){
   t.classList.remove('stk-flash');void t.offsetWidth;t.classList.add('stk-flash');
   setTimeout(function(){t.classList.remove('stk-flash');},1600);
  }
- async function render(){await loadCtx();loadWti();loadUs10y();loadIndices();loadHoldings();loadMacroNews();loadStockNews();}
- return {render:render};
+ // 기간 버튼 — 활성 표시 동기화(지표·보유 두 그룹 공통)
+ function paintRangeBtns(){
+  var bs=document.querySelectorAll('#v-market .mrng .rbtn');
+  for(var i=0;i<bs.length;i++){bs[i].classList.toggle('on',bs[i].getAttribute('data-r')===RG.k);}
+ }
+ // 차트 계열만 다시 그린다(뉴스 블록은 기간과 무관 → 재요청 안 함)
+ function redrawCharts(){loadWti();loadUs10y();loadIndices();loadHoldings();}
+ function setRange(k){
+  var r=null;for(var i=0;i<RANGES.length;i++)if(RANGES[i].k===k)r=RANGES[i];
+  if(!r||r.k===RG.k)return;
+  RG=r;paintRangeBtns();redrawCharts();
+ }
+ var _rngWired=false;
+ function wireRange(){
+  paintRangeBtns();
+  if(_rngWired)return;_rngWired=true;
+  var gs=document.querySelectorAll('#v-market .mrng');
+  for(var i=0;i<gs.length;i++){gs[i].addEventListener('click',function(e){
+   var b=e.target.closest('.rbtn');if(b)setRange(b.getAttribute('data-r'));
+  });}
+ }
+ async function render(){wireRange();await loadCtx();loadWti();loadUs10y();loadIndices();loadHoldings();loadMacroNews();loadStockNews();}
+ return {render:render,setRange:setRange};
 })();
 
 /* 다른 페이지/로그에서 8레이어 스택으로 점프 (단일 페이지 통합) */
