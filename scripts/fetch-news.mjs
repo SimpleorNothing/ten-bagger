@@ -3,10 +3,14 @@
 // same as fetch-prices.mjs. Source of truth for tickers is the C array in
 // index.html. Pulls Google News RSS per holding/candidate into news.json.
 //
-// IMPORTANT: this is a RAW FEED collector, not a scorer. It never touches
+// IMPORTANT: this collector SCREENS but never SCORES. It never touches
 // alpha.json / earnings.json / judgment.json / SIGNAL_LOG. Deciding signal
 // vs noise — and whether a headline is big enough to move a number — stays
 // with the operator/Claude (see OPS.md §2 "수시" + the daily intake loop).
+//
+// 스크리닝(items[].m)은 '무엇을 보여줄지'만 정한다(표시 창 방어) — 판단·숫자 변경이 아니다.
+// m=2 논제(펀더멘털) / m=1 가격시계(실사건) / m=0 비물질(홍보·사후추측·리스트).
+// m=0 도 news_archive.json 에는 전건 보존된다(삭제 아님, 표시 제외일 뿐).
 //
 // news.json is repo-only review material: it is in .assetsignore and
 // paths-ignored in deploy.yml, so the daily commit never redeploys the site.
@@ -18,7 +22,10 @@ const OUT = 'news.json';
 const UA = { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36' };
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-const PER_TICKER = 4;     // keep newest N headlines per name
+// 스크리닝(m)이 노이즈를 걷어내므로 원시 수집은 넉넉히 긁는다.
+// 4건만 긁으면 홍보·사후해설이 3건을 먹었을 때 실질 기사가 1건만 남는다.
+const PER_TICKER = 8;     // keep newest N headlines per name
+const MIN_M = 1;          // 사이트 표시 임계 — m>=1(주가에 영향)만 news.json·샤드에 싣는다
 // news.json = 사이트가 매 로딩마다 통째로 받는 파일 → 반드시 상한을 둔다(모바일 페이로드).
 // 삭제가 아니라 '창(window)'일 뿐이고, 잘려나간 기사는 news_archive.json 에 영구 보존된다.
 const PRUNE_DAYS = 95;         // 사이트 표시 창(약 3개월)
@@ -113,6 +120,98 @@ async function fetchFeed(c) {
 // → 과거치를 매일 재요약하지 않는다(토큰·비용 방어).
 const ART_BATCH = 30;      // 1회 호출당 기사 수 (두 점 출력이라 60은 max_tokens 초과·절단 위험)
 const ART_MAX_NEW = 240;   // 1회 실행당 신규 요약 상한
+
+// ---- 물질성 스크리닝 (items[].m) ----
+// 카드 슬롯은 종목당 5칸뿐인데 홍보·사후해설·가정 시나리오가 그 칸을 먹으면
+// 정작 주가를 움직인 기사가 밀려난다 → 수집 단에서 등급을 매겨 표시 창을 지킨다.
+//   m=2 논제(펀더멘털): 실적·가이던스·수주·계약·제품 출하·고객·공급망·규제·M&A 등 확정/구체 사실
+//   m=1 가격시계(실사건): 실제 발생한 수급·가격 사건(지수 편출입, 등급·목표가 변경, 대량 보유 변동, 급등락 사실)
+//   m=0 비물질(제외): 사내 홍보·수상·후원·블로그, "왜 떨어졌나" 사후 추측 해설, 가정 시나리오,
+//                     매수 추천·베스트 리스트, 종목 무관
+// 아카이브(news_archive.json)에는 m=0도 전건 보존한다 — 삭제가 아니라 '표시 창'에서만 뺀다.
+
+// 홍보·수상·문화·행사 (회사 PR 채널 + 언론 전재)
+const RE_PR = /\b(award|awards|awarded|honoring|honou?red|recogniz(?:ed|ing)|named (?:one|to|among)|best (?:companies|places)|great place to work|top workplace|employee|workplace|culture|diversity|inclusion|scholarship|internship|sponsor|celebrat|anniversary|webinar|podcast|blog|newsletter|life at|csr|esg report|philanthrop|donat|charit)\b|수상|시상|표창|사회공헌|기부|후원|채용|사내|기업문화|웨비나|세미나 개최/i;
+// 사후 추측 해설·가정 시나리오·추천 리스트 (콘텐츠팜 전형)
+// 주의: "Is Down 22.6% After Index Exit" 처럼 **일어난 일**을 서술한 제목은 잡으면 안 된다(가격시계 실사건 = m1).
+const RE_SPEC = /\b(why (?:is|are|did|has)\b.*\b(?:stock|shares)|what (?:a|would) .*(?:crash|happen)|should you (?:buy|sell)|is .* (?:still )?a (?:buy|sell)|(?:best|top) \d*\s*(?:ai |growth |value |chip )?stocks?|\d+ (?:reasons|predictions?)|prediction for|here'?s why you|stock (?:forecast|prediction)|better buy|vs\.? .*\b(?:stock|which|has more upside)|moving (?:higher|lower) today)\b|왜 (?:하락|급락|상승|급등)|매수해야|유망주|추천주|투자 포인트|주가 전망|급등주|테마주/i;
+
+function ruleM(it) {
+  const t = String(it.title || '');
+  const s = String(it.source || '');
+  const a = String(it.a || '');
+  if (RE_PR.test(t) || RE_PR.test(a)) return 0;
+  if (RE_SPEC.test(t)) return 0;
+  // 기존 요약(w)이 이미 '무가치'로 판정한 경우 — '가격 시계 노이즈'(=실사건)와 구분해 강한 표현만 잡는다.
+  const w = String(it.w || '');
+  if (/실질 영향 (?:없|미미)|회사 무관|무관 노이즈|가정적 시나리오|영향 없는 중립/.test(w)) return 0;
+  if (/회사 무관/.test(a)) return 0;
+  return undefined;   // 판정 보류 → LLM 스코어러에 넘긴다
+}
+
+// 하드룰로 확정된 m=0 은 요약 토큰도 쓰지 않는다(수집→즉시 배제).
+function preScreen(items) {
+  let cut = 0;
+  for (const it of items) {
+    if (it.ticker === 'MACRO' || Number.isInteger(it.m)) continue;
+    const r = ruleM(it);
+    if (r === 0) { it.m = 0; cut++; }
+  }
+  if (cut) console.log(`screen(rule): ${cut}건 m=0 (홍보·추측·리스트)`);
+}
+
+// a·w 는 이미 있는데 m 만 없는 과거 기사 → 제목·요약만 보고 등급만 경량 배치로 백필.
+const SCORE_BATCH = 60;
+async function scoreLegacy(items) {
+  const key = process.env.ANTHROPIC_API_KEY;
+  const todo = items.filter((it) => it.ticker !== 'MACRO' && !Number.isInteger(it.m));
+  if (!todo.length) { console.log('screen(llm): 대상 없음'); return; }
+  if (!key) {   // 키 없으면 보수적으로 통과(표시) — 스크리닝 실패가 기사 실종으로 이어지면 안 된다
+    for (const it of todo) it.m = 1;
+    console.log(`screen(llm): API 키 없음 → ${todo.length}건 m=1 통과`);
+    return;
+  }
+  let done = 0;
+  for (let i = 0; i < todo.length; i += SCORE_BATCH) {
+    const batch = todo.slice(i, i + SCORE_BATCH);
+    const lines = batch.map((it, n) => `${n}|${it.ticker}|${it.title}${it.a ? ' // ' + it.a : ''}`).join('\n');
+    const prompt = `너는 AI 인프라 투자 관측소의 애널리스트다. 아래 기사 각각이 **주가에 영향을 주는 기사인지** 등급(m)만 매겨라.
+
+m=2 논제(펀더멘털): 실적·가이던스·수주·계약·제품 출하·고객 확보·공급망·규제·M&A 등 확정되거나 구체적인 사실
+m=1 가격시계(실사건): 실제 일어난 수급·가격 사건 — 지수 편출입, 애널리스트 등급·목표가 변경, 대량 보유 변동, 실제 급등락 사실 보도
+m=0 비물질(제외): 사내 홍보·수상·후원·채용·블로그, "왜 떨어졌나" 식 사후 추측 해설, 가정적 시나리오·가격 예측, 매수 추천·베스트 리스트, 해당 종목과 무관한 기사
+
+원칙: **일어난 일**은 남기고, **의견·추측·홍보**는 버린다. 판단이 애매하면 m=1.
+
+다음 JSON 배열만 출력하라(마크다운·설명 금지):
+[{"n":0,"m":2}]
+
+${lines}`;
+    try {
+      const r = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01' },
+        body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 4000, messages: [{ role: 'user', content: prompt }] }),
+      });
+      if (!r.ok) throw new Error('anthropic HTTP ' + r.status);
+      const j = await r.json();
+      const text = (j.content || []).filter((b) => b.type === 'text').map((b) => b.text).join('');
+      const arr = parseArts(text);
+      for (const x of arr) {
+        if (x && Number.isInteger(x.n) && batch[x.n] && Number.isInteger(x.m)) {
+          batch[x.n].m = Math.max(0, Math.min(2, x.m));
+          done++;
+        }
+      }
+    } catch (e) {
+      console.log(`screen(llm) 배치 실패(건너뜀): ${e.message}`);
+    }
+    await sleep(600);
+  }
+  for (const it of todo) if (!Number.isInteger(it.m)) it.m = 1;   // 실패분은 통과(표시)
+  const cut = todo.filter((it) => it.m === 0).length;
+  console.log(`screen(llm): ${done}/${todo.length} 판정 · m=0 ${cut}건 제외`);
+}
 
 // ---- 트렌딩 매크로 주제 자동 발굴 (macroTopics) ----
 // 고정 주제(호르무즈·FOMC·관세)를 하드코딩하면 이슈가 식어도 계속 긁는다.
@@ -230,12 +329,14 @@ function parseArts(text) {
     const mn = chunk.match(/"n"\s*:\s*(\d+)/);
     const ma = chunk.match(/"a"\s*:\s*"((?:[^"\\]|\\.)*)"/);
     const mw = chunk.match(/"w"\s*:\s*"((?:[^"\\]|\\.)*)"/);
+    const mm = chunk.match(/"m"\s*:\s*(\d)/);
     if (!mn || !ma) continue;
     try {
       out.push({
         n: Number(mn[1]),
         a: JSON.parse('"' + ma[1] + '"'),
         w: mw ? JSON.parse('"' + mw[1] + '"') : '',
+        ...(mm ? { m: Number(mm[1]) } : {}),
       });
     } catch (e) { /* 이 항목만 포기 */ }
   }
@@ -245,7 +346,8 @@ function parseArts(text) {
 async function summarizeArticles(items) {
   const key = process.env.ANTHROPIC_API_KEY;
   if (!key) { console.log('arts: ANTHROPIC_API_KEY 없음 → 스킵'); return; }
-  const todo = items.filter((it) => it.ticker !== 'MACRO' && (!it.a || it.w === undefined)).slice(0, ART_MAX_NEW);
+  // m===0 (하드룰 확정 노이즈)은 표시되지 않으므로 요약 토큰을 쓰지 않는다.
+  const todo = items.filter((it) => it.ticker !== 'MACRO' && it.m !== 0 && (!it.a || it.w === undefined)).slice(0, ART_MAX_NEW);
   if (!todo.length) { console.log('arts: 신규 기사 없음'); return; }
   let done = 0;
   for (let i = 0; i < todo.length; i += ART_BATCH) {
@@ -267,11 +369,17 @@ w = 그래서 무슨 의미인가 · 주가에 대한 영향
 - 영향의 방향(호재/악재/중립)과 그 강도를 분명히 하되, 근거 없는 단정·매매 권유는 금지.
 - 확정 사실이 아니면 관측임을 드러낸다("~라는 관측", "~에 그침").
 
-해당 종목과 무관한 기사도 **n·a·w 세 키를 모두 포함**해 {"n":5,"a":"회사 무관 노이즈","w":""} 형태로 출력한다.
+m = 이 기사가 주가에 영향을 주는가 (정수 0·1·2)
+- **m=2 논제(펀더멘털)**: 실적·가이던스·수주·계약·제품 출하·고객 확보·공급망·규제·M&A 등 확정되거나 구체적인 사실.
+- **m=1 가격시계(실사건)**: 실제 일어난 수급·가격 사건 — 지수 편출입, 애널리스트 등급·목표가 변경, 대량 보유 변동, 실제 급등락 사실 보도.
+- **m=0 비물질**: 사내 홍보·수상·후원·채용·블로그, "왜 떨어졌나" 식 사후 추측 해설, 가정적 시나리오·가격 예측, 매수 추천·베스트 리스트, 종목 무관 기사.
+- 원칙: **일어난 일**은 남기고 **의견·추측·홍보**는 버린다. m=0 은 사이트에 표시되지 않는다. 애매하면 m=1.
+
+해당 종목과 무관한 기사도 **n·a·w·m 네 키를 모두 포함**해 {"n":5,"a":"회사 무관 노이즈","w":"","m":0} 형태로 출력한다.
 어떤 경우에도 키 이름을 생략하지 말 것(예: {"n":5,"a":"...",""} 같은 출력은 금지).
 
 다음 JSON 배열만 출력하라(마크다운·설명 금지):
-[{"n":0,"a":"명사형 요약","w":"의미·주가 영향 한 문장"}]
+[{"n":0,"a":"명사형 요약","w":"의미·주가 영향 한 문장","m":2}]
 
 ${lines}`;
     try {
@@ -289,6 +397,7 @@ ${lines}`;
         if (x && Number.isInteger(x.n) && batch[x.n] && x.a) {
           batch[x.n].a = String(x.a).trim();
           batch[x.n].w = String(x.w || '').trim();   // 두 번째 점(의미·주가 영향)
+          if (Number.isInteger(x.m)) batch[x.n].m = Math.max(0, Math.min(2, x.m));  // 물질성 등급
           done++;
         }
       }
@@ -418,16 +527,19 @@ async function main() {
     if (!cur) { byLink.set(it.link, it); continue; }
     if (!cur.a && it.a) cur.a = it.a;   // 요약은 어느 쪽에 있든 살린다
     if (cur.w === undefined && it.w !== undefined) cur.w = it.w;
+    if (!Number.isInteger(cur.m) && Number.isInteger(it.m)) cur.m = it.m;   // 물질성 등급도 승계
   }
   const all = [...byLink.values()]
     .sort((a, b) => new Date(b.published || 0) - new Date(a.published || 0));
 
-  await summarizeArticles(all);
+  preScreen(all);           // ① 하드룰: 홍보·추측·리스트 → m=0 (요약 토큰 미소모)
+  await summarizeArticles(all);   // ② 신규 기사: a·w·m 동시 생성
+  await scoreLegacy(all);   // ③ a·w 는 있는데 m 만 없는 과거 기사 → 등급만 백필
 
   fs.writeFileSync(ARCHIVE_OUT, JSON.stringify({
     asOf: now.toISOString(),
     source: 'Google News RSS · 보유/후보 종목별 영구 아카이브',
-    note: '기사 전건 누적 — 프루닝·삭제 없음. items[].a = 기사별 한 줄 요약(신규만 증분 생성·이후 영구 보존). news.json 은 이 파일에서 최근 구간만 잘라낸 사이트 표시용 창. 사이트에 배포되지 않는다(.assetsignore).',
+    note: '기사 전건 누적 — 프루닝·삭제 없음. items[].a = 기사별 한 줄 요약(신규만 증분 생성·이후 영구 보존). items[].m = 물질성 등급(2 논제·1 가격시계·0 비물질) — m=0 도 여기엔 남는다. news.json 은 이 파일에서 최근 구간·m>=1 만 잘라낸 사이트 표시용 창. 사이트에 배포되지 않는다(.assetsignore).',
     count: all.length,
     items: all,
   }, null, 2) + '\n');
@@ -437,10 +549,12 @@ async function main() {
   // 카드는 5건만 보이지만 '더 보기'로 나머지 3개월치를 볼 수 있어야 한다.
   // 전체 아카이브(수 MB)를 통째로 받게 하면 안 되므로 종목별로 쪼갠다
   // → 클릭한 종목의 파일 하나(수십 KB)만 온디맨드로 내려간다.
+  // 표시 창은 스크리닝을 통과한 기사만 담는다(m>=MIN_M). m=0 은 아카이브에만 남는다.
   const cutoff = now.getTime() - PRUNE_DAYS * 864e5;
+  const material = (it) => !Number.isInteger(it.m) || it.m >= MIN_M;
   const inWin = all.filter((it) => {
     const t = it.published ? new Date(it.published).getTime() : 0;
-    return (!t || t >= cutoff) && it.ticker !== 'MACRO';
+    return (!t || t >= cutoff) && it.ticker !== 'MACRO' && material(it);
   });
   const winByTk = new Map();
   for (const it of inWin) {
@@ -458,11 +572,11 @@ async function main() {
       asOf: now.toISOString(),
       windowDays: PRUNE_DAYS,
       count: list.length,
-      // 렌더에 필요한 필드만(용량 절감): d=일자 a=명사형 요약 w=의미·주가 영향 t=제목(폴백) u=링크
-      items: list.map((it) => ({ d: it.published, a: it.a || '', w: it.w || '', t: it.title || '', u: it.link })),
+      // 렌더에 필요한 필드만(용량 절감): d=일자 a=명사형 요약 w=의미·주가 영향 m=물질성 t=제목(폴백) u=링크
+      items: list.map((it) => ({ d: it.published, a: it.a || '', w: it.w || '', m: Number.isInteger(it.m) ? it.m : 1, t: it.title || '', u: it.link })),
     }, null, 2) + '\n');
   }
-  console.log(`shards: ${SHARD_DIR}/ ${winByTk.size}개 종목 (3개월 창 전건)`);
+  console.log(`shards: ${SHARD_DIR}/ ${winByTk.size}개 종목 (3개월 창 · 스크리닝 통과분)`);
 
   // ── 사이트 표시 창(news.json) ──────────────────────────────────────
   // 카드는 종목당 5건까지만 보여주므로 파일에도 그만큼만 싣는다
@@ -472,6 +586,7 @@ async function main() {
     .filter((it) => {
       const t = it.published ? new Date(it.published).getTime() : 0;
       if (t && t < cutoff) return false;
+      if (it.ticker !== 'MACRO' && !material(it)) return false;   // 스크리닝 탈락(홍보·추측·리스트) → 카드 슬롯을 주지 않는다
       const k = it.ticker === 'MACRO' ? (it.id || 'MACRO') : (it.ticker || '?');  // 매크로는 토픽별로 센다(합산되면 트렌딩 축이 통째로 잘림)
       const n = (perTk.get(k) || 0) + 1;
       if (n > SITE_PER_TICKER) return false;   // all 은 최신순 정렬 → 앞 5건만 통과
@@ -482,8 +597,8 @@ async function main() {
 
   const payload = {
     asOf: now.toISOString(),
-    source: 'Google News RSS · 보유/후보 종목별 (원시 피드 + 기사별 한 줄 요약)',
-    note: `사이트 종목 카드의 "일자 + 요약" 행 소스. 최근 ${PRUNE_DAYS}일 창 · 종목당 최신 ${SITE_PER_TICKER}건(첫 로딩 페이로드 상한). 나머지 3개월치는 ${SHARD_DIR}/{티커}.json 을 '더 보기'로 온디맨드 로드. 창 밖 과거 기사는 삭제된 것이 아니라 ${ARCHIVE_OUT} 에 영구 보존된다. 신호/소음 판단과 SIGNAL_LOG 반영은 사람/Claude의 몫 — 채점·차트에는 쓰이지 않는다.`,
+    source: 'Google News RSS · 보유/후보 종목별 (원시 피드 + 기사별 한 줄 요약 + 물질성 스크리닝)',
+    note: `사이트 종목 카드의 "일자 + 요약" 행 소스. 최근 ${PRUNE_DAYS}일 창 · 종목당 최신 ${SITE_PER_TICKER}건(첫 로딩 페이로드 상한) · **물질성 스크리닝 통과분만**(items[].m>=${MIN_M} — 2=논제/펀더멘털, 1=가격시계 실사건, 0=홍보·사후추측·리스트로 제외). 탈락 기사는 삭제가 아니라 ${ARCHIVE_OUT} 에 전건 보존. 나머지 3개월치는 ${SHARD_DIR}/{티커}.json 을 '더 보기'로 온디맨드 로드. 신호/소음 판단과 SIGNAL_LOG 반영은 사람/Claude의 몫 — 채점·차트에는 쓰이지 않는다.`,
     count: items.length,
     macroTopics: MACRO_TOPICS,   // 이번 실행에서 채택된 트렌딩 매크로 축(폴백·표시용)
     archive: ARCHIVE_OUT,
