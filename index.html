@@ -638,8 +638,11 @@ table.tk th.c{text-align:center}
 .arow{display:flex;gap:10px;align-items:baseline;padding:9px 14px;background:var(--panel);text-decoration:none;border-top:1px solid var(--line);transition:.12s}
 .arow:hover{background:var(--panel2)}
 .arow .adt{flex:0 0 40px;font:600 11px var(--mono);color:var(--faint)}
-.arow .atx{flex:1;min-width:0;font-size:12.5px;color:var(--txt);line-height:1.55;white-space:normal}
-.arow.is-noise .atx{color:var(--faint)}
+.arow .atx{flex:1;min-width:0;white-space:normal}
+.arow .asum{font-size:12.5px;color:var(--txt);line-height:1.55;font-weight:600}
+.arow .aimp{display:flex;gap:5px;margin-top:4px;font-size:12px;color:var(--dim);line-height:1.5}
+.arow .aimp .aar{flex:0 0 auto;color:var(--dawn);font-weight:700}
+.arow.is-noise .asum{color:var(--faint);font-weight:400}
 .aempty{padding:11px 14px;border-top:1px solid var(--line);font-size:12px;color:var(--faint)}
 .amore{display:block;width:100%;padding:9px 14px;border:0;border-top:1px solid var(--line);background:var(--panel2);color:var(--dawn);font:600 12px var(--mono);text-align:center;cursor:pointer;transition:.12s}
 .amore:hover{background:var(--panel);color:var(--txt)}
@@ -2820,16 +2823,19 @@ window.MARKET=(function(){
    var artBy={};(((dg||{}).arts)||[]).forEach(function(x){if(x&&x.link&&x.a)artBy[x.link]=x.a;});
    var WIN_D=92,MAX_ROWS=5,cutT=Date.now()-WIN_D*864e5;
    var SHARD=(nw&&nw.shardDir)||'archive',WCNT=(nw&&nw.winCounts)||{};
-   function rowHTML(dt,a,ttl,url){
+   function rowHTML(dt,a,w,ttl,url){
     var tx=String(a||'').trim()||String(ttl||'');
+    var im=String(w||'').trim();
     var noise=/무관|노이즈/.test(tx);
     return '<a class="arow'+(noise?' is-noise':'')+'" href="'+esc(url||'#')+'" target="_blank" rel="noopener">'
      +'<span class="adt">'+esc(String(dt||'').slice(5,10))+'</span>'
-     +'<span class="atx">'+esc(tx)+'</span></a>';}
+     +'<span class="atx"><span class="asum">'+esc(tx)+'</span>'
+     +(im&&!noise?'<span class="aimp"><span class="aar">\u2192</span><span>'+esc(im)+'</span></span>':'')
+     +'</span></a>';}
    function artRows(k){var lst=(byTk[k]||[]).filter(function(it){
      var t=it.published?new Date(it.published).getTime():0;return !t||t>=cutT;}).slice(0,MAX_ROWS);
     if(!lst.length)return '<div class="aempty">최근 3개월 기사 없음</div>';
-    var h=lst.map(function(it){return rowHTML(it.published,it.a||artBy[it.link],it.title,it.link);}).join('');
+    var h=lst.map(function(it){return rowHTML(it.published,it.a||artBy[it.link],it.w,it.title,it.link);}).join('');
     var tot=WCNT[k]||lst.length;
     if(tot>lst.length)h+='<button class="amore" data-more="'+esc(k)+'">더 보기 (+'+(tot-lst.length)+'건 · 최근 3개월)</button>';
     return h;}
@@ -2844,7 +2850,7 @@ window.MARKET=(function(){
       if(!lst.length)throw 0;
       var wrap=btn.parentNode;
       btn.insertAdjacentHTML('beforebegin',lst.slice(MAX_ROWS).map(function(x){
-       return rowHTML(x.d,x.a,x.t,x.u);}).join(''));
+       return rowHTML(x.d,x.a,x.w,x.t,x.u);}).join(''));
       btn.remove();})
      .catch(function(){btn.disabled=false;btn.textContent='불러오지 못했습니다 · 다시 시도';});};
    var d=document.getElementById('mktDigestAsof');if(d&&dg&&dg.asOf)d.textContent='자동 요약 · '+dg.asOf.slice(0,10);

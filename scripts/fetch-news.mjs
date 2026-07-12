@@ -98,7 +98,7 @@ async function fetchFeed(c) {
 }
 
 
-// ---- 기사별 한 줄 요약 (items[].a) ----
+// ---- 기사별 두 점 정리 (items[].a = 명사형 요약, items[].w = 의미·주가 영향) ----
 // 사이트 종목 카드는 "일자 + 요약" 행으로 렌더한다(기사 제목 미표시).
 // 요약은 아카이브에 영구 보존되고, a 가 없는 신규 기사만 증분 생성한다
 // → 과거치를 매일 재요약하지 않는다(토큰·비용 방어).
@@ -108,7 +108,7 @@ const ART_MAX_NEW = 240;   // 1회 실행당 신규 요약 상한
 async function summarizeArticles(items) {
   const key = process.env.ANTHROPIC_API_KEY;
   if (!key) { console.log('arts: ANTHROPIC_API_KEY 없음 → 스킵'); return; }
-  const todo = items.filter((it) => it.ticker !== 'MACRO' && !it.a).slice(0, ART_MAX_NEW);
+  const todo = items.filter((it) => it.ticker !== 'MACRO' && (!it.a || it.w === undefined)).slice(0, ART_MAX_NEW);
   if (!todo.length) { console.log('arts: 신규 기사 없음'); return; }
   let done = 0;
   for (let i = 0; i < todo.length; i += ART_BATCH) {
@@ -116,17 +116,24 @@ async function summarizeArticles(items) {
     const lines = batch
       .map((it, n) => `${n}|${it.ticker}|${it.name}|${(it.published || '').slice(0, 10)}|${it.title}`)
       .join('\n');
-    const prompt = `아래는 AI 인프라 투자 관측소가 추적하는 종목의 뉴스 기사다(번호|티커|종목명|날짜|제목).
-각 기사를 한국어 한 문장으로 요약하라.
+    const prompt = `너는 AI 인프라 투자 관측소의 애널리스트다. 아래는 추적 종목의 뉴스 기사다(번호|티커|종목명|날짜|제목).
+각 기사를 **두 점(a·w)** 으로 정리하라.
 
-규칙:
-- 제목을 그대로 번역·복사하지 말고, 내용의 핵심(무엇이 일어났는가)을 서술형 한 문장으로 압축한다.
-- 40~90자. 사실만. 제목에 없는 내용을 지어내지 않는다.
-- 확정 실적·수주·계약과 단순 관측·전망·내러티브를 구분해 서술한다(예: "~로 전망됐다", "~라는 분석이 나왔다").
-- 해당 종목과 무관한 기사는 "회사 무관 노이즈"로만 적는다.
+a = 기사 내용 요약
+- 제목을 그대로 번역·복사하지 말고, 무엇이 일어났는가를 압축한다.
+- **반드시 명사형으로 종결한다.** ("~했다/~됐다" 금지 → "~ 급락", "~ 계약 체결", "~ 공개", "~ 전망 제기")
+- 30~70자. 사실만. 제목에 없는 내용을 지어내지 않는다.
+
+w = 그래서 무슨 의미인가 · 주가에 대한 영향
+- 한 문장. 사이트에서 "→" 뒤에 붙는다(화살표는 넣지 말 것).
+- **두 시계를 분리한다**: 실적·수주·가이던스 = 논제(펀더멘털) 영향 / 수급·센티먼트·지수 편출입·애널리스트 코멘트 = 가격 시계 노이즈.
+- 영향의 방향(호재/악재/중립)과 그 강도를 분명히 하되, 근거 없는 단정·매매 권유는 금지.
+- 확정 사실이 아니면 관측임을 드러낸다("~라는 관측", "~에 그침").
+
+해당 종목과 무관한 기사는 a="회사 무관 노이즈", w="" 로 둔다.
 
 다음 JSON 배열만 출력하라(마크다운·설명 금지):
-[{"n":0,"a":"한 문장 요약"}]
+[{"n":0,"a":"명사형 요약","w":"의미·주가 영향 한 문장"}]
 
 ${lines}`;
     try {
@@ -141,7 +148,11 @@ ${lines}`;
       const arr = JSON.parse(text.replace(/```json|```/g, '').trim());
       if (!Array.isArray(arr)) throw new Error('arts shape invalid');
       for (const x of arr) {
-        if (x && Number.isInteger(x.n) && batch[x.n] && x.a) { batch[x.n].a = String(x.a).trim(); done++; }
+        if (x && Number.isInteger(x.n) && batch[x.n] && x.a) {
+          batch[x.n].a = String(x.a).trim();
+          batch[x.n].w = String(x.w || '').trim();   // 두 번째 점(의미·주가 영향)
+          done++;
+        }
       }
     } catch (e) {
       console.log(`arts 배치 실패(건너뜀): ${e.message}`);
@@ -271,6 +282,7 @@ async function main() {
     const cur = byLink.get(it.link);
     if (!cur) { byLink.set(it.link, it); continue; }
     if (!cur.a && it.a) cur.a = it.a;   // 요약은 어느 쪽에 있든 살린다
+    if (cur.w === undefined && it.w !== undefined) cur.w = it.w;
   }
   const all = [...byLink.values()]
     .sort((a, b) => new Date(b.published || 0) - new Date(a.published || 0));
@@ -311,8 +323,8 @@ async function main() {
       asOf: now.toISOString(),
       windowDays: PRUNE_DAYS,
       count: list.length,
-      // 렌더에 필요한 필드만(용량 절감): d=일자 a=요약 t=제목(폴백) u=링크
-      items: list.map((it) => ({ d: it.published, a: it.a || '', t: it.title || '', u: it.link })),
+      // 렌더에 필요한 필드만(용량 절감): d=일자 a=명사형 요약 w=의미·주가 영향 t=제목(폴백) u=링크
+      items: list.map((it) => ({ d: it.published, a: it.a || '', w: it.w || '', t: it.title || '', u: it.link })),
     }, null, 2) + '\n');
   }
   console.log(`shards: ${SHARD_DIR}/ ${winByTk.size}개 종목 (3개월 창 전건)`);
