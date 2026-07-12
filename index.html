@@ -611,6 +611,9 @@ table.tk th.c{text-align:center}
 .mkt-dod::before{content:'전일 ';font-weight:500;color:var(--faint)}
 .mkt-dod.up{color:var(--st-hot)}.mkt-dod.dn{color:var(--st-accel)}
 .mkt-card .spark{width:100%;height:36px;display:block}
+.mkt-axis{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font:500 11px var(--mono);color:var(--faint);margin-top:5px;letter-spacing:-.2px}
+.mkt-axis .ax-e{text-align:right}
+.mkt-axis .ax-dt{color:var(--dim);font-weight:600}
 .mkt-span{font:500 12px var(--mono);color:var(--faint);margin-top:4px}
 .mkt-card-lk{cursor:pointer}
 .mkt-card-lk:hover{border-color:var(--line2);box-shadow:0 4px 14px rgba(22,36,45,.10)}
@@ -2761,11 +2764,25 @@ window.MARKET=(function(){
    refln='<line x1="0" y1="'+yr.toFixed(1)+'" x2="'+w+'" y2="'+yr.toFixed(1)+'" stroke="var(--dim)" stroke-width="1" stroke-dasharray="3 2" opacity=".75"/>';}
   return '<svg class="spark" viewBox="0 0 '+w+' '+hh+'" preserveAspectRatio="none">'+refln+'<polyline points="'+pts+'" fill="none" stroke="'+c+'" stroke-width="1.5" stroke-linejoin="round"/></svg>';
  }
- function card(name,val,p,vals,ref,lns){
+ // 스파크라인 X축 라벨: 시작일·시작값 / 마지막일·마지막값. dates=epoch-day 정수 또는 'YYYY-MM-DD'.
+ function fmtDay(t){
+  if(t==null||t==='')return '';
+  if(typeof t==='number'||/^\d+$/.test(t)){var d=new Date(t*86400000);return (d.getUTCMonth()+1)+'/'+d.getUTCDate();}
+  var m=String(t).match(/(\d{4})-(\d{1,2})-(\d{1,2})/);return m?(+m[2])+'/'+(+m[3]):String(t);
+ }
+ function axis(vals,dates,fmtV){
+  if(!vals||vals.length<2)return '';
+  var f=(typeof fmtV==='function')?fmtV:function(x){return (Math.round(x*100)/100).toLocaleString();};
+  var sd=(dates&&dates.length)?fmtDay(dates[0]):'',ed=(dates&&dates.length)?fmtDay(dates[dates.length-1]):'';
+  var L=(sd?'<span class="ax-dt">'+esc(sd)+'</span> ':'')+esc(f(vals[0]));
+  var R=esc(f(vals[vals.length-1]))+(ed?' <span class="ax-dt">'+esc(ed)+'</span>':'');
+  return '<div class="mkt-axis"><span class="ax-s">'+L+'</span><span class="ax-e">'+R+'</span></div>';
+ }
+ function card(name,val,p,vals,ref,lns,opts){
   var up=p>=0,cls=up?'up':'dn',sign=up?'+':'';
-  var dod=pctDoD(vals),dodHTML='';
+  var dod=pctDoD(vals),dodHTML='',o=opts||{};
   if(dod!=null&&isFinite(dod)){var dcls=dod>=0?'up':'dn';dodHTML='<span class="mkt-dod '+dcls+'">'+(dod>=0?'+':'')+dod.toFixed(1)+'%</span>';}
-  return '<div class="mkt-nm">'+esc(name)+'</div><div class="mkt-val">'+val+' <span class="mkt-chg '+cls+'">'+sign+p.toFixed(1)+'%</span>'+dodHTML+'</div>'+(lns||'')+spark(vals,ref)+'<div class="mkt-span">6개월</div>';
+  return '<div class="mkt-nm">'+esc(name)+'</div><div class="mkt-val">'+val+' <span class="mkt-chg '+cls+'">'+sign+p.toFixed(1)+'%</span>'+dodHTML+'</div>'+(lns||'')+spark(vals,ref)+axis(vals,o.dates,o.fmtV)+'<div class="mkt-span">6개월</div>';
  }
  /* ===== 렌즈(요약 2줄) — l1=이 그래프가 판정하는 것(프레임) · l2=라이브 수치 → 판정.
     논제 시계(gamma.json γ·stage)와 가격 시계(고점·평단)를 분리해 붙인다. 게이트 판정은
@@ -2844,8 +2861,10 @@ window.MARKET=(function(){
   var wait='<div class="mkt-nm">WTI 유가</div>'+lensWtiWait()+'<div class="mkt-ph">유가 수집 대기</div>';
   try{var r=await fetch('/api/wti',{cache:'no-store'});var j=await r.json();
    var s=j.points||j.series||[];   /* worker /api/wti 출력 = {source,points:[["YYYY-MM-DD",close]]} — series 로 읽으면 항상 0건 */
-   var vals=slice6(s.map(function(x){return Array.isArray(x)?x[1]:x;}).filter(function(x){return x!=null&&isFinite(x);}));
-   el.innerHTML=vals.length>=2?card('WTI 유가','$'+vals[vals.length-1].toFixed(1),pct(vals),vals,null,lensWti(vals)):wait;}
+   var sp=s.filter(function(x){var v=Array.isArray(x)?x[1]:x;return v!=null&&isFinite(v);});
+   var vals=slice6(sp.map(function(x){return Array.isArray(x)?x[1]:x;}));
+   var dts=slice6(sp.map(function(x){return Array.isArray(x)?x[0]:null;}));
+   el.innerHTML=vals.length>=2?card('WTI 유가','$'+vals[vals.length-1].toFixed(1),pct(vals),vals,null,lensWti(vals),{dates:dts,fmtV:function(x){return '$'+x.toFixed(1);}}):wait;}
   catch(e){el.innerHTML=wait;}
  }
  async function loadHoldings(){
@@ -2859,22 +2878,24 @@ window.MARKET=(function(){
    var list=(typeof HOLD_DETAIL!=='undefined'?HOLD_DETAIL:[]).filter(function(d){return d.kind==='종목'&&(+d.w)>0;})
     .slice().sort(function(a,b){return (+b.w)-(+a.w);})
     .map(function(d){var tk=String(d.ticker||'').toUpperCase();return {ck:cK(d.ticker),nm:NM[d.ticker]||d.name,tk:tk};});
-   var html=list.map(function(o){var d=S[o.ck];if(!d||!d.c||!d.c.length)return '';var vals=slice6(d.c);
-    return '<div class="mkt-card mkt-card-lk" data-tk="'+o.tk+'" role="button" tabindex="0" title="'+esc(o.nm)+' 기사 보기">'+card(o.nm,pxv(o.tk,vals[vals.length-1]),pct(vals),vals,null,lensHold(o.tk,o.ck,vals))+'</div>';}).join('');
+   var html=list.map(function(o){var d=S[o.ck];if(!d||!d.c||!d.c.length)return '';var vals=slice6(d.c),dts=slice6(d.t||[]);
+    return '<div class="mkt-card mkt-card-lk" data-tk="'+o.tk+'" role="button" tabindex="0" title="'+esc(o.nm)+' 기사 보기">'+card(o.nm,pxv(o.tk,vals[vals.length-1]),pct(vals),vals,null,lensHold(o.tk,o.ck,vals),{dates:dts,fmtV:function(v){return pxv(o.tk,v);}})+'</div>';}).join('');
    host.innerHTML=html||'<div class="mkt-ph" style="grid-column:1/-1">데이터 없음</div>';
    host.querySelectorAll('.mkt-card-lk').forEach(function(cd){function go(){gotoStockNews(cd.getAttribute('data-tk'));}cd.addEventListener('click',go);cd.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();go();}});});}
   catch(e){host.innerHTML='<div class="mkt-ph" style="grid-column:1/-1">데이터 대기</div>';}
  }
  async function loadIndices(){
   try{var r=await fetch('charts.json?t='+Date.now(),{cache:'no-store'});var j=await r.json();var S=j.series||{};
-   [['ks11','코스피','mkt_ks11'],['gspc','S&P 500','mkt_gspc'],['ixic','나스닥','mkt_ixic']].forEach(function(o){var el=document.getElementById(o[2]);if(!el)return;var d=S[o[0]];if(!d||!d.c||!d.c.length)return;var vals=slice6(d.c);el.innerHTML=card(o[1],Math.round(vals[vals.length-1]).toLocaleString(),pct(vals),vals,null,lensIdx(o[0],vals));});}
+   [['ks11','코스피','mkt_ks11'],['gspc','S&P 500','mkt_gspc'],['ixic','나스닥','mkt_ixic']].forEach(function(o){var el=document.getElementById(o[2]);if(!el)return;var d=S[o[0]];if(!d||!d.c||!d.c.length)return;var vals=slice6(d.c),dts=slice6(d.t||[]);el.innerHTML=card(o[1],Math.round(vals[vals.length-1]).toLocaleString(),pct(vals),vals,null,lensIdx(o[0],vals),{dates:dts,fmtV:function(v){return Math.round(v).toLocaleString();}});});}
   catch(e){}
  }
  async function loadUs10y(){
   var el=document.getElementById('mkt_us10y');
   try{var r=await fetch('/api/us10y',{cache:'no-store'});var j=await r.json();var hh=j.history||[];
-   var vals=hh.map(function(x){return x.markets&&x.markets.ten_year;}).filter(function(x){return x!=null;});
-   if(el&&vals.length>=2)el.innerHTML=card('미 10년물',vals[vals.length-1].toFixed(2)+'%',pct(vals),vals,null,lensUs10y(vals));}
+   var pts=hh.filter(function(x){return x&&x.markets&&x.markets.ten_year!=null;});
+   var vals=pts.map(function(x){return x.markets.ten_year;});
+   var dts=pts.map(function(x){return x.date||x.day||x.d||x.timestamp||null;});
+   if(el&&vals.length>=2)el.innerHTML=card('미 10년물',vals[vals.length-1].toFixed(2)+'%',pct(vals),vals,null,lensUs10y(vals),{dates:dts,fmtV:function(v){return v.toFixed(2)+'%';}});}
   catch(e){}
  }
  async function loadMacroNews(){
