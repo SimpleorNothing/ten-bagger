@@ -345,10 +345,10 @@ function parseArts(text) {
 
 async function summarizeArticles(items) {
   const key = process.env.ANTHROPIC_API_KEY;
-  if (!key) { console.log('arts: ANTHROPIC_API_KEY 없음 → 스킵'); return; }
+  if (!key) { console.log('arts: ANTHROPIC_API_KEY 없음 → 스킵'); return 0; }
   // m===0 (하드룰 확정 노이즈)은 표시되지 않으므로 요약 토큰을 쓰지 않는다.
   const todo = items.filter((it) => it.ticker !== 'MACRO' && it.m !== 0 && (!it.a || it.w === undefined)).slice(0, ART_MAX_NEW);
-  if (!todo.length) { console.log('arts: 신규 기사 없음'); return; }
+  if (!todo.length) { console.log('arts: 신규 기사 없음'); return 0; }
   let done = 0;
   for (let i = 0; i < todo.length; i += ART_BATCH) {
     const batch = todo.slice(i, i + ART_BATCH);
@@ -407,6 +407,7 @@ ${lines}`;
     await sleep(600);
   }
   console.log(`arts: ${done}/${todo.length} 요약 생성`);
+  return done;
 }
 
 // ---- Korean daily digest (news_digest.json) ----
@@ -414,9 +415,15 @@ ${lines}`;
 // 키가 없으면 조용히 스킵(뉴스 수집 자체는 영향 없음). 실패해도 이전 digest 유지.
 const DIGEST_OUT = 'news_digest.json';
 
-async function buildDigest(items) {
+async function buildDigest(items, newArts) {
   const key = process.env.ANTHROPIC_API_KEY;
   if (!key) { console.log('digest: ANTHROPIC_API_KEY 없음 → 스킵'); return; }
+  // 신규 기사가 0건이면 다이제스트도 바뀔 게 없다 → 호출 자체를 건너뛴다(기존 파일 유지).
+  // 기존 요약은 그대로 두고 신규만 작업 → 실행 빈도를 올려도 비용이 선형으로 늘지 않는다.
+  if (newArts === 0 && fs.existsSync(DIGEST_OUT)) {
+    console.log('digest: 신규 기사 0건 → 재생성 스킵(기존 유지)');
+    return;
+  }
   const holdings = ['MRVL', 'MU', 'LITE', 'VRT', 'BE', 'TSLA', 'RMBS', '005930'];
   const lines = items
     .filter((it) => it.ticker !== 'MACRO')
@@ -426,11 +433,6 @@ async function buildDigest(items) {
     .filter((it) => it.ticker === 'MACRO')
     .map((it) => `${it.id}|${it.name}|${(it.published || '').slice(0, 10)}|${it.title}`)
     .join('\n');
-  const holdSet = new Set(holdings);
-  const holdItems = items.filter((it) => holdSet.has(it.ticker));
-  const holdLines = holdItems
-    .map((it, i) => `${i}|${it.ticker}|${(it.published || '').slice(0, 10)}|${it.title}`)
-    .join('\n');
   const prompt = `너는 AI 인프라 투자 관측소의 애널리스트다. 아래는 종목별 최근 뉴스 헤드라인이다(티커|이름|날짜|제목).
 
 보유 종목: ${holdings.join(', ')} (나머지는 워치리스트)
@@ -438,29 +440,25 @@ async function buildDigest(items) {
 
 다음 JSON 만 출력하라(마크다운·설명 금지):
 {"headline":"이번 피드의 축을 ①②③ 형식으로 요약한 결론 한 문장(한글)",
- "groups":[{"title":"보유 종목","items":[{"tk":"MU","nm":"마이크론","s":"핵심 내용 1~2문장 한글 요약","b":["핵심 포인트 불릿1(완결된 한 문장)","핵심 포인트 불릿2(완결된 한 문장)"]}]},
+ "groups":[{"title":"보유 종목","items":[{"tk":"MU","nm":"마이크론"}]},
            {"title":"워치리스트 · L2 컴퓨트","items":[...]},
            {"title":"워치리스트 · L3/L4 메모리·장비","items":[...]},
            {"title":"워치리스트 · L5~L8 서버·옵티컬·전력","items":[...]}],
  "watch":["실적 발표 임박 등 일정 주의 항목(있으면, 최대 4개)"],
- "macro":[{"id":"macro_iran","s":"해당 매크로 토픽의 핵심 흐름 1~2문장 한글 요약"}],
- "arts":[{"n":0,"a":"해당 기사의 내용→의미→영향을 한 문장(80~140자)으로. 확정 실적/수주와 단순 관측·내러티브를 구분해 서술. 회사 무관 기사는 '회사 무관 노이즈'로 표기"}]}
+ "macro":[{"id":"아래 매크로 헤드라인에 실제로 등장한 토픽id 그대로","s":"해당 매크로 토픽의 핵심 흐름 1~2문장 한글 요약"}]}
 
-규칙: b는 사이트에 그대로 표시되는 불릿이다 — 종목마다 2개(재료가 하나뿐이면 1개). 각 불릿은 완결된 한 문장이고 기사 제목을 그대로 옮기지 말 것. 서로 다른 축을 담아라(예: 불릿1=주가·수급 사건, 불릿2=펀더멘털·제품·계약). s는 b를 이어붙인 요약으로 유지(폴백용).
-보유 종목은 전부 포함(뉴스 없으면 생략 가능), 워치리스트는 의미 있는 것만. macro는 아래 매크로 헤드라인의 토픽id별 1개씩. arts는 아래 [보유 기사] 번호 전건에 대해 작성. 요약은 사실만, 과장 금지, 헤드라인에 없는 내용 추가 금지.
+규칙: groups 는 종목 카드의 그룹핑·순서만 정한다(tk·nm 만). 종목별 요약(s)·불릿(b)·기사요약(arts)은 만들지 말 것 — 기사별 두 점 요약은 news.json items[].a/w 가 이미 갖고 있고 사이트는 그쪽만 쓴다(중복 생성 = 순수 낭비).
+보유 종목은 전부 포함(뉴스 없으면 생략 가능), 워치리스트는 의미 있는 것만. macro는 아래 매크로 헤드라인의 토픽id별 1개씩. 요약은 사실만, 과장 금지, 헤드라인에 없는 내용 추가 금지.
 
 ${lines}
 
 [매크로 토픽 헤드라인 (토픽id|토픽명|날짜|제목)]
-${macroLines}
-
-[보유 기사 (번호|티커|날짜|제목)]
-${holdLines}`;
+${macroLines}`;
   try {
     const r = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: { 'content-type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01' },
-      body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 6000, messages: [{ role: 'user', content: prompt }] }),
+      body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 2500, messages: [{ role: 'user', content: prompt }] }),
     });
     if (!r.ok) throw new Error('anthropic HTTP ' + r.status);
     const j = await r.json();
@@ -468,11 +466,6 @@ ${holdLines}`;
     const clean = text.replace(/```json|```/g, '').trim();
     const digest = JSON.parse(clean);
     if (!digest.headline || !Array.isArray(digest.groups)) throw new Error('digest shape invalid');
-    if (Array.isArray(digest.arts)) {
-      digest.arts = digest.arts
-        .filter((x) => x && Number.isInteger(x.n) && holdItems[x.n] && x.a)
-        .map((x) => ({ link: holdItems[x.n].link, a: x.a }));
-    }
     const out = { asOf: new Date().toISOString(), model: 'claude-sonnet-4-6', ...digest };
     fs.writeFileSync(DIGEST_OUT, JSON.stringify(out, null, 2) + '\n');
     console.log(`digest: ${DIGEST_OUT} 작성 (groups=${digest.groups.length})`);
@@ -533,7 +526,7 @@ async function main() {
     .sort((a, b) => new Date(b.published || 0) - new Date(a.published || 0));
 
   preScreen(all);           // ① 하드룰: 홍보·추측·리스트 → m=0 (요약 토큰 미소모)
-  await summarizeArticles(all);   // ② 신규 기사: a·w·m 동시 생성
+  const newArts = await summarizeArticles(all);   // ② 신규 기사: a·w·m 동시 생성
   await scoreLegacy(all);   // ③ a·w 는 있는데 m 만 없는 과거 기사 → 등급만 백필
 
   fs.writeFileSync(ARCHIVE_OUT, JSON.stringify({
@@ -609,7 +602,7 @@ async function main() {
   };
   fs.writeFileSync(OUT, JSON.stringify(payload, null, 2) + '\n');
   console.log(`\nDone: ${ok} ok, ${fail} failed, ${items.length}/${all.length} items in ${OUT}.`);
-  await buildDigest(items);
+  await buildDigest(items, newArts);
 }
 
 main().catch((e) => { console.error(e); process.exit(1); });
