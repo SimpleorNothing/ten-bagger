@@ -6,6 +6,7 @@
 window.INSIGHT=(function(){
  var GEN='/api/insight', STORE='/api/insights', CK='ins_cache_v1';
  var recs=[], cur=null, busy=false, q='', filt='', putTimer=null;
+ var MAXRAW=20000;   /* 원문 저장 상한(자) — R2 배열·localStorage 캐시 비대 방지. 초과분은 rawcut에 전체 길이 기록 */
  function $(id){return document.getElementById(id);}
  function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
  function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
@@ -72,9 +73,12 @@ window.INSIGHT=(function(){
     if(i<0||n<0)throw new Error('응답 파싱 실패');
     var pj=JSON.parse(raw.slice(i,n+1));
     var ps=pj.src||{};
+    var rawFull=text||'';   /* 뽑을 때 넣은 원문(스크립트/본문). URL만 준 경우 빈 문자열 */
     cur={id:uid(),t:Date.now(),
      src:{kind:ps.kind||'',publisher:ps.publisher||'',title:ps.title||'',url:url||ps.url||'',date:ps.date||''},
      summary:pj.summary||'', steelman:pj.steelman||'', noise:Array.isArray(pj.noise)?pj.noise:[],
+     raw:rawFull.length>MAXRAW?rawFull.slice(0,MAXRAW):rawFull,   /* 원문 저장(상한 캡) */
+     rawcut:rawFull.length>MAXRAW?rawFull.length:0,               /* 잘렸으면 전체 길이 */
      claims:(Array.isArray(pj.claims)?pj.claims:[]).slice(0,8).map(function(c){c=clampClaim(c);c.id=uid();c.pick=recommend(c);return c;})};
     renderResult();
     stopProg();
@@ -130,7 +134,7 @@ window.INSIGHT=(function(){
    return {id:c.id,text:c.text||'',layer:c.layer||'',tickers:c.tickers,type:c.type,novelty:c.novelty,impact:c.impact,
            confidence:c.confidence,route:c.route,why:c.why||'',verify:c.verify||'',applied:false};});
   if(!picked.length){setMsg('채택한 관점이 없습니다 — 하나 이상 체크하세요.');return;}
-  recs.unshift({id:cur.id,t:cur.t,src:cur.src,summary:cur.summary,steelman:cur.steelman,claims:picked});
+  recs.unshift({id:cur.id,t:cur.t,src:cur.src,summary:cur.summary,steelman:cur.steelman,raw:cur.raw||'',rawcut:cur.rawcut||0,claims:picked});
   cur=null;renderResult();persist();
   ['insText','insUrl'].forEach(function(id){var e=$(id);if(e)e.value='';});
   setMsg('저장 완료 — 채택한 관점만 다른 메뉴에 반영됩니다.');
@@ -158,9 +162,15 @@ window.INSIGHT=(function(){
     var hay=((r.src.title||'')+' '+(r.src.publisher||'')+' '+cs.map(function(c){return c.text+' '+c.tickers.join(' ')+' '+(c.layer||'');}).join(' ')).toLowerCase();
     if(hay.indexOf(qq)<0)return '';
    }
+   var s=r.src||{};
+   var lk=s.url?'<a class="ins-src-lk" href="'+esc(s.url)+'" target="_blank" rel="noopener">원문 링크 ↗</a>':'';
+   var rb=r.raw?'<button class="ins-src-lk" data-raw="'+r.id+'">원문 보기</button>':'';
+   var bar=(lk||rb)?'<div class="ins-srcbar">'+lk+rb+'</div>':'';
+   var rawbox=r.raw?'<pre class="ins-raw" id="raw-'+r.id+'" hidden></pre>':'';
    return '<div class="ins-rec"><button class="ins-del" data-rid="'+r.id+'">삭제</button>'+
     '<h4>'+esc(r.src.title||'(제목 없음)')+'</h4>'+
     '<div class="meta">'+esc(r.src.kind||'')+(r.src.publisher?' · '+esc(r.src.publisher):'')+' · '+new Date(r.t).toLocaleDateString('ko-KR')+'</div>'+
+    bar+rawbox+
     cs.map(function(c){return claimLine(r,c,true);}).join('')+'</div>';
   }).filter(Boolean).join('');
   L.innerHTML=html||'<div class="ins-noise">해당하는 관점이 없습니다. 위에 자료를 넣고 <b>관점 뽑기</b>를 누르세요.</div>';
@@ -175,6 +185,19 @@ window.INSIGHT=(function(){
     var id=b.getAttribute('data-ap');
     flat().forEach(function(o){if(o.c.id===id)o.c.applied=!o.c.applied;});
     persist();};});
+  Array.prototype.forEach.call(L.querySelectorAll('[data-raw]'),function(b){
+   b.onclick=function(){
+    var id=b.getAttribute('data-raw'), box=document.getElementById('raw-'+id);if(!box)return;
+    if(box.hidden){
+     if(!box.getAttribute('data-filled')){
+      var rec=recs.filter(function(x){return x.id===id;})[0];
+      var t=rec&&rec.raw||'';
+      if(rec&&rec.rawcut)t+='\n\n…(원문 '+rec.rawcut.toLocaleString()+'자 중 앞 '+t.length.toLocaleString()+'자만 저장됨)';
+      box.textContent=t;box.setAttribute('data-filled','1');
+     }
+     box.hidden=false;b.textContent='원문 닫기';
+    }else{box.hidden=true;b.textContent='원문 보기';}
+   };});
  }
 
  /* --- 반영(다른 메뉴 스트립) — 채택분만, 숫자는 '대기'로만 --- */
