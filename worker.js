@@ -333,6 +333,59 @@ async function handleInsightsGet(env) {
   });
 }
 
+// 저장 원문 영구 링크 — 인테이크 때 넣은 본문(rec.raw)을 id 로 되불러 보여준다.
+// 채택 관점 카드의 "저장 원문 ↗" 이 여기로 온다(원문 URL 이 없거나 사라져도 근거가 남게).
+function hesc(s) {
+  return String(s == null ? "" : s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+}
+function insightRawPage(rec) {
+  const s = (rec && rec.src) || {};
+  const meta = [s.publisher, s.kind, s.date].filter(Boolean).join(" · ");
+  const body = String((rec && rec.raw) || "");
+  const cutNote = rec && rec.rawcut
+    ? `<p class="note">원문 ${Number(rec.rawcut).toLocaleString()}자 중 앞 ${body.length.toLocaleString()}자만 저장됨(상한 20,000자).</p>`
+    : "";
+  const link = s.url ? `<a href="${hesc(s.url)}" target="_blank" rel="noopener">원문 링크 ↗</a>` : "";
+  return `<!doctype html><html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${hesc(s.title || "저장 원문")} — 알파맵</title>
+<style>
+ body{margin:0;padding:28px 20px 60px;background:#f3f2ef;color:#16242d;font-family:"Noto Serif KR",serif;line-height:1.7}
+ main{max-width:820px;margin:0 auto}
+ .kick{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#8a9299;margin:0 0 8px}
+ h1{font-size:24px;line-height:1.4;margin:0 0 8px}
+ .meta{font-size:13px;color:#68727a;margin:0 0 6px}
+ .note{font-size:13px;color:#68727a;margin:0 0 6px}
+ a{color:#1c5fd6;font-weight:700;text-decoration:none;font-size:13px}
+ a:hover{text-decoration:underline}
+ pre{white-space:pre-wrap;word-break:break-word;margin:16px 0 0;padding:16px;background:#fff;border:1px solid #e2e0da;border-radius:3px;font-family:inherit;font-size:15px;color:#3f4a52}
+ .back{display:inline-block;margin-top:22px}
+</style></head><body><main>
+ <p class="kick">Insight Intake · 저장 원문</p>
+ <h1>${hesc(s.title || "(제목 없음)")}</h1>
+ <p class="meta">${hesc(meta || "출처 미상")}</p>
+ ${link}
+ ${cutNote}
+ <pre>${hesc(body) || "(저장된 원문 없음 — URL 만으로 뽑은 자료)"}</pre>
+ <a class="back" href="/">← 알파맵으로</a>
+</main></body></html>`;
+}
+async function handleInsightRaw(url, env) {
+  if (!env.MEMO_BUCKET) return memoJson({ error: "MEMO_BUCKET not configured" }, 503);
+  const id = (url.searchParams.get("id") || "").trim();
+  if (!id) return memoJson({ error: "id required" }, 400);
+  const obj = await env.MEMO_BUCKET.get(INSIGHTS_KEY);
+  let arr = [];
+  try { arr = JSON.parse(obj ? await obj.text() : "[]"); } catch { arr = []; }
+  const rec = Array.isArray(arr) ? arr.find((x) => x && x.id === id) : null;
+  if (!rec) return new Response("<!doctype html><meta charset=utf-8><p>해당 자료를 찾을 수 없습니다(삭제됐거나 id 불일치).", {
+    status: 404, headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-store" },
+  });
+  return new Response(insightRawPage(rec), {
+    status: 200, headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-store" },
+  });
+}
+
 async function handleInsightsPut(request, env) {
   if (!env.MEMO_BUCKET) return memoJson({ error: "MEMO_BUCKET not configured" }, 503);
   let raw;
@@ -682,6 +735,10 @@ export default {
       // 03 관점과 정보 — 관점 추출(Claude) · 인사이트 저장(R2) — 인증된 디바이스만 도달
       if (request.method === "POST" && url.pathname === "/api/insight") {
         return handleInsight(request, env);
+      }
+      // 저장 원문 영구 링크(채택 관점 → 근거 추적) — /api/insights 보다 먼저 매칭
+      if (request.method === "GET" && url.pathname === "/api/insights/raw") {
+        return handleInsightRaw(url, env);
       }
       if (url.pathname === "/api/insights") {
         if (request.method === "GET") return handleInsightsGet(env);

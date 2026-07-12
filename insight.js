@@ -64,6 +64,30 @@ window.INSIGHT=(function(){
  }
  function gradeBadge(g,reinf){return '<span class="ins-gr g'+g+'">'+GRD[g]+(reinf?' · 보강 '+reinf:'')+'</span>';}
 
+ /* --- 출처(소스 정보) — 채택 관점은 '어디서 왔는지'를 항상 달고 다닌다(시그널 로그 출처 표기 규율).
+    링크는 둘: ①원문 URL(있으면) ②저장 원문 = 인테이크 때 넣은 본문(R2 보관) → /api/insights/raw?id= 영구 링크. */
+ function rawUrl(r){return '/api/insights/raw?id='+encodeURIComponent(r.id);}
+ function cut(s,n){s=String(s||'');return s.length>n?s.slice(0,n)+'…':s;}
+ function srcBits(r){
+  var s=r.src||{},b=[];
+  if(s.publisher)b.push(s.publisher);
+  if(s.kind)b.push(s.kind);
+  if(!b.length)b.push('출처 미상');
+  b.push(s.date||new Date(r.t).toLocaleDateString('ko-KR'));
+  return b.join(' · ');
+ }
+ function srcLinks(r){
+  var s=r.src||{};
+  return (s.url?'<a class="ins-cs-lk" href="'+esc(s.url)+'" target="_blank" rel="noopener">원문 ↗</a>':'')+
+         (r.raw?'<a class="ins-cs-lk" href="'+rawUrl(r)+'" target="_blank" rel="noopener">저장 원문 ↗</a>':'');
+ }
+ /* 관점 1건에 붙는 출처 줄. withTitle = 자료 카드 밖(다른 메뉴 스트립)이라 제목까지 보여줘야 하는 경우. */
+ function claimSrc(r,withTitle){
+  var s=r.src||{};
+  return '<span class="ins-cs">출처: '+esc(srcBits(r))+
+   (withTitle&&s.title?' — '+esc(cut(s.title,44)):'')+srcLinks(r)+'</span>';
+ }
+
  /* --- 저장(R2) --- */
  function cacheGet(){try{var v=JSON.parse(localStorage.getItem(CK)||'[]');return Array.isArray(v)?v:[];}catch(e){return [];}}
  function cacheSet(){try{localStorage.setItem(CK,JSON.stringify(recs));}catch(e){}}
@@ -186,6 +210,7 @@ window.INSIGHT=(function(){
    '<span class="m">'+(c.layer?esc(c.layer)+' · ':'')+esc(RT[c.route]||c.route)+' · N'+c.novelty+'I'+c.impact+'C'+c.confidence+
    (c.reinf?' · 유사 '+c.reinf+'건 보강':'')+
    (NUM[c.route]?(c.applied?' · 반영 완료':' · 반영 대기(자동 변경 없음)'):'')+'</span>'+
+   claimSrc(r,false)+
    (showBtn&&NUM[c.route]?'<button class="ins-btn" style="margin-top:7px;padding:4px 9px;font-size:12px" data-ap="'+c.id+'">'+(c.applied?'대기로 되돌리기':'반영 완료 표시')+'</button>':'')+
    '</div>';
  }
@@ -206,7 +231,8 @@ window.INSIGHT=(function(){
    var s=r.src||{};
    var lk=s.url?'<a class="ins-src-lk" href="'+esc(s.url)+'" target="_blank" rel="noopener">원문 링크 ↗</a>':'';
    var rb=r.raw?'<button class="ins-src-lk" data-raw="'+r.id+'">원문 보기</button>':'';
-   var bar=(lk||rb)?'<div class="ins-srcbar">'+lk+rb+'</div>':'';
+   var pl=r.raw?'<a class="ins-src-lk" href="'+rawUrl(r)+'" target="_blank" rel="noopener">저장 원문 ↗</a>':'';
+   var bar=(lk||rb||pl)?'<div class="ins-srcbar">'+lk+rb+pl+'</div>':'';
    var rawbox=r.raw?'<pre class="ins-raw" id="raw-'+r.id+'" hidden></pre>':'';
    return '<div class="ins-rec"><button class="ins-del" data-rid="'+r.id+'">삭제</button>'+
     '<h4>'+esc(r.src.title||'(제목 없음)')+'</h4>'+
@@ -269,8 +295,8 @@ window.INSIGHT=(function(){
   e.innerHTML='<div class="sh">'+head+'</div>'+list.map(function(o){
    var pend=NUM[o.c.route]&&!o.c.applied;
    return '<div class="ins-si'+(pend?' pend':'')+'">'+gradeBadge(o.c.grade||0,o.c.reinf)+' '+esc(o.c.text)+
-    '<span class="m">'+(o.c.layer?esc(o.c.layer)+' · ':'')+esc(o.r.src.publisher||o.r.src.kind||'')+
-    ' · '+new Date(o.r.t).toLocaleDateString('ko-KR')+(pend?' · 숫자 반영 대기':'')+'</span></div>';}).join('')+
+    '<span class="m">'+(o.c.layer?esc(o.c.layer)+' · ':'')+esc(RT[o.c.route]||o.c.route)+
+    (pend?' · 숫자 반영 대기':'')+'</span>'+claimSrc(o.r,true)+'</div>';}).join('')+
    (note?'<div class="ins-noise">'+note+'</div>':'');
  }
  function renderStrips(){
