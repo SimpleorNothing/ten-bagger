@@ -27,6 +27,43 @@ window.INSIGHT=(function(){
  function score(c){return (c.novelty||0)+(c.impact||0)+(c.confidence||0);}
  function recommend(c){return c.route!=='none'&&score(c)>=4&&(c.impact||0)>=1;}   /* 기본 체크 = 추천일 뿐, 결정은 사람 */
 
+ /* --- 등급(승격) — 관점·정보의 확신도. 기본 점수(N·I·C) + 유사 관점 보강 횟수로 산정.
+    같은 얘기가 다른 자료에서 반복 채택될수록(보강) 등급이 오른다. narrative≠numbers 규율과 무관 — 표시 전용. */
+ var GRD=['관찰','후보','지지','확립','확신'];   /* g0..g4 */
+ function gradeOf(c){var s=score(c),r=c.reinf||0,g=(s>=5?2:s>=3?1:0)+Math.min(r,3);return Math.max(0,Math.min(4,g));}
+ function ntoks(c){
+  var s=((c.text||'')+' '+((c.tickers||[]).join(' '))+' '+(c.layer||'')).toLowerCase().replace(/[^가-힣a-z0-9]+/g,' ');
+  var seen={},out=[];s.split(/\s+/).forEach(function(w){if(w.length>1&&!seen[w]){seen[w]=1;out.push(w);}});return out;
+ }
+ function jac(a,b){if(!a.length||!b.length)return 0;var m={},n=0;a.forEach(function(w){m[w]=1;});b.forEach(function(w){if(m[w])n++;});return n/(a.length+b.length-n);}
+ function similar(a,b){
+  var ta=a.tickers||[],tb=b.tickers||[];
+  var tk=ta.some(function(x){return x&&tb.indexOf(x)>=0;});
+  var j=jac(ntoks(a),ntoks(b));
+  return (tk&&j>=0.16)||j>=0.5;
+ }
+ /* 채택분 전체를 pairwise 로 훑어 각 관점의 보강 횟수(reinf)·보강 출처(corr)·등급(grade)을 재산정.
+    같은 자료(rec) 내부는 self-corroboration 이므로 제외. 파생값이라 매 렌더마다 멱등 재계산. */
+ function recomputeGrades(){
+  var f=flat(),i,j;
+  f.forEach(function(o){o.c.reinf=0;o.c.corr=[];});
+  for(i=0;i<f.length;i++)for(j=i+1;j<f.length;j++){
+   if(f[i].r.id===f[j].r.id)continue;
+   if(similar(f[i].c,f[j].c)){
+    f[i].c.reinf++;f[j].c.reinf++;
+    f[i].c.corr.push({t:f[j].r.t,title:f[j].r.src.title||''});
+    f[j].c.corr.push({t:f[i].r.t,title:f[i].r.src.title||''});
+   }
+  }
+  f.forEach(function(o){o.c.grade=gradeOf(o.c);});
+ }
+ /* 아직 저장 전(cur)인 관점의 채택 시 등급 예고 — 기존 채택분 중 유사 건수로 산정. */
+ function previewGrade(c){
+  var n=flat().filter(function(o){return similar(o.c,c);}).length;
+  return {n:n,g:gradeOf({novelty:c.novelty,impact:c.impact,confidence:c.confidence,reinf:n})};
+ }
+ function gradeBadge(g,reinf){return '<span class="ins-gr g'+g+'">'+GRD[g]+(reinf?' · 보강 '+reinf:'')+'</span>';}
+
  /* --- 저장(R2) --- */
  function cacheGet(){try{var v=JSON.parse(localStorage.getItem(CK)||'[]');return Array.isArray(v)?v:[];}catch(e){return [];}}
  function cacheSet(){try{localStorage.setItem(CK,JSON.stringify(recs));}catch(e){}}
@@ -90,6 +127,7 @@ window.INSIGHT=(function(){
 
  /* --- 결과(선별 화면) --- */
  function claimRow(c){
+  var pv=previewGrade(c);
   return '<div class="ins-claim'+(c.pick?'':' rej')+'" data-row="'+c.id+'">'+
    '<input type="checkbox" class="ck" data-cid="'+c.id+'"'+(c.pick?' checked':'')+'>'+
    '<div><div class="ins-txt">'+esc(c.text||'')+'</div>'+
@@ -102,6 +140,7 @@ window.INSIGHT=(function(){
     '<span class="ins-tag rt">→ '+esc(RT[c.route]||c.route)+'</span>'+
     (c.clamped?'<span class="ins-tag">내러티브 → 로그로 강등</span>':'')+
     '<span class="ins-tag">N'+c.novelty+'·I'+c.impact+'·C'+c.confidence+' ('+score(c)+'/6)</span>'+
+    '<span class="ins-tag gpv g'+pv.g+'">'+(pv.n?'기존 '+pv.n+'건 보강 → '+GRD[pv.g]:'신규 · '+GRD[pv.g])+'</span>'+
    '</div></div></div>';
  }
  function renderResult(){
@@ -143,8 +182,9 @@ window.INSIGHT=(function(){
  /* --- 저장 목록 --- */
  function claimLine(r,c,showBtn){
   var pend=NUM[c.route]&&!c.applied;
-  return '<div class="ins-si'+(pend?' pend':'')+'">'+esc(c.text)+
+  return '<div class="ins-si'+(pend?' pend':'')+'">'+gradeBadge(c.grade||0,c.reinf)+' '+esc(c.text)+
    '<span class="m">'+(c.layer?esc(c.layer)+' · ':'')+esc(RT[c.route]||c.route)+' · N'+c.novelty+'I'+c.impact+'C'+c.confidence+
+   (c.reinf?' · 유사 '+c.reinf+'건 보강':'')+
    (NUM[c.route]?(c.applied?' · 반영 완료':' · 반영 대기(자동 변경 없음)'):'')+'</span>'+
    (showBtn&&NUM[c.route]?'<button class="ins-btn" style="margin-top:7px;padding:4px 9px;font-size:11px" data-ap="'+c.id+'">'+(c.applied?'대기로 되돌리기':'반영 완료 표시')+'</button>':'')+
    '</div>';
@@ -155,6 +195,7 @@ window.INSIGHT=(function(){
   var html=recs.map(function(r){
    var cs=(r.claims||[]).filter(function(c){
     if(filt==='pending')return !!NUM[c.route]&&!c.applied;
+    if(/^g[0-4]$/.test(filt))return (c.grade||0)===+filt.slice(1);
     if(filt)return c.route===filt;
     return true;});
    if(!cs.length)return '';
@@ -200,13 +241,34 @@ window.INSIGHT=(function(){
    };});
  }
 
+ /* --- 등급 보드 — 채택 관점을 등급별 집계, 칸 클릭 시 그 등급으로 필터 --- */
+ function renderGradeBoard(){
+  var e=$('insGradeBoard');if(!e)return;
+  var f=flat();
+  if(!f.length){e.innerHTML='';return;}
+  var cnt=[0,0,0,0,0];f.forEach(function(o){cnt[o.c.grade||0]++;});
+  var cells='';
+  for(var g=4;g>=0;g--){
+   cells+='<button class="ins-gcell g'+g+(filt==='g'+g?' on':'')+'" data-g="'+g+'">'+
+    '<span class="gn">'+GRD[g]+'</span><span class="gc">'+cnt[g]+'</span></button>';
+  }
+  e.innerHTML='<div class="ins-gtitle">등급 — 유사 관점이 보강될수록 승격</div><div class="ins-grow">'+cells+'</div>';
+  Array.prototype.forEach.call(e.querySelectorAll('[data-g]'),function(b){
+   b.onclick=function(){
+    var v='g'+b.getAttribute('data-g');
+    filt=(filt===v)?'':v;
+    var sel=$('insFilter');if(sel&&/^g[0-4]$/.test(filt))sel.value='';   /* 등급 필터는 셀렉트에 없음 → 셀렉트 초기화 */
+    renderGradeBoard();renderList();
+   };});
+ }
+
  /* --- 반영(다른 메뉴 스트립) — 채택분만, 숫자는 '대기'로만 --- */
  function strip(id,list,head,note){
   var e=$(id);if(!e)return;
   if(!list.length){e.innerHTML='';return;}
   e.innerHTML='<div class="sh">'+head+'</div>'+list.map(function(o){
    var pend=NUM[o.c.route]&&!o.c.applied;
-   return '<div class="ins-si'+(pend?' pend':'')+'">'+esc(o.c.text)+
+   return '<div class="ins-si'+(pend?' pend':'')+'">'+gradeBadge(o.c.grade||0,o.c.reinf)+' '+esc(o.c.text)+
     '<span class="m">'+(o.c.layer?esc(o.c.layer)+' · ':'')+esc(o.r.src.publisher||o.r.src.kind||'')+
     ' · '+new Date(o.r.t).toLocaleDateString('ko-KR')+(pend?' · 숫자 반영 대기':'')+'</span></div>';}).join('')+
    (note?'<div class="ins-noise">'+note+'</div>':'');
@@ -225,7 +287,7 @@ window.INSIGHT=(function(){
   var t=0;recs.forEach(function(r){if(r.t>t)t=r.t;});
   e.textContent=t?('update : '+new Date(t).toLocaleString('ko-KR',{hour12:false})):'';
  }
- function renderAll(){renderList();renderStrips();stamp();}
+ function renderAll(){recomputeGrades();renderGradeBoard();renderList();renderStrips();stamp();}
 
  /* --- 파일(PDF·TXT) → 텍스트 --- */
  var _pdfP=null;
@@ -278,7 +340,7 @@ window.INSIGHT=(function(){
   dz.addEventListener('dragleave',function(e){e.preventDefault();dz.classList.remove('drag');});
   dz.addEventListener('drop',function(e){e.preventDefault();dz.classList.remove('drag');addFiles(Array.prototype.slice.call((e.dataTransfer||{}).files||[]));});
   $('insSearch').oninput=function(e){q=(e.target.value||'').trim();renderList();};
-  $('insFilter').onchange=function(e){filt=e.target.value;renderList();};
+  $('insFilter').onchange=function(e){filt=e.target.value;renderGradeBoard();renderList();};
  }
 
  /* --- 자가 마운트 --- index.html 은 <script src="/insight.js"> 한 줄만 추가하고,
@@ -287,7 +349,8 @@ window.INSIGHT=(function(){
   '<h1 class="vtitle">자료에서 <em>유의미한 것</em>만 — 그리고 선별 반영</h1>'+
   '<span class="updstamp abs" id="updIns"></span>'+
   '<p class="vsub">증권사 리포트·기사·유튜브(링크 또는 스크립트)를 넣으면 8레이어·단계 프레임으로 관점과 정보를 구조화해 뽑는다. '+
-  '<b>뽑는 것과 반영하는 것은 분리한다</b> — 체크해 채택한 관점만 다른 메뉴에 뜬다. 숫자 파일(실적·판단·단계·비중)은 자동으로 바뀌지 않는다(narrative ≠ numbers).</p></div>'+
+  '<b>뽑는 것과 반영하는 것은 분리한다</b> — 체크해 채택한 관점만 다른 메뉴에 뜬다. 숫자 파일(실적·판단·단계·비중)은 자동으로 바뀌지 않는다(narrative ≠ numbers). '+
+  '채택 관점은 <b>등급</b>(관찰→후보→지지→확립→확신)을 갖고, 다른 자료에서 유사한 내용이 보강될수록 자동 승격된다.</p></div>'+
   '<div class="ins-wrap">'+
    '<div class="ins-card">'+
     '<div class="ins-row"><input class="ins-in" id="insUrl" placeholder="URL (선택 — 본문이 없으면 URL만으로 웹검색해 시도)"></div>'+
@@ -308,7 +371,7 @@ window.INSIGHT=(function(){
       '<option value="">전체</option><option value="pending">숫자 반영 대기</option>'+
       '<option value="signal_log">시그널 로그</option><option value="macro">시장 모니터링</option><option value="calendar">캘린더</option>'+
      '</select>'+
-    '</div><div id="insList"></div></div>'+
+    '</div><div class="ins-gboard" id="insGradeBoard"></div><div id="insList"></div></div>'+
   '</div>';
  function el(tag,cls,id){var e=document.createElement(tag);if(cls)e.className=cls;if(id)e.id=id;return e;}
  function anchor(id,parentSel,mode,refSel){
