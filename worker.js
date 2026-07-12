@@ -768,6 +768,14 @@ export default {
         headers.set("cache-control", "no-store");
         return new Response(transformed.body, { status: transformed.status, headers });
       }
+      // 데이터 .json 자산도 동일 이유로 캐시 금지 — Workers Assets 기본 캐시 헤더 탓에
+      // 새 배포가 엣지/브라우저에 안 잡혀(배포는 성공하는데 화면은 옛날 그대로) 주간 리뷰·게이트 등
+      // 데이터 갱신이 반영되지 않는다. HTML 과 같은 no-store 덮개를 json 에도 씌운다.
+      if (ct.includes("application/json") || url.pathname.endsWith(".json")) {
+        const jh = new Headers(res.headers);
+        jh.set("cache-control", "no-store");
+        return new Response(res.body, { status: res.status, headers: jh });
+      }
       return res;
     }
 
