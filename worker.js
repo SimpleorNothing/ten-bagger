@@ -140,6 +140,29 @@ async function handleSignalsUpdate(request, env) {
     { status: 200, headers: { "content-type": "application/json" } });
 }
 
+// Anthropic 오류 응답을 상태코드별 조치 안내가 붙은 한국어 메시지로 변환.
+// 프론트는 error 필드만 표시하므로(insight.js) 원인·조치를 여기서 문자열에 접어 넣는다.
+// 상태코드·타입별로 무엇을 해야 하는지가 갈린다: 키(401)·권한(403)·모델(404)·레이트리밋(429)·크레딧(400)·과부하(529).
+function describeAnthropicError(status, bodyText) {
+  let type = "", msg = "";
+  try {
+    const j = JSON.parse(bodyText || "");
+    const e = (j && j.error) || j;
+    if (e) { type = e.type || ""; msg = e.message || ""; }
+  } catch { msg = (bodyText || "").slice(0, 200); }
+  const lowCredit = type === "invalid_request_error" && /credit balance/i.test(msg);
+  const hint =
+    status === 401 || type === "authentication_error" ? "API 키 인증 실패 — ANTHROPIC_API_KEY 확인" :
+    status === 403 || type === "permission_error"     ? "권한 없음 — 키·모델 접근 권한 확인" :
+    status === 404 || type === "not_found_error"      ? "모델 사용 불가 — 모델 ID·계정 접근 확인" :
+    status === 429 || type === "rate_limit_error"     ? "레이트리밋 초과 — 잠시 후 재시도" :
+    lowCredit                                          ? "크레딧 부족 — Anthropic 콘솔에서 크레딧 충전" :
+    status === 529 || type === "overloaded_error"      ? "Anthropic 과부하 — 잠시 후 재시도" :
+    status === 400 || type === "invalid_request_error" ? "요청 오류" :
+    status >= 500                                      ? "Anthropic 서버 오류 — 잠시 후 재시도" : "";
+  return "anthropic api failed (" + status + (hint ? " · " + hint : "") + ")" + (msg ? ": " + msg.slice(0, 200) : "");
+}
+
 // σ·μ 추정 — Anthropic Messages API 프록시 (브라우저 직접 호출은 CORS·키 부재로 실패하므로 서버측에서 중계)
 async function handleEstimate(request, env) {
   const json = (obj, status) => new Response(JSON.stringify(obj),
@@ -185,7 +208,7 @@ async function handleEstimate(request, env) {
 
   if (!upstream.ok || !upstream.body) {
     const t = await upstream.text().catch(() => "");
-    return json({ error: "anthropic api failed", status: upstream.status, detail: t.slice(0, 400) }, 502);
+    return json({ error: describeAnthropicError(upstream.status, t), status: upstream.status, detail: t.slice(0, 400) }, 502);
   }
 
   // SSE 스트림을 서버측에서 수집해 text 블록을 재조립 — 클라이언트 계약(data.content[].text) 유지.
@@ -220,7 +243,7 @@ async function handleEstimate(request, env) {
     return json({ error: "anthropic stream failed", detail: String(e && e.message ? e.message : e) }, 502);
   }
 
-  if (errDetail) return json({ error: "anthropic api failed", detail: errDetail.slice(0, 400) }, 502);
+  if (errDetail) return json({ error: "anthropic api failed: " + errDetail.slice(0, 200), detail: errDetail.slice(0, 400) }, 502);
 
   // 클라이언트는 data.content 의 text 블록만 사용 → 동일한 형태로 반환.
   return json({ content: [{ type: "text", text: text }], stop_reason: stopReason }, 200);
@@ -353,7 +376,7 @@ async function anthropicText(env, prompt, useSearch, maxTokens) {
   }
   if (!upstream.ok || !upstream.body) {
     const t = await upstream.text().catch(() => "");
-    return { error: "anthropic api failed", status: upstream.status, detail: t.slice(0, 400) };
+    return { error: describeAnthropicError(upstream.status, t), status: upstream.status, detail: t.slice(0, 400) };
   }
 
   let text = "", stopReason = null, errDetail = null;
@@ -382,7 +405,7 @@ async function anthropicText(env, prompt, useSearch, maxTokens) {
   } catch (e) {
     return { error: "anthropic stream failed", detail: String(e && e.message ? e.message : e) };
   }
-  if (errDetail) return { error: "anthropic api failed", detail: errDetail.slice(0, 400) };
+  if (errDetail) return { error: "anthropic api failed: " + errDetail.slice(0, 200), detail: errDetail.slice(0, 400) };
   return { text: text, stop_reason: stopReason };
 }
 
