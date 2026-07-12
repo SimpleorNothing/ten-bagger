@@ -295,6 +295,156 @@ async function handleCalflagsPut(request, env) {
   return memoJson({ ok: true, count: Object.keys(obj).length }, 200);
 }
 
+// ===== 03 관점과 정보 — 인사이트 저장(R2 · insights.json) =====
+// 증권사 리포트·기사·유튜브에서 뽑아낸 "관점 카드"를 모든 인증 기기가 공유하도록 R2 에 보관.
+// 채택(adopted)된 클레임만 다른 메뉴(01/02/04/05)에 에코된다 — 선별은 사람이 한다.
+const INSIGHTS_KEY = "insights.json";
+
+async function handleInsightsGet(env) {
+  if (!env.MEMO_BUCKET) return memoJson({ error: "MEMO_BUCKET not configured" }, 503);
+  const obj = await env.MEMO_BUCKET.get(INSIGHTS_KEY);
+  const v = obj ? await obj.text() : "";
+  return new Response(v && v.trim() ? v : "[]", {
+    status: 200,
+    headers: { "content-type": "application/json", "cache-control": "no-store" },
+  });
+}
+
+async function handleInsightsPut(request, env) {
+  if (!env.MEMO_BUCKET) return memoJson({ error: "MEMO_BUCKET not configured" }, 503);
+  let raw;
+  try { raw = await request.text(); }
+  catch { return memoJson({ error: "read failed" }, 400); }
+  let arr;
+  try { arr = JSON.parse(raw); }
+  catch { return memoJson({ error: "invalid json" }, 400); }
+  if (!Array.isArray(arr)) return memoJson({ error: "expected array" }, 400);
+  if (raw.length > 16 * 1024 * 1024) return memoJson({ error: "too large", bytes: raw.length }, 413);
+  await env.MEMO_BUCKET.put(INSIGHTS_KEY, JSON.stringify(arr), {
+    httpMetadata: { contentType: "application/json" },
+  });
+  return memoJson({ ok: true, count: arr.length }, 200);
+}
+
+// Anthropic Messages 프록시(공용) — SSE 를 서버측에서 재조립해 텍스트만 반환.
+// (handleEstimate 와 동일한 이유로 스트리밍: Opus + web_search 는 비스트리밍 시 100s 한도에 걸린다.)
+async function anthropicText(env, prompt, useSearch, maxTokens) {
+  const payload = {
+    model: "claude-opus-4-8",
+    max_tokens: maxTokens || 4000,
+    stream: true,
+    messages: [{ role: "user", content: prompt }],
+  };
+  if (useSearch) payload.tools = [{ type: "web_search_20260209", name: "web_search" }];
+
+  let upstream;
+  try {
+    upstream = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "x-api-key": env.ANTHROPIC_API_KEY,
+        "anthropic-version": "2023-06-01",
+      },
+      body: JSON.stringify(payload),
+    });
+  } catch (e) {
+    return { error: "anthropic fetch failed", detail: String(e && e.message ? e.message : e) };
+  }
+  if (!upstream.ok || !upstream.body) {
+    const t = await upstream.text().catch(() => "");
+    return { error: "anthropic api failed", status: upstream.status, detail: t.slice(0, 400) };
+  }
+
+  let text = "", stopReason = null, errDetail = null;
+  try {
+    const reader = upstream.body.getReader();
+    const dec = new TextDecoder();
+    let buf = "";
+    for (;;) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      buf += dec.decode(value, { stream: true });
+      let nl;
+      while ((nl = buf.indexOf("\n")) >= 0) {
+        const line = buf.slice(0, nl).trim();
+        buf = buf.slice(nl + 1);
+        if (!line.startsWith("data:")) continue;
+        const p = line.slice(5).trim();
+        if (!p || p === "[DONE]") continue;
+        let ev;
+        try { ev = JSON.parse(p); } catch { continue; }
+        if (ev.type === "content_block_delta" && ev.delta && ev.delta.type === "text_delta") text += ev.delta.text;
+        else if (ev.type === "message_delta" && ev.delta && ev.delta.stop_reason) stopReason = ev.delta.stop_reason;
+        else if (ev.type === "error") errDetail = (ev.error && ev.error.message) || "stream error";
+      }
+    }
+  } catch (e) {
+    return { error: "anthropic stream failed", detail: String(e && e.message ? e.message : e) };
+  }
+  if (errDetail) return { error: "anthropic api failed", detail: errDetail.slice(0, 400) };
+  return { text: text, stop_reason: stopReason };
+}
+
+// 관점 추출 — 리포트/기사/유튜브 본문(또는 URL)을 알파맵 프레임으로 구조화.
+// 규율은 프롬프트에 박아 넣는다: narrative≠numbers · 상대가치 · 가격상승≠강등 · 사람 승인 필수.
+async function handleInsight(request, env) {
+  if (!env.ANTHROPIC_API_KEY) return memoJson({ error: "ANTHROPIC_API_KEY not configured" }, 503);
+
+  let body;
+  try { body = await request.json(); }
+  catch { return memoJson({ error: "invalid json" }, 400); }
+
+  const kind = String((body && body.kind) || "기타").slice(0, 24);
+  const pub = String((body && body.publisher) || "").slice(0, 120);
+  const title = String((body && body.title) || "").slice(0, 300);
+  const url = String((body && body.url) || "").slice(0, 500);
+  let text = String((body && body.text) || "");
+  if (text.length > 120000) text = text.slice(0, 120000);
+  if (!text.trim() && !url.trim()) return memoJson({ error: "text or url required" }, 400);
+
+  const useSearch = !text.trim() && !!url.trim();
+
+  const prompt = [
+    "너는 'AI 인프라 8레이어' 관측소(알파맵)의 리서치 애널리스트다. 아래 자료에서 '유의미한 관점·정보'만 뽑아 구조화한다.",
+    "",
+    "[프레임]",
+    "· 8레이어: L1 모델/소프트웨어 · L2 컴퓨트(GPU/ASIC) · L3 메모리 · L4 패키징/장비 · L5 서버 · L6 옵티컬 · L7 전력/냉각 · L8 발전/그리드. (해당 없으면 macro 또는 기타)",
+    "· 단계(Dawn Map): 태동 → 초입 → 가속 → 성숙 → 과열.",
+    "",
+    "[선별 규율 — 반드시 지킬 것]",
+    "1. narrative ≠ numbers: 발표·키노트·전망·M&A 논의 같은 내러티브는 type='narrative' 이며 route 는 최대 'signal_log' 까지만. 숫자 파일(earnings/judgment/stage/holdings) 변경을 제안하지 마라.",
+    "   실적 비트/미스, 가이더스 상향/하향, 확정 수주·계약, 확정된 가격·수급 데이터만 type='numbers'.",
+    "2. 상대가치가 핵심: '이 종목에 호재인가'가 아니라 '어느 레이어가 싸지고 어느 레이어가 비싸졌는가'를 바꾸는지로 평가하라.",
+    "3. 가격 상승 그 자체는 단계 강등 근거가 아니다. 강등은 '가격 상승률 vs FY+1/+2 EPS 추정 리비전 속도' 비교로만.",
+    "4. 이미 아는 컨센서스·홍보성 문구·중복 헤드라인은 noise 로 버려라. 애널리스트의 목표가 상향 그 자체는 근거(추정 변경)가 없으면 noise.",
+    "5. 너는 후보 정렬까지만 한다. 최종 반영은 사람이 승인한다. 단정하지 말고 검증 항목(verify)을 남겨라.",
+    "",
+    "[점수] 각 0~2 · novelty(기존 컨센 대비 새로움) · impact(레이어 상대가치를 바꾸는 정도) · confidence(출처·검증가능성)",
+    "[route] 'signal_log' | 'earnings' | 'judgment' | 'stage' | 'holdings' | 'macro' | 'calendar' | 'none'",
+    "  - macro: 금리·유가·환율·지정학 등 01 시장 모니터링에 걸릴 관점",
+    "  - calendar: 날짜가 확정된 이벤트(실적일·정책회의·제품 출시)",
+    "  - none: 소음",
+    "",
+    "[출력] 아래 JSON 객체 하나만. 마크다운 펜스·서문·후기 금지. 한국어. 결론 먼저, 문장은 짧게.",
+    '{"src":{"kind":"","publisher":"","title":"","url":"","date":""},"summary":"3줄 이내 핵심 요약","claims":[{"text":"핵심 한 줄","layer":"L3","tickers":["MU"],"type":"numbers|narrative","novelty":0,"impact":0,"confidence":0,"route":"signal_log","why":"어느 층 수요/공급을 바꾸는지 + 상대가치 함의","verify":"확인해야 할 것"}],"noise":["버린 것 한 줄씩"],"steelman":"이 자료의 논지에 대한 가장 강한 반론 1~2문장"}',
+    "claims 는 최대 8개. 유의미한 게 없으면 claims 는 빈 배열로 두고 noise 에 이유를 적어라.",
+    "",
+    "[자료]",
+    "종류: " + kind,
+    pub ? ("출처: " + pub) : "",
+    title ? ("제목: " + title) : "",
+    url ? ("URL: " + url) : "",
+    useSearch
+      ? "본문이 제공되지 않았다. web_search 로 위 URL 의 내용(또는 그 영상·기사에 대한 신뢰 가능한 요약·보도)을 찾아 근거로 삼아라. 찾지 못하면 claims 를 비우고 noise 에 '본문 확보 실패'라고 적어라."
+      : ("본문/스크립트:\n" + text),
+  ].filter(Boolean).join("\n");
+
+  const r = await anthropicText(env, prompt, useSearch, 6000);
+  if (r.error) return memoJson(r, 502);
+  return memoJson({ content: [{ type: "text", text: r.text }], stop_reason: r.stop_reason }, 200);
+}
+
 // US10Y 데이터 프록시 — 데이터 생성은 us10y 리포의 GitHub Actions(daily-update.yml)가
 // 매일 data.json 을 기본 브랜치에 커밋한다. Railway(구 us10y.simpleornothing.com)는
 // 배달 전용이었고 트라이얼 만료로 폐기 → GitHub 을 직접 SoT 로 사용.
@@ -509,6 +659,15 @@ export default {
       if (url.pathname === "/api/memo") {
         if (request.method === "GET") return handleMemoGet(env);
         if (request.method === "PUT") return handleMemoPut(request, env);
+        return memoJson({ error: "method not allowed" }, 405);
+      }
+      // 03 관점과 정보 — 관점 추출(Claude) · 인사이트 저장(R2) — 인증된 디바이스만 도달
+      if (request.method === "POST" && url.pathname === "/api/insight") {
+        return handleInsight(request, env);
+      }
+      if (url.pathname === "/api/insights") {
+        if (request.method === "GET") return handleInsightsGet(env);
+        if (request.method === "PUT") return handleInsightsPut(request, env);
         return memoJson({ error: "method not allowed" }, 405);
       }
       // 캘린더 플래그 저장/조회 (R2 · 모든 기기 공유) — 인증된 디바이스만 도달
