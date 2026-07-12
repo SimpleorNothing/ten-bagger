@@ -40,3 +40,30 @@
 .ins-si{border:1px solid var(--line);border-left:3px solid var(--st-accel);border-radius:3px;background:var(--panel);padding:9px 11px;margin-bottom:6px;font-size:12.5px;line-height:1.55;color:var(--txt)}
 .ins-si.pend{border-left-color:var(--st-hot)}
 .ins-si .m{display:block;color:var(--faint);font-size:11px;margin-top:3px;font-family:var(--mono)}
+
+/* ===== 근거 등급(Evidence Grade) — 유사 관점 보강 시 자동 승격 =====
+   등급색은 단계색(--st-*)을 쓰지 않는다. 단계 의미와 충돌하기 때문(STYLE_GUIDE §1).
+   대신 잉크 농도 사다리: E1 --faint → E2 --dim → E3 --txt 테두리 → E4 --txt 채움.
+   배지는 부표 → radius 20px, 카드는 면 → radius 3px (해도 레이어 §3).
+   크기 하한(STYLE_GUIDE §2): 읽는 글 14px · 메타 라벨 12px. */
+.ins-g{display:inline-block;font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.02em;padding:2px 8px;border-radius:20px;border:1px solid var(--line2);color:var(--faint);background:var(--panel2);white-space:nowrap;vertical-align:1px}
+.ins-g.g2{color:var(--dim);border-color:var(--line2)}
+.ins-g.g3{color:var(--txt);border-color:var(--txt)}
+.ins-g.g4{color:var(--onacc);background:var(--txt);border-color:var(--txt)}
+.ins-g.st{opacity:.5}
+.ins-tag.gp{border-style:dashed}
+.ins-tag.gp.up{border-color:var(--txt);color:var(--txt);border-style:solid}
+.ins-glg{font-size:12px;color:var(--dim);line-height:2;margin:0 0 10px}
+.ins-gwrap{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px}
+.ins-gwrap:empty{display:none}
+.ins-gcard{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--line2);border-radius:3px;padding:14px 15px;transition:.15s}
+.ins-gcard:hover{border-color:var(--line2);box-shadow:0 4px 14px rgba(22,36,45,.06)}
+.ins-gcard.g3{border-left-color:var(--dim)}
+.ins-gcard.g4{border-left-color:var(--txt)}
+.ins-gcard.st{opacity:.62}
+.ins-gtl{font-family:var(--mono);font-size:12px;color:var(--faint);letter-spacing:.02em;margin:2px 0 7px}
+.ins-gm{margin-top:9px;border-top:1px solid var(--line);padding-top:8px;display:flex;flex-direction:column;gap:6px}
+.ins-gml{font-size:14px;line-height:1.55;color:var(--txt)}
+.ins-gml .m{display:block;font-family:var(--mono);font-size:12px;color:var(--faint);margin-top:2px}
+.ins-gml.more{font-family:var(--mono);font-size:12px;color:var(--faint)}
+@media(max-width:600px){.ins-gwrap{grid-template-columns:1fr}}
