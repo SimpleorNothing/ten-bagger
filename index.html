@@ -1851,6 +1851,7 @@ window.CYCLE=(function(){
       <button class="tbtn on" id="emBtn">실적 표시</button>
       <button class="tbtn" id="sizeBtn" title="버블 크기 인코딩: 비중 ↔ 적정밴드 갭(오버/언더)">크기: 비중</button>
       <button class="tbtn" id="xBtn" title="가로축: 예상 3개월 알파 ↔ 실현 3개월 초과수익(charts.json·63거래일)">가로: 예상</button>
+      <button class="tbtn" id="centBtn" title="레이어(L1~L8) 무게중심 + 한계자본 회전 화살표(오버·트림 → 언더·증액)">무게중심</button>
     </div>
     <div class="legend" id="legend"></div>
     <div class="snapsel" id="snapSel">
@@ -4443,7 +4444,13 @@ window.VC_STOCKS=D.map(d=>({n:d.n,t:d.t,layer:d.layer,stage:d.stage,note:d.note,
 const CASH={NASDAQ:[-0.3,-2.5],KOSPI:[-0.5,-4]};
 const BNOTE={NASDAQ:'기준선=나스닥(QQQ). 각 종목의 raw 초과수익.',KOSPI:'기준선=코스피. 나스닥 대비 전 종목 동일하게 평행이동 → 순위·간격 불변, 원점만 이동.'};
 
-let bench='NASDAQ',mode='stage',showLabels=true,selected=null,showCand=true,showHeld=true,showEM=true,sizeMode='w',xMode='est';
+let bench='NASDAQ',mode='stage',showLabels=true,selected=null,showCand=true,showHeld=true,showEM=true,sizeMode='w',xMode='est',showCentroid=false;
+// C: 레이어(L1~L8) 무게중심 = 보유 종목 비중가중 평균 좌표. 방어·기타 제외.
+function layerCentroids(){
+ const g={}; D.forEach(d=>{ if(d.cand||!showHeld)return; const L=bandLayerOf(d); if(!L||L==='기타')return;
+  const a=av(d),w=(d.w||0.1); (g[L]=g[L]||{sx:0,sy:0,sw:0,n:0}); g[L].sx+=xAlpha(d)*w; g[L].sy+=a[0]*w; g[L].sw+=w; g[L].n++; });
+ const out={}; Object.keys(g).forEach(L=>{const q=g[L];out[L]={x:q.sx/q.sw,y:q.sy/q.sw,w:q.sw,n:q.n};}); return out;
+}
 // 밴드갭: D.layer(예 'L2/L6','기타','방어')를 TARGETS 레이어 키로 정규화. 방어=밴드 없음(null).
 function bandLayerOf(d){const m=String(d.layer).match(/L(\d)/);if(m)return 'L'+m[1];if(d.layer==='기타')return '기타';return null;}
 // 보유 레이어의 적정밴드 대비 부호 갭(+ 오버·− 언더·0 밴드내). TMAP/heldWeight는 상단 전역.
@@ -4524,6 +4531,7 @@ function draw(){
  const xt=el('text',{x:(PL+W-PR)/2,y:H-8,'text-anchor':'middle',class:'axtitle'});xt.textContent=`${xMode==='real'&&snapIdx<0?'실현':'예상'} 3개월 ${bench==='NASDAQ'?'나스닥':'코스피'} 대비 알파 (%p) →`;svg.appendChild(xt);
  const yt=el('text',{x:16,y:(PT+H-PB)/2,'text-anchor':'middle',class:'axtitle',transform:`rotate(-90 16 ${(PT+H-PB)/2})`});yt.textContent=`다음주 ${bench==='NASDAQ'?'나스닥':'코스피'} 대비 알파 (%p) →`;svg.appendChild(yt);
 
+ if(showCentroid)drawCentroids();
  D.forEach((d,i)=>{
    if(d.cand&&!showCand)return;
    if(!d.cand&&!showHeld)return;
@@ -4639,6 +4647,27 @@ function drawCash(){
  c.addEventListener('mouseenter',showCash);c.addEventListener('mousemove',moveTip);c.addEventListener('mouseleave',hideTip);
  c.addEventListener('click',e=>{selected=null;unhighlight();showCash();moveTip(e);});
 }
+// C: 레이어 무게중심 마커 + 회전 화살표(오버·트림 층 → 언더·증액 층 = 한계자본 회전). 버블 아래 레이어.
+function drawCentroids(){
+ const cen=layerCentroids(),Ls=Object.keys(cen); if(!Ls.length)return;
+ // 회전 화살표 — 라이브 모드만(밴드갭=현 holdings 기준). 최대 오버 → 최대 언더.
+ if(snapIdx<0){
+  const over=Ls.filter(L=>TMAP[L]&&heldWeight(L)>TMAP[L].hi).sort((a,b)=>(heldWeight(b)-TMAP[b].hi)-(heldWeight(a)-TMAP[a].hi));
+  const under=Ls.filter(L=>TMAP[L]&&heldWeight(L)<TMAP[L].lo).sort((a,b)=>(TMAP[b].lo-heldWeight(b))-(TMAP[a].lo-heldWeight(a)));
+  if(over[0]&&under[0]&&over[0]!==under[0]){
+   const A=cen[over[0]],B=cen[under[0]],x1=px(A.x),y1=py(A.y),x2=px(B.x),y2=py(B.y),ang=Math.atan2(y2-y1,x2-x1);
+   const sx=x1+Math.cos(ang)*17,sy=y1+Math.sin(ang)*17,ex=x2-Math.cos(ang)*17,ey=y2-Math.sin(ang)*17;
+   svg.appendChild(el('line',{x1:sx,y1:sy,x2:ex,y2:ey,stroke:'#5c6f7e','stroke-width':2,'stroke-dasharray':'5 4',opacity:.7,style:'pointer-events:none'}));
+   svg.appendChild(el('path',{d:'M0,0 L-10,-4.5 L-10,4.5 Z',fill:'#5c6f7e',opacity:.85,transform:`translate(${ex},${ey}) rotate(${ang*180/Math.PI})`,style:'pointer-events:none'}));
+   const tl=el('text',{x:(sx+ex)/2,y:(sy+ey)/2-5,'text-anchor':'middle','font-size':10,'font-weight':700,fill:'#5c6f7e',style:'pointer-events:none'});tl.textContent='한계자본 회전';svg.appendChild(tl);
+  }
+ }
+ // 레이어 무게중심 마커
+ Ls.forEach(L=>{const c=cen[L],x=px(c.x),y=py(c.y),col=LAYER_HEX[L]||'#94a5b4';
+  svg.appendChild(el('circle',{cx:x,cy:y,r:15,fill:col+'20',stroke:col,'stroke-width':2,opacity:.92,style:'pointer-events:none'}));
+  const tl=el('text',{x,y:y+4,'text-anchor':'middle','font-size':11,'font-weight':800,fill:col,style:'pointer-events:none'});tl.textContent=L;svg.appendChild(tl);
+ });
+}
 const tip=document.getElementById('alphaTip');
 const cls=v=>v>0?'pos':v<0?'neg':'';
 function showTip(d){
@@ -4694,7 +4723,8 @@ function renderLegend(){
  const sizeLg=sizeMode==='gap'
    ?'<span class="lg" style="color:var(--a-faint)">●크기=밴드갭</span><span class="lg" style="color:#b8860b">◯오버·트림</span><span class="lg" style="color:#0ca678">◯언더·증액</span>'
    :'<span class="lg" style="color:var(--a-faint)">●크기=비중</span>';
- document.getElementById('legend').innerHTML=items.map(([t,c])=>`<span class="lg"><span class="dot" style="background:${c}"></span>${t}</span>`).join('')+sizeLg+'<span class="lg" style="color:var(--a-faint)">◌미보유</span><span class="lg" style="color:#f59f00">⚡실적크기</span>';
+ const centLg=showCentroid?'<span class="lg" style="color:var(--a-faint)">◯Lx=레이어 무게중심</span><span class="lg" style="color:#5c6f7e">→ 한계자본 회전</span>':'';
+ document.getElementById('legend').innerHTML=items.map(([t,c])=>`<span class="lg"><span class="dot" style="background:${c}"></span>${t}</span>`).join('')+sizeLg+centLg+'<span class="lg" style="color:var(--a-faint)">◌미보유</span><span class="lg" style="color:#f59f00">⚡실적크기</span>';
 }
 document.getElementById('benchSeg').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
  document.querySelectorAll('#benchSeg button').forEach(x=>x.classList.remove('on'));b.classList.add('on');
@@ -4708,6 +4738,7 @@ document.getElementById('lblBtn').addEventListener('click',function(){showLabels
 document.getElementById('emBtn').addEventListener('click',function(){showEM=!showEM;this.classList.toggle('on',showEM);this.textContent=showEM?'실적 표시':'실적 끄기';draw();});
 document.getElementById('sizeBtn').addEventListener('click',function(){sizeMode=sizeMode==='w'?'gap':'w';this.classList.toggle('on',sizeMode==='gap');this.textContent=sizeMode==='gap'?'크기: 밴드갭':'크기: 비중';renderLegend();draw();});
 document.getElementById('xBtn').addEventListener('click',function(){xMode=xMode==='est'?'real':'est';this.classList.toggle('on',xMode==='real');this.textContent=xMode==='real'?'가로: 실현':'가로: 예상';hideTip();draw();});
+document.getElementById('centBtn').addEventListener('click',function(){showCentroid=!showCentroid;this.classList.toggle('on',showCentroid);renderLegend();draw();});
 
 // ===== 4사분면 시점 스냅샷 =====
 // 라이브 머지값을 d._aN/_aK/_stage로 보존 → 과거 스냅샷 본 뒤 '현재'로 복원 가능.
