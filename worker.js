@@ -141,13 +141,12 @@ async function handleSignalsUpdate(request, env) {
 }
 
 // σ·μ 추정 — Anthropic Messages API 프록시 (브라우저 직접 호출은 CORS·키 부재로 실패하므로 서버측에서 중계)
+// 스트리밍·재시도·에러 상세는 공용 anthropicText() 로 일원화(중복 구현이 두 벌이면 한쪽만 고쳐져 조용히 갈린다).
 async function handleEstimate(request, env) {
   const json = (obj, status) => new Response(JSON.stringify(obj),
     { status, headers: { "content-type": "application/json" } });
 
-  if (!env.ANTHROPIC_API_KEY) {
-    return json({ error: "ANTHROPIC_API_KEY not configured" }, 503);
-  }
+  if (!env.ANTHROPIC_API_KEY) return json({ error: "ANTHROPIC_API_KEY not configured" }, 503);
 
   let body;
   try { body = await request.json(); }
@@ -158,72 +157,10 @@ async function handleEstimate(request, env) {
 
   const prompt = 'You are a quant. For the stock/ETF ticker or name "' + tk + '", estimate its ANNUALIZED volatility (%) from recent ~1y daily returns, and a reasonable ANNUAL expected drift (%) assumption. Use web search for recent data. Respond with ONLY a compact JSON object, no prose, no markdown fences: {"ticker":"","name":"","annualizedVolPct":number,"suggestedDriftPct":number,"note":"one short sentence in Korean"}';
 
-  let upstream;
-  try {
-    upstream = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-        "x-api-key": env.ANTHROPIC_API_KEY,
-        "anthropic-version": "2023-06-01",
-      },
-      body: JSON.stringify({
-        model: "claude-opus-4-8",
-        max_tokens: 1500,
-        // 스트리밍 — Opus + web_search(서버툴)는 비스트리밍 시 첫 바이트까지
-        // 오래 걸려 api.anthropic.com(Cloudflare) 의 ~100s 한도를 넘기면 524 가 떴다
-        // (워커는 이를 502 "anthropic api failed" 로 전달). 스트리밍은 ping/델타로
-        // 연결을 유지해 타임아웃을 막는다. 서버측에서 텍스트를 재조립해 동일 형태로 반환.
-        stream: true,
-        messages: [{ role: "user", content: prompt }],
-        tools: [{ type: "web_search_20260209", name: "web_search" }],
-      }),
-    });
-  } catch (e) {
-    return json({ error: "anthropic fetch failed", detail: String(e && e.message ? e.message : e) }, 502);
-  }
-
-  if (!upstream.ok || !upstream.body) {
-    const t = await upstream.text().catch(() => "");
-    return json({ error: "anthropic api failed", status: upstream.status, detail: t.slice(0, 400) }, 502);
-  }
-
-  // SSE 스트림을 서버측에서 수집해 text 블록을 재조립 — 클라이언트 계약(data.content[].text) 유지.
-  let text = "", stopReason = null, errDetail = null;
-  try {
-    const reader = upstream.body.getReader();
-    const dec = new TextDecoder();
-    let buf = "";
-    for (;;) {
-      const { value, done } = await reader.read();
-      if (done) break;
-      buf += dec.decode(value, { stream: true });
-      let nl;
-      while ((nl = buf.indexOf("\n")) >= 0) {
-        const line = buf.slice(0, nl).trim();
-        buf = buf.slice(nl + 1);
-        if (!line.startsWith("data:")) continue;
-        const payload = line.slice(5).trim();
-        if (!payload || payload === "[DONE]") continue;
-        let ev;
-        try { ev = JSON.parse(payload); } catch { continue; }
-        if (ev.type === "content_block_delta" && ev.delta && ev.delta.type === "text_delta") {
-          text += ev.delta.text;
-        } else if (ev.type === "message_delta" && ev.delta && ev.delta.stop_reason) {
-          stopReason = ev.delta.stop_reason;
-        } else if (ev.type === "error") {
-          errDetail = (ev.error && ev.error.message) || "stream error";
-        }
-      }
-    }
-  } catch (e) {
-    return json({ error: "anthropic stream failed", detail: String(e && e.message ? e.message : e) }, 502);
-  }
-
-  if (errDetail) return json({ error: "anthropic api failed", detail: errDetail.slice(0, 400) }, 502);
-
+  const r = await anthropicText(env, prompt, true, 1500);
+  if (r.error) return json(r, 502);
   // 클라이언트는 data.content 의 text 블록만 사용 → 동일한 형태로 반환.
-  return json({ content: [{ type: "text", text: text }], stop_reason: stopReason }, 200);
+  return json({ content: [{ type: "text", text: r.text }], stop_reason: r.stop_reason }, 200);
 }
 
 // ===== 메모 저장 — Cloudflare R2 (MEMO_BUCKET) · DA Space 방식 =====
@@ -326,64 +263,125 @@ async function handleInsightsPut(request, env) {
   return memoJson({ ok: true, count: arr.length }, 200);
 }
 
+// ===== Anthropic 공용 상수·유틸 =====
+// web_search 는 문서화된 기본 버전으로 고정한다. 동적 필터링(코드실행 결합)을 쓰지 않으므로
+// 최신 태그를 좇을 이유가 없고, 태그가 만료되면 400(invalid_request) 으로 조용히 죽는다.
+const WEB_SEARCH_TOOL = { type: "web_search_20250305", name: "web_search" };
+const ANTHROPIC_MODEL = "claude-opus-4-8";
+
+// 한글·CJK 는 1자당 토큰이 크다(대략 1.2~1.8). 라틴은 ~4자당 1토큰.
+// 워커에는 토크나이저가 없으므로 보수적으로 과대추정한다 — 과소추정은 400 "prompt is too long" 으로 죽는다.
+function estTokens(s) {
+  let cjk = 0;
+  for (let i = 0; i < s.length; i++) {
+    const c = s.charCodeAt(i);
+    if ((c >= 0x1100 && c <= 0x11ff) || (c >= 0x3000 && c <= 0x9fff) ||
+        (c >= 0xac00 && c <= 0xd7af) || (c >= 0xf900 && c <= 0xfaff)) cjk++;
+  }
+  return Math.ceil(cjk * 1.7 + (s.length - cjk) / 3.2);
+}
+
+// 토큰 예산에 맞춰 앞에서부터 자른다(이분탐색 — 문자 단위 재계산 비용 회피).
+function clipToTokens(s, budget) {
+  if (estTokens(s) <= budget) return { text: s, cut: 0 };
+  let lo = 0, hi = s.length;
+  while (lo < hi) {
+    const mid = (lo + hi + 1) >> 1;
+    if (estTokens(s.slice(0, mid)) <= budget) lo = mid; else hi = mid - 1;
+  }
+  return { text: s.slice(0, lo), cut: s.length - lo };
+}
+
+// 업스트림 에러 본문에서 사람이 읽을 수 있는 사유를 뽑는다(type + message).
+function anthropicErrDetail(t) {
+  try {
+    const j = JSON.parse(t);
+    if (j && j.error && j.error.message) return (j.error.type ? j.error.type + ": " : "") + j.error.message;
+  } catch (_) { /* 본문이 JSON 이 아니면 원문 앞부분 */ }
+  return String(t || "").slice(0, 400);
+}
+const _retriable = (st) => st === 408 || st === 409 || st === 429 || st >= 500;
+const _sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
 // Anthropic Messages 프록시(공용) — SSE 를 서버측에서 재조립해 텍스트만 반환.
-// (handleEstimate 와 동일한 이유로 스트리밍: Opus + web_search 는 비스트리밍 시 100s 한도에 걸린다.)
+// (Opus + web_search 는 비스트리밍 시 첫 바이트까지 오래 걸려 ~100s 한도에서 524 가 났다.
+//  스트리밍은 ping/델타로 연결을 유지한다.)
+// 실패는 '조용히' 두지 않는다 — status·type·message 를 그대로 올려보낸다(§1 침묵하는 오류).
+// 429/5xx/529(overloaded)는 지수 백오프로 최대 3회 시도.
 async function anthropicText(env, prompt, useSearch, maxTokens) {
   const payload = {
-    model: "claude-opus-4-8",
+    model: ANTHROPIC_MODEL,
     max_tokens: maxTokens || 4000,
     stream: true,
     messages: [{ role: "user", content: prompt }],
   };
-  if (useSearch) payload.tools = [{ type: "web_search_20260209", name: "web_search" }];
+  if (useSearch) payload.tools = [WEB_SEARCH_TOOL];
 
-  let upstream;
-  try {
-    upstream = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-        "x-api-key": env.ANTHROPIC_API_KEY,
-        "anthropic-version": "2023-06-01",
-      },
-      body: JSON.stringify(payload),
-    });
-  } catch (e) {
-    return { error: "anthropic fetch failed", detail: String(e && e.message ? e.message : e) };
-  }
-  if (!upstream.ok || !upstream.body) {
-    const t = await upstream.text().catch(() => "");
-    return { error: "anthropic api failed", status: upstream.status, detail: t.slice(0, 400) };
-  }
+  const est = estTokens(prompt);
+  let last = null;
 
-  let text = "", stopReason = null, errDetail = null;
-  try {
-    const reader = upstream.body.getReader();
-    const dec = new TextDecoder();
-    let buf = "";
-    for (;;) {
-      const { value, done } = await reader.read();
-      if (done) break;
-      buf += dec.decode(value, { stream: true });
-      let nl;
-      while ((nl = buf.indexOf("\n")) >= 0) {
-        const line = buf.slice(0, nl).trim();
-        buf = buf.slice(nl + 1);
-        if (!line.startsWith("data:")) continue;
-        const p = line.slice(5).trim();
-        if (!p || p === "[DONE]") continue;
-        let ev;
-        try { ev = JSON.parse(p); } catch { continue; }
-        if (ev.type === "content_block_delta" && ev.delta && ev.delta.type === "text_delta") text += ev.delta.text;
-        else if (ev.type === "message_delta" && ev.delta && ev.delta.stop_reason) stopReason = ev.delta.stop_reason;
-        else if (ev.type === "error") errDetail = (ev.error && ev.error.message) || "stream error";
-      }
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (attempt) await _sleep(attempt === 1 ? 1200 : 4000);
+
+    let upstream;
+    try {
+      upstream = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          "x-api-key": env.ANTHROPIC_API_KEY,
+          "anthropic-version": "2023-06-01",
+        },
+        body: JSON.stringify(payload),
+      });
+    } catch (e) {
+      last = { error: "anthropic fetch failed", detail: String(e && e.message ? e.message : e), est_tokens: est };
+      continue;   // 네트워크 요동은 재시도 가치가 있다
     }
-  } catch (e) {
-    return { error: "anthropic stream failed", detail: String(e && e.message ? e.message : e) };
+
+    if (!upstream.ok || !upstream.body) {
+      const t = await upstream.text().catch(() => "");
+      last = { error: "anthropic api failed", status: upstream.status, detail: anthropicErrDetail(t), est_tokens: est, attempt: attempt + 1 };
+      if (_retriable(upstream.status)) continue;
+      return last;   // 400/401/403/404 는 재시도해도 같다 — 즉시 사유와 함께 반환
+    }
+
+    let text = "", stopReason = null, errDetail = null;
+    try {
+      const reader = upstream.body.getReader();
+      const dec = new TextDecoder();
+      let buf = "";
+      for (;;) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        buf += dec.decode(value, { stream: true });
+        let nl;
+        while ((nl = buf.indexOf("\n")) >= 0) {
+          const line = buf.slice(0, nl).trim();
+          buf = buf.slice(nl + 1);
+          if (!line.startsWith("data:")) continue;
+          const p = line.slice(5).trim();
+          if (!p || p === "[DONE]") continue;
+          let ev;
+          try { ev = JSON.parse(p); } catch { continue; }
+          if (ev.type === "content_block_delta" && ev.delta && ev.delta.type === "text_delta") text += ev.delta.text;
+          else if (ev.type === "message_delta" && ev.delta && ev.delta.stop_reason) stopReason = ev.delta.stop_reason;
+          else if (ev.type === "error") errDetail = ((ev.error && ev.error.type) ? ev.error.type + ": " : "") + ((ev.error && ev.error.message) || "stream error");
+        }
+      }
+    } catch (e) {
+      last = { error: "anthropic stream failed", detail: String(e && e.message ? e.message : e), est_tokens: est };
+      continue;
+    }
+
+    if (errDetail) {
+      last = { error: "anthropic api failed", detail: errDetail.slice(0, 400), est_tokens: est, attempt: attempt + 1 };
+      if (/overloaded|rate|timeout/i.test(errDetail)) continue;
+      return last;
+    }
+    return { text: text, stop_reason: stopReason, est_tokens: est };
   }
-  if (errDetail) return { error: "anthropic api failed", detail: errDetail.slice(0, 400) };
-  return { text: text, stop_reason: stopReason };
+  return last || { error: "anthropic api failed", detail: "unknown", est_tokens: est };
 }
 
 // 관점 추출 — 리포트/기사/유튜브 본문(또는 URL)을 알파맵 프레임으로 구조화.
@@ -397,8 +395,15 @@ async function handleInsight(request, env) {
 
   const url = String((body && body.url) || "").slice(0, 500);
   let text = String((body && body.text) || "");
-  if (text.length > 120000) text = text.slice(0, 120000);
   if (!text.trim() && !url.trim()) return memoJson({ error: "text or url required" }, 400);
+
+  // 입력 예산 가드 — 40쪽짜리 증권사 리포트(한글)는 문자수는 멀쩡해 보여도 토큰은 컨텍스트를 넘긴다.
+  // 넘기면 업스트림이 400 "prompt is too long" 을 던지고, 화면엔 "anthropic api failed" 만 남았다.
+  // 여기서 미리 잘라내고, 얼마나 잘렸는지를 응답에 실어 화면에 알린다(조용히 자르지 않는다).
+  const DOC_TOKEN_BUDGET = 140000;   // 컨텍스트 200k − 출력 6k − 프롬프트 골격 − 추정 오차 여유
+  const clip = clipToTokens(text, DOC_TOKEN_BUDGET);
+  const cutChars = clip.cut;
+  text = clip.text;
 
   const useSearch = !text.trim() && !!url.trim();
 
@@ -436,8 +441,13 @@ async function handleInsight(request, env) {
   ].filter(Boolean).join("\n");
 
   const r = await anthropicText(env, prompt, useSearch, 6000);
-  if (r.error) return memoJson(r, 502);
-  return memoJson({ content: [{ type: "text", text: r.text }], stop_reason: r.stop_reason }, 200);
+  if (r.error) return memoJson(Object.assign({}, r, { cut_chars: cutChars }), 502);
+  return memoJson({
+    content: [{ type: "text", text: r.text }],
+    stop_reason: r.stop_reason,
+    est_tokens: r.est_tokens,
+    cut_chars: cutChars,
+  }, 200);
 }
 
 // US10Y 데이터 프록시 — 데이터 생성은 us10y 리포의 GitHub Actions(daily-update.yml)가
