@@ -395,9 +395,6 @@ async function handleInsight(request, env) {
   try { body = await request.json(); }
   catch { return memoJson({ error: "invalid json" }, 400); }
 
-  const kind = String((body && body.kind) || "기타").slice(0, 24);
-  const pub = String((body && body.publisher) || "").slice(0, 120);
-  const title = String((body && body.title) || "").slice(0, 300);
   const url = String((body && body.url) || "").slice(0, 500);
   let text = String((body && body.text) || "");
   if (text.length > 120000) text = text.slice(0, 120000);
@@ -430,10 +427,8 @@ async function handleInsight(request, env) {
     '{"src":{"kind":"","publisher":"","title":"","url":"","date":""},"summary":"3줄 이내 핵심 요약","claims":[{"text":"핵심 한 줄","layer":"L3","tickers":["MU"],"type":"numbers|narrative","novelty":0,"impact":0,"confidence":0,"route":"signal_log","why":"어느 층 수요/공급을 바꾸는지 + 상대가치 함의","verify":"확인해야 할 것"}],"noise":["버린 것 한 줄씩"],"steelman":"이 자료의 논지에 대한 가장 강한 반론 1~2문장"}',
     "claims 는 최대 8개. 유의미한 게 없으면 claims 는 빈 배열로 두고 noise 에 이유를 적어라.",
     "",
-    "[자료]",
-    "종류: " + kind,
-    pub ? ("출처: " + pub) : "",
-    title ? ("제목: " + title) : "",
+    "[자료] 종류·출처·제목·날짜는 주어지지 않는다. 본문(또는 URL)에서 직접 판별해 src 에 채워라(불명확하면 빈 문자열).",
+    "  src.kind 는 '증권사 리포트' | '기사' | '유튜브' | '공시' | '기타' 중 하나로 분류하라. src.title 은 자료의 실제 제목, src.publisher 는 발행처·매체·채널명.",
     url ? ("URL: " + url) : "",
     useSearch
       ? "본문이 제공되지 않았다. web_search 로 위 URL 의 내용(또는 그 영상·기사에 대한 신뢰 가능한 요약·보도)을 찾아 근거로 삼아라. 찾지 못하면 claims 를 비우고 noise 에 '본문 확보 실패'라고 적어라."
