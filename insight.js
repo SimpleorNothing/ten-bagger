@@ -1,7 +1,7 @@
 /* ===== 03 관점과 정보 얻기 — 인테이크(Claude 추출) · 선별 · 반영 =====
    규율: 뽑기 ≠ 반영. 서버(/api/insight)는 '후보 정렬'까지만 하고, 채택은 사람이 체크한다.
    · narrative 는 숫자 라우트(earnings/judgment/stage/holdings)로 못 간다 → 클라에서 signal_log 로 강등(clamp).
-   · 채택돼도 숫자 파일은 자동 변경 없음 — '반영 대기'로만 03 리밸런싱에 뜬다(수기 검증 후 반영 완료 표시).
+   · 채택돼도 숫자 파일은 자동 변경 없음 — '반영 대기'로만 04 리밸런싱에 뜬다(수기 검증 후 반영 완료 표시).
    저장소: R2(/api/insights) + localStorage 캐시. 추출: /api/insight (worker → Claude, 본문 없으면 웹검색). */
 window.INSIGHT=(function(){
  var GEN='/api/insight', STORE='/api/insights', CK='ins_cache_v1';
@@ -241,7 +241,80 @@ window.INSIGHT=(function(){
   $('insSearch').oninput=function(e){q=(e.target.value||'').trim();renderList();};
   $('insFilter').onchange=function(e){filt=e.target.value;renderList();};
  }
- function init(){if(!document.getElementById('insList'))return;bind();load();}
+
+ /* --- 자가 마운트 --- index.html 은 <script src="/insight.js"> 한 줄만 추가하고,
+    탭·섹션·반영 스트립 앵커는 여기서 DOM 으로 생성한다(대용량 index.html 패치 최소화). */
+ var SECTION_HTML='<div class="vhead" style="position:relative"><div class="vkick">Insight Intake · 관점과 정보</div>'+
+  '<h1 class="vtitle">자료에서 <em>유의미한 것</em>만 — 그리고 선별 반영</h1>'+
+  '<span class="updstamp abs" id="updIns"></span>'+
+  '<p class="vsub">증권사 리포트·기사·유튜브(링크 또는 스크립트)를 넣으면 8레이어·단계 프레임으로 관점과 정보를 구조화해 뽑는다. '+
+  '<b>뽑는 것과 반영하는 것은 분리한다</b> — 체크해 채택한 관점만 다른 메뉴에 뜬다. 숫자 파일(실적·판단·단계·비중)은 자동으로 바뀌지 않는다(narrative ≠ numbers).</p></div>'+
+  '<div class="ins-wrap">'+
+   '<div class="ins-card">'+
+    '<div class="ins-row">'+
+     '<select class="ins-sel" id="insKind"><option>증권사 리포트</option><option>기사</option><option>유튜브</option><option>기타</option></select>'+
+     '<input class="ins-in" id="insPub" placeholder="출처 (예: 미래에셋 · Reuters · 채널명)">'+
+     '<input class="ins-in" id="insTitle" placeholder="제목">'+
+    '</div>'+
+    '<div class="ins-row" style="margin-top:8px"><input class="ins-in" id="insUrl" placeholder="URL (선택 — 본문이 없으면 URL만으로 웹검색해 시도)"></div>'+
+    '<textarea class="ins-ta" id="insText" style="margin-top:8px" placeholder="본문·스크립트를 붙여넣으세요. 유튜브는 자막 스크립트를 넣는 편이 URL만 주는 것보다 정확합니다."></textarea>'+
+    '<input type="file" id="insFile" accept=".pdf,.txt,.md,.csv,.json" multiple hidden>'+
+    '<div class="ins-drop" id="insDrop" role="button" tabindex="0">PDF·TXT 파일을 끌어다 놓거나 클릭해 선택 — 본문 텍스트만 추출해 위 칸에 채웁니다</div>'+
+    '<div class="ins-bar">'+
+     '<button class="ins-btn primary" id="insRun">관점 뽑기</button>'+
+     '<button class="ins-btn" id="insClear">비우기</button>'+
+     '<span class="ins-msg" id="insMsg"></span>'+
+    '</div>'+
+   '</div>'+
+   '<div class="ins-card" id="insResult" hidden></div>'+
+   '<div><h2 class="ins-h2">채택한 관점 <span class="n" id="insCount"></span></h2>'+
+    '<div class="ins-bar" style="margin:0 0 8px">'+
+     '<input class="ins-in" id="insSearch" style="flex:1 1 200px" placeholder="검색 (내용·종목·출처)">'+
+     '<select class="ins-sel" id="insFilter" style="flex:0 0 170px">'+
+      '<option value="">전체</option><option value="pending">숫자 반영 대기</option>'+
+      '<option value="signal_log">시그널 로그</option><option value="macro">시장 모니터링</option><option value="calendar">캘린더</option>'+
+     '</select>'+
+    '</div><div id="insList"></div></div>'+
+  '</div>';
+ function el(tag,cls,id){var e=document.createElement(tag);if(cls)e.className=cls;if(id)e.id=id;return e;}
+ function anchor(id,parentSel,mode,refSel){
+  if(document.getElementById(id))return;
+  var p=document.querySelector(parentSel);if(!p)return;
+  var d=el('div','ins-strip',id), ref=refSel?p.querySelector(refSel):null;
+  if(mode==='before'&&ref)p.insertBefore(d,ref);
+  else if(mode==='after'&&ref)p.insertBefore(d,ref.nextSibling);
+  else p.appendChild(d);
+ }
+ function mount(){
+  if(!document.getElementById('insight-css')){
+   var l=document.createElement('link');l.id='insight-css';l.rel='stylesheet';l.href='/insight.css';document.head.appendChild(l);
+  }
+  var nav=document.getElementById('nav');
+  if(nav&&!nav.querySelector('.tab[data-v="insight"]')){
+   var b=el('button','tab');b.setAttribute('data-v','insight');
+   b.innerHTML='<span class="n"></span>관점과 정보 얻기';
+   var port=nav.querySelector('.tab[data-v="port"]');
+   if(port)nav.insertBefore(b,port);else nav.appendChild(b);
+   Array.prototype.forEach.call(nav.querySelectorAll('.tab'),function(t,i){
+    var n=t.querySelector('.n');if(n)n.textContent=(i+1<10?'0':'')+(i+1);});
+   nav.addEventListener('click',function(e){
+    var t=e.target.closest?e.target.closest('.tab'):null;
+    if(t&&t.getAttribute('data-v')==='insight')renderAll();});
+  }
+  var main=document.querySelector('main.wrap');
+  if(main&&!document.getElementById('v-insight')){
+   var sec=el('section','view','v-insight');sec.innerHTML=SECTION_HTML;
+   var memo=document.getElementById('v-memo');
+   if(memo)main.insertBefore(sec,memo);else main.appendChild(sec);
+  }
+  anchor('insStripMarket','#v-market','after','.vhead');
+  anchor('insStripSig','#v-siglog','before','#signalLog');
+  anchor('insStripDec','#v-decision','before','#decisionBoard');
+  anchor('insStripCal','#v-cal','after','.vhead');
+  anchor('insStripThread','#v-thread','after','#instantAnswer');
+ }
+
+ function init(){mount();if(!document.getElementById('insList'))return;bind();load();}
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
  return {render:renderAll, all:function(){return recs;}, adopted:function(){return flat();}};
 })();
