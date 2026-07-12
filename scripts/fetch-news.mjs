@@ -91,10 +91,18 @@ function parseRSS(xml) {
 }
 
 async function fetchFeed(c) {
-  const r = await fetch(feedUrl(c), { headers: UA });
-  if (!r.ok) throw new Error('HTTP ' + r.status);
-  const xml = await r.text();
-  return parseRSS(xml).slice(0, PER_TICKER);
+  // 구글 뉴스는 러너 IP를 간헐적으로 스로틀링한다(503/429) → 지수 백오프 재시도.
+  let last;
+  for (let i = 0; i < 3; i++) {
+    try {
+      const r = await fetch(feedUrl(c), { headers: UA });
+      if (r.ok) return parseRSS(await r.text()).slice(0, PER_TICKER);
+      last = new Error('HTTP ' + r.status);
+      if (r.status !== 503 && r.status !== 429 && r.status < 500) throw last;  // 일시 오류만 재시도
+    } catch (e) { last = e; }
+    if (i < 2) await sleep(2000 * (i + 1) + Math.floor(Math.random() * 800));
+  }
+  throw last;
 }
 
 
@@ -102,8 +110,40 @@ async function fetchFeed(c) {
 // 사이트 종목 카드는 "일자 + 요약" 행으로 렌더한다(기사 제목 미표시).
 // 요약은 아카이브에 영구 보존되고, a 가 없는 신규 기사만 증분 생성한다
 // → 과거치를 매일 재요약하지 않는다(토큰·비용 방어).
-const ART_BATCH = 60;      // 1회 호출당 기사 수
+const ART_BATCH = 30;      // 1회 호출당 기사 수 (두 점 출력이라 60은 max_tokens 초과·절단 위험)
 const ART_MAX_NEW = 240;   // 1회 실행당 신규 요약 상한
+
+// 모델 출력이 부분 손상돼도(키 누락·꼬리 절단) 살릴 수 있는 항목만 건진다.
+// 배치 전체를 버리면 60건이 통째로 요약 없이 남는다 → 객체 단위 구제.
+function parseArts(text) {
+  const t = String(text || '').replace(/```json|```/g, '').trim();
+  try {
+    const a = JSON.parse(t);
+    if (Array.isArray(a)) return a;
+  } catch (e) { /* 아래에서 구제 */ }
+  const out = [];
+  const re = /\{[^{}]*\}/g;
+  let m;
+  while ((m = re.exec(t))) {
+    const chunk = m[0];
+    try {
+      const o = JSON.parse(chunk);
+      if (o && Number.isInteger(o.n)) { out.push(o); continue; }
+    } catch (e) { /* 필드 단위 구제로 폴백 */ }
+    const mn = chunk.match(/"n"\s*:\s*(\d+)/);
+    const ma = chunk.match(/"a"\s*:\s*"((?:[^"\\]|\\.)*)"/);
+    const mw = chunk.match(/"w"\s*:\s*"((?:[^"\\]|\\.)*)"/);
+    if (!mn || !ma) continue;
+    try {
+      out.push({
+        n: Number(mn[1]),
+        a: JSON.parse('"' + ma[1] + '"'),
+        w: mw ? JSON.parse('"' + mw[1] + '"') : '',
+      });
+    } catch (e) { /* 이 항목만 포기 */ }
+  }
+  return out;
+}
 
 async function summarizeArticles(items) {
   const key = process.env.ANTHROPIC_API_KEY;
@@ -130,7 +170,8 @@ w = 그래서 무슨 의미인가 · 주가에 대한 영향
 - 영향의 방향(호재/악재/중립)과 그 강도를 분명히 하되, 근거 없는 단정·매매 권유는 금지.
 - 확정 사실이 아니면 관측임을 드러낸다("~라는 관측", "~에 그침").
 
-해당 종목과 무관한 기사는 a="회사 무관 노이즈", w="" 로 둔다.
+해당 종목과 무관한 기사도 **n·a·w 세 키를 모두 포함**해 {"n":5,"a":"회사 무관 노이즈","w":""} 형태로 출력한다.
+어떤 경우에도 키 이름을 생략하지 말 것(예: {"n":5,"a":"...",""} 같은 출력은 금지).
 
 다음 JSON 배열만 출력하라(마크다운·설명 금지):
 [{"n":0,"a":"명사형 요약","w":"의미·주가 영향 한 문장"}]
@@ -140,13 +181,13 @@ ${lines}`;
       const r = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
         headers: { 'content-type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01' },
-        body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 8000, messages: [{ role: 'user', content: prompt }] }),
+        body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 12000, messages: [{ role: 'user', content: prompt }] }),
       });
       if (!r.ok) throw new Error('anthropic HTTP ' + r.status);
       const j = await r.json();
       const text = (j.content || []).filter((b) => b.type === 'text').map((b) => b.text).join('');
-      const arr = JSON.parse(text.replace(/```json|```/g, '').trim());
-      if (!Array.isArray(arr)) throw new Error('arts shape invalid');
+      const arr = parseArts(text);
+      if (!arr.length) throw new Error('arts 파싱 결과 0건');
       for (const x of arr) {
         if (x && Number.isInteger(x.n) && batch[x.n] && x.a) {
           batch[x.n].a = String(x.a).trim();
