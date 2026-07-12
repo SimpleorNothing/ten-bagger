@@ -607,6 +607,9 @@ table.tk th.c{text-align:center}
 .mkt-val{font:700 17px var(--mono);color:var(--txt);margin-bottom:8px}
 .mkt-chg{font-size:14px;font-weight:600}
 .mkt-chg.up{color:var(--st-hot)}.mkt-chg.dn{color:var(--st-accel)}
+.mkt-dod{font:600 12px var(--mono);margin-left:6px}
+.mkt-dod::before{content:'전일 ';font-weight:500;color:var(--faint)}
+.mkt-dod.up{color:var(--st-hot)}.mkt-dod.dn{color:var(--st-accel)}
 .mkt-card .spark{width:100%;height:36px;display:block}
 .mkt-span{font:500 12px var(--mono);color:var(--faint);margin-top:4px}
 .mkt-card-lk{cursor:pointer}
@@ -2745,6 +2748,7 @@ window.MARKET=(function(){
  function esc(s){return String(s==null?'':s).replace(/[&<>]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;'}[c];});}
  function slice6(a){return a.slice(-126);}
  function pct(v){return (!v||v.length<2)?0:(v[v.length-1]/v[0]-1)*100;}
+ function pctDoD(v){return (!v||v.length<2)?null:(v[v.length-1]/v[v.length-2]-1)*100;}
  function spark(vals,ref){
   if(!vals||vals.length<2)return '';
   var w=120,hh=36,mn=Math.min.apply(null,vals),mx=Math.max.apply(null,vals),rg=(mx-mn)||1,n=vals.length;
@@ -2758,7 +2762,9 @@ window.MARKET=(function(){
  }
  function card(name,val,p,vals,ref,lns){
   var up=p>=0,cls=up?'up':'dn',sign=up?'+':'';
-  return '<div class="mkt-nm">'+esc(name)+'</div><div class="mkt-val">'+val+' <span class="mkt-chg '+cls+'">'+sign+p.toFixed(1)+'%</span></div>'+(lns||'')+spark(vals,ref)+'<div class="mkt-span">6개월</div>';
+  var dod=pctDoD(vals),dodHTML='';
+  if(dod!=null&&isFinite(dod)){var dcls=dod>=0?'up':'dn';dodHTML='<span class="mkt-dod '+dcls+'">'+(dod>=0?'+':'')+dod.toFixed(1)+'%</span>';}
+  return '<div class="mkt-nm">'+esc(name)+'</div><div class="mkt-val">'+val+' <span class="mkt-chg '+cls+'">'+sign+p.toFixed(1)+'%</span>'+dodHTML+'</div>'+(lns||'')+spark(vals,ref)+'<div class="mkt-span">6개월</div>';
  }
  /* ===== 렌즈(요약 2줄) — l1=이 그래프가 판정하는 것(프레임) · l2=라이브 수치 → 판정.
     논제 시계(gamma.json γ·stage)와 가격 시계(고점·평단)를 분리해 붙인다. 게이트 판정은
