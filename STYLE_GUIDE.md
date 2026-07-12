@@ -1,4 +1,4 @@
-**최종 갱신: 2026-07-12 18:35 (KST)**
+**최종 갱신: 2026-07-12 19:10 (KST)**
 
 # STYLE_GUIDE — 알파맵 디자인 시스템
 
@@ -166,10 +166,15 @@ pantone.css :root       ← 현행 팔레트 (팬튼 A안, index.html 하단 <li
 .mkt-val   값                    mono 17px/700
 .mkt-chg   등락(6개월)           14px/600 · up=--st-hot / dn=--st-accel
 .mkt-dod   전일대비              mono 12px/600 · `전일 ` 접두(--faint) · up=--st-hot / dn=--st-accel · 값 옆 병기
-.spark     스파크라인            height 36px, width 100%
-.mkt-axis  X축 시작·끝 라벨       mono 11px --faint · 좌=시작일·시작값 / 우=끝값·마지막일 (날짜 .ax-dt=--dim/600) · space-between
+.mkt-chart 그래프 래퍼           position:relative · padding-top:16px · **margin-top:auto**(카드 간 그래프 하단 정렬=수평 위치 일치)
+ └ .spark  스파크라인            height 36px, width 100%
+ └ .spv    끝점 수치 오버레이     mono 11px/600 --dim · 실제 끝점 y에 붙여 그 **위**에 표기(X축 아님) · 좌=.spv-s / 우=.spv-e · --panel 배경칩
+.mkt-axis  X축 날짜              mono 11px · 좌=시작일 / 우=마지막일 (.ax-dt=--dim/600) · space-between
 .mkt-span  기간 라벨             mono 12px --faint
 ```
+
+> **.mkt-card = flex column.** 위(이름·값·렌즈)는 상단, `.mkt-chart`부터는 `margin-top:auto`로 하단에 붙어 렌즈 줄 수가 달라도 **카드 간 그래프 세로 위치가 일치**한다.
+> **끝점 수치는 그래프 위(`.spv`)**, **날짜는 X축(`.mkt-axis`)** — 값과 날짜의 자리를 분리한다.
 
 ### 6-4. **렌즈 2줄** — 알파맵의 정보 규약 (가장 중요)
 
@@ -224,6 +229,7 @@ pantone.css :root       ← 현행 팔레트 (팬튼 A안, index.html 하단 <li
 
 ## 갱신 이력
 
+- 2026-07-12 19:10 · **01 시장 모니터링: 카드 간 그래프 세로 위치 일치 + 끝점 수치를 그래프 위로 이전.** ① 렌즈 줄 수에 따라 스파크라인이 카드마다 다른 높이에 떠 수평이 안 맞던 문제 → `.mkt-card`를 flex column으로, `.mkt-chart`에 `margin-top:auto`를 줘 그래프 블록을 하단 정렬(한 줄 안에서 세로 위치 일치). ② X축(`.mkt-axis`)에 있던 **시작·마지막 값**을 그래프 위 오버레이(`.spv`, 실제 끝점 y에 붙여 위에 표기)로 이전 — X축엔 시작·마지막 **날짜만** 남김. `chart()` 헬퍼 신설(`axis()` 대체), `card()` 단일 경로라 지표·보유 종목 전부 자동 적용.
 - 2026-07-12 18:20 · **종목 뉴스 그래프를 카드 상단 정렬 + 처음·마지막 값 헤더 추가.** 기존 `.stk-chart{justify-content:center}`는 기사 목록이 길면 그래프가 세로 중앙으로 내려가 카드 상단이 비었음 → `flex-start`로 최상단 정렬. 캔버스 좌상단에 그리던 값 라벨(마지막값·%)을 캔버스 밖 `.stk-cap` DOM 헤더(`처음값 → 마지막값 · 등락%`)로 이전 — 현재 창 기준 `dr()`에서 동기 갱신, 라인 세로 여백도 확보(§6-5).
 - 2026-07-12 17:45 · 빈 상태(§6-6) 보강 — 대기 중 렌즈 l1 유지 · `.stk-sum.ph` 대기 표기.
 - 2026-07-12 18:30 · **01 시장 모니터링 스파크라인에 X축 시작·끝 라벨 추가.** 스파크라인이 값만 그리고 기간은 `6개월` 텍스트뿐이라 시작·끝 시점/값이 안 보였음 — `.spark` 바로 아래 `.mkt-axis`(좌=시작일·시작값 / 우=끝값·마지막일)를 추가. `card()`에 옵션 인자 `{dates,fmtV}` 추가(무변경 호출은 값만 표시, 날짜 없으면 자동 생략). 지표(코스피·S&P·나스닥·미10년물·WTI)·보유 종목 전부 `card()` 단일 경로라 자동 적용. 날짜 소스: charts.json `series.*.t`(epoch-day) / WTI `points[i][0]`(YYYY-MM-DD).
