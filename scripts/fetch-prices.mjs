@@ -14,7 +14,7 @@ import fs from 'node:fs';
 
 const HTML = 'index.html';
 const OUT = 'prices.json';
-const CHARTS_OUT = 'charts.json'; // 1Y 일봉 시계열(호버 차트용). t=epoch day, c=close.
+const CHARTS_OUT = 'charts.json'; // 5Y 일봉 시계열(호버·기간버튼용). t=epoch day, c=close. 매 실행 창 전체를 교체(누적 아님).
 const UA = { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36' };
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const ymd = (d) => d.toISOString().slice(0, 10).replace(/-/g, '');
@@ -67,8 +67,9 @@ async function yahooAuth() {
 }
 
 async function yahoo(sym) {
-  // range=1y → ~52주 일봉 확보 후 올해 1/1 직전 마지막 종가를 YTD 기준가로 사용.
-  const u = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?interval=1d&range=1y`;
+  // range=5y → ~5년 일봉 확보(01 시장 모니터링 기간버튼 1M~5Y 지원). YTD 기준가는
+  // 창 안에서 올해 1/1 직전 마지막 종가를 골라 계산하므로 창을 넓혀도 그대로 유효.
+  const u = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?interval=1d&range=5y`;
   const r = await fetch(u, { headers: { ...UA, ...(YCOOKIE ? { Cookie: YCOOKIE } : {}) } });
   if (!r.ok) throw new Error('yahoo HTTP ' + r.status);
   const j = await r.json();
@@ -87,7 +88,7 @@ async function yahoo(sym) {
     else { after = cl[i]; break; }       // 1/1 이후 첫 종가
   }
   const base = before ?? after ?? meta.chartPreviousClose ?? cl.find((x) => x != null) ?? null;
-  // 1Y 시계열 (null 캔들 제거, t=epoch day)
+  // 5Y 시계열 (null 캔들 제거, t=epoch day). 신규 상장은 확보된 만큼만 → 프런트가 자동 클램프.
   const st = [], sc = [];
   for (let i = 0; i < ts.length; i++) {
     if (cl[i] == null || !Number.isFinite(cl[i])) continue;
@@ -100,7 +101,7 @@ async function yahoo(sym) {
 
 async function naver(code) {
   const end = ymd(new Date());
-  const start = ymd(new Date(Date.now() - 400 * 864e5)); // ~13개월 → 연초(전년도 말) 기준가 확보
+  const start = ymd(new Date(Date.now() - 1850 * 864e5)); // ~5년+버퍼 → 기간버튼 1M~5Y + 연초 기준가 확보
   const u = `https://api.finance.naver.com/siseJson.naver?symbol=${encodeURIComponent(code)}&requestType=1&startTime=${start}&endTime=${end}&timeframe=day`;
   const r = await fetch(u, { headers: UA });
   if (!r.ok) throw new Error('naver HTTP ' + r.status);
@@ -118,10 +119,10 @@ async function naver(code) {
   }
   const baseRow = before || after || rows[0];
   const base = Number(baseRow[4]);
-  // 1Y 시계열 (최근 ~252 거래일, t=epoch day)
-  const oneY = rows.slice(-260);
+  // 5Y 시계열 (최근 ~1250 거래일, t=epoch day). 상한 캡으로 파일 크기 방어.
+  const hist = rows.slice(-1300);
   const st = [], sc = [];
-  for (const x of oneY) {
+  for (const x of hist) {
     const ds = String(x[0]).replace(/-/g, '');
     const t = Math.floor(Date.UTC(+ds.slice(0, 4), +ds.slice(4, 6) - 1, +ds.slice(6, 8)) / 864e5);
     st.push(t);
