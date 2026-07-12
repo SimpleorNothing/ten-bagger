@@ -3087,13 +3087,15 @@ window.MARKET=(function(){
    // 기간 증감률(좌상단)
    var p=((v[k-1]/v[0]-1)*100).toFixed(1);
    c.textAlign='left';c.font='10px sans-serif';c.fillStyle=cl;c.fillText((p>=0?'+':'')+p+'% / '+k+'D',6,11);
-   // 처음·마지막 값을 '그래프 아래' 눈금줄(H-4)로 이전 = 선과 안 겹쳐 가독↑. 바깥=날짜(회색) · 안쪽=값(추세색·볼드).
-   c.textAlign='left';c.font='10px sans-serif';c.fillStyle='#868e96';c.fillText(fd(t[0]),6,H-4);
-   var sdw=c.measureText(fd(t[0])).width;
-   c.font='bold 10px sans-serif';c.fillStyle=cl;c.fillText(fv(v[0]),6+sdw+6,H-4);
-   c.textAlign='right';c.font='10px sans-serif';c.fillStyle='#868e96';c.fillText(fd(t[k-1]),w-6,H-4);
-   var edw=c.measureText(fd(t[k-1])).width;
-   c.font='bold 10px sans-serif';c.fillStyle=cl;c.fillText(fv(v[k-1]),w-6-edw-6,H-4);
+   // 하단 눈금줄엔 시작·끝 날짜만
+   c.font='10px sans-serif';c.fillStyle='#868e96';
+   c.textAlign='left';c.fillText(fd(t[0]),6,H-4);
+   c.textAlign='right';c.fillText(fd(t[k-1]),w-6,H-4);
+   // 처음·마지막 값 = 각 끝점에 붙여 위/아래로. 상단 근접이면 아래(+12), 아니면 위(−5) — 라벨이 캔버스 위로 안 잘리게.
+   function lblY(yp){return (yp-14<18)?yp+12:yp-5;}
+   c.font='bold 10px sans-serif';c.fillStyle=cl;
+   c.textAlign='left';c.fillText(fv(v[0]),6,lblY(Y(v[0])));                    // 처음값 = 시작점(좌)에 붙여
+   c.textAlign='right';c.fillText(fv(v[k-1]),w-6,lblY(Y(v[k-1])));            // 마지막값 = 끝점(우)에 붙여
    c.textAlign='left';c.font='10px sans-serif';
    if(st.hv>=0&&st.hv<k){var i2=st.hv;c.strokeStyle='#adb5bd';c.lineWidth=1;c.beginPath();c.moveTo(X(i2),18);c.lineTo(X(i2),H-16);c.stroke();
     c.fillStyle=cl;c.beginPath();c.arc(X(i2),Y(v[i2]),2.6,0,6.3);c.fill();
