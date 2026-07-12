@@ -47,6 +47,7 @@ function readCandidates() {
 }
 
 function newsQuery(c) {
+  if (c.q) return c.q;                       // 트렌딩 매크로 주제: 발굴된 검색어 우선
   if (QOVERRIDE[c.id]) return QOVERRIDE[c.id];
   return c.name.replace(/\(.*?\)/g, '').replace(/\s+plays/i, '').trim();
 }
@@ -112,6 +113,102 @@ async function fetchFeed(c) {
 // → 과거치를 매일 재요약하지 않는다(토큰·비용 방어).
 const ART_BATCH = 30;      // 1회 호출당 기사 수 (두 점 출력이라 60은 max_tokens 초과·절단 위험)
 const ART_MAX_NEW = 240;   // 1회 실행당 신규 요약 상한
+
+// ---- 트렌딩 매크로 주제 자동 발굴 (macroTopics) ----
+// 고정 주제(호르무즈·FOMC·관세)를 하드코딩하면 이슈가 식어도 계속 긁는다.
+// → ① 경제 헤드라인 수집 → ② 지금 시장을 실제로 움직이는 이슈 선별 → ③ 그 주제로 검색.
+// 발굴 실패 시 직전 실행의 주제(prev.macroTopics)를 재사용하고, 그것도 없으면 시드로 폴백한다.
+const MACRO_SEED = [
+  { id: 'macro_fomc', ticker: 'MACRO', name: 'FOMC 연준 기준금리', mkt: 'KOSPI' },
+  { id: 'macro_tariff', ticker: 'MACRO', name: '미국 관세 무역협상', mkt: 'KOSPI' },
+  { id: 'macro_ai_capex', ticker: 'MACRO', name: 'AI 데이터센터 capex', mkt: 'KOSPI' },
+];
+const MACRO_N = 3;                      // 선별할 트렌딩 주제 수
+// 광역·중립 검색어로 '지금 무엇이 헤드라인인가'를 긁는다(특정 이슈를 미리 못박지 않는다).
+// rss/search 형식은 기존 파이프라인에서 작동이 검증된 경로. topic/BUSINESS 섹션은 보조(실패해도 무해).
+const DISCOVERY_FEEDS = [
+  'https://news.google.com/rss/search?q=' + encodeURIComponent('증시 when:2d') + '&hl=ko&gl=KR&ceid=KR:ko',
+  'https://news.google.com/rss/search?q=' + encodeURIComponent('stock market when:2d') + '&hl=en-US&gl=US&ceid=US:en',
+  'https://news.google.com/rss/search?q=' + encodeURIComponent('economy when:2d') + '&hl=en-US&gl=US&ceid=US:en',
+  'https://news.google.com/rss/headlines/section/topic/BUSINESS?hl=en-US&gl=US&ceid=US:en',
+];
+
+async function fetchUrlFeed(url, n) {
+  for (let i = 0; i < 2; i++) {
+    try {
+      const r = await fetch(url, { headers: UA });
+      if (r.ok) return parseRSS(await r.text()).slice(0, n);
+    } catch (e) { /* 재시도 */ }
+    if (i < 1) await sleep(2000);
+  }
+  return [];
+}
+
+function slugId(s, i) {
+  const base = String(s || '').toLowerCase().replace(/[^a-z0-9가-힣]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 24);
+  return 'macro_' + (base || 'topic') + '_' + i;
+}
+
+async function discoverMacroTopics(prevTopics) {
+  const key = process.env.ANTHROPIC_API_KEY;
+  const heads = [];
+  for (const u of DISCOVERY_FEEDS) {
+    const got = await fetchUrlFeed(u, 25);
+    for (const it of got) heads.push(it.title);
+    await sleep(500);
+  }
+  console.log(`macro 발굴: 헤드라인 ${heads.length}건 수집`);
+  if (!key || heads.length < 5) {
+    const fb = (prevTopics && prevTopics.length) ? prevTopics : MACRO_SEED;
+    console.log('macro 발굴 스킵 → 폴백 주제 사용');
+    return fb;
+  }
+  const prompt = `너는 AI 인프라 투자 관측소의 매크로 애널리스트다. 아래는 오늘의 경제·시장 헤드라인이다.
+
+지금 시장을 실제로 움직이고 있는 **트렌딩 매크로 이슈 ${MACRO_N}개**를 골라라.
+
+선별 기준:
+- AI 인프라 스택(L1 모델 ~ L8 발전/그리드) 투자 판단에 실제로 영향을 주는 축일 것.
+  (금리·유동성 / 지정학·공급망 / 관세·수출통제 / 전력·에너지 / 신용·환율 / 하이퍼스케일러 capex)
+- 개별 종목 뉴스가 아니라 **매크로 축**일 것.
+- 헤드라인에서 반복 등장하거나 새로 부상한 이슈를 우선한다. 식은 이슈는 버린다.
+- 서로 다른 축으로 분산한다(같은 축 2개 금지).
+
+각 이슈에 대해:
+- label: 사람이 읽는 이슈명(한글, 12자 내외)
+- q: 구글 뉴스 검색어(그 이슈의 기사를 잘 긁을 핵심어 2~5개. 한글 또는 영문)
+- ko: 한국 시장 관점 기사가 더 적합하면 true, 미국/글로벌이면 false
+
+다음 JSON 배열만 출력하라(마크다운·설명 금지):
+[{"label":"이슈명","q":"검색어","ko":true}]
+
+${heads.slice(0, 70).join('\n')}`;
+  try {
+    const r = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01' },
+      body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 2000, messages: [{ role: 'user', content: prompt }] }),
+    });
+    if (!r.ok) throw new Error('anthropic HTTP ' + r.status);
+    const j = await r.json();
+    const text = (j.content || []).filter((b) => b.type === 'text').map((b) => b.text).join('');
+    const arr = JSON.parse(text.replace(/```json|```/g, '').trim());
+    if (!Array.isArray(arr) || !arr.length) throw new Error('macro shape invalid');
+    const topics = arr.slice(0, MACRO_N).map((x, i) => ({
+      id: slugId(x.label, i),
+      ticker: 'MACRO',
+      name: String(x.label || x.q || '매크로').trim(),
+      q: String(x.q || x.label || '').trim(),
+      mkt: x.ko === false ? 'US' : 'KOSPI',
+    })).filter((x) => x.q);
+    if (!topics.length) throw new Error('macro 주제 0건');
+    console.log('macro 트렌딩 주제: ' + topics.map((t) => `${t.name}(${t.q})`).join(' · '));
+    return topics;
+  } catch (e) {
+    console.log(`macro 발굴 실패(${e.message}) → 폴백 주제 사용`);
+    return (prevTopics && prevTopics.length) ? prevTopics : MACRO_SEED;
+  }
+}
 
 // 모델 출력이 부분 손상돼도(키 누락·꼬리 절단) 살릴 수 있는 항목만 건진다.
 // 배치 전체를 버리면 60건이 통째로 요약 없이 남는다 → 객체 단위 구제.
@@ -276,15 +373,12 @@ ${holdLines}`;
 }
 
 async function main() {
-  const MACRO_TOPICS = [
-    { id: 'macro_iran', ticker: 'MACRO', name: '이란 호르무즈 해협', mkt: 'KOSPI' },
-    { id: 'macro_fomc', ticker: 'MACRO', name: 'FOMC 연준 기준금리', mkt: 'KOSPI' },
-    { id: 'macro_tariff', ticker: 'MACRO', name: '미국 관세 무역협상', mkt: 'KOSPI' },
-  ];
-  const candidates = [...readCandidates().filter((c) => !SKIP(c)), ...MACRO_TOPICS];
-
   let prev = { items: [] };
   try { prev = JSON.parse(fs.readFileSync(OUT, 'utf8')); } catch (e) { /* first run */ }
+
+  // 매크로 주제는 고정이 아니라 매 실행 트렌딩으로 갱신한다
+  const MACRO_TOPICS = await discoverMacroTopics(prev.macroTopics);
+  const candidates = [...readCandidates().filter((c) => !SKIP(c)), ...MACRO_TOPICS];
 
   const now = new Date();
   const collected = [];
@@ -391,6 +485,7 @@ async function main() {
     source: 'Google News RSS · 보유/후보 종목별 (원시 피드 + 기사별 한 줄 요약)',
     note: `사이트 종목 카드의 "일자 + 요약" 행 소스. 최근 ${PRUNE_DAYS}일 창 · 종목당 최신 ${SITE_PER_TICKER}건(첫 로딩 페이로드 상한). 나머지 3개월치는 ${SHARD_DIR}/{티커}.json 을 '더 보기'로 온디맨드 로드. 창 밖 과거 기사는 삭제된 것이 아니라 ${ARCHIVE_OUT} 에 영구 보존된다. 신호/소음 판단과 SIGNAL_LOG 반영은 사람/Claude의 몫 — 채점·차트에는 쓰이지 않는다.`,
     count: items.length,
+    macroTopics: MACRO_TOPICS,   // 이번 실행에서 채택된 트렌딩 매크로 축(폴백·표시용)
     archive: ARCHIVE_OUT,
     archiveCount: all.length,
     shardDir: SHARD_DIR,
