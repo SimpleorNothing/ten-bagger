@@ -2757,12 +2757,9 @@ window.MARKET=(function(){
  async function loadHoldings(){
   var host=document.getElementById('mktHoldings');if(!host)return;
   try{var r=await fetch('charts.json?t='+Date.now(),{cache:'no-store'});var j=await r.json();var S=j.series||{};
-   // 평단(주당 매입가) = holdings.json avg{} — 자산현황 xlsx에서 자동 동기화(sync-holdings.mjs). 필드 부재·페치 실패 시 선 생략.
-   var AVG={};
-   try{var hr=await fetch('holdings.json?t='+Date.now(),{cache:'no-store'});var hj=await hr.json();AVG=hj.avg||{};}catch(e2){}
    var list=[['mrvl','Marvell','MRVL'],['mu','Micron','MU'],['lite','Lumentum','LITE'],['vrt','Vertiv','VRT'],['be','Bloom Energy','BE'],['tsla','Tesla','TSLA']];
    var html=list.map(function(o){var d=S[o[0]];if(!d||!d.c||!d.c.length)return '';var vals=slice6(d.c);
-    return '<div class="mkt-card mkt-card-lk" data-tk="'+o[2]+'" role="button" tabindex="0" title="'+esc(o[1])+' 기사 보기">'+card(o[1],'$'+vals[vals.length-1].toFixed(2),pct(vals),vals,AVG[o[0]])+'</div>';}).join('');
+    return '<div class="mkt-card mkt-card-lk" data-tk="'+o[2]+'" role="button" tabindex="0" title="'+esc(o[1])+' 기사 보기">'+card(o[1],'$'+vals[vals.length-1].toFixed(2),pct(vals),vals)+'</div>';}).join('');
    host.innerHTML=html||'<div class="mkt-ph" style="grid-column:1/-1">데이터 없음</div>';
    host.querySelectorAll('.mkt-card-lk').forEach(function(cd){function go(){gotoStockNews(cd.getAttribute('data-tk'));}cd.addEventListener('click',go);cd.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();go();}});});}
   catch(e){host.innerHTML='<div class="mkt-ph" style="grid-column:1/-1">데이터 대기</div>';}
@@ -2811,9 +2808,12 @@ window.MARKET=(function(){
    var rs=await Promise.all([
     fetch('news_digest.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;}),
     fetch('news.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;}),
-    fetch('charts.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;})
+    fetch('charts.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;}),
+    fetch('holdings.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;})
    ]);
    var dg=rs[0],nw=rs[1],CH=((rs[2]||{}).series)||{};
+   // 평단(주당 매입가) = holdings.json avg{} — 자산현황 xlsx 주간 동기화(sync-holdings.mjs). 보유 종목만 존재, 미보유는 선 없음.
+   var AVG=((rs[3]||{}).avg)||{};
    var KM={'005930':'sec','009150':'sem','353200':'ddk','089030':'twng'};
    function cK(t){t=String(t||'');return KM[t]||t.toLowerCase();}
    function cCol(t){var s=CH[cK(t)];if(!s||!s.c||s.c.length<10)return '';return '<div class="stk-chart"><canvas class="stk-cv" data-ck="'+esc(cK(t))+'"></canvas><div class="stk-zn">Ctrl+휠: 기간 조절</div></div>';}
@@ -2875,11 +2875,12 @@ window.MARKET=(function(){
     host.addEventListener('click',function(e){
      var b=e.target.closest?e.target.closest('.amore'):null;
      if(b){e.preventDefault();window.__moreNews(b);}});}
-   iSC(CH);}
+   iSC(CH,AVG);}
   catch(e){host.innerHTML='<div class="mkt-ph">뉴스 대기</div>';}
  }
- function iSC(CH){document.querySelectorAll('canvas.stk-cv').forEach(function(cv){if(cv._i)return;cv._i=1;
+ function iSC(CH,AVG){document.querySelectorAll('canvas.stk-cv').forEach(function(cv){if(cv._i)return;cv._i=1;
   var s=CH[cv.getAttribute('data-ck')];if(!s||!s.c){cv.parentElement.style.display='none';return;}
+  var av=(AVG||{})[cv.getAttribute('data-ck')];if(!(av!=null&&isFinite(av)))av=null;   // 보유 종목만 평단선
   var st={sp:Math.min(126,s.c.length),hv:-1};
   function fd(x){if(x==null)return '';var n=Number(x);if(isFinite(n))return new Date(n*(n<1e6?86400000:n<1e12?1000:1)).toISOString().slice(5,10);return String(x).slice(5,10);}
   function vw(){var n=s.c.length,k=Math.max(20,Math.min(n,Math.round(st.sp)));return{k:k,v:s.c.slice(n-k),t:(s.t||[]).slice(n-k)};}
@@ -2892,7 +2893,13 @@ window.MARKET=(function(){
    var cl=(up?cs.getPropertyValue('--st-hot'):cs.getPropertyValue('--st-accel')).trim()||(up?'#e03131':'#1971c2');
    c.beginPath();for(var i=0;i<k;i++)i?c.lineTo(X(i),Y(v[i])):c.moveTo(X(0),Y(v[0]));
    c.strokeStyle=cl;c.lineWidth=1.6;c.stroke();
-   c.font='10px sans-serif';c.fillStyle='#868e96';c.fillText(fd(t[0]),6,H-4);
+   c.font='10px sans-serif';
+   if(av!=null){var ya=Y(av);if(ya<18)ya=18;if(ya>H-16)ya=H-16;                       // 평단 기준선(창 밖이면 가장자리 클램프)
+    c.save();c.setLineDash([3,2]);c.strokeStyle='#868e96';c.lineWidth=1;
+    c.beginPath();c.moveTo(6,ya);c.lineTo(w-6,ya);c.stroke();c.restore();
+    var al='\ud3c9\ub2e8 '+av.toLocaleString(),aw=c.measureText(al).width;
+    c.fillStyle='#868e96';c.fillText(al,w-6-aw,Math.max(ya-3,26));}
+   c.fillStyle='#868e96';c.fillText(fd(t[0]),6,H-4);
    var le=fd(t[k-1]);c.fillText(le,w-6-c.measureText(le).width,H-4);
    var p=((v[k-1]/v[0]-1)*100).toFixed(1);c.fillStyle=cl;c.fillText(v[k-1].toLocaleString()+' ('+(p>=0?'+':'')+p+'% / '+k+'D)',6,12);
    if(st.hv>=0&&st.hv<k){var i2=st.hv;c.strokeStyle='#adb5bd';c.lineWidth=1;c.beginPath();c.moveTo(X(i2),18);c.lineTo(X(i2),H-16);c.stroke();
