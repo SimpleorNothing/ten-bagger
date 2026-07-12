@@ -3002,7 +3002,9 @@ window.MARKET=(function(){
     (dg.groups||[]).forEach(function(g){
      html+='<div class="dg-grp">'+esc(g.title||'')+'</div>';
      (g.items||[]).forEach(function(it){var k=String(it.tk||'').toUpperCase();used[k]=1;
-      html+='<div class="stk-blk" id="stknews-'+esc(k)+'"><div class="stk-hd"><span class="tk">'+esc(it.tk||'')+'</span><span class="nm">'+esc(it.nm||'')+'</span></div><div class="stk-body"><div class="stk-left">'+artRows(k)+'</div>'+cCol(it.tk)+'</div></div>';});
+      html+='<div class="stk-blk" id="stknews-'+esc(k)+'"><div class="stk-hd"><span class="tk">'+esc(it.tk||'')+'</span><span class="nm">'+esc(it.nm||'')+'</span></div>'
+       +(it.s?'<div class="stk-sum">'+esc(it.s)+'</div>':'')   // 종목별 관전 포인트(향후 주가 영향) — 기사 위 1~2줄
+       +'<div class="stk-body"><div class="stk-left">'+artRows(k)+'</div>'+cCol(it.tk)+'</div></div>';});
     });
    }
    var rest=Object.keys(byTk).filter(function(k){return !used[k];}).sort();
