@@ -1852,6 +1852,7 @@ window.CYCLE=(function(){
       <button class="tbtn" id="sizeBtn" title="버블 크기 인코딩: 비중 ↔ 적정밴드 갭(오버/언더)">크기: 비중</button>
       <button class="tbtn" id="xBtn" title="가로축: 예상 3개월 알파 ↔ 실현 3개월 초과수익(charts.json·63거래일)">가로: 예상</button>
       <button class="tbtn" id="centBtn" title="레이어(L1~L8) 무게중심 + 한계자본 회전 화살표(오버·트림 → 언더·증액)">무게중심</button>
+      <button class="tbtn" id="trailBtn" title="궤적 꼬리: 스냅샷들 → 현재 위치를 점선으로 연결(예상 좌표) — ①↔③ 이동(강등/회복) 가시화">궤적</button>
     </div>
     <div class="legend" id="legend"></div>
     <div class="snapsel" id="snapSel">
@@ -4445,7 +4446,9 @@ window.VC_STOCKS=D.map(d=>({n:d.n,t:d.t,layer:d.layer,stage:d.stage,note:d.note,
 const CASH={NASDAQ:[-0.3,-2.5],KOSPI:[-0.5,-4]};
 const BNOTE={NASDAQ:'기준선=나스닥(QQQ). 각 종목의 raw 초과수익.',KOSPI:'기준선=코스피. 나스닥 대비 전 종목 동일하게 평행이동 → 순위·간격 불변, 원점만 이동.'};
 
-let bench='NASDAQ',mode='stage',showLabels=true,selected=null,showCand=true,showHeld=true,showEM=true,sizeMode='w',xMode='est',showCentroid=false;
+let bench='NASDAQ',mode='stage',showLabels=true,selected=null,showCand=true,showHeld=true,showEM=true,sizeMode='w',xMode='est',showCentroid=false,showTrail=false;
+// F: 스냅샷 → 라이브 궤적. 좌표는 항상 예상(추정) 공간(스냅샷은 과거 추정치). 벤치=코스피면 av와 동일하게 DELTA 평행이동.
+function trailShift(aN){return bench==='NASDAQ'?[aN[0],aN[1]]:[+(aN[0]-DELTA[0]).toFixed(2),+(aN[1]-DELTA[1]).toFixed(2)];}
 // C: 레이어(L1~L8) 무게중심 = 보유 종목 비중가중 평균 좌표. 방어·기타 제외.
 function layerCentroids(){
  const g={}; D.forEach(d=>{ if(d.cand||!showHeld)return; const L=bandLayerOf(d); if(!L||L==='기타')return;
@@ -4532,6 +4535,7 @@ function draw(){
  const xt=el('text',{x:(PL+W-PR)/2,y:H-8,'text-anchor':'middle',class:'axtitle'});xt.textContent=`${xMode==='real'&&snapIdx<0?'실현':'예상'} 3개월 ${bench==='NASDAQ'?'나스닥':'코스피'} 대비 알파 (%p) →`;svg.appendChild(xt);
  const yt=el('text',{x:16,y:(PT+H-PB)/2,'text-anchor':'middle',class:'axtitle',transform:`rotate(-90 16 ${(PT+H-PB)/2})`});yt.textContent=`다음주 ${bench==='NASDAQ'?'나스닥':'코스피'} 대비 알파 (%p) →`;svg.appendChild(yt);
 
+ if(showTrail)drawTrails();
  if(showCentroid)drawCentroids();
  D.forEach((d,i)=>{
    if(d.cand&&!showCand)return;
@@ -4648,6 +4652,19 @@ function drawCash(){
  c.addEventListener('mouseenter',showCash);c.addEventListener('mousemove',moveTip);c.addEventListener('mouseleave',hideTip);
  c.addEventListener('click',e=>{selected=null;unhighlight();showCash();moveTip(e);});
 }
+// F: 궤적 꼬리 — 스냅샷(과거 추정)들 → 라이브(추정) 위치를 점선으로 연결. ①↔③ 이동(강등/회복)이 보인다.
+function drawTrails(){
+ if(snapIdx>=0||!SNAPS.length)return; // 라이브 뷰만
+ D.forEach(d=>{ if(d.cand||!showHeld)return;
+  const pts=[];
+  SNAPS.forEach(s=>{const p=s.pos&&s.pos[d.n]; if(p&&Array.isArray(p.aN)){const sh=trailShift(p.aN); pts.push([px(sh[1]),py(sh[0])]);}});
+  const liveAN=d._aN||d.aN,shl=trailShift(liveAN); pts.push([px(shl[1]),py(shl[0])]); // 라이브 끝점(추정)
+  if(pts.length<2)return;
+  const col=colorOf(d);
+  svg.appendChild(el('path',{d:'M'+pts.map(p=>p[0]+','+p[1]).join(' L'),fill:'none',stroke:col,'stroke-width':1.4,'stroke-dasharray':'2 3',opacity:.5,style:'pointer-events:none'}));
+  for(let i=0;i<pts.length-1;i++)svg.appendChild(el('circle',{cx:pts[i][0],cy:pts[i][1],r:2.4,fill:'var(--a-surface,#fff)',stroke:col,'stroke-width':1,opacity:.65,style:'pointer-events:none'}));
+ });
+}
 // C: 레이어 무게중심 마커 + 회전 화살표(오버·트림 층 → 언더·증액 층 = 한계자본 회전). 버블 아래 레이어.
 function drawCentroids(){
  const cen=layerCentroids(),Ls=Object.keys(cen); if(!Ls.length)return;
@@ -4725,7 +4742,8 @@ function renderLegend(){
    ?'<span class="lg" style="color:var(--a-faint)">●크기=밴드갭</span><span class="lg" style="color:#b8860b">◯오버·트림</span><span class="lg" style="color:#0ca678">◯언더·증액</span>'
    :'<span class="lg" style="color:var(--a-faint)">●크기=비중</span>';
  const centLg=showCentroid?'<span class="lg" style="color:var(--a-faint)">◯Lx=레이어 무게중심</span><span class="lg" style="color:#5c6f7e">→ 한계자본 회전</span>':'';
- document.getElementById('legend').innerHTML=items.map(([t,c])=>`<span class="lg"><span class="dot" style="background:${c}"></span>${t}</span>`).join('')+sizeLg+centLg+'<span class="lg" style="color:var(--a-faint)">◌미보유</span><span class="lg" style="color:#f59f00">⚡실적크기</span>';
+ const trailLg=showTrail?'<span class="lg" style="color:var(--a-faint)">┄ 궤적(스냅샷→현재·예상)</span>':'';
+ document.getElementById('legend').innerHTML=items.map(([t,c])=>`<span class="lg"><span class="dot" style="background:${c}"></span>${t}</span>`).join('')+sizeLg+centLg+trailLg+'<span class="lg" style="color:var(--a-faint)">◌미보유</span><span class="lg" style="color:#f59f00">⚡실적크기</span>';
 }
 document.getElementById('benchSeg').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
  document.querySelectorAll('#benchSeg button').forEach(x=>x.classList.remove('on'));b.classList.add('on');
@@ -4740,6 +4758,7 @@ document.getElementById('emBtn').addEventListener('click',function(){showEM=!sho
 document.getElementById('sizeBtn').addEventListener('click',function(){sizeMode=sizeMode==='w'?'gap':'w';this.classList.toggle('on',sizeMode==='gap');this.textContent=sizeMode==='gap'?'크기: 밴드갭':'크기: 비중';renderLegend();draw();});
 document.getElementById('xBtn').addEventListener('click',function(){xMode=xMode==='est'?'real':'est';this.classList.toggle('on',xMode==='real');this.textContent=xMode==='real'?'가로: 실현':'가로: 예상';hideTip();draw();});
 document.getElementById('centBtn').addEventListener('click',function(){showCentroid=!showCentroid;this.classList.toggle('on',showCentroid);renderLegend();draw();});
+document.getElementById('trailBtn').addEventListener('click',function(){showTrail=!showTrail;this.classList.toggle('on',showTrail);renderLegend();draw();});
 
 // ===== 4사분면 시점 스냅샷 =====
 // 라이브 머지값을 d._aN/_aK/_stage로 보존 → 과거 스냅샷 본 뒤 '현재'로 복원 가능.
