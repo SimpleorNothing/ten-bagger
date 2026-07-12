@@ -2901,13 +2901,40 @@ window.MARKET=(function(){
    var nw=rs[0],dg=rs[1];
    var items=(((nw||{}).items)||[]).filter(function(x){return x.ticker==='MACRO';});
    if(!items.length){host.innerHTML='<div class="mkt-ph">수집 대기 (다음 크론)</div>';return;}
-   var NM={};   // 매크로 주제는 매 실행 발굴되므로 고정 매핑 금지 — it.name 을 그대로 쓴다
-   var byT={},order=[];
-   items.forEach(function(it){var k=it.id||it.name||'macro';if(!byT[k]){byT[k]=[];order.push(k);}byT[k].push(it);});
-   var sums={};(((dg||{}).macro)||[]).forEach(function(m){if(m&&m.id)sums[m.id]=m.s;});
+   // 매크로 축은 매 실행 자동 발굴 → 같은 축이 실행마다 다른 이름·id로 들어온다
+   // ('중동 분쟁·유가·에너지' / '중동분쟁·유가·에너지' / '이란 호르무즈 해협' = 한 축).
+   // id·name 을 그대로 키로 쓰면 같은 토픽이 여러 블록으로 쪼개진다 → 축 키로 병합한다.
+   // 표시 이름은 하드코딩하지 않는다(라이브 macroTopics → 없으면 최신 기사의 it.name).
+   var AXR=[['capex',/capex|하이퍼스케일러|hyperscaler|빅테크투자|ai투자/],
+    ['chip',/반도체|수출통제|공급망|hbm|semiconductor|chip|exportcontrol|supplychain/],
+    ['power',/전력|원전|그리드|송전|냉각|power|grid|nuclear|smr|electric/],
+    ['energy',/중동|이란|호르무즈|유가|원유|석유|oil|opec|에너지|energy|지정학|geopolit|전쟁|war|이스라엘|israel/],
+    ['trade',/관세|무역|tariff|trade/],
+    ['rates',/금리|연준|기준금리|통화정책|물가|인플레|cpi|pce|fomc|fed|inflation|rate/],
+    ['fx',/환율|원화|달러|dollar|forex|fx/]];
+   function axOf(s){var t=String(s||'').toLowerCase().replace(/[^0-9a-z가-힣]/g,'');
+    for(var i=0;i<AXR.length;i++)if(AXR[i][1].test(t))return AXR[i][0];
+    return 'x_'+(t||'macro');}
+   function axIt(it){return it.ax||axOf(it.name||it.id);}
+   var MX=5,byA={},byId={},seen={};
+   items.forEach(function(it){var k=axIt(it);
+    if(it.id&&!byId[it.id])byId[it.id]=k;
+    var u=k+'|'+(it.link||it.title||'');if(seen[u])return;seen[u]=1;   // 축 병합 시 같은 기사 중복 제거
+    (byA[k]=byA[k]||[]).push(it);});
+   Object.keys(byA).forEach(function(k){byA[k].sort(function(a,b){return new Date(b.published||0)-new Date(a.published||0);});});
+   // 다이제스트 요약: 신규는 축 키, 구버전은 토픽id로 들어온다 → 둘 다 축으로 환원
+   var sums={};(((dg||{}).macro)||[]).forEach(function(m){if(!m||!m.id)return;
+    var k=byId[m.id]||axOf(m.id);if(!sums[k])sums[k]=m.s;});
+   var NM={},order=[];   // 이번 실행 채택 축 먼저 → 식은 축은 최신순
+   (((nw||{}).macroTopics)||[]).forEach(function(t){var k=t.ax||axOf(t.name||t.id);
+    if(!NM[k])NM[k]=t.name;
+    if(byA[k]&&order.indexOf(k)<0)order.push(k);});
+   Object.keys(byA).filter(function(k){return order.indexOf(k)<0;})
+    .sort(function(a,b){return new Date((byA[b][0]||{}).published||0)-new Date((byA[a][0]||{}).published||0);})
+    .forEach(function(k){order.push(k);});
    var html='';
    order.forEach(function(k){
-    var lst=byT[k].slice().sort(function(a,b){return new Date(b.published||0)-new Date(a.published||0);});
+    var lst=byA[k].slice(0,MX);
     var title=NM[k]||(lst[0]&&lst[0].name)||k;
     html+='<div class="stk-blk"><div class="stk-hd"><span class="nm">'+esc(title)+'</span></div>';
     if(sums[k])html+='<div class="stk-sum">'+esc(sums[k])+'</div>';

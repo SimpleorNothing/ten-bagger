@@ -248,6 +248,44 @@ function slugId(s, i) {
   return 'macro_' + (base || 'topic') + '_' + i;
 }
 
+// ---- 매크로 축 정규화 (같은 축 = 한 블록) ----
+// 발굴은 매 실행이라 같은 축이 실행마다 다른 이름으로 나온다
+// ('중동 분쟁·유가·에너지' / '중동분쟁·유가·에너지' / '이란 호르무즈 해협' = 한 축).
+// 이름을 키로 쓰면 사이트에서 같은 토픽이 여러 블록으로 쪼개진다 → 축 키(ax)로 병합한다.
+// ※ 축 키는 '병합용 식별자'일 뿐 표시명이 아니다(표시명은 라이브 name 그대로 — 하드코딩 금지).
+const AXIS_RULES = [
+  ['capex', /capex|하이퍼스케일러|hyperscaler|빅테크투자|ai투자/],
+  ['chip', /반도체|수출통제|공급망|hbm|semiconductor|chip|exportcontrol|supplychain/],
+  ['power', /전력|원전|그리드|송전|냉각|power|grid|nuclear|smr|electric/],
+  ['energy', /중동|이란|호르무즈|유가|원유|석유|oil|opec|에너지|energy|지정학|geopolit|전쟁|war|이스라엘|israel/],
+  ['trade', /관세|무역|tariff|trade/],
+  ['rates', /금리|연준|기준금리|통화정책|물가|인플레|cpi|pce|fomc|fed|inflation|rate/],
+  ['fx', /환율|원화|달러|dollar|forex|fx/],
+];
+function axisOf(s) {
+  const t = String(s || '').toLowerCase().replace(/[^0-9a-z가-힣]/g, '');
+  for (const [id, re] of AXIS_RULES) if (re.test(t)) return id;
+  return 'x_' + (t || 'macro');
+}
+// 발굴 결과에 축을 붙이고, 같은 축이 둘 나오면 앞엣것만 남긴다.
+// 직전 실행에 같은 축이 있으면 그 id·name 을 승계 → 실행마다 이름이 흔들리지 않는다.
+function stabilizeTopics(topics, prevTopics) {
+  const prevByAx = new Map();
+  for (const p of (prevTopics || [])) {
+    const a = p.ax || axisOf(p.name || p.id);
+    if (!prevByAx.has(a)) prevByAx.set(a, p);
+  }
+  const out = [], seen = new Set();
+  for (const t of (topics || [])) {
+    const ax = axisOf(t.name || t.id);
+    if (seen.has(ax)) continue;
+    seen.add(ax);
+    const p = prevByAx.get(ax);
+    out.push({ ...t, ax, id: (p && p.id) || t.id, name: (p && p.name) || t.name });
+  }
+  return out;
+}
+
 async function discoverMacroTopics(prevTopics) {
   const key = process.env.ANTHROPIC_API_KEY;
   const heads = [];
@@ -260,7 +298,7 @@ async function discoverMacroTopics(prevTopics) {
   if (!key || heads.length < 5) {
     const fb = (prevTopics && prevTopics.length) ? prevTopics : MACRO_SEED;
     console.log('macro 발굴 스킵 → 폴백 주제 사용');
-    return fb;
+    return stabilizeTopics(fb, prevTopics);
   }
   const prompt = `너는 AI 인프라 투자 관측소의 매크로 애널리스트다. 아래는 오늘의 경제·시장 헤드라인이다.
 
@@ -301,11 +339,12 @@ ${heads.slice(0, 70).join('\n')}`;
       mkt: x.ko === false ? 'US' : 'KOSPI',
     })).filter((x) => x.q);
     if (!topics.length) throw new Error('macro 주제 0건');
-    console.log('macro 트렌딩 주제: ' + topics.map((t) => `${t.name}(${t.q})`).join(' · '));
-    return topics;
+    const fixed = stabilizeTopics(topics, prevTopics);   // 축 중복 제거 + 직전 이름·id 승계
+    console.log('macro 트렌딩 주제: ' + fixed.map((t) => `${t.name}[${t.ax}](${t.q})`).join(' · '));
+    return fixed;
   } catch (e) {
     console.log(`macro 발굴 실패(${e.message}) → 폴백 주제 사용`);
-    return (prevTopics && prevTopics.length) ? prevTopics : MACRO_SEED;
+    return stabilizeTopics((prevTopics && prevTopics.length) ? prevTopics : MACRO_SEED, prevTopics);
   }
 }
 
@@ -431,7 +470,7 @@ async function buildDigest(items, newArts) {
     .join('\n');
   const macroLines = items
     .filter((it) => it.ticker === 'MACRO')
-    .map((it) => `${it.id}|${it.name}|${(it.published || '').slice(0, 10)}|${it.title}`)
+    .map((it) => `${it.ax || axisOf(it.name || it.id)}|${it.name}|${(it.published || '').slice(0, 10)}|${it.title}`)
     .join('\n');
   const prompt = `너는 AI 인프라 투자 관측소의 애널리스트다. 아래는 종목별 최근 뉴스 헤드라인이다(티커|이름|날짜|제목).
 
@@ -490,7 +529,7 @@ async function main() {
       const items = await fetchFeed(c);
       for (const it of items) {
         collected.push({
-          id: c.id, ticker: c.ticker, name: c.name,
+          id: c.id, ticker: c.ticker, name: c.name, ax: c.ax,   // ax = 매크로 축(종목은 undefined → 직렬화 시 생략)
           title: it.title, link: it.link,
           published: it.published || now.toISOString(),
           source: it.source,
@@ -580,7 +619,8 @@ async function main() {
       const t = it.published ? new Date(it.published).getTime() : 0;
       if (t && t < cutoff) return false;
       if (it.ticker !== 'MACRO' && !material(it)) return false;   // 스크리닝 탈락(홍보·추측·리스트) → 카드 슬롯을 주지 않는다
-      const k = it.ticker === 'MACRO' ? (it.id || 'MACRO') : (it.ticker || '?');  // 매크로는 토픽별로 센다(합산되면 트렌딩 축이 통째로 잘림)
+      // 매크로는 축별로 센다 — 토픽id로 세면 같은 축이 실행마다 다른 id로 잡혀 슬롯이 중복 배정된다(블록 쪼개짐)
+      const k = it.ticker === 'MACRO' ? (it.ax || axisOf(it.name || it.id)) : (it.ticker || '?');
       const n = (perTk.get(k) || 0) + 1;
       if (n > SITE_PER_TICKER) return false;   // all 은 최신순 정렬 → 앞 5건만 통과
       perTk.set(k, n);
