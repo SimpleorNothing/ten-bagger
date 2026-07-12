@@ -1850,6 +1850,7 @@ window.CYCLE=(function(){
       <button class="tbtn on" id="lblBtn">라벨 표시</button>
       <button class="tbtn on" id="emBtn">실적 표시</button>
       <button class="tbtn" id="sizeBtn" title="버블 크기 인코딩: 비중 ↔ 적정밴드 갭(오버/언더)">크기: 비중</button>
+      <button class="tbtn" id="xBtn" title="가로축: 예상 3개월 알파 ↔ 실현 3개월 초과수익(charts.json·63거래일)">가로: 예상</button>
     </div>
     <div class="legend" id="legend"></div>
     <div class="snapsel" id="snapSel">
@@ -1872,6 +1873,14 @@ window.CYCLE=(function(){
     <b>주도주 표기(파생·자동):</b> ①사분면이라도 같지 않다 — <b style="color:#d4a017">♕ 금색 링 = 주도주 확립</b>(가속·①·γ열림=추정&gt;가격, 능동 보유 정당), <b style="color:#e03131">빨강 점선 링 = 강등/트랩</b>(γ소진=가격&gt;추정 또는 내러티브 S5=0, 추격금지). γ 상태는 judgment.json `g`(open/spent/none)에서 옴 — 점 클릭 시 툴팁에 표시.<br>
     <b>알파 도출:</b> 베타(고변동 AI주)×모멘텀/카탈리스트 + runway − 지수 기대. 평균회귀(많이올라서↓/떨어져서↑) 미사용. MRVL 5/27·MU 6월말 실적, 삼성 HBM4 6월 공급 반영. 모두 <b>추정치</b>.<br>
     <b>이중 벤치마크 주의:</b> 코스피 기준은 (지수 스프레드)+(자기 시장 조정)을 반영한 추정. 채권혼합의 음(−)알파는 설계상 정상(방어자산). 의사결정 지원용, 매매 권유 아님 · 기준일 <span id="alphaAsof">2026-05-24</span> KST.
+  </div>
+
+  <div class="card" id="calibCard" style="margin-top:14px">
+    <div class="mkt-lens" style="margin-bottom:8px">
+      <div class="l1"><b>캘리브레이션</b>지난 스냅샷의 예상 알파 부호가 이후 실현과 맞았나 (판단층 부패 감시 · OPS §1)</div>
+      <div class="l2">스냅샷 예상 3M 알파(나스닥) vs 스냅샷일 이후 <b>실현 경과</b>(charts.json) — 부호 적중률·편향</div>
+    </div>
+    <div id="calibBody"><div class="mkt-ph">charts·snapshots 로딩 대기…</div></div>
   </div>
 
   <div class="atip" id="alphaTip"></div>
@@ -4434,7 +4443,7 @@ window.VC_STOCKS=D.map(d=>({n:d.n,t:d.t,layer:d.layer,stage:d.stage,note:d.note,
 const CASH={NASDAQ:[-0.3,-2.5],KOSPI:[-0.5,-4]};
 const BNOTE={NASDAQ:'기준선=나스닥(QQQ). 각 종목의 raw 초과수익.',KOSPI:'기준선=코스피. 나스닥 대비 전 종목 동일하게 평행이동 → 순위·간격 불변, 원점만 이동.'};
 
-let bench='NASDAQ',mode='stage',showLabels=true,selected=null,showCand=true,showHeld=true,showEM=true,sizeMode='w';
+let bench='NASDAQ',mode='stage',showLabels=true,selected=null,showCand=true,showHeld=true,showEM=true,sizeMode='w',xMode='est';
 // 밴드갭: D.layer(예 'L2/L6','기타','방어')를 TARGETS 레이어 키로 정규화. 방어=밴드 없음(null).
 function bandLayerOf(d){const m=String(d.layer).match(/L(\d)/);if(m)return 'L'+m[1];if(d.layer==='기타')return '기타';return null;}
 // 보유 레이어의 적정밴드 대비 부호 갭(+ 오버·− 언더·0 밴드내). TMAP/heldWeight는 상단 전역.
@@ -4445,10 +4454,24 @@ let SNAPS=[],snapIdx=-1;
 // Δ = (코스피 수익률 − 나스닥 수익률) = 현금알파의 차이(현금선과 일치). y1은 근사 상수.
 const DELTA=[+(CASH.NASDAQ[0]-CASH.KOSPI[0]).toFixed(2),+(CASH.NASDAQ[1]-CASH.KOSPI[1]).toFixed(2),3.5];
 const av=d=>bench==='NASDAQ'?d.aN:[+(d.aN[0]-DELTA[0]).toFixed(2),+(d.aN[1]-DELTA[1]).toFixed(2),+(d.aN[2]-DELTA[2]).toFixed(2)];
+// A/B: charts.json 실현 초과수익. CK=티커→시리즈 키(01 시장 cK 규약 재사용). 벤치=나스닥 ixic / 코스피 ks11.
+let CHARTS=null;
+const CK=t=>(({'005930':'sec','009150':'sem','353200':'ddk','089030':'twng'})[t])||String(t).toLowerCase();
+const benchKey=()=>bench==='NASDAQ'?'ixic':'ks11';
+const M3_TD=63; // 3개월 ≈ 63 거래일
+function serRet(key,back){ // 최근값 대비 back 거래일 전 종가 수익률(%)
+ const s=CHARTS&&CHARTS.series&&CHARTS.series[key]; if(!s||!s.c||s.c.length<back+1)return null;
+ const c=s.c,last=c[c.length-1],prev=c[c.length-1-back]; if(!prev)return null; return (last/prev-1)*100; }
+// 실현 3개월 초과수익(%p) = 종목 3M − 벤치 3M. charts 없으면 null(→ 추정 폴백).
+function realizedAlpha(d){ const k=CK(d.t); const rs=serRet(k,M3_TD),rb=serRet(benchKey(),M3_TD); if(rs==null||rb==null)return null; return +(rs-rb).toFixed(1); }
+// 현재 모드의 X값(가로=3개월). real 모드·라이브에서 실현치 있으면 실현, 없으면 추정 m3.
+function xAlpha(d){ const a=av(d); if(xMode==='real'&&snapIdx<0){ const r=realizedAlpha(d); if(r!=null)return r; } return a[1]; }
+// 실현 X 미측정(추정 폴백) 여부 — 표식용.
+function xIsEst(d){ return !(xMode==='real'&&snapIdx<0&&realizedAlpha(d)!=null); }
 // 실적 expected move(옵션 IV 기반 ±변동, 방향 아님). earnings.json이 로드되면 덮어씀. axis: wk=세로(다음주)/m3=가로(3개월).
 let EM={MU:{pct:6.5,axis:'m3',date:'2026-06-25'}};
 let EPLAY=[];
-function quad(d){const a=av(d),r=a[0]>=0,u=a[1]>=0;return u?(r?'①':'②'):(r?'④':'③');}
+function quad(d){const a=av(d),r=xAlpha(d)>=0,u=a[0]>=0;return u?(r?'①':'②'):(r?'④':'③');}
 
 const svg=document.getElementById('plot'),NS='http://www.w3.org/2000/svg';
 let W=860,H=470;const PL=58,PR=28,PT=30,PB=52;
@@ -4469,8 +4492,8 @@ function niceAxis(min,max,target){
 }
 function computeRanges(){
  const xs=[0],ys=[0];
- D.forEach(d=>{ if(d.cand&&!showCand)return; if(!d.cand&&!showHeld)return; const a=av(d); xs.push(a[1]); ys.push(a[0]); });
- const cb=CASH[bench]; xs.push(cb[1]); ys.push(cb[0]);
+ D.forEach(d=>{ if(d.cand&&!showCand)return; if(!d.cand&&!showHeld)return; const a=av(d); xs.push(xAlpha(d)); ys.push(a[0]); });
+ const cb=CASH[bench]; xs.push(xMode==='real'&&snapIdx<0&&serRet(benchKey(),M3_TD)!=null?-serRet(benchKey(),M3_TD):cb[1]); ys.push(cb[0]);
  const padX=Math.max(0.6,(Math.max(...xs)-Math.min(...xs))*0.1);
  const padY=Math.max(0.4,(Math.max(...ys)-Math.min(...ys))*0.12);
  const ax=niceAxis(Math.min(...xs)-padX,Math.max(...xs)+padX,7);
@@ -4498,24 +4521,24 @@ function draw(){
  ql.forEach(([num,txt,x,y,anc,col])=>{
    const a=el('text',{x,y,'text-anchor':anc,class:'qlabel',fill:col,'font-size':19,opacity:.55});a.textContent=num;svg.appendChild(a);
    const b=el('text',{x,y:y+16,'text-anchor':anc,class:'qsub',fill:col,'font-size':12,opacity:.6});b.textContent=txt;svg.appendChild(b);});
- const xt=el('text',{x:(PL+W-PR)/2,y:H-8,'text-anchor':'middle',class:'axtitle'});xt.textContent=`3개월 ${bench==='NASDAQ'?'나스닥':'코스피'} 대비 알파 (%p) →`;svg.appendChild(xt);
+ const xt=el('text',{x:(PL+W-PR)/2,y:H-8,'text-anchor':'middle',class:'axtitle'});xt.textContent=`${xMode==='real'&&snapIdx<0?'실현':'예상'} 3개월 ${bench==='NASDAQ'?'나스닥':'코스피'} 대비 알파 (%p) →`;svg.appendChild(xt);
  const yt=el('text',{x:16,y:(PT+H-PB)/2,'text-anchor':'middle',class:'axtitle',transform:`rotate(-90 16 ${(PT+H-PB)/2})`});yt.textContent=`다음주 ${bench==='NASDAQ'?'나스닥':'코스피'} 대비 알파 (%p) →`;svg.appendChild(yt);
 
  D.forEach((d,i)=>{
    if(d.cand&&!showCand)return;
    if(!d.cand&&!showHeld)return;
-   const a=av(d),x=px(a[1]),y=py(a[0]);
+   const a=av(d),x=px(xAlpha(d)),y=py(a[0]);
    let r; if(d.cand)r=7.5; else if(sizeMode==='gap'){const g=bandGap(d);r=6+Math.min(Math.sqrt(Math.abs(g))*3.6,14);} else r=7+Math.sqrt(d.w)*3.4;
    const col=colorOf(d);
    const c=el('circle',{cx:x,cy:y,r,fill:col+(d.cand?'12':'2e'),stroke:col,'stroke-width':d.cand?1.6:2,class:'bub','data-i':i});
-   if(d.cand)c.setAttribute('stroke-dasharray','3 3');svg.appendChild(c);
+   if(d.cand||(xMode==='real'&&snapIdx<0&&xIsEst(d)))c.setAttribute('stroke-dasharray','3 3');svg.appendChild(c);
    // D: 밴드갭 모드 — 적정밴드 이탈 종목을 링 색으로 자동 하이라이트(amber=오버·트림 / green=언더·증액).
    if(sizeMode==='gap'&&!d.cand){const g=bandGap(d);if(g!==0){const gc=g>0?'#b8860b':'#0ca678';
      svg.appendChild(el('circle',{cx:x,cy:y,r:r+3.5,fill:'none',stroke:gc,'stroke-width':2,opacity:.9,style:'pointer-events:none'}));}}
    // 주도주 파생 마크(저장 X, render-only) — 라이브 모드만. ♕확립=가속·①사분면·γ열림 / 강등·트랩=γ소진|없음.
    if(snapIdx<0){
      const stg=d._stage||d.stage;
-     if(!d.cand&&stg==='가속'&&a[0]>=0&&a[1]>=0&&d.g==='open'){
+     if(!d.cand&&stg==='가속'&&a[0]>=0&&xAlpha(d)>=0&&d.g==='open'){
        svg.appendChild(el('circle',{cx:x,cy:y,r:r+4,fill:'none',stroke:'#d4a017','stroke-width':2,opacity:.9,style:'pointer-events:none'}));
        const cr=el('path',{d:'M-5,3 L-5,-2 L-2,1 L0,-4 L2,1 L5,-2 L5,3 Z',fill:'#d4a017',stroke:'#fff','stroke-width':.6,transform:`translate(${x},${y-r-8})`,style:'pointer-events:none'});svg.appendChild(cr);
      } else if(d.g==='spent'||d.g==='none'){
@@ -4563,10 +4586,38 @@ function renderAlphaLens(){
  const gr=(typeof window.MACRO_GRADE==='number')?window.MACRO_GRADE:null;
  const gate=gr==null?'매크로 게이트 미수집':('매크로 게이트 G'+gr+'/3');
  const act=gr==null?'<span class="nt">판정 보류</span>':(gr===0?'<span class="wn">신규매수 금지 · 트림만</span>':'<span class="ok">언더레이어 증액 가능</span>');
- l1e.innerHTML='<b>'+bn+'</b>벤치마크 대비 초과수익 — 가로 3개월·세로 다음주(모두 추정, 가격시계)'+(snapIdx<0?'':' · <span class="nt">과거 스냅샷</span>');
+ const realX=xMode==='real'&&snapIdx<0;
+ l1e.innerHTML='<b>'+bn+'</b>벤치마크 대비 초과수익 — 가로 '+(realX?'<span class="ok">실현 3개월(charts)</span>':'예상 3개월')+'·세로 다음주(추정)'+(realX?' — 점선=미측정(추정 폴백)':'')+(snapIdx<0?'':' · <span class="nt">과거 스냅샷</span>');
  l2e.innerHTML='① 알파 '+q1.length+'종목(비중 '+w1.toFixed(0)+'%) · ③ 벤치마크이하 '+q3.length+'종목('+w3.toFixed(0)+'%) · '+gate+' → '+act;
 }
 window.refreshAlphaLens=renderAlphaLens;
+// B: 판단 캘리브레이션 — 스냅샷 예상 3M 알파(나스닥) 부호가 이후 실현 경과와 맞았나. 부분 경과(63거래일 미만)면 방향 위주.
+function renderCalib(){
+ const body=document.getElementById('calibBody'); if(!body)return;
+ if(!CHARTS||!CHARTS.series){body.innerHTML='<div class="mkt-ph">charts.json 미로드 — 실현치 계산 불가</div>';return;}
+ if(!SNAPS.length){body.innerHTML='<div class="mkt-ph">스냅샷 없음 — snapshots.json 대기</div>';return;}
+ const IX='ixic';
+ const n2k={}; D.forEach(d=>{const k=CK(d.t);const s=CHARTS.series[k];if(s&&s.c&&s.c.length>10)n2k[d.n]=k;});
+ const idxAtOrAfter=(key,ed)=>{const t=CHARTS.series[key]&&CHARTS.series[key].t;if(!t)return -1;for(let i=0;i<t.length;i++)if(t[i]>=ed)return i;return -1;};
+ const retFrom=(key,ed)=>{const s=CHARTS.series[key];if(!s||!s.c)return null;const i=idxAtOrAfter(key,ed);if(i<0||i>=s.c.length-1)return null;return {ret:(s.c[s.c.length-1]/s.c[i]-1)*100,days:s.t.length-1-i};};
+ const rows=[]; let allHit=0,allN=0,sumR=0,sumP=0;
+ SNAPS.forEach(s=>{
+  const ed=Math.floor(Date.parse((s.asOf||'')+'T00:00:00Z')/864e5); if(!isFinite(ed))return;
+  const rb=retFrom(IX,ed); if(!rb)return;
+  let hit=0,n=0,sr=0,sp=0;
+  Object.keys(s.pos||{}).forEach(nm=>{const k=n2k[nm];if(!k)return;const p=s.pos[nm];const pred=p&&p.aN&&p.aN[1];if(pred==null)return;
+   const rf=retFrom(k,ed);if(!rf)return;const real=rf.ret-rb.ret;n++;sr+=real;sp+=pred;if((pred>0&&real>0)||(pred<0&&real<0))hit++;});
+  if(n>0){rows.push({label:s.label||s.asOf,n,hit,avgR:sr/n,avgP:sp/n,days:rb.days});allHit+=hit;allN+=n;sumR+=sr;sumP+=sp;}
+ });
+ if(!allN){body.innerHTML='<div class="mkt-ph">측정 가능한 스냅샷 없음 — 경과 거래일·매핑 종목 부족</div>';return;}
+ const hr=Math.round(allHit/allN*100);
+ const bias=(sumR/allN)>(sumP/allN)?'예상 과소(실현 &gt; 예상)':'예상 과대(실현 &lt; 예상)';
+ const GS='display:grid;grid-template-columns:1.7fr .5fr 1.1fr .9fr .9fr .5fr;gap:8px;padding:6px 2px;border-top:1px solid var(--line);font-size:13px;align-items:baseline';
+ const head='<div style="'+GS+';color:var(--dim);font-size:12px;border-top:none"><span>스냅샷</span><span>종목</span><span>부호적중</span><span>평균 실현</span><span>평균 예상</span><span>경과</span></div>';
+ const trs=rows.map(r=>'<div style="'+GS+'"><span>'+r.label+'</span><span>'+r.n+'</span><span>'+r.hit+'/'+r.n+' ('+Math.round(r.hit/r.n*100)+'%)</span><span class="'+(r.avgR>=0?'pos':'neg')+'">'+fmt(r.avgR)+'%p</span><span class="'+(r.avgP>=0?'pos':'neg')+'">'+fmt(r.avgP)+'%p</span><span>'+r.days+'일</span></div>').join('');
+ const summ='<div style="margin-top:9px;font-size:13px;color:var(--txt)">종합 부호 적중률 <b>'+hr+'%</b> ('+allHit+'/'+allN+') · 편향 <b>'+bias+'</b><div style="font-size:11.5px;color:var(--faint);margin-top:3px">경과 &lt;63거래일 = 부분 실현(3M 미완) → 방향(부호) 신뢰도 위주로 해석. 매핑: 단일종목 시계열 보유 종목만(ETF·바스켓 제외).</div></div>';
+ body.innerHTML=head+trs+summ;
+}
 // 강도 → 색 / 크기 (이모지 아님, SVG path라 색·크기 100% 적용)
 function emColor(pct){ return pct>13?'#e03131':pct>8?'#f76707':'#f59f00'; } // 빨강/주황/amber
 function emScale(pct){ return Math.max(.8, Math.min(2.0, pct/9)); }          // 0.8~2.0배
@@ -4595,7 +4646,8 @@ function showTip(d){
  tip.innerHTML=`<div><span class="tn">${d.n}</span><span class="tk">${d.t}</span></div>
    <div class="row"><span>레이어 / ${d.cand?'상태':'비중'}</span><b>${d.layer} · ${d.cand?'미보유 후보':d.w+'%'}</b></div>
    <div class="row"><span>다음주 vs ${bn}</span><b class="${cls(a[0])}">${fmt(a[0])}%p</b></div>
-   <div class="row"><span>3개월 vs ${bn}</span><b class="${cls(a[1])}">${fmt(a[1])}%p</b></div>
+   <div class="row"><span>3개월 vs ${bn} (예상)</span><b class="${cls(a[1])}">${fmt(a[1])}%p</b></div>
+   ${(()=>{const rl=realizedAlpha(d);return rl!=null?`<div class="row"><span>3개월 실현(charts)</span><b class="${cls(rl)}">${fmt(rl)}%p</b></div>`:'';})()}
    <div class="row"><span>1년 vs ${bn}</span><b class="${cls(a[2])}">${fmt(a[2])}%p</b></div>
    <div class="row"><span>사분면</span><b>${q} ${({'①':'알파','②':'중기 알파','③':'벤치마크 이하','④':'단기만'})[q]}</b></div>
    ${d.g?`<div class="row"><span>γ(추정속도)</span><b style="color:${d.g==='open'?'#0ca678':'#e03131'}">${d.g==='open'?'열림 · 추정>가격':d.g==='spent'?'소진 · 가격>추정':'없음 · 내러티브(S5=0)'}</b></div>`:''}
@@ -4655,6 +4707,7 @@ document.getElementById('candBtn').addEventListener('click',function(){showCand=
 document.getElementById('lblBtn').addEventListener('click',function(){showLabels=!showLabels;this.classList.toggle('on',showLabels);this.textContent=showLabels?'라벨 표시':'라벨 끄기';applyLabels();});
 document.getElementById('emBtn').addEventListener('click',function(){showEM=!showEM;this.classList.toggle('on',showEM);this.textContent=showEM?'실적 표시':'실적 끄기';draw();});
 document.getElementById('sizeBtn').addEventListener('click',function(){sizeMode=sizeMode==='w'?'gap':'w';this.classList.toggle('on',sizeMode==='gap');this.textContent=sizeMode==='gap'?'크기: 밴드갭':'크기: 비중';renderLegend();draw();});
+document.getElementById('xBtn').addEventListener('click',function(){xMode=xMode==='est'?'real':'est';this.classList.toggle('on',xMode==='real');this.textContent=xMode==='real'?'가로: 실현':'가로: 예상';hideTip();draw();});
 
 // ===== 4사분면 시점 스냅샷 =====
 // 라이브 머지값을 d._aN/_aK/_stage로 보존 → 과거 스냅샷 본 뒤 '현재'로 복원 가능.
@@ -4718,7 +4771,8 @@ document.addEventListener('click',e=>{if(!e.target.closest('.bub')&&!e.target.cl
 // 3층 병합: 자동(alpha.json) → 실적(earnings.json) → 판단(judgment.json, 마지막에 덮어씀). 없으면 폴백.
 function paint(){renderLegend();draw();}
 const getJSON=u=>fetch(u,{cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null);
-Promise.all([getJSON('alpha.json'),getJSON('earnings.json'),getJSON('judgment.json'),getJSON('snapshots.json'),getJSON('holdings.json'),getJSON('signal_log.json'),getJSON('gamma.json'),getJSON('reviews.json'),getJSON('calendar.json')]).then(([j,e,g,sn,hh,sl,gm,rv,cal])=>{
+Promise.all([getJSON('alpha.json'),getJSON('earnings.json'),getJSON('judgment.json'),getJSON('snapshots.json'),getJSON('holdings.json'),getJSON('signal_log.json'),getJSON('gamma.json'),getJSON('reviews.json'),getJSON('calendar.json'),getJSON('charts.json')]).then(([j,e,g,sn,hh,sl,gm,rv,cal,ch])=>{
+ if(ch&&ch.series){CHARTS=ch;} // A/B: 실현 초과수익·캘리브레이션 소스
  // 5) 외부화 데이터 — 비중은 holdings.json이 있으면 교체, 시그널 로그는 signal_log.json 신규분을 인라인 히스토리 뒤에 누적
  if(hh&&Array.isArray(hh.holdings))HOLDINGS=hh.holdings;
  if(hh&&Number.isFinite(hh.total))HOLD_TOTAL=hh.total;
@@ -4739,7 +4793,7 @@ Promise.all([getJSON('alpha.json'),getJSON('earnings.json'),getJSON('judgment.js
  window.GAMMA=gmm||{};
  // 4) 시점 스냅샷(snapshots.json) — 라이브 머지 후 현재 배치를 보존하고 셀렉터 구성.
  captureLive();SNAPS=(sn&&Array.isArray(sn.snapshots))?sn.snapshots:[];initSnapSel();
-}).finally(()=>{paint(); if(typeof renderSignalLog==='function')renderSignalLog(); if(typeof renderReviews==='function')renderReviews(); if(typeof renderStack==='function')renderStack(); if(typeof renderInstantAnswer==='function')renderInstantAnswer(); if(typeof renderPortfolio==='function')renderPortfolio(); if(typeof updateAsof==='function')updateAsof(); if(typeof renderCalNow==='function')renderCalNow(); if(typeof loadDigest==='function')loadDigest(); if(typeof applyStackDeepLink==='function')applyStackDeepLink();});
+}).finally(()=>{paint(); renderCalib(); if(typeof renderSignalLog==='function')renderSignalLog(); if(typeof renderReviews==='function')renderReviews(); if(typeof renderStack==='function')renderStack(); if(typeof renderInstantAnswer==='function')renderInstantAnswer(); if(typeof renderPortfolio==='function')renderPortfolio(); if(typeof updateAsof==='function')updateAsof(); if(typeof renderCalNow==='function')renderCalNow(); if(typeof loadDigest==='function')loadDigest(); if(typeof applyStackDeepLink==='function')applyStackDeepLink();});
 })();
 </script>
 <script>
