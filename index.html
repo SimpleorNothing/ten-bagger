@@ -872,28 +872,6 @@ header::after{
 @media(max-width:640px){#v-alpha h1{font-size:24px}#v-alpha .legend{margin-left:0;width:100%}#v-alpha .qkey{grid-template-columns:1fr}#v-alpha .bublab{font-size:13px}
 #v-alpha .toolbtns{flex:1 1 100%;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:2px}
 #v-alpha .toolbtns .tbtn{flex:0 0 auto;font-size:12px;padding:6px 10px}}
-#v-alpha .eops{margin-top:18px;border:1.5px solid var(--a-line);border-radius:14px;background:var(--a-surface);padding:16px 18px}
-#v-alpha .eops-h{font-size:15px;font-weight:800;color:var(--a-txt);margin-bottom:12px}
-#v-alpha .eops-h em{font-style:normal;font-weight:600;font-size:13px;color:var(--a-dim);margin-left:6px}
-#v-alpha .eops-grid{display:grid;grid-template-columns:1fr 280px;gap:16px}
-@media(max-width:760px){#v-alpha .eops-grid{grid-template-columns:1fr}}
-#v-alpha .eops-row{display:grid;grid-template-columns:54px 1fr 56px;gap:10px;align-items:start;padding:8px 0;border-top:1px solid var(--a-line);font-size:13px}
-#v-alpha .eops-row:first-child{border-top:0}
-#v-alpha .eops-dn{font-weight:800;color:var(--a-dim)}
-#v-alpha .eops-do{color:var(--a-dim);line-height:1.5}
-#v-alpha .eops-st{text-align:right;font-weight:700;font-size:12px;color:var(--a-faint)}
-#v-alpha .eops-row.now{background:rgba(18,87,214,.06);border-radius:8px}
-#v-alpha .eops-row.now .eops-dn,#v-alpha .eops-row.now .eops-do{color:var(--a-txt)}
-#v-alpha .eops-row.now .eops-st{color:var(--a-brand)}
-#v-alpha .eops-row.past .eops-st{color:var(--a-mature)}
-#v-alpha .eops-row.past .eops-dn,#v-alpha .eops-row.past .eops-do{opacity:.55}
-#v-alpha .eops-tl{border-left:1px solid var(--a-line);padding-left:16px}
-@media(max-width:760px){#v-alpha .eops-tl{border-left:0;padding-left:0;border-top:1px solid var(--a-line);padding-top:12px}}
-#v-alpha .eops-tlh{font-size:12px;font-weight:700;color:var(--a-faint);margin-bottom:8px}
-#v-alpha .eops-tlr{display:flex;flex-wrap:wrap;gap:2px 8px;align-items:baseline;padding:5px 0;font-size:12px}
-#v-alpha .eops-tlr b{color:var(--a-brand);font-weight:800;min-width:42px}
-#v-alpha .eops-tlr .nm{font-weight:700;color:var(--a-txt)}
-#v-alpha .eops-tlr .mt{color:var(--a-faint);font-size:11px;width:100%}
 /* ===== PRINT / 출력 ===== */
 .printbar{display:flex;justify-content:flex-end;margin:44px 0 10px;position:relative}
 .print-btn{cursor:pointer;font-family:var(--mono);font-size:13px;color:var(--dim);background:var(--panel2);border:1px solid var(--line2);border-radius:10px;padding:9px 18px;transition:.15s}
@@ -1880,10 +1858,6 @@ window.CYCLE=(function(){
     <b>알파 도출:</b> 베타(고변동 AI주)×모멘텀/카탈리스트 + runway − 지수 기대. 평균회귀(많이올라서↓/떨어져서↑) 미사용. MRVL 5/27·MU 6월말 실적, 삼성 HBM4 6월 공급 반영. 모두 <b>추정치</b>.<br>
     <b>이중 벤치마크 주의:</b> 코스피 기준은 (지수 스프레드)+(자기 시장 조정)을 반영한 추정. 채권혼합의 음(−)알파는 설계상 정상(방어자산). 의사결정 지원용, 매매 권유 아님 · 기준일 2026-05-24 KST.
   </div>
-
-  <hr class="a-sep">
-
-  <div class="eops" id="earnOps"></div>
 
   <div class="atip" id="alphaTip"></div>
 </section>
@@ -4587,29 +4561,6 @@ function declutterLabels(){
 }
 function positionTip(x,y){const tw=tip.offsetWidth,th=tip.offsetHeight;if(x+tw>innerWidth-8)x=innerWidth-tw-8;if(x<8)x=8;
  if(y+th>innerHeight-8)y=innerHeight-th-8;if(y<8)y=8;tip.style.left=x+'px';tip.style.top=y+'px';}
-function renderEarnOps(){
- const host=document.getElementById('earnOps'); if(!host) return;
- const today=new Date(Date.now()+9*3600000); today.setUTCHours(0,0,0,0);
- const fmtDN=n=> n>0?'D-'+n: n===0?'D-Day':'D+'+(-n);
- const list=Object.entries(EM).filter(([t,m])=>m&&m.date).map(([t,m])=>{
-   const dn=Math.round((new Date(m.date+'T00:00:00Z')-today)/864e5);
-   return {t,name:(D.find(d=>d.t===t)||{}).n||t,m,dn};
- }).sort((a,b)=>a.dn-b.dn);
- const upcoming=list.filter(x=>x.dn>=-3);
- if(!upcoming.length){host.innerHTML='';return;}
- const near=upcoming[0];
- const pb=EPLAY.length?EPLAY:[{dn:'D-3',at:3,do:'옵션 IV로 expected move 갱신.'},{dn:'D-1',at:1,do:'프런트 스트래들 최종 확정.'},{dn:'D-Day',at:0,do:'방향 예측 불가 — wk 중립 유지.'},{dn:'D+1',at:-1,do:'방향 확정 → judgment 갱신·EM 제거·로그.'}];
- const stTxt=at=> near.dn>at?'예정': near.dn===at?'● 오늘':'처리요';
- const stCls=at=> near.dn>at?'soon': near.dn===at?'now':'past';
- host.innerHTML=
-  '<div class="eops-h">실적 운영 캘린더 <em>가장 임박 · '+near.name+' · '+near.m.date+' · '+fmtDN(near.dn)+(near.m.basis==='event-iv'?' · ±'+near.m.pct+'% IV실측':'')+'</em></div>'
-  +'<div class="eops-grid"><div class="eops-pb">'
-  +pb.map(p=>'<div class="eops-row '+stCls(p.at)+'"><span class="eops-dn">'+p.dn+'</span><span class="eops-do">'+p.do+'</span><span class="eops-st">'+stTxt(p.at)+'</span></div>').join('')
-  +'</div><div class="eops-tl"><div class="eops-tlh">다가오는 실적</div>'
-  +list.filter(x=>x.dn>=0).slice(0,6).map(x=>'<div class="eops-tlr"><b>'+fmtDN(x.dn)+'</b><span class="nm">'+x.name+'</span><span class="mt">'+x.m.date+' · ±'+x.m.pct+'% · '+(x.m.basis==='event-iv'?'IV실측':'추정')+'</span></div>').join('')
-  +'</div></div>';
-}
-
 function renderLegend(){
  let items;
  if(mode==='stage'){items=[['가속',STAGE['가속']],['성숙',STAGE['성숙']],['과열',STAGE['과열']],['방어',STAGE['방어']]];}
@@ -4687,7 +4638,7 @@ window.dumpSnap=function(){const pos={};D.forEach(d=>{pos[d.n]={aN:(d._aN||d.aN)
 document.addEventListener('click',e=>{if(!e.target.closest('.bub')&&!e.target.closest('.cashdot')&&!e.target.closest('.seg')&&!e.target.closest('.tbtn')){selected=null;hideTip();unhighlight();}},true);
 
 // 3층 병합: 자동(alpha.json) → 실적(earnings.json) → 판단(judgment.json, 마지막에 덮어씀). 없으면 폴백.
-function paint(){renderLegend();draw();renderEarnOps();}
+function paint(){renderLegend();draw();}
 const getJSON=u=>fetch(u,{cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null);
 Promise.all([getJSON('alpha.json'),getJSON('earnings.json'),getJSON('judgment.json'),getJSON('snapshots.json'),getJSON('holdings.json'),getJSON('signal_log.json'),getJSON('gamma.json'),getJSON('reviews.json'),getJSON('calendar.json')]).then(([j,e,g,sn,hh,sl,gm,rv,cal])=>{
  // 5) 외부화 데이터 — 비중은 holdings.json이 있으면 교체, 시그널 로그는 signal_log.json 신규분을 인라인 히스토리 뒤에 누적
