@@ -997,7 +997,7 @@ header::after{
 <section class="view" id="v-decision">
   <div class="vhead"><div class="vkick">Decision Board · 리밸런싱 결정판</div>
     <h1 class="vtitle">지금 <em>무엇을·언제</em> — 그리고 <em>어디로</em></h1>
-    <p class="vsub">자산구성·게이트·타이밍 종합 + 미/한 모멘텀 전망 + 방향 확률 추정(GBM). 값은 라이브(holdings·gamma·signals·cycle·charts·prices) 구동. 추정치·투자권유 아님.</p></div>
+    <p class="vsub">자산구성·게이트·타이밍 종합 + 미/한 모멘텀 전망 + <b>추정 리비전 트래커</b>. 값은 라이브(holdings·gamma·signals·cycle·charts·prices) 구동. <b>리비전은 관측이지 예측이 아니다</b> — 투자권유 아님.</p></div>
   <div class="decboard" id="decisionBoard" style="margin:2px 0 20px"></div>
   <div id="momOutlook" style="margin:0 0 18px"></div>
   <div id="probEst" style="margin:0 0 8px"></div>
@@ -4917,33 +4917,27 @@ function renderInstantAnswer(){
 
 </script>
 <script>
-/* ===== 모멘텀 전망 + 방향 확률 추정 — 03 리밸런싱 (결정 보드 하단) =====
-   Section A: 미/한 시장 모멘텀 레짐(signals + 삼성 프록시). Section B: 포지션·지수 방향 확률(GBM).
-   모델: charts 실현변동성(σ) + 최근모멘텀 블렌드 드리프트(μ)로 로그정규(GBM) → 다음주/1달/3개월 P(상승/유지/하락).
-   추정치 · 투자권유 아님. 값은 라이브(charts·prices·signals·gamma) 구동. */
+/* ===== 모멘텀 전망 + 추정 리비전 트래커 — 03 리밸런싱 (결정 보드 하단) =====
+   Section A: 미/한 시장 모멘텀 레짐(signals + 삼성 프록시).
+   Section B: 추정 리비전 트래커(gamma.json e.rev) — TP·EPS 추정이 데일리로 어디로 움직이는가.
+
+   [2026-07 교체] 구 "방향 확률 추정(GBM)" 폐기.
+     폐기 사유: σ는 코드에 박힌 상수(라이브 아님), μ는 최근 3개월 수익률의 연율 외삽.
+       → 과거를 미래로 위장해 표시하고 있었음. QQQ 행은 라이브 입력이 0인 상수였음.
+     교체: 예측을 그만두고 관측을 표시한다. §2-4 강등 룰이 요구하는 것은
+       "가격 상승률 vs FY+1 EPS 추정 리비전 속도"이며, 이는 예측이 아니라 측정이다.
+
+   ★ 강등 게이트 = 가격 변화율 − EPS(FY+1) 리비전율 (동기간, fetch-gamma.mjs 산출)
+       gate > 0 → 가격이 추정을 추월 = 성숙 강등 후보
+       gate < 0 → 추정이 앞섬       = γ open 유지
+   관측치 · 투자권유 아님. 값은 라이브(gamma·charts·signals) 구동. */
 (function(){
   var J=function(u){return fetch(u,{cache:'no-store'}).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;});};
-  function erf(x){var s=x<0?-1:1;x=Math.abs(x);var t=1/(1+0.3275911*x);var y=1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-0.284496736)*t+0.254829592)*t*Math.exp(-x*x);return s*y;}
-  function ncdf(z){return 0.5*(1+erf(z/Math.SQRT2));}
-  var HZ=[{k:'w1',label:'다음주',days:5,band:0.03},{k:'m1',label:'1달',days:21,band:0.06},{k:'m3',label:'3개월',days:63,band:0.10}];
-  // 티커 → charts 키 · 프리셋(σ,μ 연율, 확률랩 계승)
-  var TK=[
-    {t:'QQQ', n:'나스닥100(미)', k:null,      sg:0.22, mu:0.10, mkt:1},
-    {t:'KOSPI',n:'코스피(한)',   k:'sec',     sg:0.20, mu:0.07, mkt:1},
-    {t:'MU',  n:'마이크론',      k:'mu',      sg:0.55, mu:0.15},
-    {t:'MRVL',n:'마벨',          k:'mrvl',    sg:0.55, mu:0.18},
-    {t:'LITE',n:'루멘텀',        k:'lite',    sg:0.60, mu:0.12},
-    {t:'VRT', n:'버티브',        k:'vrt',     sg:0.55, mu:0.15},
-    {t:'BE',  n:'블룸에너지',    k:'be',      sg:0.80, mu:0.10},
-    {t:'TSLA',n:'테슬라',        k:'tsla',    sg:0.65, mu:0.08},
-    {t:'005930',n:'삼성전자',    k:'sec',     sg:0.30, mu:0.10},
-    {t:'471990',n:'KODEX 반도체장비',k:'kodexeq',sg:0.45,mu:0.12}
-  ];
+  // gamma 티커 → 표시명
+  var NM={MRVL:'마벨','005930':'삼성전자',MU:'마이크론',LITE:'루멘텀',VRT:'버티브',BE:'블룸에너지',
+          AMD:'AMD',RMBS:'램버스',CEG:'컨스텔레이션',QCOM:'퀄컴',APH:'앰페놀',BESI:'BESI','000660':'SK하이닉스'};
   function series(CH,k){ if(!k||!CH||!CH.series||!CH.series[k])return null; var s=CH.series[k]; return Array.isArray(s.c)?s.c.filter(function(x){return typeof x==='number'&&x>0;}):null; }
-  function volAnn(c){ if(!c||c.length<30)return null; var n=Math.min(120,c.length-1),rs=[]; for(var i=c.length-n;i<c.length;i++){if(c[i-1]>0&&c[i]>0)rs.push(Math.log(c[i]/c[i-1]));} if(rs.length<20)return null; var mn=rs.reduce(function(a,b){return a+b;},0)/rs.length; var v=rs.reduce(function(a,b){return a+(b-mn)*(b-mn);},0)/(rs.length-1); return Math.sqrt(v*252); }
   function trend(c){ if(!c||c.length<22)return {dir:'—',r20:null,r63:null}; var last=c[c.length-1]; var r20=last/c[c.length-21]-1; var r63=c.length>=64?last/c[c.length-64]-1:null; var dir=r20>0.02?'상승':(r20<-0.02?'하락':'횡보'); return {dir:dir,r20:r20,r63:r63}; }
-  function probs(muA,sgA,days,band){ var t=days/252; var m=(muA-sgA*sgA/2)*t; var s=sgA*Math.sqrt(t); if(s<=0)s=1e-6; var lHi=Math.log(1+band),lLo=Math.log(1-band); var pUp=1-ncdf((lHi-m)/s),pDown=ncdf((lLo-m)/s),pFlat=Math.max(0,1-pUp-pDown); return {pUp:pUp,pFlat:pFlat,pDown:pDown,med:Math.exp(m)-1}; }
-  function P(x){return Math.round(x*100);}
   function sp(x){return (x>=0?'+':'')+Math.round(x*100)+'%';}
   function css(){ if(document.getElementById('mp-css'))return; var s=document.createElement('style');s.id='mp-css';
     s.textContent='.mp-card{border:1px solid var(--line2);border-radius:14px;background:var(--panel);overflow:hidden}'
@@ -4998,43 +4992,91 @@ function renderInstantAnswer(){
       +'<div class="mp-note">추세 = 40주선 기울기(미)·최근 20거래일 수익률(한). 방향 확률은 아래 표. 이 판정은 관측 레짐 요약이며 예측·투자권유 아님.</div></div>';
   }
 
-  function renderProb(CH,PR){
+  /* ── 추정 리비전 트래커 ── */
+  function renderRev(GM){
     var el=document.getElementById('probEst'); if(!el)return;
     css();
-    function cell(pr){
-      var u=Math.round(pr.pUp*100),f=Math.round(pr.pFlat*100),d=Math.round(pr.pDown*100);
-      var big=u>=d?('<span style="color:var(--st-dawn)">▲'+u+'%</span>'):('<span style="color:var(--st-hot)">▼'+d+'%</span>');
-      return '<div class="pe-bar"><i class="pe-up" style="width:'+u+'%"></i><i class="pe-fl" style="width:'+f+'%"></i><i class="pe-dn" style="width:'+d+'%"></i></div>'
-        +'<div class="pe-p">'+big+' · 유지 '+f+'%</div>';
-    }
-    var rows=TK.map(function(o){
-      var c=series(CH,o.k);
-      var tr=trend(c);
-      var sgA=o.sg; // σ = 프리셋(전방 가정) — 후행 실현변동성은 일회성 급등에 부풀려져 미사용
-      var momAnn=tr.r63!=null?Math.pow(1+tr.r63,252/63)-1:0; momAnn=Math.max(-0.5,Math.min(0.8,momAnn));
-      var muA=(c&&tr.r63!=null)?(0.5*o.mu+0.5*momAnn):o.mu;
-      // 추세 부호: charts 있으면 r20, 없으면 prices.changePct
-      var dir=tr.dir;
-      if(dir==='—'&&PR&&PR.quotes){var q=PR.quotes[o.t.toLowerCase()];if(q&&typeof q.changePct==='number')dir=q.changePct>3?'상승':q.changePct<-3?'하락':'횡보';}
-      var dcol=dir==='상승'?'var(--st-dawn)':dir==='하락'?'var(--st-hot)':'var(--dim)';
-      var arr=dir==='상승'?'▲':dir==='하락'?'▼':'▬';
-      var cells=HZ.map(function(h){return '<td class="c">'+cell(probs(muA,sgA,h.days,h.band))+'</td>';}).join('');
-      return '<tr><td><span class="pe-nm">'+o.n+'<span class="tk">'+o.t+'</span></span></td>'
-        +'<td class="c"><span class="pe-tr" style="color:'+dcol+'">'+arr+' '+dir+'</span>'
-        +'<div class="pe-p">σ '+Math.round(sgA*100)+'%(가정)</div>'+'</td>'+cells+'</tr>';
+    var G=GM&&GM.gamma?GM.gamma:null;
+    if(!G){el.innerHTML='<div class="mp-card"><div class="mp-hd">추정 리비전 트래커</div><div class="mp-note">gamma.json 로드 실패.</div></div>';return;}
+
+    var sgn=function(x,d){ if(x==null)return '<span style="color:var(--faint)">—</span>';
+      var c=x>0?'var(--st-dawn)':x<0?'var(--st-hot)':'var(--dim)';
+      return '<span style="color:'+c+'">'+(x>0?'+':'')+x.toFixed(d==null?1:d)+'%</span>'; };
+    var gcol={open:'var(--st-dawn)',spent:'var(--st-hot)'};
+
+    var rows=[],pend=0,upN=0,dnN=0,hotN=0;
+    Object.keys(G).forEach(function(tk){
+      var e=G[tk]; if(!e)return; var r=e.rev;
+      if(!r){pend++;return;}
+      var f1=(r.eps&&r.eps.fy1)?r.eps.fy1:null;
+      var gate=r.gate?r.gate.d30:null;
+      if(f1&&f1.c30!=null){ if(f1.c30>0)upN++; else if(f1.c30<0)dnN++; }
+      if(gate!=null&&gate>0)hotN++;
+      rows.push({tk:tk,e:e,r:r,f1:f1,gate:gate});
+    });
+    // 강등 위험(게이트 큰 순) → 상단
+    rows.sort(function(a,b){var x=a.gate==null?-1e9:a.gate,y=b.gate==null?-1e9:b.gate;return y-x;});
+
+    var body=rows.map(function(o){
+      var e=o.e,r=o.r,f1=o.f1,g=o.gate;
+      var nm=NM[o.tk]||o.tk;
+      var tp=r.tp||{},px=r.px||{};
+      var bd=(f1&&(f1.up30!=null||f1.dn30!=null))
+        ? '<span style="color:var(--st-dawn)">▲'+(f1.up30||0)+'</span> / <span style="color:var(--st-hot)">▼'+(f1.dn30||0)+'</span>'
+        : '<span style="color:var(--faint)">—</span>';
+      var gcell = g==null
+        ? '<span style="color:var(--faint)">—</span>'
+        : '<b style="color:'+(g>0?'var(--st-hot)':'var(--st-dawn)')+'">'+(g>0?'+':'')+g.toFixed(1)+'p</b>';
+      var gate_t = g==null?'':(g>0?'가격이 추정 추월':'추정이 앞섬');
+      return '<tr>'
+        +'<td><span class="pe-nm">'+nm+'<span class="tk">'+o.tk+'</span></span>'
+          +'<div class="pe-p">'+(e.stage||'—')+' · <span style="color:'+(gcol[e.g]||'var(--dim)')+'">γ '+(e.g||'—')+'</span></div></td>'
+        +'<td class="c"><b>'+(tp.now!=null?tp.now.toLocaleString():'—')+'</b>'
+          +'<div class="pe-p">여력 '+(e.pct!=null?(e.pct>0?'+':'')+e.pct+'%':'—')+'</div></td>'
+        +'<td class="c">'+sgn(tp.c7)+'<div class="pe-p">30d '+ (tp.c30==null?'<span style="color:var(--faint)">축적중</span>':sgn(tp.c30)) +'</div></td>'
+        +'<td class="c"><b>'+(f1&&f1.now!=null?f1.now:'—')+'</b>'
+          +'<div class="pe-p">'+(f1&&f1.end?String(f1.end).slice(0,4):'FY+1')+'</div></td>'
+        +'<td class="c"><b>'+sgn(f1?f1.c30:null)+'</b><div class="pe-p">90d '+sgn(f1?f1.c90:null)+'</div></td>'
+        +'<td class="c">'+bd+'<div class="pe-p">애널 30d</div></td>'
+        +'<td class="c">'+sgn(px.c30)+'<div class="pe-p">90d '+sgn(px.c90)+'</div></td>'
+        +'<td class="c">'+gcell+'<div class="pe-p">'+gate_t+'</div></td>'
+      +'</tr>';
     }).join('');
-    el.innerHTML='<div class="mp-card"><div class="mp-hd">방향 확률 추정 <span class="sub">GBM · 다음주/1달/3개월 · P(상승/유지/하락)</span></div>'
-      +'<table class="pe-tbl"><thead><tr><th>종목</th><th class="c">현재 추세</th>'
-        +HZ.map(function(h){return '<th class="c">'+h.label+'<br><span style="font-weight:400;color:var(--faint)">±'+Math.round(h.band*100)+'%</span></th>';}).join('')
-      +'</tr></thead><tbody>'+rows+'</tbody></table>'
-      +'<div class="mp-note">모델 = 로그정규(GBM): σ는 프리셋(전방 변동성 가정, 확률랩 계승), μ는 프리셋 성장 가정과 최근 3개월 모멘텀을 50:50 블렌드(상승/하락 추세 반영). 밴드(±%) 넘으면 상승/하락, 안이면 유지. <b>지수(QQQ·코스피)는 프리셋 σ/μ</b>. <b>추정치이며 예측·투자권유 아님</b> — 가정이 바뀌면 확률도 바뀜(상세 조정은 02 확률랩).</div></div>';
+
+    var asOf=GM.asOf?String(GM.asOf).slice(0,10):'—';
+    var verdict = rows.length
+      ? 'EPS(FY+1) 30일 리비전 <b style="color:var(--st-dawn)">상향 '+upN+'</b> · <b style="color:var(--st-hot)">하향 '+dnN+'</b>. '
+        +'강등 게이트 점등(가격이 추정 추월) <b style="color:'+(hotN?'var(--st-hot)':'var(--st-dawn)')+'">'+hotN+'/'+rows.length+'</b>.'
+      : '';
+    var pendMsg = pend
+      ? '<div class="mp-note" style="border-top:none;padding-top:0;color:var(--st-hot)">리비전 미수집 '+pend+'종목 — 다음 크론(06:37 KST · update-prices)에서 채워집니다.</div>'
+      : '';
+
+    el.innerHTML='<div class="mp-card"><div class="mp-hd">추정 리비전 트래커 <span class="sub">gamma '+asOf+' · TP·EPS 리비전 · 강등 게이트</span></div>'
+      +(rows.length?'<div style="padding:11px 16px 0;font-size:12.5px;line-height:1.55;color:var(--txt)">'+verdict+'</div>':'')
+      +'<div style="overflow-x:auto"><table class="pe-tbl"><thead><tr>'
+        +'<th>종목</th>'
+        +'<th class="c">목표가<br><span style="font-weight:400;color:var(--faint)">TP 평균</span></th>'
+        +'<th class="c">TP 리비전<br><span style="font-weight:400;color:var(--faint)">7d · 30d</span></th>'
+        +'<th class="c">EPS<br><span style="font-weight:400;color:var(--faint)">FY+1</span></th>'
+        +'<th class="c">EPS 리비전<br><span style="font-weight:400;color:var(--faint)">30d · 90d</span></th>'
+        +'<th class="c">상향/하향<br><span style="font-weight:400;color:var(--faint)">애널 수</span></th>'
+        +'<th class="c">주가<br><span style="font-weight:400;color:var(--faint)">30d · 90d</span></th>'
+        +'<th class="c">★ 강등 게이트<br><span style="font-weight:400;color:var(--faint)">주가−EPS, 30d</span></th>'
+      +'</tr></thead><tbody>'+(body||'<tr><td colspan="8" style="color:var(--faint);padding:14px">리비전 수집 대기</td></tr>')+'</tbody></table></div>'
+      +pendMsg
+      +'<div class="mp-note"><b>강등 게이트(§2-4)</b> = 30일 주가 변화율 − 30일 EPS(FY+1) 리비전율. '
+        +'<b style="color:var(--st-hot)">양수 = 가격이 추정을 추월</b>(성숙 강등 후보) · '
+        +'<b style="color:var(--st-dawn)">음수 = 추정이 앞섬</b>(γ open 유지). '
+        +'EPS 리비전은 Yahoo epsTrend(7/30/60/90일 전 값)를 그대로 읽는다. '
+        +'<b>관측치이며 예측 아님</b> — 미래 확률을 계산하지 않는다. TP 리비전 30d는 targetHist 누적 후 표시(구 코드가 6일치만 보관해 폐기하던 것을 120일로 확장).</div></div>';
   }
 
   function boot(){
     var m=document.getElementById('momOutlook'), p=document.getElementById('probEst');
     if(!m&&!p)return;
-    Promise.all([J('charts.json?t='+Date.now()),J('signals.json?t='+Date.now()),J('prices.json?t='+Date.now())])
-      .then(function(a){renderMom(a[0],a[1]);renderProb(a[0],a[2]);})
+    Promise.all([J('charts.json?t='+Date.now()),J('signals.json?t='+Date.now()),J('gamma.json?t='+Date.now())])
+      .then(function(a){renderMom(a[0],a[1]);renderRev(a[2]);})
       .catch(function(){});
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
