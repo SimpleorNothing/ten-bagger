@@ -2754,7 +2754,9 @@ window.MARKET=(function(){
  async function loadHoldings(){
   var host=document.getElementById('mktHoldings');if(!host)return;
   try{var r=await fetch('charts.json?t='+Date.now(),{cache:'no-store'});var j=await r.json();var S=j.series||{};
-   var AVG={mrvl:152.12,mu:353.84,lite:682.92,vrt:289.23,be:236.83,tsla:352.36};
+   // 평단(주당 매입가) = holdings.json avg{} — 자산현황 xlsx에서 자동 동기화(sync-holdings.mjs). 필드 부재·페치 실패 시 선 생략.
+   var AVG={};
+   try{var hr=await fetch('holdings.json?t='+Date.now(),{cache:'no-store'});var hj=await hr.json();AVG=hj.avg||{};}catch(e2){}
    var list=[['mrvl','Marvell','MRVL'],['mu','Micron','MU'],['lite','Lumentum','LITE'],['vrt','Vertiv','VRT'],['be','Bloom Energy','BE'],['tsla','Tesla','TSLA']];
    var html=list.map(function(o){var d=S[o[0]];if(!d||!d.c||!d.c.length)return '';var vals=slice6(d.c);
     return '<div class="mkt-card mkt-card-lk" data-tk="'+o[2]+'" role="button" tabindex="0" title="'+esc(o[1])+' 기사 보기">'+card(o[1],'$'+vals[vals.length-1].toFixed(2),pct(vals),vals,AVG[o[0]])+'</div>';}).join('');
