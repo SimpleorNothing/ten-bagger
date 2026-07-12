@@ -314,18 +314,59 @@ window.INSIGHT=(function(){
   }
   return out.join('\n');
  }
+
+ /* --- 이미지(캡처·붙여넣기) → 글자 인식(OCR) --- */
+ var _tessP=null;
+ function tesseract(){
+  if(window.Tesseract)return Promise.resolve(window.Tesseract);
+  if(_tessP)return _tessP;
+  _tessP=new Promise(function(res,rej){
+   var s=document.createElement('script');
+   s.src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
+   s.onload=function(){res(window.Tesseract);};
+   s.onerror=function(){_tessP=null;rej(new Error('tesseract.js 로드 실패'));};
+   document.head.appendChild(s);});
+  return _tessP;
+ }
+ var _ocrW=null;
+ async function ocrWorker(){
+  if(_ocrW)return _ocrW;
+  var T=await tesseract();
+  _ocrW=await T.createWorker(['kor','eng'],1,{logger:function(m){
+   if(m&&m.status==='recognizing text')setMsg('글자 인식 중 — '+Math.round((m.progress||0)*100)+'%');
+  }});
+  return _ocrW;
+ }
+ async function ocrImage(file){
+  var w=await ocrWorker();
+  var r=await w.recognize(file);
+  return (r&&r.data&&r.data.text?r.data.text:'').replace(/[ \t]+\n/g,'\n').trim();
+ }
+ function isImg(f){return /^image\//.test(f.type||'')||/\.(png|jpe?g|gif|bmp|webp)$/i.test(f.name||'');}
+
  async function addFiles(files){
   for(var i=0;i<files.length;i++){
    var f=files[i];
-   setMsg('읽는 중 — '+f.name);
+   var img=isImg(f),name=f.name||(img?'붙여넣은 이미지':'파일');
+   setMsg((img?'이미지 글자 인식 준비 — ':'읽는 중 — ')+name);
    try{
-    var t=(/\.pdf$/i.test(f.name)||f.type==='application/pdf')?await pdfText(f):await f.text();
+    var t=img?await ocrImage(f)
+            :(/\.pdf$/i.test(f.name)||f.type==='application/pdf')?await pdfText(f):await f.text();
     t=(t||'').trim();
     var ta=$('insText');
-    ta.value=(ta.value?ta.value+'\n\n':'')+'--- '+f.name+' ---\n'+t;
-    setMsg(f.name+' — '+t.length.toLocaleString()+'자 추출 · 종류·출처·제목은 내용에서 판별합니다');
-   }catch(e){setMsg(f.name+' 추출 실패: '+(e&&e.message?e.message:e));}
+    ta.value=(ta.value?ta.value+'\n\n':'')+'--- '+name+' ---\n'+t;
+    setMsg(name+' — '+t.length.toLocaleString()+'자 '+(img?'인식':'추출')+' · 종류·출처·제목은 내용에서 판별합니다');
+   }catch(e){setMsg(name+(img?' 글자 인식 실패: ':' 추출 실패: ')+(e&&e.message?e.message:e));}
   }
+ }
+ function pasteImgs(e){
+  var items=((e.clipboardData||window.clipboardData||{}).items)||[],imgs=[];
+  for(var i=0;i<items.length;i++){
+   if(items[i].kind==='file'&&/^image\//.test(items[i].type||'')){
+    var f=items[i].getAsFile();if(f)imgs.push(f);
+   }
+  }
+  if(imgs.length){e.preventDefault();addFiles(imgs);}
  }
 
  /* --- 바인딩 --- */
@@ -339,6 +380,8 @@ window.INSIGHT=(function(){
   ['dragover','dragenter'].forEach(function(ev){dz.addEventListener(ev,function(e){e.preventDefault();dz.classList.add('drag');});});
   dz.addEventListener('dragleave',function(e){e.preventDefault();dz.classList.remove('drag');});
   dz.addEventListener('drop',function(e){e.preventDefault();dz.classList.remove('drag');addFiles(Array.prototype.slice.call((e.dataTransfer||{}).files||[]));});
+  $('insText').addEventListener('paste',pasteImgs);
+  dz.addEventListener('paste',pasteImgs);
   $('insSearch').oninput=function(e){q=(e.target.value||'').trim();renderList();};
   $('insFilter').onchange=function(e){filt=e.target.value;renderGradeBoard();renderList();};
  }
@@ -354,9 +397,9 @@ window.INSIGHT=(function(){
   '<div class="ins-wrap">'+
    '<div class="ins-card">'+
     '<div class="ins-row"><input class="ins-in" id="insUrl" placeholder="URL (선택 — 본문이 없으면 URL만으로 웹검색해 시도)"></div>'+
-    '<textarea class="ins-ta" id="insText" style="margin-top:8px" placeholder="본문·스크립트를 붙여넣으세요. 종류·출처·제목은 내용에서 자동 판별합니다. 유튜브는 자막 스크립트를 넣는 편이 URL만 주는 것보다 정확합니다."></textarea>'+
-    '<input type="file" id="insFile" accept=".pdf,.txt,.md,.csv,.json" multiple hidden>'+
-    '<div class="ins-drop" id="insDrop" role="button" tabindex="0">PDF·TXT 파일을 끌어다 놓거나 클릭해 선택 — 본문 텍스트만 추출해 위 칸에 채웁니다</div>'+
+    '<textarea class="ins-ta" id="insText" style="margin-top:8px" placeholder="본문·스크립트를 붙여넣으세요. 캡처 이미지를 붙여넣으면(Ctrl/⌘+V) 글자를 인식해 채웁니다. 종류·출처·제목은 내용에서 자동 판별합니다. 유튜브는 자막 스크립트를 넣는 편이 URL만 주는 것보다 정확합니다."></textarea>'+
+    '<input type="file" id="insFile" accept=".pdf,.txt,.md,.csv,.json,.png,.jpg,.jpeg,.gif,.bmp,.webp,image/*" multiple hidden>'+
+    '<div class="ins-drop" id="insDrop" role="button" tabindex="0">PDF·TXT·이미지 파일을 끌어다 놓거나 클릭해 선택 · 캡처 이미지는 붙여넣기(Ctrl/⌘+V)만 해도 글자를 인식합니다</div>'+
     '<div class="ins-bar">'+
      '<button class="ins-btn primary" id="insRun">관점 뽑기</button>'+
      '<button class="ins-btn" id="insClear">비우기</button>'+
