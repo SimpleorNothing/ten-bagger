@@ -663,6 +663,11 @@ table.tk th.c{text-align:center}
 .stk-cv{width:100%;height:190px;flex:0 0 190px;display:block;cursor:crosshair}
 .stk-zn{font-size:10px;color:var(--faint);text-align:right;margin-top:4px}
 @media(max-width:700px){.stk-body{flex-direction:column}.stk-chart{border-left:0;flex-basis:auto}.stk-cv{height:150px;flex-basis:150px}}
+/* 관련 기사(매크로 토픽) = 2열 그리드. 블록마다 기사 수가 달라도 상단 정렬(빈 오른쪽 공백 제거) */
+#mktMacroNews{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;align-items:start}
+#mktMacroNews .stk-blk{margin:0}
+#mktMacroNews .mkt-ph{grid-column:1/-1}
+@media(max-width:700px){#mktMacroNews{grid-template-columns:1fr}}
 
 /* ===================== 해도(海圖) 레이어 ===================== */
 /* 용지: 등간격 괘선 격자. 패널이 그 위에 놓여 해도의 도판(圖版)처럼 읽힌다. */
