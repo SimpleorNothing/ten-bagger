@@ -1,32 +1,32 @@
 {
-  "asOf": "2026-07-12T22:04:28.977Z",
+  "asOf": "2026-07-13T22:05:51.890Z",
   "source": "Google News RSS · 종목축 + 시그널축 + 병목축 (기사별 한 줄 요약 + 물질성 스크리닝)",
   "note": "사이트 종목 카드의 \"일자 + 요약\" 행 소스. 최근 95일 창 · 종목당 최신 5건(첫 로딩 페이로드 상한) · **물질성 스크리닝 통과분만**(items[].m>=1 — 2=논제/펀더멘털, 1=리비전·수급 실사건, 0=사후 등락 서술·홍보·추측·콘텐츠팜으로 제외). 탈락 기사는 삭제가 아니라 news_archive.json 에 전건 보존. 나머지 3개월치는 archive/{티커}.json 을 '더 보기'로 온디맨드 로드. 신호/소음 판단과 SIGNAL_LOG 반영은 사람/Claude의 몫 — 채점·차트에는 쓰이지 않는다.",
-  "count": 124,
+  "count": 147,
   "macroTopics": [
-    {
-      "id": "macro_하이퍼스케일러_실적_ai_capex_0",
-      "ticker": "MACRO",
-      "name": "하이퍼스케일러 실적·AI Capex",
-      "q": "Big Tech AI spending earnings capex bubble",
-      "mkt": "US",
-      "ax": "capex"
-    },
-    {
-      "id": "macro_미국_cpi_연준_금리경로_1",
-      "ticker": "MACRO",
-      "name": "미국 CPI·연준 금리경로",
-      "q": "US CPI inflation Fed rate cut Warsh testimony",
-      "mkt": "US",
-      "ax": "rates"
-    },
     {
       "id": "macro_중동분쟁_유가_에너지_1",
       "ticker": "MACRO",
       "name": "중동분쟁·유가·에너지",
-      "q": "US Iran attack oil price geopolitical risk",
+      "q": "호르무즈 봉쇄 유가 급등 중동 긴장 에너지",
       "mkt": "US",
       "ax": "energy"
+    },
+    {
+      "id": "macro_반도체_ai_과열_조정_1",
+      "ticker": "MACRO",
+      "name": "반도체 AI 과열 조정",
+      "q": "SK하이닉스 ADR 급락 AI 반도체 과열 나스닥 하락",
+      "mkt": "KOSPI",
+      "ax": "chip"
+    },
+    {
+      "id": "macro_ai_경제충격_대응론_2",
+      "ticker": "MACRO",
+      "name": "AI 경제충격 대응론",
+      "q": "AI job displacement economists Nobel laureate economic transformation",
+      "mkt": "US",
+      "ax": "x_ai경제충격대응론"
     }
   ],
   "bottleneck": [
@@ -67,36 +67,388 @@
     }
   ],
   "archive": "news_archive.json",
-  "archiveCount": 390,
+  "archiveCount": 486,
   "shardDir": "archive",
   "winCounts": {
-    "353200": 10,
-    "VRT": 9,
+    "353200": 11,
+    "089030": 7,
+    "SNDK": 5,
+    "VRT": 10,
+    "BESI": 6,
+    "AMD": 9,
+    "BE": 5,
+    "CEG": 6,
+    "0522": 5,
+    "QCOM": 4,
+    "VICR": 5,
+    "ALAB": 4,
+    "COHR": 4,
+    "SMCI": 9,
+    "CBRS": 7,
     "LITE": 1,
-    "CBRS": 6,
-    "SMCI": 8,
-    "SNDK": 2,
-    "005930": 11,
-    "BE": 3,
+    "005930": 13,
+    "MU": 5,
     "MRVL": 2,
-    "COHR": 2,
     "TSLA": 3,
-    "089030": 4,
-    "PLTR": 7,
-    "AMD": 6,
-    "CEG": 5,
-    "MU": 3,
-    "RMBS": 5,
-    "0522": 4,
-    "ALAB": 3,
+    "PLTR": 10,
+    "RMBS": 6,
     "TER": 1,
-    "VICR": 4,
     "009150": 6,
-    "BESI": 3,
-    "QCOM": 3,
     "OKLO": 1
   },
   "items": [
+    {
+      "id": "macro_반도체_ai_과열_조정_1",
+      "ticker": "MACRO",
+      "name": "반도체 AI 과열 조정",
+      "ax": "chip",
+      "title": "AI 랠리에 균열… 주식 투매 불러온 ‘반도체 고점론’ - Chosunbiz",
+      "link": "https://news.google.com/rss/articles/CBMiiAFBVV95cUxOc2FzZi1tV0N1NThoX0hjTmhCS2gwQ3pBSmtyN0dMLXdFTHN1ZVBGVC0yVGFWeGNVd2stakpPbDg0bl9xNXQ2bGRhc0cyY0VoYnlCSUtzeHlmR2NPZ1p5RzQwR0h6NGZDSHNKdC1wdDZEdm5QUlcwcTFCUnAzSG40dVI0YjFmSzBj?oc=5",
+      "published": "2026-07-13T21:01:17.000Z",
+      "source": "Chosunbiz",
+      "st": 3
+    },
+    {
+      "id": "twng",
+      "ticker": "089030",
+      "name": "테크윙",
+      "title": "[IB토마토]대신PE 발목 잡은 테크윙 EB, '리픽싱 제로' 부메랑 - 뉴스토마토",
+      "link": "https://news.google.com/rss/articles/CBMiYEFVX3lxTE1MWnNxZzdUaTluRDItakZuNlRMOF9HMVRyV3dCMWhzR0dWZzJNajlTaDJhNmx4aVRYUFVuWW5FdW1FWmVCcl9wY2NTdmZ4dUh0NDhKWHoxZW92R0hUdnJWWQ?oc=5",
+      "published": "2026-07-13T21:00:00.000Z",
+      "source": "뉴스토마토",
+      "st": 3,
+      "m": 1,
+      "a": "대신PE 보유 테크윙 교환사채, 리픽싱 조항 없어 주가 하락 시 손실 고스란히 귀속되는 구조 노출",
+      "w": "EB 리픽싱 부재는 대신PE의 투자 손실 리스크이지 테크윙 펀더멘털과 직접 무관하나, 오버행 우려로 단기 센티먼트에 소폭 부정적 관측.",
+      "mv": 2
+    },
+    {
+      "id": "sndk",
+      "ticker": "SNDK",
+      "name": "SanDisk",
+      "title": "Sandisk Just Had Its Price Target More Than Doubled by This Analyst. Why the Stock Is Falling. - Barron's",
+      "link": "https://news.google.com/rss/articles/CBMihwFBVV95cUxPVjZxRk52YlQxY1NtcUN5Y1lMNGZyZ1k3OGtxSEk0M1lvUURfSVpVM09tQWhHTWpJTF9ESkdUbkxDSTNsektfYVJiRVF6dkxsTlB1WFBvQXQ5UFNsNXdidlpiT3I3SlhqUkJTbXhhVGhPSGR3WnRYTDgzdGNEOWFoR1hfd2RoNW8?oc=5",
+      "published": "2026-07-13T20:48:00.000Z",
+      "source": "Barron's",
+      "st": 3,
+      "m": 1,
+      "a": "애널리스트 목표주가 두 배 이상 상향에도 SanDisk 주가 하락",
+      "w": "목표가 대폭 상향은 펀더멘털 기대 개선 신호이나, 주가가 오히려 하락한 것은 선반영·차익실현 수급 노이즈로 해석되며 논제 영향은 제한적.",
+      "mv": 2
+    },
+    {
+      "id": "macro_ai_경제충격_대응론_2",
+      "ticker": "MACRO",
+      "name": "AI 경제충격 대응론",
+      "ax": "x_ai경제충격대응론",
+      "title": "Economic Impact of AI: Urgent Call for Action from Experts - The Cryptonomist",
+      "link": "https://news.google.com/rss/articles/CBMickFVX3lxTE5ETzQzV2FMeDRnREhEcHM3cUFIaXFrVms5cng1NnBPT3ExcWo5TE43NkFpYy1uSDg2NE1UUGRIVkJNTG1TZVh2RE03S2pDeXRkcGpOVDY3M1BRZXdKalFrTjFwdVFZMHRidDZyVTJuYzU2QQ?oc=5",
+      "published": "2026-07-13T19:37:44.000Z",
+      "source": "The Cryptonomist",
+      "st": 3
+    },
+    {
+      "id": "vrt",
+      "ticker": "VRT",
+      "name": "Vertiv",
+      "title": "Modern data centers can run on no water consumption: Vertiv CEO - CNBC",
+      "link": "https://news.google.com/rss/articles/CBMiqAFBVV95cUxNYlhMQUpOcDJOM2ZTaEVxd3IyWnRMRkhCaUdHcWJiQnFQYjdRZXpCTzVJNVk2eW5kMEQza2x5LU5sRjFpZHBYSjdOMnJYX0ozcFdWcXI0YlIyYVdaNWxLMHVOMC0yR3VhY0lNaUxhMDhNZDlGZUk2OUU5dmMtTEJtVW1JMEVoQWQ5YkZJNlRaeXQzcUNQWlFmWUhxcXJjaUVZcnVjYThYcVo?oc=5",
+      "published": "2026-07-13T19:08:15.000Z",
+      "source": "CNBC",
+      "st": 3,
+      "m": 1,
+      "a": "Vertiv CEO, 무수냉각 방식 데이터센터 구현 가능성 공개 발언",
+      "w": "액냉·무수냉각 솔루션 경쟁력을 강조한 내용으로, 제품 포트폴리오 차별화 관점에서 중장기 수주 가능성에 소폭 긍정적 관측.",
+      "mv": 2
+    },
+    {
+      "id": "macro_ai_경제충격_대응론_2",
+      "ticker": "MACRO",
+      "name": "AI 경제충격 대응론",
+      "ax": "x_ai경제충격대응론",
+      "title": "200+ economists say 'we must act now' on AI's economic impact and job displacement risks - TRT World",
+      "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTFB1U3FfZzl3elB5MVc2OVB5bFRjXzQxd2Q0OU9jOUhzS210VjhKZFAzLVZyOFRMREN3UjBWWDR2Q0ptaVJsZGc0WDU4QUl2TmttUmlPbFZqQkM?oc=5",
+      "published": "2026-07-13T18:41:23.000Z",
+      "source": "TRT World",
+      "st": 3
+    },
+    {
+      "id": "macro_ai_경제충격_대응론_2",
+      "ticker": "MACRO",
+      "name": "AI 경제충격 대응론",
+      "ax": "x_ai경제충격대응론",
+      "title": "15 Nobel Laureates Sound the Alarm on an AI ‘Tsunami’ for Jobs—We’re Not Ready - inc.com",
+      "link": "https://news.google.com/rss/articles/CBMiuAFBVV95cUxPQkJIS256YV8wMllkaGRPYnBnLVRQTE1waXFEU1B2TloxWFhjODE1WWlFb1F3RXdEd0tlY1oyOWI3YlBNRExEYzl4eS02Y2lBQkJwR2VlY0RBMi1TRm1jMENUcFFYUHI2Z3FwOFA1eUR4QndWMzF1X2xOYzRYNjNnWl9HOEd6OEFSSFJGMy1hTlVoN0FGU1hCb3JhV05GbldQa2ZSVlBoM2oxM2ExRE4wS3d2MzlpZFBO?oc=5",
+      "published": "2026-07-13T18:06:29.000Z",
+      "source": "inc.com",
+      "st": 3
+    },
+    {
+      "id": "macro_ai_경제충격_대응론_2",
+      "ticker": "MACRO",
+      "name": "AI 경제충격 대응론",
+      "ax": "x_ai경제충격대응론",
+      "title": "Hundreds of economists say 'we must act now' on AI’s economic impact and job displacement risks - ABC News - Breaking News, Latest News and Videos",
+      "link": "https://news.google.com/rss/articles/CBMipAFBVV95cUxPTmhId2tJVDJMdUVPal9IalJoSWRVWHIzTlp0UE9ySTE2SGwwODZWRlJJRFF5d1E1YWJWblZJTHp0VFlsX2ZxS19Sd3dxdlNkNFJENHhqRWEwaEo5TGpISVg3QklRN3U5NGozUkktcGQySFlUaVNfSG50M3M3RlNVUWhJWFVmMHZfOEJrdnF5MVR3Q2hNZXFyQmtBV1Jzd2ptcFlFV9IBqgFBVV95cUxPa0FlVkNGN1NfcEJLbzRoc0QtMzJsTnFrUk12ZWN2bmF5NnE0cnJGaFFwbzJiOE15MElJUEJEdTNuTFRvazBIcFVIWmtrVU1Bd0ZuUkpUZURRUGd0bDFPQllYS2Q5UjVPZGIwNURMU3gzQmJsUGdOM1JVLTcyV0x1MTZ2ZEVraDA0eHRqQzBCaHo5a0MzdmJIOFp1UUp5ZTNkcmxZd1k4Y2xIZw?oc=5",
+      "published": "2026-07-13T16:26:51.000Z",
+      "source": "ABC News - Breaking News, Latest News and Videos",
+      "st": 3
+    },
+    {
+      "id": "besi",
+      "ticker": "BESI",
+      "name": "BE Semiconductor",
+      "title": "BE Semiconductor Industries N : Announces Transactions Under Share Repurchase Program - marketscreener.com",
+      "link": "https://news.google.com/rss/articles/CBMi0gFBVV95cUxObmtvV1V1cW9sMExJLUVTSnlJTW9GUmlCUnYydldMMEM1QUtRcEJfMTh0T1ZVSDZScEdvcTlQR19WM2FrQVZEcWNPYlBaQWs2OTN1cHFXNm5GOHFRbTVIV0JCeDBNRUhzT3BYYXc1b2dSZ1ByeVVoYXZwY24wVll0U2xhTkpaaDNoVXp3NmdFTlI5RTY2VGoxdTBpVjlyM01qS0ZZaEcxVGVja3BHZVlqb3ItWHo3dVFfU2ZtbzBnWjVZZFlvSXNJb0VuNG5IbTRIRlE?oc=5",
+      "published": "2026-07-13T16:18:07.000Z",
+      "source": "marketscreener.com",
+      "st": 3,
+      "m": 1,
+      "a": "BESI, 자사주 매입 프로그램 하의 주식 매입 거래 공시",
+      "w": "자사주 매입 실행은 주주환원 의지를 확인하는 수급 호재이나 규모 미확인으로 영향 강도는 제한적.",
+      "mv": 2
+    },
+    {
+      "id": "macro_ai_경제충격_대응론_2",
+      "ticker": "MACRO",
+      "name": "AI 경제충격 대응론",
+      "ax": "x_ai경제충격대응론",
+      "title": "Nobel laureates and AI leaders warn the window to prepare for AI's economic impact is closing fast - the-decoder.com",
+      "link": "https://news.google.com/rss/articles/CBMivwFBVV95cUxObW1fN0I3QWs1WFdVRUNIWjZDV0JtRWNRTm1CaUw2ZWNOMWU1WDd4azJ6a1FQRnA5Q3MyZnZpX1FRc3VvSjFFRGRmV0xRNkJrVlMySUVleGlRUXIyUFRXcGpJeWh5YzM4cGFvVHphdFR4NGJLa0VRSnFYWWZPdTlyRkx5Rlk4LVgzeHF4cmJkSmFyX1AxSi1Dd183MVB1SVc3ZVRSQ0hMb0JrdktRT01TWlZKc3FzcU9YTnFQRHFJOA?oc=5",
+      "published": "2026-07-13T16:03:47.000Z",
+      "source": "the-decoder.com",
+      "st": 3
+    },
+    {
+      "id": "amd",
+      "ticker": "AMD",
+      "name": "AMD",
+      "title": "New AMD Price Target as Earnings Estimates Grow - TheStreet Pro",
+      "link": "https://news.google.com/rss/articles/CBMilAFBVV95cUxNZmVhVGFJYTJYaF9ENHlwNmJoZDhpTVVUamdodGNtenphVHZBeS1XTENrckhIN1dXVXQzVVlUSUFYRkJ3WWhMY3hkQ0VqNllNQXJfM3FlbXZxV2dxYlFrajUxekZRMUx3RGFWNUVhZFJ6M3RNWmlfZTZza3FIN05McnRIdjFlN3VCTGxwS0JBUEN6dnAz?oc=5",
+      "published": "2026-07-13T15:35:00.000Z",
+      "source": "TheStreet Pro",
+      "st": 3,
+      "m": 1,
+      "a": "AMD 실적 추정치 상향에 따른 목표주가 조정 발표",
+      "w": "애널리스트 추정치 상향 및 목표주가 조정은 단기 가격 시계 호재이나 확정 사실 아닌 리비전에 그침.",
+      "mv": 2
+    },
+    {
+      "id": "be",
+      "ticker": "BE",
+      "name": "Bloom Energy",
+      "title": "UBS says to 'buy the dip' in Bloom Energy stock | BE - thestreet.com",
+      "link": "https://news.google.com/rss/articles/CBMihwFBVV95cUxOWFI1ZWpTOU1tOG41ZVpyYkRxaGF3emYtS0d6Mko3WE1OcTZ3OVdLTXYxcHdvMWdlekRSTzhYUXU4cGFJTDFmdzNpOUV3eGZYQXYwb1FkU2djd3BpNDI1WFN5amkxZHNJRHp5TXpaTHlHWGJPTmFrdTJZTTJkVzhpdjRZV0YtZjA?oc=5",
+      "published": "2026-07-13T15:03:00.000Z",
+      "source": "thestreet.com",
+      "st": 3,
+      "m": 1,
+      "a": "UBS, Bloom Energy 주가 하락 시 매수 권고 의견 제시",
+      "w": "투자의견 유지·매수 권고는 단기 센티먼트 지지 요인이나 실적 변화 없는 리비전 수준에 그침.",
+      "mv": 2
+    },
+    {
+      "id": "macro_반도체_ai_과열_조정_1",
+      "ticker": "MACRO",
+      "name": "반도체 AI 과열 조정",
+      "ax": "chip",
+      "title": "성공적 미국 데뷔 후 반전…SK하이닉스 ADR 6% 하락 - 블록미디어",
+      "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE15Z0RvNGZDdEo4dElWbk92OGNjMGhERjBVNTdIbnVGNTZ5cXRyQTV2a1lhVUJtTVY5elZiYllYRXRGemJFZGlsSW9YV21JM3Y2QW9HOS0xZjI?oc=5",
+      "published": "2026-07-13T14:56:00.000Z",
+      "source": "블록미디어",
+      "st": 3
+    },
+    {
+      "id": "bneck_l6_opt",
+      "ticker": "MACRO",
+      "name": "L6 · 옵티컬 리드타임",
+      "title": "Zhongji Innolight Issues Urgent Denial of Multiple Rumors: Refutes Earnings Miss and Stock Price Manipulation, Says 1.6T Demand Remains Strong - finance.biggo.com",
+      "link": "https://news.google.com/rss/articles/CBMidkFVX3lxTE9keUVQZUtHcGQtdk1nZEQtQ2x0azdaVnV0eVlvVGN2NVB5TEhIY0UycGFRNzZHRzRPbjV5dVZrY2NkWWpURGhQZkJhaV9rOGd5NUF0cUVBM2RlbC1POFppMkhrb0E0Y0RFcldmZnRTaG4xSEJFZmc?oc=5",
+      "published": "2026-07-13T11:35:00.000Z",
+      "source": "finance.biggo.com",
+      "st": 3
+    },
+    {
+      "id": "ceg",
+      "ticker": "CEG",
+      "name": "Constellation",
+      "title": "Constellation Energy Beat Earnings Estimates. Wall Street Cut Its Price Target Anyway. - TIKR.com",
+      "link": "https://news.google.com/rss/articles/CBMirwFBVV95cUxQMTU1Z3pVTWs0eUc5dnIyYnJHOTE2VExaMmdBakt1enFUcUdac0RIekhoUW5pQllXbktZRmJYYnBtb3NmVUFRRXc5YjRGMlYtM1llWUMzdkY5V0FuRE12ejVoZ3FwOEtSRlNEakdTX2JkeTc2eXhXa3EwNkxkX3luVzQ3S3Y4UVZVZjBYSENMZk53cjdzLS02WHo5SmZZd0Y4b3A1YjZ0d0lrR3BsRG84?oc=5",
+      "published": "2026-07-13T11:15:12.000Z",
+      "source": "TIKR.com",
+      "st": 9,
+      "m": 1,
+      "a": "Constellation Energy 실적 어닝 비트에도 월가 목표주가 하향 조정",
+      "w": "실적 상회에도 목표주가 하향은 향후 이익 전망에 대한 보수적 시각이 반영된 것으로, 단기 주가에 혼재 신호.",
+      "mv": 2
+    },
+    {
+      "id": "bneck_l4_pkg",
+      "ticker": "MACRO",
+      "name": "L4 · 패키징 캐파",
+      "title": "Advanced Packaging Becomes AI Computing's New Bottleneck: Four Chinese Leaders Pour Over 27 Billion Yuan Into Expansion in First Half - finance.biggo.com",
+      "link": "https://news.google.com/rss/articles/CBMidkFVX3lxTE1UYzQtVmlNNWl0WEd1OTlEYU5XeTIyZm5wZTJmaWhtaWRKdmNMVVFKb0dyMFpxSnJ3V1E1NXozbnU2U2VSOE43aTNaXzZzNzdrV0p2WFlqSkQ1SENlekVQRi1SUURaQUFpMlZSZXE5S0FnSkN6emc?oc=5",
+      "published": "2026-07-13T11:15:00.000Z",
+      "source": "finance.biggo.com",
+      "st": 3
+    },
+    {
+      "id": "asmpt",
+      "ticker": "0522",
+      "name": "ASMPT",
+      "title": "ASMPT Sets Late-July Board Meeting to Approve Interim Results and Dividend - TipRanks",
+      "link": "https://news.google.com/rss/articles/CBMixAFBVV95cUxOZlhMTklRNDh4OWlaelRfSVMyRXpMMUZrb0R0VG9tMFhYdVJCbFBNMlYzbGYyTzV5OWVScGdhaUljRUQ0ZjFhLTFLR1Z2LXowMlhpdHdZeHpadmVQMUg1dVRCUmxzQjZtUlpsaUVWTGZBREtCQnF5Y3hfR1RkWllWQWZpVG94YjM0dW9hdGk1TWl5Z1o1dS1jZjlZd2xmMHhnMTFidklabWNhandUSGE2MmJwYTU1OWJqdGRWZ1YzUVRzUHVR?oc=5",
+      "published": "2026-07-13T09:17:40.000Z",
+      "source": "TipRanks",
+      "st": 9,
+      "m": 1,
+      "a": "ASMPT, 7월 말 이사회 소집 예정 — 중간 실적 및 배당 승인 목적 공시",
+      "w": "실적 발표 및 배당 결정이 예고된 이벤트로, 결과에 따라 주가 방향이 확정될 수 있어 주목 필요.",
+      "mv": 2
+    },
+    {
+      "id": "bneck_capex",
+      "ticker": "MACRO",
+      "name": "상류 · 하이퍼스케일러 capex",
+      "title": "AI Infrastructure Investment 2026: $700B Hyperscaler Boom Analysis - Intellectia AI",
+      "link": "https://news.google.com/rss/articles/CBMidEFVX3lxTE9TSDVWLVY0N3RUREpPdVBqcHBRVlFtUXZ2ck9DVXhmaDBNZ0w1WWtRVGM4akhyeHd0bC1Iekd5WmNJS0tQOHJwZGltNjhWWHpxMUJPcTA2M2Q2RlZUUmJmR2ozUmhnZEZ6NHhud21UZnlITXZR?oc=5",
+      "published": "2026-07-13T08:22:16.000Z",
+      "source": "Intellectia AI",
+      "st": 3
+    },
+    {
+      "id": "bneck_l4_pkg",
+      "ticker": "MACRO",
+      "name": "L4 · 패키징 캐파",
+      "title": "Advanced Packaging Semiconductor Market to Reach US$ 46.98 - openPR.com",
+      "link": "https://news.google.com/rss/articles/CBMimAFBVV95cUxNeTJyYlZMd09jYzg4Rzc1ZTd6VGxybG5NWlFSd1JuOUZPLU15bXNBcjhwdGpDU3JtcWlINE03ZzlZUTZSb0E3R3l5VmtfbzVNenhnSFhrc3NyR2RpV0pfcGkyeFl2ZDVGYmtKb21OMmhjUXRkeGhreWY1Q3FNY0xFS3l4LTZHdmhCd3RWT09RUFg2V1RZQWRZRA?oc=5",
+      "published": "2026-07-13T07:23:22.000Z",
+      "source": "openPR.com",
+      "st": 3
+    },
+    {
+      "id": "twng",
+      "ticker": "089030",
+      "name": "테크윙",
+      "title": "테크윙 2분기 영업익 125억…전년比 96% '껑충' - 한국신용신문",
+      "link": "https://news.google.com/rss/articles/CBMiakFVX3lxTE9RZE84ekV0UjNKcGRFMVRuQUdjRW92UkxJWkZyNGpKRl9lMnhWc01zT3d0ZW41VGdvUUx6RUs5M3JyZ01sZHhrWjRBV3dsUEg4dkloNmF1YnNEZnROcW5ZcEo4WnAwWTN4dUE?oc=5",
+      "published": "2026-07-13T06:14:00.000Z",
+      "source": "한국신용신문",
+      "st": 3,
+      "m": 2,
+      "a": "테크윙 2분기 영업이익 125억 원, 전년 동기 대비 96% 급증 잠정 실적 발표",
+      "w": "HBM 테스트 장비 수요 본격화로 영업이익이 컨센서스 대비 큰 폭 상회한 어닝 서프라이즈로, 펀더멘털 관점에서 강한 호재.",
+      "mv": 2
+    },
+    {
+      "id": "twng",
+      "ticker": "089030",
+      "name": "테크윙",
+      "title": "HBM 병목 해결사 통했다…테크윙, 2분기 '깜짝 실적' - 경제타임스",
+      "link": "https://news.google.com/rss/articles/CBMiU0FVX3lxTE1IN2xMaEpZVjJfOUFiOWlxS3pXUVZrNlBiWkt0dXk0RzJ0UDNKNUU2dmp4NkhPRUgySVQ4S2tRUEpqcE1ZZjRkS2lMZDlFRXdPMlhV?oc=5",
+      "published": "2026-07-13T06:13:58.000Z",
+      "source": "경제타임스",
+      "st": 3,
+      "m": 2,
+      "a": "테크윙 2분기 HBM 핸들러 수요 호조로 깜짝 실적 달성",
+      "w": "HBM 병목 해소 핸들러 수요 증가가 실적으로 확인되어 HBM 장비 싸이클 수혜 지속 가능성을 뒷받침하는 강한 펀더멘털 호재.",
+      "mv": 2
+    },
+    {
+      "id": "macro_반도체_ai_과열_조정_1",
+      "ticker": "MACRO",
+      "name": "반도체 AI 과열 조정",
+      "ax": "chip",
+      "title": "“SK하이닉스 ADR 대박났다며”…월가가 바라본 ‘코스피 패닉셀’ [머니+] - 에너지경제신문",
+      "link": "https://news.google.com/rss/articles/CBMiW0FVX3lxTFA1V09xN1p6bmhNcF93azhVTGtwNFVPUEZ2ZXNaZkVnV2lRLTNXa0hZS0xFZUgxYlp2d0dBX29Mb2dDdTBTLXctUktUSnBPSFlMVjhSV0ZfSlE5OEE?oc=5",
+      "published": "2026-07-13T06:03:39.000Z",
+      "source": "에너지경제신문",
+      "st": 3
+    },
+    {
+      "id": "qcom",
+      "ticker": "QCOM",
+      "name": "Qualcomm",
+      "title": "Qualcomm retreats from small cells with eye on bigger 6G prize - Light Reading",
+      "link": "https://news.google.com/rss/articles/CBMimgFBVV95cUxNVDdJZWI1NloyWkJCcUdhYzA0bHIwNzk4b2ZKaVJoZV9JeWlhWTNTMzhrU2g4eFhfRzBrcDNQQmcwRjZfUzBYQlNXaEtBSFJ0bldhbHd6bFloc2tONHU2VW4yZzE3SW5rbUdKT2UyYkVsUWxSaHRZOEV3c3IxSERwdXd4QWVOZTBHSWFaek9VYlB0UzRzaFlRLXl3?oc=5",
+      "published": "2026-07-13T05:41:05.000Z",
+      "source": "Light Reading",
+      "st": 3,
+      "m": 2,
+      "a": "Qualcomm, 소형 셀 사업 철수 결정 및 6G 역량 집중 전략으로 선회",
+      "w": "소형 셀 사업 철수는 선택과 집중 전략으로, 6G 투자 기대를 높이는 방향이나 단기 매출 감소 우려도 병존하는 혼재 신호.",
+      "mv": 2
+    },
+    {
+      "id": "macro_반도체_ai_과열_조정_1",
+      "ticker": "MACRO",
+      "name": "반도체 AI 과열 조정",
+      "ax": "chip",
+      "title": "\"AI 파티 끝났나\"…월가가 본 SK하이닉스 13% 급락 이유 - 연합인포맥스",
+      "link": "https://news.google.com/rss/articles/CBMicEFVX3lxTE5BZ2NTYXlHTHRyUjZhYjFrWVhXblNfbE5PT1UzMWNxelFEallsMC1zQXplRldqQjNLQ29TRW1mZUcxV09EQk12WFV5a2ROVkFpdTR2cnFRSkFtTGNPem5YNWtacW9tQlVCVWItOHE3aEY?oc=5",
+      "published": "2026-07-13T05:15:00.000Z",
+      "source": "연합인포맥스",
+      "st": 3
+    },
+    {
+      "id": "bneck_l4_pkg",
+      "ticker": "MACRO",
+      "name": "L4 · 패키징 캐파",
+      "title": "TSMC Advanced Packaging Shortage Triggers Global Silicon Wafer and OSAT Reorganization - Technetbook",
+      "link": "https://news.google.com/rss/articles/CBMif0FVX3lxTFBSM1gxdUNjeU55dUI4LVZNd0E5a1lkLXdLbjZyRVc5Z0tRNHVoenFQeTJ6bU5DSnJaZmxCQmFIb1FKWjFySk5aTHFWZHdLOFdJX0xoTjlZb2pVR0REZU8xdmtsTElIYUR6MUJsQzlJckJaRlZ3TU1FOVhCSUxDems?oc=5",
+      "published": "2026-07-13T03:00:00.000Z",
+      "source": "Technetbook",
+      "st": 3
+    },
+    {
+      "id": "bneck_l4_pkg",
+      "ticker": "MACRO",
+      "name": "L4 · 패키징 캐파",
+      "title": "Weekly news roundup: TSMC widens AI chip lead as HBM and CoWoS bottlenecks reshape supply chains - digitimes",
+      "link": "https://news.google.com/rss/articles/CBMimgFBVV95cUxNVnNpX0ZlY0dCWnlUYlEyS1JpRUhIaTdkMWtJU1YySmZHRDBrMnVJVGVZc2FGa3FrYUJkUndUVG1RaU5IY3R1TkhDQlRUQnF5dXhnZUVYSW1nSnVpUG52cG1LZGlpcVRLNkI4TEdKcXdpb2JXU2dyWVh2NkY4eXo0NG5LZEh5SlZ4SEFmUDlwbnZWcUpkSkdkZk1n?oc=5",
+      "published": "2026-07-13T02:48:44.000Z",
+      "source": "digitimes",
+      "st": 2
+    },
+    {
+      "id": "macro_반도체_ai_과열_조정_1",
+      "ticker": "MACRO",
+      "name": "반도체 AI 과열 조정",
+      "ax": "chip",
+      "title": "SK하이닉스 실적전망 하향…코스피 과열론 불붙이나(종합) - 아시아경제",
+      "link": "https://news.google.com/rss/articles/CBMiYEFVX3lxTE9wQzlVZU00Um5BcF9rQ1BEeHNyenBTYVBDdWV2V0ViV3FVeC1BRmlDbTVnQlRMOHRIZi14Z08zZU0xQTNybFlnNkJGVmcyb0U2WFBHMm5kNTkyblkwSDUzZQ?oc=5",
+      "published": "2026-07-13T01:27:49.000Z",
+      "source": "아시아경제",
+      "st": 3
+    },
+    {
+      "id": "vicr",
+      "ticker": "VICR",
+      "name": "Vicor",
+      "title": "What's Behind a $211,680 CEO Sale at Vicor While AI Demand Drives 20% Revenue Growth? - The Motley Fool",
+      "link": "https://news.google.com/rss/articles/CBMi0AFBVV95cUxPMzgxZWFnbVBzVk5JZ3A0a0pReUxpTGdSa2pUc1ZVMFNnZnZfRHkweXI5SXMyRUo0ekNMdGtuaTdXUEpRcWNpZUdQbWh3UXM4T0FTYUFjRzg2V3pkNTBZLVFJbEZ4YkJJZld4SkxodzdjOVNpRGVSU0ZWeDFFVU9KYjRqejNZSm5BejBtQXhQV2Q0emJ3Y0RCaWhQbUxPYU9EbWs0YTVYTm5JdEJZZWsxRjE2N2h0UndSZXRKODZKWGMyS3lnNVZFakQwcmlwbnNp?oc=5",
+      "published": "2026-07-12T23:18:00.000Z",
+      "source": "The Motley Fool",
+      "st": 9,
+      "m": 1,
+      "a": "Vicor CEO, AI 매출 20% 성장 시기에 21만 달러 규모 자사주 매도 공시",
+      "w": "내부자 매도는 수급 부담 신호로 단기 센티먼트에 부정적이나, 실적 성장 추세 훼손 여부와는 별개로 해석 필요.",
+      "mv": 2
+    },
+    {
+      "id": "alab",
+      "ticker": "ALAB",
+      "name": "Astera Labs",
+      "title": "An Astera Labs Insider Sold at $458, but the 93% Revenue Growth Is the Real Story - Yahoo Finance",
+      "link": "https://news.google.com/rss/articles/CBMimAFBVV95cUxPSENHbS1zc0hveUJKU280QUM4VkN3eWZQVGZJeDlWTFJpVjhYS3pLamdRR21kWFFkTXJDb3lNYzF6bE85cENPRjlJWDdkWnlvbEgtLWM4NGVSNDBPN0hnU3diQ1k1R2V1Y0RjdURadjd6d1VsX0lKRGNkUzV3d0tmeS1kSGdINUw0QzZLTmp0WEZuOXdpMEQzNg?oc=5",
+      "published": "2026-07-12T22:10:34.000Z",
+      "source": "Yahoo Finance",
+      "st": 3,
+      "m": 1,
+      "a": "Astera Labs 내부자, 주당 458달러에 지분 매도 — 동사 매출 93% 성장 지속",
+      "w": "내부자 매도는 단기 수급 부담 요인이나 93% 매출 성장이라는 펀더멘털은 훼손되지 않아 혼재 신호로 해석.",
+      "mv": 2
+    },
     {
       "id": "bneck_l8_pwr",
       "ticker": "MACRO",
@@ -155,6 +507,48 @@
       "st": 3
     },
     {
+      "id": "cohr",
+      "ticker": "COHR",
+      "name": "Coherent",
+      "title": "Is Coherent (COHR) Undervalued As AI Demand And Backlog Strength Raise Expectations? - Yahoo Finance",
+      "link": "https://news.google.com/rss/articles/CBMiogFBVV95cUxPVjlnZHhFT1JFXzJXNmNuemV1UmF2T3NRWFpxUWxWRVdnWlRweFVZd25oMGFuQWFfNHN6MVJUbzQxbi1FSXp3eUhUZURwaEhQUkRvTk90Wm9UNEI2UFdlRmtYc0RFendvZVdTUlFnRmgxbkhDWXVZbmZkNEcwOGQyWXZKXzFxSHdzdGh3Y014MEhENTJrbjBPeUdMdFZ2S2tNeUE?oc=5",
+      "published": "2026-07-12T14:06:59.000Z",
+      "source": "Yahoo Finance",
+      "st": 3,
+      "m": 1,
+      "a": "Coherent, AI 수요 증가와 수주 잔고 강세를 근거로 저평가 가능성 분석 제기",
+      "w": "AI 수요 확대 및 백로그 강세는 실적 가시성을 높이는 긍정 관측이나, 확정 계약·가이던스 아닌 애널리스트 분석에 그침.",
+      "mv": 2
+    },
+    {
+      "id": "amd",
+      "ticker": "AMD",
+      "name": "AMD",
+      "title": "AMD Radeon Drivers Silently Add Multi Frame Generation “MFG 8x”, Ray Regeneration, and Neural Radiance Overrides, Hinting At A Bigger FSR Push - Wccftech",
+      "link": "https://news.google.com/rss/articles/CBMi3wFBVV95cUxQZktCNXA2NXAtUDN6QzE5SmtmQW11S2dnUEdNdUVxMDhqRFdWek9hUVl1LXMydlM2WlRXWW5fbXhFZl9yUktkVkw0RldQN3V0aUJqX1NOX1hjUjE5YzNJSnY1Z2k2OWJBSzlvVVRtb3B4ZC1EbFgxQ085Z0J0QWVTVVBnYWNQdFdvMXJ6OTVldnpkbk50VXA2RFF4VnVvSEo2ZlpETFEyMlVWaDI3anFiWW55Q0hqUXVNQWlNYkdWVHowZUJpZVN1NVI2QVEwNUNDRlpBR2gxb3hNV095MmNV0gHkAUFVX3lxTE8tZmo5OFpKSHZ3SnNWWEd2R1lPZ3B4aFAwMmpEM29GblUxbVhndlNDZVFZXzRhRXdodmZHNGxxamN2bWxzbWJIQlItRGxHUXFvcEZBVWFZWm1NaVhZT19pbC1GaWo5XzhrdTdTZHBDX3VDcUJZRXlxenhrT0JjMjlZOU9RanJsanNWVXhLZ0YzSXd1U0hjbVRxUFFUeUJuQmpXeGcxS0VXRURCT2RYUEhiN1hGczBGbl9KQ283ZXBiOUNIXzF2QXBjZDhveENpZnNHT3dCNXBuVW12bnk4Um5obC1VMw?oc=5",
+      "published": "2026-07-12T12:55:05.000Z",
+      "source": "Wccftech",
+      "st": 3,
+      "m": 1,
+      "a": "AMD Radeon 드라이버에 MFG 8x·Ray Regeneration·Neural Radiance Overrides 기능 조용히 추가, FSR 확장 가능성 시사",
+      "w": "소프트웨어 기능 선행 탑재는 차기 GPU 아키텍처·FSR 로드맵의 간접 신호이나 확정 제품 발표가 아닌 관측 수준이므로 펀더멘털 영향은 제한적.",
+      "mv": 2
+    },
+    {
+      "id": "besi",
+      "ticker": "BESI",
+      "name": "BE Semiconductor",
+      "title": "Q1 Semiconductor Manufacturing Earnings: Kulicke and Soffa (NASDAQ:KLIC) Earns Top Marks - StockStory",
+      "link": "https://news.google.com/rss/articles/CBMi2wFBVV95cUxQY3lzR1Z0U0lZNkFEdllqV0RLNjhKamtNVk44STh5YnBlZy1sTG5GQjFDRUtWaVh4UG45bXp5ZlZETmhVUmlGRmZIeGFSOGZyQ2dNMzV4RlpqYjFoRFYwVm9vcXNNM2EtSkQ1V1BnWHMyZ3dZZklFRFRwZGtOU2VRNW1ITUh5alk4ZVFFRERCT091TGVqQVU3S0FGZ0s3dHlZdmtZb0YwWHctRE1RLW01NXJaMmhqM0tnZnZwQ2dNVEgyTnVycmdUSDIxLW56RFl0S3ZuVnNKZ0ZIelk?oc=5",
+      "published": "2026-07-12T07:00:00.000Z",
+      "source": "StockStory",
+      "st": 3,
+      "m": 1,
+      "a": "경쟁사 KLIC Q1 실적 상위 평가 — BESI와 동일 세그먼트 어드밴스드 패키징 장비 비교 맥락 제공",
+      "w": "KLIC 호실적은 어드밴스드 패키징 장비 수요 회복의 참고 지표이나 BESI 직접 실적·수주가 아니므로 BESI 주가에는 간접·제한적 호재에 그침.",
+      "mv": 2
+    },
+    {
       "id": "macro_iran",
       "ticker": "MACRO",
       "name": "이란 호르무즈 해협",
@@ -173,6 +567,20 @@
       "published": "2026-07-11T23:42:06.000Z",
       "source": "서울신문",
       "st": 3
+    },
+    {
+      "id": "smci",
+      "ticker": "SMCI",
+      "name": "Supermicro",
+      "title": "Super Micro Computer (SMCI) Introduces DCBBS Blueprint for HPC - Yahoo Finance",
+      "link": "https://news.google.com/rss/articles/CBMiowFBVV95cUxONDlpU0pNT2E1WDYyWW03ZGpRRmJHY1dmeFp0NEdtWndwVlVQU0lSWHRWTjFfVHRkam5hdG5MaVJWV1ZpTkJTWlNZY2dvUVRnT0NFbHpaN0cwbFBJQVFTMlVDMDZVN3hvVkZ3ZUZnajRGQ2V0NGRDY0NuT2I1ZXBWZE1UWlVDNXhUcXhlNTlBOThEWlRDaW85bnNuZ1JFd3pqUjdJ?oc=5",
+      "published": "2026-07-11T21:12:02.000Z",
+      "source": "Yahoo Finance",
+      "st": 3,
+      "m": 1,
+      "a": "SMCI, HPC용 데이터센터 블록 빌딩 블루프린트(DCBBS) 아키텍처 공개",
+      "w": "HPC 고객 대상 솔루션 포트폴리오 확장 시도로 중기 수주 파이프라인에 긍정적이나 구체적 계약·출하 확정이 없는 단계라 영향은 관측 수준.",
+      "mv": 2
     },
     {
       "id": "vrt",
@@ -197,6 +605,20 @@
       "published": "2026-07-11T14:34:25.000Z",
       "source": "ad-hoc-news.de",
       "st": 3
+    },
+    {
+      "id": "cbrs",
+      "ticker": "CBRS",
+      "name": "Cerebras",
+      "title": "Cerebras Stock Sends Massive Expansion Signal at Paris Summit - Yahoo Finance",
+      "link": "https://news.google.com/rss/articles/CBMipAFBVV95cUxOZHBhQlAxYkNYbFFtM3hlX216T2tXQVAyVUtnSEhXdWZzU2libXMwZFZUdTkwV010djNTbGxrVGlGZ2VIdHpGZG1KYi1iOUdIY09tSTR4WGMtUEdPOTZSQnZHbkVtU1ZZbTNCSTNjSHFmMmswY2QtcktkSEhRem9kS2Y5cnA1WEhFVFdkdmVHVUJ0YzNiS0hmd3NibHlaN2M4MEhDOA?oc=5",
+      "published": "2026-07-11T13:15:01.000Z",
+      "source": "Yahoo Finance",
+      "st": 3,
+      "m": 1,
+      "a": "Cerebras, 파리 AI 서밋에서 대규모 사업 확장 신호 발신",
+      "w": "구체적 계약·고객 확보 내용이 기사에서 확인되지 않아 센티먼트 호재에 가깝고 펀더멘털 확정 전까지 영향은 제한적이라는 관측.",
+      "mv": 2
     },
     {
       "id": "lite",
@@ -272,16 +694,6 @@
       "st": 1
     },
     {
-      "id": "macro_반도체_수출통제_공급망_2",
-      "ticker": "MACRO",
-      "name": "반도체 수출통제·공급망",
-      "title": "SK Hynix raises $26.5b in record US listing amid AI chip boom - China Daily",
-      "link": "https://news.google.com/rss/articles/CBMifkFVX3lxTE14XzBNTnBxRjdCaGxHel83ZFFaZy1HYUpCNWUtWktVSk53YWMwaF9WaDhsMlE5QUQwcEl4dzF5QU5PaXNFdWdUVWJEV1NkenNfakFmcTJMMV93UDZqOFlzRUdZMjUyNUJQdkxNaUdaV3NFN3NaRnNsc3Q4SlBtZw?oc=5",
-      "published": "2026-07-11T01:26:29.000Z",
-      "source": "China Daily",
-      "st": 3
-    },
-    {
       "id": "macro_하이퍼스케일러_실적_ai_capex_0",
       "ticker": "MACRO",
       "name": "하이퍼스케일러 실적·AI Capex",
@@ -290,16 +702,6 @@
       "link": "https://news.google.com/rss/articles/CBMinwFBVV95cUxPSVNyZnR3Uzh6VWdkX1I2NncxT0hkWVQ0dUZGc2tNbzFyTjVhV1dKS3Rfakp4LVUxLURBX1NrVEJIVU9aRWdaMEtILUZPZDUyOTBVaFZLckJRSTRuY0I2YVBjMGFJS25kanZaR2tINGg5NkVUdUI1SnMzc2o3STZyY1hwWDZTdnh5LXVldERWeWFOQ3NpYjVxM3NUQ191bVE?oc=5",
       "published": "2026-07-11T00:13:00.000Z",
       "source": "Yahoo Finance",
-      "st": 3
-    },
-    {
-      "id": "macro_반도체_수출통제_공급망_2",
-      "ticker": "MACRO",
-      "name": "반도체 수출통제·공급망",
-      "title": "US eases export controls on advanced chips and drones for UAE in major policy shift - Crypto Briefing",
-      "link": "https://news.google.com/rss/articles/CBMibkFVX3lxTE12dXp0bFJVR2t1TFRMMWxsczg0MTFBTGRwOXctWVBUeXNlS21ydWktQ3dmZTdlUzYtSXNhZ3JzTVRqOWJGWkFPMG5yTnRGc2FQak1LcHJWbnEyaTRhYWlXTnBSR2NyRkhXaWhEU1Jn?oc=5",
-      "published": "2026-07-10T22:29:08.000Z",
-      "source": "Crypto Briefing",
       "st": 3
     },
     {
@@ -374,17 +776,6 @@
       "st": 3
     },
     {
-      "id": "macro_하이퍼스케일러_실적_ai_capex_0",
-      "ticker": "MACRO",
-      "name": "하이퍼스케일러 실적·AI Capex",
-      "ax": "capex",
-      "title": "Big Tech Doubles Down on AI Infrastructure - PYMNTS.com",
-      "link": "https://news.google.com/rss/articles/CBMiogFBVV95cUxNTWxRdjFyRWFRMlppNFNURl8xTkdTclBDcjZmN0FMMmdrZkFzZGRZSGQ0M19ESm9pRDV4VGUzUDFULXB5TlB0c1ZjSXpLZWlwM0dYekNsbU40dmRreU5qbExaZ1JVeFJrNlVPY3U4NWs1MjRZVWhXd2pVZTNGa1J1Yk81RkNmNERQVE8yMDV6V213YWwtS25MNW9yVnFPSWJ4TUE?oc=5",
-      "published": "2026-07-10T18:44:48.000Z",
-      "source": "PYMNTS.com",
-      "st": 3
-    },
-    {
       "id": "macro_중동_분쟁_유가_에너지_2",
       "ticker": "MACRO",
       "name": "중동 분쟁·유가·에너지",
@@ -406,6 +797,20 @@
       "w": "생산 능력 확충 투자라는 펀더멘털 사실이나, 단기 실적보다 중장기 공급망 확장 효과로 영향 강도는 완만.",
       "m": 2,
       "st": 3,
+      "mv": 2
+    },
+    {
+      "id": "mu",
+      "ticker": "MU",
+      "name": "마이크론",
+      "title": "SK Hynix Listing Closes Gap With Micron. The Korean Stock Is Still the Better Bet. - Barron's",
+      "link": "https://news.google.com/rss/articles/CBMif0FVX3lxTE9PMzAyLW5ESFE3dVE5LXBmWjBlNzd0TWk3S2lIU08xQ0JOTlZvZG1VTnNoeHAyZFlaRUxBNGhlLTBrZ2wzdFJyWm9JaTY0T29lNGhrNDlIRkFBdmtNRHNzTjRPYUs0ZTBjbFc5V0tmTGxCWXZ4SS1SRXRjdEpzTzA?oc=5",
+      "published": "2026-07-10T16:51:00.000Z",
+      "source": "Barron's",
+      "st": 3,
+      "m": 1,
+      "a": "Barron's, SK하이닉스 시총이 마이크론에 근접했으나 SK하이닉스 주식이 더 나은 베팅이라는 의견 제시",
+      "w": "애널리스트·미디어의 상대 종목 선호 의견으로 마이크론에는 단기 센티먼트 부정 요인이나 실적·가이던스 변화 없으므로 펀더멘털 영향은 없음.",
       "mv": 2
     },
     {
@@ -443,14 +848,14 @@
       "mv": 2
     },
     {
-      "id": "macro_반도체_수출통제_공급망_2",
+      "id": "bneck_l8_pwr",
       "ticker": "MACRO",
-      "name": "반도체 수출통제·공급망",
-      "title": "SK Hynix IPO: Everything You Need to Know - Investing.com",
-      "link": "https://news.google.com/rss/articles/CBMiogFBVV95cUxOTTZ1T0NBMFBBblJnWmRfM0xtdmlBa3k1NWxfN0kwRlRpOHh2dUtzSjd5ZnR6QnRTdDFIRjNONFJ6cl9lVE5aQThfR1AyTV9XVEtsQjBJZVFWRl9acndPZm9lYXhHeldaTXpDVEFJTzNTb3FFRldRY3VMaDhacUFUTXhGQ3BnN2labkJDTWtsTXBkUzZQZ2lFMVdreWUwTV9USUE?oc=5",
-      "published": "2026-07-10T14:23:24.000Z",
-      "source": "Investing.com",
-      "st": 3
+      "name": "L7·L8 · 전력 병목",
+      "title": "The AI data center boom isn't facing a bottleneck - Data Center Dynamics",
+      "link": "https://news.google.com/rss/articles/CBMinAFBVV95cUxQSXdhLU9pVjhkd1JYTnoyZjZweENBZFlSeWJaa1d4blZ5QzlJVkp6Wk1oLXNFTkpVMTJ4Qi1SQnViU2VXc2tmNklrSEdBN0pINEdYYWhIZ0JEcXQxa0t5ZnRpVFNpNDZxd21Rb1pxTlJGVzhGWU5vSHk5dVNOQzB4LW0zckFpY0ZaRnZjSWNTN2l3a2lpZkpJUVRuRjg?oc=5",
+      "published": "2026-07-10T15:03:05.000Z",
+      "source": "Data Center Dynamics",
+      "st": 2
     },
     {
       "id": "mrvl",
@@ -509,6 +914,20 @@
       "mv": 2
     },
     {
+      "id": "ddk",
+      "ticker": "353200",
+      "name": "대덕전자",
+      "title": "외국인, 하락장서 대덕전자·LG이노텍 더 샀다 - 한국경제",
+      "link": "https://news.google.com/rss/articles/CBMiWkFVX3lxTE9CdkstV3JMeGJtSlI0bS0zWW0zTnJMa292WHhVYnRTUmpXSHRhWTlWYlBIdGRyUW1aOVo4OU5XRjVRZDV2WEU5Qll4N24wRmFGS1ZmX3J0TUN1UQ?oc=5",
+      "published": "2026-07-10T09:14:37.000Z",
+      "source": "한국경제",
+      "st": 1,
+      "m": 1,
+      "a": "하락장 속 외국인 투자자, 대덕전자·LG이노텍 순매수 확대",
+      "w": "외국인 수급 유입은 단기 가격 지지 요인이나 펀더멘털 변화 없는 수급 이벤트로 장기 시그널 강도는 낮음.",
+      "mv": 2
+    },
+    {
       "id": "tsla",
       "ticker": "TSLA",
       "name": "테슬라",
@@ -537,16 +956,6 @@
       "mv": 2
     },
     {
-      "id": "bneck_l4_pkg",
-      "ticker": "MACRO",
-      "name": "L4 · 패키징 캐파",
-      "title": "World Semiconductor Grade Chemicals - Market Analysis, Forecast, Size, Trends and Insights - IndexBox",
-      "link": "https://news.google.com/rss/articles/CBMi5gFBVV95cUxNRUEtUWZFeS1iYmNXdmN5RmRYS0xLaVFZYTIyVktXNlY4SE9FX1FleHdfMnZpOVJCc3Q0M3dVMl80MkNOcV9CVjZaU0NtR3BCSEl1WnhpMTNSekRqYVZrYldDYkp3VVl6WV91ZHZadmh4cTJFUUtPNmVmdTFIQmhMLXNyVHVqU3ZkN2V1ZUpZTk90RGxEV0xEODRYejk4b2hha3dCSmhkVXNqR2hvQVV0bU1yck0tU291NkY3Z3FrWHg5WVp1TzJhandpQ25PZHBNZERKUUY0YXdKeEJqdE9LVTg1LURUUQ?oc=5",
-      "published": "2026-07-10T06:26:12.000Z",
-      "source": "IndexBox",
-      "st": 3
-    },
-    {
       "id": "cbrs",
       "ticker": "CBRS",
       "name": "Cerebras",
@@ -561,16 +970,6 @@
       "mv": 2
     },
     {
-      "id": "macro_반도체_수출통제_공급망_2",
-      "ticker": "MACRO",
-      "name": "반도체 수출통제·공급망",
-      "title": "SK hynix Achieves the Second Largest IPO After SpaceX - Businesskorea",
-      "link": "https://news.google.com/rss/articles/CBMidEFVX3lxTFBnVUNUWmpWODhyZk9PLTZZTTl6anRhQkRXcVp3RjlCVjRaUXU3ZFMtbUVSYl94NjZ1M1NOakxCVUY3WXhFeWRFLXBlaUo5MWplUy01VFZvYlY1YjB4QUpUWHRxLWI1VlhOMzlSM2tRbWJkS3Zv?oc=5",
-      "published": "2026-07-10T04:22:21.000Z",
-      "source": "Businesskorea",
-      "st": 3
-    },
-    {
       "id": "macro_tariff",
       "ticker": "MACRO",
       "name": "미국 관세 무역협상",
@@ -581,14 +980,18 @@
       "st": 1
     },
     {
-      "id": "bneck_l4_pkg",
-      "ticker": "MACRO",
-      "name": "L4 · 패키징 캐파",
-      "title": "World Cmp Materials for Semiconductor - Market Analysis, Forecast, Size, Trends and Insights - IndexBox",
-      "link": "https://news.google.com/rss/articles/CBMi2AFBVV95cUxOYmJUd3RlZUx6QmhibE9ocTNZRERhN0FnTHUwR29XVDFoTVpRU3RpdzAyQlNUUTA1bnBMOFpTS3ZOT0l6Y0JiOTViX2laUGFzb0Nqbnp2TXRCYmFWOGVnSVV3M0l6VFlwWWplZkticlQzYzdWMGVNVDdFSFRldUxCQlRjTUhKdDF4S0NKUzQzNWlBWTE3RXh2QngzOWZfbnFxbUIxSGx6QXRYcFVKcS1PcVR6blhBZUkwVnhOQmthUXJoNFNFaXlMaXNjUUxKNTRwd2N2WThWM2Y?oc=5",
-      "published": "2026-07-10T01:41:11.000Z",
-      "source": "IndexBox",
-      "st": 3
+      "id": "mu",
+      "ticker": "MU",
+      "name": "마이크론",
+      "title": "\"Samsung and SK should build more factories in the U.S.\" U.S. Commerce Secretary pressures firms to expand AI memory supply chain - 매일경제",
+      "link": "https://news.google.com/rss/articles/CBMiU0FVX3lxTE9jd01uTkRGeTU5Sndsa1oxZU14eGk0UHM3YTZyWjNkeWVYLWVoWTJuclpNVHJaT2dGSVgtdE5uRzNjUm9MTTdhY1BVMllkZmF5YUhF?oc=5",
+      "published": "2026-07-10T00:12:06.000Z",
+      "source": "매일경제",
+      "st": 1,
+      "m": 2,
+      "a": "미국 상무장관, 삼성·SK하이닉스에 미국 내 AI 메모리 공장 추가 건설 공식 압박",
+      "w": "미국 현지 메모리 공급망 확충 요구는 마이크론의 경쟁 환경 변화 변수이며, 실현 시 마이크론 상대적 수혜·한국 업체 비용 증가로 이어질 수 있다는 관측.",
+      "mv": 2
     },
     {
       "id": "ddk",
@@ -657,6 +1060,20 @@
       "mv": 2
     },
     {
+      "id": "sec",
+      "ticker": "005930",
+      "name": "삼성전자",
+      "title": "삼성전자 \"HBM·로직·실리콘포토닉스 묶는 2.xD 개발중\" - 아이뉴스24",
+      "link": "https://news.google.com/rss/articles/CBMiS0FVX3lxTE9zT3FZc3AxVWdadjNVSmZVZXhCWmY4QVVYd3VIRlBQdm1Ub0FVM2pjQnVSblg5WlR6XzlFR0NrU2ZFeE5hMEtURnBuaw?oc=5",
+      "published": "2026-07-09T22:45:00.000Z",
+      "source": "아이뉴스24",
+      "st": 3,
+      "m": 2,
+      "a": "삼성전자, HBM·로직·실리콘포토닉스를 통합하는 2.xD 패키징 기술 개발 중임을 공식 언급",
+      "w": "차세대 이종집적 패키징 기술 로드맵 공개는 HBM 경쟁력 강화 방향의 펀더멘털 호재이며 중장기 고객 확보 가능성을 높이는 시그널.",
+      "mv": 2
+    },
+    {
       "id": "twng",
       "ticker": "089030",
       "name": "테크윙",
@@ -699,6 +1116,20 @@
       "mv": 2
     },
     {
+      "id": "rmbs",
+      "ticker": "RMBS",
+      "name": "Rambus",
+      "title": "Rambus Enables Next-Gen AI and Data Center Platforms with DDR5 9600 Server RDIMM Chipset - HPCwire",
+      "link": "https://news.google.com/rss/articles/CBMixAFBVV95cUxQUHMyYnplRzdYYWljdjRQSGQwVFhLRGFxbnV6N3NGaGtJNlRMcHBKM3JCOVA2U0twMFdVRjVYaTFHYnRsRFFxXzRfbXZ2d0lMSnJaQ0tWZHFhYnlRV3hMZGx6bk1RYXZDZ0t3NjEwcVdBZ1ctX0xtZmZ0ZWFlQzRibWk4bXBNR3ljcVdXa1NPRE1vRmotc0MySzU5MVI5T1JKYkhTbm5tMDlEM0dmOGtxa01aajVsMTl6Y2lmcm4yM2ROQW4z?oc=5",
+      "published": "2026-07-09T19:36:15.000Z",
+      "source": "HPCwire",
+      "st": 3,
+      "m": 2,
+      "a": "Rambus, DDR5 9600 서버 RDIMM 칩셋 출시로 차세대 AI·데이터센터 플랫폼 지원 공식 발표",
+      "w": "고속 메모리 인터페이스 신제품 출시는 AI 서버 플랫폼 채택 확대의 펀더멘털 호재로 중기 라이선스·칩셋 매출 증가 가능성 시사.",
+      "mv": 2
+    },
+    {
       "id": "amd",
       "ticker": "AMD",
       "name": "AMD",
@@ -710,6 +1141,20 @@
       "w": "대형 AI 인프라 파트너십 확보는 중장기 AI 가속기·서버 수요 기반 강화 신호로 펀더멘털 호재이나 구체적 규모·조건 미공개로 강도 판단은 관측 수준.",
       "m": 2,
       "st": 3,
+      "mv": 2
+    },
+    {
+      "id": "sndk",
+      "ticker": "SNDK",
+      "name": "SanDisk",
+      "title": "SanDisk set for earnings upside as Wedbush lifts price target - Yahoo! Finance Canada",
+      "link": "https://news.google.com/rss/articles/CBMijAFBVV95cUxPc05RQUNQUWEzSW5QNVVZX2ZSVlRpSUdyQ1ljeTloOVhZWnNJWDMydllnOEpITUZMN3gzRGJGTXZoOHVPWi1qM1FWeXlxc3M0YzNwSTNsM0lueTlFWVNaLURYY2lXSkFDN19VM3FSZTF2cktlVXE4b090MHZBbkZ4cEIzN0xGMHB4TzJ2bA?oc=5",
+      "published": "2026-07-09T18:03:00.000Z",
+      "source": "Yahoo! Finance Canada",
+      "st": 3,
+      "m": 1,
+      "a": "Wedbush, SanDisk 실적 상향 가능성 언급하며 목표주가 상향",
+      "w": "애널리스트 목표가 상향은 단기 센티먼트·수급 호재이나 실적 확정 전 관측 수준.",
       "mv": 2
     },
     {
@@ -738,6 +1183,20 @@
       "w": "Coherent와 직접 연관성이 낮은 경쟁사 발표이나 포토닉스 수요 확대 확인으로 섹터 센티먼트에 소폭 긍정적 관측.",
       "m": 2,
       "st": 3,
+      "mv": 2
+    },
+    {
+      "id": "sndk",
+      "ticker": "SNDK",
+      "name": "SanDisk",
+      "title": "Sandisk to Report Fiscal Fourth Quarter and Fiscal Year 2026 Results on August 5, 2026; Announces Investor Day on August 13, 2026 - Business Wire",
+      "link": "https://news.google.com/rss/articles/CBMikAJBVV95cUxQbWdETEt3TFpqd3lvVU5sOHVBaXNMaThsOUJKdFJYYzdjSkRDajl3RXdwT3poNlEtWUY0bmpNdmV0QnM4V21DZjJpQ3lpZGZURnJucXZYZExjcFpYMHZpWTVOdm90bUFMR0E0bDhEak5Ga2Fudi1IVVRjUmRxbWZ1YWR6YTVpSVdkaEQ2bXRDVDZmbThVSTd4bnBRaW4taW1aWWd1SFBVNEh1QXpuSzhVTG84Q1Ytc1dxY3gyQlpaa2VhdkE5dmM0OERuUzM1MjUyaXdPSXhSalVzNTZSeG90WVBTeFhHaks1cXMtbURrTDlSZGhzUUFLVGpzUmJSckhfRUVULVc5M21SaFdueW5wUQ?oc=5",
+      "published": "2026-07-09T16:05:00.000Z",
+      "source": "Business Wire",
+      "st": 1,
+      "m": 1,
+      "a": "SanDisk, 2026년 8월 5일 FY4Q 실적 발표 및 8월 13일 인베스터데이 일정 공식 확정",
+      "w": "실적 발표·인베스터데이 일정 확정은 가이던스 공개 기대감을 높이는 이벤트 드라이버로 단기 수급 집중 촉매.",
       "mv": 2
     },
     {
@@ -783,20 +1242,6 @@
       "mv": 2
     },
     {
-      "id": "cbrs",
-      "ticker": "CBRS",
-      "name": "Cerebras",
-      "title": "Flex and Cerebras Expand Partnership to Scale American Manufacturing of Cerebras AI Supercomputers - PR Newswire",
-      "link": "https://news.google.com/rss/articles/CBMi6gFBVV95cUxNX0Zmek9QdTRFb1JLM0dyNGlreWRJMG1KT3hWYzJpbXhfX2JYN3dleWpfcWJKemhiX2h5NzJ2T0RVVW9OOVBiUEItMzBJYXlTcFBPdzJ4cWJOVElmZzBQcHB3b1hVaG9FMXJSSkRiSS11UVVWdGRrLXJ1eldsNmRlM3N2QUIwQTBOeVBpS2h5dWRfRjhLc1hGR3hXM0lwMlJqakFydWlJbU92T21LUWw3cExZMXoyZWpENjFQcFFKYzREa2NmOWZ2blo4Nm1XR2F4TWlUdDRuQm9nZ3RfU0R6bW5kT3hIUTJta1E?oc=5",
-      "published": "2026-07-09T13:05:00.000Z",
-      "source": "PR Newswire",
-      "a": "Flex와 Cerebras, 미국 내 AI 슈퍼컴퓨터 제조 확대를 위한 파트너십 확장 공식 발표",
-      "w": "미국 자국 생산 기반 확대 파트너십은 공급망 안정성 및 수주 가시성 제고로 중장기 펀더멘털 호재 관측.",
-      "m": 2,
-      "st": 1,
-      "mv": 2
-    },
-    {
       "id": "be",
       "ticker": "BE",
       "name": "Bloom Energy",
@@ -839,6 +1284,44 @@
       "mv": 2
     },
     {
+      "id": "pltr",
+      "ticker": "PLTR",
+      "name": "Palantir",
+      "title": "Palantir alleges 'unlawful' City Hall veto on Met Police contract - BBC",
+      "link": "https://news.google.com/rss/articles/CBMiWkFVX3lxTE9ULXh5eGxlM3dZTW9VczBNRDlSVEFhNjB5UmwzTS1sMVUzUWI4ZnM0ODJad0NyUkZHaEduamZaclgtSFRLNGtCZEJsSU12QnFVc0V1WWxZSUNMdw?oc=5",
+      "published": "2026-07-09T11:19:41.000Z",
+      "source": "BBC",
+      "st": 3,
+      "m": 2,
+      "a": "Palantir, 런던 메트로폴리탄 경찰 계약에 대한 시청의 거부권 행사를 '불법'이라며 법적 이의 제기",
+      "w": "공공부문 핵심 계약이 규제·정치 리스크로 지연될 수 있어 단기 수주 불확실성 증가로 펀더멘털에 부정적 요인.",
+      "mv": 2
+    },
+    {
+      "id": "be",
+      "ticker": "BE",
+      "name": "Bloom Energy",
+      "title": "Sam Koppelman on report questioning Bloom Energy's AI supply chain claims - CNBC",
+      "link": "https://news.google.com/rss/articles/CBMitgFBVV95cUxONDNjRXNBT0R6MmRfMXlaODBadmo5YjhyUnd0dDJzTDBBWEtGMzZRRXRIYlRLMFU3VTloczNzN0JNYmw2Y29hS1RIMEFwWWhUcEowQXV5ekdUQTJmNG1lbW84TTNuaHUxaEtIQ25ZSmZ5ajRoRFZ5QXVCdnZuMnRFZjBtZV90ZEdrd2c2X0JuZG9WOGpNcXlVc3A3V2tBVThhc1JZeUJwY2twX1F0ZXRxbG52VTdVUQ?oc=5",
+      "published": "2026-07-09T11:10:00.000Z",
+      "source": "CNBC",
+      "st": 3,
+      "m": 1,
+      "a": "Bloom Energy AI 공급망 관련 주장에 의문을 제기하는 보고서 대응, 경영진 CNBC 출연 해명",
+      "w": "AI 수요 관련 사업 신뢰도에 대한 외부 의혹 제기는 센티먼트 악재이며, 실체 확인 전까지 투자자 신뢰에 부정적 영향 가능성.",
+      "mv": 2
+    },
+    {
+      "id": "bneck_l8_pwr",
+      "ticker": "MACRO",
+      "name": "L7·L8 · 전력 병목",
+      "title": "What Is A Data Center And Why Are They Suddenly Everywhere? - Forbes",
+      "link": "https://news.google.com/rss/articles/CBMiekFVX3lxTE8wcENSV25ialptRXVqa3kyQkk0blJ1aDktS0hIR3ZtdElDZmlacUM2aEJKSTU4TjRFRklxOUwtOE5nZm1xcXRXa1Ixemx3WklsRXpBQlRlZVMzLTF6MlJZQW1Ca3Q5blowT0VydVlpUXNVVHZXcFpZVFln?oc=5",
+      "published": "2026-07-09T10:30:00.000Z",
+      "source": "Forbes",
+      "st": 3
+    },
+    {
       "id": "bneck_l8_pwr",
       "ticker": "MACRO",
       "name": "L7·L8 · 전력 병목",
@@ -873,16 +1356,6 @@
       "st": 3
     },
     {
-      "id": "bneck_l4_pkg",
-      "ticker": "MACRO",
-      "name": "L4 · 패키징 캐파",
-      "title": "Heterogeneous Integration Market to Reach USD 35.09 Billion - openPR.com",
-      "link": "https://news.google.com/rss/articles/CBMimwFBVV95cUxQYVFnMGNueFYyaVd6enl4NVRLUENiXzBMX3lEQy1DUVo0RnlMdXU4WVdoMmdLWVM3aDRaRjJYRjIyaG0wdm82THRyQVlpVW81dmN6Tm5MZ3JHRGdDOWl1Q1JiYm01cFUtUlB3OHdBdzVPbFh2Y2xZS194NU1SUmJzMnJWUzVab2lGSFdfa0o2R2xReV81cnJDYzl0RQ?oc=5",
-      "published": "2026-07-09T07:10:04.000Z",
-      "source": "openPR.com",
-      "st": 3
-    },
-    {
       "id": "asmpt",
       "ticker": "0522",
       "name": "ASMPT",
@@ -897,16 +1370,6 @@
       "mv": 2
     },
     {
-      "id": "bneck_l8_pwr",
-      "ticker": "MACRO",
-      "name": "L7·L8 · 전력 병목",
-      "title": "The century-old device quietly choking the world’s AI ambitions - Crypto Briefing",
-      "link": "https://news.google.com/rss/articles/CBMifEFVX3lxTFA1LXV6ZDEwVXdRVTlEZU5FalJWbEZPc2hEUXpTYkhuUmZpdUt6OGh2MnBBYk0weVdrN1dpU2ZTTEptdjJwQXhhUm1EQ0otM0lFS2xzeGRKQ25KNXBsZzRMMXRVLXpTNUZ1aUhPRTlYYld0QndEUGplbFdoZUI?oc=5",
-      "published": "2026-07-09T04:27:28.000Z",
-      "source": "Crypto Briefing",
-      "st": 3
-    },
-    {
       "id": "rmbs",
       "ticker": "RMBS",
       "name": "Rambus",
@@ -919,16 +1382,6 @@
       "m": 2,
       "st": 3,
       "mv": 2
-    },
-    {
-      "id": "bneck_l8_pwr",
-      "ticker": "MACRO",
-      "name": "L7·L8 · 전력 병목",
-      "title": "How the Data Center Boom Is Squeezing Oilfield Services Companies - The National Law Review",
-      "link": "https://news.google.com/rss/articles/CBMilgFBVV95cUxPRGkzS3cyUHg1RTRfUFhSb3VFcW13ZldHR2Q5WjZuQ0pnd0REQ1JkdUZUd09tQnlGbWxYYUNBVGZqcjFmS0ZjWnZmc2hwS1ZoSkdsTWJ4NGVIRXc3Z1J1eE5yQ3V5Y1NqUFh6MktWZVVGT1BNY3R0Y1ctanhZZUNOeFRrOWFfMjcyc3g1YnRFQ09nZG16Z3fSAZsBQVVfeXFMT0dzMTRXS015V0RlbjZWSGw4NnA3b0NGbEJPemJNM0E4bVpKUUtwN1ZFdmJOX0JvSEdTSk9NS2JBYUN5SnA2eGI2eXB0LXdiQmFoNmNYZHRGdTBQbzRSdGhET0dZWW01X1l6cVF4MGRqc0RPSDl2amNxR1gyLU8xS1FDeFNYYUdLX09SaGxrVHF4N25KVERJSzlTWVE?oc=5",
-      "published": "2026-07-08T21:01:25.000Z",
-      "source": "The National Law Review",
-      "st": 3
     },
     {
       "id": "rmbs",
@@ -956,6 +1409,20 @@
       "w": "26번 기사 동일 내용 반복 배포로 추가 펀더멘털 변화 없으나 노출 확대로 센티먼트 소폭 긍정.",
       "m": 2,
       "st": 3,
+      "mv": 2
+    },
+    {
+      "id": "amd",
+      "ticker": "AMD",
+      "name": "AMD",
+      "title": "AMD to Report Fiscal Second Quarter 2026 Financial Results - AMD",
+      "link": "https://news.google.com/rss/articles/CBMisAFBVV95cUxNQW1aMlA1a2pHY3drLUdlNGpaZWRMN1JMMnRqNjRidzMyd0Fvbk5uTENOYVFCTVRKa2NlZ04teEpDZmExcGdWTW5oUTJIbWtHMUJzZ0NmZ09MclBROWRRM3E5V3IzNXpNS0JhUlJSbU91MC1nUXVzSGJPZWt1X3hVSHpuTGlDZ0hSZkVzSE1xZGN1Tkk4dnNwNzBNRFNIM05aUVRHTWhfVDdzamdqeW5YRA?oc=5",
+      "published": "2026-07-08T20:15:00.000Z",
+      "source": "AMD",
+      "st": 3,
+      "m": 1,
+      "a": "AMD, 2026년 2분기 실적 발표 일정 공식 공지",
+      "w": "실적 발표 일정 확정은 이벤트 드라이버로 단기 옵션·수급 변동성 촉매이나 실적 내용 자체는 미확정.",
       "mv": 2
     },
     {
@@ -1029,20 +1496,6 @@
       "mv": 2
     },
     {
-      "id": "smci",
-      "ticker": "SMCI",
-      "name": "Supermicro",
-      "title": "Supermicro partners with Red Hat, Everpure to simplify edge AI deployments - Seeking Alpha",
-      "link": "https://news.google.com/rss/articles/CBMisAFBVV95cUxQelJJZVFXRzRYWGZtbWtWWFFmc3ctdUNLcnV1U0plZWxseGhuZW51c2Nlb05MSDBEeXpjVExQSEo0QkdFVHV1dUY4Z0ZNUVA3QTEzUGxZdUdyeXdGQnd4OVdzRzQyNXBTR0VSOERFNFpLNEliVnRnS2w1WjBSUzJuTEJ6RlZENUc4R19xZG5MYlZad094VnlQTUdWZDVkQmlUWEVyd3RmM3FITVVFUndncQ?oc=5",
-      "published": "2026-07-08T14:56:02.000Z",
-      "source": "Seeking Alpha",
-      "a": "SMCI, Red Hat·Everpure와 협력해 쿠버네티스 기반 엣지 AI 어플라이언스 출시",
-      "w": "신규 파트너십 기반 제품 출시로 엣지 AI 시장 공략 확대라는 관측이나 매출 기여 규모는 미확인.",
-      "m": 2,
-      "st": 3,
-      "mv": 2
-    },
-    {
       "id": "bneck_l6_opt",
       "ticker": "MACRO",
       "name": "L6 · 옵티컬 리드타임",
@@ -1053,17 +1506,17 @@
       "st": 3
     },
     {
-      "id": "vrt",
-      "ticker": "VRT",
-      "name": "Vertiv",
-      "title": "Vertiv Expands in Malaysia to Boost AI Infrastructure: What's Ahead? - Yahoo Finance",
-      "link": "https://news.google.com/rss/articles/CBMinAFBVV95cUxOU0JQYm1oenFzNlNHYl90N1NJZGZ4TFppUTFBSXJFV1VIY01pSVgxMGpPN2IzMTFYUzJfYWpqOGdvLWpxTlBfald5MGVZOXNaUV9TV2dHUXVmQVBLajlGRGxFbjJoV2Joc0hmQlpwLXItb3g5eVpXQXRQOGtFYkhVWENXLU5NMlVrTUNzenFLVlF4V3NURzV5TGNqQzc?oc=5",
-      "published": "2026-07-08T14:34:00.000Z",
-      "source": "Yahoo Finance",
-      "a": "Vertiv, 말레이시아 사업 확장 통해 AI 인프라 공급 역량 강화 계획 공개",
-      "w": "신흥 시장 생산·공급 거점 다각화로 중장기 수주 펀더멘털에 소폭 긍정적이라는 관측.",
-      "m": 2,
+      "id": "cohr",
+      "ticker": "COHR",
+      "name": "Coherent",
+      "title": "Coherent Invests $50 Million To Expand Semiconductor Manufacturing Facility In Texas - megaproject.com",
+      "link": "https://news.google.com/rss/articles/CBMivAFBVV95cUxOMG1UaUU4N3loLWl4NDVPX1J1TFlyajM0VGlOVy02aG5WQm13TmlHbkNOR0pXZ21UbF9wYkdqMk5BODVCQ21ENnp3dWtCX25hT2pyU3hsRXpIYXdBUC0ySl8yLTNiTzN3NWNfNXJOdmdFVE5Ob0tKYmNyampvUVg2TEVmSmJQTzloc3lUdGVoSVJSaVFRWm91TUpkMWU2VC1EZTZjOTVmRjhhaE50TmpMblBjODlQajFzMmdXZQ?oc=5",
+      "published": "2026-07-08T09:44:30.000Z",
+      "source": "megaproject.com",
       "st": 3,
+      "m": 2,
+      "a": "Coherent, 텍사스 반도체 제조 시설에 5,000만 달러 증설 투자 확정",
+      "w": "생산능력 확대 투자 확정은 중기 매출 성장 기반 구축의 펀더멘털 호재로 AI·데이터센터 광부품 공급 확대 기대.",
       "mv": 2
     },
     {
@@ -1123,28 +1576,18 @@
       "mv": 2
     },
     {
-      "id": "ddk",
-      "ticker": "353200",
-      "name": "대덕전자",
-      "title": "GDDR7·SOCAMM·FC-BGA∙∙∙대덕전자, '3대 성장' 시동 - 리드경제",
-      "link": "https://news.google.com/rss/articles/CBMib0FVX3lxTE9veWdabXJtOFlKcTZaZXo3VWtaSEpVek9WaFg4S1kzQUJDNTUyS3pOLWtJTjZuMDc2dmJZQUlrTWNxSFVzeHVSbUdWNTAtVmdjWElqVUcyOWg5aFFXUnNQNUZTbTJhdU0tLUR3bGktMA?oc=5",
-      "published": "2026-07-08T01:10:05.000Z",
-      "source": "리드경제",
-      "a": "대덕전자, GDDR7·SOCAMM·FC-BGA 3대 성장 제품군 사업 본격화 공개",
-      "w": "AI·메모리 관련 고부가 기판 제품 다각화로 중장기 매출 펀더멘털에 긍정적이라는 관측.",
+      "id": "sec",
+      "ticker": "005930",
+      "name": "삼성전자",
+      "title": "HBM 다음은 AI인프라...삼성전자, 엔비디아 가속기 탑재 '기업용 SSD' 양산 - 머니투데이 - 머니투데이",
+      "link": "https://news.google.com/rss/articles/CBMibEFVX3lxTE05NGYxTEduQzhKbUQ2ZFMwQ0dmNDExcmlNREtfV1RkenhmQTdXOTRrakRfSVhRZGtHTkJIRFI1YWZRVldmVWFMTFZSN1JlMlMtUFVHdkZJSDhwMC16QUZwNEE5YjExMEtuUTZwa9IBckFVX3lxTE1ScHhKMkxrYWtTU0paaEoyXzlxZDBna0M0cEFiZUlTTDR5TjVQVnFLZkJWMmJwUl9hN3cwZzF3UGo1aFRENlZCcVJwWnAwUkg4VGtreDRvSF9sSWdwN0dqalhTTUlrSEdyMWFaRjlHZHl3dw?oc=5",
+      "published": "2026-07-08T00:14:47.000Z",
+      "source": "머니투데이",
+      "st": 1,
       "m": 2,
-      "st": 3,
+      "a": "삼성전자, 엔비디아 가속기 탑재 기업용 SSD 양산 개시 — HBM 이후 AI 인프라 제품 라인 확장",
+      "w": "엔비디아 생태계 내 AI SSD 양산은 신규 고객·매출처 확보로 중기 펀더멘털 호재이며 AI 인프라 공급망 내 지위 강화 시그널.",
       "mv": 2
-    },
-    {
-      "id": "macro_반도체_수출통제_공급망_2",
-      "ticker": "MACRO",
-      "name": "반도체 수출통제·공급망",
-      "title": "Semiconductor Peak Fears Spread Amid AI Rally; Wall Street Urges Shift to Low-Volatility Quality Stocks - finance.biggo.com",
-      "link": "https://news.google.com/rss/articles/CBMidkFVX3lxTFBXXzdwbWZuV2RFejZwSGVOeEFuQ0p2Wk1kVmpsNkRoai15VmZOTnE3Q0lMSDlOZTRoVlBxZldfQnBwc1NuRERkMGY2bmZldG5NM1RFUFFLdElGb1lxeHJmV1hQZm1pNnR4NzBmdnZqNk8xMnVwcUE?oc=5",
-      "published": "2026-07-08T00:07:00.000Z",
-      "source": "finance.biggo.com",
-      "st": 3
     },
     {
       "id": "mu",
@@ -1161,6 +1604,20 @@
       "mv": 2
     },
     {
+      "id": "pltr",
+      "ticker": "PLTR",
+      "name": "Palantir",
+      "title": "Palantir Has a Hand in NIH’s Most Ambitious Health Initiative - Mother Jones",
+      "link": "https://news.google.com/rss/articles/CBMisgFBVV95cUxNaXZzZHZuaDVQNlpSYm93MFNRNVF6UF8xSHVuN0dmY1E0dFZRd25kSTNoQ0JHMXJWUlNHNW01QW8xSWNMMC1NbE93TG5aM0JQdEFlemp6aWRocl93NVRIbC0wSHk4OXFHcVVCZEdDNWRaTTU5NnZZS0RsUkQ0dm04NGNacEVfam91N0t4ZTNqRXJVLTgyNHRNSVdsWmREWXNqdzltMHpFdmlSLVkzQ0dubk53?oc=5",
+      "published": "2026-07-07T20:37:46.000Z",
+      "source": "Mother Jones",
+      "st": 3,
+      "m": 2,
+      "a": "Palantir, NIH 최대 규모 건강 이니셔티브 참여 사실 보도",
+      "w": "대형 연방 의료 데이터 프로젝트 수주는 공공부문 매출 파이프라인 확대의 펀더멘털 호재로 장기 계약 가시성 제고.",
+      "mv": 2
+    },
+    {
       "id": "ceg",
       "ticker": "CEG",
       "name": "Constellation",
@@ -1170,34 +1627,6 @@
       "source": "ESG Dive",
       "a": "월마트-Constellation Energy 일리노이 원전 PPA 체결 보도 반복 게재",
       "w": "15번 기사와 동일 사안으로 추가 정보 없는 중복 노이즈.",
-      "m": 2,
-      "st": 3,
-      "mv": 2
-    },
-    {
-      "id": "pltr",
-      "ticker": "PLTR",
-      "name": "Palantir",
-      "title": "Palantir Expands AI Deal With Mexico's GNP Seguros - Yahoo Finance",
-      "link": "https://news.google.com/rss/articles/CBMinAFBVV95cUxQV0lQV1Z6dGlxNXhZM2V4QklrVGsxNDlpd2ZyNGhUQjhHX2NtVm5VaWhGX2xiYldwQWpNb3BQWEFyTG1zZjVHSjhpU3VIMmg0VkMxV2ttRjlkdTAzZHJPc19YYWd2UWE5ck80OFVXUmpqV093NGM5cjE4aDJjb25Pd0l5NDJYN0NiemV0TTRyNS1JbnphRFpxX1ViM2o?oc=5",
-      "published": "2026-07-07T18:45:19.000Z",
-      "source": "Yahoo Finance",
-      "a": "Palantir, 멕시코 보험사 GNP Seguros와 AI 계약 확대 체결",
-      "w": "신규 글로벌 상업 계약 확대로 ARR 성장 기대감 강화, 펀더멘털에 소폭 긍정적.",
-      "m": 2,
-      "st": 3,
-      "mv": 2
-    },
-    {
-      "id": "pltr",
-      "ticker": "PLTR",
-      "name": "Palantir",
-      "title": "Palantir Stock: The Big Deal Driving Shares Higher - Barron's",
-      "link": "https://news.google.com/rss/articles/CBMigAFBVV95cUxOdjNpMVNncDM5U3ZjdExQSUt1QjExYjhlT3JXdHdPVElBOUxWRTAwdHo5RFZ0YzljeFJ4QUI3NXRQRW9lZkI3Z1FvdU9BR1hRRGxqMENIYTN1cXBoX2p3UDY5cU56RU5uNGtYRnl1ck1HQl9ScV8wMVNkLUZXVEtVWQ?oc=5",
-      "published": "2026-07-07T18:40:00.000Z",
-      "source": "Barron's",
-      "a": "Palantir 주가 상승을 견인한 대형 계약 내용 분석 보도",
-      "w": "계약 구체화 확인으로 펀더멘털 기대감 지속이나 이미 주가에 상당 부분 반영됐을 가능성.",
       "m": 2,
       "st": 3,
       "mv": 2
@@ -1259,6 +1688,20 @@
       "mv": 2
     },
     {
+      "id": "besi",
+      "ticker": "BESI",
+      "name": "BE Semiconductor",
+      "title": "China’s semiconductor industry is racing to catch the West’s - The Economist",
+      "link": "https://news.google.com/rss/articles/CBMipwFBVV95cUxPRlFMNlpVWWlLMGZHcGc4Z0s1WUJkbXhGN1VuSklRbEFrMjFZVTZ5QWJwZ1ROTjJWRnhwUGtadUUyZmdRUk4zZld6RGM5OXFrUkk2MEFKeXVOWXNBdFhieUc3WFA1NWVWSE1mSVZfSkhCR2E4N21FRWVLQ0Jpb2QtN1pvaUw1cVRoMXZhOXdmVHB1RDdEYjBsS3Qybl9PM0VjZ2xrQ29wSQ?oc=5",
+      "published": "2026-07-07T16:18:19.000Z",
+      "source": "The Economist",
+      "st": 3,
+      "m": 1,
+      "a": "중국 반도체 산업의 서방 추격 가속화 현황 분석 — BESI 경쟁 환경 변화 맥락",
+      "w": "중국 로컬 장비 자급화 가속은 BESI의 중국향 수주 중장기 리스크 요인이나 현시점 확정 수주 변화는 없어 관측 수준.",
+      "mv": 2
+    },
+    {
       "id": "sndk",
       "ticker": "SNDK",
       "name": "SanDisk",
@@ -1315,34 +1758,6 @@
       "mv": 2
     },
     {
-      "id": "sec",
-      "ticker": "005930",
-      "name": "삼성전자",
-      "title": "삼성전자, 반도체만 90조 벌었다…“HBM 두 배 오를 것” - v.daum.net",
-      "link": "https://news.google.com/rss/articles/CBMiRkFVX3lxTE1xNHBrSmtrVDh1cHFwWm0xSUpWUzVESzQwb01BQVk0dkVqX3NvTVRPN29VYU1kUFFOclNqLUluN2QtZWF5REE?oc=5",
-      "published": "2026-07-07T05:28:34.000Z",
-      "source": "v.daum.net",
-      "a": "삼성전자 반도체 부문 연 90조 원 수익 및 HBM 가격 2배 상승 전망 보도",
-      "w": "HBM 가격 상승 전망은 메모리 ASP 개선 기대로 펀더멘털에 긍정적이나 전망치 확정 여부 확인 필요.",
-      "m": 1,
-      "st": 3,
-      "mv": 2
-    },
-    {
-      "id": "sec",
-      "ticker": "005930",
-      "name": "삼성전자",
-      "title": "삼성전자, 반도체만 90조 벌었다…“HBM 두 배 오를 것” - v.daum.net",
-      "link": "https://news.google.com/rss/articles/CBMiT0FVX3lxTE9KMUE0SHE3TllvYjB3aEJqR0FzX3k4QXEyMzYzY1lEaU04dDVPZ1lTMWNVcnFHdlFXcHpHbHZqWF90N1VnOEVkZ2FETE1DdHc?oc=5",
-      "published": "2026-07-07T05:28:34.000Z",
-      "source": "v.daum.net",
-      "st": 3,
-      "m": 2,
-      "a": "삼성전자 반도체 부문 상반기 영업이익 약 90조 원 달성, HBM 가격 두 배 상승 전망 제기",
-      "w": "HBM 가격 급등 전망은 삼성전자 메모리 수익성 개선 기대를 높이는 긍정적 관측이나, 가격 확정 거래가 아닌 전망 수준임을 유의해야 함.",
-      "mv": 2
-    },
-    {
       "id": "besi",
       "ticker": "BESI",
       "name": "BE Semiconductor",
@@ -1357,20 +1772,6 @@
       "mv": 2
     },
     {
-      "id": "rmbs",
-      "ticker": "RMBS",
-      "name": "Rambus",
-      "title": "Rambus lines up July 27 call for Q2 FY2026 results - Stock Titan",
-      "link": "https://news.google.com/rss/articles/CBMiqAFBVV95cUxOOXpZNTM4OF85Z3MwS3ZBSGNBZWxyXzhIaUQxemgycU1vaGVRNWp0XzNaYUZNOHVITHg3OTBfRkdVWXJZZkN1Qm0xbnpPZXdIZjBfYlVHMl9hVzZvMWV0UE5HaXA0bzVrYXdUSTh2aG9tT0tGbktKVktkbVFpX0RaSXJ6dTJldmowYTlxeC1MVkltN2JwQ2VnOHRzcFlWNHJ4WGdCUzR6Mk4?oc=5",
-      "published": "2026-07-06T20:05:00.000Z",
-      "source": "Stock Titan",
-      "a": "Rambus, 2026년 2분기 실적 발표 컨퍼런스콜 7월 27일로 일정 확정",
-      "w": "실적 발표 일정 공지는 이벤트 예고로 중립적이며 수치 공개 전까지 주가 영향 제한적.",
-      "m": 1,
-      "st": 1,
-      "mv": 2
-    },
-    {
       "id": "ceg",
       "ticker": "CEG",
       "name": "Constellation",
@@ -1380,34 +1781,6 @@
       "source": "Power Engineering",
       "a": "Constellation Energy, 뉴욕주 원전 2기 수명 연장 허가 신청 제출",
       "w": "원전 수명 연장 신청은 장기 발전 용량 확보 관련 펀더멘털 호재 신호이나 규제 승인 여부 미확정.",
-      "m": 2,
-      "st": 3,
-      "mv": 2
-    },
-    {
-      "id": "amd",
-      "ticker": "AMD",
-      "name": "AMD",
-      "title": "AMD Stock Rises as Goldman Sees Big Earnings Coming - Barron's",
-      "link": "https://news.google.com/rss/articles/CBMihgFBVV95cUxNVTRlRkthTlU3S1ZpSHpRdW41REc4OWZvbHBjNUgxNUxVMjBlS0xCd3dPaVlqTmhsOEM4NWpQTW9hclE4V1JqU0o3RnZBWjd2T0xfMl9CQ1BERWlldGF5TmRMbm9pZlNzb0pwMXZUdkJwblFMTkJ5WEVvVUVPaWt6R3pXcUVWdw?oc=5",
-      "published": "2026-07-06T19:01:00.000Z",
-      "source": "Barron's",
-      "a": "Goldman Sachs, AMD 실적 대폭 증가 전망 제시로 주가 상승",
-      "w": "대형 IB의 실적 상향 전망은 컨센서스 상향 기대감으로 단기 센티먼트에 긍정적, 펀더멘털 확인 필요.",
-      "m": 1,
-      "st": 3,
-      "mv": 2
-    },
-    {
-      "id": "amd",
-      "ticker": "AMD",
-      "name": "AMD",
-      "title": "AMD launches $3,999 Ryzen AI Halo PC, limited to one US retailer - VideoCardz.com",
-      "link": "https://news.google.com/rss/articles/CBMikwFBVV95cUxNWENRSlp0X1MtV1lVR1liRTNkVHVFdmxtd0kxbVNpYVphakpUd1hHUXJJd1kzd25TdVVtNFptUkZHQXNVT0Zua19kWkdNd3FWd1Z1eFV4UU1oVUpYclFjclNBZmIxRGZsZmZvWUljQW9CQW1vVnhoWEZBQkJWLTBBWWMyV0JpRU11MklTSVdWMFo1Smc?oc=5",
-      "published": "2026-07-06T17:17:00.000Z",
-      "source": "VideoCardz.com",
-      "a": "AMD, 3,999달러 Ryzen AI Halo PC를 미국 단일 리테일러를 통해 공식 출시",
-      "w": "AI PC 라인업의 실제 출시·판매 개시는 소비자 AI PC 시장 진입 확인이나, 고가·단일 채널 한정으로 초기 매출 기여 규모는 제한적이라는 관측.",
       "m": 2,
       "st": 3,
       "mv": 2
@@ -1433,20 +1806,6 @@
       "a": "Bank of America, Astera Labs에 대해 Street 최고 수준의 목표가 제시",
       "w": "업계 최고 목표가 상향은 단기 주가 상승 촉매로 작용하는 수급·센티먼트 이벤트이며, 펀더멘털 확정 사실 변화는 없음.",
       "m": 1,
-      "st": 3,
-      "mv": 2
-    },
-    {
-      "id": "amd",
-      "ticker": "AMD",
-      "name": "AMD",
-      "title": "AMD Ryzen™ AI Halo Now Available at Micro Center - AMD",
-      "link": "https://news.google.com/rss/articles/CBMijwFBVV95cUxNQnlWNWlQRmVUYUctemZzNDJYQ1hROTFsZ1VlZy1OMEdLMFR0bndEeVl5YnNxdjdwUFppNGhTMkI5THlkOHpjOWxtbEN1bTlMTmFnV0dHMU1DbFd4T2VIY0ZoUEJxaEFXb0ZuX3hNZEdMMVpfN0c0cXFZTzloUHk1WjlmQWM5dHpiM2hCbko0UQ?oc=5",
-      "published": "2026-07-06T14:13:00.000Z",
-      "source": "AMD",
-      "a": "AMD Ryzen AI Halo 프로세서, Micro Center 오프라인 채널 판매 개시",
-      "w": "소매 채널 출시는 AI PC 매출 가시화 첫 단계로 소폭 펀더멘털 호재이나, 대형 하이퍼스케일러 수주 대비 매출 기여 규모 제한적 관측.",
-      "m": 2,
       "st": 3,
       "mv": 2
     },
@@ -1507,20 +1866,6 @@
       "mv": 2
     },
     {
-      "id": "besi",
-      "ticker": "BESI",
-      "name": "BE Semiconductor",
-      "title": "Besi Shares Tumble Amid Fears of Uptake Delay of New Chip-Stacking Technology - WSJ",
-      "link": "https://news.google.com/rss/articles/CBMisAFBVV95cUxPenlJX2czQ3B0Vnh1eGY2ZmdOajNLVTVZTGticEl2STJ6c3htb3dLUkRfYWUyU2lLSkR0dmNsTEtNWWJTUUt2Y2M5dVQ4QUNnbWtOdGlZTVhCZHRNLTNQeEZISEtZOFRvMC1ORTQzR2paRURYUkM2dkFKRUV5Y2VrVUpsbTY2TnNLV2dzMDlTMG1rT3ZGZE85SEU1Z19GN01WYzdlUk5UTURlaU4yM0lLcQ?oc=5",
-      "published": "2026-07-06T11:53:00.000Z",
-      "source": "WSJ",
-      "a": "BESI, 신규 칩 스태킹 기술 채택 지연 우려로 주가 급락",
-      "w": "핵심 신기술 수요 지연이 매출 가시성 훼손 우려를 야기, 단기 펀더멘털에 명확한 부정적 촉매.",
-      "m": 2,
-      "st": 1,
-      "mv": 2
-    },
-    {
       "id": "mu",
       "ticker": "MU",
       "name": "마이크론",
@@ -1545,20 +1890,6 @@
       "a": "BlackRock의 AI 핵심 30개 종목 포트폴리오에 Astera Labs 포함 보도",
       "w": "대형 기관의 AI 핵심 바스켓 편입 확인으로 수급·센티먼트에 소폭 긍정적이나 펀더멘털 변화 없음.",
       "m": 1,
-      "st": 3,
-      "mv": 2
-    },
-    {
-      "id": "ceg",
-      "ticker": "CEG",
-      "name": "Constellation",
-      "title": "Constellation Energy (CEG) Applies for License Renewals for 2 Plants - Yahoo Finance",
-      "link": "https://news.google.com/rss/articles/CBMingFBVV95cUxQam5rT0R3UkNSRmU2V21TbTFheHVERmhDcElvdEVXUFY4N2xFejlzTDBQOVVOM2JtVC1KZlRKdU5EQ2dES2x2ZFRjeWtWLWJhUDNHNEpjQXBULXJLZFZHY2xFVUo1VWtQc2hvcUdwQ2dPWFdlaUl1c0EyMVBhNDIwUVNmaElvQ2ZneVhjamplTFRFRk5wTVF2U3ZJUVcyUQ?oc=5",
-      "published": "2026-07-06T00:17:00.000Z",
-      "source": "Yahoo Finance",
-      "a": "Constellation Energy, 원전 2기 운영 허가 갱신 신청—장기 전력 공급 기반 확보 추진",
-      "w": "인허가 갱신은 장기 발전 용량 유지의 펀더멘털 호재이나, 승인까지 수년 소요 예상으로 단기 재무 영향은 제한적 관측.",
-      "m": 2,
       "st": 3,
       "mv": 2
     },
@@ -1672,34 +2003,6 @@
       "m": 2,
       "a": "DOE, 7월 4일 원자로 인허가 마감 기한 설정 — 핵 관련주 주가 영향 분석",
       "w": "DOE의 구체적 원자로 인허가 마감 기한은 SMR 섹터 전반의 규제 진행 속도에 긍정적 시그널이나, Oklo 등 개별 수주 확정은 아닌 수준.",
-      "mv": 2
-    },
-    {
-      "id": "twng",
-      "ticker": "089030",
-      "name": "테크윙",
-      "title": "테크윙 투자분석 2026. 06. 30 - 주달",
-      "link": "https://news.google.com/rss/articles/CBMic0FVX3lxTE8ta1VMYy14VWxTaWxJZGIyMGxWSy1fX1RXR2dSSnFTc2Rvb08zRUVzRUFXVlRXNFJqZDlPV0VRaE9FenJ5ZnZrV0pHdTFTcWRKMlVnMDZpQkllbGlmdmJJZWdPZ29yZWpGd2VWci1LNzJPZG8?oc=5",
-      "published": "2026-06-30T07:25:18.000Z",
-      "source": "주달",
-      "st": 3,
-      "m": 1,
-      "a": "테크윙 투자 분석 리포트 발간 — 2026년 6월 30일 기준",
-      "w": "분석 리포트 발간 자체로는 내용 확인 불가하며, 목표가·투자의견 변경 등 구체적 리비전 여부 불명확해 애매한 수준에 그침.",
-      "mv": 2
-    },
-    {
-      "id": "twng",
-      "ticker": "089030",
-      "name": "테크윙",
-      "title": "[오늘의 IR] LG화학ㆍ테크윙ㆍ파마리서치 등 - 이투데이",
-      "link": "https://news.google.com/rss/articles/CBMiVEFVX3lxTE9tSXpxYlNiNmU1U0ltOG5OUkMyLVdLajFaSFNQaUVRTEoyUUU5UUlLLVdteVh1cmFmNkw4QTZOUGljQ09PNUZ5UTlmVHJXY3NIVm9mRA?oc=5",
-      "published": "2026-06-28T22:08:00.000Z",
-      "source": "이투데이",
-      "st": 3,
-      "m": 1,
-      "a": "테크윙 등 기업의 IR 일정 및 주요 내용 안내",
-      "w": "IR 일정 공지 수준으로, 구체적 수주·실적·가이던스 변경 내용 확인 전까지 펀더멘털 영향 판단 불가하며 현 단계는 중립적 노출 이벤트.",
       "mv": 2
     }
   ]
