@@ -2997,6 +2997,9 @@ window.MARKET=(function(){
    var dg=rs[0],nw=rs[1],CH=((rs[2]||{}).series)||{};
    // 평단(주당 매입가) = holdings.json avg{} — 자산현황 xlsx 주간 동기화(sync-holdings.mjs). 보유 종목만 존재, 미보유는 선 없음.
    var AVG=((rs[3]||{}).avg)||{};
+   // 종목 순서 = holdings.json detail[].w(보유 비중) 내림차순. 미보유(비중 없음)는 원래 순서 유지(안정 정렬). digest 재생성돼도 순서 고정.
+   var WMAP={};(((rs[3]||{}).detail)||[]).forEach(function(d){var t=String(d.ticker||'').toUpperCase();if(t&&t!=='—')WMAP[t]=Number(d.w)||0;});
+   function byHeld(items){return (items||[]).map(function(it,i){return{it:it,i:i};}).sort(function(a,b){var wa=WMAP[String(a.it.tk||'').toUpperCase()]||0,wb=WMAP[String(b.it.tk||'').toUpperCase()]||0;return (wb-wa)||(a.i-b.i);}).map(function(o){return o.it;});}
    var KM={'005930':'sec','009150':'sem','353200':'ddk','089030':'twng'};
    function cK(t){t=String(t||'');return KM[t]||t.toLowerCase();}
    function cCol(t){var s=CH[cK(t)];if(!s||!s.c||s.c.length<10)return '';return '<div class="stk-chart"><canvas class="stk-cv" data-ck="'+esc(cK(t))+'"></canvas></div>';}
@@ -3042,7 +3045,7 @@ window.MARKET=(function(){
     html+='<div class="dg-head">'+esc(dg.headline||'')+'</div>';
     (dg.groups||[]).forEach(function(g){
      html+='<div class="dg-grp">'+esc(g.title||'')+'</div>';
-     (g.items||[]).forEach(function(it){var k=String(it.tk||'').toUpperCase();used[k]=1;
+     byHeld(g.items).forEach(function(it){var k=String(it.tk||'').toUpperCase();used[k]=1;
       html+='<div class="stk-blk" id="stknews-'+esc(k)+'"><div class="stk-hd"><span class="tk">'+esc(it.tk||'')+'</span><span class="nm">'+esc(it.nm||'')+'</span></div>'
        +(it.s?'<div class="stk-sum">'+esc(it.s)+'</div>':'')   // 종목별 관전 포인트(향후 주가 영향) — 기사 위 1~2줄
        +'<div class="stk-body"><div class="stk-left">'+artRows(k)+'</div>'+cCol(it.tk)+'</div></div>';});
