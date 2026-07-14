@@ -2,7 +2,8 @@ name: Update stock prices
 
 on:
   schedule:
-    - cron: '37 21 * * *'   # 06:37 KST · 1일 1회
+    - cron: '37 21 * * *'   # 06:37 KST — 미 장 마감 반영 (아침)
+    - cron: '37 9 * * *'    # 18:37 KST — 한국 장 마감 반영 (저녁) · 1일 2회
   workflow_dispatch: {}      # allow manual run from the Actions tab
 
 permissions:
