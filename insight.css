@@ -1,58 +1,57 @@
-/* ===== 03 관점과 정보 얻기 (v-insight) — 인테이크 · 선별 · 반영 ===== */
-/* 글자 크기: STYLE_GUIDE §2 하한 준수 — 읽는 글은 뷰 부제(.vsub 15px)에 정렬, 메타 라벨(mono 칩·배지·집계·날짜)은 12px 하한. */
-.ins-wrap{display:flex;flex-direction:column;gap:22px}
-.ins-card{background:var(--panel);border:1px solid var(--line);border-radius:3px;padding:18px}
+/* 03 관점과 정보 얻기 — insight.js 가 <link> 로 지연 로드. index.html 토큰(--panel/--line/--dawn…) 재사용. */
+.ins-wrap{display:flex;flex-direction:column;gap:16px}
+.ins-card{background:var(--panel);border:1px solid var(--line);border-radius:3px;padding:16px}
 .ins-row{display:flex;gap:8px;flex-wrap:wrap}
-.ins-row>*{flex:1 1 160px}
-.ins-in,.ins-sel,.ins-ta{width:100%;font-family:var(--serif);font-size:15px;color:var(--txt);background:var(--panel2);border:1px solid var(--line);border-radius:3px;padding:9px 10px;box-sizing:border-box}
-.ins-ta{min-height:150px;resize:vertical;line-height:1.6;font-size:15px}
-.ins-drop{margin-top:8px;border:1px dashed var(--line2);border-radius:3px;padding:14px;text-align:center;color:var(--dim);font-size:15px;cursor:pointer}
-.ins-drop.drag{border-color:var(--txt);background:var(--panel2)}
-.ins-bar{display:flex;align-items:center;gap:9px;margin-top:10px;flex-wrap:wrap}
-.ins-btn{font-family:var(--serif);font-size:15px;font-weight:700;padding:9px 14px;border-radius:3px;border:1px solid var(--line2);background:var(--panel2);color:var(--txt);cursor:pointer}
-.ins-btn.primary{background:var(--txt);color:var(--onacc);border-color:var(--txt)}
-.ins-btn:disabled{opacity:.45;cursor:default}
-.ins-msg{font-size:15px;color:var(--dim);flex:1 1 180px}
-.ins-h2{font-size:20px;font-weight:700;letter-spacing:-.3px;margin:6px 0 12px;display:flex;align-items:center;gap:8px}
-.ins-h2 .n{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--faint);letter-spacing:.04em}
-.ins-sum{font-size:15px;line-height:1.7;color:var(--txt);margin:0 0 10px}
-.ins-srcline{font-size:15px;color:var(--txt);margin:0 0 8px;padding:0 0 8px;border-bottom:1px solid var(--line)}
-.ins-srcline span{color:var(--faint)}
-.ins-steel{font-size:15px;line-height:1.65;color:var(--dim);border-left:2px solid var(--line2);padding-left:10px;margin-top:12px}
-.ins-claim{display:grid;grid-template-columns:24px 1fr;gap:10px;padding:12px 0;border-top:1px solid var(--line)}
+.ins-in{flex:1 1 240px;background:var(--panel2);border:1px solid var(--line);border-radius:3px;padding:9px 11px;color:var(--txt);font-family:var(--mono);font-size:13px}
+.ins-in:focus{outline:none;border-color:var(--dawn)}
+.ins-ta{width:100%;min-height:132px;resize:vertical;background:var(--panel2);border:1px solid var(--line);border-radius:3px;padding:11px 12px;color:var(--txt);font-size:14px;line-height:1.6}
+.ins-ta:focus{outline:none;border-color:var(--dawn)}
+.ins-sel{background:var(--panel2);border:1px solid var(--line);border-radius:3px;padding:9px 11px;color:var(--txt);font-family:var(--mono);font-size:13px}
+.ins-drop{margin-top:8px;padding:14px;border:1px dashed var(--line2);border-radius:3px;background:var(--panel2);color:var(--faint);font-family:var(--mono);font-size:12px;text-align:center;cursor:pointer}
+.ins-drop:hover,.ins-drop.drag{border-color:var(--dawn);color:var(--dim)}
+.ins-bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:12px}
+.ins-btn{background:var(--panel2);border:1px solid var(--line);border-radius:3px;padding:8px 14px;color:var(--txt);font-family:var(--mono);font-size:13px;font-weight:700;cursor:pointer}
+.ins-btn:hover{border-color:var(--dim)}
+.ins-btn.primary{background:var(--dawn);border-color:var(--dawn);color:var(--onacc)}
+.ins-btn:disabled{opacity:.5;cursor:default}
+.ins-msg{font-family:var(--mono);font-size:12px;color:var(--faint)}
+.ins-srcline{font-size:14px;color:var(--txt);margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+.ins-srcline span{color:var(--faint);font-family:var(--mono);font-size:12px}
+.ins-sum{font-size:14px;line-height:1.7;color:var(--dim);margin:0 0 12px}
+.ins-claim{display:flex;gap:10px;align-items:flex-start;padding:11px 0;border-top:1px solid var(--line)}
 .ins-claim.rej{opacity:.42}
-.ins-claim .ck{margin-top:4px}
-.ins-txt{font-size:15px;font-weight:600;line-height:1.55;color:var(--txt)}
-.ins-why{font-size:15px;color:var(--dim);line-height:1.6;margin-top:4px}
-.ins-vf{font-size:15px;color:var(--faint);margin-top:3px}
-.ins-tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px;align-items:center}
-.ins-tag{font-family:var(--mono);font-size:12px;font-weight:700;padding:2px 6px;border-radius:2px;border:1px solid var(--line2);color:var(--dim);background:var(--panel2)}
-.ins-tag.num{border-color:var(--st-accel);color:var(--st-accel)}
-.ins-tag.nar{border-color:var(--faint);color:var(--faint)}
-.ins-tag.rt{border-color:var(--txt);color:var(--txt)}
-.ins-noise{font-size:15px;color:var(--faint);line-height:1.7;margin-top:10px}
-.ins-rec{border-top:1px solid var(--line);padding:13px 0}
-.ins-rec h4{font-size:15px;font-weight:700;margin:0 0 3px}
-.ins-rec .meta{font-family:var(--mono);font-size:12px;color:var(--faint);margin-bottom:7px}
-.ins-del{float:right;font-family:var(--mono);font-size:12px;color:var(--faint);background:none;border:0;cursor:pointer}
-/* 원문(자료·스크립트) 링크·뷰어 — 관점을 뽑은 근거 추적 */
-.ins-srcbar{display:flex;gap:14px;flex-wrap:wrap;margin:0 0 8px}
-a.ins-src-lk,button.ins-src-lk{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--dawn);background:none;border:0;padding:0;cursor:pointer;text-decoration:none;letter-spacing:.02em}
-a.ins-src-lk:hover,button.ins-src-lk:hover{text-decoration:underline}
-.ins-raw{white-space:pre-wrap;word-break:break-word;max-height:280px;overflow:auto;margin:0 0 10px;padding:11px 12px;background:var(--panel2);border:1px solid var(--line);border-radius:3px;font-family:var(--serif);font-size:15px;line-height:1.65;color:var(--dim)}
+.ins-claim .ck{margin-top:3px;flex:0 0 auto;width:15px;height:15px;accent-color:var(--dawn);cursor:pointer}
+.ins-txt{font-size:14px;line-height:1.6;color:var(--txt)}
+.ins-why{font-size:13px;line-height:1.6;color:var(--faint);margin-top:3px}
+.ins-vf{font-family:var(--mono);font-size:12px;color:var(--st-hot);margin-top:4px}
+.ins-tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}
+.ins-tag{font-family:var(--mono);font-size:12px;padding:2px 7px;border:1px solid var(--line);border-radius:20px;color:var(--faint)}
+.ins-tag.num{border-color:var(--st-hot);color:var(--st-hot)}
+.ins-tag.nar{border-color:var(--line2);color:var(--dim)}
+.ins-tag.rt{border-color:var(--dawn);color:var(--dawn)}
+.ins-steel{margin-top:12px;padding:11px 12px;background:var(--panel2);border-left:2px solid var(--line2);border-radius:3px;font-size:13px;line-height:1.65;color:var(--dim)}
+.ins-noise{margin-top:10px;font-family:var(--mono);font-size:12px;line-height:1.7;color:var(--faint)}
+.ins-h2{font-family:var(--serif);font-size:22px;font-weight:700;margin:6px 0 10px;color:var(--txt)}
+.ins-h2 .n{font-family:var(--mono);font-size:13px;font-weight:400;color:var(--faint);margin-left:8px}
+.ins-rec{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:3px;padding:14px 16px;margin-bottom:10px}
+.ins-rec h4{font-size:15px;font-weight:700;margin:0 0 3px;color:var(--txt);padding-right:58px}
+.ins-rec .meta{font-family:var(--mono);font-size:12px;color:var(--faint);margin-bottom:9px}
+.ins-del{position:absolute;top:12px;right:12px;background:none;border:1px solid var(--line);border-radius:3px;padding:3px 8px;color:var(--faint);font-family:var(--mono);font-size:12px;cursor:pointer}
+.ins-del:hover{border-color:var(--st-hot);color:var(--st-hot)}
+.ins-srcbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:9px}
+.ins-src-lk{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--dawn);background:none;border:none;padding:0;cursor:pointer;text-decoration:none}
+.ins-src-lk:hover{text-decoration:underline}
+.ins-raw{max-height:280px;overflow:auto;margin:0 0 10px;padding:10px 11px;background:var(--panel2);border:1px solid var(--line);border-radius:3px;font-family:var(--mono);font-size:12px;line-height:1.65;color:var(--dim);white-space:pre-wrap;word-break:break-word}
+.ins-si{padding:9px 0;border-top:1px solid var(--line);font-size:14px;line-height:1.6;color:var(--txt)}
+.ins-si.pend{border-left:2px solid var(--st-hot);padding-left:9px}
+.ins-si .m{display:block;font-family:var(--mono);font-size:12px;color:var(--faint);margin-top:3px}
+.ins-cs{display:block;font-family:var(--mono);font-size:12px;color:var(--faint);margin-top:3px}
+.ins-cs-lk{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--dawn);text-decoration:none;margin-left:7px}
+.ins-cs-lk:hover{text-decoration:underline}
+.ins-strip{margin-top:14px}
 .ins-strip:empty{display:none}
-.ins-strip{margin:0 0 18px}
 .ins-strip .sh{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--faint);letter-spacing:.05em;margin-bottom:6px}
-.ins-si{border:1px solid var(--line);border-left:3px solid var(--st-accel);border-radius:3px;background:var(--panel);padding:9px 11px;margin-bottom:6px;font-size:15px;line-height:1.55;color:var(--txt)}
-.ins-si.pend{border-left-color:var(--st-hot)}
-.ins-si .m{display:block;color:var(--faint);font-size:12px;margin-top:3px;font-family:var(--mono)}
-.ins-cs{display:block;margin-top:3px;font-family:var(--mono);font-size:12px;line-height:1.5;color:var(--faint)}
-.ins-cs .ins-cs-lk{font-weight:700;color:var(--dawn);text-decoration:none;margin-left:8px;white-space:nowrap}
-.ins-cs .ins-cs-lk:hover{text-decoration:underline}
-
-/* --- 등급(승격) 배지 · 예고 · 보드 --- */
-.ins-gr{display:inline-block;font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.03em;padding:1px 6px;border-radius:2px;border:1px solid var(--line2);color:var(--dim);background:var(--panel2);vertical-align:middle;margin-right:2px}
-.ins-gr.g0{color:var(--faint)}
+.ins-gr{display:inline-block;font-family:var(--mono);font-size:12px;font-weight:700;padding:1px 6px;border:1px solid var(--line2);border-radius:20px;color:var(--faint);margin-right:6px}
 .ins-gr.g1{color:var(--dim)}
 .ins-gr.g2{color:var(--st-dawn);border-color:var(--st-dawn)}
 .ins-gr.g3{color:var(--st-accel);border-color:var(--st-accel)}
@@ -75,3 +74,16 @@ a.ins-src-lk:hover,button.ins-src-lk:hover{text-decoration:underline}
 .ins-gcell.g2.on{border-color:var(--st-dawn)}
 .ins-gcell.g3.on{border-color:var(--st-accel)}
 .ins-gcell.g4.on{border-color:var(--st-hot)}
+
+/* ── 시그널 로그 (03 이관, 2026-07-14) — 채택 관점 아래 중첩 · 미연결 잔여 블록 ──
+   구 #v-siglog 독립 메뉴 폐지. 신규 토큰 없음(기존 --line/--panel2/--faint/--mono 재사용). */
+.ins-sig{margin-top:9px;padding-left:10px;border-left:2px solid var(--line2)}
+.ins-sig.rest{border-left:none;padding-left:0}
+.ins-sig-h{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--faint);letter-spacing:.05em;margin-bottom:6px}
+.ins-sig-it{padding:8px 10px;margin-bottom:6px;background:var(--panel2);border:1px solid var(--line);border-radius:3px}
+.ins-sig-it:last-child{margin-bottom:0}
+.ins-sig-tag{display:inline-block;font-family:var(--mono);font-size:12px;font-weight:700;padding:2px 7px;border-radius:20px;margin-bottom:5px}
+.ins-sig-tx{font-size:14px;line-height:1.65;color:var(--txt)}
+.ins-sig-tx b{font-weight:700}
+.ins-sig-m{display:block;font-family:var(--mono);font-size:12px;color:var(--faint);margin-top:5px}
+.ins-sig-m .ins-cs{display:block;margin-top:3px}
