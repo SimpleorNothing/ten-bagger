@@ -14,7 +14,11 @@ import fs from 'node:fs';
 
 const HTML = 'index.html';
 const OUT = 'prices.json';
-const CHARTS_OUT = 'charts.json'; // 5Y 일봉 시계열(호버·기간버튼용). t=epoch day, c=close. 매 실행 창 전체를 교체(누적 아님).
+const CHARTS_OUT = 'charts.json'; // 5Y 일봉 시계열(호버·기간버튼용). t=epoch day, c=close. 이전 창과 union 병합(결측 방어).
+// 결측 캠들 수동 보강(seed). 야후가 KRX 서킷브레이커 당일 일봉을 창에서 누락한 사고(2026-07-13)
+// 대응 — t=epoch day, c=close. 시리즈 병합 시 소스(야후/네이버) 값이 있으면 소스가 이긴다.
+const BACKFILL = { ks11: [[20647, 6807]] }; // 2026-07-13 코스피 종가 6,806.93 (−8.95%, 1단계 서킷)
+
 const UA = { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36' };
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const ymd = (d) => d.toISOString().slice(0, 10).replace(/-/g, '');
@@ -88,12 +92,22 @@ async function yahoo(sym) {
     else { after = cl[i]; break; }       // 1/1 이후 첫 종가
   }
   const base = before ?? after ?? meta.chartPreviousClose ?? cl.find((x) => x != null) ?? null;
-  // 5Y 시계열 (null 캔들 제거, t=epoch day). 신규 상장은 확보된 만큼만 → 프런트가 자동 클램프.
+  // 5Y 시계열 (null 캠들 제거, t=epoch day). 신규 상장은 확보된 만큼만 → 프런트가 자동 클램프.
   const st = [], sc = [];
   for (let i = 0; i < ts.length; i++) {
     if (cl[i] == null || !Number.isFinite(cl[i])) continue;
     st.push(Math.floor(ts[i] / 86400));
     sc.push(+cl[i].toFixed(cl[i] >= 1000 ? 0 : 2));
+  }
+  // 시세(meta)와 시계열(candles)의 정합 보증. 야후는 당일 일봉을 창에서 누락하거나 지연 반영하는
+  // 경우가 있다(2026-07-13 ^KS11 서킷 당일 누락 → 사이트가 3일 전 종가를 표시). meta 의 거래일을
+  // 시계열 끝에 강제로 반영해 prices.json 과 charts.json 이 절대 갈라지지 않게 한다.
+  const mt = meta.regularMarketTime;
+  if (Number.isFinite(mt) && Number.isFinite(price)) {
+    const dq = Math.floor(mt / 86400);
+    const px = +price.toFixed(price >= 1000 ? 0 : 2);
+    if (!st.length || dq > st[st.length - 1]) { st.push(dq); sc.push(px); }
+    else if (dq === st[st.length - 1]) { sc[sc.length - 1] = px; }
   }
   return { price, changePct: base ? +(((price - base) / base) * 100).toFixed(2) : null, currency: meta.currency || 'USD',
     series: sc.length >= 20 ? { t: st, c: sc } : null };
@@ -132,6 +146,21 @@ async function naver(code) {
     series: sc.length >= 20 ? { t: st, c: sc } : null };
 }
 
+// 시계열 병합: 이전 창 ∪ seed ∪ 새 창 (같은 t 는 새 소스가 우선). 소스가 캠들을 빠뜨려도
+// 과거 값이 사라지지 않는다(구 로직은 매 실행 창 전체 교체 → 결측이 그대로 구멍으로 남았다).
+function mergeSeries(prev, next, seed) {
+  const m = new Map();
+  const add = (s) => { if (!s || !Array.isArray(s.t)) return; for (let i = 0; i < s.t.length; i++) m.set(s.t[i], s.c[i]); };
+  add(prev);
+  if (Array.isArray(seed)) for (const [t, c] of seed) m.set(t, c);
+  add(next);
+  if (!m.size) return null;
+  const ts = [...m.keys()].sort((a, b) => a - b);
+  const newest = ts[ts.length - 1];
+  const keep = ts.filter((t) => t >= newest - 1900); // 5년+버퍼로 트림(파일 크기 방어)
+  return { t: keep, c: keep.map((t) => m.get(t)) };
+}
+
 async function quote(c) {
   if (c.mkt === 'KOSPI' || c.mkt === 'KOSDAQ') {
     try { return { ...(await naver(c.ticker)), src: 'naver' }; } catch (e1) {
@@ -161,7 +190,8 @@ async function main() {
     try {
       const q = await quote(c);
       out.quotes[c.id] = { price: q.price, changePct: q.changePct, currency: q.currency, ticker: c.ticker, src: q.src };
-      if (q.series) charts.series[c.id] = q.series; // 시리즈 없으면 이전 유지
+      const merged = mergeSeries(charts.series[c.id], q.series, BACKFILL[c.id]);
+      if (merged) charts.series[c.id] = merged; // 병합 실패 시에만 이전 유지
       ok++;
       console.log(`OK   ${c.id.padEnd(8)} ${c.ticker.padEnd(8)} ${q.price} ${q.currency} YTD=${q.changePct}% (${q.src})`);
     } catch (e) {
@@ -170,6 +200,17 @@ async function main() {
     }
     await sleep(300);
   }
+  // 무결성 가드 — charts 마지막 종가 vs prices 시세 괴리(>1%)는 '침묵하는 오류'다. 파일에 남겨 눈에 띄게 한다.
+  const warn = [];
+  for (const c of candidates) {
+    const q = out.quotes[c.id], s = charts.series[c.id];
+    if (!q || !q.price || !s || !s.c || !s.c.length) continue;
+    const last = s.c[s.c.length - 1];
+    if (Math.abs(last - q.price) / q.price > 0.01) warn.push(`${c.id} chart ${last} vs quote ${q.price}`);
+  }
+  out.warn = warn;
+  if (warn.length) console.log('::warning::chart/quote divergence → ' + warn.join(' | '));
+
   if (ok > 0) { out.asOf = new Date().toISOString(); charts.asOf = out.asOf; }
   fs.writeFileSync(OUT, JSON.stringify(out, null, 2) + '\n');
   fs.writeFileSync(CHARTS_OUT, JSON.stringify(charts) + '\n'); // 시계열은 압축 직렬화(파일 크기)
