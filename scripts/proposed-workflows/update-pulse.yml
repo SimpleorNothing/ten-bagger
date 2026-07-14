@@ -1,0 +1,78 @@
+# update-pulse.yml — 「시장 맥박」 동인 브리핑(pulse.json) 4~6회/일 재합성
+# ─────────────────────────────────────────────────────────────
+# ⚠️ 운영자 수동 설치 필요: GitHub App 권한 부재로 Claude 는 .github/workflows/ 를 직접 커밋 못 함(403).
+#    이 파일을 .github/workflows/update-pulse.yml 로 복사하고 커밋하면 활성화된다.
+# 전제: repo secret ANTHROPIC_API_KEY (update-news 와 동일 키 재사용).
+# 특징: 게이지는 프런트 런타임(/api/fx·signals.json)이라 워크플로 불필요 — 이 크론은 '동인 합성'만 담당.
+#       pulse.json 은 deploy.yml paths-ignore 에 없다 → 커밋 시 자동 배포되어 사이트에 도달.
+# 가드: pulse.json.gen(epoch) 기준 3h 이내면 스킵(정시 다중 트리거의 중복 방지). 수동 실행은 우회.
+
+name: Update market pulse
+
+on:
+  schedule:
+    # 정시 부하 회피 + 하루 4~6회. 가드가 3h 이내 중복을 스킵하므로 실효 ≈ 4~6회.
+    - cron: '18 21 * * *'   # 06:18 KST (미 장 마감 반영)
+    - cron: '18 1 * * *'    # 10:18 KST (아시아 장중)
+    - cron: '18 5 * * *'    # 14:18 KST (한국 장중)
+    - cron: '18 9 * * *'    # 18:18 KST (한국 장 마감)
+    - cron: '18 13 * * *'   # 22:18 KST (유럽·미 개장)
+    - cron: '18 17 * * *'   # 02:18 KST (미 장중)
+  workflow_dispatch: {}     # 수동(가드 우회 — 전시 급변 시 강제 재합성)
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-pulse
+  cancel-in-progress: false
+
+jobs:
+  pulse:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Guard - 최근 3h 내 이미 합성됐으면 스킵 (수동은 우회)
+        id: guard
+        env:
+          MANUAL: ${{ github.event_name == 'workflow_dispatch' }}
+        run: |
+          if [ "$MANUAL" = "true" ]; then
+            echo "수동 실행 → 가드 우회"; echo "skip=false" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          DECISION=$(node -e "try{const d=require('./pulse.json');const ageH=(Date.now()-(d.gen||0))/3600000;process.stderr.write('gen age='+ageH.toFixed(2)+'h\n');process.stdout.write(ageH<3?'skip':'run')}catch(e){process.stdout.write('run')}")
+          if [ "$DECISION" = "skip" ]; then
+            echo "3h 이내 합성됨 → 스킵"; echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "미합성/노후 → 진행"; echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+      - uses: actions/setup-node@v4
+        if: steps.guard.outputs.skip != 'true'
+        with:
+          node-version: '20'
+      - name: Synthesize market pulse
+        if: steps.guard.outputs.skip != 'true'
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: node scripts/fetch-pulse.mjs
+      - name: Commit & push if changed (rebase-safe)
+        if: steps.guard.outputs.skip != 'true'
+        run: |
+          if [ -z "$(git status --porcelain pulse.json)" ]; then
+            echo "No change in pulse.json."; exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add pulse.json
+          git commit -m "chore: update market pulse"
+          for i in 1 2 3 4 5; do
+            if git pull --rebase --autostash origin main && git push origin HEAD:main; then
+              echo "pushed on attempt $i"; exit 0
+            fi
+            git rebase --abort 2>/dev/null || true
+            echo "push attempt $i lost the race; backing off"; sleep $(( RANDOM % 6 + 3 ))
+          done
+          echo "::error::push failed after 5 attempts"; exit 1
