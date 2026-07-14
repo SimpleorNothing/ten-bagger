@@ -1,4 +1,4 @@
-**최종 갱신: 2026-07-14 22:57 (KST)**
+**최종 갱신: 2026-07-14 23:40 (KST)**
 
 # STYLE_GUIDE — 알파맵 디자인 시스템
 
@@ -232,6 +232,7 @@ pantone.css :root       ← 현행 팔레트 (팬튼 A안, index.html 하단 <li
 
 ## 갱신 이력
 
+- 2026-07-14 23:40 · **03 시그널 로그 중첩 블록(`.ins-sig`).** 채택 관점 카드(`.ins-si`) 안쪽에 관련 시그널을 중첩 — 좌측 2px `--line2` 룰로 **종속**을 표시, 아이템은 `--panel2` 면 + 1px `--line` + radius 3px(§3 면 규약). 태그 칩은 구 시그널 로그 배지 규약 승계(radius 20px · `col+'22'` 배경 · mono 12px) — 색은 데이터(`items[].col`). 본문 15px(§2 하한). 하단 「미연결 시그널」은 `.ins-sig.rest`(좌측 룰 없음 = 비종속). **신규 토큰 0개** · `insight.css` 에만 추가. 구 `.siglog` 뷰 폐지.
 - 2026-07-14 22:57 · **관련 기사(매크로) 행을 `.arow`(종목 뉴스와 동일)로 통일.** `loadMacroNews()`가 `.nrow`(날짜+제목)로만 그리던 개별 기사를 종목 뉴스와 같은 `.arow`(일자 + 요약 `a` + `→` 의미 `w`)로 렌더. `.nlist` 래퍼 제거하고 `.stk-sum` 아래 `.arow` 직접 나열. **기존 `.arow` 컴포넌트 재사용 — 신규 클래스·토큰·CSS 0**(check-docs 무영향). 데이터 `a·w`는 `fetch-news.mjs summarizeMacro()`가 생성(OPS §3). `a` 없으면 제목 폴백. §6-5 매크로 행 규칙 신설.
 
 - 2026-07-14 22:18 · **01 보유 종목 뉴스 블록을 보유 비중(`holdings.json` `detail[].w`) 내림차순 정렬.** digest `groups[].items[]` 원순서 대신 렌더 시점 `byHeld()`/`WMAP`로 정렬(안정) → MU→MRVL→LITE→TSLA→VRT→삼성전자→BE. 미보유는 원순서. 신규 소스·토큰·CSS 없음(check-docs 무영향).
