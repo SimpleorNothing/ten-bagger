@@ -203,6 +203,101 @@ window.INSIGHT=(function(){
   setMsg('저장 완료 — 채택한 관점만 다른 메뉴에 반영됩니다.');
  }
 
+ /* --- 시그널 로그 (2026-07-14 · 03으로 이관) -----------------------------------
+    구 `#v-siglog` 독립 메뉴는 6탭 재편 때 nav에서 빠져 도달 불가한 고아 뷰가 됐다.
+    → 로그를 03의 '채택한 관점' 밑으로 옮긴다. 시그널은 관점을 뒷받침하는 컨텍스트지
+      그 자체로 독립 화면이 아니다(누적 판단 컨텍스트 — OPS §0-4).
+    데이터: index.html 전역 `window.SIGNAL_LOG`(인라인 히스토리 + signal_log.json 병합분) 우선,
+            없으면 signal_log.json 직접 페치(폴백 — 03은 index.html 로드 순서에 의존하지 않는다).
+    매칭:   ①티커가 시그널 본문·출처에 등장 → 정밀 매칭(이것만 씀)  ②없으면 레이어 일치
+    미연결: 어느 관점에도 안 붙은 시그널은 하단 블록에 전건 보존(로그는 아카이브가 아니라 컨텍스트 — 유실 금지). */
+ var SIG=[], SIGCTX={all:[],used:{}}, sigN=-1;
+ function sigStrip(h){return String(h||'').replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim();}
+ /* 전역 SIGNAL_LOG 읽기. index.html 은 `let SIGNAL_LOG=[...]`(인라인 히스토리) 로 선언하고
+    signal_log.json 이 도착하면 `SIGNAL_LOG=SIGNAL_LOG.concat(...)` 로 재할당한다.
+    top-level `let` 은 window 에 안 붙지만 클래식 스크립트 간 전역 렉시컬 환경은 공유되므로
+    bare 식별자로 읽힌다(insight.js 는 defer → 인라인 실행 후라 TDZ 아님). index.html 무패치. */
+ function sigGlobal(){
+  try{if(typeof SIGNAL_LOG!=='undefined'&&Array.isArray(SIGNAL_LOG))return SIGNAL_LOG;}catch(x){}
+  return null;
+ }
+ /* 병합은 비동기라 init 시점엔 인라인분만 있을 수 있다 → 길이가 늘면 재렌더(추종). */
+ function sigSync(){
+  var g=sigGlobal();
+  if(!g||g.length===sigN)return false;
+  SIG=g;sigN=g.length;return true;
+ }
+ function sigLoad(){
+  if(sigSync())renderAll();
+  [900,2500,6000].forEach(function(ms){setTimeout(function(){if(sigSync())renderAll();},ms);});
+  if(sigGlobal())return;   /* 전역이 있으면 폴백 페치 불필요 */
+  fetch('./signal_log.json',{cache:'no-store'}).then(function(r){return r.ok?r.json():null;})
+   .then(function(d){if(!sigGlobal()&&d&&Array.isArray(d.log)&&d.log.length){SIG=d.log;sigN=d.log.length;renderAll();}}).catch(function(){});
+ }
+ /* 엔트리 → 아이템 평탄화(엔트리 메타를 아이템에 부착) · 최신순 */
+ function sigFlat(){
+  var out=[];
+  SIG.forEach(function(en,ei){
+   if(!en||!Array.isArray(en.items))return;
+   var srcs=(en.srcs||[]).map(function(s){return s&&s.label||'';}).filter(Boolean).join(' · ');
+   en.items.forEach(function(it,ii){
+    if(!it)return;
+    /* tx = 티커 매칭 대상. 엔트리 메타(source·srcs)는 제외한다 —
+       한 인테이크에 여러 종목이 섞이면(예: "MRVL·MU 뉴스") 엔트리 텍스트로는 서로를 오매칭한다.
+       시그널의 주장은 items[].html 에 있다. */
+    out.push({key:ei+'#'+ii, date:en.date||'', at:en.at||en.date||'', source:en.source||'', srcs:srcs,
+      tag:it.tag||'', layer:it.layer||'', col:it.col||'#868e96', html:it.html||'',
+      tx:(sigStrip(it.html)+' '+(it.tag||'')).toUpperCase()});
+   });
+  });
+  out.sort(function(a,b){return a.at<b.at?1:a.at>b.at?-1:0;});
+  return out;
+ }
+ function sigFor(c,all){
+  var tk=(c.tickers||[]).filter(Boolean);
+  if(tk.length){
+   var byTk=all.filter(function(s){
+    return tk.some(function(t){return s.tx.indexOf(String(t).toUpperCase())>=0;});});
+   if(byTk.length)return byTk.slice(0,4);
+  }
+  if(/^L[1-8]$/.test(c.layer||''))return all.filter(function(s){return s.layer===c.layer;}).slice(0,3);
+  return [];
+ }
+ /* 매칭은 표시 필터와 무관하게 채택분 전체 기준으로 한 번만 산정(멱등) */
+ function sigCtx(){
+  var all=sigFlat(), used={};
+  flat().forEach(function(o){sigFor(o.c,all).forEach(function(s){used[s.key]=1;});});
+  return {all:all,used:used};
+ }
+ function sigItem(s){
+  return '<div class="ins-sig-it">'+
+   (s.tag?'<span class="ins-sig-tag" style="background:'+esc(s.col)+'22;color:'+esc(s.col)+'">'+esc(s.tag)+'</span>':'')+
+   '<div class="ins-sig-tx">'+s.html+'</div>'+
+   '<div class="ins-sig-m">'+esc(s.date)+(s.source?' · '+esc(cut(s.source,72)):'')+
+   (s.srcs?'<span class="ins-cs">출처: '+esc(cut(s.srcs,80))+'</span>':'')+'</div></div>';
+ }
+ function sigBlock(c){
+  var list=sigFor(c,SIGCTX.all);
+  if(!list.length)return '';
+  return '<div class="ins-sig"><div class="ins-sig-h">관련 시그널 로그 · '+list.length+'건</div>'+
+   list.map(sigItem).join('')+'</div>';
+ }
+ /* 미연결 시그널 — 관점이 아직 안 붙은 로그. 로그는 삭제되지 않는다. */
+ function renderSigRest(){
+  var e=$('insSigRest');if(!e)return;
+  var rest=SIGCTX.all.filter(function(s){return !SIGCTX.used[s.key];});
+  if(!SIGCTX.all.length){e.innerHTML='';return;}
+  if(!rest.length){
+   e.innerHTML='<h2 class="ins-h2">미연결 시그널 <span class="n">0개 — 모든 시그널이 관점에 붙었습니다</span></h2>';
+   return;
+  }
+  e.innerHTML='<h2 class="ins-h2">미연결 시그널 <span class="n">'+rest.length+'개 · 관점 '+SIGCTX.all.length+'건 중</span></h2>'+
+   '<div class="ins-noise" style="margin-bottom:8px">아직 어떤 채택 관점과도 티커·레이어가 겹치지 않는 시그널입니다. '+
+   '해당 종목·레이어의 관점을 채택하면 자동으로 그 관점 아래로 들어갑니다.</div>'+
+   '<div class="ins-sig rest">'+rest.map(sigItem).join('')+'</div>';
+  try{if(window.vcDecorate)window.vcDecorate(e);}catch(x){}
+ }
+
  /* --- 저장 목록 --- */
  function claimLine(r,c,showBtn){
   var pend=NUM[c.route]&&!c.applied;
@@ -212,6 +307,7 @@ window.INSIGHT=(function(){
    (NUM[c.route]?(c.applied?' · 반영 완료':' · 반영 대기(자동 변경 없음)'):'')+'</span>'+
    claimSrc(r,false)+
    (showBtn&&NUM[c.route]?'<button class="ins-btn" style="margin-top:7px;padding:4px 9px;font-size:12px" data-ap="'+c.id+'">'+(c.applied?'대기로 되돌리기':'반영 완료 표시')+'</button>':'')+
+   sigBlock(c)+
    '</div>';
  }
  function renderList(){
@@ -265,6 +361,8 @@ window.INSIGHT=(function(){
      box.hidden=false;b.textContent='원문 닫기';
     }else{box.hidden=true;b.textContent='원문 보기';}
    };});
+  /* 중첩된 시그널 로그 본문의 종목명·티커 → 밸류체인 호버 팝업(index.html 전역 재사용) */
+  try{if(window.vcDecorate)window.vcDecorate(L);}catch(x){}
  }
 
  /* --- 등급 보드 — 채택 관점을 등급별 집계, 칸 클릭 시 그 등급으로 필터 --- */
@@ -302,7 +400,7 @@ window.INSIGHT=(function(){
  function renderStrips(){
   var f=flat();
   strip('insStripMarket',f.filter(function(o){return o.c.route==='macro';}).sort(byScore).slice(0,4),'관점과 정보 — 채택한 매크로 관점');
-  strip('insStripSig',f.filter(function(o){return o.c.route==='signal_log';}).sort(byScore).slice(0,5),'관점과 정보 — 시그널 로그 후보(승격은 수동)');
+  /* insStripSig 폐지 — 앵커였던 #v-siglog 가 사라졌고, 시그널 로그는 03의 관점 아래로 들어왔다. */
   strip('insStripCal',f.filter(function(o){return o.c.route==='calendar';}).sort(byScore).slice(0,4),'관점과 정보 — 채택한 일정 관점');
   strip('insStripThread',f.filter(function(o){return /^L[1-8]$/.test(o.c.layer||'')&&o.c.route!=='none';}).sort(byScore).slice(0,4),'관점과 정보 — 채택한 레이어 관점');
   strip('insStripDec',f.filter(function(o){return !!NUM[o.c.route]&&!o.c.applied;}).sort(byScore).slice(0,5),'관점과 정보 — 숫자 반영 대기',
@@ -313,7 +411,7 @@ window.INSIGHT=(function(){
   var t=0;recs.forEach(function(r){if(r.t>t)t=r.t;});
   e.textContent=t?('update : '+new Date(t).toLocaleString('ko-KR',{hour12:false})):'';
  }
- function renderAll(){recomputeGrades();renderGradeBoard();renderList();renderStrips();stamp();}
+ function renderAll(){recomputeGrades();SIGCTX=sigCtx();renderGradeBoard();renderList();renderSigRest();renderStrips();stamp();}
 
  /* --- 파일(PDF·TXT) → 텍스트 --- */
  var _pdfP=null;
@@ -419,7 +517,8 @@ window.INSIGHT=(function(){
   '<span class="updstamp abs" id="updIns"></span>'+
   '<p class="vsub">증권사 리포트·기사·유튜브(링크 또는 스크립트)를 넣으면 8레이어·단계 프레임으로 관점과 정보를 구조화해 뽑는다. '+
   '<b>뽑는 것과 반영하는 것은 분리한다</b> — 체크해 채택한 관점만 다른 메뉴에 뜬다. 숫자 파일(실적·판단·단계·비중)은 자동으로 바뀌지 않는다(narrative ≠ numbers). '+
-  '채택 관점은 <b>등급</b>(관찰→후보→지지→확립→확신)을 갖고, 다른 자료에서 유사한 내용이 보강될수록 자동 승격된다.</p></div>'+
+  '채택 관점은 <b>등급</b>(관찰→후보→지지→확립→확신)을 갖고, 다른 자료에서 유사한 내용이 보강될수록 자동 승격된다. '+
+  '<b>시그널 로그</b>는 관련 관점 밑에 붙어 그 관점의 누적 컨텍스트가 된다 — 티커가 겹치면 종목 기준, 없으면 레이어 기준으로 매칭된다.</p></div>'+
   '<div class="ins-wrap">'+
    '<div class="ins-card">'+
     '<div class="ins-row"><input class="ins-in" id="insUrl" placeholder="URL (선택 — 본문이 없으면 URL만으로 웹검색해 시도)"></div>'+
@@ -441,6 +540,7 @@ window.INSIGHT=(function(){
       '<option value="signal_log">시그널 로그</option><option value="macro">시장 모니터링</option><option value="calendar">캘린더</option>'+
      '</select>'+
     '</div><div class="ins-gboard" id="insGradeBoard"></div><div id="insList"></div></div>'+
+   '<div id="insSigRest"></div>'+
   '</div>';
  function el(tag,cls,id){var e=document.createElement(tag);if(cls)e.className=cls;if(id)e.id=id;return e;}
  function anchor(id,parentSel,mode,refSel){
@@ -473,14 +573,19 @@ window.INSIGHT=(function(){
    var memo=document.getElementById('v-memo');
    if(memo)main.insertBefore(sec,memo);else main.appendChild(sec);
   }
+  /* 고아 뷰 정리 — #v-siglog 는 6탭 재편 때 nav 탭을 잃어 도달 불가였다.
+     로그가 03으로 들어왔으니 죽은 섹션은 걷어낸다. index.html 의 renderSignalLog() 는
+     `if(!el)return;` 가드가 있어 섹션이 없으면 조용히 no-op 이 된다(패치 불필요). */
+  var orphan=document.getElementById('v-siglog');
+  if(orphan&&orphan.parentNode)orphan.parentNode.removeChild(orphan);
+
   anchor('insStripMarket','#v-market','after','.vhead');
-  anchor('insStripSig','#v-siglog','before','#signalLog');
   anchor('insStripDec','#v-decision','before','#decisionBoard');
   anchor('insStripCal','#v-cal','after','.vhead');
   anchor('insStripThread','#v-thread','after','#instantAnswer');
  }
 
- function init(){mount();if(!document.getElementById('insList'))return;bind();load();}
+ function init(){mount();if(!document.getElementById('insList'))return;bind();load();sigLoad();}
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
  return {render:renderAll, all:function(){return recs;}, adopted:function(){return flat();}};
 })();
