@@ -2979,9 +2979,15 @@ window.MARKET=(function(){
     html+='<div class="stk-blk"><div class="stk-hd"><span class="nm">'+esc(title)+'</span></div>';
     html+=sums[k]?'<div class="stk-sum">'+esc(sums[k])+'</div>'
             :'<div class="stk-sum ph">요약 대기 — 다음 다이제스트(06:12·18:12)에서 생성</div>';
-    html+='<div class="nlist">';
-    lst.forEach(function(it){html+='<a class="nrow" href="'+esc(it.link||'#')+'" target="_blank" rel="noopener"><span class="ndt">'+esc((it.published||'').slice(5,10))+'</span><span class="ntt">'+esc(it.title||'')+'</span></a>';});
-    html+='</div></div>';});
+    lst.forEach(function(it){
+     var tx=String(it.a||'').trim()||String(it.title||'');   // a(요약) 없으면 제목 폴백(다음 크론 전까지)
+     var im=String(it.w||'').trim();
+     html+='<a class="arow" href="'+esc(it.link||'#')+'" target="_blank" rel="noopener">'
+      +'<span class="adt">'+esc((it.published||'').slice(5,10))+'</span>'
+      +'<span class="atx"><span class="asum">'+esc(tx)+'</span>'
+      +(im?'<span class="aimp"><span class="aar">→</span><span>'+esc(im)+'</span></span>':'')
+      +'</span></a>';});
+    html+='</div>';});
    host.innerHTML=html;}
   catch(e){host.innerHTML='<div class="mkt-ph">수집 대기</div>';}
  }
