@@ -3094,13 +3094,16 @@ window.MARKET=(function(){
   var s=CH[cv.getAttribute('data-ck')];if(!s||!s.c){cv.parentElement.style.display='none';return;}
   var av=(AVG||{})[cv.getAttribute('data-ck')];if(!(av!=null&&isFinite(av)))av=null;   // 보유 종목만 평단선
   var st={sp:Math.min(126,s.c.length),hv:-1};
-  function fd(x){if(x==null)return '';var n=Number(x);if(isFinite(n))return new Date(n*(n<1e6?86400000:n<1e12?1000:1)).toISOString().slice(5,10);return String(x).slice(5,10);}
+  function fdD(x){if(x==null)return null;var n=Number(x);var d=isFinite(n)?new Date(n*(n<1e6?86400000:n<1e12?1000:1)):new Date(x);return isNaN(d)?null:d;}
+  // yr=true면 연도까지(YY-MM-DD) — 창이 여러 해에 걸치면 시작·끝이 몇 해 차인지 드러나야 함. false면 종전대로 MM-DD.
+  function fd(x,yr){var d=fdD(x);if(!d){var s=String(x==null?'':x);return yr?s.slice(0,10):s.slice(5,10);}var p=function(n){return String(n).padStart(2,'0');};var md=p(d.getUTCMonth()+1)+'-'+p(d.getUTCDate());return yr?(String(d.getUTCFullYear()).slice(2)+'-'+md):md;}
   function fv(x){var n=Number(x);if(!isFinite(n))return String(x==null?'':x);return Math.abs(n)<10?n.toFixed(1):Math.round(n).toLocaleString();}   // 10 미만=소수1자리 · 10 이상=정수(콤마)
   function vw(){var n=s.c.length,k=Math.max(20,Math.min(n,Math.round(st.sp)));return{k:k,v:s.c.slice(n-k),t:(s.t||[]).slice(n-k)};}
   function dr(){var d=window.devicePixelRatio||1,w=cv.clientWidth,H=cv.clientHeight;if(!w||!H)return;
    if(cv.width!==Math.round(w*d)){cv.width=Math.round(w*d);cv.height=Math.round(H*d);}
    var c=cv.getContext('2d');c.setTransform(d,0,0,d,0,0);c.clearRect(0,0,w,H);
    var o=vw(),v=o.v,t=o.t,k=o.k,mn=Math.min.apply(null,v),mx=Math.max.apply(null,v);if(mx===mn)mx=mn+1;
+   var _d0=fdD(t[0]),_dN=fdD(t[k-1]),spanYr=!!(_d0&&_dN&&_d0.getUTCFullYear()!==_dN.getUTCFullYear());  // 창이 해를 넘나들면 날짜 라벨에 연도 표기
    function X(i){return 6+(w-12)*i/(k-1);}function Y(x){return 18+(H-34)*(1-(x-mn)/(mx-mn));}
    var cs=getComputedStyle(document.documentElement),up=v[k-1]>=v[0];
    var cl=(up?cs.getPropertyValue('--st-hot'):cs.getPropertyValue('--st-accel')).trim()||(up?'#e03131':'#1971c2');
@@ -3119,8 +3122,8 @@ window.MARKET=(function(){
    c.textAlign='left';c.font='10px sans-serif';c.fillStyle=cl;c.fillText((p>=0?'+':'')+p+'% / '+k+'D',6,11);
    // 하단 눈금줄엔 시작·끝 날짜만
    c.font='10px sans-serif';c.fillStyle='#868e96';
-   c.textAlign='left';c.fillText(fd(t[0]),6,H-4);
-   c.textAlign='right';c.fillText(fd(t[k-1]),w-6,H-4);
+   c.textAlign='left';c.fillText(fd(t[0],spanYr),6,H-4);
+   c.textAlign='right';c.fillText(fd(t[k-1],spanYr),w-6,H-4);
    // 처음·마지막 값 = 각 끝점에 붙여 위/아래로. 상단 근접이면 아래(+12), 아니면 위(−5) — 라벨이 캔버스 위로 안 잘리게.
    function lblY(yp){return (yp-14<18)?yp+12:yp-5;}
    c.font='bold 10px sans-serif';
@@ -3129,7 +3132,7 @@ window.MARKET=(function(){
    c.textAlign='left';c.font='10px sans-serif';
    if(st.hv>=0&&st.hv<k){var i2=st.hv;c.strokeStyle='#adb5bd';c.lineWidth=1;c.beginPath();c.moveTo(X(i2),18);c.lineTo(X(i2),H-16);c.stroke();
     c.fillStyle=cl;c.beginPath();c.arc(X(i2),Y(v[i2]),2.6,0,6.3);c.fill();
-    var tp=fd(t[i2])+' '+fv(v[i2]);var tw=c.measureText(tp).width;
+    var tp=fd(t[i2],spanYr)+' '+fv(v[i2]);var tw=c.measureText(tp).width;
     c.textAlign='left';halo(tp,Math.min(Math.max(X(i2)-tw/2,6),w-6-tw),28,'#495057');}}
   cv.addEventListener('wheel',function(e){if(!e.ctrlKey)return;e.preventDefault();st.sp=Math.max(20,Math.min(s.c.length,st.sp*(e.deltaY>0?1.25:0.8)));st.hv=-1;dr();},{passive:false});
   cv.addEventListener('mousemove',function(e){var r=cv.getBoundingClientRect(),o=vw();st.hv=Math.max(0,Math.min(o.k-1,Math.round((e.clientX-r.left-6)*(o.k-1)/(r.width-12))));dr();});
