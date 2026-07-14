@@ -1,4 +1,4 @@
-**최종 갱신: 2026-07-12 23:59 (KST)**
+**최종 갱신: 2026-07-14 (KST)**
 
 # OPS — 알파맵 운영 가이드
 
@@ -65,7 +65,7 @@
 | 정보명 | 자동/수동 | 주기 | 소스 |
 |---|---|---|---|
 | 업데이트 이력(변경 로그) | 수동(인라인) | 사이트 변경 시 | `changelog.js` 인라인 `MKT_CHANGELOG`(`{d,t}` 최신순·자가 마운트=insight.js 패턴). 헤더 우상단 `.mkt-upd` 배지 → 클릭 시 `.cyc-pop` 모달. **사용자 향 변경만** 기록 · 신규 항목은 배열 맨 위 |
-| 코스피·S&P·나스닥 지수 | 자동 | 매일 06:37 KST | `charts.json` (`fetch-prices.mjs`, `^KS11·^GSPC·^IXIC` Yahoo 5Y) |
+| 코스피·S&P·나스닥 지수 | 자동 | 매일 06:37 KST | `charts.json` (`fetch-prices.mjs`, `^KS11·^GSPC·^IXIC` Yahoo 5Y). **meta 거래일을 시계열 끝에 강제 반영 + 이전 창과 union 병합** → `prices.json`과 갈라지지 않는다. 괴리>1%는 `prices.json.warn` |
 | 미 10년물 금리 | 자동 | 런타임 | worker `/api/us10y` → `history[].markets.ten_year` |
 | WTI 유가 | 자동 | 런타임 | worker `/api/wti` → **`points`** 배열 (Yahoo). `series` 로 읽으면 0건 |
 | 보유 종목 스파크라인 | 자동 | 매일 06:37 KST | `charts.json` (Yahoo/Naver 5Y 일봉 t/c · 기간버튼 1M~5Y) |
@@ -264,11 +264,14 @@
 6. **Google News RSS 503 스로틀링** — 2026-07-12 전 피드 503(러너 IP 차단 추정). `fetchFeed`에 지수 백오프 3회 적용. 재발 시 **신규 수집만** 멈추고 기존 요약·표시는 유지. 상시화되면 **RSS 소스 교체**(IR·뉴스와이어 피드 또는 유료 API).
 7. **다이제스트 증분 게이트의 사각** — 신규 기사 0건이면 다이제스트를 스킵하므로, **RSS가 며칠 죽으면 `headline`·`macro`가 낡은 채 고정**된다. 필요 시 「신규 0건이어도 N시간 이상 낡으면 강제 재생성」 OR 조건 추가(+월 $1.5).
 8. **캘린더 동적화** — `calendar.json`·`derive-calendar.mjs` 진행 중. 완료 시 §3의 05 행을 「수동(정적)」→「혼합」으로 갱신.
+9. **야후 일봉 결측 (2026-07-13 ^KS11)** — 코스피 −8.95%(1단계 서킷) 당일 Yahoo `chart` 의 meta 는 최신인데 일봉 배열에 그 캔들이 없었다. `charts.json` 만 3일 스테일(7/10 · 전일 +2.5%) → 01 카드가 최대 폭락일을 못 보고, KR 서킷·사이드카도 미점등(=침묵하는 오류). 조치: ①`fetch-prices.mjs` meta 강제 반영·union 병합·`BACKFILL`·괴리 가드 ②`fetch-signals.mjs` KR 판정에 **종가 백스톱**(charts ks11) 추가. **매 세션 `prices.json.warn` 확인.**
+10. **`charts.json`(942KB)은 MCP 직접 푸시 불가** — 스크립트 수정 후 Actions에서 `Update stock prices` → `Update macro signals` dispatch 해야 즉시 반영(미실행 시 다음 크론까지 스테일).
 
 ---
 
 ## 갱신 이력
 
+- 2026-07-14 · **코스피 스테일 사고 수리.** 7/13 코스피 −8.95%(6,806.93) 당일 Yahoo 가 `^KS11` 일봉을 누락 → `charts.json` 만 7/10에 고착, 01 카드 「전일 +2.5%」. `prices.json`과 충돌인데 경보가 없었다. `fetch-prices.mjs`(meta 강제 반영·union 병합·BACKFILL·`warn` 가드) · `fetch-signals.mjs`(KR 종가 백스톱) · `signals.json`(7/13 서킷·사이드카 true). §3 01 지수 행 · §8-9·10.
 - 2026-07-12 23:59 · **03 채택 관점에 출처 표기 + 저장 원문 영구 링크.** 관점 카드가 `레이어 · 라우트 · NIC`만 달고 다녀 «어느 자료에서 왔나»가 자료 카드 헤더에만 있었음(다른 메뉴 스트립에선 매체·날짜뿐, 링크 없음) → `claimSrc()` 신설로 **관점 1건마다 출처 줄**(매체·종류·날짜 + 스트립에선 제목까지) 부착. 링크 ①원문 URL ↗ ②**저장 원문 ↗** — worker에 `GET /api/insights/raw?id=` 신설(R2 `insights.json` → 인테이크 원문 HTML 페이지, `no-store`·인증 쿠키). 인테이크 원문은 이미 R2에 저장되고 있었으나 **링크가 없어 03 목록 안에서 토글로만 열렸던 것**을 어디서든 열리는 영구 URL로 승격. 숫자 파일·narrative≠numbers 규율 무변경. §3 03 인벤토리 2행 갱신·신설.
 - 2026-07-12 22:40 · **03 인테이크 이미지 OCR** — 캡처 이미지를 텍스트칸/드롭존에 **붙여넣기(Ctrl/⌘+V)**하거나 끌어다 놓으면 `tesseract.js@5`(kor+eng, CDN 지연 로드·워커 1회 생성 재사용)로 글자를 인식해 위 칸에 append. 파일선택 `accept`·드롭 안내문·플레이스홀더에 이미지 병기. 클라 전용(worker·숫자 파일 무변경). §3 03행 신설.
 - 2026-07-12 22:25 · **01 헤더 업데이트 이력 배지·팝업 추가** — 사이트 변경 로그를 헤더 우상단에 노출(클릭 시 전체 이력 모달). `changelog.js` 자가 마운트, index.html은 `<script src>` 한 줄. §3 01 인벤토리 행 신설. 디자인은 STYLE_GUIDE §4.
