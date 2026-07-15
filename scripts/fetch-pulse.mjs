@@ -7,8 +7,9 @@
 //       숫자 파일은 절대 건드리지 않는다. 매매 권유가 아니라 프레임 도출.
 // 입력: news.json(MACRO items+macroTopics) · news_digest.json(macro 요약) · signals.json(게이지) ·
 //       gamma.json(stage) · holdings.json(레이어). 출력: pulse.json.
-// LLM 실패/키 없음 → 기존 pulse.json 유지(조용히 스킵). 스키마 불일치도 이전 파일 보존.
-// 비용: 실행 횟수에 비례(신규 기사 수 아님). Sonnet 4.6 기준 1회 ≈ $0.01~0.02. 4~6회/일 ≈ 월 $2~4.
+// 실패 정책: 키 없음/LLM 실패 → 기존 pulse.json 유지(exit 0, 뉴스 커밋 비차단). 단 조용히 넘어가지 않고
+//       ::warning:: 로 Actions 요약에 원인을 남긴다(OPS §1 침묵하는 오류 방지).
+// 비용: 실행 횟수에 비례(신규 기사 수 아님). Sonnet 4.6 기준 1회 ≈ $0.01~0.02.
 
 import fs from 'node:fs';
 
@@ -16,6 +17,16 @@ const OUT = 'pulse.json';
 const MODEL = 'claude-sonnet-4-6';
 
 function readJSON(p, fb) { try { return JSON.parse(fs.readFileSync(p, 'utf8')); } catch (e) { return fb; } }
+
+// LLM 응답에서 JSON 객체만 견고하게 뽑는다: 코드펜스 제거 → 첫 '{' ~ 마지막 '}' 슬라이스.
+// 모델이 "다음은 JSON입니다:" 같은 서론을 붙이거나 펜스로 감싸도 파싱이 깨지지 않는다.
+function extractJSON(text) {
+  const noFence = text.replace(/```json|```/g, '').trim();
+  const s = noFence.indexOf('{');
+  const e = noFence.lastIndexOf('}');
+  if (s === -1 || e === -1 || e < s) throw new Error('no JSON object in response: ' + noFence.slice(0, 200));
+  return noFence.slice(s, e + 1);
+}
 
 function buildPrompt(ctx) {
   const { macroLines, digestMacro, sig, stages, layers } = ctx;
@@ -52,7 +63,7 @@ ${macroLines || '(없음)'}
 
 async function main() {
   const key = process.env.ANTHROPIC_API_KEY;
-  if (!key) { console.log('pulse: ANTHROPIC_API_KEY 없음 → 스킵(기존 유지)'); return; }
+  if (!key) { console.log('::warning::pulse: ANTHROPIC_API_KEY 없음 → 스킵(기존 유지)'); return; }
 
   const news = readJSON('news.json', { items: [], macroTopics: [] });
   const digest = readJSON('news_digest.json', {});
@@ -77,12 +88,16 @@ async function main() {
     const r = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: { 'content-type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01' },
-      body: JSON.stringify({ model: MODEL, max_tokens: 3000, messages: [{ role: 'user', content: prompt }] }),
+      body: JSON.stringify({ model: MODEL, max_tokens: 4096, messages: [{ role: 'user', content: prompt }] }),
     });
-    if (!r.ok) throw new Error('anthropic HTTP ' + r.status);
+    if (!r.ok) {
+      const body = await r.text().catch(() => '');
+      throw new Error('anthropic HTTP ' + r.status + ' ' + body.slice(0, 300));
+    }
     const j = await r.json();
+    if (j.stop_reason === 'max_tokens') console.log('::warning::pulse: 응답이 max_tokens 로 잘렸을 수 있음 → 추출 시도');
     const text = (j.content || []).filter((b) => b.type === 'text').map((b) => b.text).join('');
-    const clean = text.replace(/```json|```/g, '').trim();
+    const clean = extractJSON(text);
     const parsed = JSON.parse(clean);
     if (!parsed.headline || !Array.isArray(parsed.drivers) || !parsed.drivers.length) throw new Error('pulse shape invalid');
     // asOf 는 KST 분단위(사이트 표시용). new Date() → UTC → +9h.
@@ -91,7 +106,7 @@ async function main() {
     fs.writeFileSync(OUT, JSON.stringify(out, null, 2) + '\n');
     console.log(`pulse: ${OUT} 작성 (drivers=${parsed.drivers.length})`);
   } catch (e) {
-    console.log('pulse 실패(이전 파일 유지):', e.message);
+    console.log('::warning::pulse 실패(이전 파일 유지): ' + e.message);
   }
 }
 
