@@ -9,6 +9,7 @@
 //       gamma.json(stage) · holdings.json(레이어). 출력: pulse.json.
 // 실패 정책: 키 없음/LLM 실패 → 기존 pulse.json 유지(exit 0, 뉴스 커밋 비차단). 단 조용히 넘어가지 않고
 //       ::warning:: 로 Actions 요약에 원인을 남긴다(OPS §1 침묵하는 오류 방지).
+// max_tokens: 한국어 6드라이버 + 긴 srcs URL 은 4096 을 넘겨 절단됨(run 실측 pos 5596) → 8192.
 // 비용: 실행 횟수에 비례(신규 기사 수 아님). Sonnet 4.6 기준 1회 ≈ $0.01~0.02.
 
 import fs from 'node:fs';
@@ -88,7 +89,7 @@ async function main() {
     const r = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: { 'content-type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01' },
-      body: JSON.stringify({ model: MODEL, max_tokens: 4096, messages: [{ role: 'user', content: prompt }] }),
+      body: JSON.stringify({ model: MODEL, max_tokens: 8192, messages: [{ role: 'user', content: prompt }] }),
     });
     if (!r.ok) {
       const body = await r.text().catch(() => '');
