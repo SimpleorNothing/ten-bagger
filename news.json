@@ -1,30 +1,30 @@
 {
-  "asOf": "2026-07-15T11:00:52.329Z",
+  "asOf": "2026-07-15T13:43:13.103Z",
   "source": "Google News RSS · 종목축 + 시그널축 + 병목축 (기사별 한 줄 요약 + 물질성 스크리닝)",
   "note": "사이트 종목 카드의 \"일자 + 요약\" 행 소스. 최근 95일 창 · 종목당 최신 5건(첫 로딩 페이로드 상한) · **물질성 스크리닝 통과분만**(items[].m>=1 — 2=논제/펀더멘털, 1=리비전·수급 실사건, 0=사후 등락 서술·홍보·추측·콘텐츠팜으로 제외). 탈락 기사는 삭제가 아니라 news_archive.json 에 전건 보존. 나머지 3개월치는 archive/{티커}.json 을 '더 보기'로 온디맨드 로드. 신호/소음 판단과 SIGNAL_LOG 반영은 사람/Claude의 몫 — 채점·차트에는 쓰이지 않는다.",
-  "count": 161,
+  "count": 167,
   "macroTopics": [
     {
       "id": "macro_미국_cpi_둔화_금리경로_0",
       "ticker": "MACRO",
       "name": "미국 CPI 둔화·금리경로",
-      "q": "US CPI June 2025 Fed rate cut probability inflation",
+      "q": "US CPI inflation Fed rate cut expectations 2025",
       "mkt": "US",
       "ax": "rates"
     },
     {
-      "id": "macro_중국_gdp_성장_급둔화_1",
+      "id": "macro_중국_gdp_부진_수요둔화_1",
       "ticker": "MACRO",
-      "name": "중국 GDP 성장 급둔화",
-      "q": "China Q2 GDP slowdown 2025 economy weakest",
+      "name": "중국 GDP 부진·수요둔화",
+      "q": "China GDP Q2 2025 slowest growth economic slowdown",
       "mkt": "US",
-      "ax": "x_중국gdp성장급둔화"
+      "ax": "x_중국gdp부진수요둔화"
     },
     {
       "id": "macro_반도체_ai_과열_조정_1",
       "ticker": "MACRO",
       "name": "반도체 AI 과열 조정",
-      "q": "반도체 SK하이닉스 ASML AI 투자심리 2025",
+      "q": "반도체 HBM SK하이닉스 수출통제 AI 칩 랠리",
       "mkt": "KOSPI",
       "ax": "chip"
     }
@@ -67,17 +67,19 @@
     }
   ],
   "archive": "news_archive.json",
-  "archiveCount": 647,
+  "archiveCount": 672,
   "shardDir": "archive",
   "winCounts": {
     "353200": 15,
+    "QCOM": 6,
+    "SMCI": 11,
+    "VRT": 13,
     "005930": 17,
-    "TSLA": 6,
+    "TSLA": 7,
     "009150": 9,
     "CEG": 9,
-    "LITE": 2,
+    "LITE": 3,
     "COHR": 7,
-    "SMCI": 10,
     "SNDK": 7,
     "VICR": 6,
     "AMD": 14,
@@ -85,19 +87,98 @@
     "OKLO": 2,
     "PLTR": 13,
     "089030": 8,
-    "VRT": 12,
     "BESI": 6,
     "APH": 1,
     "BE": 5,
-    "QCOM": 5,
     "ALAB": 6,
     "CBRS": 8,
     "MU": 5,
     "MRVL": 3,
-    "RMBS": 7,
+    "RMBS": 8,
     "TER": 1
   },
   "items": [
+    {
+      "id": "macro_미국_cpi_둔화_금리경로_0",
+      "ticker": "MACRO",
+      "name": "미국 CPI 둔화·금리경로",
+      "ax": "rates",
+      "title": "Fed rate hike odds plummet as US PPI inflation sees largest drop since April 2025 - Crypto Briefing",
+      "link": "https://news.google.com/rss/articles/CBMipwFBVV95cUxNOWpscUQxVExsVVJRYWhDOTNnb0theFVVYVpsdG5hejdWZXlvR01TMTk5YXNwUlU1SElzcjlOanZsQ2hOVHhmZXNpN0lCal9qaGRHTFFlRlpXRmdlZXhScVZkRUgyTW80bHdEWHRpcW1scDZZODAzWDhPbGtmVHlHeVYyaXAtbTVYUEhpWGVmdXdFVm1Ec1FPcFd5RmJici1MRzEzcGhGdw?oc=5",
+      "published": "2026-07-15T13:15:19.000Z",
+      "source": "Crypto Briefing",
+      "st": 3,
+      "a": "미국 PPI, 2025년 4월 이후 최대 낙폭 기록으로 Fed 금리 인상 기대 급감",
+      "w": "인플레 압력 완화로 매크로 게이트(금리·VIX) 압박이 약화되는 관측이나, 실질 수요 둔화 여부를 동반 확인해야 하이퍼스케일러 capex 지속성 판단 가능."
+    },
+    {
+      "id": "qcom",
+      "ticker": "QCOM",
+      "name": "Qualcomm",
+      "title": "Qualcomm to Post Fiscal Third-Quarter Results July 29 - Stock Titan",
+      "link": "https://news.google.com/rss/articles/CBMivAFBVV95cUxNVnBlTEZMdVhEZmZwQXVYbWJaMWJtaXpzNUVfQWVvSlFjRVJsbGF1UGNRaDNMcnNQOTZ3SjZFbFl1VGRQWWZKaXM0N3Y5OVIyQnJUalhiekc4ZlJsVkhNTkt5VUd2VzVTWDFZZU1hbHhiUFBXMGRBVV9jWGc2eUNkN2pCSEw3ekpISWdiZkFGa0lpMjJDQldvNUVDNXo2c3EzdnkzX0JyaFZNR21yVFpTSkI3VjNvMURIZVM1Yw?oc=5",
+      "published": "2026-07-15T13:13:27.000Z",
+      "source": "Stock Titan",
+      "st": 1,
+      "m": 1,
+      "a": "Qualcomm, 2026년 회계연도 3분기 실적 발표일 7월 29일로 확정",
+      "w": "실적 발표 일정 공개로 펀더멘털 확인 이벤트 예고이며, 발표 전까지 수급 변동성 확대 가능성 있는 중립적 일정 공시에 그침.",
+      "mv": 2
+    },
+    {
+      "id": "smci",
+      "ticker": "SMCI",
+      "name": "Supermicro",
+      "title": "Supermicro Expands End-to-End DCBBS Liquid Cooling Portfolio with Rear Door Heat Exchangers for High-Density AI and HPC Infrastructure - Supermicro",
+      "link": "https://news.google.com/rss/articles/CBMiogJBVV95cUxONXVUbXpZVGJXSjlOUk96NmEzMzdpR1ZfRFlRalplTno1Ul9Ja2hvREZfaFVPMDdqUkVOQWdTRWUyVWlhR0J2NnBmQ2tvaTA0X2FSS3RUcTRhY3R2R0w1RkYxTGhaTFNkZUt3OE91UW0wZ01IeUlkb1NCYXk2Uno2QTNQdXdiZ1Etem80bVEtTmE3NTJyQ3g3LS1YR2JLemFWblowYjBFSDNLcFVXQ3VpOTlJN2c4cjVkWkNRRTZjT2VYcGRUT1lXTW5OZUFJOVVUcjlaVXFVUnV6SkdzR1VYWGFLN2o2Wko0THFlTS16QTNOSzFPVWFzdDNYVmJoX0VOOVRFcmtSN24tbWQ4X0hTUmphQkJ2cUQ4eFNQTVNycHI3Zw?oc=5",
+      "published": "2026-07-15T13:08:27.000Z",
+      "source": "Supermicro",
+      "st": 3,
+      "m": 2,
+      "a": "Supermicro, 고밀도 AI·HPC 인프라용 후면 도어 열교환기 포함 DCBBS 액체냉각 포트폴리오 확장 발표",
+      "w": "액체냉각 제품군 구체적 확장은 고밀도 AI 서버 수요 대응 역량 강화를 시사하는 펀더멘털 호재이나, 실제 수주·출하 확정 전까지 효과 크기는 불확실.",
+      "mv": 2
+    },
+    {
+      "id": "vrt",
+      "ticker": "VRT",
+      "name": "Vertiv",
+      "title": "Vertiv sets July 29 call to discuss second-quarter results - Stock Titan",
+      "link": "https://news.google.com/rss/articles/CBMiuwFBVV95cUxPLWtTMXFxQ1YwZ2Y1LWwxZlNpLVF4RndIVG1WRXFKM015LWc5bWlQSF91YV9jUlczamhxdDRzbWctR1NIMlpMbU5GSzRwaTlKcWNYSkVmWDJ6cHlyc3I5bEptcmlkeThpaElIbmJvOW52X2Q3b2NnZ3Vyay1feVlVRFl0ckRBUHM5NmRxcDl1Tm52d0lqUDRya0FaV2N3TXhXSEZPUFc5MGlfallLVll1THJlRXVSWFJHTVgw?oc=5",
+      "published": "2026-07-15T12:00:00.000Z",
+      "source": "Stock Titan",
+      "st": 1,
+      "m": 1,
+      "a": "Vertiv, 2분기 실적 발표 컨퍼런스콜 7월 29일로 일정 확정",
+      "w": "실적 발표 일정 공시로 펀더멘털 확인 이벤트 예고이며, 가이던스 기대감 선반영 여부에 따라 발표 전 수급 변동 가능성 있는 중립적 일정 공시에 그침.",
+      "mv": 2
+    },
+    {
+      "id": "macro_반도체_ai_과열_조정_1",
+      "ticker": "MACRO",
+      "name": "반도체 AI 과열 조정",
+      "ax": "chip",
+      "title": "美 수출통제, AI칩 판로까지 조인다…고객 검증 새 병목 - 글로벌이코노믹",
+      "link": "https://news.google.com/rss/articles/CBMihgFBVV95cUxOQlF5ZDE1NVljZWRfVzNRVE1lTVNPMVNyWUhtVzNJQkVweTRYaWpBaGgwU1p6YzVUQkZ1RFNCczNLUmRBSFRkazRJRHRaYTMydmdrRHc3cElyUGhkaWI5bTNjVXdYdF9kNXlnT3E5Z3VSa1BaXzZHeXE5YUtpZWpWWDZqVjZjUQ?oc=5",
+      "published": "2026-07-15T11:17:12.000Z",
+      "source": "글로벌이코노믹",
+      "st": 3,
+      "a": "미국 수출통제 강화로 AI칩 판매 전 고객 검증 절차가 신규 병목으로 부상",
+      "w": "L2·L3(학습 클러스터·추론 인프라) 수요 충족 속도 저해 요인으로 작용, 상류 하이퍼스케일러의 GPU 조달 리드타임 추가 조임 가능성이라는 관측."
+    },
+    {
+      "id": "macro_중국_gdp_부진_수요둔화_1",
+      "ticker": "MACRO",
+      "name": "중국 GDP 부진·수요둔화",
+      "ax": "x_중국gdp부진수요둔화",
+      "title": "China’s Economy Grows at Weakest Pace Since 2022 - WSJ",
+      "link": "https://news.google.com/rss/articles/CBMingFBVV95cUxPaHA2eWEya3pIcjd5MjZYSVRoODJvOHB2MDNBdEszZ3dETTlKbERybV9VNjk1R0JWcFJCY1VnUm9WN3BHOGktWDAzclBYckNRTzJJV2M1UHN1RFV4c3ltTmVGNndGUmloTVk5V2FKN2FPV3pMMVRLY1Bnc29qSWxfYmkySV92OU8zUVBNbGNYZzcyeDhDTF9nUzJ1cDBBUQ?oc=5",
+      "published": "2026-07-15T10:42:00.000Z",
+      "source": "WSJ",
+      "st": 1,
+      "a": "중국 경제, 2022년 이후 최저 성장률 기록으로 경기 부진 현실화",
+      "w": "중국 내 AI 인프라 투자 수요 기반 약화 신호로, L4~L5(데이터센터·전력) 현지 capex 확대 모멘텀 둔화 압력."
+    },
     {
       "id": "sec",
       "ticker": "005930",
@@ -139,6 +220,32 @@
       "w": "중국 내수 소비 회복이 제한적일 경우 L7(데이터센터 수요)·L8(에너지 인프라) 투자 확대 속도 둔화 가능성이라는 관측."
     },
     {
+      "id": "macro_중국_gdp_부진_수요둔화_1",
+      "ticker": "MACRO",
+      "name": "중국 GDP 부진·수요둔화",
+      "ax": "x_중국gdp부진수요둔화",
+      "title": "China’s economy grows at one of lowest rates in decades - Financial Times",
+      "link": "https://news.google.com/rss/articles/CBMihAFBVV95cUxQMXlEeTFQUjVUWVVJLUY5ZXRCNW1nUnFiWkR2bThYR2RyTVExaHk0cWI2eEcxVHd4UjBwRmlXaGxQaXRKU2FHaHhORUZuU0RZQ2FpdWZpNnNZdHNlcmhnZDhWOTJKXzNVN1hPNExGZW8wWjJqNUt6al96YTFySGZjZi1namM?oc=5",
+      "published": "2026-07-15T08:15:01.000Z",
+      "source": "Financial Times",
+      "st": 1,
+      "a": "중국 GDP 성장률, 수십 년 최저 수준 근접으로 구조적 둔화 우려 확산",
+      "w": "글로벌 AI 반도체 수요의 중국발 하방 리스크가 확인되며 L1~L3 레이어 전반의 수요 증가 강도 약화 관측."
+    },
+    {
+      "id": "macro_중국_gdp_부진_수요둔화_1",
+      "ticker": "MACRO",
+      "name": "중국 GDP 부진·수요둔화",
+      "ax": "x_중국gdp부진수요둔화",
+      "title": "China's 2nd quarter GDP slows to 4.3% amid weak consumption, below 2026 target - Japan Wire by Kyodo News",
+      "link": "https://news.google.com/rss/articles/CBMiWkFVX3lxTE43ZzJDOV9qSWpDT0VHZExMa3pxaXljNWR2dGlEVUdQVkZHUG1lZ3ptT1BvcURoQWludWdndF9DSTMwbF9pVnNRRmpodVNLczZ3dUVTb0lwZ1k5Zw?oc=5",
+      "published": "2026-07-15T07:03:29.000Z",
+      "source": "Japan Wire by Kyodo News",
+      "st": 3,
+      "a": "중국 2분기 GDP 4.3% 성장으로 목표치 하회, 소비 부진이 주요 원인",
+      "w": "소비 기반 약화로 클라우드·AI 서비스 수익화 속도가 지연될 수 있어 L3 추론 인프라 투자 회수 전망에 하방 압력."
+    },
+    {
       "id": "macro_중국_gdp_성장_급둔화_1",
       "ticker": "MACRO",
       "name": "중국 GDP 성장 급둔화",
@@ -150,6 +257,19 @@
       "st": 3,
       "a": "중국 Q2 GDP 성장률 4.3%로 2022년 말 이후 최저치 기록",
       "w": "하이퍼스케일러 capex 수요의 주요 변수인 중국 AI 인프라 투자 모멘텀이 둔화될 수 있다는 관측."
+    },
+    {
+      "id": "macro_중국_gdp_부진_수요둔화_1",
+      "ticker": "MACRO",
+      "name": "중국 GDP 부진·수요둔화",
+      "ax": "x_중국gdp부진수요둔화",
+      "title": "Instant View: China’s second-quarter economic growth misses market forecast - 1450 AM 99.7 FM WHTC",
+      "link": "https://news.google.com/rss/articles/CBMikwFBVV95cUxNQWZuWXNWQVZReWFHbmJnSTFpejdQSzNMVlFlTlpmZ0oyUE9RQXFqMXYzZV9lb19vLUVXZFRBTVBQM3VBQ1BZNzRSLXhWemNjWmxSY19jZTkzeHZyblFYZThXdTJodTVLREE1emRKTWQ2TzdrVy1XbW5vaWNDTm1EdHhJR1AyZzNUeFRDZFBxci1OUVU?oc=5",
+      "published": "2026-07-15T05:30:09.000Z",
+      "source": "1450 AM 99.7 FM WHTC",
+      "st": 3,
+      "a": "중국 2분기 성장률, 시장 전망치 하회로 즉각적 경기 실망감 형성",
+      "w": "예상치 미달 확인으로 매크로 게이트(F&G·VIX) 경계심 자극 가능성, 중국 연계 AI 인프라 수요 전망 하향 조정 리스크."
     },
     {
       "id": "macro_중국_gdp_성장_급둔화_1",
@@ -177,6 +297,19 @@
       "a": "테슬라 FSD v14 Lite, HW3 차량에서 양호한 성능에도 제한적 배포 유지 중",
       "w": "FSD 상용 확산 속도가 예상보다 더딘 것으로 관측되어 단기 FSD 수익화 일정에 소폭 부정적 시그널.",
       "mv": 2
+    },
+    {
+      "id": "macro_중국_gdp_부진_수요둔화_1",
+      "ticker": "MACRO",
+      "name": "중국 GDP 부진·수요둔화",
+      "ax": "x_중국gdp부진수요둔화",
+      "title": "China's second-quarter economic growth misses market forecast - Yahoo Finance",
+      "link": "https://news.google.com/rss/articles/CBMilwFBVV95cUxPQmdBUmhROXdFZl9YaEs3bUJlUk1HLXE2UDNrRDZ4VEctVkNpR2VQQ3ZlbWt6RFMzd3p2WTROWnNFTlc3ZGVNX0laeGVRaHpxSlNzczlvOHJnODU3SVV5UG80Q0VmZzBKQkQ0Z2k3S1k0UWNYM1RaSXNWemloU0x4ODdha0ZuTTktN244MWt2QThPYzZJZWw0?oc=5",
+      "published": "2026-07-15T02:38:00.000Z",
+      "source": "Yahoo Finance",
+      "st": 3,
+      "a": "중국 2분기 GDP, 시장 컨센서스 하회로 경기 회복 기대 재조정",
+      "w": "중국발 수요 둔화가 글로벌 AI 반도체 소비 증가 속도를 제한하는 요인으로 작용한다는 관측."
     },
     {
       "id": "macro_중국_gdp_성장_급둔화_1",
@@ -435,19 +568,6 @@
       "mv": 2
     },
     {
-      "id": "macro_미국_cpi_둔화_금리경로_0",
-      "ticker": "MACRO",
-      "name": "미국 CPI 둔화·금리경로",
-      "ax": "rates",
-      "title": "Treasury yields hit 16-month high as Fed hike bets surge - MSN",
-      "link": "https://news.google.com/rss/articles/CBMi9wFBVV95cUxNcEozSUNMMWhuZFdoLUtnVUViNVUxQ3ZoTFZyMEFueXhSSnJkdDlDWUs2dENhZktia1hHMUUyWnJKQi1udTJXX0hIa2pIU3pXYVcxRXBzdTFUWFJXUkl2X0hCWmt1UDk5U3p3Y2xMTklpRGp1anpQTWhqUUhkVWdhN3hpbXoweldxZkNEMzV1R3c5alJoNjBnQl83UEMtd21Jc2VBc0pnNUZlT083TkNCZWxDdFk0dWhUZXpCRUZzUU14SHVVbXY1bzg5QndPZWN1QmUxb0J6a2VuLWUyMDA0UVhLZ3VnUVpwWHVjYjljUThuUFFuMEhN?oc=5",
-      "published": "2026-07-14T11:22:46.000Z",
-      "source": "MSN",
-      "st": 3,
-      "a": "국채 금리 16개월 최고치 도달, 연준 인상 베팅 재점화",
-      "w": "장기금리 상승은 L7·L8 인프라 프로젝트의 자본비용을 높여 데이터센터·전력망 capex 집행 속도를 제약하는 방향으로 작용."
-    },
-    {
       "id": "asmpt",
       "ticker": "0522",
       "name": "ASMPT",
@@ -489,6 +609,19 @@
       "mv": 2
     },
     {
+      "id": "macro_반도체_ai_과열_조정_1",
+      "ticker": "MACRO",
+      "name": "반도체 AI 과열 조정",
+      "ax": "chip",
+      "title": "[이슈&논란] \"삼전 직원, SK닉스 이직 18개월간 금지\" 위반시 1일 500만원 판결…낸드플래시 전쟁, 법정까지 번진 이유 - 뉴스스페이스",
+      "link": "https://news.google.com/rss/articles/CBMiW0FVX3lxTE1WdmVpcmZyck5IajQwWG9rM3JHNUZkdDN4Y1E2alVSZDNSR09IU3JJU0ZjcTY1TEZXMk9IcUZ2eGJaTXNIbkF6UkNZY3BaSTktVGZaVmNpWi1pTXM?oc=5",
+      "published": "2026-07-14T04:16:44.000Z",
+      "source": "뉴스스페이스",
+      "st": 3,
+      "a": "삼성전자 직원의 SK하이닉스 이직 금지 판결로 낸드 기술 유출 분쟁이 법정 단계 격화",
+      "w": "L2~L3 레이어에 필요한 고대역폭 메모리·낸드 공급망의 인력·기술 병목이 법적 마찰로 심화될 수 있다는 관측."
+    },
+    {
       "id": "bneck_l4_pkg",
       "ticker": "MACRO",
       "name": "L4 · 패키징 캐파",
@@ -523,18 +656,6 @@
       "st": 3,
       "a": "AI 칩 패키징 캐파 부족이 엔비디아 포함 전 업계의 새로운 병목으로 부상, 글로벌 capex 경쟁 심화",
       "w": "L4(첨단 패키징) 병목이 L1~L3 모델·칩 공급망 전체의 처리량을 제한하는 구조적 게이트로 확인되는 관측."
-    },
-    {
-      "id": "bneck_l3_dram",
-      "ticker": "MACRO",
-      "name": "L3 · DRAM/HBM 가격·공급",
-      "title": "메모리 3사 올해 HBM 생산량 2배 이상↑···내년 가격 인상 본격화 - 시사저널e",
-      "link": "https://news.google.com/rss/articles/CBMickFVX3lxTE5KalI1RE8xX2hJczV5VXNTZXF6azdYLWpOcmR5c3BreG1SbW00RnpLaTE1bG9ZbWdab29qTmpvQzJWZzRPSXNvZVNpYi1jMWF3TV9VZkxGRlpoc1dmWlVCblpOSzRHa0h5RHlYUzVhNk02UdIBdkFVX3lxTE14dU9FR3FacVAyWXJWR3pOZFhGNFJSbC10cXhwdUxjZ0FhVHB5bW1fTVRhU3Zqb2J0cVJlcDZ1aHBpTWhZRWNYWXFpNmpicmhBRW40R1BMSEszdVhubW5JSDhla0pGWGJCMk9UUXRpZXV6VlFrTHc?oc=5",
-      "published": "2026-07-14T01:54:38.000Z",
-      "source": "시사저널e",
-      "st": 3,
-      "a": "메모리 3사 올해 HBM 생산량 2배 이상 확대, 내년 가격 인상 본격화 전망 제기",
-      "w": "L3 HBM 공급 레이어에서 단기 증산과 내년 가격 인상이 공존하는 구조로, AI 가속기 BOM 비용의 시간차 상승 압력 관측."
     },
     {
       "id": "sndk",
@@ -590,19 +711,6 @@
       "a": "Palantir, 2026년 2분기 실적 발표 일정 및 웨비나 날짜 공식 공지",
       "w": "실적 발표 일정 확정은 이벤트 드리븐 수급 주목 시점 예고로 중립적 수급 시그널.",
       "mv": 2
-    },
-    {
-      "id": "macro_반도체_ai_과열_조정_1",
-      "ticker": "MACRO",
-      "name": "반도체 AI 과열 조정",
-      "ax": "chip",
-      "title": "AI 랠리에 균열… 주식 투매 불러온 ‘반도체 고점론’ - Chosunbiz",
-      "link": "https://news.google.com/rss/articles/CBMiiAFBVV95cUxOc2FzZi1tV0N1NThoX0hjTmhCS2gwQ3pBSmtyN0dMLXdFTHN1ZVBGVC0yVGFWeGNVd2stakpPbDg0bl9xNXQ2bGRhc0cyY0VoYnlCSUtzeHlmR2NPZ1p5RzQwR0h6NGZDSHNKdC1wdDZEdm5QUlcwcTFCUnAzSG40dVI0YjFmSzBj?oc=5",
-      "published": "2026-07-13T21:01:17.000Z",
-      "source": "Chosunbiz",
-      "st": 3,
-      "a": "반도체 고점론 확산으로 AI 랠리 균열 및 주식 투매 현상 관측 제기",
-      "w": "L3~L4 반도체 레이어의 밸류에이션 피크 우려가 매크로 게이트 F&G 지수 하락 및 AI 인프라 투자 심리 냉각의 조기 신호로 관측."
     },
     {
       "id": "twng",
@@ -820,6 +928,20 @@
       "m": 1,
       "a": "AMD FSR 멀티프레임 생성 8x 모드 실험적 드라이버 설정 포착",
       "w": "GPU 소프트웨어 기술 업데이트 관측으로 게임·AI 수요 확대 가능성 시사하나 매출 기여까지 시간 필요라는 관측.",
+      "mv": 2
+    },
+    {
+      "id": "lite",
+      "ticker": "LITE",
+      "name": "Lumentum",
+      "title": "Press Release: Lumentum Announces Reporting Date for Fourth Quarter and Fiscal Year 2026 Results - Moomoo",
+      "link": "https://news.google.com/rss/articles/CBMisgFBVV95cUxPVlRCNnpDbjdTOGh5RU5oc05iakxHbk9HSlVLRlJ5M3VQRmVfbW1ZU1NYUVAzRUlmdU92UnZDRXRkZm9Yd3MxeENHbHlwck5jYWlrVlhrbGF1aklvejdLU2lNUEhyVlFRcjN2N200U1VuMWhVLWs1UEUxTDFqLXJXNEp3YmpUbzhQUjUtd3JyTXViNVhaMmZiTmdtYzJyOFBsejJyMzV3blVQQXhRSjdabUpR?oc=5",
+      "published": "2026-07-13T12:04:00.000Z",
+      "source": "Moomoo",
+      "st": 9,
+      "m": 1,
+      "a": "Lumentum, 2026 회계연도 4분기 및 연간 실적 발표 일정 공시",
+      "w": "실적 발표 일정 확정으로 펀더멘털 확인 이벤트가 예고되며, 발표 전 수급 변동성 확대 가능성 있는 중립적 일정 공시에 그침.",
       "mv": 2
     },
     {
@@ -1321,20 +1443,6 @@
       "mv": 2
     },
     {
-      "id": "vrt",
-      "ticker": "VRT",
-      "name": "Vertiv",
-      "title": "Vertiv Plans Over 1,000 New Jobs With US$15 Million - Mexico Business News",
-      "link": "https://news.google.com/rss/articles/CBMinwFBVV95cUxPMmpHSm1kSGE1SmRHUWZlVTZpOU1rLUUyWmdralRnODA3UVpPTzVNaC1ZQjZhV3M1N1ZVWkNFYVhJblYyaEluQjU0dmtqTFdDX0hXM2F1aXRfamd0M2cwQlBWR0szcWFobmNWbEFkTmpzRm9BMHZ2SWhnMlRHWVdCUXVNZUZ3aVpLQWVTQndJVUNhTjROMDFFN3licDU3X00?oc=5",
-      "published": "2026-07-10T16:51:16.000Z",
-      "source": "Mexico Business News",
-      "a": "Vertiv, 멕시코에서 1,000여 명 신규 고용 및 1,500만 달러 투자 계획 발표",
-      "w": "생산 능력 확충 투자라는 펀더멘털 사실이나, 단기 실적보다 중장기 공급망 확장 효과로 영향 강도는 완만.",
-      "m": 2,
-      "st": 3,
-      "mv": 2
-    },
-    {
       "id": "mu",
       "ticker": "MU",
       "name": "마이크론",
@@ -1717,6 +1825,20 @@
       "mv": 2
     },
     {
+      "id": "tsla",
+      "ticker": "TSLA",
+      "name": "테슬라",
+      "title": "NHTSA Signals Openness to Ending Steering Wheel Requirement for Driverless Cars - BASENOR - Tesla Accessories",
+      "link": "https://news.google.com/rss/articles/CBMitAFBVV95cUxQaHUtZEtGUm5YSThFRlJieVZoOVJ2ZjRZVnYwM3c5dzJkTWpnQ1BzWTNzdzNLaUtmSEhMQnpHTnZiY3cxNlJQbVpNd0U4NGxQSVRySWllLVpoQVBvNUdpZWRIckZmQWYwUlBmV1U1Sk9FcFFPai10cnlVLUtzLV9XeWdQQTlVaFQwSGczbW5sYkp4eWptSlU0OEczVTUyR1o1NlA3SjJxbUFNRkhIWDMza2hrVFA?oc=5",
+      "published": "2026-07-09T16:17:53.000Z",
+      "source": "BASENOR - Tesla Accessories",
+      "st": 3,
+      "m": 2,
+      "a": "NHTSA, 자율주행차 대상 스티어링 휠 의무 규정 완화 검토 신호 표명",
+      "w": "완전 자율주행 규제 완화 방향성은 테슬라 FSD 사업의 장기 펀더멘털 호재 관측이나, 아직 확정 규제 변경이 아닌 검토 단계에 그침.",
+      "mv": 2
+    },
+    {
       "id": "mu",
       "ticker": "MU",
       "name": "마이크론",
@@ -1801,6 +1923,18 @@
       "mv": 2
     },
     {
+      "id": "bneck_l6_opt",
+      "ticker": "MACRO",
+      "name": "L6 · 옵티컬 리드타임",
+      "title": "Gold in the Light: The Next Strategic Destination of AI Through a Tech Investor’s Lens - 36 Kr",
+      "link": "https://news.google.com/rss/articles/CBMiU0FVX3lxTE9SUm51am9meHE0OHZmOEhuY181ai1hUEF5NDFpX1p6VU5oUXJpckRJUWQyS3FZNGd1ZlJCU0lrcW9PcnFtYUNNYnlRdFZlMEJBV0pz?oc=5",
+      "published": "2026-07-09T11:03:21.000Z",
+      "source": "36 Kr",
+      "st": 3,
+      "a": "광 인터커넥트(옵티컬) 기술이 AI 인프라의 차세대 전략 자산으로 주목받는 시각 제기",
+      "w": "L6(네트워킹·옵티컬) 레이어의 리드타임 및 공급 병목이 전체 AI 스택 확장 속도를 제한하는 핵심 게이트로 부상할 수 있다는 관측."
+    },
+    {
       "id": "bneck_l8_pwr",
       "ticker": "MACRO",
       "name": "L7·L8 · 전력 병목",
@@ -1823,20 +1957,6 @@
       "st": 3,
       "a": "전력망을 군사·국가안보 핵심 인프라로 규정하는 전략 분석 공개",
       "w": "그리드 안보화 담론은 L8 전력 인프라 투자에 대한 정부 개입·규제 강화 가능성을 높여 AI 데이터센터 전력 조달의 정책 리스크 게이트를 새롭게 형성하는 신호."
-    },
-    {
-      "id": "smci",
-      "ticker": "SMCI",
-      "name": "Supermicro",
-      "title": "Supermicro launches Kubernetes edge AI appliances - Engineering.com",
-      "link": "https://news.google.com/rss/articles/CBMihAFBVV95cUxONllJcGZUVGpSdHBZNnQxdVktZ05vNlRqNE5sUzVwaFhhVkRlSkphdHBkazljOXdNWVlmNDlwUHkyZUJlc2h5V1Nzb0E3V1dFamtNV25WQUVTNS1RWjh6OG1FUGJMNzk2WFU0NGVVVjhxMkhyc1c1a2QxS0dtekprNWFZMUw?oc=5",
-      "published": "2026-07-09T09:41:55.000Z",
-      "source": "Engineering.com",
-      "st": 3,
-      "m": 2,
-      "a": "Supermicro, Kubernetes 기반 엣지 AI 어플라이언스 신제품 출시",
-      "w": "엣지 AI 시장을 겨냥한 신제품 라인업 확대로, 신규 수요처 개척 측면에서 중기 펀더멘털에 소폭 긍정적이나 확정 수주는 미확인.",
-      "mv": 2
     },
     {
       "id": "bneck_l6_opt",
@@ -1882,6 +2002,20 @@
       "id": "rmbs",
       "ticker": "RMBS",
       "name": "Rambus",
+      "title": "Rambus launches DDR5 9600 server memory chipset - Investing.com",
+      "link": "https://news.google.com/rss/articles/CBMipwFBVV95cUxOOUNnb1I4NHNsMFdyY29TUW13dUdtQzdBUWRMaEg5cEw3ZC1KZjFfMkNfQ2JsUmdxdVBoeU9GNVZvYmlrMThXMkhNaWU3YW1tcDNJQTJMT3ZoOHVLRk5PQy1OZHEzYmtjN3hrZ05EVjBUZ2RTUWVvODBELWljZkJkUzhWT0lkWHpDckt3OWs2M2pkUVFoUnd2eXVscmwzWnNGaHBlOGVLWQ?oc=5",
+      "published": "2026-07-08T22:29:51.000Z",
+      "source": "Investing.com",
+      "st": 3,
+      "m": 2,
+      "a": "Rambus, DDR5 9600 서버 메모리 칩셋 신제품 출시",
+      "w": "최신 고속 서버 메모리 칩셋 출시는 AI 서버 메모리 시장 내 제품 경쟁력 강화를 나타내는 펀더멘털 호재이나, 실제 고객 채택 및 출하량 확인 전까지 재무적 영향은 미지수.",
+      "mv": 2
+    },
+    {
+      "id": "rmbs",
+      "ticker": "RMBS",
+      "name": "Rambus",
       "title": "Rambus Announces DDR5 9600 Server RDIMM Chipset - TechPowerUp",
       "link": "https://news.google.com/rss/articles/CBMiigFBVV95cUxPX0RFOFJkLS12RFRIaU1ZQ1lvUjdUTG02RXpHTlBBTktxQm1zYzRZRjhIQi1RWVphT2hSWExmcWZ1d21lSzVnNmF0MWRmSmdqTVJjSjU4cFdFUWlvVk5tcGhJNDBDS1BLa2hEVjhDaVFXZ3U2bVBsVTFUeExqZFBPWWt4cGtKNW1Qc0HSAY8BQVVfeXFMUGplTWlDZ3IwSV9NaWNEZFIzbDQ4MkFveklmNVhUX3BxQWFuWmtaUGRXZ3g4Y1NRSUFNTE9fOHVWeVN2MVNxY2VLelZIRnRscUlXeHdmQ1JVYU5JYURQNTlieEJGcmt4X1kzRVJ1YzR3R0ZiOUpFWjNhS3NFYklJdHpZR1o3b3UtV0tEUjhxVEk?oc=5",
       "published": "2026-07-08T21:06:05.000Z",
@@ -1890,20 +2024,6 @@
       "w": "고속 서버 메모리 신제품 출시로 AI 서버 시장 내 포트폴리오 강화라는 펀더멘털 호재.",
       "m": 2,
       "st": 3,
-      "mv": 2
-    },
-    {
-      "id": "rmbs",
-      "ticker": "RMBS",
-      "name": "Rambus",
-      "title": "Rambus Enables Next-Generation AI and Data Center Platforms with DDR5 9600 Server RDIMM Chipset - Business Wire",
-      "link": "https://news.google.com/rss/articles/CBMi5wFBVV95cUxOOHdzVzloUERKNVBrYWEzNDhFdEhVM0dXRGFBenFSWkNudm1WYW0wbWh6MEhUUE1wQ01OMkNXYTV6NU5HRVVZNENjLWhnSk1DdjZGYkxSbWsydTZQd2JUOFh4Rlo1TnB2WEhEeFJuM1ZvVVpOZ2NiQUNqaFV2eUpWbENST3BfZ0xCUlVOM2xNNWhienhWVURjcjRlRHRkMnBHTEwwR2NCUHFZdkU0YmhUN2dZcF9UUEJXQkFTY254Z0dJWVlJSWw5VUVXNkhXU29VcjdXMDFCaXBDbDBtX2xiN0dtNnRSODQ?oc=5",
-      "published": "2026-07-08T21:00:36.000Z",
-      "source": "Business Wire",
-      "a": "Rambus, AI·데이터센터 차세대 플랫폼용 DDR5 9600 서버 RDIMM 칩셋 공식 출시 발표",
-      "w": "9번 기사와 동일 제품 출시 이슈 공식 배포로 AI 서버 메모리 인터페이스 시장 공략 본격화, 중장기 매출 기여 호재 관측.",
-      "m": 2,
-      "st": 1,
       "mv": 2
     },
     {
@@ -1987,32 +2107,6 @@
       "a": "마벨, 자사 테라링스 칩 기반 패킷 트리밍·자동 부하분산·UET 기술 검증 결과 공개",
       "w": "AI 네트워크 스위칭 기술 경쟁력 입증으로 펀더멘털 관점에서 소폭 긍정적이나, 상용 수주 확정 전까지는 제한적 영향에 그침.",
       "m": 2,
-      "st": 3,
-      "mv": 2
-    },
-    {
-      "id": "bneck_l6_opt",
-      "ticker": "MACRO",
-      "name": "L6 · 옵티컬 리드타임",
-      "title": "Photonic Packaging Market Growth Forecast to 2035: Co-Packaged Optics and Hyperscale Data Centers Drive Expansion - News and Statistics - IndexBox",
-      "link": "https://news.google.com/rss/articles/CBMi6AFBVV95cUxQVzBxaUg2MVoxbGtIUmd0SEZZMnZPbjBWRUtyUldmdDZ4ck1hZWE2YmFPNGdwRmxYT3VnRTlPR2ZSQlpuR2prejZvTklMT2JiMlVFZWZkTHBNeUlLYWNMNmw3ZzdxZG00c3VWemNnMTNYMkVacVVpM1BPdXRMb2ZBUmJGZmtEdUxQQndpU0RlM3JBS0k2LTBiaFZPeVFFeUdpUWhzbmg3Y2FrNDJBTlpBdkRDQ1gxa1VYMlRoZnphaDRzUHpSUjQ3NjNQdUpVWjUwMy1jVHhLZF9STEdvNTN3bXRGa3hTOXFH?oc=5",
-      "published": "2026-07-08T14:52:23.000Z",
-      "source": "IndexBox",
-      "st": 3,
-      "a": "코패키지드 옵틱스·하이퍼스케일러 수요 주도로 포토닉 패키징 시장 2035년까지 고성장 전망 발표",
-      "w": "L6 광학 인터커넥트 레이어의 중장기 수요 확대가 확인되며, CPO 리드타임 단축 여부가 L5~L7 데이터센터 대역폭 병목 완화의 핵심 변수로 부상 중이라는 관측."
-    },
-    {
-      "id": "tsla",
-      "ticker": "TSLA",
-      "name": "테슬라",
-      "title": "JPMorgan Warns: Tesla-SpaceX Merger No Easy Feat — Watch for Three Key Signals - finance.biggo.com",
-      "link": "https://news.google.com/rss/articles/CBMidkFVX3lxTFByc1cxUkpwZWxscWJFMGV5eEptSTZjSUVObmUyNVlrYjBZeXJpYi1WN1liTjRRY3I2UHZ6N05tRlRwOWYzSmxsZVdPNXFkQUVkb0ZYYWlKNDJEalFDbEVyM1RncG85d1BnR2g1NW1SUTdWX1BaZGc?oc=5",
-      "published": "2026-07-08T01:26:00.000Z",
-      "source": "finance.biggo.com",
-      "a": "JPMorgan, Tesla-SpaceX 합병 난항 가능성 및 3가지 관찰 신호 경고",
-      "w": "합병 관련 확정 사실 없는 시나리오 경고로 단기 센티먼트 영향에 그치며 실현 여부 불확실.",
-      "m": 1,
       "st": 3,
       "mv": 2
     },
@@ -2238,20 +2332,6 @@
       "m": 1,
       "a": "MLCC 공급 부족·반도체 기판 판가 상승 배경으로 삼성전기 목표가 300만원 제시",
       "w": "6번 기사와 동일 사건을 다룬 중복 보도로, 추가 정보 없이 목표가 상향 리비전 확인에 그침.",
-      "mv": 2
-    },
-    {
-      "id": "qcom",
-      "ticker": "QCOM",
-      "name": "Qualcomm",
-      "title": "This AI Chip Stock Just Signed Massive Deals With 3 Hyperscalers, and It Still Looks Like a Great Buy Right Now (Hint: Not Nvidia or Intel) - Yahoo Finance",
-      "link": "https://news.google.com/rss/articles/CBMikwFBVV95cUxQYUxIOHRwSFhTNUR4Mk9iQzNBbFBWOTg5OG5sYlo3ckp4NnZlbnRxSDRKVFBRenJoZTRzNlZmcE9tTVZvWFY5QkRMMHcyN2R5SWpNSWVfcnB4T2VCZlYxcm84ZHpaRmVVc05iVUx3cC16TnZJWk81TzFNbzdTT2s5Z3I0emhaaTFpUUF6endSZTdzYUU?oc=5",
-      "published": "2026-07-05T08:50:00.000Z",
-      "source": "Yahoo Finance",
-      "a": "Qualcomm, 3개 하이퍼스케일러와 AI 칩 대규모 공급 계약 체결 보도",
-      "w": "복수 하이퍼스케일러 동시 수주는 AI 칩 매출 다변화 및 규모 확대의 강한 펀더멘털 호재로, 가이던스 상향 여지와 밸류에이션 재평가 모멘텀 제공 관측.",
-      "m": 2,
-      "st": 3,
       "mv": 2
     },
     {
