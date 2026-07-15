@@ -1,24 +1,14 @@
-# update-pulse.yml — 「시장 맥박」 동인 브리핑(pulse.json) 4~6회/일 재합성
+# update-pulse.yml — 「시장 맥박」 동인 브리핑(pulse.json) 재합성
 # ─────────────────────────────────────────────────────────────
-# ⚠️ 운영자 수동 설치 필요: GitHub App 권한 부재로 Claude 는 .github/workflows/ 를 직접 커밋 못 함(403).
-#    이 파일을 .github/workflows/update-pulse.yml 로 복사하고 커밋하면 활성화된다.
-# 전제: repo secret ANTHROPIC_API_KEY (update-news 와 동일 키 재사용).
-# 특징: 게이지는 프런트 런타임(/api/fx·signals.json)이라 워크플로 불필요 — 이 크론은 '동인 합성'만 담당.
-#       pulse.json 은 deploy.yml paths-ignore 에 없다 → 커밋 시 자동 배포되어 사이트에 도달.
-# 가드: pulse.json.gen(epoch) 기준 3h 이내면 스킵(정시 다중 트리거의 중복 방지). 수동 실행은 우회.
+# 2026-07-15: 자동 스케줄 은퇴 → 맥박 합성을 update-news.yml 에 편승(뉴스 세션마다 1일 2회 재합성).
+#             검증 안 된 별도 크론 대신 검증된 크론에 편승 → 침묵 실패 위험 제거(OPS §4 편승 패턴).
+# 여기 남은 workflow_dispatch 는 전시 급변 시 '지금 당장 맥박만' 강제 재합성하는 escape hatch.
+# 전제: repo secret ANTHROPIC_API_KEY. pulse.json 은 deploy.yml paths-ignore 밖 → 커밋 시 자동 배포.
 
 name: Update market pulse
 
 on:
-  schedule:
-    # 정시 부하 회피 + 하루 4~6회. 가드가 3h 이내 중복을 스킵하므로 실효 ≈ 4~6회.
-    - cron: '18 21 * * *'   # 06:18 KST (미 장 마감 반영)
-    - cron: '18 1 * * *'    # 10:18 KST (아시아 장중)
-    - cron: '18 5 * * *'    # 14:18 KST (한국 장중)
-    - cron: '18 9 * * *'    # 18:18 KST (한국 장 마감)
-    - cron: '18 13 * * *'   # 22:18 KST (유럽·미 개장)
-    - cron: '18 17 * * *'   # 02:18 KST (미 장중)
-  workflow_dispatch: {}     # 수동(가드 우회 — 전시 급변 시 강제 재합성)
+  workflow_dispatch: {}     # 수동(가드 우회 — 전시 급변 시 강제 재합성). 정기 갱신은 update-news 편승.
 
 permissions:
   contents: write
