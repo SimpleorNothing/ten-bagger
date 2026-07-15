@@ -1,5 +1,5 @@
 {
-  "asOf": "2026-07-15T13:43:13.103Z",
+  "asOf": "2026-07-15T13:58:02.655Z",
   "source": "Google News RSS · 종목축 + 시그널축 + 병목축 (기사별 한 줄 요약 + 물질성 스크리닝)",
   "note": "사이트 종목 카드의 \"일자 + 요약\" 행 소스. 최근 95일 창 · 종목당 최신 5건(첫 로딩 페이로드 상한) · **물질성 스크리닝 통과분만**(items[].m>=1 — 2=논제/펀더멘털, 1=리비전·수급 실사건, 0=사후 등락 서술·홍보·추측·콘텐츠팜으로 제외). 탈락 기사는 삭제가 아니라 news_archive.json 에 전건 보존. 나머지 3개월치는 archive/{티커}.json 을 '더 보기'로 온디맨드 로드. 신호/소음 판단과 SIGNAL_LOG 반영은 사람/Claude의 몫 — 채점·차트에는 쓰이지 않는다.",
   "count": 167,
@@ -8,24 +8,24 @@
       "id": "macro_미국_cpi_둔화_금리경로_0",
       "ticker": "MACRO",
       "name": "미국 CPI 둔화·금리경로",
-      "q": "US CPI inflation Fed rate cut expectations 2025",
+      "q": "US CPI inflation Fed rate cut 2025",
       "mkt": "US",
       "ax": "rates"
     },
     {
-      "id": "macro_중국_gdp_부진_수요둔화_1",
+      "id": "macro_중국_gdp_성장_둔화_1",
       "ticker": "MACRO",
-      "name": "중국 GDP 부진·수요둔화",
-      "q": "China GDP Q2 2025 slowest growth economic slowdown",
+      "name": "중국 GDP 성장 둔화",
+      "q": "China GDP Q2 2025 slowest growth economy",
       "mkt": "US",
-      "ax": "x_중국gdp부진수요둔화"
+      "ax": "x_중국gdp성장둔화"
     },
     {
       "id": "macro_반도체_ai_과열_조정_1",
       "ticker": "MACRO",
       "name": "반도체 AI 과열 조정",
-      "q": "반도체 HBM SK하이닉스 수출통제 AI 칩 랠리",
-      "mkt": "KOSPI",
+      "q": "ASML SK Hynix chip rally AI demand capex",
+      "mkt": "US",
       "ax": "chip"
     }
   ],
@@ -67,12 +67,12 @@
     }
   ],
   "archive": "news_archive.json",
-  "archiveCount": 672,
+  "archiveCount": 685,
   "shardDir": "archive",
   "winCounts": {
     "353200": 15,
     "QCOM": 6,
-    "SMCI": 11,
+    "SMCI": 12,
     "VRT": 13,
     "005930": 17,
     "TSLA": 7,
@@ -98,6 +98,44 @@
     "TER": 1
   },
   "items": [
+    {
+      "id": "bneck_l8_pwr",
+      "ticker": "MACRO",
+      "name": "L7·L8 · 전력 병목",
+      "title": "Data center power shifts favor BESS, solid-state transformers - pv magazine USA",
+      "link": "https://news.google.com/rss/articles/CBMiogFBVV95cUxQOGNCb3Z0Vk5DLVMtN2YwQk0xSUtsRjhkNW9KTXR5RXZTTFVqdTJTVUlrd1N6QU5kZWdmN0lUQ0FJbXo3Vkh6bG9aZmFKVEJCTm5pT1V5VkcxVzlJNG1Pd1BSLUVuZkRkZERBcEFfQUozUFFGQ1pHSU5pUHpGMmh0bXpzbF90Rk9WcU0xRUszV1pSWVJmZUtiV0VtMG9JU0EzR2c?oc=5",
+      "published": "2026-07-15T13:57:00.000Z",
+      "source": "pv magazine USA",
+      "st": 3,
+      "a": "데이터센터 전력 인프라에서 BESS·고체변압기로의 구조적 수요 전환 관측",
+      "w": "L8(전력·그리드) 레이어에서 배터리 에너지저장·차세대 변압기로 병목 해소 경로가 이동하는 추세로, 기존 유틸리티 의존도 완화 및 신규 전력 인프라 capex 수요 증가 가능성 시사."
+    },
+    {
+      "id": "macro_반도체_ai_과열_조정_1",
+      "ticker": "MACRO",
+      "name": "반도체 AI 과열 조정",
+      "ax": "chip",
+      "title": "ASML Just Told Us The AI Boom Isn't Slowing Down (NASDAQ:ASML) - Seeking Alpha",
+      "link": "https://news.google.com/rss/articles/CBMitwFBVV95cUxNUE1hb0MtbHJMYkR6MFdJRFFoNVM2a3lFbUhWdmRPNHpKMHZ5R0xGWnF3N3BhVHhYMGhFa084MmQ1OEx3b1pHLUhYblNKQ05oRWZ2RUxCcWF2NzlDb3RfRUlMbDM4ZjNaQzd6NHJvYlFiSmxKZ1JRNkI5MzQzWVYwTldoeU15eTc3Q0dJcWoyNlZndFJORm4xWXlXTlNwcFcxajNMSzZVRmZGeFFpenVUU2ZWNzZ5OG8?oc=5",
+      "published": "2026-07-15T13:56:45.000Z",
+      "source": "Seeking Alpha",
+      "st": 3,
+      "a": "ASML, AI 수요 둔화 없음 선언 및 실적 기반 반도체 업황 강세 전망 제기",
+      "w": "L6(파운드리·장비) 레이어에서 EUV 리소그래피 수요 견조 확인으로, 하이퍼스케일러 AI 가속기 공급 사슬 병목이 장비 단에서 완화되지 않고 있다는 관측."
+    },
+    {
+      "id": "macro_반도체_ai_과열_조정_1",
+      "ticker": "MACRO",
+      "name": "반도체 AI 과열 조정",
+      "ax": "chip",
+      "title": "ASML raises outlook on strong orders for advanced chipmaking equipment - Yahoo Finance UK",
+      "link": "https://news.google.com/rss/articles/CBMiuwFBVV95cUxNQVlCTlJhbW5TWnVSTVlqZzk2WnVOZFY3QkxkV3lrZXVVSWlpQ21lbnN1OFJzWlhtd0kwTzI1VHByVWNLbjJ1V0NNR1ZPV3RRRWVnX0pub2M1TjFPZkx6M1d5b3pNNU5sQXFXbXZ5ZS1GbzhpWG9HNEVCRkZTaXFIekxUam0zT2JMN3BQMWpuc21fTmxSc2hNcERuYXpubFhUOWdXdHhrQjhJVGc2dFNmaXBXWmZlSGZvSWxn?oc=5",
+      "published": "2026-07-15T13:54:26.000Z",
+      "source": "Yahoo Finance UK",
+      "st": 3,
+      "a": "ASML, 2Q 수주 호조에 따른 연간 가이던스 상향 조정 공개",
+      "w": "L6 장비 레이어 수요 확장 확인으로, 선단 공정 capex 사이클이 가속 국면에 있다는 공급망 상류 신호로 해석 가능."
+    },
     {
       "id": "macro_미국_cpi_둔화_금리경로_0",
       "ticker": "MACRO",
@@ -137,6 +175,20 @@
       "m": 2,
       "a": "Supermicro, 고밀도 AI·HPC 인프라용 후면 도어 열교환기 포함 DCBBS 액체냉각 포트폴리오 확장 발표",
       "w": "액체냉각 제품군 구체적 확장은 고밀도 AI 서버 수요 대응 역량 강화를 시사하는 펀더멘털 호재이나, 실제 수주·출하 확정 전까지 효과 크기는 불확실.",
+      "mv": 2
+    },
+    {
+      "id": "smci",
+      "ticker": "SMCI",
+      "name": "Supermicro",
+      "title": "Supermicro Expands End-to-End DCBBS Liquid Cooling Portfolio with Rear Door Heat Exchangers for High-Density AI and HPC Infrastructure - PR Newswire",
+      "link": "https://news.google.com/rss/articles/CBMimgJBVV95cUxNNFdQWnRCZDlaYVdHWWd5SDQtRThYR0RGZzJpa3JlQ3J4dWtUcWRTVy1ZQkgzdkpjd0V5LWVOR3JRdFhoQnNKa1ZtYk96dEtmQWpnaldVbnpSWlpmNXFLa2trcXdwU05xbkh1aDVvdnhGcmVkQTMtQmdmWGpudEVZaDJlOG9qbWpXbDdiZnJ4T3JKOG5kWkJIRUxxTjBxQWpQSmUyUmpVUlktVGdIQTUzRmFBZk1HNWcxRzBCY1huV0ZkQ3NpZThOOC1TdUVSUXNiUVJLSjBsRUNWMGpvdTVfdXVXYmNsZThzZThFNUhTX2dBNG5VWDZSWEVNLXBERUpOSHB0T0o4elp4NG5vUkpGUVlxNlhlS3l4dkE?oc=5",
+      "published": "2026-07-15T13:05:00.000Z",
+      "source": "PR Newswire",
+      "st": 1,
+      "m": 1,
+      "a": "SMCI, 고밀도 AI·HPC 인프라용 후면 도어 열교환기 포함 DCBBS 액체 냉각 포트폴리오 확장 공개",
+      "w": "냉각 솔루션 라인업 확대는 고밀도 AI 서버 수주 경쟁력 강화 관점에서 중립~소폭 호재이나, 자사 보도자료 기반 PR 성격으로 수요 확정과는 거리가 있어 펀더멘털 영향은 제한적이라는 관측.",
       "mv": 2
     },
     {
@@ -435,18 +487,6 @@
       "mv": 2
     },
     {
-      "id": "bneck_l3_dram",
-      "ticker": "MACRO",
-      "name": "L3 · DRAM/HBM 가격·공급",
-      "title": "1172조 증설 충격… 마이크론, 공급 사이클 우려 부각 - 초이스스탁",
-      "link": "https://news.google.com/rss/articles/CBMiZ0FVX3lxTFBKdi16akJwRFlncnVueWJWRmxNeFgyQWx4b2dzOWh3U1dVTEhleDlkWjJDbDBGenRaR3hieVJFeHAtWnZDMnh2WTQ0U1U3aGcxUVRCUEtwLTE0czhrb1hkTmg3MXJvQzQ?oc=5",
-      "published": "2026-07-14T18:35:00.000Z",
-      "source": "초이스스탁",
-      "st": 3,
-      "a": "마이크론 등 메모리 업체의 1172조 규모 증설 계획으로 공급 과잉 사이클 우려 부각",
-      "w": "L3 HBM/DRAM 공급 레이어에서 대규모 캐파 확장이 중장기 가격 하락 압력으로 작용할 수 있다는 관측으로, AI 인프라 원가 구조에 완화 신호 가능성."
-    },
-    {
       "id": "smci",
       "ticker": "SMCI",
       "name": "Supermicro",
@@ -607,19 +647,6 @@
       "a": "Cathie Wood ARK Invest, Oklo 등 SMR 관련주 추가 매수 베팅 보도",
       "w": "ARK의 추가 매수는 단기 수급 및 센티먼트 호재이나 Oklo 펀더멘털 변화 아님.",
       "mv": 2
-    },
-    {
-      "id": "macro_반도체_ai_과열_조정_1",
-      "ticker": "MACRO",
-      "name": "반도체 AI 과열 조정",
-      "ax": "chip",
-      "title": "[이슈&논란] \"삼전 직원, SK닉스 이직 18개월간 금지\" 위반시 1일 500만원 판결…낸드플래시 전쟁, 법정까지 번진 이유 - 뉴스스페이스",
-      "link": "https://news.google.com/rss/articles/CBMiW0FVX3lxTE1WdmVpcmZyck5IajQwWG9rM3JHNUZkdDN4Y1E2alVSZDNSR09IU3JJU0ZjcTY1TEZXMk9IcUZ2eGJaTXNIbkF6UkNZY3BaSTktVGZaVmNpWi1pTXM?oc=5",
-      "published": "2026-07-14T04:16:44.000Z",
-      "source": "뉴스스페이스",
-      "st": 3,
-      "a": "삼성전자 직원의 SK하이닉스 이직 금지 판결로 낸드 기술 유출 분쟁이 법정 단계 격화",
-      "w": "L2~L3 레이어에 필요한 고대역폭 메모리·낸드 공급망의 인력·기술 병목이 법적 마찰로 심화될 수 있다는 관측."
     },
     {
       "id": "bneck_l4_pkg",
@@ -1895,20 +1922,6 @@
       "mv": 2
     },
     {
-      "id": "smci",
-      "ticker": "SMCI",
-      "name": "Supermicro",
-      "title": "Supermicro outlines HPC blueprint for Rubin NVL4 - Engineering.com",
-      "link": "https://news.google.com/rss/articles/CBMigwFBVV95cUxQcUsyOXdnczB2c01XdHJzN0FqOUdtNmJ0WjYxT1dXc19USk5WblVTZXE4emY1d1htZUVJYkhmd3ZGUFpSSGw4bVo1Q1J0TmhSOHpGcTZtV0ZFb1RIdmQ5eGg4eTVNS2MtaUs1T2h0Ul82YmxUWlNkc0o0aFVzUFU1bnQyYw?oc=5",
-      "published": "2026-07-09T11:51:55.000Z",
-      "source": "Engineering.com",
-      "a": "Supermicro, NVIDIA Rubin NVL4 기반 HPC 시스템 설계 청사진 공개",
-      "w": "차세대 GPU 플랫폼 대응 제품 로드맵 공개로 펀더멘털 긍정 신호이나, 실제 출하·수주 확정 전까지는 관측 단계.",
-      "m": 2,
-      "st": 3,
-      "mv": 2
-    },
-    {
       "id": "be",
       "ticker": "BE",
       "name": "Bloom Energy",
@@ -1945,18 +1958,6 @@
       "st": 3,
       "a": "포브스, 데이터센터 급증 배경과 구조적 인프라 수요 증가 분석 게재",
       "w": "L7 데이터센터 레이어에 대한 주류 미디어 커버리지 확대는 전력·냉각·토지 조달 병목에 대한 사회적 인식과 규제 압력 증가를 예고하는 선행 신호로 해석된다는 관측."
-    },
-    {
-      "id": "bneck_l8_pwr",
-      "ticker": "MACRO",
-      "name": "L7·L8 · 전력 병목",
-      "title": "The Grid is the Arsenal: Power Wars and the New Foundations of Military Strength - Center for International Maritime Security",
-      "link": "https://news.google.com/rss/articles/CBMioAFBVV95cUxNeEVZQ2xmUGFsanBqUEwzVXFucTc0VG9BN3l1QllDdUxjMGpFLUZEWVlTdnJ0ZF9uaEZmUmRELUlvbHczOWJHVG43V056YU00V2lzWTJGT25YaW5scGlvMUp6QjUtWEV3UEphR1VGQ2NBTUpHcGdlby13dmlMY3NuUUFpMkJ1NUFWZXdvVktlanVlcG9lSmkyVVB6YVVKSEky?oc=5",
-      "published": "2026-07-09T10:00:33.000Z",
-      "source": "Center for International Maritime Security",
-      "st": 3,
-      "a": "전력망을 군사·국가안보 핵심 인프라로 규정하는 전략 분석 공개",
-      "w": "그리드 안보화 담론은 L8 전력 인프라 투자에 대한 정부 개입·규제 강화 가능성을 높여 AI 데이터센터 전력 조달의 정책 리스크 게이트를 새롭게 형성하는 신호."
     },
     {
       "id": "bneck_l6_opt",
