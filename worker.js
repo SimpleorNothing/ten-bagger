@@ -613,6 +613,57 @@ async function handleWti() {
     { status: 502, headers: { "content-type": "application/json" } });
 }
 
+// 원/달러 환율(USD/KRW) 일별 시계열 프록시 — 01 시장 맥박 환율 게이지용.
+// 출력 = {source, points:[["YYYY-MM-DD", close]]} (WTI 와 동일 스키마 → 프런트 재사용). 최근 ~1년.
+async function handleFx() {
+  const okJson = (obj) => new Response(JSON.stringify(obj), {
+    status: 200,
+    headers: { "content-type": "application/json; charset=utf-8", "cache-control": "public, max-age=1800" },
+  });
+  const now = Math.floor(Date.now() / 1000);
+  const P1 = now - 400 * 86400; // 최근 ~400일
+
+  // 1) Yahoo Finance v8 chart — KRW=X (USD→KRW)
+  for (const host of ["query1.finance.yahoo.com", "query2.finance.yahoo.com"]) {
+    try {
+      const u = `https://${host}/v8/finance/chart/KRW=X?period1=${P1}&period2=${now}&interval=1d`;
+      const r = await fetch(u, { headers: { "user-agent": "Mozilla/5.0 (compatible; alphamap/1.0)" }, cf: { cacheTtl: 1800, cacheEverything: true } });
+      if (r.ok) {
+        const j = await r.json();
+        const res = j && j.chart && j.chart.result && j.chart.result[0];
+        const ts = res && res.timestamp;
+        const cl = res && res.indicators && res.indicators.quote && res.indicators.quote[0] && res.indicators.quote[0].close;
+        if (ts && cl && ts.length) {
+          const out = [];
+          for (let i = 0; i < ts.length; i++) {
+            if (cl[i] == null) continue;
+            out.push([new Date(ts[i] * 1000).toISOString().slice(0, 10), Math.round(cl[i] * 100) / 100]);
+          }
+          if (out.length) return okJson({ source: "yahoo", points: out });
+        }
+      }
+    } catch (_) { /* 다음 소스 */ }
+  }
+
+  // 2) Stooq CSV 폴백 (usdkrw)
+  try {
+    const r = await fetch("https://stooq.com/q/d/l/?s=usdkrw&i=d", { cf: { cacheTtl: 1800, cacheEverything: true } });
+    if (r.ok) {
+      const t = await r.text();
+      const lines = t.trim().split("\n");
+      const out = [];
+      for (let i = 1; i < lines.length; i++) {
+        const c = lines[i].split(",");
+        if (c.length >= 5 && c[4] && !isNaN(+c[4])) out.push([c[0], Math.round(+c[4] * 100) / 100]);
+      }
+      if (out.length) return okJson({ source: "stooq", points: out.slice(-400) });
+    }
+  } catch (_) { /* 폴백 실패 */ }
+
+  return new Response(JSON.stringify({ error: "fx upstream unavailable" }),
+    { status: 502, headers: { "content-type": "application/json" } });
+}
+
 // FRED 시계열 프록시 — fredgraph.csv (무키). ?ids=ID1,ID2,... (영숫자_, 최대 12개)
 // 2020-01-01 이후만 반환. 출력: {series:{ID:[["YYYY-MM-DD", value], ...]}}
 // 한 시리즈 다운로드: 성공 시 포인트 배열, 항구적 빈값([]) 구분, 실패(네트워크/비200) 시 null.
@@ -721,6 +772,10 @@ export default {
       // WTI 일별 시계열(2020~현재) 프록시 (인증된 디바이스만 도달)
       if (request.method === "GET" && url.pathname === "/api/wti") {
         return handleWti();
+      }
+      // 원/달러 환율(USD/KRW) 일별 시계열 — 01 시장 맥박 환율 게이지(런타임). (인증된 디바이스만 도달)
+      if (request.method === "GET" && url.pathname === "/api/fx") {
+        return handleFx();
       }
       // FRED 시계열 프록시(정책금리·CPI 2020+) (인증된 디바이스만 도달)
       if (request.method === "GET" && url.pathname === "/api/fred") {

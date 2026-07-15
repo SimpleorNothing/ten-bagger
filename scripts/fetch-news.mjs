@@ -448,6 +448,67 @@ ${lines}`;
   return done;
 }
 
+// ---- 매크로(관련 기사) 기사별 두 점 정리 (items[].a·w) ----
+// 종목 뉴스와 동일한 "일자 + 요약(a) + → 의미(w)" 형식을 관련 기사에도 준다.
+// 단, 매크로는 여전히 LLM 물질성 채점(m) 대상이 아니다(축 자체가 관측 대상) — a·w 만 채우고 m 은 건드리지 않는다.
+// 의미(w)는 개별 주가가 아니라 8레이어 스택·매크로 게이트·상류 수요 관점의 함의다.
+async function summarizeMacro(items) {
+  const key = process.env.ANTHROPIC_API_KEY;
+  if (!key) { console.log('macro-arts: ANTHROPIC_API_KEY 없음 → 스킵'); return 0; }
+  // 표시되는(m!==0) 매크로 기사 중 요약이 없는 신규만 증분 생성(과거치 재요약 안 함).
+  const todo = items.filter((it) => it.ticker === 'MACRO' && it.m !== 0 && (!it.a || it.w === undefined)).slice(0, ART_MAX_NEW);
+  if (!todo.length) { console.log('macro-arts: 신규 기사 없음'); return 0; }
+  let done = 0;
+  for (let i = 0; i < todo.length; i += ART_BATCH) {
+    const batch = todo.slice(i, i + ART_BATCH);
+    const lines = batch
+      .map((it, n) => `${n}|${it.name || it.ax || ''}|${(it.published || '').slice(0, 10)}|${it.title}`)
+      .join('\n');
+    const prompt = `너는 AI 인프라 투자 관측소의 매크로 애널리스트다. 아래는 매크로·병목 축의 뉴스 기사다(번호|축이름|날짜|제목).
+각 기사를 **두 점(a·w)** 으로 정리하라.
+
+a = 기사 내용 요약
+- 제목을 그대로 번역·복사하지 말고, 무엇이 일어났는가를 압축한다.
+- **반드시 명사형으로 종결한다.** ("~했다/~됐다" 금지 → "~ 급락", "~ 계약 체결", "~ 공개", "~ 전망 제기")
+- 30~70자. 사실만. 제목에 없는 내용을 지어내지 않는다.
+
+w = 그래서 무슨 의미인가 · 어느 레이어·게이트에 함의가 있나
+- 한 문장. 사이트에서 "→" 뒤에 붙는다(화살표는 넣지 말 것).
+- 개별 종목 주가가 아니라 **8레이어 스택(L1 모델~L8 발전/그리드)·매크로 게이트(드로다운·VIX·F&G)·상류 하이퍼스케일러 capex/수요** 관점의 함의로 쓴다.
+- 영향의 방향(수요 증가/병목 조임/완화·게이트 압박 등)과 강도를 분명히 하되, 근거 없는 단정·매매 권유는 금지.
+- 확정 사실이 아니면 관측임을 드러낸다("~라는 관측", "~에 그침").
+
+다음 JSON 배열만 출력하라(마크다운·설명 금지):
+[{"n":0,"a":"명사형 요약","w":"레이어·게이트 함의 한 문장"}]
+
+${lines}`;
+    try {
+      const r = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01' },
+        body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 12000, messages: [{ role: 'user', content: prompt }] }),
+      });
+      if (!r.ok) throw new Error('anthropic HTTP ' + r.status);
+      const j = await r.json();
+      const text = (j.content || []).filter((b) => b.type === 'text').map((b) => b.text).join('');
+      const arr = parseArts(text);
+      if (!arr.length) throw new Error('macro-arts 파싱 결과 0건');
+      for (const x of arr) {
+        if (x && Number.isInteger(x.n) && batch[x.n] && x.a) {
+          batch[x.n].a = String(x.a).trim();
+          batch[x.n].w = String(x.w || '').trim();   // 두 번째 점(레이어·게이트 함의) — m 은 매크로에서 건드리지 않는다
+          done++;
+        }
+      }
+    } catch (e) {
+      console.log(`macro-arts 배치 실패(건너뜀): ${e.message}`);
+    }
+    await sleep(600);
+  }
+  console.log(`macro-arts: ${done}/${todo.length} 요약 생성`);
+  return done;
+}
+
 // ---- Korean daily digest (news_digest.json) ----
 // ANTHROPIC_API_KEY 가 env 에 있으면 위 items 를 한글 레이어별 요약으로 변환해 저장.
 // 키가 없으면 조용히 스킵(뉴스 수집 자체는 영향 없음). 실패해도 이전 digest 유지.
@@ -568,6 +629,7 @@ async function main() {
 
   preScreen(all);           // ① 하드룰: 콘텐츠팜·홍보·추측·사후 등락 서술 → m=0 (요약 토큰 미소모)
   const newArts = await summarizeArticles(all);   // ② 신규 기사: a·w·m 동시 생성
+  await summarizeMacro(all);   // ②' 매크로(관련 기사) 신규: a·w 생성(m 은 미채점 — 축 자체가 관측 대상)
   await scoreLegacy(all);   // ③ 등급 없음·구세대(mv<MV) → 등급만 백필·재채점
 
   fs.writeFileSync(ARCHIVE_OUT, JSON.stringify({

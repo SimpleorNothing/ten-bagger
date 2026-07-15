@@ -681,6 +681,21 @@ table.tk th.c{text-align:center}
 #mktMacroNews .stk-blk{margin:0}
 #mktMacroNews .mkt-ph{grid-column:1/-1}
 @media(max-width:700px){#mktMacroNews{grid-template-columns:1fr}}
+/* 시장 맥박 = 동인 브리핑(pulse.json) + 심리·수급·환율 게이지. 동인은 축마다 방향(위험/기회/중립) + 렌즈 2줄 + 근거. 새 면 컴포넌트 없이 .stk-blk/.mkt-lens/.nlist 재사용 · 방향 배지(.pdir)만 부표(pill 20px). */
+#mktPulse{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;align-items:start;margin-bottom:6px}
+#mktPulse .stk-blk{margin:0}
+#mktPulse .p-hl{grid-column:1/-1;font:600 15px/1.55 var(--serif);color:var(--txt);background:var(--panel);border:1px solid var(--line);border-radius:3px;padding:12px 15px}
+#mktPulse .p-hl b{color:var(--dawn);font-weight:700}
+#mktPulse .p-hl .p-as{font:600 12px var(--mono);color:var(--faint);letter-spacing:.03em;margin-left:6px}
+#mktPulse .mkt-ph{grid-column:1/-1}
+#mktPulse .mkt-lens{padding:10px 14px;margin:0}
+#mktPulse .stk-blk .nlist{border-top:1px solid var(--line)}
+.stk-hd .pdir{margin-left:auto;flex:0 0 auto;align-self:center;font:700 11px var(--mono);border-radius:20px;padding:2px 9px;letter-spacing:.02em;border:1px solid var(--line)}
+.pdir.risk{color:var(--st-hot);background:rgba(180,71,47,.08);border-color:rgba(180,71,47,.28)}
+.pdir.opp{color:var(--st-dawn);background:rgba(47,125,99,.08);border-color:rgba(47,125,99,.28)}
+.pdir.neu{color:var(--st-mature);background:var(--panel2)}
+.mkt-val .dn{color:var(--st-accel)}.mkt-val .up{color:var(--st-hot)}.mkt-val .vlab{font:600 14px var(--serif);color:var(--dim);margin-left:6px}
+@media(max-width:700px){#mktPulse{grid-template-columns:1fr}}
 
 /* ===================== 해도(海圖) 레이어 ===================== */
 /* 용지: 등간격 괘선 격자. 패널이 그 위에 놓여 해도의 도판(圖版)처럼 읽힌다. */
@@ -1720,6 +1735,9 @@ window.CYCLE=(function(){
     <div class="vkick">Market · 시장 모니터링</div>
     <h1 class="vtitle">한눈에 보는 <em>시장</em> — 증시·금리·유가·뉴스</h1>
   </div>
+  <h2 class="msec">시장 맥박 <span class="mnote">지금 무엇이 시장을 움직이나 · 동인 4~6회/일 · 게이지 실시간</span></h2>
+  <div id="mktPulse"><div class="mkt-ph">동인 합성 대기 (pulse.json)</div></div>
+  <div class="mkt-grid" id="mktGauge"><div class="mkt-ph" style="grid-column:1/-1">게이지 로딩…</div></div>
   <h2 class="msec">지표 <span class="mrng" role="group" aria-label="기간 선택"><button type="button" class="rbtn" data-r="1M">1M</button><button type="button" class="rbtn" data-r="6M">6M</button><button type="button" class="rbtn" data-r="1Y">1Y</button><button type="button" class="rbtn" data-r="3Y">3Y</button><button type="button" class="rbtn" data-r="5Y">5Y</button></span></h2>
   <div class="mkt-grid">
     <div class="mkt-card" id="mkt_ks11"><div class="mkt-nm">코스피</div><div class="mkt-ph">지수 수집 대기</div></div>
@@ -2979,9 +2997,15 @@ window.MARKET=(function(){
     html+='<div class="stk-blk"><div class="stk-hd"><span class="nm">'+esc(title)+'</span></div>';
     html+=sums[k]?'<div class="stk-sum">'+esc(sums[k])+'</div>'
             :'<div class="stk-sum ph">요약 대기 — 다음 다이제스트(06:12·18:12)에서 생성</div>';
-    html+='<div class="nlist">';
-    lst.forEach(function(it){html+='<a class="nrow" href="'+esc(it.link||'#')+'" target="_blank" rel="noopener"><span class="ndt">'+esc((it.published||'').slice(5,10))+'</span><span class="ntt">'+esc(it.title||'')+'</span></a>';});
-    html+='</div></div>';});
+    lst.forEach(function(it){
+     var tx=String(it.a||'').trim()||String(it.title||'');   // a(요약) 없으면 제목 폴백(다음 크론 전까지)
+     var im=String(it.w||'').trim();
+     html+='<a class="arow" href="'+esc(it.link||'#')+'" target="_blank" rel="noopener">'
+      +'<span class="adt">'+esc((it.published||'').slice(5,10))+'</span>'
+      +'<span class="atx"><span class="asum">'+esc(tx)+'</span>'
+      +(im?'<span class="aimp"><span class="aar">→</span><span>'+esc(im)+'</span></span>':'')
+      +'</span></a>';});
+    html+='</div>';});
    host.innerHTML=html;}
   catch(e){host.innerHTML='<div class="mkt-ph">수집 대기</div>';}
  }
@@ -2997,6 +3021,9 @@ window.MARKET=(function(){
    var dg=rs[0],nw=rs[1],CH=((rs[2]||{}).series)||{};
    // 평단(주당 매입가) = holdings.json avg{} — 자산현황 xlsx 주간 동기화(sync-holdings.mjs). 보유 종목만 존재, 미보유는 선 없음.
    var AVG=((rs[3]||{}).avg)||{};
+   // 종목 순서 = holdings.json detail[].w(보유 비중) 내림차순. 미보유(비중 없음)는 원래 순서 유지(안정 정렬). digest 재생성돼도 순서 고정.
+   var WMAP={};(((rs[3]||{}).detail)||[]).forEach(function(d){var t=String(d.ticker||'').toUpperCase();if(t&&t!=='—')WMAP[t]=Number(d.w)||0;});
+   function byHeld(items){return (items||[]).map(function(it,i){return{it:it,i:i};}).sort(function(a,b){var wa=WMAP[String(a.it.tk||'').toUpperCase()]||0,wb=WMAP[String(b.it.tk||'').toUpperCase()]||0;return (wb-wa)||(a.i-b.i);}).map(function(o){return o.it;});}
    var KM={'005930':'sec','009150':'sem','353200':'ddk','089030':'twng'};
    function cK(t){t=String(t||'');return KM[t]||t.toLowerCase();}
    function cCol(t){var s=CH[cK(t)];if(!s||!s.c||s.c.length<10)return '';return '<div class="stk-chart"><canvas class="stk-cv" data-ck="'+esc(cK(t))+'"></canvas></div>';}
@@ -3042,7 +3069,7 @@ window.MARKET=(function(){
     html+='<div class="dg-head">'+esc(dg.headline||'')+'</div>';
     (dg.groups||[]).forEach(function(g){
      html+='<div class="dg-grp">'+esc(g.title||'')+'</div>';
-     (g.items||[]).forEach(function(it){var k=String(it.tk||'').toUpperCase();used[k]=1;
+     byHeld(g.items).forEach(function(it){var k=String(it.tk||'').toUpperCase();used[k]=1;
       html+='<div class="stk-blk" id="stknews-'+esc(k)+'"><div class="stk-hd"><span class="tk">'+esc(it.tk||'')+'</span><span class="nm">'+esc(it.nm||'')+'</span></div>'
        +(it.s?'<div class="stk-sum">'+esc(it.s)+'</div>':'')   // 종목별 관전 포인트(향후 주가 영향) — 기사 위 1~2줄
        +'<div class="stk-body"><div class="stk-left">'+artRows(k)+'</div>'+cCol(it.tk)+'</div></div>';});
@@ -3067,13 +3094,16 @@ window.MARKET=(function(){
   var s=CH[cv.getAttribute('data-ck')];if(!s||!s.c){cv.parentElement.style.display='none';return;}
   var av=(AVG||{})[cv.getAttribute('data-ck')];if(!(av!=null&&isFinite(av)))av=null;   // 보유 종목만 평단선
   var st={sp:Math.min(126,s.c.length),hv:-1};
-  function fd(x){if(x==null)return '';var n=Number(x);if(isFinite(n))return new Date(n*(n<1e6?86400000:n<1e12?1000:1)).toISOString().slice(5,10);return String(x).slice(5,10);}
+  function fdD(x){if(x==null)return null;var n=Number(x);var d=isFinite(n)?new Date(n*(n<1e6?86400000:n<1e12?1000:1)):new Date(x);return isNaN(d)?null:d;}
+  // yr=true면 연도까지(YY-MM-DD) — 창이 여러 해에 걸치면 시작·끝이 몇 해 차인지 드러나야 함. false면 종전대로 MM-DD.
+  function fd(x,yr){var d=fdD(x);if(!d){var s=String(x==null?'':x);return yr?s.slice(0,10):s.slice(5,10);}var p=function(n){return String(n).padStart(2,'0');};var md=p(d.getUTCMonth()+1)+'-'+p(d.getUTCDate());return yr?(String(d.getUTCFullYear()).slice(2)+'-'+md):md;}
   function fv(x){var n=Number(x);if(!isFinite(n))return String(x==null?'':x);return Math.abs(n)<10?n.toFixed(1):Math.round(n).toLocaleString();}   // 10 미만=소수1자리 · 10 이상=정수(콤마)
   function vw(){var n=s.c.length,k=Math.max(20,Math.min(n,Math.round(st.sp)));return{k:k,v:s.c.slice(n-k),t:(s.t||[]).slice(n-k)};}
   function dr(){var d=window.devicePixelRatio||1,w=cv.clientWidth,H=cv.clientHeight;if(!w||!H)return;
    if(cv.width!==Math.round(w*d)){cv.width=Math.round(w*d);cv.height=Math.round(H*d);}
    var c=cv.getContext('2d');c.setTransform(d,0,0,d,0,0);c.clearRect(0,0,w,H);
    var o=vw(),v=o.v,t=o.t,k=o.k,mn=Math.min.apply(null,v),mx=Math.max.apply(null,v);if(mx===mn)mx=mn+1;
+   var _d0=fdD(t[0]),_dN=fdD(t[k-1]),spanYr=!!(_d0&&_dN&&_d0.getUTCFullYear()!==_dN.getUTCFullYear());  // 창이 해를 넘나들면 날짜 라벨에 연도 표기
    function X(i){return 6+(w-12)*i/(k-1);}function Y(x){return 18+(H-34)*(1-(x-mn)/(mx-mn));}
    var cs=getComputedStyle(document.documentElement),up=v[k-1]>=v[0];
    var cl=(up?cs.getPropertyValue('--st-hot'):cs.getPropertyValue('--st-accel')).trim()||(up?'#e03131':'#1971c2');
@@ -3092,8 +3122,8 @@ window.MARKET=(function(){
    c.textAlign='left';c.font='10px sans-serif';c.fillStyle=cl;c.fillText((p>=0?'+':'')+p+'% / '+k+'D',6,11);
    // 하단 눈금줄엔 시작·끝 날짜만
    c.font='10px sans-serif';c.fillStyle='#868e96';
-   c.textAlign='left';c.fillText(fd(t[0]),6,H-4);
-   c.textAlign='right';c.fillText(fd(t[k-1]),w-6,H-4);
+   c.textAlign='left';c.fillText(fd(t[0],spanYr),6,H-4);
+   c.textAlign='right';c.fillText(fd(t[k-1],spanYr),w-6,H-4);
    // 처음·마지막 값 = 각 끝점에 붙여 위/아래로. 상단 근접이면 아래(+12), 아니면 위(−5) — 라벨이 캔버스 위로 안 잘리게.
    function lblY(yp){return (yp-14<18)?yp+12:yp-5;}
    c.font='bold 10px sans-serif';
@@ -3102,7 +3132,7 @@ window.MARKET=(function(){
    c.textAlign='left';c.font='10px sans-serif';
    if(st.hv>=0&&st.hv<k){var i2=st.hv;c.strokeStyle='#adb5bd';c.lineWidth=1;c.beginPath();c.moveTo(X(i2),18);c.lineTo(X(i2),H-16);c.stroke();
     c.fillStyle=cl;c.beginPath();c.arc(X(i2),Y(v[i2]),2.6,0,6.3);c.fill();
-    var tp=fd(t[i2])+' '+fv(v[i2]);var tw=c.measureText(tp).width;
+    var tp=fd(t[i2],spanYr)+' '+fv(v[i2]);var tw=c.measureText(tp).width;
     c.textAlign='left';halo(tp,Math.min(Math.max(X(i2)-tw/2,6),w-6-tw),28,'#495057');}}
   cv.addEventListener('wheel',function(e){if(!e.ctrlKey)return;e.preventDefault();st.sp=Math.max(20,Math.min(s.c.length,st.sp*(e.deltaY>0?1.25:0.8)));st.hv=-1;dr();},{passive:false});
   cv.addEventListener('mousemove',function(e){var r=cv.getBoundingClientRect(),o=vw();st.hv=Math.max(0,Math.min(o.k-1,Math.round((e.clientX-r.left-6)*(o.k-1)/(r.width-12))));dr();});
@@ -3137,7 +3167,66 @@ window.MARKET=(function(){
    var b=e.target.closest('.rbtn');if(b)setRange(b.getAttribute('data-r'));
   });}
  }
- async function render(){wireRange();await loadCtx();loadWti();loadUs10y();loadIndices();loadHoldings();loadMacroNews();loadStockNews();}
+ // ===== 시장 맥박: 동인 브리핑(pulse.json) — 지금 시장을 움직이는 6축.
+ //  심리 요소 포함. narrative != numbers: 관측 판정 전용. =====
+ var PDIR={risk:'위험',opp:'기회',opportunity:'기회',neu:'중립',neutral:'중립'};
+ function pdirCls(d){d=String(d||'neu').toLowerCase();return d==='risk'?'risk':(d==='opp'||d==='opportunity')?'opp':'neu';}
+ async function loadPulse(){
+  var host=document.getElementById('mktPulse');if(!host)return;
+  try{
+   var r=await fetch('pulse.json?t='+Date.now(),{cache:'no-store'});if(!r.ok)throw 0;
+   var p=await r.json();var ds=(p.drivers||p.axes||[]).filter(function(x){return x&&(x.name||x.l1);});
+   if(!ds.length){host.innerHTML='<div class="mkt-ph">동인 합성 대기 (다음 크론)</div>';return;}
+   var as=p.asOf?' <span class="p-as">'+esc(String(p.asOf).slice(0,16).replace('T',' '))+' KST 기준</span>':'';
+   var html=p.headline?'<div class="p-hl"><b>오늘의 시장</b> '+esc(p.headline)+as+'</div>':'';
+   ds.forEach(function(d){
+    var badge='<span class="pdir '+pdirCls(d.dir)+'">'+esc(PDIR[String(d.dir||'').toLowerCase()]||'중립')+'</span>';
+    var l1=(d.layer?'<b>'+esc(d.layer)+'</b>':'')+esc(d.l1||'');
+    var jc=pdirCls(d.dir)==='risk'?'wn':pdirCls(d.dir)==='opp'?'ok':'nt';   // 판정 색은 data가 아니라 dir에서 파생(HTML 주입 차단)
+    var l2=esc(d.l2||'')+(d.verdict?' → <span class="'+jc+'">'+esc(d.verdict)+'</span>':'');
+    html+='<div class="stk-blk"><div class="stk-hd"><span class="nm">'+esc(d.name||'')+'</span>'+badge+'</div>'
+     +'<div class="mkt-lens"><div class="l1">'+l1+'</div><div class="l2">'+l2+'</div></div>';
+    var srcs=(d.srcs||d.src||[]).filter(function(s){return s&&(s.u||s.url);});
+    if(srcs.length){html+='<div class="nlist">';
+     srcs.slice(0,3).forEach(function(s){html+='<a class="nrow" href="'+esc(s.u||s.url)+'" target="_blank" rel="noopener"><span class="ntt">'+esc(s.t||s.title||s.u||s.url)+'</span></a>';});
+     html+='</div>';}
+    html+='</div>';});
+   host.innerHTML=html;}
+  catch(e){host.innerHTML='<div class="mkt-ph">동인 합성 대기 (pulse.json)</div>';}
+ }
+ // ===== 심리·수급·환율 게이지 (런타임 — 페이지 열 때마다 최신) =====
+ function gauge(nm,val,lns){return '<div class="mkt-card"><div class="mkt-nm">'+esc(nm)+'</div><div class="mkt-val">'+val+'</div>'+(lns||'')+'</div>';}
+ async function loadGauges(){
+  var host=document.getElementById('mktGauge');if(!host)return;
+  try{
+   var rs=await Promise.all([
+    fetch('signals.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;}),
+    fetch('/api/fx',{cache:'no-store'}).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;})
+   ]);
+   var s=rs[0]||{},fx=rs[1]||{},cards='';
+   if(s.vix!=null){var bw=(s.vix3m!=null&&s.vix>s.vix3m);
+    var vv=s.vix>=25?'<span class="wn">고변동 — 위험회피</span>':s.vix>=18?'<span class="nt">경계대</span>':'<span class="ok">저변동 — 안도</span>';
+    cards+=gauge('VIX 변동성',s.vix.toFixed(1),
+     lens('<b>심리</b>공포·변동성 · VIX3M 대비 기간구조',
+      'VIX '+s.vix.toFixed(1)+' vs 3M '+(s.vix3m!=null?s.vix3m.toFixed(1):'--')+(bw?' · <span class="wn">백워데이션(급성)</span>':' · 콘탱고(정상)')+' → '+vv));}
+   if(s.fearGreed!=null){var f=s.fearGreed;var fl=f<=25?'극도의 공포':f<=45?'공포':f<=55?'중립':f<=75?'탐욕':'극도의 탐욕';
+    var fj=f<=25?'<span class="ok">역발상 매수 관심대</span>':f>=75?'<span class="wn">과열 — 되돌림 경계</span>':'<span class="nt">방향 미확정</span>';
+    cards+=gauge('CNN 공포·탐욕',f+'<span class="vlab">'+fl+'</span>',
+     lens('<b>심리</b>공포탐욕지수 0~100 · 역발상 렌즈','F&amp;G '+f+' ('+fl+') → '+fj));}
+   if(s.nasdaqDrawdownPct!=null){var dd=s.nasdaqDrawdownPct,g=dd<=-20?3:dd<=-13?2:dd<=-8?1:0;
+    var gv=g>=1?'<span class="ok">깊이 게이트 G'+g+' 점등</span>':'<span class="nt">G0 — 조정 미진입</span>';
+    cards+=gauge('나스닥 드로다운','<span class="'+(dd<0?'dn':'up')+'">'+dd.toFixed(1)+'%</span>',
+     lens('<b>수급</b>고점 대비 낙폭 · 40주선 추세 · 매수 깊이축',
+      dd.toFixed(1)+'% · 40주선 '+(s.wma40SlopeUp?'상승':'하락')+' 이격 '+(s.wma40GapPct!=null?fmtP(s.wma40GapPct,1)+'%':'--')+' → '+gv));}
+   var fp=(fx.points||[]),last=fp.length?fp[fp.length-1][1]:null;
+   if(last!=null&&isFinite(last)){var prev=fp.length>1?fp[fp.length-2][1]:null,chg=(prev?((last/prev-1)*100):null);
+    var wv=last>=1400?'<span class="wn">원약세 심화 — 외인 이탈·위험회피</span>':last<=1300?'<span class="ok">원강세 — 위험선호</span>':'<span class="nt">중립대</span>';
+    cards+=gauge('원/달러 환율','₩'+Math.round(last).toLocaleString()+(chg!=null&&isFinite(chg)?' <span class="mkt-dod '+(chg>=0?'up':'dn')+'">'+(chg>=0?'+':'')+chg.toFixed(1)+'%</span>':''),
+     lens('<b>환율</b>달러/원 · 외국인 수급·위험선호 대리','₩'+Math.round(last).toLocaleString()+' → '+wv));}
+   host.innerHTML=cards||'<div class="mkt-ph" style="grid-column:1/-1">게이지 데이터 대기</div>';}
+  catch(e){host.innerHTML='<div class="mkt-ph" style="grid-column:1/-1">게이지 대기</div>';}
+ }
+ async function render(){wireRange();loadPulse();loadGauges();await loadCtx();loadWti();loadUs10y();loadIndices();loadHoldings();loadMacroNews();loadStockNews();}
  return {render:render,setRange:setRange};
 })();
 
