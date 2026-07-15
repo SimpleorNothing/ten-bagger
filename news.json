@@ -1,32 +1,32 @@
 {
-  "asOf": "2026-07-15T14:13:53.275Z",
+  "asOf": "2026-07-15T14:22:58.376Z",
   "source": "Google News RSS · 종목축 + 시그널축 + 병목축 (기사별 한 줄 요약 + 물질성 스크리닝)",
   "note": "사이트 종목 카드의 \"일자 + 요약\" 행 소스. 최근 95일 창 · 종목당 최신 5건(첫 로딩 페이로드 상한) · **물질성 스크리닝 통과분만**(items[].m>=1 — 2=논제/펀더멘털, 1=리비전·수급 실사건, 0=사후 등락 서술·홍보·추측·콘텐츠팜으로 제외). 탈락 기사는 삭제가 아니라 news_archive.json 에 전건 보존. 나머지 3개월치는 archive/{티커}.json 을 '더 보기'로 온디맨드 로드. 신호/소음 판단과 SIGNAL_LOG 반영은 사람/Claude의 몫 — 채점·차트에는 쓰이지 않는다.",
   "count": 169,
   "macroTopics": [
     {
-      "id": "macro_미국_cpi_둔화_금리경로_0",
+      "id": "macro_중국_gdp_성장_둔화_0",
       "ticker": "MACRO",
-      "name": "미국 CPI 둔화·금리경로",
-      "q": "US CPI inflation Fed rate cut 2025",
+      "name": "중국 GDP 성장 둔화",
+      "q": "China GDP Q2 2026 slowest growth deflation",
       "mkt": "US",
-      "ax": "rates"
-    },
-    {
-      "id": "macro_중국_경제_부진_디플레_1",
-      "ticker": "MACRO",
-      "name": "중국 경제 부진·디플레",
-      "q": "China GDP slowdown 4.3% deflation trade imbalance",
-      "mkt": "US",
-      "ax": "x_중국경제부진디플레"
+      "ax": "x_중국gdp성장둔화"
     },
     {
       "id": "macro_반도체_ai_과열_조정_1",
       "ticker": "MACRO",
       "name": "반도체 AI 과열 조정",
-      "q": "ASML 반도체 AI 수요 SK하이닉스 chip rally",
+      "q": "ASML 반도체 AI칩 수출통제 주가 랠리",
       "mkt": "KOSPI",
       "ax": "chip"
+    },
+    {
+      "id": "macro_미국_cpi_둔화_금리경로_0",
+      "ticker": "MACRO",
+      "name": "미국 CPI 둔화·금리경로",
+      "q": "US PPI inflation Fed rate cut expectations 2026",
+      "mkt": "US",
+      "ax": "rates"
     }
   ],
   "bottleneck": [
@@ -67,15 +67,16 @@
     }
   ],
   "archive": "news_archive.json",
-  "archiveCount": 700,
+  "archiveCount": 712,
   "shardDir": "archive",
   "winCounts": {
     "353200": 15,
     "QCOM": 6,
     "SMCI": 12,
     "VRT": 13,
+    "BESI": 7,
     "005930": 17,
-    "PLTR": 14,
+    "PLTR": 15,
     "TSLA": 7,
     "009150": 9,
     "CEG": 9,
@@ -87,7 +88,6 @@
     "0522": 6,
     "OKLO": 2,
     "089030": 8,
-    "BESI": 6,
     "APH": 1,
     "BE": 5,
     "ALAB": 6,
@@ -219,6 +219,20 @@
       "mv": 2
     },
     {
+      "id": "besi",
+      "ticker": "BESI",
+      "name": "BE Semiconductor",
+      "title": "India approves $13.3 billion for fresh semiconductor push - Reuters",
+      "link": "https://news.google.com/rss/articles/CBMioAFBVV95cUxQek53STVHMDBLT0Q2dXNVejgyUW9ndDRDNEl3RWI1RUpXNGE4US1udzFIaGpDNU9VMXNIRGlvXzBPOFlFQ1ROR1kzMkU0WWMtOURPa2FpRXpUQ3NRTGxBZ1ZyRXFNbjI0SHJWSkJnLXVOUjdiTzhlcGNyMERnQ0gwX3dPNnhtUXNxcGZrQ3BUYTJlNWdMS1k2aTZ4M2lmN1FE?oc=5",
+      "published": "2026-07-15T11:50:09.000Z",
+      "source": "Reuters",
+      "st": 1,
+      "m": 1,
+      "a": "인도 정부, 반도체 산업 육성을 위한 133억 달러 규모 신규 투자 승인",
+      "w": "인도의 반도체 생태계 확장은 중장기적으로 후공정·패키징 장비 수요 증가로 이어질 수 있어 BESI에 간접적 호재 관측이나, 구체적 수주 확정 전까지는 펀더멘털 직접 영향은 제한적.",
+      "mv": 2
+    },
+    {
       "id": "macro_반도체_ai_과열_조정_1",
       "ticker": "MACRO",
       "name": "반도체 AI 과열 조정",
@@ -256,6 +270,19 @@
       "st": 1,
       "a": "중국 경제, 2022년 이후 최저 성장률 기록으로 경기 부진 현실화",
       "w": "중국 내 AI 인프라 투자 수요 기반 약화 신호로, L4~L5(데이터센터·전력) 현지 capex 확대 모멘텀 둔화 압력."
+    },
+    {
+      "id": "macro_미국_cpi_둔화_금리경로_0",
+      "ticker": "MACRO",
+      "name": "미국 CPI 둔화·금리경로",
+      "ax": "rates",
+      "title": "Treasury yields rise as investors await latest producer price inflation data - CNBC",
+      "link": "https://news.google.com/rss/articles/CBMilwFBVV95cUxQXzM1MGUzakxPZW5JV3VLTkV1dWNsWWxjcUVSN2hJME9abVJhaHY4ZXpFS2tEVERGT0VmcDhma2ZFc2NOTnFXZ1Q2REl3bFdicmhCWV9WeUxmbG0wSEZuV0xrX1MzOWZILTJNdDR2ZmF5OFMtYjdRdlNSbE1HdTVyejJoMkpyNVJfcEdXVXozMUFHVzdmUjNN0gGcAUFVX3lxTE1KNFA3NV85T1lyNXBjcHBJZkstVTk0eHZIUTdKa3M0MVBsZ1l4T09GZUFrdFdySW53RFhhRndVQjluQ0pMRVZQd0pxUVdrLWE5VlNmNVdkQk50eHJxWWNxVmM4eUVrMVRlTGFpZHY0ZTU5TmRSVUFreUdWOWw3amU3eGFjeW5oT0N1MndhNUZIeTFBdkdPU0tadkQ3YQ?oc=5",
+      "published": "2026-07-15T09:30:12.000Z",
+      "source": "CNBC",
+      "st": 3,
+      "a": "PPI 발표 대기 속 미국 국채 금리 상승 재개",
+      "w": "금리 상단 불확실성 지속으로 하이퍼스케일러 capex 할인율 압박이 유지되는 관측"
     },
     {
       "id": "sec",
@@ -457,6 +484,19 @@
       "mv": 2
     },
     {
+      "id": "macro_미국_cpi_둔화_금리경로_0",
+      "ticker": "MACRO",
+      "name": "미국 CPI 둔화·금리경로",
+      "ax": "rates",
+      "title": "Asia FX Talk - US inflation decline softens Fed rate hike expectations - MUFG Research",
+      "link": "https://news.google.com/rss/articles/CBMitAFBVV95cUxQVnBnZzJyNWhnaDBDYldYTlVwOGFoMUNPM29NSXNHdWJCMXdWdDZibEVFT1JjVDhrM3NjVnJZVW5VeGtCNlpUTmFRdFNPdTR4dklYdEZOdEwxaENYaTBOLTM2UENlRzVPVk56dGZHdWMzXy1KSlM2WXpicUVmcngtTWdNbk1xbWhCMEJCREU1NnNRXzE4SURfTGhOU3F6ZUloOGZXZW1tbTF2dktqS293T0RhWE4?oc=5",
+      "published": "2026-07-15T01:04:20.000Z",
+      "source": "MUFG Research",
+      "st": 3,
+      "a": "미국 인플레이션 둔화로 Fed 추가 금리 인상 기대 완화",
+      "w": "매크로 게이트 압박 소폭 경감 신호로, AI 인프라 조달 금융비용 완화 가능성 관측"
+    },
+    {
       "id": "tsla",
       "ticker": "TSLA",
       "name": "테슬라",
@@ -606,32 +646,6 @@
       "a": "애널리스트, VICR 차기 실적 이익 감소 전망 제기",
       "w": "컨센서스 기반 이익 감소 전망은 펀더멘털 하방 리스크 신호로, 실적 발표 전 주가 부담 요인.",
       "mv": 2
-    },
-    {
-      "id": "macro_미국_cpi_둔화_금리경로_0",
-      "ticker": "MACRO",
-      "name": "미국 CPI 둔화·금리경로",
-      "ax": "rates",
-      "title": "Inflation slowed to 3.5% in June, giving Fed breathing room - American Banker",
-      "link": "https://news.google.com/rss/articles/CBMimAFBVV95cUxPbnV3Q1hpUy1DNTg4Q3RXc0VVT2Nza1k3T3drMExkdDRvdG9lRTV2elNhSFVONDVZT1JxU2tERVNobEhwR1hXcE42Z2stM0hxOXFIT21ycFY5elFZX0RUWTNtWGhtWWJjd282aDdacUowbVEyOUprNkVwTXQxeWNybjlickpTaGJrWmJ0R0N3UjUweVJEc1RnTQ?oc=5",
-      "published": "2026-07-14T13:13:00.000Z",
-      "source": "American Banker",
-      "st": 3,
-      "a": "6월 미국 인플레이션 3.5%로 둔화, 연준 추가 대응 여유 확보",
-      "w": "인플레 둔화로 연준의 정책 유연성 증가는 매크로 게이트 압박 완화 신호이며, AI 인프라 투자 심리 지지 요인으로 관측."
-    },
-    {
-      "id": "macro_미국_cpi_둔화_금리경로_0",
-      "ticker": "MACRO",
-      "name": "미국 CPI 둔화·금리경로",
-      "ax": "rates",
-      "title": "US inflation fell more than expected to 3.5% in June as petrol prices tumbled - Financial Times",
-      "link": "https://news.google.com/rss/articles/CBMihAFBVV95cUxQMmFLWHRoUE9ORGZ2eHNRSWlWSU5fejViWlBjT1NWcndmX2ZRUXQxd1lQNWU5WGlLbjI5WmpYVnJUQk1icWJUdXV1NEUtck15cDgtWk5sZDVic01NRzRNbWpzbDBxWndhRDlENnphU3ZuOXlWUWgydEc1WVlzLVlVR1BEMVA?oc=5",
-      "published": "2026-07-14T12:31:06.000Z",
-      "source": "Financial Times",
-      "st": 1,
-      "a": "6월 미국 CPI 3.5%로 예상 대비 큰 폭 하락, 유가 하락이 주요 원인",
-      "w": "에너지 가격 하락이 CPI 둔화를 견인한 구조는 L8 데이터센터 전력 비용 완화와 연준 긴축 후퇴 가능성을 동시에 시사하는 복합 완화 신호."
     },
     {
       "id": "amd",
@@ -968,6 +982,20 @@
       "st": 3,
       "a": "미국과 이란의 호르무즈 해협 통제권 분쟁으로 유가 상승",
       "w": "호르무즈 분쟁 심화는 L8 에너지 비용 상승과 매크로 게이트 VIX·드로다운 압박을 동시에 자극하는 복합 리스크로 관측."
+    },
+    {
+      "id": "pltr",
+      "ticker": "PLTR",
+      "name": "Palantir",
+      "title": "Peter Geoghegan and Lucas Amin · ‘This looks absolutely rubbish’: Palantir and the NHS - London Review of Books",
+      "link": "https://news.google.com/rss/articles/CBMiogFBVV95cUxQUWRfcklwcUVTbTI1RlZoU2pQeG9aY0NSZHVOaXFoTThNajJLRWx2dUs5MVpsNUdjaFhNS1c3bl9CcEpNZ19MdHVkdXJfUmRya3dvZkpHSWRrRzJwaFZXbnhfcm0tVTJDbVFhQUVUdXFvR0dOWGVhRV9XYm5lMnp0N0JybWVnYWFSUVJMMVFlQ29xeUxrMnlPclZnYV9zbG83THc?oc=5",
+      "published": "2026-07-13T14:11:25.000Z",
+      "source": "London Review of Books",
+      "st": 3,
+      "m": 1,
+      "a": "런던 리뷰 오브 북스, Palantir의 NHS 데이터 계약에 대한 비판적 조사 보도 공개",
+      "w": "영국 공공의료 부문 내 Palantir 계약의 신뢰성·윤리성에 대한 부정적 여론 형성 가능성이 있어 유럽 공공부문 수주 확대에 중기 리스크로 작용할 수 있는 관측.",
+      "mv": 2
     },
     {
       "id": "amd",
@@ -1822,20 +1850,6 @@
       "mv": 2
     },
     {
-      "id": "pltr",
-      "ticker": "PLTR",
-      "name": "Palantir",
-      "title": "Palantir says UK police contract wrongly blocked over perceived 'values' - Reuters",
-      "link": "https://news.google.com/rss/articles/CBMisgFBVV95cUxPTF85ZzZtbnJiVjRXMmpySzM4T1dqSm11YldWUDJwQXhER0dCSVlVZTc2YlhfT0REV3ZhUGVha3lFN0FjeV9vQ2VwZkhkT1RVeUdJY2RGM05ETlRReXZLelFWUTc2MHFYc0w0SEJSS2ZZZ29kbnJ1QzBYcmtObDFkeFhDVDkyNDB1RTFOVEx0MjRRQjRmQzI2dGw3RVktaDlUalg1RGE1Z19HbDQwVDNseG53?oc=5",
-      "published": "2026-07-09T21:22:12.000Z",
-      "source": "Reuters",
-      "a": "Palantir, 영국 경찰청 계약이 '가치관' 우려를 이유로 부당 차단됐다고 주장",
-      "w": "공공 계약 수주 차질 가능성은 단기 펀더멘털 리스크 요인이나 PLTR의 정부 계약 다변화 전략상 영향 강도는 제한적이라는 관측.",
-      "m": 2,
-      "st": 1,
-      "mv": 2
-    },
-    {
       "id": "rmbs",
       "ticker": "RMBS",
       "name": "Rambus",
@@ -2261,20 +2275,6 @@
       "w": "업계 최고 목표가 상향은 단기 주가 상승 촉매로 작용하는 수급·센티먼트 이벤트이며, 펀더멘털 확정 사실 변화는 없음.",
       "m": 1,
       "st": 3,
-      "mv": 2
-    },
-    {
-      "id": "besi",
-      "ticker": "BESI",
-      "name": "BE Semiconductor",
-      "title": "This semiconductor-linked stock could gain more momentum in earnings season, Deutsche Bank says - CNBC",
-      "link": "https://news.google.com/rss/articles/CBMipAFBVV95cUxQRXV5UUMyRTVYSGN3bncxVGlWbUEtQ3pKREpYQWI3S2RaSFc3S1dkb0g5Z21QLWw5cmpDUFJFNlJVWmtuc1o5SlVQT240akt1V3Z0VXUwNVZwUUV0dVdaWjJOLTRKQXZZYkNvNGxZZy1FQzJBOGFEcW1vdkU0dW1lOUFXWDloV1ZhQ1I5TEUyX2Jfbk5BM0hXZ0dKRFRNNkZfMVdLXw?oc=5",
-      "published": "2026-07-06T13:46:31.000Z",
-      "source": "CNBC",
-      "st": 3,
-      "m": 1,
-      "a": "Deutsche Bank, BESI를 반도체 연계 수혜주로 지목하며 실적 시즌 모멘텀 기대 언급",
-      "w": "글로벌 IB의 긍정적 코멘트로 단기 수급 관심 유입 가능성이 있으나, 목표가·투자의견 변경 공식 발표가 아닌 인터뷰성 언급에 그침.",
       "mv": 2
     },
     {
