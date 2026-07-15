@@ -53,17 +53,22 @@ jobs:
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: node scripts/fetch-news.mjs
+      - name: Synthesize market pulse
+        if: steps.guard.outputs.skip != 'true'
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: node scripts/fetch-pulse.mjs
       - name: Commit & push if changed (rebase-safe)
         if: steps.guard.outputs.skip != 'true'
         run: |
-          FILES="news.json news_digest.json news_archive.json archive"
+          FILES="news.json news_digest.json news_archive.json archive pulse.json"
           if [ -z "$(git status --porcelain $FILES)" ]; then
             echo "No change in $FILES."; exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add $FILES
-          git commit -m "chore: update news feed + digest"
+          git commit -m "chore: update news feed + digest + pulse"
           for i in 1 2 3 4 5; do
             if git pull --rebase --autostash origin main \
                && git push origin HEAD:main; then
