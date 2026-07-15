@@ -1,8 +1,8 @@
 {
-  "asOf": "2026-07-15T13:58:02.655Z",
+  "asOf": "2026-07-15T14:13:53.275Z",
   "source": "Google News RSS · 종목축 + 시그널축 + 병목축 (기사별 한 줄 요약 + 물질성 스크리닝)",
   "note": "사이트 종목 카드의 \"일자 + 요약\" 행 소스. 최근 95일 창 · 종목당 최신 5건(첫 로딩 페이로드 상한) · **물질성 스크리닝 통과분만**(items[].m>=1 — 2=논제/펀더멘털, 1=리비전·수급 실사건, 0=사후 등락 서술·홍보·추측·콘텐츠팜으로 제외). 탈락 기사는 삭제가 아니라 news_archive.json 에 전건 보존. 나머지 3개월치는 archive/{티커}.json 을 '더 보기'로 온디맨드 로드. 신호/소음 판단과 SIGNAL_LOG 반영은 사람/Claude의 몫 — 채점·차트에는 쓰이지 않는다.",
-  "count": 167,
+  "count": 169,
   "macroTopics": [
     {
       "id": "macro_미국_cpi_둔화_금리경로_0",
@@ -13,19 +13,19 @@
       "ax": "rates"
     },
     {
-      "id": "macro_중국_gdp_성장_둔화_1",
+      "id": "macro_중국_경제_부진_디플레_1",
       "ticker": "MACRO",
-      "name": "중국 GDP 성장 둔화",
-      "q": "China GDP Q2 2025 slowest growth economy",
+      "name": "중국 경제 부진·디플레",
+      "q": "China GDP slowdown 4.3% deflation trade imbalance",
       "mkt": "US",
-      "ax": "x_중국gdp성장둔화"
+      "ax": "x_중국경제부진디플레"
     },
     {
       "id": "macro_반도체_ai_과열_조정_1",
       "ticker": "MACRO",
       "name": "반도체 AI 과열 조정",
-      "q": "ASML SK Hynix chip rally AI demand capex",
-      "mkt": "US",
+      "q": "ASML 반도체 AI 수요 SK하이닉스 chip rally",
+      "mkt": "KOSPI",
       "ax": "chip"
     }
   ],
@@ -67,7 +67,7 @@
     }
   ],
   "archive": "news_archive.json",
-  "archiveCount": 685,
+  "archiveCount": 700,
   "shardDir": "archive",
   "winCounts": {
     "353200": 15,
@@ -75,6 +75,7 @@
     "SMCI": 12,
     "VRT": 13,
     "005930": 17,
+    "PLTR": 14,
     "TSLA": 7,
     "009150": 9,
     "CEG": 9,
@@ -85,7 +86,6 @@
     "AMD": 14,
     "0522": 6,
     "OKLO": 2,
-    "PLTR": 13,
     "089030": 8,
     "BESI": 6,
     "APH": 1,
@@ -135,6 +135,19 @@
       "st": 3,
       "a": "ASML, 2Q 수주 호조에 따른 연간 가이던스 상향 조정 공개",
       "w": "L6 장비 레이어 수요 확장 확인으로, 선단 공정 capex 사이클이 가속 국면에 있다는 공급망 상류 신호로 해석 가능."
+    },
+    {
+      "id": "macro_중국_경제_부진_디플레_1",
+      "ticker": "MACRO",
+      "name": "중국 경제 부진·디플레",
+      "ax": "x_중국경제부진디플레",
+      "title": "China's Economy Slows to 4.3%: Why It Matters for the World—and for India - outlookbusiness.com",
+      "link": "https://news.google.com/rss/articles/CBMiuwFBVV95cUxNSWZwYzB4Y2tOMG1mZG1NWmNrVUc1b0NtMjFtU3ptVmg1LTMzN21rWlBVcElGbUZjb3dia2ZfdHlTVW9lczdWb09VcUdUZW5jSFlHNUJhVkM2amFOMFJhZzJRdlRvbnJQZjRHellzVEJQZmV6VWU0Vm1lVEh6S0Zra3B5QUhXX2stMWJwOEh0WnA5SGxONEtqN081RkJJNXNLSmRnTktKMm0tWW5wM2ExOVE0dXQ1UkNjNDgw0gHIAUFVX3lxTE5JN2Y1SGo5dlo5TDNpZmk5Ti1GTlRNVkF5UTRaelJ0TlFHU3p1b1JSUWl5N0hLNmlfQWtPQUVkWkdBZ0RhUkR2VldYeFFXWUxzTUxvYTFfTTFteUZNMG41OW1BT1BHbDE4bVpEcXpaODJuUFFCRUxZWGFyT0w5MkFkTU5tUmR0Q1NYTHIyRl9xZW9lY3MzbkN2Nnloc3NKbTlKX0xMYTZ2Tml5MjJaN3VQdFdSdmc3UDlzMHVHLWJOR3dZV0R5cGVm?oc=5",
+      "published": "2026-07-15T13:23:38.000Z",
+      "source": "outlookbusiness.com",
+      "st": 3,
+      "a": "중국 2026년 2분기 GDP 성장률 4.3% 기록, 내수 부진·디플레 압력 지속 속 수출 의존 심화 확인",
+      "w": "중국 내수 위축은 L8 전력·냉각 인프라 현지 수요 둔화 신호이나, 저가 서버·부품 공급 과잉으로 글로벌 AI 하드웨어 단가 하락 압력이 강화될 수 있다는 관측."
     },
     {
       "id": "macro_미국_cpi_둔화_금리경로_0",
@@ -219,6 +232,19 @@
       "w": "L2·L3(학습 클러스터·추론 인프라) 수요 충족 속도 저해 요인으로 작용, 상류 하이퍼스케일러의 GPU 조달 리드타임 추가 조임 가능성이라는 관측."
     },
     {
+      "id": "macro_반도체_ai_과열_조정_1",
+      "ticker": "MACRO",
+      "name": "반도체 AI 과열 조정",
+      "ax": "chip",
+      "title": "CPI가 살린 불씨, PPI가 이어받을까? [7/15 G브닝]│Global Money Club - 중앙일보",
+      "link": "https://news.google.com/rss/articles/CBMiW0FVX3lxTE55LXFjNWc1VmhFM1VVcmQ1OHdvZmlZSjJUN3BKVDB5Ny1PZV9pSmgwaXgySXRxN092cEZ4eVdiVHplQ1dPT1BpWXk3Vy1VWXhET2NTOURPUmsyQWs?oc=5",
+      "published": "2026-07-15T10:50:14.000Z",
+      "source": "중앙일보",
+      "st": 3,
+      "a": "미국 CPI 완화 이후 PPI 지표가 추가 인플레 경로를 결정할 변수로 부각",
+      "w": "PPI 결과에 따라 연준 금리 경로가 재조정될 수 있어 매크로 게이트(VIX·드로다운) 변동성이 단기적으로 확대될 가능성 관측."
+    },
+    {
       "id": "macro_중국_gdp_부진_수요둔화_1",
       "ticker": "MACRO",
       "name": "중국 GDP 부진·수요둔화",
@@ -283,6 +309,33 @@
       "st": 1,
       "a": "중국 GDP 성장률, 수십 년 최저 수준 근접으로 구조적 둔화 우려 확산",
       "w": "글로벌 AI 반도체 수요의 중국발 하방 리스크가 확인되며 L1~L3 레이어 전반의 수요 증가 강도 약화 관측."
+    },
+    {
+      "id": "pltr",
+      "ticker": "PLTR",
+      "name": "Palantir",
+      "title": "I investigated Palantir’s foothold in the British state – and what I found should worry us all | Peter Geoghegan - The Guardian",
+      "link": "https://news.google.com/rss/articles/CBMirwFBVV95cUxPN0dSWDZxY2dHbjBMeEZsbnJUQWJJNkI2S2ltYThXaUhWdHRGU1llRUJqUWlIVmhnNTl1Vkw2bTZmY2Rmb2d2b2tMTllrXzVob3FycHp1NWQzYmhjLXoxX1psbkpZMUl4RWxYNGo5NG1HWE9EV2Vtb1laQ09OREVUN3phRXNHM05EMi16Xy1YRUVYbjJXUENjSVlia21iT2tEcXZod0h5bENIQ1VuSUxV?oc=5",
+      "published": "2026-07-15T07:31:00.000Z",
+      "source": "The Guardian",
+      "st": 3,
+      "m": 1,
+      "a": "Palantir의 영국 정부 기관 데이터 접근 범위에 대한 탐사 보도 및 우려 제기",
+      "w": "데이터 프라이버시·정치적 반발 리스크가 부각될 경우 영국 공공부문 계약 확장에 단기 역풍으로 작용할 수 있다는 관측이나, 현재 계약 취소 등 확정 사실은 없어 센티먼트 변수에 그침.",
+      "mv": 2
+    },
+    {
+      "id": "macro_중국_경제_부진_디플레_1",
+      "ticker": "MACRO",
+      "name": "중국 경제 부진·디플레",
+      "ax": "x_중국경제부진디플레",
+      "title": "China’s Q2 Growth Slows to 4.3%, Weakest Since 2022 as Exports Mask Domestic Weakness - bloomingbit",
+      "link": "https://news.google.com/rss/articles/CBMiVEFVX3lxTE1VTHhSb3BWVllUVUFuOThaOEozZGtYNXdVSjZPdkhvNEE1Z0VMUlRPT3JtMGw5YVE0amd5R3FRbXdqR2NXUEZ2SVBfOWNqOHhsejFjcQ?oc=5",
+      "published": "2026-07-15T07:30:16.000Z",
+      "source": "bloomingbit",
+      "st": 3,
+      "a": "중국 Q2 성장률 4.3%로 2022년 이후 최저, 수출 호조에도 내수·소비 부진 구조 재확인",
+      "w": "중국 내수 병목이 장기화될 경우 L7·L8(데이터센터 부지·전력) 현지 투자 수요가 제한되며 글로벌 AI capex의 미·유럽 편중이 심화될 수 있다는 관측."
     },
     {
       "id": "macro_중국_gdp_부진_수요둔화_1",
@@ -444,19 +497,6 @@
       "a": "미국 에너지부 GAIN 바우처, Constellation·Nano Nuclear·NuCube 3사에 지급 결정",
       "w": "정부 지원 바우처 수혜는 Constellation의 차세대 원자력 개발 비용 경감 호재이나 규모·금액 미확정으로 영향 제한적.",
       "mv": 2
-    },
-    {
-      "id": "macro_반도체_ai_과열_조정_1",
-      "ticker": "MACRO",
-      "name": "반도체 AI 과열 조정",
-      "ax": "chip",
-      "title": "반도체 슈퍼사이클 계속 될까…15일 ASML 16일 TSMC 실적 '주목' - 뉴스1",
-      "link": "https://news.google.com/rss/articles/CBMiZEFVX3lxTE5LSl9KSXVHdXE1c1UtUjdZZ0l6M1VFNWNjYjZIZlVKeTVJTmE0Vk9fcHE0SkFrNVppc0syZkNkaHZwdjFoaU5SUERjTmRJZG9FNlYwcEFzeGc0MmRXd1g3bmtDc0I?oc=5",
-      "published": "2026-07-14T21:00:00.000Z",
-      "source": "뉴스1",
-      "st": 3,
-      "a": "ASML(15일)·TSMC(16일) 실적 발표를 앞두고 반도체 슈퍼사이클 지속 여부 주목",
-      "w": "두 실적이 L3(EUV 장비)·L4(선단 파운드리 캐파) 병목 완화 또는 조임의 방향타 역할을 할 것이라는 관측."
     },
     {
       "id": "lite",
@@ -1905,20 +1945,6 @@
       "w": "공매도 보고서 반박이라는 실제 이벤트로 단기 주가 방어 요인이나, 공급망·재무 우려 완전 해소 여부는 미확정.",
       "m": 2,
       "st": 3,
-      "mv": 2
-    },
-    {
-      "id": "pltr",
-      "ticker": "PLTR",
-      "name": "Palantir",
-      "title": "MPs urge Labour to ditch £330m Palantir software contract with NHS - The Guardian",
-      "link": "https://news.google.com/rss/articles/CBMitAFBVV95cUxQcHFYVk5rQlRUU2NIVm5GR3FjUXBXVGNrOC1PSHdSRFhzVHNyNTRjWW5LZkRNTGNLMkQtazlUZWpnMmpJcEFPVDNrdjhMVDVydHhmMFVzY3dRTDFsR2JXWmZkVE5jRHBROEdLQmtOYTkyc3Eydmd2N1h0eW9LN2tRY1N3N2VOYU1MckEyQklFTzBHMWRuRm5mRFJrSGJhV2E1ZTc0UUZZTktSaFVYSEFiUnI2czk?oc=5",
-      "published": "2026-07-09T12:16:00.000Z",
-      "source": "The Guardian",
-      "st": 3,
-      "m": 2,
-      "a": "영국 의원들, NHS와 체결된 3억 3000만 파운드 규모 Palantir 소프트웨어 계약 철회 촉구",
-      "w": "정부 계약 철회 압력은 Palantir 공공부문 수주 리스크 현실화 가능성을 높이는 펀더멘털 악재 시그널로, 계약 유지 여부 추이 모니터링 필요.",
       "mv": 2
     },
     {
