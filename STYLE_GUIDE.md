@@ -1,4 +1,4 @@
-**최종 갱신: 2026-07-14 23:40 (KST)**
+**최종 갱신: 2026-07-16 21:15 (KST)**
 
 # STYLE_GUIDE — 알파맵 디자인 시스템
 
@@ -101,7 +101,7 @@ pantone.css :root       ← 현행 팔레트 (팬튼 A안, index.html 하단 <li
 | 페이지 폭 | `main.wrap` max **1340px** · padding `0 22px` |
 | 뷰 전환 | `section.view#v-{key}` + `.view.on{display:block}` · nav `.tab[data-v="{key}"]` |
 | 뷰 머리 | `.vhead` → `.vkick`(mono 13px, uppercase, .14em, 앞에 18px 선) → `.vtitle`(30px/700, 강조는 `<em>` = `--dawn`) → `.vsub`(15px `--dim`, max 820px) |
-| 갱신 배지 | `.updstamp`(mono 11.5px `--faint`) · 우상단 고정은 `.updstamp.abs` · 비면 자동 숨김 |
+| 갱신 배지 | `.updstamp`(mono 11.5px `--faint`) · 우상단 고정은 `.updstamp.abs` · 비면 자동 숨김 · **01 헤더 `.mkt-upd` 배지 = 라이브 데이터 시각(`pulse.json` asOf, `changelog.js`) — 클릭 팝업만 사이트 변경 로그** |
 | 카드 | `background:var(--panel); border:1px solid var(--line)` (실효 radius 3px) |
 | 버튼(기본) | `--panel2` 바탕 + `--line2` 테두리 + `--txt` 글자 |
 | 버튼(주) | `--txt` 또는 `--dawn` 바탕 + `--onacc` 글자 |
@@ -232,6 +232,7 @@ pantone.css :root       ← 현행 팔레트 (팬튼 A안, index.html 하단 <li
 
 ## 갱신 이력
 
+- 2026-07-16 · **01 헤더 `update` 배지를 라이브 데이터 시각으로.** 배지 `update : YYYY.MM.DD`가 변경 로그(마지막 코드 수정일)라 데이터가 매 세션 갱신돼도 07-14 고착 → '업데이트 안 됨' 오독. `changelog.js`가 `pulse.json` asOf(KST 분단위) 페치해 `update : YYYY.MM.DD HH:MM` 표시, 변경 로그는 「이력 N」 클릭 모달로 이전(제목 「사이트 변경 이력」). `index.html`·CSS·토큰 무변경(자가 마운트·신규 클래스 0·check-docs 무영향)·페치 실패 시 변경 로그 날짜 폴백. §4 갱신 배지 행 갱신. (PR #340)
 - 2026-07-14 · **종목 뉴스 미니차트(`.stk-cv`) X축 날짜 연도 인식.** Ctrl+휠로 다년 창을 열면 시작·끝이 `MM-DD`만 찍혀 5년 차(PLTR 2021-07-14→2026-07-13, 1254D)를 하루 차로 오독 → `fd()`를 `fd(x,yr)`+`fdD()`로 확장, `dr()`의 `spanYr`로 다년은 `YY-MM-DD`, 한 해 안은 종전 `MM-DD`(눈금·호버 공통). §6-5 갱신. 신규 토큰·CSS 없음(check-docs 무영향). (PR #333)
 
 - 2026-07-14 23:40 · **03 시그널 로그 중첩 블록(`.ins-sig`).** 채택 관점 카드(`.ins-si`) 안쪽에 관련 시그널을 중첩 — 좌측 2px `--line2` 룰로 **종속**을 표시, 아이템은 `--panel2` 면 + 1px `--line` + radius 3px(§3 면 규약). 태그 칩은 구 시그널 로그 배지 규약 승계(radius 20px · `col+'22'` 배경 · mono 12px) — 색은 데이터(`items[].col`). 본문 15px(§2 하한). 하단 「미연결 시그널」은 `.ins-sig.rest`(좌측 룰 없음 = 비종속). **신규 토큰 0개** · `insight.css` 에만 추가. 구 `.siglog` 뷰 폐지.
