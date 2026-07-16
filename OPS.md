@@ -1,4 +1,4 @@
-**최종 갱신: 2026-07-16 21:51 (KST)**
+**최종 갱신: 2026-07-16 22:15 (KST)**
 
 # OPS — 알파맵 운영 가이드
 
@@ -288,6 +288,7 @@
 
 ## 갱신 이력
 
+- 2026-07-16 22:15 · **뉴스 동일 내용 기사 dedup(`news-dedup.js`).** 출처만 다른 근접 중복(VRT 실적 컨퍼런스콜 공지 2건 등)을 자가 마운트 스크립트가 렌더 직후 `.stk-blk` 내 `.arow`(표시 요약 char-bigram Jaccard ≥0.35)로 1건화. `#mktDigest`·`#mktMacroNews` MutationObserver. index.html은 `<script src>` 1줄(PR #349). 표시 전용 — 데이터·숫자 무변경(narrative≠numbers). 상세 STYLE_GUIDE §6-5.
 - 2026-07-16 · **§6-3에 큰 MD 문서 md5 왕복 게이트 절차 추가.** MCP 전문 업로드가 큰 한글 문서에서 1자 드리프트(실측 STYLE `남긴다→남김`)를 내므로 — 로컬 클론 편집 → raw md5 대조 → 일치 시 머지 절차를 명문화(크기 일치는 무결성 보증 아님). 문서만 변경.
 - 2026-07-16 · **시장 맥박 파이프라인 안정화 + 헤더 배지 라이브화.** ①별도 `update-pulse` 크론이 seed(manual)에 고착 → 맥박 합성을 검증된 `update-news`에 **편승**(Synthesize 스텝, 1일 2회)·update-pulse 스케줄 은퇴(dispatch만). ②`fetch-pulse.mjs` 침묵 실패 하드닝 — 응답 JSON 견고 추출 + 실패 `::warning::` 노출(exit 0)로 원인 가시화(#337). ③그 로그가 짚은 `stop_reason=max_tokens` 절단을 **max_tokens 4096→8192**로 수리(#339). ④01 헤더 `update` 배지를 변경 로그 날짜 대신 **`pulse.json` asOf(라이브)**로 표시(`changelog.js`)·변경 로그는 「이력」 모달로 보존(#340). §3 스크립트 인벤토리·헤더 타임스탬프 · §4 케이던스 · §8-11.
 - 2026-07-15 23:07 · **01 갱신 시 02·03·05 교차 점검 규율 신설(§3 01 절).** SimpleorNothing 지시 — 01 시장 모니터링 정보 갱신 시 05 캘린더 경과 이벤트(CPI·FOMC·실적 등)·02 사이클/주도주·γ·stage 함의·03 관점/`signal_log` 연결을 **매 세션 동반 확인**. narrative≠numbers·게이트 AND 불변(일정·발표·뉴스는 표시/`signal_log`만, 숫자 파일은 §1 트리거). 순수 규율 추가(코드·데이터·토큰 무변). 지시문(Project)은 실행 세부 미포함 원칙이라 무변경.
