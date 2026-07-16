@@ -2792,7 +2792,7 @@ setTimeout(function(){var _t0=document.querySelector('#nav .tab.on');if(_t0)_t0.
 window.MARKET=(function(){
  function esc(s){return String(s==null?'':s).replace(/[&<>]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;'}[c];});}
  // 기간 선택(지표·보유 종목 공통) — 거래일 근사: 1M≈21 · 6M≈126 · 1Y≈252 · 3Y≈756 · 5Y≈1260.
- // charts.json 은 현재 ~1년치만 보유 → 3Y·5Y 는 확보된 전 구간(≈1년)까지 표시(가용분에 자동 클램프).
+ // charts.json 은 fetch-prices.mjs 가 ~5년 일봉(range=5y)으로 채운다 → 3Y·5Y 버튼까지 실데이터. 확보분이 창보다 짧은 시리즈만 자동 클램프.
  var RANGES=[{k:'1M',days:21,ko:'1개월'},{k:'6M',days:126,ko:'6개월'},{k:'1Y',days:252,ko:'1년'},{k:'3Y',days:756,ko:'3년'},{k:'5Y',days:1260,ko:'5년'}];
  var RG=RANGES[1];   // 기본 6개월 — 기존 동작 보존
  function slice6(a){return a.slice(-RG.days);}
@@ -2941,12 +2941,20 @@ window.MARKET=(function(){
   catch(e){}
  }
  async function loadUs10y(){
-  var el=document.getElementById('mkt_us10y');
-  try{var r=await fetch('/api/us10y',{cache:'no-store'});var j=await r.json();var hh=j.history||[];
+  var el=document.getElementById('mkt_us10y');if(!el)return;
+  // 1순위: charts.json us10y(^TNX 5Y 일봉 · 지수 카드와 동일 t/c 경로) → 기간버튼(1M~5Y)이 실제로 재슬라이스된다.
+  //  구버전은 /api/us10y 만 썼는데 이 외부 피드는 히스토리가 ~2개월(약 60거래일)뿐이라 6M 이상에서 창이 안 바뀌어
+  //  「기간을 바꿔도 같은 그래프」 버그가 났다. charts.json 은 fetch-prices.mjs 가 5Y 로 채운다.
+  try{var r=await fetch('charts.json?t='+Date.now(),{cache:'no-store'});var j=await r.json();var d=(j.series||{}).us10y;
+   if(d&&d.c&&d.c.length>=2){var vals=slice6(d.c),dts=slice6(d.t||[]);
+    el.innerHTML=card('미 10년물',vals[vals.length-1].toFixed(2)+'%',pct(vals),vals,null,lensUs10y(vals),{dates:dts,fmtV:function(v){return fmtNum(v)+'%';}});return;}
+  }catch(e){}
+  // 폴백: charts.json 에 us10y 시리즈가 아직 없으면(파이프라인 첫 실행 전) 외부 피드로 — 최소 표시 보존.
+  try{var r2=await fetch('/api/us10y',{cache:'no-store'});var j2=await r2.json();var hh=j2.history||[];
    var pts=hh.filter(function(x){return x&&x.markets&&x.markets.ten_year!=null;});
-   var vals=slice6(pts.map(function(x){return x.markets.ten_year;}));   // 기간버튼 창에 맞춰 슬라이스(us10y 히스토리는 외부 피드 → 확보분에 자동 클램프)
-   var dts=slice6(pts.map(function(x){return x.date||x.day||x.d||x.timestamp||null;}));
-   if(el&&vals.length>=2)el.innerHTML=card('미 10년물',vals[vals.length-1].toFixed(2)+'%',pct(vals),vals,null,lensUs10y(vals),{dates:dts,fmtV:function(v){return fmtNum(v)+'%';}});}
+   var v2=slice6(pts.map(function(x){return x.markets.ten_year;}));
+   var t2=slice6(pts.map(function(x){return x.date||x.day||x.d||x.timestamp||null;}));
+   if(v2.length>=2)el.innerHTML=card('미 10년물',v2[v2.length-1].toFixed(2)+'%',pct(v2),v2,null,lensUs10y(v2),{dates:t2,fmtV:function(v){return fmtNum(v)+'%';}});}
   catch(e){}
  }
  async function loadMacroNews(){
@@ -3129,6 +3137,12 @@ window.MARKET=(function(){
    c.font='bold 10px sans-serif';
    c.textAlign='left';halo(fv(v[0]),6,lblY(Y(v[0])),cl);                      // 처음값 = 시작점(좌)에 붙여 · 흰 헤일로로 라인 위서도 가독
    c.textAlign='right';halo(fv(v[k-1]),w-6,lblY(Y(v[k-1])),cl);              // 마지막값 = 끝점(우)에 붙여
+   // 창 중간에 최고가(고점)가 찍히고 현재가 1%+ 밀렸으면: 고점 점 + 고점값·낙폭(MDD=고점 대비 현재) 표기. 호버 땐 평단·툴팁에 양보.
+   if(st.hv<0){var mxi=0;for(var j=1;j<k;j++)if(v[j]>v[mxi])mxi=j;var dd=(v[k-1]/mx-1)*100;
+    if(mxi>0&&mxi<k-1&&dd<=-1){var _pc=(cs.getPropertyValue('--st-accel').trim()||'#1971c2'),px=X(mxi),py=Y(mx);
+     c.save();c.fillStyle=_pc;c.beginPath();c.arc(px,py,2.4,0,6.3);c.fill();c.restore();
+     var pl='고점 '+fv(mx)+' ('+dd.toFixed(1)+'%)';c.font='bold 10px sans-serif';var pw=c.measureText(pl).width;
+     c.textAlign='left';halo(pl,Math.min(Math.max(px-pw/2,6),w-6-pw),py+12,_pc);}}
    c.textAlign='left';c.font='10px sans-serif';
    if(st.hv>=0&&st.hv<k){var i2=st.hv;c.strokeStyle='#adb5bd';c.lineWidth=1;c.beginPath();c.moveTo(X(i2),18);c.lineTo(X(i2),H-16);c.stroke();
     c.fillStyle=cl;c.beginPath();c.arc(X(i2),Y(v[i2]),2.6,0,6.3);c.fill();
@@ -5986,5 +6000,6 @@ buildChips(); buildBands(); renderAll();
 </script>
 <script src="/insight.js" defer></script>
 <script src="/changelog.js" defer></script>
+<script src="/news-dedup.js" defer></script>
 </body>
 </html>

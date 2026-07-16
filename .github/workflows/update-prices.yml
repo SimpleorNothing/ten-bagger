@@ -32,7 +32,7 @@ jobs:
         run: node scripts/derive-cycle-e.mjs        
       - name: Commit & push if changed (rebase-safe)
         run: |
-          FILES="prices.json charts.json gamma.json cycle.json"
+          FILES="prices.json charts.json gamma.json cycle.json holdings.json"
           if [ -z "$(git status --porcelain $FILES)" ]; then
             echo "No change in $FILES."; exit 0
           fi
