@@ -66,7 +66,7 @@
 |---|---|---|---|
 | 업데이트 이력(변경 로그) | 수동(인라인) | 사이트 변경 시 | `changelog.js` 인라인 `MKT_CHANGELOG`(`{d,t}` 최신순·자가 마운트=insight.js 패턴). 헤더 우상단 `.mkt-upd` 배지 → 클릭 시 `.cyc-pop` 모달. **사용자 향 변경만** 기록 · 신규 항목은 배열 맨 위 |
 | 코스피·S&P·나스닥 지수 | 자동 | 06:37·18:37 KST (1일 2회 · ⏳저녁 §8-11) | `charts.json` (`fetch-prices.mjs`, `^KS11·^GSPC·^IXIC` Yahoo 5Y). **meta 거래일을 시계열 끝에 강제 반영 + 이전 창과 union 병합** → `prices.json`과 갈라지지 않는다. 괴리>1%는 `prices.json.warn` |
-| 미 10년물 금리 | 자동 | 런타임 | worker `/api/us10y` → `history[].markets.ten_year` |
+| 미 10년물 금리 | 자동 | 06:37·18:37 KST + 폴백 런타임 | **1순위 `charts.json` `us10y`**(`fetch-prices.mjs` `^TNX` Yahoo 5Y · 지수 카드와 동일 t/c → 기간버튼 1M~5Y 실동작 · `^TNX` 10× 스케일은 `>20→÷10`로 % 정규화). **폴백** worker `/api/us10y` → `history[].markets.ten_year`(외부 피드 ~2개월). ※구버전은 폴백만 써서 6M+ 기간 무반응 버그(2026-07-16 수리, PR #345) |
 | WTI 유가 | 자동 | 런타임 | worker `/api/wti` → **`points`** 배열 (Yahoo). `series` 로 읽으면 0건 |
 | 보유 종목 스파크라인 | 자동 | 06:37·18:37 KST (1일 2회 · ⏳저녁 §8-11) | `charts.json` (Yahoo/Naver 5Y 일봉 t/c · 기간버튼 1M~5Y) |
 | **카드 렌즈 요약 2줄** (그래프마다 프레임→판정) | 자동(런타임 파생) | gamma·signals 일별 / holdings 주간에 편승 | `gamma.json`(γ·stage·flagged) + `signals.json`(**`window.macroEval` 단일소스 재사용**) + `holdings.json`(layer·평단) + `charts.json` |
