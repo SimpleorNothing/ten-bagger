@@ -233,6 +233,8 @@ pantone.css :root       ← 현행 팔레트 (팬튼 A안, index.html 하단 <li
 
 ## 갱신 이력
 
+- 2026-07-17 · **신규 뷰 `#v-council`(04 전문가 원탁) 등록.** §7 체크리스트 준수 — `.mkt-grid` 복제 · `#v-council` 스코프 스타일(신규 `:root` 토큰 0 → TOKENS 무변) · 레이어칩(§6-4 관행) · stance는 기능색(`--st-dawn/-mature/-hot`) 재사용. 카드=면 radius 3px · 뱃지=pill 20px. check-docs 통과.
+
 - 2026-07-16 22:44 · **중간 고점 MDD 라벨 정수화.** 고점값·낙폭% 소수점 제거(`fv`/`dd.toFixed(1)` → `Math.round`) — SimpleorNothing 지시. §6-5. (신규 토큰·CSS 0)
 - 2026-07-16 22:03 · **종목 뉴스 미니차트 중간 고점 MDD 라벨.** 창 내부(첫·끝 아닌)에 최고가가 찍히고 현재가 고점 대비 1%+ 밀리면 `dr()`가 고점 점 + `고점 {fv} ({낙폭%})` 표기(`--st-accel`·halo·호버 중 숨김). 신규 토큰·CSS 0(check-docs 무영향). §6-5. (MU 캡처 지시)
 - 2026-07-16 · **01 헤더 `update` 배지를 라이브 데이터 시각으로.** 배지 `update : YYYY.MM.DD`가 변경 로그(마지막 코드 수정일)라 데이터가 매 세션 갱신돼도 07-14 고착 → '업데이트 안 됨' 오독. `changelog.js`가 `pulse.json` asOf(KST 분단위) 페치해 `update : YYYY.MM.DD HH:MM` 표시, 변경 로그는 「이력 N」 클릭 모달로 이전(제목 「사이트 변경 이력」). `index.html`·CSS·토큰 무변경(자가 마운트·신규 클래스 0·check-docs 무영향)·페치 실패 시 변경 로그 날짜 폴백. §4 갱신 배지 행 갱신. (PR #340)

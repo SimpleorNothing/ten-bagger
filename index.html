@@ -929,8 +929,9 @@ header::after{
     <button class="tab on" data-v="market"><span class="n">01</span>시장 모니터링</button>
     <button class="tab" data-v="cycle"><span class="n">02</span>궁금한 것</button>
     <button class="tab" data-v="port"><span class="n">03</span>리밸런싱</button>
-    <button class="tab" data-v="cal"><span class="n">04</span>캘린더</button>
-    <button class="tab" data-v="memo"><span class="n">05</span>메모</button>
+    <button class="tab" data-v="council"><span class="n">04</span>전문가 원탁</button>
+    <button class="tab" data-v="cal"><span class="n">05</span>캘린더</button>
+    <button class="tab" data-v="memo"><span class="n">06</span>메모</button>
   </nav>
 </div></header>
 
@@ -1753,6 +1754,254 @@ window.CYCLE=(function(){
   <h2 class="msec">종목 뉴스 <span class="mnote" id="mktDigestAsof">요약 · 일자별</span></h2>
   <div id="mktDigest"><div class="mkt-ph">로딩…</div></div>
 </section>
+
+<!-- 04 전문가 원탁 (v-council) -->
+<section class="view" id="v-council">
+  <div class="vhead">
+    <div class="vkick">Council · 전문가 원탁</div>
+    <h1 class="vtitle">전문가 <em>원탁</em> — 골라 앉히면 현 상황을 토론식으로 진단</h1>
+  </div>
+
+  <style>
+  #v-council .cl-ta{width:100%;background:var(--panel);color:var(--txt);border:1px solid var(--line);border-radius:3px;padding:10px;font-family:var(--mono);font-size:12.5px;line-height:1.6;resize:vertical;box-sizing:border-box}
+  #v-council .cl-card{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:3px;padding:15px 16px;cursor:pointer;transition:border-color .14s,box-shadow .14s,transform .05s}
+  #v-council .cl-card:hover{border-color:var(--line2);box-shadow:0 4px 14px rgba(22,36,45,.06)}
+  #v-council .cl-card:active{transform:translateY(1px)}
+  #v-council .cl-card:focus-visible{outline:2px solid var(--st-accel,#2a6f97);outline-offset:2px}
+  #v-council .cl-card.on{border-color:var(--dawn);box-shadow:0 0 0 1px var(--dawn),0 4px 14px rgba(22,36,45,.08)}
+  #v-council .cl-chk{position:absolute;top:12px;right:12px;width:20px;height:20px;border-radius:20px;border:1px solid var(--line2);display:flex;align-items:center;justify-content:center;color:var(--onacc);font-size:12px;font-weight:800}
+  #v-council .cl-card.on .cl-chk{background:var(--dawn);border-color:var(--dawn)}
+  #v-council .cl-top{display:flex;gap:12px}
+  #v-council .cl-nm{font-size:15px;font-weight:700;color:var(--txt)}
+  #v-council .cl-field{font-size:12.5px;color:var(--dim)}
+  #v-council .cl-chip{font-family:var(--mono);font-size:10px;font-weight:700;color:var(--dim);background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:2px 6px;white-space:nowrap}
+  #v-council .cl-pill{font-family:var(--mono);font-size:11px;font-weight:700;border-radius:20px;padding:2px 9px;white-space:nowrap}
+  #v-council .cl-view{font-size:14px;line-height:1.6;color:var(--txt);margin:12px 0 0;padding-left:10px;border-left:2px solid var(--line2)}
+  #v-council .cl-foot{display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:10px;border-top:1px solid var(--line)}
+  #v-council .cl-upd{font-size:12px;color:var(--faint)}
+  #v-council .cl-btn{background:var(--panel2);border:1px solid var(--line2);color:var(--txt);border-radius:3px;padding:5px 10px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit}
+  #v-council .cl-btn:hover{border-color:var(--dawn)}
+  #v-council .cl-btnp{background:var(--dawn);border:1px solid var(--dawn);color:var(--onacc);border-radius:3px;padding:9px 18px;font-size:13.5px;font-weight:700;cursor:pointer;font-family:inherit}
+  #v-council .cl-btnp:disabled{opacity:.45;cursor:not-allowed}
+  #v-council .cl-bar{position:sticky;bottom:0;z-index:20;margin-top:20px;display:flex;align-items:center;gap:12px;background:color-mix(in srgb,var(--ink,#F0EFEB) 92%,transparent);border-top:1px solid var(--line);padding:12px 2px;backdrop-filter:blur(6px)}
+  #v-council .cl-crumb{font-size:12.5px;color:var(--dim);flex:1}
+  #v-council .cl-rep{margin-top:20px;background:var(--panel);border:1px solid var(--line);border-radius:3px;padding:18px}
+  #v-council .cl-diag{font-size:18px;font-weight:700;line-height:1.5;color:var(--txt);margin:8px 0 4px}
+  #v-council .cl-brow{display:flex;gap:12px;background:var(--panel2);border:1px solid var(--line);border-radius:3px;padding:12px;margin-top:10px}
+  #v-council .cl-two{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:16px}
+  #v-council .cl-blk{background:var(--panel2);border:1px solid var(--line);border-radius:3px;padding:12px}
+  #v-council .cl-steel{margin-top:16px;background:var(--panel2);border:1px solid var(--line);border-left:3px solid var(--dawn);border-radius:3px;padding:12px}
+  #v-council .cl-eye{font-family:var(--mono);font-size:12px;letter-spacing:.04em;color:var(--faint);font-weight:600}
+  #v-council .cl-modal{position:fixed;inset:0;background:rgba(61,57,53,.42);display:flex;align-items:center;justify-content:center;padding:16px;z-index:120}
+  #v-council .cl-modal[hidden]{display:none}
+  #v-council .cl-sheet{width:100%;max-width:540px;max-height:88vh;overflow:auto;background:var(--panel);border:1px solid var(--line2);border-radius:3px;padding:18px}
+  #v-council .cl-tabs{display:flex;gap:4px;margin-top:14px;background:var(--ink,#F0EFEB);border:1px solid var(--line);border-radius:3px;padding:4px}
+  #v-council .cl-tab{flex:1;text-align:center;padding:8px 6px;font-size:13px;font-weight:600;cursor:pointer;background:transparent;border:none;color:var(--faint);border-radius:3px;font-family:inherit}
+  #v-council .cl-tab.on{background:var(--panel2);color:var(--dawn)}
+  #v-council .cl-in{width:100%;background:var(--panel);color:var(--txt);border:1px solid var(--line);border-radius:3px;padding:10px;font-size:13px;box-sizing:border-box;font-family:inherit}
+  #v-council .cl-drop{border:1px dashed var(--line2);border-radius:3px;padding:18px;text-align:center;cursor:pointer;background:var(--ink,#F0EFEB);color:var(--dim);font-size:13px}
+  #v-council .cl-drop:hover{border-color:var(--dawn);color:var(--txt)}
+  #v-council .cl-note{font-size:12px;color:var(--faint);line-height:1.5;margin-top:6px}
+  #v-council .cl-err{color:var(--st-hot,#b4472f);font-size:12.5px;margin-top:10px}
+  @media(max-width:760px){#v-council .cl-two{grid-template-columns:1fr}}
+  </style>
+
+  <h2 class="msec">현 상황 <span class="mnote">토론의 입력값 · 운영 시 라이브 게이트·보유 주입(예정)</span></h2>
+  <textarea id="clCtx" class="cl-ta" rows="6"></textarea>
+
+  <h2 class="msec">논제 시계 <span class="mnote">무엇이 진짜인가 · 실적·수주·capex</span></h2>
+  <div class="mkt-grid" id="clThesis"></div>
+
+  <h2 class="msec">가격·규율 시계 <span class="mnote">지금 사도 되는가 · 게이트·집중·하방</span></h2>
+  <div class="mkt-grid" id="clPrice"></div>
+
+  <div id="clResult"></div>
+
+  <div class="cl-bar" id="clBar">
+    <div id="clSeated" style="display:flex;align-items:center"></div>
+    <span class="cl-crumb" id="clCrumb">전문가를 선택하세요</span>
+    <button class="cl-btnp" id="clRun" disabled>토론 시작</button>
+  </div>
+
+  <p class="cl-note" style="margin-top:14px">전문가는 렌즈별 페르소나입니다. 「관점 갱신」으로 유튜브 링크·텍스트·파일에서 주요 관점을 요약해 반영합니다(관점 텍스트만 갱신 · 숫자 파일 불변).</p>
+
+  <div class="cl-modal" id="clModal" hidden>
+    <div class="cl-sheet" id="clSheet">
+      <div style="display:flex;gap:10px;align-items:center">
+        <span id="clMavatar"></span>
+        <div><div class="cl-nm" id="clMname"></div><div class="cl-field">유튜브·텍스트·파일에서 주요 관점을 요약해 반영</div></div>
+      </div>
+      <div class="cl-tabs">
+        <button class="cl-tab on" data-t="text">텍스트</button>
+        <button class="cl-tab" data-t="yt">유튜브 링크</button>
+        <button class="cl-tab" data-t="file">파일</button>
+      </div>
+      <div id="clPane" style="margin-top:12px"></div>
+      <div class="cl-err" id="clMerr" style="display:none"></div>
+      <div id="clPreview"></div>
+      <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:14px" id="clMactions"></div>
+    </div>
+  </div>
+
+  <script>
+  window.COUNCIL=(function(){
+    var SC={'강세':'var(--st-dawn,#2f7d63)','중립':'var(--st-mature,#9a7b2f)','약세':'var(--st-hot,#b4472f)'};
+    function sc(s){return SC[s]||SC['중립'];}
+    function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+    function extractJSON(t){t=String(t).replace(/```json/gi,'').replace(/```/g,'').trim();var a=t.indexOf('{'),b=t.lastIndexOf('}');if(a>=0&&b>=0)t=t.slice(a,b+1);return JSON.parse(t);}
+    function cleanCap(t){return t.split(/\r?\n/).filter(function(l){var s=l.trim();return s&&!/^WEBVTT/.test(s)&&!/-->/.test(s)&&!/^\d+$/.test(s);}).join(' ').replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim();}
+
+    function avatar(c,size){size=size||56;var cid='cav'+c.id;
+      var hair='';
+      if(c.style!=='bald')hair+='<path d="M33 47 A17.5 18.5 0 0 1 67 47 C67 37 60 30 50 30 C40 30 33 37 33 47 Z" fill="'+c.hair+'"/>';
+      if(c.style==='side')hair+='<path d="M33 47 C33 41 41 37 50 37 C44 41 41 45 44 50 Z" fill="'+c.hair+'"/>';
+      if(c.style==='long')hair+='<path d="M32 46 L31 68 Q35 70 38 61 L38 46 Z" fill="'+c.hair+'"/><path d="M68 46 L69 68 Q65 70 62 61 L62 46 Z" fill="'+c.hair+'"/>';
+      if(c.style==='bun')hair+='<circle cx="50" cy="27" r="5.5" fill="'+c.hair+'"/>';
+      if(c.style==='curly'){[36,44,50,56,64].forEach(function(x,i){hair+='<circle cx="'+x+'" cy="'+(31+(i%2)*2)+'" r="5" fill="'+c.hair+'"/>';});}
+      if(c.style==='bald')hair+='<path d="M34 47 C34 44 37 41 41 40 C38 44 37 47 38 50 C36 50 34 49 34 47 Z" fill="'+c.hair+'"/>';
+      var beard=c.beard?'<path d="M35 48 C37 63 63 63 65 48 C61 58 39 58 35 48 Z" fill="'+c.hair+'" opacity=".9"/>':'';
+      var gl=c.glasses?'<g stroke="#2a2a2a" stroke-width="1.4" fill="none" opacity=".8"><rect x="39.5" y="41" width="9" height="7" rx="2"/><rect x="51.5" y="41" width="9" height="7" rx="2"/><line x1="48.5" y1="44" x2="51.5" y2="44"/><line x1="39.5" y1="43" x2="34" y2="45"/><line x1="60.5" y1="43" x2="66" y2="45"/></g>':'';
+      return '<svg width="'+size+'" height="'+size+'" viewBox="0 0 100 100" style="display:block"><defs><clipPath id="'+cid+'"><circle cx="50" cy="50" r="49"/></clipPath></defs>'+
+        '<g clip-path="url(#'+cid+')"><rect width="100" height="100" fill="'+c.disc+'"/>'+
+        '<path d="M8 100 C8 78 28 70 50 70 C72 70 92 78 92 100 Z" fill="'+c.shirt+'"/>'+
+        '<rect x="43" y="56" width="14" height="16" rx="5" fill="'+c.skin+'"/>'+
+        '<ellipse cx="50" cy="44" rx="16.5" ry="18.5" fill="'+c.skin+'"/>'+
+        '<circle cx="33.5" cy="46" r="3.2" fill="'+c.skin+'"/><circle cx="66.5" cy="46" r="3.2" fill="'+c.skin+'"/>'+
+        beard+hair+
+        '<rect x="41" y="40.5" width="6" height="1.6" rx=".8" fill="#3a3a3a"/><rect x="53" y="40.5" width="6" height="1.6" rx=".8" fill="#3a3a3a"/>'+
+        '<circle cx="44" cy="44.5" r="1.7" fill="#2b2b2b"/><circle cx="56" cy="44.5" r="1.7" fill="#2b2b2b"/>'+
+        '<path d="M45 53.5 Q50 56 55 53.5" fill="none" stroke="#7a3b3b" stroke-width="1.4" stroke-linecap="round"/>'+gl+
+        '</g><circle cx="50" cy="50" r="48" fill="none" stroke="var(--line2)" stroke-width="1.5"/></svg>';
+    }
+
+    var EXPERTS=[
+      {id:'semi',bench:'thesis',name:'서민재',chip:'L3 · 사이클',field:'메모리 수급 · DRAM/HBM · MU γ',stance:'강세',updated:'2026-07-15 · YouTube',view:'메모리는 결국 사이클. HBM 믹스가 이번을 다르게 만들지만 진짜 텔은 스팟 롤오버. 믹스가 살아있는 한 γ는 열려 있다.',cfg:{id:'a1',skin:'#d99a6c',hair:'#1c1c1c',style:'short',glasses:false,beard:true,disc:'#e6e9e4',shirt:'#6a7a70'}},
+      {id:'growth',bench:'thesis',name:'백지훈',chip:'L1–2 · 상류',field:'AI capex · 모델/컴퓨트 · 강물 상류',stance:'강세',updated:'2026-07-16 · YouTube',view:'다년 슈퍼사이클. 상류 capex가 꺾이기 전에 하류가 마른다는 신호는 이르다. 강물이 흐르는 한 논제 시계는 우상향.',cfg:{id:'a2',skin:'#c98a5a',hair:'#141014',style:'curly',glasses:false,beard:false,disc:'#e5e8ec',shirt:'#5f7183'}},
+      {id:'pkg',bench:'thesis',name:'이현수',chip:'L4 · 회전',field:'패키징/장비 · 공급망 (언더웨이트 회전 타깃)',stance:'중립',updated:'2026-07-14 · YouTube',view:'L4는 만성 언더웨이트이자 트림의 목적지. 백엔드 비중 확인·수주 잔고 가시성이 붙으면 한계γ가 여기로 먼저 온다.',cfg:{id:'a3',skin:'#e8b78f',hair:'#2a2a2a',style:'short',glasses:true,beard:false,disc:'#ece7dd',shirt:'#8a7a55'}},
+      {id:'power',bench:'thesis',name:'정우람',chip:'L7–8 · 전력',field:'전력 · 냉각 · 그리드',stance:'강세',updated:'2026-07-12 · YouTube',view:'연산은 결국 전력이다. 병목은 칩에서 전력·냉각으로 이동 중. 발전·그리드가 다음 구간의 구조적 승자.',cfg:{id:'a4',skin:'#e0a878',hair:'#2b2b2b',style:'bald',glasses:true,beard:true,disc:'#e2ece9',shirt:'#567069'}},
+      {id:'macro',bench:'price',name:'강도현',chip:'게이트 · 매크로',field:'금리 · 유동성 · 매크로 게이트',stance:'중립',updated:'2026-07-14 · YouTube',view:'금리·유동성이 밸류에이션의 중력. 매크로 게이트 미점등이면 신규 매수는 사치, 방어는 현금 비중에서 나온다.',cfg:{id:'a5',skin:'#e8b78f',hair:'#2a2a2a',style:'side',glasses:true,beard:false,disc:'#e4e7ec',shirt:'#5b6b7a'}},
+      {id:'cap',bench:'price',name:'윤태경',chip:'자본 · 회전',field:'자본배분 · 집중 리스크 (유한자본)',stance:'중립',updated:'2026-07-11 · YouTube',view:'80% 단일 테마의 기회비용을 늘 계산. 비싸진 층에서 공포에 눌린 층으로. 언더웨이트 레이어의 한계γ가 오버웨이트보다 우선.',cfg:{id:'a6',skin:'#ecc19a',hair:'#3a2a1a',style:'bun',glasses:false,beard:false,disc:'#ece2e6',shirt:'#7a5f6b'}},
+      {id:'risk',bench:'price',name:'한서율',chip:'규율 · 하방',field:'리스크 · 드로다운 · 하방 시나리오',stance:'약세',updated:'2026-07-13 · YouTube',view:'집중은 상승장의 친구, 하락장의 적. 낙하칼은 잡지 않는다. 첫 눌림 규율·D-1 중립화가 없으면 수익은 환상이다.',cfg:{id:'a7',skin:'#f0c9a4',hair:'#4a3320',style:'long',glasses:true,beard:false,disc:'#efe4e0',shirt:'#8a5f52'}}
+    ];
+    var SAMPLE='【샘플 · 운영 시엔 라이브 주입】\n포트폴리오: AI 인프라 8레이어 ~80% 집중.\n· L3 메모리 오버웨이트(~44%, 목표 30~32%) · L4 장비 언더웨이트(~2%)\n· L7/L8 전력 ~14% · 현금 ~7%(목표 9~12% 하회)\n게이트: MU γ-닫힘 3트리거 미점등 → L3 트림 보류.\n매크로 게이트(나스닥·VIX·CNN F&G 3중 AND) 미점등 → 신규 매수 금지.';
+
+    var sel=[], mounted=false, modalFor=null, mtab='text', mfileText='', mfileName='';
+
+    function cardHTML(e){var on=sel.indexOf(e.id)>=0;var c=sc(e.stance);
+      return '<div class="cl-card'+(on?' on':'')+'" data-id="'+e.id+'" role="button" tabindex="0" aria-pressed="'+on+'">'+
+        '<div class="cl-chk">'+(on?'✓':'')+'</div>'+
+        '<div class="cl-top">'+avatar(e.cfg,56)+
+          '<div style="min-width:0;flex:1"><div style="display:flex;align-items:center;gap:8px"><span class="cl-nm">'+esc(e.name)+'</span>'+
+          '<span class="cl-pill" style="color:'+c+';background:color-mix(in srgb,'+c+' 12%,transparent);border:1px solid color-mix(in srgb,'+c+' 45%,transparent)">'+esc(e.stance)+'</span></div>'+
+          '<div style="display:flex;align-items:center;gap:6px;margin-top:5px"><span class="cl-chip">'+esc(e.chip)+'</span><span class="cl-field">'+esc(e.field)+'</span></div></div></div>'+
+        '<p class="cl-view" style="border-left-color:'+c+'">'+esc(e.view)+'</p>'+
+        '<div class="cl-foot"><span class="cl-upd">업데이트 '+esc(e.updated)+'</span>'+
+          '<button class="cl-btn" data-act="upd" data-id="'+e.id+'">관점 갱신</button></div></div>';
+    }
+    function renderCards(){
+      document.getElementById('clThesis').innerHTML=EXPERTS.filter(function(e){return e.bench==='thesis';}).map(cardHTML).join('');
+      document.getElementById('clPrice').innerHTML=EXPERTS.filter(function(e){return e.bench==='price';}).map(cardHTML).join('');
+      var seated=EXPERTS.filter(function(e){return sel.indexOf(e.id)>=0;});
+      document.getElementById('clSeated').innerHTML=seated.slice(0,6).map(function(e,i){return '<span style="margin-left:'+(i?-10:0)+'px">'+avatar(e.cfg,32)+'</span>';}).join('');
+      document.getElementById('clCrumb').textContent=sel.length===0?'전문가를 선택하세요':(sel.length+'명 착석 · '+(sel.length<2?'1명 더 선택':'토론 준비 완료'));
+      document.getElementById('clRun').disabled=sel.length<2;
+    }
+    function toggle(id){var i=sel.indexOf(id);if(i>=0)sel.splice(i,1);else sel.push(id);renderCards();}
+
+    async function post(url,payload){var r=await fetch(url,{method:'POST',headers:{'content-type':'application/json'},credentials:'same-origin',body:JSON.stringify(payload)});var j=await r.json().catch(function(){return null;});if(!r.ok||!j)throw new Error((j&&j.error)?j.error:('HTTP '+r.status));if(j.error)throw new Error(j.error);return j;}
+    function textOf(j){return (j.content||[]).filter(function(b){return b.type==='text';}).map(function(b){return b.text;}).join('\n');}
+
+    async function runDiscussion(){
+      if(sel.length<2)return;
+      var btn=document.getElementById('clRun');btn.disabled=true;btn.textContent='진단 중…';
+      var res=document.getElementById('clResult');res.innerHTML='';
+      try{
+        var personas=EXPERTS.filter(function(e){return sel.indexOf(e.id)>=0;}).map(function(e){return {id:e.id,name:e.name,field:e.field,clock:e.bench==='thesis'?'논제 시계':'가격·규율 시계',stance:e.stance,view:e.view};});
+        var j=await post('/api/council',{personas:personas,situation:document.getElementById('clCtx').value});
+        var d=extractJSON(textOf(j));
+        res.innerHTML=reportHTML(d);
+      }catch(err){res.innerHTML='<div class="cl-err" style="margin-top:20px">토론 생성 실패: '+esc(err.message)+'</div>';}
+      finally{btn.textContent='토론 시작';btn.disabled=sel.length<2;}
+    }
+    function list(title,color,items){if(!items||!items.length)return '';return '<div class="cl-blk"><div class="cl-eye" style="color:'+color+'">'+esc(title)+'</div><ul style="margin:8px 0 0;padding-left:16px;line-height:1.7;font-size:14px">'+items.map(function(x){return '<li style="margin-bottom:4px">'+esc(x)+'</li>';}).join('')+'</ul></div>';}
+    function reportHTML(d){
+      var board=(d.board||[]).map(function(b){var ex=EXPERTS.filter(function(e){return e.id===b.id;})[0]||{};var c=sc(b.call);
+        return '<div class="cl-brow">'+(ex.cfg?avatar(ex.cfg,44):'')+'<div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span class="cl-nm" style="font-size:14px">'+esc(ex.name||b.id)+'</span><span class="cl-pill" style="color:'+c+';background:color-mix(in srgb,'+c+' 12%,transparent);border:1px solid color-mix(in srgb,'+c+' 45%,transparent)">'+esc(b.call)+'</span>'+(ex.chip?'<span class="cl-chip">'+esc(ex.chip)+'</span>':'')+'</div><p style="margin:6px 0 0;font-size:14px;line-height:1.6">'+esc(b.take)+'</p></div></div>';}).join('');
+      return '<div class="cl-rep"><div class="cl-eye">원탁 진단 리포트</div><div class="cl-diag">'+esc(d.diagnosis||'')+'</div>'+board+
+        '<div class="cl-two">'+list('합의점','var(--st-dawn,#2f7d63)',d.consensus)+list('이견 · 긴장','var(--st-mature,#9a7b2f)',d.tension)+'</div>'+
+        ((d.actions&&d.actions.length)?'<div style="margin-top:14px"><div class="cl-eye">액션 (게이트 조건부)</div><ul style="margin:8px 0 0;padding-left:18px;line-height:1.8;font-size:14px">'+d.actions.map(function(a){return '<li>'+esc(a)+'</li>';}).join('')+'</ul></div>':'')+
+        (d.steelman?'<div class="cl-steel"><div class="cl-eye">스틸맨 반론</div><p style="margin:6px 0 0;font-size:14px;line-height:1.7">'+esc(d.steelman)+'</p></div>':'')+'</div>';
+    }
+
+    /* ── 관점 갱신 모달 ── */
+    function openModal(id){modalFor=EXPERTS.filter(function(e){return e.id===id;})[0];mtab='text';mfileText='';mfileName='';
+      document.getElementById('clMavatar').innerHTML=avatar(modalFor.cfg,40);
+      document.getElementById('clMname').textContent=modalFor.name+' · 관점 갱신';
+      document.getElementById('clModal').hidden=false;
+      document.querySelectorAll('#v-council .cl-tab').forEach(function(t){t.classList.toggle('on',t.dataset.t==='text');});
+      renderPane();clearMsg();
+    }
+    function closeModal(){document.getElementById('clModal').hidden=true;modalFor=null;}
+    function clearMsg(){var e=document.getElementById('clMerr');e.style.display='none';e.textContent='';document.getElementById('clPreview').innerHTML='';setActions('run');}
+    function showErr(m){var e=document.getElementById('clMerr');e.style.display='';e.textContent=m;}
+    function setActions(mode){var w=document.getElementById('clMactions');
+      if(mode==='preview'){w.innerHTML='<button class="cl-btn" data-m="cancel">취소</button><button class="cl-btn" data-m="retry">다시</button><button class="cl-btnp" data-m="apply">이 관점으로 반영</button>';}
+      else{w.innerHTML='<button class="cl-btn" data-m="cancel">취소</button><button class="cl-btnp" data-m="run">'+(mode==='busy'?'인식·요약 중…':'관점 인식')+'</button>';var b=w.querySelector('[data-m=run]');if(b&&mode==='busy')b.disabled=true;}
+    }
+    function renderPane(){var p=document.getElementById('clPane');
+      if(mtab==='yt'){p.innerHTML='<input id="clYt" class="cl-in" placeholder="https://youtu.be/… 또는 watch?v=…"><div class="cl-note">링크만 넣으면 서버(/api/yt-view · Gemini)가 영상에서 관점을 추출합니다. 공개 영상만.</div>';}
+      else if(mtab==='file'){p.innerHTML='<input id="clFile" type="file" style="display:none" accept=".txt,.md,.srt,.vtt,.csv,.json,.docx,.pdf"><div class="cl-drop" id="clDrop">'+(mfileName?('선택됨: '+esc(mfileName)+(mfileText?(' · '+mfileText.length.toLocaleString()+'자'):'')):'클릭 또는 드래그 — txt · md · srt · vtt · csv · docx · pdf')+'</div>';}
+      else{p.innerHTML='<textarea id="clScript" class="cl-in" rows="7" placeholder="블로그 기사·자막·발언 텍스트를 붙여넣기…" style="line-height:1.6"></textarea>';}
+    }
+    function fileToText(file){return new Promise(function(res,rej){var name=(file.name||'').toLowerCase();
+      if(name.match(/\.(pdf)$/)&&!window.pdfjsLib){rej(new Error('PDF는 텍스트로 붙여넣어 주세요'));return;}
+      if(name.match(/\.(docx)$/)&&!window.mammoth){rej(new Error('DOCX는 텍스트로 붙여넣어 주세요'));return;}
+      if(name.match(/\.(txt|md|srt|vtt|csv|json)$/)){file.text().then(function(t){res((name.match(/\.(vtt|srt)$/))?cleanCap(t):t);}).catch(rej);return;}
+      // fallback: try as text
+      file.text().then(res).catch(rej);
+    });}
+    async function onFile(file){if(!file)return;mfileName=file.name;mfileText='';renderPane();clearMsg();
+      try{mfileText=await fileToText(file);renderPane();}catch(e){showErr(e.message);}
+    }
+    async function recognize(){clearMsg();setActions('busy');
+      try{var out,source;
+        if(mtab==='yt'){var u=(document.getElementById('clYt').value||'').trim();if(!/youtu\.?be/.test(u))throw new Error('유효한 유튜브 링크가 아닙니다');var j=await post('/api/yt-view',{url:u,expert:{name:modalFor.name,field:modalFor.field}});out=extractJSON(textOf(j));source='YouTube';}
+        else if(mtab==='file'){if(!mfileText.trim())throw new Error('먼저 파일을 선택하세요');var j2=await post('/api/council-summary',{content:mfileText,expert:{name:modalFor.name,field:modalFor.field},source:'파일: '+mfileName});out=extractJSON(textOf(j2));source='파일 '+mfileName;}
+        else{var sc2=(document.getElementById('clScript').value||'').trim();if(!sc2)throw new Error('텍스트를 입력하세요');var j3=await post('/api/council-summary',{content:sc2,expert:{name:modalFor.name,field:modalFor.field},source:'텍스트'});out=extractJSON(textOf(j3));source='텍스트';}
+        var stance=(['강세','중립','약세'].indexOf(out.stance)>=0)?out.stance:modalFor.stance;
+        window.__clPrev={view:out.view,stance:stance,source:source};
+        document.getElementById('clPreview').innerHTML='<div class="cl-blk" style="margin-top:12px"><div style="display:flex;align-items:center;gap:8px"><span class="cl-eye">요약된 관점 미리보기</span><span class="cl-pill" style="color:'+sc(stance)+';background:color-mix(in srgb,'+sc(stance)+' 12%,transparent);border:1px solid color-mix(in srgb,'+sc(stance)+' 45%,transparent)">'+esc(stance)+'</span><span style="font-size:11px;color:var(--faint)">출처: '+esc(source)+'</span></div><p style="margin:8px 0 0;font-size:14px;line-height:1.6">'+esc(out.view)+'</p></div>';
+        setActions('preview');
+      }catch(err){showErr(err.message);setActions('run');}
+    }
+    function applyPreview(){var pv=window.__clPrev;if(!pv||!modalFor)return;modalFor.view=pv.view;modalFor.stance=pv.stance;modalFor.updated='방금 · '+pv.source;renderCards();closeModal();}
+
+    function bind(){
+      var root=document.getElementById('v-council');
+      root.addEventListener('click',function(e){
+        var up=e.target.closest('[data-act=upd]');if(up){e.stopPropagation();openModal(up.dataset.id);return;}
+        var card=e.target.closest('.cl-card');if(card){toggle(card.dataset.id);return;}
+      });
+      root.addEventListener('keydown',function(e){var card=e.target.closest('.cl-card');if(card&&(e.key==='Enter'||e.key===' ')){e.preventDefault();toggle(card.dataset.id);}});
+      document.getElementById('clRun').addEventListener('click',runDiscussion);
+      // modal
+      var modal=document.getElementById('clModal');
+      modal.addEventListener('click',function(e){if(e.target===modal)closeModal();});
+      document.getElementById('clSheet').addEventListener('click',function(e){
+        var tab=e.target.closest('.cl-tab');if(tab){mtab=tab.dataset.t;document.querySelectorAll('#v-council .cl-tab').forEach(function(t){t.classList.toggle('on',t===tab);});renderPane();clearMsg();return;}
+        var drop=e.target.closest('#clDrop');if(drop){document.getElementById('clFile').click();return;}
+        var m=e.target.closest('[data-m]');if(m){var k=m.dataset.m;if(k==='cancel')closeModal();else if(k==='run')recognize();else if(k==='retry'){clearMsg();}else if(k==='apply')applyPreview();return;}
+      });
+      document.getElementById('clSheet').addEventListener('change',function(e){if(e.target.id==='clFile')onFile(e.target.files&&e.target.files[0]);});
+      document.getElementById('clSheet').addEventListener('dragover',function(e){if(e.target.closest('#clDrop'))e.preventDefault();});
+      document.getElementById('clSheet').addEventListener('drop',function(e){var d=e.target.closest('#clDrop');if(d){e.preventDefault();onFile(e.dataTransfer.files&&e.dataTransfer.files[0]);}});
+    }
+    function render(){if(!mounted){mounted=true;var ta=document.getElementById('clCtx');if(!ta.value)ta.value=SAMPLE;renderCards();bind();}}
+    return {render:render};
+  })();
+  </script>
+</section>
+
 
 <!-- 06 US10Y -->
 <section class="view" id="v-us10y">
@@ -2781,11 +3030,12 @@ async function loadPrices(){try{const r=await fetch('./prices.json',{cache:'no-s
 document.getElementById('nav').addEventListener('click',e=>{const b=e.target.closest('.tab');if(!b)return;
  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));document.querySelectorAll('.view').forEach(v=>v.classList.remove('on'));
  b.classList.add('on');(({cycle:['cycle','alpha','thread'],port:['decision']})[b.dataset.v]||[b.dataset.v]).forEach(function(_i){var _e=document.getElementById('v-'+_i);if(_e)_e.classList.add('on');});
- var _ab=document.getElementById('asofBox');if(_ab)_ab.style.display=(b.dataset.v==='memo')?'none':'';
+ var _ab=document.getElementById('asofBox');if(_ab)_ab.style.display=(b.dataset.v==='memo'||b.dataset.v==='council')?'none':'';
  if(b.dataset.v==='thread'){drawSCurve();drawRiverCurves();}
  if(b.dataset.v==='us10y'){if(window.US10Y)window.US10Y.render();}
  if(b.dataset.v==='cycle'){if(window.CYCLE)window.CYCLE.render();drawSCurve();drawRiverCurves();if(typeof renderInstantAnswer==='function')renderInstantAnswer();}
- if(b.dataset.v==='market'){if(window.MARKET)window.MARKET.render();}});
+ if(b.dataset.v==='market'){if(window.MARKET)window.MARKET.render();}
+ if(b.dataset.v==='council'){if(window.COUNCIL)window.COUNCIL.render();}});
 setTimeout(function(){var _t0=document.querySelector('#nav .tab.on');if(_t0)_t0.click();},0);
 
 /* ===== MARKET (01 market) ===== */

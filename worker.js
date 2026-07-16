@@ -249,6 +249,125 @@ async function handleEstimate(request, env) {
   return json({ content: [{ type: "text", text: text }], stop_reason: stopReason }, 200);
 }
 
+// ===== 07 자문단(Council) — 원탁 토론(Claude) · 유튜브 관점 추출(Gemini) =====
+
+// 유튜브 URL → 발화자 투자 관점 요약. Gemini 가 fileData(file_uri)로 URL 을 직접 처리
+// (NotebookLM 방식). 공개 영상만·프리뷰 무료·하루 8h 한도. 키 부재 시 503(무해).
+async function handleYtView(request, env) {
+  const json = (obj, status) => new Response(JSON.stringify(obj),
+    { status, headers: { "content-type": "application/json" } });
+  if (!env.GEMINI_API_KEY) return json({ error: "GEMINI_API_KEY not configured" }, 503);
+
+  let body;
+  try { body = await request.json(); } catch { return json({ error: "invalid json" }, 400); }
+  const ytUrl = (body && body.url ? String(body.url) : "").trim();
+  const exp = (body && body.expert) ? body.expert : {};
+  if (!/youtu\.?be/.test(ytUrl)) return json({ error: "youtube url required" }, 400);
+
+  const prompt =
+    "이 유튜브 영상에서 발화자 '" + (exp.name || "") + "'(" + (exp.field || "") + ")의 " +
+    "핵심 투자 관점을 한국어로 요약해줘. 반드시 JSON만 출력하고 다른 말은 하지 마. " +
+    '스키마: {"view":"2~3문장 관점 요약","stance":"강세|중립|약세","transcript":"핵심 발언 원문 발췌(2~4문장)"}';
+
+  let up;
+  try {
+    up = await fetch(
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
+      { method: "POST",
+        headers: { "content-type": "application/json", "x-goog-api-key": env.GEMINI_API_KEY },
+        body: JSON.stringify({
+          contents: [{ parts: [ { text: prompt }, { file_data: { file_uri: ytUrl } } ] }],
+          generationConfig: { responseMimeType: "application/json", temperature: 0.2 },
+        }),
+      });
+  } catch (e) {
+    return json({ error: "gemini fetch failed", detail: String(e && e.message ? e.message : e) }, 502);
+  }
+  const g = await up.json().catch(() => null);
+  if (!up.ok || !g) {
+    const d = (g && g.error && g.error.message) ? g.error.message : "";
+    return json({ error: "gemini api failed (" + up.status + ")" + (d ? ": " + d.slice(0, 200) : "") }, 502);
+  }
+  const parts = (g.candidates && g.candidates[0] && g.candidates[0].content && g.candidates[0].content.parts) || [];
+  const text = parts.map((x) => x.text || "").join("");
+  if (!text.trim()) return json({ error: "빈 응답 — 공개 영상인지 확인하거나 텍스트 탭을 사용하세요" }, 502);
+  // 클라이언트 계약: data.content[].text (estimate/insight 와 동일)
+  return json({ content: [{ type: "text", text: text }] }, 200);
+}
+
+// 자문단 원탁 토론(Claude). web_search 미사용이라 비스트리밍으로도 100s 여유.
+async function handleCouncil(request, env) {
+  const json = (obj, status) => new Response(JSON.stringify(obj),
+    { status, headers: { "content-type": "application/json" } });
+  if (!env.ANTHROPIC_API_KEY) return json({ error: "ANTHROPIC_API_KEY not configured" }, 503);
+
+  let body;
+  try { body = await request.json(); } catch { return json({ error: "invalid json" }, 400); }
+  const personas = (body && Array.isArray(body.personas)) ? body.personas : [];
+  const situation = (body && body.situation) ? String(body.situation) : "";
+  if (personas.length < 2) return json({ error: "personas>=2 required" }, 400);
+
+  const sys =
+    "너는 '알파맵' AI 인프라 투자 관측소의 자문단 원탁 토론 시뮬레이터다. " +
+    "주어진 전문가 페르소나들이 '현 상황'을 놓고 각자 clock/field/view 에 충실하게 토론식으로 진단·조언한다. " +
+    "규율: 결론 먼저 · 게이트는 전부 AND · 매수 권유가 아니라 프레임 도출 · 논제 시계와 가격·규율 시계 분리 · " +
+    "narrative≠numbers(관점일 뿐 숫자 파일 제안 금지). 한국어, 종결어 '~하겠습니다/~할게'. " +
+    "반드시 아래 JSON만 출력(코드펜스·설명 금지).\n" +
+    'JSON: {"diagnosis":"한 줄 종합 진단","board":[{"id":"페르소나 id","take":"2~3문장","call":"강세|중립|약세"}],' +
+    '"consensus":["합의점"],"tension":["이견·긴장점"],"actions":["게이트 조건부 구체 액션"],"steelman":"합의에 대한 반론 한 단락"}';
+
+  let up;
+  try {
+    up = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "content-type": "application/json", "x-api-key": env.ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01" },
+      body: JSON.stringify({ model: "claude-opus-4-8", max_tokens: 2500, system: sys,
+        messages: [{ role: "user", content: JSON.stringify({ personas: personas, situation: situation }) }] }),
+    });
+  } catch (e) {
+    return json({ error: "anthropic fetch failed", detail: String(e && e.message ? e.message : e) }, 502);
+  }
+  const t = await up.text();
+  if (!up.ok) return json({ error: describeAnthropicError(up.status, t), status: up.status }, 502);
+  let data; try { data = JSON.parse(t); } catch { return json({ error: "anthropic parse failed" }, 502); }
+  return json({ content: data.content || [] }, 200);
+}
+
+// 텍스트/파일 → 전문가 '주요 관점' 요약(Claude). 03 인테이크와 별개로 자문단 전용.
+async function handleCouncilSummary(request, env) {
+  const json = (obj, status) => new Response(JSON.stringify(obj),
+    { status, headers: { "content-type": "application/json" } });
+  if (!env.ANTHROPIC_API_KEY) return json({ error: "ANTHROPIC_API_KEY not configured" }, 503);
+
+  let body;
+  try { body = await request.json(); } catch { return json({ error: "invalid json" }, 400); }
+  const content = (body && body.content) ? String(body.content).slice(0, 16000) : "";
+  const expert = (body && body.expert) ? body.expert : {};
+  const source = (body && body.source) ? String(body.source) : "";
+  if (!content.trim()) return json({ error: "content required" }, 400);
+
+  const sys =
+    "너는 투자 전문가의 발언/기사를 그 전문가의 '주요 관점'으로 요약하는 도구다. 핵심 투자 관점만 한국어로. " +
+    "narrative≠numbers: 관점 텍스트만 만들고 숫자 파일 변경은 제안하지 마라. " +
+    '반드시 JSON만 출력: {"view":"2~3문장 관점 요약","stance":"강세|중립|약세"}';
+  const user = JSON.stringify({ expert: expert.name || "", field: expert.field || "", source: source, content: content });
+
+  let up;
+  try {
+    up = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "content-type": "application/json", "x-api-key": env.ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01" },
+      body: JSON.stringify({ model: "claude-opus-4-8", max_tokens: 700, system: sys, messages: [{ role: "user", content: user }] }),
+    });
+  } catch (e) {
+    return json({ error: "anthropic fetch failed", detail: String(e && e.message ? e.message : e) }, 502);
+  }
+  const t = await up.text();
+  if (!up.ok) return json({ error: describeAnthropicError(up.status, t), status: up.status }, 502);
+  let data; try { data = JSON.parse(t); } catch { return json({ error: "anthropic parse failed" }, 502); }
+  return json({ content: data.content || [] }, 200);
+}
+
 // ===== 메모 저장 — Cloudflare R2 (MEMO_BUCKET) · DA Space 방식 =====
 // 메모 노트 JSON 을 R2 오브젝트("notes.json")로 보관. KV 의 25MiB 단일값 한도가 없어
 // 이미지(캡쳐) 누적에도 여유가 크다. 클라이언트(/api/memo)는 백엔드를 모른 채 그대로 동작.
@@ -790,6 +909,16 @@ export default {
       // 03 관점과 정보 — 관점 추출(Claude) · 인사이트 저장(R2) — 인증된 디바이스만 도달
       if (request.method === "POST" && url.pathname === "/api/insight") {
         return handleInsight(request, env);
+      }
+      // 07 자문단 — 유튜브 관점 추출(Gemini) · 원탁 토론(Claude) — 인증된 디바이스만 도달
+      if (request.method === "POST" && url.pathname === "/api/yt-view") {
+        return handleYtView(request, env);
+      }
+      if (request.method === "POST" && url.pathname === "/api/council") {
+        return handleCouncil(request, env);
+      }
+      if (request.method === "POST" && url.pathname === "/api/council-summary") {
+        return handleCouncilSummary(request, env);
       }
       // 저장 원문 영구 링크(채택 관점 → 근거 추적) — /api/insights 보다 먼저 매칭
       if (request.method === "GET" && url.pathname === "/api/insights/raw") {

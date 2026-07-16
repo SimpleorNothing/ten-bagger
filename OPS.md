@@ -57,7 +57,7 @@
 > 메뉴·정보명·소스·주기가 바뀌면 **같은 PR에서 이 절을 갱신**한다(§7).
 
 ### 현행 메뉴 (6탭)
-`01 시장 모니터링(v-market)` · `02 궁금한 것(v-cycle/v-alpha/v-thread)` · `03 관점과 정보 얻기(insight.js 자가 마운트)` · `04 리밸런싱(v-decision)` · `05 캘린더(v-cal)` · `06 메모(v-memo)`
+`01 시장 모니터링(v-market)` · `02 궁금한 것(v-cycle/v-alpha/v-thread)` · `03 관점과 정보 얻기(insight.js 자가 마운트)` · `04 리밸런싱(v-decision)` · `05 캘린더(v-cal)` · `06 메모(v-memo)` · **`전문가 원탁(v-council)` — 네비 04 삽입(캘린더·메모 표시번호 +1). §3 내부번호와 네비번호가 원래 어긋나 있어(insight=03 자가마운트) 내부 재번호는 보류, council은 추가만.**
 ※ `nav`의 정적 버튼은 5개 + `insight.js`가 03을 주입. `v-port`·`v-tracker`·`v-macro`는 2026-07-11 재편으로 **뷰서 제외·코드 잔존**(데이터는 계속 갱신되어 결정보드가 소비).
 
 ### 01 시장 모니터링 (`v-market`)
@@ -144,6 +144,18 @@
 | 방향 확률 추정 (다음주/1달/3개월 P) | 자동 (**추정치·투자권유 아님**) | 런타임 | `#probEst` — GBM: σ 프리셋 · μ 프리셋+`charts` 모멘텀 50:50 블렌드 |
 | 매매 타이밍 (매크로 게이트 lamp) | 자동 | 매일 06:37 KST | `signals.json` (VIX·S&P·CNN F&G·나스닥 드로다운·40주선) |
 | γ · stage | 혼합 | g 매일 / stage 판단 시 | `gamma.json` (`fetch-gamma.mjs`) |
+
+### 전문가 원탁 (`v-council`) — 네비 04
+
+| 정보 | 자동/수동 | 주기 | 소스 |
+|---|---|---|---|
+| 전문가 페르소나(이름·전문분야·이력·주요관점·stance·레이어칩) | 수동 | 관점 갱신 시 | index.html `window.COUNCIL` embedded `EXPERTS`(7인, 논제/가격·규율 2벤치) |
+| 관점 갱신 — 유튜브 링크 | 반자동 | 요청 시 | worker `/api/yt-view`(Gemini 2.5-flash · fileData URL 인입 = NotebookLM 방식 · 공개영상·프리뷰 무료·하루 8h) |
+| 관점 갱신 — 텍스트·파일(txt/md/srt/vtt/csv/docx/pdf) | 반자동 | 요청 시 | worker `/api/council-summary`(Claude opus-4-8 요약). 파일은 클라이언트 파싱(자막 타임스탬프 제거 · docx/pdf는 site 추출기 존재 시) |
+| 원탁 토론 진단(결론·보드·합의·이견·액션·스틸맨) | 반자동 | 요청 시 | worker `/api/council`(Claude opus-4-8 · web_search 미사용 비스트리밍) |
+
+**규율:** narrative≠numbers — 관점 텍스트·stance만 갱신, `earnings/judgment/stage/holdings` 숫자 파일 불변. 현 상황 입력은 편집 가능(운영 시 라이브 게이트·보유 주입 예정). 카드는 `.mkt-grid` 복제 · 렌즈칩(§6-4 관행) 부착.
+**운영자 조치:** `npx wrangler secret put GEMINI_API_KEY`(AI Studio) — 없으면 `/api/yt-view` 503.
 
 ### 05 캘린더 (`v-cal`)
 
@@ -282,11 +294,14 @@
 11. **01 전 지표 1일 2회 — 저녁 크론 운영자 대기(2026-07-14).** `.github/workflows/` 403이라 수동. ①`update-prices.yml` schedule에 `- cron: '37 9 * * *'`(18:37 KST) 추가 → 시세·지수·스파크라인 저녁 반영(가드 없음·멱등). ②`update-news.yml` schedule에 `- cron: '12,42 9 * * *'` + `- cron: '12 10 * * *'`(18:12·18:42·19:12 KST) 추가 → 뉴스 저녁 세션(가드 6h<12h라 아침·저녁 각각 실행). 반영 전까지 시세·뉴스는 **아침 1회**로 돈다(문서가 앞섬 — 충돌 시 라이브가 이기는 값). 유가·10년물은 런타임이라 대상 아님.
 12. **`index.html` 잔여 죽은 코드(07-14 이관 후)** — `#v-siglog` 마크업·`renderSignalLog()`·호출이 남아 있다. `mount()` 가 섹션을 런타임 제거하고 렌더러는 `if(!el)return;` 가드라 **무해**. 다음 `index.html` 패치 때 함께 걷어낸다(단독 패치는 b64 리스크만 산다 — §6-3).
 13. **patches/ 루트 잔여 .b64 23건(스테일)** — 과거 실패 런·미이관 잔여물. `git apply --check` 실패분이라 push 트리거엔 무해하나, 수동 dispatch 폴백에서 자동 보관 처리됨 → **운영자 1회 dispatch로 일괄 정리 권장**. 재적용 위험이 있던 5건(worker 인사이트 중복·구버전 뉴스 mjs·OPS 부분수정)은 2026-07-14 `patches/applied/`로 이관 완료.
+10. **전문가 원탁(v-council · 네비 04) — Stage 2 빌드 완료·커밋 대기.** worker 3라우트(`/api/yt-view` Gemini · `/api/council`·`/api/council-summary` Claude) + index.html(네비 04 삽입·05/06 재번호·라우터 훅·`#v-council` 뷰) + 본 §3 서브섹션. **운영자 조치: `GEMINI_API_KEY` 시크릿 + 배포 후 시각 스모크 테스트.** 미결정: §3 내부번호 vs 네비번호 정합(교차점검 규율이 §3번호 참조 → SimpleorNothing 확정 필요).
 
 ---
 
 ## 갱신 이력
 
+- 2026-07-17 · **전문가 원탁(v-council) Stage 2 빌드.** 네비 04 삽입(캘린더·메모 +1) · `#v-council` 뷰(01 `#v-market` 복제·`.mkt-grid`·`window.COUNCIL`) · worker 3라우트. 전문가=렌즈별 7인 페르소나, 유튜브/텍스트/파일 관점 갱신(narrative≠numbers). §3 서브섹션·§8-10. 커밋·시크릿·스모크 대기.
+- 2026-07-17 · **07 자문단 Stage 1 — worker 라우트 추가.** `/api/yt-view`(Gemini fileData URL 인입) · `/api/council`(Claude 원탁). 신규 라우트 2개 · 기존 라우트 불변 · 키 부재 시 503. 운영자 `GEMINI_API_KEY` 시크릿 등록 필요. 프런트(#v-council)는 Stage 2. §8-10.
 - 2026-07-16 22:41 · **03 인테이크 PDF 추출에 OCR 폴백 추가(`insight.js`).** `pdfText()` 가 pdf.js 텍스트 레이어만 읽어, ToUnicode 가 깨진 PDF(실측 20260716_CXMT.pdf — Word 2019 Batang CID 폰트가 전 글자를 U+2014(—)로 매핑)는 「— — —」만 뽑히고 사이트가 「본문 공백」으로 판정하던 사각을 해소. 실글자(한글·영숫자) 수 < max(24, 페이지×8) 이면 `pdfOcr()` 로 폴백 — 페이지를 캔버스(scale 2.2)로 렌더해 **기존 이미지 OCR 워커(tesseract kor+eng)** 재사용(앞 20페이지 상한). 신규 의존성 0(pdf.js·tesseract 둘 다 이미 로드)·클라 전용·서버·숫자 파일 무변경(narrative≠numbers). 실측 검증: 깨진 레이어 실글자 0→폴백 발동, OCR 결과 7,509자→통과. §3 03 자료 입력 경로 행 갱신.
 - 2026-07-16 22:15 · **뉴스 동일 내용 기사 dedup(`news-dedup.js`).** 출처만 다른 근접 중복(VRT 실적 컨퍼런스콜 공지 2건 등)을 자가 마운트 스크립트가 렌더 직후 `.stk-blk` 내 `.arow`(표시 요약 char-bigram Jaccard ≥0.35)로 1건화. `#mktDigest`·`#mktMacroNews` MutationObserver. index.html은 `<script src>` 1줄(PR #349). 표시 전용 — 데이터·숫자 무변경(narrative≠numbers). 상세 STYLE_GUIDE §6-5.
 - 2026-07-16 · **§6-3에 큰 MD 문서 md5 왕복 게이트 절차 추가.** MCP 전문 업로드가 큰 한글 문서에서 1자 드리프트(실측 STYLE `남긴다→남김`)를 내므로 — 로컬 클론 편집 → raw md5 대조 → 일치 시 머지 절차를 명문화(크기 일치는 무결성 보증 아님). 문서만 변경.
