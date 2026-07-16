@@ -3137,6 +3137,12 @@ window.MARKET=(function(){
    c.font='bold 10px sans-serif';
    c.textAlign='left';halo(fv(v[0]),6,lblY(Y(v[0])),cl);                      // 처음값 = 시작점(좌)에 붙여 · 흰 헤일로로 라인 위서도 가독
    c.textAlign='right';halo(fv(v[k-1]),w-6,lblY(Y(v[k-1])),cl);              // 마지막값 = 끝점(우)에 붙여
+   // 창 중간에 최고가(고점)가 찍히고 현재가 1%+ 밀렸으면: 고점 점 + 고점값·낙폭(MDD=고점 대비 현재) 표기. 호버 땐 평단·툴팁에 양보.
+   if(st.hv<0){var mxi=0;for(var j=1;j<k;j++)if(v[j]>v[mxi])mxi=j;var dd=(v[k-1]/mx-1)*100;
+    if(mxi>0&&mxi<k-1&&dd<=-1){var _pc=(cs.getPropertyValue('--st-accel').trim()||'#1971c2'),px=X(mxi),py=Y(mx);
+     c.save();c.fillStyle=_pc;c.beginPath();c.arc(px,py,2.4,0,6.3);c.fill();c.restore();
+     var pl='고점 '+fv(mx)+' ('+dd.toFixed(1)+'%)';c.font='bold 10px sans-serif';var pw=c.measureText(pl).width;
+     c.textAlign='left';halo(pl,Math.min(Math.max(px-pw/2,6),w-6-pw),py+12,_pc);}}
    c.textAlign='left';c.font='10px sans-serif';
    if(st.hv>=0&&st.hv<k){var i2=st.hv;c.strokeStyle='#adb5bd';c.lineWidth=1;c.beginPath();c.moveTo(X(i2),18);c.lineTo(X(i2),H-16);c.stroke();
     c.fillStyle=cl;c.beginPath();c.arc(X(i2),Y(v[i2]),2.6,0,6.3);c.fill();
