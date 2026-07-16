@@ -2,8 +2,8 @@ name: Update stock prices
 
 on:
   schedule:
-    - cron: '37 21 * * *'   # 06:37 KST — 미 장 마감 반영 (아침)
-    - cron: '37 9 * * *'    # 18:37 KST — 한국 장 마감 반영 (저녁) · 1일 2회
+    - cron: '5 21 * * *'    # 06:05 KST 예약 → 실측지연 ~53분 → ~06:55 KST 완료 (미 장마감 후·여름/겨울 모두 안전)
+    - cron: '52 7 * * *'    # 16:52 KST 예약 → 실측지연 ~98분 → ~18:30 KST 완료 (한국 장마감 15:30 이후)
   workflow_dispatch: {}      # allow manual run from the Actions tab
 
 permissions:
