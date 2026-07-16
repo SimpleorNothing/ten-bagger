@@ -16,7 +16,7 @@ const HTML = 'index.html';
 const OUT = 'prices.json';
 const CHARTS_OUT = 'charts.json'; // 5Y 일봉 시계열(호버·기간버튼용). t=epoch day, c=close. 이전 창과 union 병합(결측 방어).
 const HOLD = 'holdings.json'; // 보유자산 — detail[].priceKey/qty/ccy 로 하루 2회 시가평가(수량 고정·환율=NH). 수량은 주간 sync-holdings(체결)만 갱신.
-// 결측 츠들 수동 보강(seed). 야후가 KRX 서킷브레이커 당일 일봉을 창에서 누락한 사고(2026-07-13)
+// 결측 캔들 수동 보강(seed). 야후가 KRX 서킷브레이커 당일 일봉을 창에서 누락한 사고(2026-07-13)
 // 대응 — t=epoch day, c=close. 시리즈 병합 시 소스(야후/네이버) 값이 있으면 소스가 이긴다.
 const BACKFILL = { ks11: [[20647, 6807]] }; // 2026-07-13 코스피 종가 6,806.93 (−8.95%, 1단계 서킷)
 
@@ -49,7 +49,7 @@ function readCandidates() {
   return list;
 }
 
-// 보유자산 detail[] 의 시세 티커(priceKey/ticker/mkt)를 후보에 합류시킨다. 개밄주(mu·mrvl…)는
+// 보유자산 detail[] 의 시세 티커(priceKey/ticker/mkt)를 후보에 합류시킨다. 개별주(mu·mrvl…)는
 // C·RV_PX 에 이미 있으니 seen 으로 스킵되고, 보유 ETF(442580·0162Z0…)만 신규로 추가된다.
 function addHoldingsCandidates(list, holdings) {
   if (!holdings || !Array.isArray(holdings.detail)) return list;
@@ -106,7 +106,7 @@ async function yahoo(sym) {
     else { after = cl[i]; break; }       // 1/1 이후 첫 종가
   }
   const base = before ?? after ?? meta.chartPreviousClose ?? cl.find((x) => x != null) ?? null;
-  // 5Y 시계열 (null 츠들 제거, t=epoch day). 신규 상장은 확보된 만큼만 → 프런트가 자동 클램프.
+  // 5Y 시계열 (null 캔들 제거, t=epoch day). 신규 상장은 확보된 만큼만 → 프런트가 자동 클램프.
   const st = [], sc = [];
   for (let i = 0; i < ts.length; i++) {
     if (cl[i] == null || !Number.isFinite(cl[i])) continue;
@@ -160,7 +160,7 @@ async function naver(code) {
     series: sc.length >= 20 ? { t: st, c: sc } : null };
 }
 
-// 시계열 병합: 이전 창 ∪ seed ∪ 새 창 (같은 t 는 새 소스가 우선). 소스가 츠들을 빠뜨려도
+// 시계열 병합: 이전 창 ∪ seed ∪ 새 창 (같은 t 는 새 소스가 우선). 소스가 캔들을 빠뜨려도
 // 과거 값이 사라지지 않는다(구 로직은 매 실행 창 전체 교체 → 결측이 그대로 구멍으로 남았다).
 function mergeSeries(prev, next, seed) {
   const m = new Map();
@@ -225,7 +225,7 @@ async function main() {
   const candidates = [...readCandidates(), { id: 'ks11', ticker: '^KS11', mkt: 'INDEX' }, { id: 'gspc', ticker: '^GSPC', mkt: 'INDEX' }, { id: 'ixic', ticker: '^IXIC', mkt: 'INDEX' }, { id: 'us10y', ticker: '^TNX', mkt: 'INDEX' }];
   let holdings = null;
   try { holdings = JSON.parse(fs.readFileSync(HOLD, 'utf8')); } catch (e) { /* holdings optional */ }
-  addHoldingsCandidates(candidates, holdings); // 보유 ETF 티커 합류(개밄주는 seen 스킵)
+  addHoldingsCandidates(candidates, holdings); // 보유 ETF 티커 합류(개별주는 seen 스킵)
   let prev = { asOf: null, quotes: {} };
   try { prev = JSON.parse(fs.readFileSync(OUT, 'utf8')); } catch (e) { /* first run */ }
   const out = { asOf: prev.asOf, quotes: { ...(prev.quotes || {}) } };
