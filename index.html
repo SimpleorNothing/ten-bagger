@@ -3141,7 +3141,7 @@ window.MARKET=(function(){
    if(st.hv<0){var mxi=0;for(var j=1;j<k;j++)if(v[j]>v[mxi])mxi=j;var dd=(v[k-1]/mx-1)*100;
     if(mxi>0&&mxi<k-1&&dd<=-1){var _pc=(cs.getPropertyValue('--st-accel').trim()||'#1971c2'),px=X(mxi),py=Y(mx);
      c.save();c.fillStyle=_pc;c.beginPath();c.arc(px,py,2.4,0,6.3);c.fill();c.restore();
-     var pl='고점 '+fv(mx)+' ('+dd.toFixed(1)+'%)';c.font='bold 10px sans-serif';var pw=c.measureText(pl).width;
+     var pl='고점 '+Math.round(mx).toLocaleString()+' ('+Math.round(dd)+'%)';c.font='bold 10px sans-serif';var pw=c.measureText(pl).width;
      c.textAlign='left';halo(pl,Math.min(Math.max(px-pw/2,6),w-6-pw),py+12,_pc);}}
    c.textAlign='left';c.font='10px sans-serif';
    if(st.hv>=0&&st.hv<k){var i2=st.hv;c.strokeStyle='#adb5bd';c.lineWidth=1;c.beginPath();c.moveTo(X(i2),18);c.lineTo(X(i2),H-16);c.stroke();
