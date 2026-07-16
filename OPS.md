@@ -1,11 +1,11 @@
-**최종 갱신: 2026-07-16 21:15 (KST)**
+**최종 갱신: 2026-07-16 21:47 (KST)**
 
 # OPS — 알파맵 운영 가이드
 
 > 初入 Observatory · **운영 SoT = 이 파일(리포 `main`).**
 > **짝 문서 = `STYLE_GUIDE.md`(디자인).** 이 리포의 지속 갱신 문서는 **이 둘뿐**이다 — 화면을 어떻게 그리나=STYLE_GUIDE, 정보를 언제·어떻게 갱신하나=OPS.
 > `.assetsignore`에 `*.md` → 사이트 미배포·리포 전용.
-> 버전: **v3.1** (2문서 체계 확정 · `INFO_SOURCES.md` 흡수 · 6탭 현행화 · 상단 타임스탬프 규칙)
+> 버전: **v3.2** (2문서 체계 · `INFO_SOURCES.md` 흡수 · 6탭 · 상단 타임스탬프 · **무날짜 실적 일정 공시 컷 규율 + MV 3**)
 > **문서 맨 위 「최종 갱신」은 연월일+시분(KST). 이 문서를 고치면 그 줄을 반드시 함께 갱신한다.**
 
 ---
@@ -88,17 +88,18 @@
 | 3 | 집계·해설 — Yahoo Finance · Investing.com · CNBC · Barron's | 통과 |
 | 9 | 콘텐츠팜 — Motley Fool · simplywall.st · 24/7 Wall St. · Kavout · Trefis · TIKR · MarketBeat · Stocktwits · Quiver · Benzinga · Zacks · AOL · TipRanks · Barchart · Moomoo/富途 · 씽크풀 · 팍스넷 | **확정 사건(`RE_EVENT`) 없으면 m=0** (실측 254건에서 이 매체군의 m=2 산출 **0건**. 특종 유실 방지용 안전판만 둔다) |
 
-**물질성 스크리닝(`items[].m`) · 스크리너 세대 `items[].mv` = MV(현재 **2**):** 기준은 하나 — **앞으로의 등락에 영향을 줄 시그널인가.** 지나간 등락의 해설은 시그널이 아니다.
+**물질성 스크리닝(`items[].m`) · 스크리너 세대 `items[].mv` = MV(현재 **3**):** 기준은 하나 — **앞으로의 등락에 영향을 줄 시그널인가.** 지나간 등락의 해설은 시그널이 아니다.
 
 | m | 정의 | 예 |
 |---|---|---|
 | 2 | **논제(펀더멘털)** | 실적·가이던스·수주·계약·출하·고객·공급망·제품가격(고정거래가)·증설·규제·M&A |
 | 1 | **리비전·수급 실사건** | 애널리스트 목표가·투자의견·추정 변경(= **MU γ-닫힘 트리거 ① 입력**) · 지수 편출입 · 대량보유/내부자 공시 · 자사주·증자 |
-| 0 | **비물질(표시 제외)** | **"주가가 X% 올랐다/내렸다"는 사후 등락 서술** · "왜 떨어졌나" 해설 · 홍보·수상·채용 · 가정 시나리오·가격 예측 · 추천 리스트 · 콘텐츠팜(st=9) |
+| 0 | **비물질(표시 제외)** | **"주가가 X% 올랐다/내렸다"는 사후 등락 서술** · "왜 떨어졌나" 해설 · 홍보·수상·채용 · 가정 시나리오·가격 예측 · 추천 리스트 · 콘텐츠팜(st=9) · **날짜 없는 실적 발표 「일정 공시」**(언제 발표할지가 빠지면 시그널 가치 0 · `RE_ERN_SCHED`&&!`RE_HAS_DATE`) |
 
 핵심 구분: 주가 움직임 **자체를 보도**하면 원인이 사실이어도 m=0(「지수 편출 이후 22.6% 하락」). 그 원인을 **사건으로 보도**하면 살린다(「S&P500 편출 결정」 → m=1, 「Tower PIC 500만개 출하」 → m=2).
+**날짜 없는 실적 일정 공시(2026-07-16 신설):** 파이프라인은 **제목만** LLM에 넘긴다 → 본문의 발표일이 요약(`a`)에 못 담긴다. 「실적 발표 일정을 공시/공지했다」만 있고 **실제 발표 날짜(월·일)가 제목·요약에 없으면 m=0**(「Lumentum 실적 발표일 공시」→0). **날짜가 박히면 살린다**(「Qualcomm 실적 발표일 7월 29일 확정」→1, 「Astera Q2 실적 8월 4일」→1). 같은 종목이라도 무날짜 판(0)은 떨어지고 날짜 판(1)은 남는다(VRT 실측). 캘린더 반영은 별개 — 발표일 자체는 05 캘린더·`signal_log`에서 다룬다(narrative≠numbers).
 
-**3층 판정:** ①하드룰(`RE_PR` 홍보 / `RE_SPEC` 추측·리스트 / `RE_MOVE`&&!`RE_KEEP` 사후 등락 서술 / st=9&&!`RE_EVENT`) → ②신규 요약 시 LLM이 `a`·`w`와 함께 `m` 생성 → ③`scoreLegacy` 백필·**MV 상향 시 전건 재채점**(요약 `a`·`w`는 재사용 → 토큰 낭비 없음). 사다리·정규식·티어의 **단일 소스 = `scripts/news-screen.mjs`**. `news.json`·`archive/{TK}.json`은 **m≥1만 적재**, m=0은 `news_archive.json`에 **전건 보존(삭제 아님)**.
+**3층 판정:** ①하드룰(`RE_PR` 홍보 / `RE_SPEC` 추측·리스트 / `RE_MOVE`&&!`RE_KEEP` 사후 등락 서술 / st=9&&!`RE_EVENT` / **`RE_ERN_SCHED`&&!`RE_HAS_DATE` 무날짜 일정 공시**) → ②신규 요약 시 LLM이 `a`·`w`와 함께 `m` 생성(LADDER에 무날짜 일정 공시 룰 명시) → ③`scoreLegacy` 백필·**MV 상향 시 전건 재채점**(요약 `a`·`w`는 재사용 → 토큰 낭비 없음). **`ruleM`은 title+`a`를 함께 본다** → MV 3 재채점 때 과거 기사는 이미 한글 요약이 있어 무날짜 일정 공시가 결정적으로 컷된다(LITE 등 5건 실측). 신규 기사는 preScreen에서 제목만 보므로, 제목에 일정어가 약한 영문 기사(예: "AMD to Report … Results")는 ②의 LLM(LADDER)이 m=0을 매긴다. 사다리·정규식·티어의 **단일 소스 = `scripts/news-screen.mjs`**. `news.json`·`archive/{TK}.json`은 **m≥1만 적재**, m=0은 `news_archive.json`에 **전건 보존(삭제 아님)**.
 **규율:** 스크리닝은 **표시 대상만** 정한다. 판단·숫자 파일은 건드리지 않는다(narrative≠numbers).
 
 **교차 점검 규율 — 01 갱신 시 02·03·05 동반 확인(2026-07-15 신설):** 01 시장 모니터링 정보를 갱신할 때는 **매번** 아래 3개 메뉴에서 해당분이 있는지 확인하고, 있으면 같은 세션에서 반영한다. **단, narrative≠numbers·게이트 AND 규율은 그대로** — 일정·발표·뉴스 자체는 `signal_log`/캘린더 **표시일 뿐**, 숫자·판단 파일 변경은 §1 트리거를 통과해야 한다.
@@ -176,11 +177,10 @@
 | 시세 표시 | `prices.json` asOf | 자동(cron) |
 | 정보 표시 | `signal_log` 최신 `at` (`infoAsof()`) | 수동(시그널 기록 시) |
 | 정적 뷰 배지(`.updstamp`) | `VIEW_UPDATED` 상수 | **정보가 바뀔 때만** 수동. CSS·문구만 고친 배포에선 건드리지 않는다 |
-| 01 헤더 `update` 배지(`.mkt-upd`) | `pulse.json` asOf(라이브) — 클릭 팝업만 `changelog.js` 변경 로그 | 자동(뉴스 세션 편승) |
 | 자동 뷰 배지 | 해당 데이터 파일 asOf | 자동 |
 
 ### 스크립트 인벤토리 (`scripts/`)
-`fetch-prices` · `fetch-news` · **`news-screen`(뉴스 스크리너 SoT — 사다리·정규식·소스 티어·병목축)** · `fetch-signals` · `fetch-gamma` · `fetch-cpi` · `fetch-tsla-deliveries` · `compute-alpha` · `derive-cycle-e` · `derive-drafts` · `derive-calendar` · `sync-holdings` · `judgment-diff` · `daily-brief-slack` · **`fetch-pulse`(시장 맥박 6축 합성 · update-news 편승)** · `check-docs` · `enable-r2` · `proposed-workflows/`
+`fetch-prices` · `fetch-news` · **`news-screen`(뉴스 스크리너 SoT — 사다리·정규식·소스 티어·병목축)** · `fetch-signals` · `fetch-gamma` · `fetch-cpi` · `fetch-tsla-deliveries` · `compute-alpha` · `derive-cycle-e` · `derive-drafts` · `derive-calendar` · `sync-holdings` · `judgment-diff` · `daily-brief-slack` · `check-docs` · `enable-r2` · `proposed-workflows/`
 ※ **cron 시각·워크플로 권한·`paths-ignore` 목록은 라이브 `.github/workflows/`가 SoT.** 위 주기는 관측값이며, 어긋나면 라이브가 이긴다.
 
 ---
@@ -191,7 +191,6 @@
 - **뉴스 = 1일 2회(2026-07-12~).** `06:12 KST`(미국 장 마감 반영) · `18:12 KST`(한국 장 마감 반영). 각 세션에 30분 후행 + 1시간 백업 트리거(스케줄러 누락 흡수). **가드 6h < 세션 간격 12h** → 같은 세션의 중복만 스킵되고 두 세션은 각각 실행. `workflow_dispatch`는 가드 우회. ※ **라이브 크론은 아직 아침 세션만** — 저녁 18:12 cron 추가는 운영자 수동(§8-11). 반영 전까지 실제 실행은 아침 1건.
 - **시세·종합지수·스파크라인 = 1일 2회(2026-07-14~).** `06:37 KST`(미 장 마감) · `18:37 KST`(한국 장 마감) — `update-prices.yml`. 가드 없음·union 병합 멱등이라 중복 무해. **토큰 0**(Yahoo/Naver HTTP·LLM 미사용). 저녁 `37 9 * * *` cron 추가는 운영자 수동(§8-11). **유가·10년물은 worker 런타임 = 페이지 로드마다 ≥2회 → 배치 불요.**
 - **LLM 호출 3종·비용 성격이 다르다:** ①매크로 발굴·②다이제스트 = **실행 횟수**에 비례 / ③기사 요약 = **신규 기사 수**에 비례(증분이라 빈도를 올려도 거의 안 늘어난다). 다이제스트는 **신규 0건이면 호출 자체를 스킵**(기존 파일 유지). Sonnet 4.6 $3/$15 per MTok 기준 **1일 2회 ≈ 월 $2.3**(1일 4회 $3.5 · 매시간 $12).
-- **시장 맥박(pulse.json) = update-news 편승(2026-07-16~).** 뉴스 세션(06:12·18:12 KST) fetch-news 직후 `fetch-pulse.mjs`가 6축 재합성 → 별도 크론 불요. **신규 0건 스킵 없음**(매 세션 재합성 = 다이제스트보다 신선). `max_tokens 8192`(한국어 6축 절단 방지) · 실패는 `::warning::`로 노출·exit 0(뉴스 커밋 비차단).
 **실적마다** — D-N 플레이북(§5)이 캘린더에서 자동 점등.
 **주 1회** — `alpha.json` 자동 재계산(토). `judgment.json` override의 `why` 조건이 아직 살아있는지 점검.
 **분기 1회** — 초입 5신호 재채점 · stage 재평가 · `TARGETS` 적정밴드 재산정 · 낡은 실적·판단 일괄 정리 · `judgment.json` 덮기 전 `history/judgment_YYMMDD.json` 스냅샷 → `judgment-diff.mjs`로 사분면 궤적 기록.
@@ -279,7 +278,7 @@
 8. **캘린더 동적화** — `calendar.json`·`derive-calendar.mjs` 진행 중. 완료 시 §3의 05 행을 「수동(정적)」→「혼합」으로 갱신.
 9. **야후 일봉 결측 (2026-07-13 ^KS11)** — 코스피 −8.95%(1단계 서킷) 당일 Yahoo `chart` 의 meta 는 최신인데 일봉 배열에 그 캔들이 없었다. `charts.json` 만 3일 스테일(7/10 · 전일 +2.5%) → 01 카드가 최대 폭락일을 못 보고, KR 서킷·사이드카도 미점등(=침묵하는 오류). 조치: ①`fetch-prices.mjs` meta 강제 반영·union 병합·`BACKFILL`·괴리 가드 ②`fetch-signals.mjs` KR 판정에 **종가 백스톱**(charts ks11) 추가. **매 세션 `prices.json.warn` 확인.**
 10. **`charts.json`(942KB)은 MCP 직접 푸시 불가** — 스크립트 수정 후 Actions에서 `Update stock prices` → `Update macro signals` dispatch 해야 즉시 반영(미실행 시 다음 크론까지 스테일).
-11. **01 전 지표 1일 2회 — 저녁 크론 운영자 대기(2026-07-14).** `.github/workflows/` 403이라 수동. ①`update-prices.yml` schedule에 `- cron: '37 9 * * *'`(18:37 KST) 추가 → 시세·지수·스파크라인 저녁 반영(가드 없음·멱등). ②`update-news.yml` schedule에 `- cron: '12,42 9 * * *'` + `- cron: '12 10 * * *'`(18:12·18:42·19:12 KST) 추가 → 뉴스 저녁 세션(가드 6h<12h라 아침·저녁 각각 실행). 반영 전까지 시세·뉴스는 **아침 1회**로 돈다(문서가 앞섬 — 충돌 시 라이브가 이기는 값). 유가·10년물은 런타임이라 대상 아님. ✅ **2026-07-16 뉴스 저녁 세션 해소:** update-news.yml에 저녁 cron(18:12·18:42·19:12 KST) 설치 완료 → 뉴스 1일 2회 라이브. **시장 맥박은 별도 update-pulse 크론 대신 update-news에 편승**(Synthesize 스텝) — 뉴스 세션마다 재합성. update-pulse.yml은 스케줄 은퇴·`workflow_dispatch`만 유지.
+11. **01 전 지표 1일 2회 — 저녁 크론 운영자 대기(2026-07-14).** `.github/workflows/` 403이라 수동. ①`update-prices.yml` schedule에 `- cron: '37 9 * * *'`(18:37 KST) 추가 → 시세·지수·스파크라인 저녁 반영(가드 없음·멱등). ②`update-news.yml` schedule에 `- cron: '12,42 9 * * *'` + `- cron: '12 10 * * *'`(18:12·18:42·19:12 KST) 추가 → 뉴스 저녁 세션(가드 6h<12h라 아침·저녁 각각 실행). 반영 전까지 시세·뉴스는 **아침 1회**로 돈다(문서가 앞섬 — 충돌 시 라이브가 이기는 값). 유가·10년물은 런타임이라 대상 아님.
 12. **`index.html` 잔여 죽은 코드(07-14 이관 후)** — `#v-siglog` 마크업·`renderSignalLog()`·호출이 남아 있다. `mount()` 가 섹션을 런타임 제거하고 렌더러는 `if(!el)return;` 가드라 **무해**. 다음 `index.html` 패치 때 함께 걷어낸다(단독 패치는 b64 리스크만 산다 — §6-3).
 13. **patches/ 루트 잔여 .b64 23건(스테일)** — 과거 실패 런·미이관 잔여물. `git apply --check` 실패분이라 push 트리거엔 무해하나, 수동 dispatch 폴백에서 자동 보관 처리됨 → **운영자 1회 dispatch로 일괄 정리 권장**. 재적용 위험이 있던 5건(worker 인사이트 중복·구버전 뉴스 mjs·OPS 부분수정)은 2026-07-14 `patches/applied/`로 이관 완료.
 
@@ -287,7 +286,7 @@
 
 ## 갱신 이력
 
-- 2026-07-16 · **시장 맥박 파이프라인 안정화 + 헤더 배지 라이브화.** ①별도 `update-pulse` 크론이 seed(manual)에 고착 → 맥박 합성을 검증된 `update-news`에 **편승**(Synthesize 스텝, 1일 2회)·update-pulse 스케줄 은퇴(dispatch만). ②`fetch-pulse.mjs` 침묵 실패 하드닝 — 응답 JSON 견고 추출 + 실패 `::warning::` 노출(exit 0)로 원인 가시화(#337). ③그 로그가 짚은 `stop_reason=max_tokens` 절단을 **max_tokens 4096→8192**로 수리(#339). ④01 헤더 `update` 배지를 변경 로그 날짜 대신 **`pulse.json` asOf(라이브)**로 표시(`changelog.js`)·변경 로그는 「이력」 모달로 보존(#340). §3 스크립트 인벤토리·헤더 타임스탬프 · §4 케이던스 · §8-11.
+- 2026-07-16 21:47 · **날짜 없는 실적 발표 「일정 공시」 m=0 컷 규율 신설(MV 2→3).** SimpleorNothing 지시 — 「실적 발표 일정을 공시했다」만 있고 정작 **언제 발표하는지(월·일)가 없으면 기사로서 의미 0** → 표시 제외. 근인: 파이프라인이 **제목만** LLM에 넘겨 본문의 발표일이 요약에 못 담기는 구조(`summarizeArticles` 입력=제목). `news-screen.mjs`에 `RE_ERN_SCHED`·`RE_HAS_DATE`·`isSchedNoDate` 추가 → `ruleM`(title+`a`)에 컷 + LADDER에 룰 명시. MV 3으로 올려 과거분 자동 재채점(요약 `a·w` 재사용) → 기존 기사는 한글 요약이 있어 컷 확정. 실측 리플레이(archive 835건): 무날짜 일정 공시 **5건 컷**(VRT·PLTR·LITE·AMD·ALAB), 날짜 있는 건 유지(QCOM 7/29·ALAB 8/4·VRT 7/29 확정판), m=2 펀더멘털·프리뷰(VICR) 오탐 0건. narrative≠numbers 불변(표시 창만·숫자 파일 무변). §3 물질성 사다리 m=0 행·3층 판정. **데이터 반영은 다음 뉴스 크론(06:12/18:12) 또는 `Update news feed` 수동 dispatch부터**(§8-4).
 - 2026-07-15 23:07 · **01 갱신 시 02·03·05 교차 점검 규율 신설(§3 01 절).** SimpleorNothing 지시 — 01 시장 모니터링 정보 갱신 시 05 캘린더 경과 이벤트(CPI·FOMC·실적 등)·02 사이클/주도주·γ·stage 함의·03 관점/`signal_log` 연결을 **매 세션 동반 확인**. narrative≠numbers·게이트 AND 불변(일정·발표·뉴스는 표시/`signal_log`만, 숫자 파일은 §1 트리거). 순수 규율 추가(코드·데이터·토큰 무변). 지시문(Project)은 실행 세부 미포함 원칙이라 무변경.
 - 2026-07-14 · **종목 뉴스 미니차트 X축 다년 날짜 오독 수리.** Ctrl+휠로 넓힌 다년 창(PLTR 1254D)이 `MM-DD`만 찍혀 하루 차로 보였음 → `index.html` `fd()`를 `spanYr`(시작·끝 연도 상이) 인식으로: 다년은 `YY-MM-DD`, 한 해 안은 종전 `MM-DD`. 순수 표기 변경(데이터·크론 무변, 신규 토큰 없음). 상세=STYLE_GUIDE §6-5. (PR #333)
 
