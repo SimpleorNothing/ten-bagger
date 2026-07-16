@@ -426,6 +426,11 @@ window.INSIGHT=(function(){
    document.head.appendChild(s);});
   return _pdfP;
  }
+ /* 텍스트 레이어 품질 판정 = 실제 글자(한글·영숫자) 수. 스캔 PDF(빈 텍스트)와
+    ToUnicode 깨진 PDF(글자가 —·치환문자로만 매핑) 둘 다 실글자 수가 0에 수렴한다.
+    실측(20260716_CXMT.pdf): Word 2019 Batang CID 폰트가 전 글자를 U+2014(—)로 매핑
+    → getTextContent 는 "— — —"만 준다. 실글자 수로 판정해 OCR 로 폴백한다. */
+ function realLetters(s){var m=String(s||'').match(/[가-힣a-zA-Z0-9]/g);return m?m.length:0;}
  async function pdfText(file){
   var lib=await pdfjs();
   var buf=await file.arrayBuffer();
@@ -436,7 +441,29 @@ window.INSIGHT=(function(){
    var tc=await pg.getTextContent();
    out.push(tc.items.map(function(it){return it.str;}).join(' '));
   }
-  return out.join('\n');
+  var txt=out.join('\n');
+  /* 텍스트 레이어가 비었거나 깨졌으면(실글자 < 페이지당 8자 수준) 렌더→OCR 폴백.
+     OCR 은 정상 텍스트 PDF 에도 안전(느릴 뿐)이라 컷은 보수적으로 둔다. */
+  if(realLetters(txt)<Math.max(24,N*8))return await pdfOcr(doc,N);
+  return txt;
+ }
+ /* PDF 페이지를 캔버스로 렌더 → tesseract(kor+eng) OCR. 이미지 OCR 워커 재사용. 클라 전용·서버 무변경. */
+ async function pdfOcr(doc,N){
+  var w=await ocrWorker();
+  var M=Math.min(N,20),out=[];   /* OCR 은 느리다 → 앞 20페이지 상한(리포트 본문은 앞부분 집중) */
+  for(var i=1;i<=M;i++){
+   setMsg('텍스트 레이어가 없어 OCR 로 읽는 중 — '+i+'/'+M+' 페이지');
+   var pg=await doc.getPage(i);
+   var vp=pg.getViewport({scale:2.2});   /* ~158dpi 상당 — 한글 인식 정확도 확보 */
+   var cv=document.createElement('canvas');cv.width=vp.width;cv.height=vp.height;
+   await pg.render({canvasContext:cv.getContext('2d'),viewport:vp}).promise;
+   var r=await w.recognize(cv);
+   out.push(r&&r.data&&r.data.text?r.data.text:'');
+   cv.width=cv.height=0;   /* 캔버스 메모리 해제 */
+  }
+  var t=out.join('\n').replace(/[ \t]+\n/g,'\n').trim();
+  if(N>M)t+='\n\n…(총 '+N+'페이지 중 앞 '+M+'페이지만 OCR)';
+  return t;
  }
 
  /* --- 이미지(캡처·붙여넣기) → 글자 인식(OCR) --- */
