@@ -176,7 +176,7 @@ async function quote(c) {
 }
 
 async function main() {
-  const candidates = [...readCandidates(), { id: 'ks11', ticker: '^KS11', mkt: 'INDEX' }, { id: 'gspc', ticker: '^GSPC', mkt: 'INDEX' }, { id: 'ixic', ticker: '^IXIC', mkt: 'INDEX' }];
+  const candidates = [...readCandidates(), { id: 'ks11', ticker: '^KS11', mkt: 'INDEX' }, { id: 'gspc', ticker: '^GSPC', mkt: 'INDEX' }, { id: 'ixic', ticker: '^IXIC', mkt: 'INDEX' }, { id: 'us10y', ticker: '^TNX', mkt: 'INDEX' }];
   let prev = { asOf: null, quotes: {} };
   try { prev = JSON.parse(fs.readFileSync(OUT, 'utf8')); } catch (e) { /* first run */ }
   const out = { asOf: prev.asOf, quotes: { ...(prev.quotes || {}) } };
@@ -189,6 +189,13 @@ async function main() {
   for (const c of candidates) {
     try {
       const q = await quote(c);
+      // ^TNX(미 10년물)는 야후가 수익률(4.55) 로 주기도, 구 CBOE 관례의 10× 스케일(45.5) 로 주기도 한다.
+      // 10Y 수익률이 20% 를 넘을 일은 없으므로 20 초과면 %로 정규화 → charts.json us10y 는 항상 %(4.55) 단위.
+      if (c.id === 'us10y' && q && q.price != null && q.price > 20) {
+        q.price = +(q.price / 10).toFixed(2);
+        if (q.series && Array.isArray(q.series.c)) q.series.c = q.series.c.map((v) => +(v / 10).toFixed(2));
+        // changePct 는 비율이라 스케일 불변 → 그대로 둔다.
+      }
       out.quotes[c.id] = { price: q.price, changePct: q.changePct, currency: q.currency, ticker: c.ticker, src: q.src };
       const merged = mergeSeries(charts.series[c.id], q.series, BACKFILL[c.id]);
       if (merged) charts.series[c.id] = merged; // 병합 실패 시에만 이전 유지
