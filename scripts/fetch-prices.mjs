@@ -15,7 +15,8 @@ import fs from 'node:fs';
 const HTML = 'index.html';
 const OUT = 'prices.json';
 const CHARTS_OUT = 'charts.json'; // 5Y 일봉 시계열(호버·기간버튼용). t=epoch day, c=close. 이전 창과 union 병합(결측 방어).
-// 결측 캠들 수동 보강(seed). 야후가 KRX 서킷브레이커 당일 일봉을 창에서 누락한 사고(2026-07-13)
+const HOLD = 'holdings.json'; // 보유자산 — detail[].priceKey/qty/ccy 로 하루 2회 시가평가(수량 고정·환율=NH). 수량은 주간 sync-holdings(체결)만 갱신.
+// 결측 캔들 수동 보강(seed). 야후가 KRX 서킷브레이커 당일 일봉을 창에서 누락한 사고(2026-07-13)
 // 대응 — t=epoch day, c=close. 시리즈 병합 시 소스(야후/네이버) 값이 있으면 소스가 이긴다.
 const BACKFILL = { ks11: [[20647, 6807]] }; // 2026-07-13 코스피 종가 6,806.93 (−8.95%, 1단계 서킷)
 
@@ -44,6 +45,19 @@ function readCandidates() {
       seen.add(e.id);
       list.push({ id: e.id, ticker: e.t, mkt: e.mkt });
     }
+  }
+  return list;
+}
+
+// 보유자산 detail[] 의 시세 티커(priceKey/ticker/mkt)를 후보에 합류시킨다. 개별주(mu·mrvl…)는
+// C·RV_PX 에 이미 있으니 seen 으로 스킵되고, 보유 ETF(442580·0162Z0…)만 신규로 추가된다.
+function addHoldingsCandidates(list, holdings) {
+  if (!holdings || !Array.isArray(holdings.detail)) return list;
+  const seen = new Set(list.map((c) => c.id));
+  for (const d of holdings.detail) {
+    if (!d.priceKey || !d.ticker || !d.mkt || seen.has(d.priceKey)) continue;
+    seen.add(d.priceKey);
+    list.push({ id: d.priceKey, ticker: String(d.ticker), mkt: d.mkt });
   }
   return list;
 }
@@ -92,7 +106,7 @@ async function yahoo(sym) {
     else { after = cl[i]; break; }       // 1/1 이후 첫 종가
   }
   const base = before ?? after ?? meta.chartPreviousClose ?? cl.find((x) => x != null) ?? null;
-  // 5Y 시계열 (null 캠들 제거, t=epoch day). 신규 상장은 확보된 만큼만 → 프런트가 자동 클램프.
+  // 5Y 시계열 (null 캔들 제거, t=epoch day). 신규 상장은 확보된 만큼만 → 프런트가 자동 클램프.
   const st = [], sc = [];
   for (let i = 0; i < ts.length; i++) {
     if (cl[i] == null || !Number.isFinite(cl[i])) continue;
@@ -146,7 +160,7 @@ async function naver(code) {
     series: sc.length >= 20 ? { t: st, c: sc } : null };
 }
 
-// 시계열 병합: 이전 창 ∪ seed ∪ 새 창 (같은 t 는 새 소스가 우선). 소스가 캠들을 빠뜨려도
+// 시계열 병합: 이전 창 ∪ seed ∪ 새 창 (같은 t 는 새 소스가 우선). 소스가 캔들을 빠뜨려도
 // 과거 값이 사라지지 않는다(구 로직은 매 실행 창 전체 교체 → 결측이 그대로 구멍으로 남았다).
 function mergeSeries(prev, next, seed) {
   const m = new Map();
@@ -175,8 +189,43 @@ async function quote(c) {
   return { ...(await yahoo(s)), src: 'yahoo' };
 }
 
+// 보유자산 시가평가(수량 고정 × 최신가 × NH환율). 비파괴: 시세 누락 라인은 직전 amt 유지.
+// 수량·priceKey·ccy·fx 는 주간 sync-holdings(엑셀 체결)만 세팅한다 → 여기선 평가만.
+function revalueHoldings(h, quotes) {
+  if (!h || !Array.isArray(h.detail)) throw new Error('holdings.detail 없음');
+  const fx = h.fx && h.fx.usdkrw;
+  if (!(fx > 0)) throw new Error('holdings.fx.usdkrw 없음(주간 sync 대기)');
+  const amtByName = {};
+  let total = 0, priced = 0;
+  for (const d of h.detail) {
+    if (d.priceKey && d.qty != null) {
+      const q = quotes[d.priceKey];
+      if (q && Number.isFinite(q.price)) {
+        d.amt = Math.round((d.qty * q.price * (d.ccy === 'USD' ? fx : 1)) / 1e6);
+        priced++;
+      } // 시세 없으면 직전 amt 유지(아래 warn 집계)
+    }
+    amtByName[d.name] = d.amt || 0;
+    total += d.amt || 0;
+  }
+  if (!(total > 0)) throw new Error('holdings total 0');
+  for (const d of h.detail) d.w = +(((d.amt || 0) / total) * 100).toFixed(2);
+  for (const row of (h.holdings || [])) {
+    if (Array.isArray(row.members)) row.amt = row.members.reduce((s, n) => s + (amtByName[n] || 0), 0);
+    row.w = +(((row.amt || 0) / total) * 100).toFixed(1);
+  }
+  h.total = total;
+  // 평가 시각(KST 분단위) — 보드 asOf 배지 = 시가평가 시각. 체결일은 qtyAsOf(주간) 별도 보존.
+  h.asOf = new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 16).replace('T', ' ');
+  fs.writeFileSync(HOLD, JSON.stringify(h, null, 1) + '\n');
+  return { total, priced, of: h.detail.filter((d) => d.priceKey && d.qty != null).length };
+}
+
 async function main() {
   const candidates = [...readCandidates(), { id: 'ks11', ticker: '^KS11', mkt: 'INDEX' }, { id: 'gspc', ticker: '^GSPC', mkt: 'INDEX' }, { id: 'ixic', ticker: '^IXIC', mkt: 'INDEX' }, { id: 'us10y', ticker: '^TNX', mkt: 'INDEX' }];
+  let holdings = null;
+  try { holdings = JSON.parse(fs.readFileSync(HOLD, 'utf8')); } catch (e) { /* holdings optional */ }
+  addHoldingsCandidates(candidates, holdings); // 보유 ETF 티커 합류(개별주는 seen 스킵)
   let prev = { asOf: null, quotes: {} };
   try { prev = JSON.parse(fs.readFileSync(OUT, 'utf8')); } catch (e) { /* first run */ }
   const out = { asOf: prev.asOf, quotes: { ...(prev.quotes || {}) } };
@@ -221,6 +270,17 @@ async function main() {
   if (ok > 0) { out.asOf = new Date().toISOString(); charts.asOf = out.asOf; }
   fs.writeFileSync(OUT, JSON.stringify(out, null, 2) + '\n');
   fs.writeFileSync(CHARTS_OUT, JSON.stringify(charts) + '\n'); // 시계열은 압축 직렬화(파일 크기)
+  // 보유자산 시가평가(비파괴) — 실패해도 시세 파일은 이미 기록됨(피드 우선).
+  if (holdings) {
+    try {
+      const r = revalueHoldings(holdings, out.quotes);
+      console.log(`\nholdings revalued: total=${r.total}M · priced ${r.priced}/${r.of} 라인 · asOf=${holdings.asOf} (fx=${holdings.fx.usdkrw})`);
+      if (r.priced < r.of) console.log(`::warning::holdings ${r.of - r.priced}개 라인 시세 결측 → 직전 평가 유지`);
+    } catch (e) {
+      console.log('::warning::holdings 시가평가 스킵: ' + e.message);
+    }
+  }
+
   console.log(`\nDone: ${ok} ok, ${fail} failed. asOf=${out.asOf}`);
 }
 
