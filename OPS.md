@@ -1,11 +1,11 @@
-**최종 갱신: 2026-07-17 17:14 (KST)**
+**최종 갱신: 2026-07-17 18:56 (KST)**
 
 # OPS — 알파맵 운영 가이드
 
 > 初入 Observatory · **운영 SoT = 이 파일(리포 `main`).**
 > **짝 문서 = `STYLE_GUIDE.md`(디자인).** 이 리포의 지속 갱신 문서는 **이 둘뿐**이다 — 화면을 어떻게 그리나=STYLE_GUIDE, 정보를 언제·어떻게 갱신하나=OPS.
 > `.assetsignore`에 `*.md` → 사이트 미배포·리포 전용.
-> 버전: **v3.3** (2문서 체계 · `INFO_SOURCES.md` 흡수 · 6탭 · 상단 타임스탬프 · 무날짜 실적 일정 공시 컷 · MV 3 · **관점 라이프사이클 트리아지 §0-5·§3**)
+> 버전: **v3.4** (2문서 체계 · `INFO_SOURCES.md` 흡수 · **06 캘린더 뷰 삭제→01 흡수(정적 5버튼·런타임 6탭)** · 상단 타임스탬프 · 무날짜 실적 일정 공시 컷 · MV 3 · 관점 라이프사이클 트리아지 §0-5·§3)
 > **문서 맨 위 「최종 갱신」은 연월일+시분(KST). 이 문서를 고치면 그 줄을 반드시 함께 갱신한다.**
 
 ---
@@ -57,14 +57,15 @@
 > 범례 — **자동**: cron 워크플로 or worker 런타임 API · **수동**: 편집→PR→deploy · **혼합**: 자동값 위에 판단이 덮음 · **날짜연동**: 클라가 날짜 기준 자동 표시.
 > 메뉴·정보명·소스·주기가 바뀌면 **같은 PR에서 이 절을 갱신**한다(§7).
 
-### 현행 메뉴 (7탭 · 런타임 렌더 순)
-`01 시장 모니터링(v-market)` · `02 궁금한 것(v-cycle/v-alpha/v-thread)` · `03 관점과 정보 얻기(v-insight · insight.js 자가 마운트)` · `04 전문가 원탁(v-council)` · `05 리밸런싱(v-decision)` · `06 캘린더(v-cal)` · `07 메모(v-memo)`
-※ 위는 **런타임 렌더 순**(§3 내부번호 = 이 순서). `nav` 정적 버튼은 6개(market·cycle·port·council·cal·memo)이고, `insight.js` `mount()`가 `insight` 탭을 `port` 앞에 주입 + `council`을 `port` 앞으로 이동 + 전 탭 index 순 재번호 → 위 순서 확정(정적 번호는 마운트 전 폴백). `v-port`·`v-tracker`·`v-macro`는 2026-07-11 재편으로 **뷰서 제외·코드 잔존**(결정보드가 소비).
+### 현행 메뉴 (6탭 · 런타임 렌더 순)
+`01 시장 모니터링(v-market)` · `02 궁금한 것(v-cycle/v-alpha/v-thread)` · `03 관점과 정보 얻기(v-insight · insight.js 자가 마운트)` · `04 전문가 원탁(v-council)` · `05 리밸런싱(v-decision)` · `06 메모(v-memo)`
+※ 위는 **런타임 렌더 순**(§3 내부번호 = 이 순서). `nav` 정적 버튼은 5개(market·cycle·port·council·memo)이고, `insight.js` `mount()`가 `insight` 탭을 `port` 앞에 주입 + `council`을 `port` 앞으로 이동 + 전 탭 index 순 재번호 → 위 순서 확정(정적 번호는 마운트 전 폴백). `v-port`·`v-tracker`·`v-macro`·`v-cal`은 **뷰서 제외·코드 잔존**(v-cal은 2026-07-17 06 캘린더 삭제로 합류 — 임박 이벤트는 01로 흡수, `#v-cal` CSS는 비활성 잔존).
 
 ### 01 시장 모니터링 (`v-market`)
 
 | 정보명 | 자동/수동 | 주기 | 소스 |
 |---|---|---|---|
+| **다가오는 일정** (거시·실적 게이트 D-N 카드+범례 · 2026-07-17 06서 흡수) | 혼합 | 데일리 프루닝·asOf / 큐레이션 수시 | `calendar.json` `events`(수기+`derive-calendar.mjs` 프루닝) + `earnings.json` moves(`CAL_EARN_MOVES`). `renderCalNow()`가 오늘 기준 경과 제거·D-N·임박 `CAL_NOW_MAX`(8) 렌더. `#calNow`·`--cat-*` `#v-market` 스코프. 크론 `update-calendar.yml`(운영자 수동) |
 | 업데이트 이력(변경 로그) | 수동(인라인) | 사이트 변경 시 | `changelog.js` 인라인 `MKT_CHANGELOG`(`{d,t}` 최신순·자가 마운트=insight.js 패턴). `mountHead()`가 **01 시장 모니터링(`#v-market`) + 전문가 원탁(`#v-council`) 헤더(`.vhead`) 우상단**에 각각 `.mkt-upd` 배지를 마운트 → 클릭 시 `.cyc-pop` 모달(`.cyc-upd`/`.cyc-pop` 재사용 · 신규 토큰 0). **사용자 향 변경만** 기록 · 신규 항목은 배열 맨 위 |
 | 코스피·S&P·나스닥 지수 | 자동 | 06:37·18:37 KST (1일 2회 · ⏳저녁 §8-11) | `charts.json` (`fetch-prices.mjs`, `^KS11·^GSPC·^IXIC` Yahoo 5Y). **meta 거래일을 시계열 끝에 강제 반영 + 이전 창과 union 병합** → `prices.json`과 갈라지지 않는다. 괴리>1%는 `prices.json.warn` |
 | 미 10년물 금리 | 자동 | 06:37·18:37 KST + 폴백 런타임 | **1순위 `charts.json` `us10y`**(`fetch-prices.mjs` `^TNX` Yahoo 5Y · 지수 카드와 동일 t/c → 기간버튼 1M~5Y 실동작 · `^TNX` 10× 스케일은 `>20→÷10`로 % 정규화). **폴백** worker `/api/us10y` → `history[].markets.ten_year`(외부 피드 ~2개월). ※구버전은 폴백만 써서 6M+ 기간 무반응 버그(2026-07-16 수리, PR #345) |
@@ -107,7 +108,7 @@
 
 | 대상 | 무엇을 교차 확인 | 반영 방향 |
 |---|---|---|
-| **06 캘린더** | 예정 거시·실적 이벤트(FOMC·CPI/PCE·금통위·메가이벤트·워치리스트·실적)가 **경과**했는지 | 경과분 → 01(관련 기사·매크로 렌즈)에서 파악 · 06에선 해당 일정 **경과 처리·다음 회차 갱신**. 예: 어제 US CPI 발표 → 01 매크로 축에 반영, 05 일정 소거→다음 CPI로 |
+| **01 다가오는 일정** | 예정 거시·실적 이벤트(FOMC·CPI/PCE·금통위·메가이벤트·실적)가 **경과**했는지 | 경과분은 `renderCalNow()`가 오늘(KST) 기준 자동 소거 · 이벤트 큐레이션·다음 회차 추가는 `calendar.json` `events` 수기 편집. 예: US CPI 발표 → 01 매크로 축에 반영. narrative≠numbers |
 | **02 궁금한 것** | 01 데이터·병목 뉴스(지수·메모리 가격·capex·L3~L8 병목)가 **반도체 사이클(E군집)·주도주 사분면·γ·stage**에 함의가 있는지 | 메모리 가격 롤오버·병목 조임/완화 → 02 `cycle`·`gamma` stage 렌즈 점검. **숫자 변경은 §1 트리거 통과 시만**(가격 상승 자체는 플래그) |
 | **03 관점** | 01 종목·매크로 뉴스의 **확정 사건(m≥1)**이 채택 관점·`signal_log`로 이어지는지 | 확정 사건 → 03 관점 아래 `signal_log.json` EOF append(§6-5). 관점은 「반영 대기」 유지, 숫자는 §1 트리거 |
 
@@ -150,14 +151,7 @@
 | 결정 보드 | 혼합 | 리밸런싱 실행 시 | `judgment.json` (`decisions` 배열). 매매 방향·게이트·근거·사후 추적 |
 | 포트폴리오 테이블 | 자동 + 수동 | holdings 주간 + prices 일별 | `holdings.json` × `prices.json` |
 
-### 06 캘린더 (`v-cal`)
-
-| 정보명 | 자동/수동 | 주기 | 소스 |
-|---|---|---|---|
-| 실적·매크로 이벤트 | 수동 | 일정 변경 시 | `earnings.json` (실적 일정·추정) + `signals.json` (매크로 이벤트) |
-| D-N 카운트다운 | 자동(런타임) | 매 로딩 | 현재 날짜 vs `earnings.json` 일정 |
-
-### 07 메모 (`v-memo`)
+### 06 메모 (`v-memo`)
 
 | 정보명 | 자동/수동 | 주기 | 소스 |
 |---|---|---|---|
@@ -260,6 +254,7 @@
 ## 8. 알려진 이슈 · 미완료 항목
 
 - **E-군집 자동화** (`update-prices.yml` manual edit): GitHub App lacks workflows write scope (403) → 운영자 수동 dispatch 필요
+- **`update-calendar.yml` 미등록(수동)**: `derive-calendar.mjs`(01 다가오는 일정 프루닝·asOf) 크론 미등록 — App workflow write 부재(403). 런타임 `renderCalNow()`가 오늘 기준 재계산하므로 표시는 신선(파일 `asOf`만 수동 refresh까지 스테일 가능). 신규 이벤트는 `calendar.json` 수기.
 - **⏳ 저녁 fetch-prices 지연**: cron 18:37 KST가 실제로 19:xx~20:xx에 돌고 있음 — 원인 미확인(Actions 큐 지연 추정). 모니터링 중.
 - **관점 라이프사이클 LLM 자동 제안 미구현**: `hyp`·`until`을 `/api/insight`(worker) 추출 시 자동 채우면 신규 채택분이 처음부터 폐기 조건을 달고 태어난다. 현재는 운영자가 03 「🕔 라이프사이클」로 수동 입력 · 신규 채택은 `review`=+14d 자동. worker 프롬프트 편집은 후속 PR(③).
 - `prices.json.warn = lazr chart 43.47 vs quote 41.35` — LAZR 비보유·무시 가능
@@ -268,6 +263,7 @@
 
 ## 9. 갱신 이력
 
+- 2026-07-17 18:56 · **06 캘린더 뷰 삭제 → 01 「다가오는 일정」 흡수.** SimpleorNothing 지시. nav `cal` 버튼 제거(메모 06→05·insight.js 런타임 6탭 재번호) · `#calNow`+범례를 `#v-market`으로 이관(`--cat-*`·`.now-card`·3px목록 동반) · v-cal은 v-port식 코드 잔존 · `insight.js insStripCal` 앵커 이동. `calendar.json`+`derive-calendar.mjs` 소스 유지 — `renderCalNow()` 접속마다 재계산. §3·교차점검·§8 갱신. check-docs 통과.
 - 2026-07-17 17:14 · **03 관점 라이프사이클 + 세션 트리아지 도입.** 채택 관점에 `hyp`·`trig`·`until`·`review` 필드 추가(`insight.js` `save()` · 카드 「🕔 라이프사이클」 편집기 · 「점검 필요」 필터/배지 · 신규 채택 `review`=오늘+14일 기본). §0-5 트리아지 프로토콜(지지↑ 관점을 라이브 게이트와 대조 → 발동/만료/유지) · §3 03 관점 필드 정정(구 「인라인 INSIGHTS 배열」 서술 → R2 `/api/insights` 실제 스키마) · §4 세션마다 케이던스 · §8 LLM 자동 제안 후속 과제. insight.css `:root` 미변경(check-docs 무관). SimpleorNothing 지시. narrative≠numbers 유지.
 - 2026-07-17 17:12 · **04 원탁 「여러 링크」 소스별 제외/복원(✕) + 재통합.** 인식 소스 행마다 ✕/복원 → 제외 시 남은 소스로 `/api/council-summary` 재호출(`recombine()`·`prev.__rows`/`__recombine` 위임 핸들러·`srcRow(r,i,del)`). 기존 `.cl-btn` 재사용(토큰 0). index.html patches/*.b64(apply-patch 경합으로 #389 미적용→#391 재적용).
 - 2026-07-17 17:12 · **04 전문가 관점 단일 SoT `council.json`(experts[]+synthesis) + `council-sot.js` 배선(#387).** flags.js가 인핸서 로드→카드 view/stance를 council.json으로 패치(KV 갱신분 라이브 우선)+`#clSynth` 관점 지형 렌더. 실제 공개발언 기반(소속 정정: 김장열=유니스토리·강세, 김효진=신영증권·강세, 오건영=신한 프리미어 단장). index·worker·인라인 COUNCIL 무편집. narrative≠numbers.

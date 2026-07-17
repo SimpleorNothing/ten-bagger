@@ -1,4 +1,4 @@
-**최종 갱신: 2026-07-17 17:12 (KST)**
+**최종 갱신: 2026-07-17 18:56 (KST)**
 
 # STYLE_GUIDE — 알파맵 디자인 시스템
 
@@ -7,7 +7,7 @@
 > `.assetsignore`에 `*.md` → 사이트에 배포되지 않고 리포에만 남는다.
 > **토큰 표는 손으로 고치지 않는다.** `node scripts/check-docs.mjs --fix` 가 `index.html` `:root` + `pantone.css` 오버라이드에서 실측해 재생성한다.
 > **신규 메뉴·컴포넌트는 §6 「01 시장 모니터링 = 레퍼런스 구현」을 복제해 만든다.**
-> 버전: **v3.1** (레퍼런스 구현 §6 · 신규 메뉴 체크리스트 §7 · 상단 타임스탬프 규칙)
+> 버전: **v3.2** (레퍼런스 구현 §6 · 신규 메뉴 체크리스트 §7 · 상단 타임스탬프 규칙 · **06 캘린더 삭제→01 「다가오는 일정」 흡수**)
 > **문서 맨 위 「최종 갱신」은 연월일+시분(KST). 이 문서를 고치면 그 줄을 반드시 함께 갱신한다.**
 
 ---
@@ -119,8 +119,9 @@ pantone.css :root       ← 현행 팔레트 (팬튼 A안, index.html 하단 <li
 
 - `#v-alpha` → `--a-surface/-2 · --a-line/-2 · --a-txt · --a-dim · --a-faint · --a-brand`
   ⚠️ `index.html` 안의 `--a-*` 기본값(`#f6f7f9`·`#1a1d21`·`#1257d6` 등)은 **팬튼이 덮는 레거시**다. 이 값들을 근거로 새 UI를 만들면 안 된다.
-- `#v-cal` → `--pt-card/-line/-ink/-txt/-mut/-brand` + 카테고리색 `--cat-macro|infl|earn|event|pol|watch`
-- 신규 뷰는 **전용 토큰을 새로 파지 않는다**(01 시장 모니터링은 전역 토큰만 쓴다). 뷰 전용 토큰은 유지비만 낳는다 — 위 둘은 레거시로 취급.
+- ~~`#v-cal`~~ **2026-07-17 06 캘린더 삭제.** `#v-cal` CSS(`cal-*`·`watch-*`·`fomc-*` 등)는 `v-port`식 비활성 잔존(매칭 DOM 없음). 「임박 이벤트」만 01로 이관.
+- **카테고리색 `--cat-macro|infl|earn|event|pol|watch`는 `#v-market`으로 이관** — 「다가오는 일정」 D-N 카드/범례의 **데이터(카테고리) 인코딩**(6색 정성 팔레트가 전역 토큰에 없어 예외 존치 · 신규 토큰 아님, `#v-cal`서 이동만). `.now-card::before` 3px 스트라이프=`--c:var(--cat-{cat})`. 등락색(§4)·단계색(`--st-*`)과 **의미 다름, 혼용 금지**.
+- 신규 뷰는 **전용 토큰을 새로 파지 않는다**(01은 전역 토큰 + 위 카테고리 인코딩만). `#v-alpha` `--a-*`는 레거시.
 
 ---
 
@@ -136,6 +137,9 @@ pantone.css :root       ← 현행 팔레트 (팬튼 A안, index.html 하단 <li
     <div class="vkick">Market · 시장 모니터링</div>
     <h1 class="vtitle">한눈에 보는 <em>시장</em> — 증시·금리·유가·뉴스</h1>
   </div>
+  <h2 class="msec">다가오는 일정 <span class="mnote">거시·실적 게이트 · D-카운트다운 · 기준일 … · 지난 이벤트 자동 제거</span></h2>
+  <div class="cal-legend"> … 6색 카테고리 범례(--cat-*) … </div>
+  <div class="cal-now" id="calNow"> … .now-card × 최대 8(renderCalNow) … </div>
   <h2 class="msec">지표 <span class="mnote">6개월</span></h2>
   <div class="mkt-grid"> … .mkt-card … </div>
   <h2 class="msec">보유 종목 <span class="mnote">6개월</span></h2>
@@ -148,6 +152,7 @@ pantone.css :root       ← 현행 팔레트 (팬튼 A안, index.html 하단 <li
 - **섹션 리듬:** `h2.msec`(20px/700, margin `26px 0 12px`) + 조건 배지 = 「제목 + 조건(기간·정렬)」. 조건이 **고정 텍스트**면 `span.mnote`(mono 11px `--faint`, .04em), **선택형**이면 `span.mrng`(세그먼트 버튼군 — `.rbtn` 5개 = 1M/6M/1Y/3Y/5Y, 활성 `.on`). 부제 문단을 길게 쓰지 않는다.
   - 기간 선택군(`.mrng`)은 지표·보유 두 헤더에 각각 두되 **공통 상태(`RG`)** 로 동기화 — 한쪽을 누르면 두 그룹 배지·모든 카드가 함께 재슬라이스된다. 거래일 근사: 1M≈21·6M≈126·1Y≈252·3Y≈756·5Y≈1260, `slice6()` 단일 경로. charts.json은 `fetch-prices.mjs`가 **Yahoo/Naver 5Y 일봉**으로 채운다(매 실행 창 전체 교체) → 5Y 버튼까지 실데이터. 신규 상장 등 확보분이 창보다 짧으면 자동 클램프. WTI(`/api/wti`)는 2020~ · **US10Y도 `charts.json.us10y`(`^TNX` 5Y) 1순위 · `/api/us10y` 폴백**(외부 피드 ~2개월뿐이라 단독 사용 시 기간버튼 무반응 — 2026-07-16 수리, PR #345).
 - 뷰 안에서 정보 밀도는 **섹션 4개 안팎**으로 끊는다.
+- **「다가오는 일정」(06 흡수, 2026-07-17):** `.cal-now`(4열·모바일 2열)+`.now-card`(D-N + `.when`·`.lbl`·`.meta` · 좌측 3px `--cat-*` 스트라이프·radius 3px). `renderCalNow()`가 `calendar.json`+`earnings.json` moves를 오늘 기준 병합·프루닝, 임박 8개. `.meta`가 프레임→게이트 판정을 나르므로 §6-4 렌즈에 부합(숫자만 카드 아님). `#v-cal`서 이동 — 신규 클래스 0.
 
 ### 6-2. 카드 그리드
 
@@ -233,6 +238,7 @@ pantone.css :root       ← 현행 팔레트 (팬튼 A안, index.html 하단 <li
 
 ## 갱신 이력
 
+- 2026-07-17 18:56 · **06 캘린더 삭제 → 01 「다가오는 일정」 흡수.** SimpleorNothing 지시. nav `cal` 버튼 제거(메모 06→05·insight.js 런타임 재번호), 「임박 이벤트」 컴포넌트·`--cat-*`·3px목록을 `#v-cal`→`#v-market` 이관만(신규 클래스·토큰 0 → TOKENS 무변·check-docs 통과). v-cal은 v-port식 코드 잔존. §5·§6-1 갱신. Playwright 렌더 검증(nav 01~06·D-N 8·pageerror 0). (OPS §3·§9 동반)
 - 2026-07-17 17:12 · **04 「관점 지형」(`#clSynth`)·「여러 링크」 소스별 ✕ 제외/복원.** 관점 지형은 council.json synthesis를 `.cl-two`/`.cl-blk`/`.cl-eye`/`.cl-steel`/`.cl-rep` 재사용 렌더. 소스 ✕/복원은 기존 `.cl-btn`(면 3px)·제외 행 opacity .4+취소선. **신규 토큰·클래스 0** → TOKENS 무변·check-docs 통과. (OPS §3·§9 동반)
 - 2026-07-17 16:38 · **04 전문가 원탁에 「토론 주제」 입력창 추가.** 「현 상황」 위 단일행 주제 입력(`#clTopic`) — 비우면 현 상황 종합, 채우면 그 논제 중심. **신규 `:root` 토큰·CSS 클래스 0** — 폼 `.cl-in` 재사용, 안내 `.cl-note`·`h2.msec`+`span.mnote`. 리포트 논제 노출은 `.cl-eye`(`--dawn`) 인라인. TOKENS 무변 → `check-docs` 통과. narrative≠numbers. (OPS §3·§9 동반 갱신)
 - 2026-07-17 13:38 · **04 전문가 원탁 관점 갱신 모달에 「여러 링크」 탭 추가.** 유튜브·기사 링크를 한꺼번에 붙여넣어 소스별 인식→통합 관점으로 정리하는 흐름. **신규 `:root` 토큰·CSS 클래스 0** — 기존 모달 컴포넌트(`.cl-tabs`/`.cl-tab`·`.cl-in` textarea·`.cl-blk`·`.cl-eye`·`.cl-chip`·`.cl-pill`·`.cl-note`)만 재사용, 소스별 진행·한 줄·통합 미리보기는 인라인 스타일(모달 관행 승계). 탭은 4번째 `.cl-tab`(flex:1 → 4등분, 라벨 「여러 링크」)로 폭 자동. stance는 기능색(`--st-dawn/-mature/-hot`) 재사용. TOKENS 구역 무변 → `check-docs` 통과. (OPS §3·§9 동반 갱신)

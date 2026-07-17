@@ -643,7 +643,7 @@ window.INSIGHT=(function(){
 
   anchor('insStripMarket','#v-market','after','.vhead');
   anchor('insStripDec','#v-decision','before','#decisionBoard');
-  anchor('insStripCal','#v-cal','after','.vhead');
+  anchor('insStripCal','#v-market','after','.vhead');
   anchor('insStripThread','#v-thread','after','#instantAnswer');
  }
 

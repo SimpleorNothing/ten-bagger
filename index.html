@@ -524,19 +524,19 @@ table.tk th.c{text-align:center}
 #v-macro ol.mc-steps{margin:6px 0;padding-left:20px;font-size:13.5px;color:var(--dim);line-height:1.75}
 @media(max-width:760px){#v-macro .mc-cards{grid-template-columns:1fr 1fr}#v-macro .mc-2col{grid-template-columns:1fr}#v-macro table.mc{display:block;overflow-x:auto;white-space:nowrap}}
 /* ===== 02 CALENDAR (v-cal) ===== */
-#v-cal{--cat-macro:#1c7ed6;--cat-infl:#7048e8;--cat-earn:#0ca678;--cat-event:#e8590c;--cat-pol:#b8860b;--cat-watch:#e03131}
+#v-cal,#v-market{--cat-macro:#1c7ed6;--cat-infl:#7048e8;--cat-earn:#0ca678;--cat-event:#e8590c;--cat-pol:#b8860b;--cat-watch:#e03131}
 #v-cal .cal-sec{margin:30px 0 10px;font-family:var(--mono);font-size:13px;color:var(--dawn);font-weight:700;display:flex;align-items:baseline;gap:8px}
 #v-cal .cal-sec .sub{font-weight:500;color:var(--faint)}
-#v-cal .cal-now{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0 4px}
-#v-cal .now-card{border:1px solid var(--line);border-radius:12px;padding:13px 15px;background:var(--panel);position:relative;overflow:hidden}
-#v-cal .now-card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--c,#16242d)}
-#v-cal .now-card .dn{font-family:var(--mono);font-size:26px;font-weight:800;letter-spacing:-.01em;color:var(--txt);line-height:1}
-#v-cal .now-card .when{font-family:var(--mono);font-size:12px;color:var(--faint);margin-top:3px}
-#v-cal .now-card .lbl{font-size:14px;font-weight:700;margin-top:8px;color:var(--txt)}
-#v-cal .now-card .meta{font-size:12px;color:var(--dim);margin-top:2px}
-#v-cal .cal-legend{display:flex;gap:14px;flex-wrap:wrap;margin:8px 0 4px;font-family:var(--mono);font-size:13px}
-#v-cal .cal-legend .lg{display:flex;align-items:center;gap:6px;color:var(--dim)}
-#v-cal .cal-legend .dot{width:9px;height:9px;border-radius:50%;display:inline-block}
+#v-market .cal-now{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0 4px}
+#v-market .now-card{border:1px solid var(--line);border-radius:12px;padding:13px 15px;background:var(--panel);position:relative;overflow:hidden}
+#v-market .now-card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--c,#16242d)}
+#v-market .now-card .dn{font-family:var(--mono);font-size:26px;font-weight:800;letter-spacing:-.01em;color:var(--txt);line-height:1}
+#v-market .now-card .when{font-family:var(--mono);font-size:12px;color:var(--faint);margin-top:3px}
+#v-market .now-card .lbl{font-size:14px;font-weight:700;margin-top:8px;color:var(--txt)}
+#v-market .now-card .meta{font-size:12px;color:var(--dim);margin-top:2px}
+#v-market .cal-legend{display:flex;gap:14px;flex-wrap:wrap;margin:8px 0 4px;font-family:var(--mono);font-size:13px}
+#v-market .cal-legend .lg{display:flex;align-items:center;gap:6px;color:var(--dim)}
+#v-market .cal-legend .dot{width:9px;height:9px;border-radius:50%;display:inline-block}
 #v-cal .cal-month{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--txt);margin:20px 0 6px;padding-bottom:5px;border-bottom:1px solid var(--line2);display:flex;align-items:baseline;gap:8px}
 #v-cal .cal-month .mo-sub{font-weight:500;color:var(--faint);font-size:12px}
 #v-cal .cal-row{display:grid;grid-template-columns:78px 14px 1fr;align-items:start;gap:11px;padding:9px 6px;border-bottom:1px solid var(--line)}
@@ -595,7 +595,7 @@ table.tk th.c{text-align:center}
 #v-cal .cal-past{display:none}
 #v-cal.cal-open .cal-row.cal-past{display:grid}
 #v-cal.cal-open .cal-month.cal-past{display:flex}
-@media(max-width:760px){#v-cal .cal-now{grid-template-columns:1fr 1fr}#v-cal .watch-grid{grid-template-columns:1fr}#v-cal .cal-row{grid-template-columns:70px 12px 1fr;gap:9px}}
+@media(max-width:760px){#v-market .cal-now{grid-template-columns:1fr 1fr}#v-cal .watch-grid{grid-template-columns:1fr}#v-cal .cal-row{grid-template-columns:70px 12px 1fr;gap:9px}}
 
 /* ===== MARKET (01 market) ===== */
 #v-market .msec{font-size:20px;font-weight:700;letter-spacing:-.3px;margin:26px 0 12px;display:flex;align-items:center;gap:8px}
@@ -719,7 +719,7 @@ header::after{
 .digest,.siglog,.cyc-pop,.vc-pop,.thread-card,.dchain,.dstrip,.cpick,.casc-trigger,
 .casc-driver,.cnode,.lcar,.layer,.sidecard,.exlabel,.excell,.map-card,.tip,.xray-hero,
 .pclass .pc,.rvw,.rcand,.mkt-card,.mkt-ph-box,.nlist,.dg-head,.stk-blk,.sync-modal,
-#v-macro .mc-card,#v-macro .mc-2col .col,#v-cal .now-card,#v-cal .fomc-tip,
+#v-macro .mc-card,#v-macro .mc-2col .col,#v-market .now-card,#v-cal .fomc-tip,
 #v-cal .watch-card,#v-cal .cal-fold-bar,.tab{border-radius:3px}
 /* 측심값 정렬: 숫자 폭 고정 */
 .wpx,.pc .pct,.excell,.trow td,.lstage,.t-stage{font-variant-numeric:tabular-nums}
@@ -930,8 +930,7 @@ header::after{
     <button class="tab" data-v="cycle"><span class="n">02</span>궁금한 것</button>
     <button class="tab" data-v="port"><span class="n">03</span>리밸런싱</button>
     <button class="tab" data-v="council"><span class="n">04</span>전문가 원탁</button>
-    <button class="tab" data-v="cal"><span class="n">05</span>캘린더</button>
-    <button class="tab" data-v="memo"><span class="n">06</span>메모</button>
+    <button class="tab" data-v="memo"><span class="n">05</span>메모</button>
   </nav>
 </div></header>
 
@@ -1156,17 +1155,7 @@ header::after{
     <p class="vsub" style="margin-top:7px"><b>⏱ 모든 시각은 한국시간(KST) 기준.</b> 美 지표는 ET+13h(예: 08:30 ET = <b>21:30 KST</b>, 같은 날) · <b>FOMC 결정·실적 AMC는 익일 새벽 KST</b> · ECB는 CET+7h · BOJ·한국 금통위는 KST 그대로.</p>
   </div>
 
-  <div class="cal-sec">임박 이벤트 <span class="sub">· 기준일(자동) <span id="calAsOf">2026-06-28</span> · 매 접속 시 재계산 · 실적은 earnings.json 자동 병합</span></div>
-  <div class="cal-now" id="calNow"></div>
-
-  <div class="cal-legend">
-    <span class="lg"><span class="dot" style="background:var(--cat-macro)"></span>거시(Fed·ECB·BOJ·금통위)</span>
-    <span class="lg"><span class="dot" style="background:var(--cat-infl)"></span>물가(CPI·PCE)</span>
-    <span class="lg"><span class="dot" style="background:var(--cat-earn)"></span>실적(보유·후보)</span>
-    <span class="lg"><span class="dot" style="background:var(--cat-event)"></span>투자 이벤트</span>
-    <span class="lg"><span class="dot" style="background:var(--cat-pol)"></span>정치</span>
-    <span class="lg"><span class="dot" style="background:var(--cat-watch)"></span>글로벌 워치</span>
-  </div>
+  <!-- 임박 이벤트·범례 → 01 시장 모니터링 「다가오는 일정」으로 이관(2026-07-17). v-cal은 뷰서 제외·코드 잔존 -->
 
   <div class="cal-sec">아젠다 타임라인 <span class="sub">· 2026 6월 → 12월</span><span class="updstamp" id="updCal" style="margin-left:auto"></span></div>
 
@@ -1736,6 +1725,16 @@ window.CYCLE=(function(){
     <div class="vkick">Market · 시장 모니터링</div>
     <h1 class="vtitle">한눈에 보는 <em>시장</em> — 증시·금리·유가·뉴스</h1>
   </div>
+  <h2 class="msec">다가오는 일정 <span class="mnote">거시·실적 게이트 · D-카운트다운 · 기준일 <span id="calAsOf"></span> · 지난 이벤트 자동 제거</span></h2>
+  <div class="cal-legend">
+    <span class="lg"><span class="dot" style="background:var(--cat-macro)"></span>거시(Fed·ECB·BOJ·금통위)</span>
+    <span class="lg"><span class="dot" style="background:var(--cat-infl)"></span>물가(CPI·PCE)</span>
+    <span class="lg"><span class="dot" style="background:var(--cat-earn)"></span>실적(보유·후보)</span>
+    <span class="lg"><span class="dot" style="background:var(--cat-event)"></span>투자 이벤트</span>
+    <span class="lg"><span class="dot" style="background:var(--cat-pol)"></span>정치</span>
+    <span class="lg"><span class="dot" style="background:var(--cat-watch)"></span>글로벌 워치</span>
+  </div>
+  <div class="cal-now" id="calNow"><div class="mkt-ph" style="grid-column:1/-1">임박 이벤트 계산 대기 (calendar.json)</div></div>
   <h2 class="msec">시장 맥박 <span class="mnote">지금 무엇이 시장을 움직이나 · 동인 4~6회/일 · 게이지 실시간</span></h2>
   <div id="mktPulse"><div class="mkt-ph">동인 합성 대기 (pulse.json)</div></div>
   <div class="mkt-grid" id="mktGauge"><div class="mkt-ph" style="grid-column:1/-1">게이지 로딩…</div></div>
@@ -5008,15 +5007,15 @@ document.getElementById('filterSel').addEventListener('change',renderTracker);
 
 /* ===== INIT ===== */
 function renderAll(){renderSignalLog();renderThread();renderStack();renderPortfolio();renderTracker();}
-renderLegends();loadStore().then(renderAll);renderAll();updateAsof();loadPrices();stampStatics();renderCalNow();foldPastCal();
+renderLegends();loadStore().then(renderAll);renderAll();updateAsof();loadPrices();stampStatics();renderCalNow();
 
 /* ===== 출력(인쇄/PDF) — 페이지별 버튼: 이 페이지만 / 전체 ===== */
 (function initPrint(){
- const order=['cal','siglog','thread','alpha','macro','port'];
+ const order=['siglog','thread','alpha','macro','port'];
  order.forEach((v,i)=>{const el=document.getElementById('v-'+v);if(!el)return;
   el.classList.add('pview');el.style.order=i;
   const bar=document.createElement('div');bar.className='printbar';
-  bar.innerHTML=`<div class="print-menu" hidden><button type="button" data-pm="one">이 페이지만 출력</button><button type="button" data-pm="all">전체 페이지 출력 (01~06)</button></div><button type="button" class="print-btn">인쇄 / PDF로 저장</button>`;
+  bar.innerHTML=`<div class="print-menu" hidden><button type="button" data-pm="one">이 페이지만 출력</button><button type="button" data-pm="all">전체 페이지 출력 (01~05)</button></div><button type="button" class="print-btn">인쇄 / PDF로 저장</button>`;
   el.appendChild(bar);
   const pn=document.createElement('div');pn.className='pagenum';el.appendChild(pn);});
  const closeAll=()=>document.querySelectorAll('.print-menu').forEach(m=>m.hidden=true);
