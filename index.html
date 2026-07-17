@@ -2024,11 +2024,12 @@ window.CYCLE=(function(){
     function hostOf(u){try{return new URL(u).hostname.replace(/^www\./,'');}catch(e){return String(u).slice(0,40);}}
     function normStance(s){return(['강세','중립','약세'].indexOf(s)>=0)?s:'';}
     function pill(st){var c=sc(st);return '<span class="cl-pill" style="color:'+c+';background:color-mix(in srgb,'+c+' 12%,transparent);border:1px solid color-mix(in srgb,'+c+' 45%,transparent)">'+esc(st)+'</span>';}
-    function srcRow(r){var body=r.one?esc(r.one):('<span style="color:var(--faint)">'+esc(r.status||'')+'</span>');
-      return '<div style="display:flex;gap:8px;align-items:baseline;margin:6px 0;font-size:13px"><span class="cl-chip">'+esc(r.kind)+'</span>'+
+    function srcRow(r,i,del){var body=r.one?esc(r.one):('<span style="color:var(--faint)">'+esc(r.status||'')+'</span>');
+      var x=(del&&i!=null)?'<button type="button" class="cl-btn" data-del="'+i+'" title="'+(r.deleted?'이 소스 복원':'이 소스 제외')+'" style="flex:0 0 auto;padding:1px 7px;font-size:12px;line-height:1.4">'+(r.deleted?'복원':'✕')+'</button>':'';
+      return '<div style="display:flex;gap:8px;align-items:baseline;margin:6px 0;font-size:13px;'+(r.deleted?'opacity:.4;text-decoration:line-through':'')+'"><span class="cl-chip">'+esc(r.kind)+'</span>'+
         '<span style="flex:1;min-width:0"><span style="word-break:break-all;color:var(--faint)">'+esc(hostOf(r.u))+'</span>'+
         (r.one?('<br><span style="color:var(--txt)">'+body+'</span>'):'')+'</span>'+
-        (r.stance?pill(r.stance):'<span style="font-size:11px;color:var(--faint)">'+esc(r.status||'')+'</span>')+'</div>';}
+        (r.stance?pill(r.stance):'<span style="font-size:11px;color:var(--faint)">'+esc(r.status||'')+'</span>')+x+'</div>';}
     async function recognizeLinks(){clearMsg();
       var raw=(document.getElementById('clLinks').value||'').trim();
       if(!raw){showErr('링크를 붙여넣으세요');setActions('run');return;}
@@ -2040,7 +2041,7 @@ window.CYCLE=(function(){
       var exp={name:modalFor.name,field:modalFor.field};
       var rows=urls.map(function(u){return {u:u,kind:isYt(u)?'YouTube':'기사',status:'대기',one:'',title:'',stance:'',ok:false};});
       var prev=document.getElementById('clPreview');
-      function paint(head){prev.innerHTML='<div class="cl-blk" style="margin-top:12px"><div class="cl-eye">'+esc(head)+'</div>'+rows.map(srcRow).join('')+(notes?'<div style="margin-top:6px;font-size:12px;color:var(--faint)">메모: '+esc(notes.slice(0,120))+(notes.length>120?'…':'')+'</div>':'')+'</div>';}
+      function paint(head){prev.innerHTML='<div class="cl-blk" style="margin-top:12px"><div class="cl-eye">'+esc(head)+'</div>'+rows.map(function(r,i){return srcRow(r,i,false);}).join('')+(notes?'<div style="margin-top:6px;font-size:12px;color:var(--faint)">메모: '+esc(notes.slice(0,120))+(notes.length>120?'…':'')+'</div>':'')+'</div>';}
       rows.forEach(function(r){r.status='인식 중…';});
       var done=0;paint('소스 인식 · 0/'+rows.length);
       await Promise.all(rows.map(async function(r){
@@ -2051,8 +2052,10 @@ window.CYCLE=(function(){
         }catch(e){r.ok=false;r.status='실패: '+String(e.message||'').slice(0,40);}
         done++;paint('소스 인식 · '+done+'/'+rows.length);
       }));
-      var good=rows.filter(function(r){return r.ok&&r.one;});
-      if(!good.length){showErr('인식된 소스가 없습니다. 링크를 확인하거나 텍스트 탭에 본문을 붙여넣으세요.');setActions('run');return;}
+      prev.__rows=rows;
+      async function recombine(){setActions('busy');
+      var good=rows.filter(function(r){return r.ok&&r.one&&!r.deleted;});
+      if(!good.length){showErr('남은 소스가 없습니다. 일부를 「복원」하거나 링크를 확인하세요.');setActions('run');return;}
       var combined=good.map(function(r,i){return '['+(i+1)+' · '+r.kind+(r.title?(' · '+r.title):'')+']\n'+r.one;}).join('\n\n')+(notes?('\n\n[메모]\n'+notes):'');
       try{
         var js=await post('/api/council-summary',{content:combined,expert:exp,source:'복수 소스 '+good.length+'건'});
@@ -2061,9 +2064,13 @@ window.CYCLE=(function(){
         var refs=rows.filter(function(r){return r.ok;}).map(function(r){return {label:r.kind,url:r.u};});
         window.__clPrev={view:out.view,stance:stance,source:'복수 소스 '+good.length+'건',ref:(refs[0]?refs[0].url:''),refs:refs};
         prev.innerHTML='<div class="cl-blk" style="margin-top:12px"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span class="cl-eye">통합 관점 미리보기</span>'+pill(stance)+'<span style="font-size:11px;color:var(--faint)">'+good.length+'개 소스 통합'+(rows.length>good.length?(' · '+(rows.length-good.length)+'건 제외'):'')+'</span></div><p style="margin:8px 0 0;font-size:14px;line-height:1.6">'+esc(out.view)+'</p></div>'+
-          '<div class="cl-blk" style="margin-top:8px"><div class="cl-eye">소스별 한 줄</div>'+rows.map(srcRow).join('')+(notes?'<div style="margin-top:6px;font-size:12px;color:var(--faint)">메모 반영: '+esc(notes.slice(0,120))+(notes.length>120?'…':'')+'</div>':'')+'</div>';
+          '<div class="cl-blk" style="margin-top:8px"><div class="cl-eye">소스별 한 줄 <span style="font-size:11px;color:var(--faint);font-weight:400">· ✕로 제외 후 재통합</span></div>'+rows.map(function(r,i){return srcRow(r,i,true);}).join('')+(notes?'<div style="margin-top:6px;font-size:12px;color:var(--faint)">메모 반영: '+esc(notes.slice(0,120))+(notes.length>120?'…':'')+'</div>':'')+'</div>';
         setActions('preview');
       }catch(err){showErr('통합 요약 실패: '+err.message);setActions('run');}
+      }
+      prev.__recombine=recombine;
+      if(!prev.__delBound){prev.__delBound=true;prev.addEventListener('click',function(ev){var b=ev.target.closest('[data-del]');if(!b)return;ev.preventDefault();var i=+b.getAttribute('data-del');if(prev.__rows&&prev.__rows[i]){prev.__rows[i].deleted=!prev.__rows[i].deleted;prev.__recombine();}});}
+      await recombine();
     }
     async function recognize(){if(mtab==='links')return recognizeLinks();clearMsg();setActions('busy');
       try{var out,source;
