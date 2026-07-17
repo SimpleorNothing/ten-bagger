@@ -404,6 +404,37 @@ async function handleCouncilLogPost(request, env) {
   return memoJson({ ok: true, count: arr.length }, 200);
 }
 
+const COUNCIL_DISC_KEY = "council_discussions.json";
+async function handleCouncilDiscGet(env) {
+  if (!env.MEMO_BUCKET) return memoJson({ error: "MEMO_BUCKET not configured" }, 503);
+  const obj = await env.MEMO_BUCKET.get(COUNCIL_DISC_KEY);
+  const v = obj ? await obj.text() : "";
+  return new Response(v && v.trim() ? v : "[]", { status: 200, headers: { "content-type": "application/json", "cache-control": "no-store" } });
+}
+async function handleCouncilDiscPost(request, env) {
+  if (!env.MEMO_BUCKET) return memoJson({ error: "MEMO_BUCKET not configured" }, 503);
+  let e;
+  try { e = await request.json(); } catch { return memoJson({ error: "invalid json" }, 400); }
+  if (!e || !e.diagnosis) return memoJson({ error: "diagnosis required" }, 400);
+  const obj = await env.MEMO_BUCKET.get(COUNCIL_DISC_KEY);
+  let arr = [];
+  if (obj) { try { arr = JSON.parse(await obj.text()); } catch (_) { arr = []; } }
+  if (!Array.isArray(arr)) arr = [];
+  arr.push({
+    at: (typeof e.at === "string" && e.at) ? e.at : new Date().toISOString(),
+    members: Array.isArray(e.members) ? e.members.slice(0, 12).map(String) : [],
+    diagnosis: String(e.diagnosis || "").slice(0, 1000),
+    board: Array.isArray(e.board) ? e.board.slice(0, 12) : [],
+    consensus: Array.isArray(e.consensus) ? e.consensus.slice(0, 20) : [],
+    tension: Array.isArray(e.tension) ? e.tension.slice(0, 20) : [],
+    actions: Array.isArray(e.actions) ? e.actions.slice(0, 20) : [],
+    steelman: String(e.steelman || "").slice(0, 2000),
+  });
+  if (arr.length > 500) arr = arr.slice(-500);
+  await env.MEMO_BUCKET.put(COUNCIL_DISC_KEY, JSON.stringify(arr), { httpMetadata: { contentType: "application/json" } });
+  return memoJson({ ok: true, count: arr.length }, 200);
+}
+
 // ===== 메모 저장 — Cloudflare R2 (MEMO_BUCKET) · DA Space 방식 =====
 // 메모 노트 JSON 을 R2 오브젝트("notes.json")로 보관. KV 의 25MiB 단일값 한도가 없어
 // 이미지(캡쳐) 누적에도 여유가 크다. 클라이언트(/api/memo)는 백엔드를 모른 채 그대로 동작.
@@ -959,6 +990,11 @@ export default {
       if (url.pathname === "/api/council-log") {
         if (request.method === "GET") return handleCouncilLogGet(env);
         if (request.method === "POST") return handleCouncilLogPost(request, env);
+        return memoJson({ error: "method not allowed" }, 405);
+      }
+      if (url.pathname === "/api/council-discussions") {
+        if (request.method === "GET") return handleCouncilDiscGet(env);
+        if (request.method === "POST") return handleCouncilDiscPost(request, env);
         return memoJson({ error: "method not allowed" }, 405);
       }
       // 저장 원문 영구 링크(채택 관점 → 근거 추적) — /api/insights 보다 먼저 매칭
