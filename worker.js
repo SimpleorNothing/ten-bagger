@@ -276,7 +276,7 @@ async function handleYtView(request, env) {
       { method: "POST",
         headers: { "content-type": "application/json", "x-goog-api-key": env.GEMINI_API_KEY },
         body: JSON.stringify({
-          contents: [{ parts: [ { text: prompt }, { file_data: { file_uri: ytUrl } } ] }],
+          contents: [{ parts: [ { text: prompt }, { file_data: { file_uri: ytUrl, mime_type: "video/mp4" } } ] }],
           generationConfig: { responseMimeType: "application/json", temperature: 0.2 },
         }),
       });
