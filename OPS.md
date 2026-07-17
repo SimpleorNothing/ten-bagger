@@ -1,4 +1,4 @@
-**최종 갱신: 2026-07-17 09:23 (KST)**
+**최종 갱신: 2026-07-17 10:12 (KST)**
 
 # OPS — 알파맵 운영 가이드
 
@@ -64,7 +64,7 @@
 
 | 정보명 | 자동/수동 | 주기 | 소스 |
 |---|---|---|---|
-| 업데이트 이력(변경 로그) | 수동(인라인) | 사이트 변경 시 | `changelog.js` 인라인 `MKT_CHANGELOG`(`{d,t}` 최신순·자가 마운트=insight.js 패턴). 헤더 우상단 `.mkt-upd` 배지(01 `#v-market` 한정) → 클릭 시 `.cyc-pop` 모달. **+ 전 화면 좌하단 고정 배지 `.mkt-foot-upd`(`footMount()`가 `body`에 전역 마운트·`.cyc-upd` 재사용) → 동일 모달**(04 전문가 원탁 등 `#v-market` 밖에서도 이력 접근). **사용자 향 변경만** 기록 · 신규 항목은 배열 맨 위 |
+| 업데이트 이력(변경 로그) | 수동(인라인) | 사이트 변경 시 | `changelog.js` 인라인 `MKT_CHANGELOG`(`{d,t}` 최신순·자가 마운트=insight.js 패턴). `mountHead()`가 **01 시장 모니터링(`#v-market`) + 전문가 원탁(`#v-council`) 헤더(`.vhead`) 우상단**에 각각 `.mkt-upd` 배지를 마운트 → 클릭 시 `.cyc-pop` 모달(`.cyc-upd`/`.cyc-pop` 재사용 · 신규 토큰 0). **사용자 향 변경만** 기록 · 신규 항목은 배열 맨 위 |
 | 코스피·S&P·나스닥 지수 | 자동 | 06:37·18:37 KST (1일 2회 · ⏳저녁 §8-11) | `charts.json` (`fetch-prices.mjs`, `^KS11·^GSPC·^IXIC` Yahoo 5Y). **meta 거래일을 시계열 끝에 강제 반영 + 이전 창과 union 병합** → `prices.json`과 갈라지지 않는다. 괴리>1%는 `prices.json.warn` |
 | 미 10년물 금리 | 자동 | 06:37·18:37 KST + 폴백 런타임 | **1순위 `charts.json` `us10y`**(`fetch-prices.mjs` `^TNX` Yahoo 5Y · 지수 카드와 동일 t/c → 기간버튼 1M~5Y 실동작 · `^TNX` 10× 스케일은 `>20→÷10`로 % 정규화). **폴백** worker `/api/us10y` → `history[].markets.ten_year`(외부 피드 ~2개월). ※구버전은 폴백만 써서 6M+ 기간 무반응 버그(2026-07-16 수리, PR #345) |
 | WTI 유가 | 자동 | 런타임 | worker `/api/wti` → **`points`** 배열 (Yahoo). `series` 로 읽으면 0건 |
@@ -301,6 +301,7 @@
 
 ## 갱신 이력
 
+- 2026-07-17 10:12 · **update 배지를 전문가 원탁 헤더로 이전(`changelog.js`).** 직전 좌하단 고정 배지(`.mkt-foot-upd`, #366)가 04 하단 「토론 시작」 스티키 바와 겹쳐, SimpleorNothing 지시(스크린샷: 헤더 우상단 지정)로 **전문가 원탁 헤더 우상단**(`#v-council .vhead`)에 01과 동일한 `.mkt-upd` 배지로 재배치. `mount()`→`mountHead(sel,id)` 일반화로 01·council 공통 마운트(asOf 도착 시 `renderAll()`이 전 배지 재렌더) · `footMount`/`footRender`/`.mkt-foot-upd` 제거. 신규 컴포넌트·토큰 0(`.cyc-upd`/`.cyc-pop` 재사용) · `index.html` 무패치. §3 01 업데이트 이력 행 갱신.
 - 2026-07-17 · **관점 갱신 감사 로그 신설(`/api/council-log` · R2 `council_log.json`).** 04 전문가 원탁에서 관점 반영 시 {at·전문가·소스(유튜브/텍스트/파일)·참조·view·stance}를 R2에 append. 04 상단 「관점 갱신 이력」 버튼으로 조회(최신순). narrative≠numbers. SimpleorNothing 지시.
 - 2026-07-17 09:23 · **전 화면 좌하단 update 배지 추가(`changelog.js`).** 01 헤더 배지(`.mkt-upd`)는 `#v-market`에만 마운트돼 04 전문가 원탁 등 다른 화면에선 변경 이력 접근 경로가 없었음(좌하단 빈 공간) → `footMount()`가 `body`에 고정 배지(`.mkt-foot-upd`)를 전역 마운트하고, 클릭 시 기존 `.cyc-pop` 모달·`open()`을 그대로 재사용. **신규 컴포넌트·토큰 0**(`.cyc-upd`/`.cyc-pop` 재사용 · CSS는 위치용 `.mkt-foot-upd` 1클래스만, design token 무추가). MKT_CHANGELOG에 사용자향 항목 2건 추가(04 전문가 원탁 신설 07-16 · 본 배지 07-17). `index.html` 무패치(`changelog.js`만 수정). §3 01 업데이트 이력 행 갱신.
 - 2026-07-17 · **전문가 원탁(v-council) Stage 2 빌드.** 네비 04 삽입(캘린더·메모 +1) · `#v-council` 뷰(01 `#v-market` 복제·`.mkt-grid`·`window.COUNCIL`) · worker 3라우트. 전문가=렌즈별 7인 페르소나, 유튜브/텍스트/파일 관점 갱신(narrative≠numbers). §3 서브섹션·§8-10. 커밋·시크릿·스모크 대기.
