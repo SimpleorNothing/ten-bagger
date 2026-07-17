@@ -1,4 +1,4 @@
-**최종 갱신: 2026-07-17 20:02 (KST)**
+**최종 갱신: 2026-07-17 21:10 (KST)**
 
 # OPS — 알파맵 운영 가이드
 
@@ -70,6 +70,7 @@
 | 코스피·S&P·나스닥 지수 | 자동 | 06:37·18:37 KST (1일 2회 · ⏳저녁 §8-11) | `charts.json` (`fetch-prices.mjs`, `^KS11·^GSPC·^IXIC` Yahoo 5Y). **meta 거래일을 시계열 끝에 강제 반영 + 이전 창과 union 병합** → `prices.json`과 갈라지지 않는다. 괴리>1%는 `prices.json.warn` |
 | 미 10년물 금리 | 자동 | 06:37·18:37 KST + 폴백 런타임 | **1순위 `charts.json` `us10y`**(`fetch-prices.mjs` `^TNX` Yahoo 5Y · 지수 카드와 동일 t/c → 기간버튼 1M~5Y 실동작 · `^TNX` 10× 스케일은 `>20→÷10`로 % 정규화). **폴백** worker `/api/us10y` → `history[].markets.ten_year`(외부 피드 ~2개월). ※구버전은 폴백만 써서 6M+ 기간 무반응 버그(2026-07-16 수리, PR #345) |
 | WTI 유가 | 자동 | 런타임 | worker `/api/wti` → **`points`** 배열 (Yahoo). `series` 로 읽으면 0건 |
+| **DXI 메모리 현물** (신규 · 지표 6번째 카드) | 수동/주간 | **매주 금요일 장마감 후**(스케줄 태스크) | `dxi.json` `series[]`(DDR4 16Gb 3200 메인스트림 현물 $). DXI 지수는 DRAMeXchange 포털 게이트라 무료 피드 없음 → TrendForce 공개 현물가로 주간 1점 append. `loadDxi()`·`lensDxi()`=01 `card()`/`lens()` 복제(신규 토큰 0·`dod:false`로 전일대비 억제). narrative≠numbers — MU γ-닫힘 ③ 입력 참고용 |
 | 보유 종목 스파크라인 | 자동 | 06:37·18:37 KST (1일 2회 · ⏳저녁 §8-11) | `charts.json` (Yahoo/Naver 5Y 일봉 t/c · 기간버튼 1M~5Y) |
 | **카드 렌즈 요약 2줄** (그래프마다 프레임→판정) | 자동(런타임 파생) | gamma·signals 일별 / holdings 주간에 편승 | `gamma.json`(γ·stage·flagged) + `signals.json`(**`window.macroEval` 단일소스 재사용**) + `holdings.json`(layer·평단) + `charts.json` |
 | 종목 뉴스 (종목 블록형 + 기사별 **일자 + 두 점**[명사형 요약 `a` / `→` 의미·주가영향 `w`] + 우측 주가 차트) | 자동 | **뉴스·digest 06:12·18:12 (1일 2회)** / 차트 06:37·18:37 | `news_digest.json`(claude-sonnet-4-6) + `news.json`(**물질성 m≥1만**) + `charts.json` |
@@ -166,7 +167,7 @@
 | 일별 (06:12·18:12) | 뉴스 수집·스크리닝·요약·digest | signal_log 인테이크(narrative) |
 | 일별 (06:37·18:37) | 시세·차트·신호·알파 업데이트 | — |
 | 세션마다 | — | **관점 트리아지(§0-5)** — 지지↑ 관점 `until`·`review` 대조 → 발동/만료/유지 |
-| 주간 | — | holdings 동기화 · reviews.json 주간 리뷰 append |
+| 주간 (금요일) | — | **DXI 현물가 갱신**(`dxi.json` · 스케줄 태스크) · holdings 동기화 · reviews.json 주간 리뷰 append |
 | 실적 시즌 | — | earnings.json 갱신 · γ·stage 재채점 |
 | 수시 | — | judgment override · signal_log 확정 사건 |
 
@@ -257,12 +258,14 @@
 - **`update-calendar.yml` 미등록(수동)**: `derive-calendar.mjs`(01 다가오는 일정 프루닝·asOf) 크론 미등록 — App workflow write 부재(403). 런타임 `renderCalNow()`가 오늘 기준 재계산하므로 표시는 신선(파일 `asOf`만 수동 refresh까지 스테일 가능). 신규 이벤트는 `calendar.json` 수기.
 - **⏳ 저녁 fetch-prices 지연**: cron 18:37 KST가 실제로 19:xx~20:xx에 돌고 있음 — 원인 미확인(Actions 큐 지연 추정). 모니터링 중.
 - **관점 라이프사이클 LLM 자동 제안 미구현(부분 완화)**: 03 「🕔 라이프사이클」 편집은 **모달 + 필드별 「보기 칩」 선택식**으로, 클라 템플릿(게이트 어휘·8레이어·관점 티커·thesis-break 패턴)이 `hyp`·`trig`·`until` 후보와 `review` 날짜 프리셋을 즉시 제시한다(수동 4연타 부담 해소·오프라인·기존 채택분 전부). 다만 이는 **템플릿**이라 관점 고유 맥락은 못 맞춘다 — `/api/insight`(worker) 추출 시 `hyp`·`until`을 LLM으로 관점별 맞춤 자동 채우는 건 여전히 후속 PR(③). 신규 채택은 `review`=+14d 자동 유지.
+- **DXI 자동 피드 없음(2026-07-17)**: DXI 지수는 포털 게이트라 무료 피드 없음 → 매주 금요일 스케줄이 TrendForce 현물가로 `dxi.json` append.
 - `prices.json.warn = lazr chart 43.47 vs quote 41.35` — LAZR 비보유·무시 가능
 
 ---
 
 ## 9. 갱신 이력
 
+- 2026-07-17 21:10 · **01 지표 DXI 메모리 현물 카드 + 매주 금요일 갱신.** `dxi.json` 신설·`loadDxi`/`lensDxi`(01 복제). §3·§4·§8 동반. 토큰 0. narrative≠numbers.
 - 2026-07-17 20:02 · **03 라이프사이클 편집을 모달 + 「보기 칩」 선택식으로.** `insight.js` `editLC` 재작성 — `window.prompt` 4연타 → 오버레이 모달(필드별 클라 템플릿 칩: `hyp`·`trig`·`until` 후보 + `review` 날짜 프리셋). 칩 클릭=아래 칸 채우기(단일)·직접 수정 가능·Esc/배경/취소 닫기. 보기는 게이트 어휘(MU γ 3트리거·매크로 3중 AND)·8레이어·관점 티커·thesis-break 패턴으로 즉시 생성(서버·외부호출 0·오프라인·기존 채택분 전부). `insight.css` `.ins-lc-*` 모달 컴포넌트 신설(신규 `:root` 토큰 0 → check-docs 무관). §3 03 관점 필드 편집기 서술 갱신 · §8 LLM 자동 제안 이슈 「부분 완화」로 정정(템플릿은 관점 고유 맥락 못 맞춤 → LLM-at-intake는 여전히 후속 PR③) · STYLE_GUIDE 컴포넌트/갱신 이력 동반. SimpleorNothing 지시. narrative≠numbers 유지.
 - 2026-07-17 18:56 · **06 캘린더 뷰 삭제 → 01 「다가오는 일정」 흡수.** SimpleorNothing 지시. nav `cal` 버튼 제거(메모 06→05·insight.js 런타임 6탭 재번호) · `#calNow`+범례를 `#v-market`으로 이관(`--cat-*`·`.now-card`·3px목록 동반) · v-cal은 v-port식 코드 잔존 · `insight.js insStripCal` 앵커 이동. `calendar.json`+`derive-calendar.mjs` 소스 유지 — `renderCalNow()` 접속마다 재계산. §3·교차점검·§8 갱신. check-docs 통과.
 - 2026-07-17 17:14 · **03 관점 라이프사이클 + 세션 트리아지 도입.** 채택 관점에 `hyp`·`trig`·`until`·`review` 필드 추가(`insight.js` `save()` · 카드 「🕔 라이프사이클」 편집기 · 「점검 필요」 필터/배지 · 신규 채택 `review`=오늘+14일 기본). §0-5 트리아지 프로토콜(지지↑ 관점을 라이브 게이트와 대조 → 발동/만료/유지) · §3 03 관점 필드 정정(구 「인라인 INSIGHTS 배열」 서술 → R2 `/api/insights` 실제 스키마) · §4 세션마다 케이던스 · §8 LLM 자동 제안 후속 과제. insight.css `:root` 미변경(check-docs 무관). SimpleorNothing 지시. narrative≠numbers 유지.

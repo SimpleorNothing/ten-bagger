@@ -1745,6 +1745,7 @@ window.CYCLE=(function(){
     <div class="mkt-card" id="mkt_ixic"><div class="mkt-nm">나스닥</div><div class="mkt-ph">지수 수집 대기</div></div>
     <div class="mkt-card" id="mkt_us10y"><div class="mkt-nm">미 10년물</div><div class="mkt-ph">스키마 확정 대기</div></div>
     <div class="mkt-card" id="mkt_wti"><div class="mkt-nm">WTI 유가</div><div class="mkt-ph">로딩…</div></div>
+    <div class="mkt-card" id="mkt_dxi"><div class="mkt-nm">DXI 메모리 현물</div><div class="mkt-ph">현물 수집 대기</div></div>
   </div>
   <h2 class="msec">보유 종목 <span class="mrng" role="group" aria-label="기간 선택"><button type="button" class="rbtn" data-r="1M">1M</button><button type="button" class="rbtn" data-r="6M">6M</button><button type="button" class="rbtn" data-r="1Y">1Y</button><button type="button" class="rbtn" data-r="3Y">3Y</button><button type="button" class="rbtn" data-r="5Y">5Y</button></span></h2>
   <div class="mkt-grid" id="mktHoldings"><div class="mkt-ph" style="grid-column:1/-1">로딩…</div></div>
@@ -3319,7 +3320,7 @@ window.MARKET=(function(){
  }
  function card(name,val,p,vals,ref,lns,opts){
   var up=p>=0,cls=up?'up':'dn',sign=up?'+':'';
-  var dod=pctDoD(vals),dodHTML='',o=opts||{};
+  var o=opts||{},dod=(o.dod===false)?null:pctDoD(vals),dodHTML='';
   if(dod!=null&&isFinite(dod)){var dcls=dod>=0?'up':'dn';dodHTML='<span class="mkt-dod '+dcls+'">'+(dod>=0?'+':'')+dod.toFixed(1)+'%</span>';}
   return '<div class="mkt-nm">'+esc(name)+'</div><div class="mkt-val">'+val+' <span class="mkt-chg '+cls+'">'+sign+p.toFixed(1)+'%</span>'+dodHTML+'</div>'+(lns||'')+chart(vals,ref,o.dates,o.fmtV)+'<div class="mkt-span">'+RG.ko+'</div>';
  }
@@ -3395,6 +3396,15 @@ window.MARKET=(function(){
    '$'+last.toFixed(1)+' · '+RG.k+' '+fmtP(p,1)+'% → '+v);
  }
  function lensWtiWait(){return lens(WTI_L1,'수집 대기 → 판정 보류');}
+ var DXI_L1='<b>L3 · 메모리</b>DRAM 현물 — 사이클 텔 · MU γ-닫힘 ③ 입력';
+ function lensDxi(j,vals){
+  var last=vals[vals.length-1],p=pct(vals),sp=(j&&j.spot)||{};
+  var d5=(sp.ddr5_16g!=null&&isFinite(sp.ddr5_16g))?' · DDR5 $'+(+sp.ddr5_16g).toFixed(1):'';
+  var v=p>=0?'<span class="ok">현물 강세</span> = 공급 타이트 · ③(가격 롤오버) 미점등 → L3 논제 유지'
+           :'<span class="wn">현물 롤오버</span> = MU γ-닫힘 ③ 입력 — 공급 정상화 여부 확인';
+  return lens(DXI_L1,'DDR4 $'+last.toFixed(1)+d5+' · 주간 '+fmtP(p,1)+'% → '+v);
+ }
+ function lensDxiWait(){return lens(DXI_L1,'수집 대기 → 판정 보류');}
  async function loadWti(){
   var el=document.getElementById('mkt_wti');if(!el)return;
   var wait='<div class="mkt-nm">WTI 유가</div>'+lensWtiWait()+'<div class="mkt-ph">유가 수집 대기</div>';
@@ -3404,6 +3414,15 @@ window.MARKET=(function(){
    var vals=slice6(sp.map(function(x){return Array.isArray(x)?x[1]:x;}));
    var dts=slice6(sp.map(function(x){return Array.isArray(x)?x[0]:null;}));
    el.innerHTML=vals.length>=2?card('WTI 유가','$'+vals[vals.length-1].toFixed(1),pct(vals),vals,null,lensWti(vals),{dates:dts,fmtV:function(x){return '$'+fmtNum(x);}}):wait;}
+  catch(e){el.innerHTML=wait;}
+ }
+ async function loadDxi(){
+  var el=document.getElementById('mkt_dxi');if(!el)return;
+  var wait='<div class="mkt-nm">DXI 메모리 현물</div>'+lensDxiWait()+'<div class="mkt-ph">현물 수집 대기</div>';
+  try{var r=await fetch('dxi.json?t='+Date.now(),{cache:'no-store'});var j=await r.json();
+   var sr=(j.series||[]).filter(function(x){return x&&x.v!=null&&isFinite(x.v);});
+   var vals=slice6(sr.map(function(x){return +x.v;})),dts=slice6(sr.map(function(x){return x.t;}));
+   el.innerHTML=vals.length>=2?card('DXI 메모리 현물','$'+vals[vals.length-1].toFixed(1),pct(vals),vals,null,lensDxi(j,vals),{dates:dts,fmtV:function(x){return '$'+fmtNum(x);},dod:false}):wait;}
   catch(e){el.innerHTML=wait;}
  }
  async function loadHoldings(){
@@ -3655,7 +3674,7 @@ window.MARKET=(function(){
   for(var i=0;i<bs.length;i++){bs[i].classList.toggle('on',bs[i].getAttribute('data-r')===RG.k);}
  }
  // 차트 계열만 다시 그린다(뉴스 블록은 기간과 무관 → 재요청 안 함)
- function redrawCharts(){loadWti();loadUs10y();loadIndices();loadHoldings();}
+ function redrawCharts(){loadWti();loadDxi();loadUs10y();loadIndices();loadHoldings();}
  function setRange(k){
   var r=null;for(var i=0;i<RANGES.length;i++)if(RANGES[i].k===k)r=RANGES[i];
   if(!r||r.k===RG.k)return;
@@ -3729,7 +3748,7 @@ window.MARKET=(function(){
    host.innerHTML=cards||'<div class="mkt-ph" style="grid-column:1/-1">게이지 데이터 대기</div>';}
   catch(e){host.innerHTML='<div class="mkt-ph" style="grid-column:1/-1">게이지 대기</div>';}
  }
- async function render(){wireRange();loadPulse();loadGauges();await loadCtx();loadWti();loadUs10y();loadIndices();loadHoldings();loadMacroNews();loadStockNews();}
+ async function render(){wireRange();loadPulse();loadGauges();await loadCtx();loadWti();loadDxi();loadUs10y();loadIndices();loadHoldings();loadMacroNews();loadStockNews();}
  return {render:render,setRange:setRange};
 })();
 
