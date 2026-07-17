@@ -1834,6 +1834,10 @@ window.CYCLE=(function(){
   #v-council .cl-pstat{flex:1;font-size:12px;color:var(--dim);min-width:0}
   </style>
 
+  <h2 class="msec">토론 주제 <span class="mnote">비우면 현 상황 종합 진단 · 입력하면 그 논제를 원탁 중심에</span></h2>
+  <input id="clTopic" class="cl-in" type="text" maxlength="200" placeholder="예: HBM4 병목이 L3 트림 게이트를 앞당길까? · 전력·냉각(L7) 언더웨이트를 지금 늘려야 하나?" style="margin-bottom:6px">
+  <p class="cl-note" style="margin:0 0 4px">선택 입력 — 주제가 있으면 각 전문가가 <b>그 논제</b>를 자기 렌즈로 다투고, 현 상황(아래)은 전제로 깔립니다. 관점 시뮬레이션일 뿐 매매 권유가 아니며 숫자 파일을 바꾸지 않습니다(narrative≠numbers).</p>
+
   <h2 class="msec">현 상황 <span class="mnote">라이브 게이트·보유·γ·사이클 자동 주입 (알파맵 SoT) · 편집 가능</span> <button class="cl-btn" id="clLiveBtn" style="margin-left:8px;vertical-align:middle">라이브 갱신</button></h2>
   <textarea id="clCtx" class="cl-ta" rows="8"></textarea>
 
@@ -1963,8 +1967,9 @@ window.CYCLE=(function(){
       var res=document.getElementById('clResult');res.innerHTML='';
       try{
         var personas=EXPERTS.filter(function(e){return sel.indexOf(e.id)>=0;}).map(function(e){return {id:e.id,name:e.name,field:e.field,clock:e.bench==='thesis'?'논제 시계':(e.bench==='chair'?'좌장(SoT)':'가격·규율 시계'),stance:e.stance,view:e.view};});
-        var j=await post('/api/council',{personas:personas,situation:document.getElementById('clCtx').value});
-        var d=extractJSON(textOf(j));
+        var _tt=document.getElementById('clTopic');var _topic=(_tt&&_tt.value?_tt.value:'').trim();
+        var j=await post('/api/council',{personas:personas,situation:document.getElementById('clCtx').value,topic:_topic});
+        var d=extractJSON(textOf(j));d.topic=_topic;
         res.innerHTML=reportHTML(d);
         (function(){var pb=res.querySelector('.cl-playbtn');if(pb)pb.addEventListener('click',function(){playReport(d);});})();
         await saveDiscussion({at:nowLocal(),members:personas.map(function(p){return p.name;}),diagnosis:d.diagnosis||'',board:(d.board||[]).map(function(b){var ex=EXPERTS.filter(function(e){return e.id===b.id;})[0]||{};return {id:b.id,name:ex.name||b.id,call:b.call,take:b.take};}),consensus:d.consensus||[],tension:d.tension||[],actions:d.actions||[],steelman:d.steelman||''});
@@ -1976,7 +1981,7 @@ window.CYCLE=(function(){
     function reportHTML(d){
       var board=(d.board||[]).map(function(b){var ex=EXPERTS.filter(function(e){return e.id===b.id;})[0]||{};var c=sc(b.call);
         return '<div class="cl-brow">'+(ex.cfg?avatar(ex.cfg,44):'')+'<div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span class="cl-nm" style="font-size:14px">'+esc(ex.name||b.id)+'</span><span class="cl-pill" style="color:'+c+';background:color-mix(in srgb,'+c+' 12%,transparent);border:1px solid color-mix(in srgb,'+c+' 45%,transparent)">'+esc(b.call)+'</span>'+(ex.chip?'<span class="cl-chip">'+esc(ex.chip)+'</span>':'')+'</div><p style="margin:6px 0 0;font-size:14px;line-height:1.6">'+esc(b.take)+'</p></div></div>';}).join('');
-      return '<div class="cl-rep"><div class="cl-eye">원탁 진단 리포트</div><div class="cl-diag">'+esc(d.diagnosis||'')+'</div><button type="button" class="cl-btn cl-playbtn" style="margin:0 0 4px">▶ 음성 토론 재생</button>'+board+
+      return '<div class="cl-rep"><div class="cl-eye">원탁 진단 리포트</div>'+(d.topic?'<div class="cl-eye" style="color:var(--dawn);margin-top:6px">논제 · '+esc(d.topic)+'</div>':'')+'<div class="cl-diag">'+esc(d.diagnosis||'')+'</div><button type="button" class="cl-btn cl-playbtn" style="margin:0 0 4px">▶ 음성 토론 재생</button>'+board+
         '<div class="cl-two">'+list('합의점','var(--st-dawn,#2f7d63)',d.consensus)+list('이견 · 긴장','var(--st-mature,#9a7b2f)',d.tension)+'</div>'+
         ((d.actions&&d.actions.length)?'<div style="margin-top:14px"><div class="cl-eye">액션 (게이트 조건부)</div><ul style="margin:8px 0 0;padding-left:18px;line-height:1.8;font-size:14px">'+d.actions.map(function(a){return '<li>'+esc(a)+'</li>';}).join('')+'</ul></div>':'')+
         (d.steelman?'<div class="cl-steel"><div class="cl-eye">스틸맨 반론</div><p style="margin:6px 0 0;font-size:14px;line-height:1.7">'+esc(d.steelman)+'</p></div>':'')+'</div>';

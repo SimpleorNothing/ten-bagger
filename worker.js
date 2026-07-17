@@ -308,11 +308,13 @@ async function handleCouncil(request, env) {
   try { body = await request.json(); } catch { return json({ error: "invalid json" }, 400); }
   const personas = (body && Array.isArray(body.personas)) ? body.personas : [];
   const situation = (body && body.situation) ? String(body.situation) : "";
+  const topic = (body && body.topic) ? String(body.topic).slice(0, 300).trim() : "";
   if (personas.length < 2) return json({ error: "personas>=2 required" }, 400);
 
   const sys =
     "너는 '알파맵' AI 인프라 투자 관측소의 자문단 원탁 시뮬레이터다. 참여자는 실존 공개 인물의 '공개 발언·콘텐츠 기반 관점(field/view)'과 「알파맵」좌장(진실원천 SoT)이다. " +
     "각 인물의 실제 발언을 지어내지 마라 — 그의 공개된 분석 렌즈(field/view)를 '현 상황'에 적용해 '이 관점에서 보면 …' 식으로 해석한다(가짜 인용·구체적 미발화 예측 금지). 「알파맵」좌장은 라이브 게이트·보유·γ를 전제로 팩트·게이트·스틸맨을 강제하되 결론을 확정하지 않는다. " +
+    "입력에 topic(토론 주제)이 있으면 그것을 원탁 중심 논제로 삼아 각 인물이 자기 렌즈로 그 논제를 다투게 하고 situation은 전제 배경으로 깐다. diagnosis는 그 논제에 대한 한 줄 답이어야 한다. topic이 비면 현 상황 종합 진단. " +
     "규율: 결론 먼저 · 게이트는 전부 AND · 매수 권유가 아니라 프레임 도출 · 논제 시계와 가격·규율 시계 분리 · " +
     "narrative≠numbers(관점일 뿐 숫자 파일 제안 금지). 한국어, 종결어 '~하겠습니다/~할게'. " +
     "반드시 아래 JSON만 출력(코드펜스·설명 금지).\n" +
@@ -325,7 +327,7 @@ async function handleCouncil(request, env) {
       method: "POST",
       headers: { "content-type": "application/json", "x-api-key": env.ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01" },
       body: JSON.stringify({ model: "claude-opus-4-8", max_tokens: 2500, system: sys,
-        messages: [{ role: "user", content: JSON.stringify({ personas: personas, situation: situation }) }] }),
+        messages: [{ role: "user", content: JSON.stringify({ topic: topic, personas: personas, situation: situation }) }] }),
     });
   } catch (e) {
     return json({ error: "anthropic fetch failed", detail: String(e && e.message ? e.message : e) }, 502);

@@ -1,4 +1,4 @@
-**최종 갱신: 2026-07-17 16:03 (KST)**
+**최종 갱신: 2026-07-17 16:38 (KST)**
 
 # OPS — 알파맵 운영 가이드
 
@@ -134,7 +134,7 @@
 
 | 정보명 | 자동/수동 | 주기 | 소스 |
 |---|---|---|---|
-| 원탁 토론 | 수동 | 필요 시 | `council.json` (패널리스트 배열 + 토론 라운드). 원탁 플레이어·포맷은 handover-council.md 참조 |
+| 원탁 토론 | 수동 | 필요 시 | 전문가 2인+ → 「토론 시작」 → `/api/council`(Claude). **토론 주제(`#clTopic`) 선택 입력**(2026-07-17) — 비우면 현 상황 종합, 채우면 그 논제 중심. `narrative≠numbers` |
 | 전문가 관점 갱신 | 수동(운영자 입력) | 필요 시 | 각 전문가 카드 「관점 갱신」 모달 4탭 — **텍스트**(`/api/council-summary` Claude) · **유튜브 링크**(`/api/yt-view` Gemini 영상 인식) · **여러 링크**(신설) · **파일**(txt·md·srt·vtt·csv·docx·pdf → council-summary). 관점 텍스트·stance만 갱신, **숫자 파일 불변**(narrative≠numbers). 반영분은 R2 감사 로그 `council_log.json`(`/api/council-log`)에 누적 → 카드 복원·「관점 갱신 이력」 모달 |
 | ↳ **여러 링크 자동 인식·통합**(2026-07-17 신설) | 수동(운영자 입력) | 필요 시 | 유튜브·기사 링크를 **한꺼번에 붙여넣으면** 클라(`recognizeLinks`)가 URL을 파싱→유형 자동 분류(유튜브/기사)→소스별 요약(유튜브=`/api/yt-view` Gemini 영상 인식 · 기사=`/api/council-read` **서버가 URL 본문을 직접 페치→HTML 스트립→Claude 비스트리밍 요약**, web_search 아님 → 특정 URL을 빠르고 확실하게 읽음)→**하나의 통합 관점으로 합성**(`/api/council-summary` 재사용). **소스는 병렬 인식**(`Promise.all` — 다건도 동시 처리). 링크 아닌 문장은 메모로 반영. 소스별 진행·한 줄 요약 표시, **실패·본문 얇음(차단·JS 렌더·페이월)은 건너뜀**(개별 처리 · view 빈 문자열). 모든 출처 링크는 로그 `refs[]`(신규 필드 · `{label,url}`)에 함께 저장·이력 모달에서 각각 링크로 표시. 신규 CSS·토큰 0(모달 컴포넌트 재사용) |
 | 원탁 음성 토론 재생 | 클라이언트(브라우저 TTS) | 재생 시 | 원탁 진단 리포트(diagnosis·board·consensus·tension·steelman)를 화자별 브라우저 TTS로 메신저형 극화 재생하는 인앱 플레이어(`#v-council`, 「▶ 음성 토론 재생」 버튼 · `window.COUNCIL.playReport`). 서버·데이터 페치 무관(리포트 재사용·오프라인). 고품질 Gemini AI 음성판은 사이트 밖 로컬 도구(`claude/roundtable`)로 별도 |
@@ -263,6 +263,7 @@
 
 ## 9. 갱신 이력
 
+- 2026-07-17 16:38 · **04 전문가 원탁에 「토론 주제」 입력 신설.** 「현 상황」 위 단일행 `#clTopic` — 비우면 현 상황 종합, 채우면 그 논제 중심. `/api/council`가 `topic`(≤300자) 수용→중심 논제로 강제. **신규 CSS·토큰 0** · check-docs 통과. §3·STYLE 동반 갱신.
 - 2026-07-17 16:03 · **「여러 링크」 기사 읽기를 web_search→서버 직접 페치로 교체 + 소스 병렬 인식(버그픽스).** 첫 배포판은 기사 URL을 Claude web_search로 '검색'해 특정 URL(economist·namu·yes24·millie 등)을 못 찾고 느리게 맴돌아 인식이 멈춘 것처럼 보임 → `handleCouncilRead`가 **URL 본문을 직접 fetch(12s 타임아웃·브라우저 UA)→HTML 스트립(`stripHtmlToText`)→Claude 비스트리밍 요약**하도록 교체(빠르고 확실). 본문 <200자면 view 빈 문자열로 개별 건너뜀. 클라 `recognizeLinks`는 순차 루프→`Promise.all` 병렬로 전환(다건 체감속도 개선). worker.js·index.html만 변경, 신규 CSS·토큰 0.
 - 2026-07-17 13:38 · **04 전문가 원탁 관점 갱신에 「여러 링크」 탭 신설.** 유튜브·기사 링크를 한꺼번에 붙여넣으면 클라(`recognizeLinks`)가 URL 파싱→유형 분류→소스별 요약(유튜브 `/api/yt-view` · 기사 신설 `/api/council-read` = Claude web_search 본문 읽기, 기존 `/api/insight` useSearch 패턴 재사용)→`/api/council-summary`로 **하나의 통합 관점 합성**. 소스별 진행·한 줄 표시, 실패 링크는 개별 건너뜀. 로그(`council_log.json`)에 `refs[]`(복수 출처 `{label,url}`) 필드 추가 — 이력 모달이 각 출처를 링크로 표시. worker.js: 엔드포인트 1종(`/api/council-read`)+로그 refs 저장. index.html: 모달 컴포넌트 재사용(**신규 CSS·토큰 0** · check-docs 통과). §3 04 원탁 갱신.
 - 2026-07-17 · **04 자문단 관점 초기값 업데이트(공개 발언 기반).** 지식인사이드·신뢰 매체 보도 기준 카드 view 갱신 — 김정호(AI=메모리·HBM4 시스템통합·HBF, **강세**)·김장열(이익추정 20~30%↑·안전마진·MU 선행)·오건영(뉴노멀·K자 양극화·달러는 파동)·이광수(국장 전환점·저점매수 경계). 김효진은 개별 발언 미확보→도메인 렌즈·관점 갱신 권장. 실존 인물 가드레일 유지. narrative≠numbers. SimpleorNothing 지시.

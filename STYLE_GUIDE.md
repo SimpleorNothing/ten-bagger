@@ -1,4 +1,4 @@
-**최종 갱신: 2026-07-17 13:38 (KST)**
+**최종 갱신: 2026-07-17 16:38 (KST)**
 
 # STYLE_GUIDE — 알파맵 디자인 시스템
 
@@ -233,6 +233,7 @@ pantone.css :root       ← 현행 팔레트 (팬튼 A안, index.html 하단 <li
 
 ## 갱신 이력
 
+- 2026-07-17 16:38 · **04 전문가 원탁에 「토론 주제」 입력창 추가.** 「현 상황」 위 단일행 주제 입력(`#clTopic`) — 비우면 현 상황 종합, 채우면 그 논제 중심. **신규 `:root` 토큰·CSS 클래스 0** — 폼 `.cl-in` 재사용, 안내 `.cl-note`·`h2.msec`+`span.mnote`. 리포트 논제 노출은 `.cl-eye`(`--dawn`) 인라인. TOKENS 무변 → `check-docs` 통과. narrative≠numbers. (OPS §3·§9 동반 갱신)
 - 2026-07-17 13:38 · **04 전문가 원탁 관점 갱신 모달에 「여러 링크」 탭 추가.** 유튜브·기사 링크를 한꺼번에 붙여넣어 소스별 인식→통합 관점으로 정리하는 흐름. **신규 `:root` 토큰·CSS 클래스 0** — 기존 모달 컴포넌트(`.cl-tabs`/`.cl-tab`·`.cl-in` textarea·`.cl-blk`·`.cl-eye`·`.cl-chip`·`.cl-pill`·`.cl-note`)만 재사용, 소스별 진행·한 줄·통합 미리보기는 인라인 스타일(모달 관행 승계). 탭은 4번째 `.cl-tab`(flex:1 → 4등분, 라벨 「여러 링크」)로 폭 자동. stance는 기능색(`--st-dawn/-mature/-hot`) 재사용. TOKENS 구역 무변 → `check-docs` 통과. (OPS §3·§9 동반 갱신)
 
 - 2026-07-17 11:45 · **04 전문가 원탁 「음성 토론 재생」 플레이어 컴포넌트(`.cl-p*`).** 원탁 진단 리포트를 화자별 브라우저 TTS 메신저형으로 극화하는 오버레이(`.cl-play`/`.cl-psheet`/`.cl-pmsg`/`.cl-pbub`/`.cl-pcall`/`.cl-ptype`). **신규 `:root` 토큰 0**(전역 토큰만 — `--panel`/`--line`/`--txt`/`--dawn`/`--st-dawn`/`--st-mature`) → TOKENS 구역 무변, `check-docs` 통과. **면(sheet·bubble·callout·typing)=radius 3px 직접 지정**(§3 — 전역 3px 셀렉터 목록 미편집, 이미 3px라 결 일치)·**부표(stance pill·타이핑 점)=radius 20px**·아바타=기존 `avatar()` SVG 재사용. 말풍선 본문 14px·메타 12·13px(§2 하한 준수). 발언 강조=`--dawn` 보더. 화자 구분은 색이 아니라 톤(`CLV` rate·pitch)·이름·stance pill. `#v-council` 스코프. (OPS §3 동반 갱신)
