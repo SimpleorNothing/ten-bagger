@@ -1810,6 +1810,9 @@ window.CYCLE=(function(){
   <h2 class="msec">현 상황 <span class="mnote">토론의 입력값 · 운영 시 라이브 게이트·보유 주입(예정)</span></h2>
   <textarea id="clCtx" class="cl-ta" rows="6"></textarea>
 
+  <h2 class="msec">좌장 <span class="mnote">진실원천(SoT) · 라이브 데이터·게이트·규율</span></h2>
+  <div class="mkt-grid" id="clChair"></div>
+
   <h2 class="msec">논제 시계 <span class="mnote">무엇이 진짜인가 · 실적·수주·capex</span></h2>
   <div class="mkt-grid" id="clThesis"></div>
 
@@ -1824,7 +1827,7 @@ window.CYCLE=(function(){
     <button class="cl-btnp" id="clRun" disabled>토론 시작</button>
   </div>
 
-  <p class="cl-note" style="margin-top:14px">전문가는 렌즈별 페르소나입니다. 「관점 갱신」으로 유튜브 링크·텍스트·파일에서 주요 관점을 요약해 반영합니다(관점 텍스트만 갱신 · 숫자 파일 불변).</p>
+  <p class="cl-note" style="margin-top:14px">전문가 카드는 실존 공개 인물의 <b>공개 발언·콘텐츠 기반 렌즈 요약</b>이며 실제 발언·투자자문이 아닙니다. 「관점 갱신」으로 유튜브·텍스트·파일에서 실제 공개 관점을 반영합니다(관점 텍스트만 갱신 · 숫자 파일 불변). 「토론 시작」 리포트는 각 인물의 <b>공개 관점을 시뮬레이션</b>한 AI 해석입니다.</p>
 
   <div class="cl-modal" id="clLogModal" hidden>
     <div class="cl-sheet" id="clLogSheet" style="max-width:640px">
@@ -1863,6 +1866,7 @@ window.CYCLE=(function(){
     function cleanCap(t){return t.split(/\r?\n/).filter(function(l){var s=l.trim();return s&&!/^WEBVTT/.test(s)&&!/-->/.test(s)&&!/^\d+$/.test(s);}).join(' ').replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim();}
 
     function avatar(c,size){size=size||56;var cid='cav'+c.id;
+      if(c.emblem){return '<svg width="'+size+'" height="'+size+'" viewBox="0 0 100 100" style="display:block"><circle cx="50" cy="50" r="49" fill="'+(c.disc||"#16324a")+'"/><g fill="none" stroke="#7fd0d0" stroke-width="2" opacity="0.5"><circle cx="50" cy="50" r="30"/><circle cx="50" cy="50" r="20"/><circle cx="50" cy="50" r="10"/></g><circle cx="50" cy="50" r="3.5" fill="#a6e6e6"/><circle cx="50" cy="50" r="48" fill="none" stroke="var(--line2)" stroke-width="1.5"/></svg>';}
       var hair='';
       if(c.style!=='bald')hair+='<path d="M33 47 A17.5 18.5 0 0 1 67 47 C67 37 60 30 50 30 C40 30 33 37 33 47 Z" fill="'+c.hair+'"/>';
       if(c.style==='side')hair+='<path d="M33 47 C33 41 41 37 50 37 C44 41 41 45 44 50 Z" fill="'+c.hair+'"/>';
@@ -1886,13 +1890,12 @@ window.CYCLE=(function(){
     }
 
     var EXPERTS=[
-      {id:'semi',bench:'thesis',name:'서민재',chip:'L3 · 사이클',field:'메모리 수급 · DRAM/HBM · MU γ',stance:'강세',updated:'2026-07-15 · YouTube',view:'메모리는 결국 사이클. HBM 믹스가 이번을 다르게 만들지만 진짜 텔은 스팟 롤오버. 믹스가 살아있는 한 γ는 열려 있다.',cfg:{id:'a1',skin:'#d99a6c',hair:'#1c1c1c',style:'short',glasses:false,beard:true,disc:'#e6e9e4',shirt:'#6a7a70'}},
-      {id:'growth',bench:'thesis',name:'백지훈',chip:'L1–2 · 상류',field:'AI capex · 모델/컴퓨트 · 강물 상류',stance:'강세',updated:'2026-07-16 · YouTube',view:'다년 슈퍼사이클. 상류 capex가 꺾이기 전에 하류가 마른다는 신호는 이르다. 강물이 흐르는 한 논제 시계는 우상향.',cfg:{id:'a2',skin:'#c98a5a',hair:'#141014',style:'curly',glasses:false,beard:false,disc:'#e5e8ec',shirt:'#5f7183'}},
-      {id:'pkg',bench:'thesis',name:'이현수',chip:'L4 · 회전',field:'패키징/장비 · 공급망 (언더웨이트 회전 타깃)',stance:'중립',updated:'2026-07-14 · YouTube',view:'L4는 만성 언더웨이트이자 트림의 목적지. 백엔드 비중 확인·수주 잔고 가시성이 붙으면 한계γ가 여기로 먼저 온다.',cfg:{id:'a3',skin:'#e8b78f',hair:'#2a2a2a',style:'short',glasses:true,beard:false,disc:'#ece7dd',shirt:'#8a7a55'}},
-      {id:'power',bench:'thesis',name:'정우람',chip:'L7–8 · 전력',field:'전력 · 냉각 · 그리드',stance:'강세',updated:'2026-07-12 · YouTube',view:'연산은 결국 전력이다. 병목은 칩에서 전력·냉각으로 이동 중. 발전·그리드가 다음 구간의 구조적 승자.',cfg:{id:'a4',skin:'#e0a878',hair:'#2b2b2b',style:'bald',glasses:true,beard:true,disc:'#e2ece9',shirt:'#567069'}},
-      {id:'macro',bench:'price',name:'강도현',chip:'게이트 · 매크로',field:'금리 · 유동성 · 매크로 게이트',stance:'중립',updated:'2026-07-14 · YouTube',view:'금리·유동성이 밸류에이션의 중력. 매크로 게이트 미점등이면 신규 매수는 사치, 방어는 현금 비중에서 나온다.',cfg:{id:'a5',skin:'#e8b78f',hair:'#2a2a2a',style:'side',glasses:true,beard:false,disc:'#e4e7ec',shirt:'#5b6b7a'}},
-      {id:'cap',bench:'price',name:'윤태경',chip:'자본 · 회전',field:'자본배분 · 집중 리스크 (유한자본)',stance:'중립',updated:'2026-07-11 · YouTube',view:'80% 단일 테마의 기회비용을 늘 계산. 비싸진 층에서 공포에 눌린 층으로. 언더웨이트 레이어의 한계γ가 오버웨이트보다 우선.',cfg:{id:'a6',skin:'#ecc19a',hair:'#3a2a1a',style:'bun',glasses:false,beard:false,disc:'#ece2e6',shirt:'#7a5f6b'}},
-      {id:'risk',bench:'price',name:'한서율',chip:'규율 · 하방',field:'리스크 · 드로다운 · 하방 시나리오',stance:'약세',updated:'2026-07-13 · YouTube',view:'집중은 상승장의 친구, 하락장의 적. 낙하칼은 잡지 않는다. 첫 눌림 규율·D-1 중립화가 없으면 수익은 환상이다.',cfg:{id:'a7',skin:'#f0c9a4',hair:'#4a3320',style:'long',glasses:true,beard:false,disc:'#efe4e0',shirt:'#8a5f52'}}
+      {id:'chair',bench:'chair',name:'알파맵',chip:'좌장 · SoT',field:'라이브 데이터·규율 (진실원천)',stance:'중립',updated:'—',view:'라이브 게이트·보유·γ·signal_log를 전제로 팩트·게이트·스틸맨을 강제한다. 결론 확정권은 없다 — 데이터가 못 보는 걸 사람이 반박하는 게 원탁의 이유.',cfg:{id:'k6',emblem:true,disc:'#16324a'}},
+      {id:'kimjh',bench:'thesis',name:'김정호',chip:'L3·L4 · 기술',field:'반도체·HBM 기술 (KAIST)',stance:'중립',updated:'관점 갱신 대기',view:'HBM·어드밴스드 패키징(CoWoS) 병목과 메모리 사이클을 기술 근거로 읽는 관점(공개 콘텐츠 기반).',cfg:{id:'k1',skin:'#e8b78f',hair:'#2a2a2a',style:'side',glasses:true,beard:false,disc:'#e6e9e4',shirt:'#5b6b7a'}},
+      {id:'kimjy',bench:'thesis',name:'김장열',chip:'L2·L3 · 실적',field:'반도체 애널리스트',stance:'중립',updated:'관점 갱신 대기',view:'실적 비트와 가격↔EPS 리비전 속도로 단계(강등/유지)를 판독하는 관점(공개 콘텐츠 기반).',cfg:{id:'k2',skin:'#d99a6c',hair:'#1c1c1c',style:'short',glasses:true,beard:false,disc:'#e5e8ec',shirt:'#6a7a70'}},
+      {id:'ohgy',bench:'price',name:'오건영',chip:'게이트 · 매크로',field:'거시·금리·환율',stance:'중립',updated:'관점 갱신 대기',view:'유동성·통화정책·환율로 밸류에이션의 「가격 시계」를 읽는 관점(공개 콘텐츠 기반).',cfg:{id:'k3',skin:'#e8b78f',hair:'#2a2a2a',style:'short',glasses:false,beard:false,disc:'#e4e7ec',shirt:'#5f7183'}},
+      {id:'kimhj',bench:'price',name:'김효진',chip:'매크로 · 원자재',field:'글로벌 매크로·원자재',stance:'중립',updated:'관점 갱신 대기',view:'글로벌 사이클·원자재(전력·구리)·이머징 자본흐름으로 매크로 게이트를 정량 보강하는 관점(공개 콘텐츠 기반).',cfg:{id:'k4',skin:'#f0c9a4',hair:'#3a2a1a',style:'bun',glasses:false,beard:false,disc:'#ece2e6',shirt:'#7a5f6b'}},
+      {id:'leegs',bench:'price',name:'이광수',chip:'자본 · 회전',field:'상대가치·투자 심리',stance:'중립',updated:'관점 갱신 대기',view:'비싸진 쪽에서 눌린 쪽으로의 회전, 저점매수 집착 경계를 강조하는 관점(공개 콘텐츠 기반).',cfg:{id:'k5',skin:'#c98a5a',hair:'#141014',style:'short',glasses:true,beard:false,disc:'#ece7dd',shirt:'#8a7a55'}}
     ];
     var SAMPLE='【샘플 · 운영 시엔 라이브 주입】\n포트폴리오: AI 인프라 8레이어 ~80% 집중.\n· L3 메모리 오버웨이트(~44%, 목표 30~32%) · L4 장비 언더웨이트(~2%)\n· L7/L8 전력 ~14% · 현금 ~7%(목표 9~12% 하회)\n게이트: MU γ-닫힘 3트리거 미점등 → L3 트림 보류.\n매크로 게이트(나스닥·VIX·CNN F&G 3중 AND) 미점등 → 신규 매수 금지.';
 
@@ -1910,6 +1913,7 @@ window.CYCLE=(function(){
           '<button class="cl-btn" data-act="upd" data-id="'+e.id+'">관점 갱신</button></div></div>';
     }
     function renderCards(){
+      var _ch=document.getElementById('clChair');if(_ch)_ch.innerHTML=EXPERTS.filter(function(e){return e.bench==='chair';}).map(cardHTML).join('');
       document.getElementById('clThesis').innerHTML=EXPERTS.filter(function(e){return e.bench==='thesis';}).map(cardHTML).join('');
       document.getElementById('clPrice').innerHTML=EXPERTS.filter(function(e){return e.bench==='price';}).map(cardHTML).join('');
       var seated=EXPERTS.filter(function(e){return sel.indexOf(e.id)>=0;});
@@ -1927,7 +1931,7 @@ window.CYCLE=(function(){
       var btn=document.getElementById('clRun');btn.disabled=true;btn.textContent='진단 중…';
       var res=document.getElementById('clResult');res.innerHTML='';
       try{
-        var personas=EXPERTS.filter(function(e){return sel.indexOf(e.id)>=0;}).map(function(e){return {id:e.id,name:e.name,field:e.field,clock:e.bench==='thesis'?'논제 시계':'가격·규율 시계',stance:e.stance,view:e.view};});
+        var personas=EXPERTS.filter(function(e){return sel.indexOf(e.id)>=0;}).map(function(e){return {id:e.id,name:e.name,field:e.field,clock:e.bench==='thesis'?'논제 시계':(e.bench==='chair'?'좌장(SoT)':'가격·규율 시계'),stance:e.stance,view:e.view};});
         var j=await post('/api/council',{personas:personas,situation:document.getElementById('clCtx').value});
         var d=extractJSON(textOf(j));
         res.innerHTML=reportHTML(d);
