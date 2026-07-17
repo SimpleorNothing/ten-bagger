@@ -2066,7 +2066,16 @@ window.CYCLE=(function(){
     }
     async function loadDiscussions(){var host=document.getElementById('clHistory');try{var r=await fetch('/api/council-discussions',{credentials:'same-origin',cache:'no-store'});var arr=r.ok?await r.json():[];renderDiscussions(Array.isArray(arr)?arr:[]);}catch(e){if(host)host.innerHTML='<div class="cl-err">이력 불러오기 실패</div>';}}
     async function saveDiscussion(d){try{await fetch('/api/council-discussions',{method:'POST',headers:{'content-type':'application/json'},credentials:'same-origin',body:JSON.stringify(d)});}catch(e){}}
-    function render(){if(!mounted){mounted=true;var ta=document.getElementById('clCtx');if(!ta.value)ta.value=SAMPLE;renderCards();bind();loadLiveCtx();loadDiscussions();}}
+    async function restoreCards(){
+      try{
+        var r=await fetch('/api/council-log',{credentials:'same-origin',cache:'no-store'});
+        var arr=r.ok?await r.json():[];if(!Array.isArray(arr)||!arr.length)return;
+        var latest={};arr.forEach(function(e){if(!e.expertId)return;if(!latest[e.expertId]||String(e.at||'')>String(latest[e.expertId].at||''))latest[e.expertId]=e;});
+        var changed=false;EXPERTS.forEach(function(x){var e=latest[x.id];if(e&&e.view){x.view=e.view;if(e.stance)x.stance=e.stance;x.updated=fmtAt(e.at)+(e.source?' · '+e.source:'');changed=true;}});
+        if(changed)renderCards();
+      }catch(_e){}
+    }
+    function render(){if(!mounted){mounted=true;var ta=document.getElementById('clCtx');if(!ta.value)ta.value=SAMPLE;renderCards();bind();loadLiveCtx();loadDiscussions();restoreCards();}}
     return {render:render};
   })();
   </script>
