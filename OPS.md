@@ -1,4 +1,4 @@
-**최종 갱신: 2026-07-17 10:45 (KST)**
+**최종 갱신: 2026-07-17 12:20 (KST)**
 
 # OPS — 알파맵 운영 가이드
 
@@ -135,6 +135,7 @@
 | 정보명 | 자동/수동 | 주기 | 소스 |
 |---|---|---|---|
 | 원탁 토론 | 수동 | 필요 시 | `council.json` (패널리스트 배열 + 토론 라운드). 원탁 플레이어·포맷은 handover-council.md 참조 |
+| 원탁 음성 토론 재생 | 클라이언트(브라우저 TTS) | 재생 시 | 원탁 진단 리포트(diagnosis·board·consensus·tension·steelman)를 화자별 브라우저 TTS로 메신저형 극화 재생하는 인앱 플레이어(`#v-council`, 「▶ 음성 토론 재생」 버튼 · `window.COUNCIL.playReport`). 서버·데이터 페치 무관(리포트 재사용·오프라인). 고품질 Gemini AI 음성판은 사이트 밖 로컬 도구(`claude/roundtable`)로 별도 |
 | 원탁 업데이트 배지 | 자동(런타임) | 로딩 시 | `changelog.js` `mountHead()` — 01 시장 모니터링과 동일 `.mkt-upd` 배지 재사용 |
 
 ### 05 리밸런싱 (`v-decision`)
