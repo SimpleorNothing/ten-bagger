@@ -3717,7 +3717,8 @@ window.MARKET=(function(){
   catch(e){host.innerHTML='<div class="mkt-ph">동인 합성 대기 (pulse.json)</div>';}
  }
  // ===== 심리·수급·환율 게이지 (런타임 — 페이지 열 때마다 최신) =====
- function gauge(nm,val,lns){return '<div class="mkt-card"><div class="mkt-nm">'+esc(nm)+'</div><div class="mkt-val">'+val+'</div>'+(lns||'')+'</div>';}
+ function gauge(nm,val,lns,extra){return '<div class="mkt-card"><div class="mkt-nm">'+esc(nm)+'</div><div class="mkt-val">'+val+'</div>'+(lns||'')+(extra||'')+'</div>';}
+ function fgGauge(f){var v=Math.max(0,Math.min(100,+f||0)),cx=105,cy=104,R=80,W=13,D=Math.PI/180,pt=function(x,r){var t=(180*(1-x/100))*D;return[cx+r*Math.cos(t),cy-r*Math.sin(t)]},A=function(a,b,k,o,w){var p=pt(a,R),q=pt(b,R);return '<path d="M'+p[0].toFixed(1)+' '+p[1].toFixed(1)+' A'+R+' '+R+' 0 0 1 '+q[0].toFixed(1)+' '+q[1].toFixed(1)+'" fill="none" style="stroke:var('+k+');stroke-width:'+w+';opacity:'+o+'"/>'},Z=[[0,25,'--st-dawn',1],[25,45,'--st-dawn',.4],[45,55,'--st-mature',.5],[55,75,'--st-hot',.4],[75,100,'--st-hot',1]],a=-1,i,s='';for(i=0;i<5;i++){if(v>=Z[i][0]&&v<Z[i][1]){a=i;break}}if(v>=100)a=4;if(a<0)a=0;for(i=0;i<5;i++){var on=i===a;s+=A(Z[i][0],Z[i][1],Z[i][2],on?1:Z[i][3],on?W+3:W)}var t=(180*(1-v/100))*D,c=Math.cos(t),n=Math.sin(t),tp=pt(v,R-4),P=function(p){return p[0].toFixed(1)+' '+p[1].toFixed(1)},nd='<polygon points="'+P(tp)+' '+P([cx+5.5*n,cy+5.5*c])+' '+P([cx-13*c,cy+13*n])+' '+P([cx-5.5*n,cy-5.5*c])+'" style="fill:var(--txt)"/><circle cx="'+cx+'" cy="'+cy+'" r="6.5" style="fill:var(--txt)"/><circle cx="'+cx+'" cy="'+cy+'" r="3" style="fill:var(--panel)"/>',z=pt(0,R+13),h=pt(100,R+13),L='<text x="'+z[0].toFixed(1)+'" y="'+(z[1]+4).toFixed(1)+'" text-anchor="middle" style="font:12px var(--mono);fill:var(--faint)">0</text><text x="'+h[0].toFixed(1)+'" y="'+(h[1]+4).toFixed(1)+'" text-anchor="middle" style="font:12px var(--mono);fill:var(--faint)">100</text><text x="30" y="123" text-anchor="middle" style="font:600 12px var(--serif);fill:var(--st-dawn)">공포</text><text x="180" y="123" text-anchor="middle" style="font:600 12px var(--serif);fill:var(--st-hot)">탐욕</text>';return '<div class="mkt-chart" style="padding-top:6px"><svg viewBox="0 0 210 130" style="width:100%;height:auto;display:block" role="img" aria-label="공포탐욕 게이지 '+v+'">'+s+nd+L+'</svg></div>'}
  async function loadGauges(){
   var host=document.getElementById('mktGauge');if(!host)return;
   try{
@@ -3734,7 +3735,7 @@ window.MARKET=(function(){
    if(s.fearGreed!=null){var f=s.fearGreed;var fl=f<=25?'극도의 공포':f<=45?'공포':f<=55?'중립':f<=75?'탐욕':'극도의 탐욕';
     var fj=f<=25?'<span class="ok">역발상 매수 관심대</span>':f>=75?'<span class="wn">과열 — 되돌림 경계</span>':'<span class="nt">방향 미확정</span>';
     cards+=gauge('CNN 공포·탐욕',f+'<span class="vlab">'+fl+'</span>',
-     lens('<b>심리</b>공포탐욕지수 0~100 · 역발상 렌즈','F&amp;G '+f+' ('+fl+') → '+fj));}
+     lens('<b>심리</b>공포탐욕지수 0~100 · 역발상 렌즈','F&amp;G '+f+' ('+fl+') → '+fj),fgGauge(f));}
    if(s.nasdaqDrawdownPct!=null){var dd=s.nasdaqDrawdownPct,g=dd<=-20?3:dd<=-13?2:dd<=-8?1:0;
     var gv=g>=1?'<span class="ok">깊이 게이트 G'+g+' 점등</span>':'<span class="nt">G0 — 조정 미진입</span>';
     cards+=gauge('나스닥 드로다운','<span class="'+(dd<0?'dn':'up')+'">'+dd.toFixed(1)+'%</span>',
