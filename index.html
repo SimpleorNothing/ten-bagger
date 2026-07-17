@@ -1821,6 +1821,9 @@ window.CYCLE=(function(){
 
   <div id="clResult"></div>
 
+  <h2 class="msec" style="margin-top:26px">토론 이력 <span class="mnote">지난 원탁 진단 · 최신순</span> <button class="cl-btn" id="clHistBtn" style="margin-left:8px;vertical-align:middle">새로고침</button></h2>
+  <div id="clHistory"><div class="cl-note">불러오는 중…</div></div>
+
   <div class="cl-bar" id="clBar">
     <div id="clSeated" style="display:flex;align-items:center"></div>
     <span class="cl-crumb" id="clCrumb">전문가를 선택하세요</span>
@@ -1935,6 +1938,8 @@ window.CYCLE=(function(){
         var j=await post('/api/council',{personas:personas,situation:document.getElementById('clCtx').value});
         var d=extractJSON(textOf(j));
         res.innerHTML=reportHTML(d);
+        await saveDiscussion({at:nowLocal(),members:personas.map(function(p){return p.name;}),diagnosis:d.diagnosis||'',board:(d.board||[]).map(function(b){var ex=EXPERTS.filter(function(e){return e.id===b.id;})[0]||{};return {id:b.id,name:ex.name||b.id,call:b.call,take:b.take};}),consensus:d.consensus||[],tension:d.tension||[],actions:d.actions||[],steelman:d.steelman||''});
+        loadDiscussions();
       }catch(err){res.innerHTML='<div class="cl-err" style="margin-top:20px">토론 생성 실패: '+esc(err.message)+'</div>';}
       finally{btn.textContent='토론 시작';btn.disabled=sel.length<2;}
     }
@@ -2002,6 +2007,7 @@ window.CYCLE=(function(){
       root.addEventListener('keydown',function(e){var card=e.target.closest('.cl-card');if(card&&(e.key==='Enter'||e.key===' ')){e.preventDefault();toggle(card.dataset.id);}});
       document.getElementById('clRun').addEventListener('click',runDiscussion);
       var _lb=document.getElementById('clLiveBtn');if(_lb)_lb.addEventListener('click',loadLiveCtx);
+      var _hb=document.getElementById('clHistBtn');if(_hb)_hb.addEventListener('click',loadDiscussions);
       document.getElementById('clLogBtn').addEventListener('click',openLog);
       var _lm=document.getElementById('clLogModal');
       _lm.addEventListener('click',function(e){if(e.target===_lm)_lm.hidden=true;});
@@ -2048,7 +2054,19 @@ window.CYCLE=(function(){
       return lines.length>1?lines.join('\n'):'';
     }
     async function loadLiveCtx(){var ta=document.getElementById('clCtx');if(!ta)return;var b=document.getElementById('clLiveBtn');if(b){b.disabled=true;b.textContent='불러오는 중…';}var live=await buildLiveSituation();if(live){ta.value=live;}if(b){b.disabled=false;b.textContent='라이브 갱신';}}
-    function render(){if(!mounted){mounted=true;var ta=document.getElementById('clCtx');if(!ta.value)ta.value=SAMPLE;renderCards();bind();loadLiveCtx();}}
+    function discBody(d){
+      var board=(d.board||[]).map(function(b){var c=sc(b.call);return '<div style="display:flex;gap:8px;align-items:baseline;margin:4px 0"><span style="font-weight:700;font-size:13px;flex:0 0 auto">'+esc(b.name||b.id||'')+'</span><span class="cl-pill" style="color:'+c+';background:color-mix(in srgb,'+c+' 12%,transparent);border:1px solid color-mix(in srgb,'+c+' 45%,transparent);flex:0 0 auto">'+esc(b.call||'')+'</span><span style="font-size:13px;line-height:1.6">'+esc(b.take||'')+'</span></div>';}).join('');
+      return '<div>'+board+'</div><div class="cl-two" style="margin-top:10px">'+list('합의점','var(--st-dawn,#2f7d63)',d.consensus)+list('이견 · 긴장','var(--st-mature,#9a7b2f)',d.tension)+'</div>'+((d.actions&&d.actions.length)?'<div style="margin-top:10px"><div class="cl-eye">액션</div><ul style="margin:6px 0 0;padding-left:18px;line-height:1.7;font-size:13px">'+d.actions.map(function(a){return '<li>'+esc(a)+'</li>';}).join('')+'</ul></div>':'')+(d.steelman?'<div class="cl-steel" style="margin-top:10px"><div class="cl-eye">스틸맨 반론</div><p style="margin:6px 0 0;font-size:13px;line-height:1.7">'+esc(d.steelman)+'</p></div>':'');
+    }
+    function renderDiscussions(arr){
+      var host=document.getElementById('clHistory');if(!host)return;
+      if(!arr||!arr.length){host.innerHTML='<div class="cl-note">아직 토론 이력이 없습니다. 전문가 2인 이상 선택 후 「토론 시작」을 누르면 여기에 쌓입니다.</div>';return;}
+      arr.sort(function(a,b){return String(b.at||'').localeCompare(String(a.at||''));});
+      host.innerHTML=arr.map(function(d){var one=String(d.diagnosis||'').slice(0,80);var mem=(d.members||[]).join(' · ');return '<details class="rvw"><summary><span class="rvw-date">'+esc(fmtAt(d.at))+'</span><span class="rvw-one">'+esc(one)+'</span><span class="rvw-badge" style="flex:0 0 auto;font-size:11px;color:var(--dim)">'+((d.members&&d.members.length)?d.members.length+'인':'')+'</span></summary><div class="rvw-body"><div style="font-size:12px;color:var(--dim);margin:6px 0 8px">'+esc(mem)+'</div>'+discBody(d)+'</div></details>';}).join('');
+    }
+    async function loadDiscussions(){var host=document.getElementById('clHistory');try{var r=await fetch('/api/council-discussions',{credentials:'same-origin',cache:'no-store'});var arr=r.ok?await r.json():[];renderDiscussions(Array.isArray(arr)?arr:[]);}catch(e){if(host)host.innerHTML='<div class="cl-err">이력 불러오기 실패</div>';}}
+    async function saveDiscussion(d){try{await fetch('/api/council-discussions',{method:'POST',headers:{'content-type':'application/json'},credentials:'same-origin',body:JSON.stringify(d)});}catch(e){}}
+    function render(){if(!mounted){mounted=true;var ta=document.getElementById('clCtx');if(!ta.value)ta.value=SAMPLE;renderCards();bind();loadLiveCtx();loadDiscussions();}}
     return {render:render};
   })();
   </script>
