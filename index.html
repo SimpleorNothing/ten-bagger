@@ -3300,7 +3300,8 @@ window.MARKET=(function(){
    // ('중동 분쟁·유가·에너지' / '중동분쟁·유가·에너지' / '이란 호르무즈 해협' = 한 축).
    // id·name 을 그대로 키로 쓰면 같은 토픽이 여러 블록으로 쪼개진다 → 축 키로 병합한다.
    // 표시 이름은 하드코딩하지 않는다(라이브 macroTopics → 없으면 최신 기사의 it.name).
-   var AXR=[['capex',/capex|하이퍼스케일러|hyperscaler|빅테크투자|ai투자/],
+   var AXR=[['china',/중국|china/],
+    ['capex',/capex|하이퍼스케일러|hyperscaler|빅테크투자|ai투자/],
     ['chip',/반도체|수출통제|공급망|hbm|semiconductor|chip|exportcontrol|supplychain/],
     ['power',/전력|원전|그리드|송전|냉각|power|grid|nuclear|smr|electric/],
     ['energy',/중동|이란|호르무즈|유가|원유|석유|oil|opec|에너지|energy|지정학|geopolit|전쟁|war|이스라엘|israel/],
@@ -3310,7 +3311,7 @@ window.MARKET=(function(){
    function axOf(s){var t=String(s||'').toLowerCase().replace(/[^0-9a-z가-힣]/g,'');
     for(var i=0;i<AXR.length;i++)if(AXR[i][1].test(t))return AXR[i][0];
     return 'x_'+(t||'macro');}
-   function axIt(it){return it.ax||axOf(it.name||it.id);}
+   function axIt(it){return axOf(it.name||it.id);}
    var MX=5,byA={},byId={},seen={};
    items.forEach(function(it){var k=axIt(it);
     if(it.id&&!byId[it.id])byId[it.id]=k;
@@ -3321,7 +3322,7 @@ window.MARKET=(function(){
    var sums={};(((dg||{}).macro)||[]).forEach(function(m){if(!m||!m.id)return;
     var k=byId[m.id]||axOf(m.id);if(!sums[k])sums[k]=m.s;});
    var NM={},order=[];   // 이번 실행 채택 축 먼저 → 식은 축은 최신순
-   (((nw||{}).macroTopics)||[]).forEach(function(t){var k=t.ax||axOf(t.name||t.id);
+   (((nw||{}).macroTopics)||[]).forEach(function(t){var k=axOf(t.name||t.id);
     if(!NM[k])NM[k]=t.name;
     if(byA[k]&&order.indexOf(k)<0)order.push(k);});
    Object.keys(byA).filter(function(k){return order.indexOf(k)<0;})
