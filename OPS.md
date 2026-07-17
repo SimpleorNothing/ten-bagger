@@ -301,6 +301,7 @@
 
 ## 갱신 이력
 
+- 2026-07-17 · **04 전문가 원탁 Stage 3 — 라이브 현 상황 자동 주입(알파맵 SoT석 사양).** 현 상황 텍스트를 샘플 하드코딩 → 라이브 조립으로 대체: `buildLiveSituation()`이 `holdings`(비중)·`gamma`(MU γ·open/closed)·`signals`(매크로 게이트 raw: 나스닥DD·VIX·F&G)·`cycle`(신호등 D~A)·`signal_log`(최근)을 동일 오리진 페치해 조립, 마운트 시 clCtx에 주입(SAMPLE 폴백)·「라이브 갱신」 버튼. worker 무변경(클라이언트 페치). narrative≠numbers: 전제 표시일 뿐 숫자 파일 불변. 미결: 토론 이력 코너·§3 번호정합. SimpleorNothing 지시.
 - 2026-07-17 · **04 전문가 원탁 로스터 확정(인수인계서 반영).** 가상 7인 → 실존 공개 인물 5인(김정호·김장열·오건영·김효진·이광수) + 「알파맵」좌장(SoT·비인간). 실존 인물 가드레일: 사진 미사용(일러스트) · 카드 관점=공개 도메인 렌즈 중립 요약(구체 발언 날조 금지 · 실제 관점은 관점 갱신으로 반영) · 면책 문구 + 토론 프롬프트를 「공개 관점 시뮬레이션·가짜 인용 금지」로 재프레이밍. 좌장 벤치 신설. narrative≠numbers 불변. 미결: Stage 3 라이브 주입(알파맵석 사양)·토론 이력 코너·§3 번호정합. SimpleorNothing 지시.
 - 2026-07-17 10:12 · **update 배지를 전문가 원탁 헤더로 이전(`changelog.js`).** 직전 좌하단 고정 배지(`.mkt-foot-upd`, #366)가 04 하단 「토론 시작」 스티키 바와 겹쳐, SimpleorNothing 지시(스크린샷: 헤더 우상단 지정)로 **전문가 원탁 헤더 우상단**(`#v-council .vhead`)에 01과 동일한 `.mkt-upd` 배지로 재배치. `mount()`→`mountHead(sel,id)` 일반화로 01·council 공통 마운트(asOf 도착 시 `renderAll()`이 전 배지 재렌더) · `footMount`/`footRender`/`.mkt-foot-upd` 제거. 신규 컴포넌트·토큰 0(`.cyc-upd`/`.cyc-pop` 재사용) · `index.html` 무패치. §3 01 업데이트 이력 행 갱신.
 - 2026-07-17 · **관점 갱신 감사 로그 신설(`/api/council-log` · R2 `council_log.json`).** 04 전문가 원탁에서 관점 반영 시 {at·전문가·소스(유튜브/텍스트/파일)·참조·view·stance}를 R2에 append. 04 상단 「관점 갱신 이력」 버튼으로 조회(최신순). narrative≠numbers. SimpleorNothing 지시.

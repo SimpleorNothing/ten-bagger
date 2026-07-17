@@ -1807,8 +1807,8 @@ window.CYCLE=(function(){
   @media(max-width:760px){#v-council .cl-two{grid-template-columns:1fr}}
   </style>
 
-  <h2 class="msec">현 상황 <span class="mnote">토론의 입력값 · 운영 시 라이브 게이트·보유 주입(예정)</span></h2>
-  <textarea id="clCtx" class="cl-ta" rows="6"></textarea>
+  <h2 class="msec">현 상황 <span class="mnote">라이브 게이트·보유·γ·사이클 자동 주입 (알파맵 SoT) · 편집 가능</span> <button class="cl-btn" id="clLiveBtn" style="margin-left:8px;vertical-align:middle">라이브 갱신</button></h2>
+  <textarea id="clCtx" class="cl-ta" rows="8"></textarea>
 
   <h2 class="msec">좌장 <span class="mnote">진실원천(SoT) · 라이브 데이터·게이트·규율</span></h2>
   <div class="mkt-grid" id="clChair"></div>
@@ -2001,6 +2001,7 @@ window.CYCLE=(function(){
       });
       root.addEventListener('keydown',function(e){var card=e.target.closest('.cl-card');if(card&&(e.key==='Enter'||e.key===' ')){e.preventDefault();toggle(card.dataset.id);}});
       document.getElementById('clRun').addEventListener('click',runDiscussion);
+      var _lb=document.getElementById('clLiveBtn');if(_lb)_lb.addEventListener('click',loadLiveCtx);
       document.getElementById('clLogBtn').addEventListener('click',openLog);
       var _lm=document.getElementById('clLogModal');
       _lm.addEventListener('click',function(e){if(e.target===_lm)_lm.hidden=true;});
@@ -2033,7 +2034,21 @@ window.CYCLE=(function(){
         }).join(""):'<div style="color:var(--faint);font-size:13px">아직 갱신 이력이 없습니다.</div>';
       }catch(err){body.innerHTML='<div class="cl-err">이력 불러오기 실패: '+esc(err.message)+'</div>';}
     }
-    function render(){if(!mounted){mounted=true;var ta=document.getElementById('clCtx');if(!ta.value)ta.value=SAMPLE;renderCards();bind();}}
+    async function fetchJSON(u){try{var r=await fetch(u,{credentials:'same-origin',cache:'no-store'});return r.ok?await r.json():null;}catch(e){return null;}}
+    function fmtN(n){return (n==null||isNaN(n))?'—':(Math.round(n*100)/100);}
+    async function buildLiveSituation(){
+      var g=await Promise.all([fetchJSON('/holdings.json'),fetchJSON('/signals.json'),fetchJSON('/cycle.json'),fetchJSON('/gamma.json'),fetchJSON('/signal_log.json')]);
+      var H=g[0],S=g[1],C=g[2],G=g[3],L=g[4];var lines=['【라이브 자동 주입 · 알파맵 SoT】'];
+      if(H&&Array.isArray(H.holdings)){lines.push('■ 포트폴리오 비중: '+H.holdings.map(function(h){return (h.layer||'')+' '+(h.w!=null?h.w+'%':'');}).join(' · ')+(H.total?(' (총 '+H.total+')'):''));}
+      if(G&&G.gamma){var gk=Object.keys(G.gamma);var op=gk.filter(function(k){return G.gamma[k].g==='open';}).length;var cl=gk.filter(function(k){return G.gamma[k].g==='closed';}).length;var mu=G.gamma.MU||G.gamma.mu;lines.push('■ γ·단계: MU '+(mu?('g='+mu.g+'·'+(mu.stage||'')+(mu.lock?'·lock':'')):'—')+' · 전체 open '+op+'/closed '+cl);}
+      if(S){lines.push('■ 매크로 게이트(3중 AND: 나스닥 -8%↓·VIX 급등·F&G 극단공포): 나스닥DD '+fmtN(S.nasdaqDrawdownPct)+'% · VIX '+fmtN(S.vix)+' · F&G '+S.fearGreed+(S.sidecarKR?' · KR사이드카 on':'')+(S.circuitKR?' · KR서킷 on':''));}
+      if(C&&Array.isArray(C.clusters)){lines.push('■ 반도체 사이클 신호등: '+C.clusters.map(function(c){return (c.id||'')+' '+(c.name||'')+'='+(c.lamp||'');}).join(' · '));}
+      if(L&&Array.isArray(L.log)&&L.log.length){lines.push('■ 최근 누적 신호: '+L.log.slice(0,2).map(function(e){return (e.date||'')+' '+String(e.source||'').slice(0,50);}).join(' / '));}
+      var asOf=(H&&H.asOf)||(S&&S.asOf)||'';if(asOf)lines.push('(기준 '+asOf+' · narrative≠numbers)');
+      return lines.length>1?lines.join('\n'):'';
+    }
+    async function loadLiveCtx(){var ta=document.getElementById('clCtx');if(!ta)return;var b=document.getElementById('clLiveBtn');if(b){b.disabled=true;b.textContent='불러오는 중…';}var live=await buildLiveSituation();if(live){ta.value=live;}if(b){b.disabled=false;b.textContent='라이브 갱신';}}
+    function render(){if(!mounted){mounted=true;var ta=document.getElementById('clCtx');if(!ta.value)ta.value=SAMPLE;renderCards();bind();loadLiveCtx();}}
     return {render:render};
   })();
   </script>
