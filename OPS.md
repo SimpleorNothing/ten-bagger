@@ -56,9 +56,9 @@
 > 범례 — **자동**: cron 워크플로 or worker 런타임 API · **수동**: 편집→PR→deploy · **혼합**: 자동값 위에 판단이 덮음 · **날짜연동**: 클라가 날짜 기준 자동 표시.
 > 메뉴·정보명·소스·주기가 바뀌면 **같은 PR에서 이 절을 갱신**한다(§7).
 
-### 현행 메뉴 (6탭)
-`01 시장 모니터링(v-market)` · `02 궁금한 것(v-cycle/v-alpha/v-thread)` · `03 관점과 정보 얻기(insight.js 자가 마운트)` · `04 리밸런싱(v-decision)` · `05 캘린더(v-cal)` · `06 메모(v-memo)` · **`전문가 원탁(v-council)` — 네비 04 삽입(캘린더·메모 표시번호 +1). §3 내부번호와 네비번호가 원래 어긋나 있어(insight=03 자가마운트) 내부 재번호는 보류, council은 추가만.**
-※ `nav`의 정적 버튼은 5개 + `insight.js`가 03을 주입. `v-port`·`v-tracker`·`v-macro`는 2026-07-11 재편으로 **뷰서 제외·코드 잔존**(데이터는 계속 갱신되어 결정보드가 소비).
+### 현행 메뉴 (7탭 · 런타임 렌더 순)
+`01 시장 모니터링(v-market)` · `02 궁금한 것(v-cycle/v-alpha/v-thread)` · `03 관점과 정보 얻기(v-insight · insight.js 자가 마운트)` · `04 전문가 원탁(v-council)` · `05 리밸런싱(v-decision)` · `06 캘린더(v-cal)` · `07 메모(v-memo)`
+※ 위는 **런타임 렌더 순**(§3 내부번호 = 이 순서). `nav` 정적 버튼은 6개(market·cycle·port·council·cal·memo)이고, `insight.js` `mount()`가 `insight` 탭을 `port` 앞에 주입 + `council`을 `port` 앞으로 이동 + 전 탭 index 순 재번호 → 위 순서 확정(정적 번호는 마운트 전 폴백). `v-port`·`v-tracker`·`v-macro`는 2026-07-11 재편으로 **뷰서 제외·코드 잔존**(결정보드가 소비).
 
 ### 01 시장 모니터링 (`v-market`)
 
@@ -102,11 +102,11 @@
 **3층 판정:** ①하드룰(`RE_PR` 홍보 / `RE_SPEC` 추측·리스트 / `RE_MOVE`&&!`RE_KEEP` 사후 등락 서술 / st=9&&!`RE_EVENT` / **`RE_ERN_SCHED`&&!`RE_HAS_DATE` 무날짜 일정 공시**) → ②신규 요약 시 LLM이 `a`·`w`와 함께 `m` 생성(LADDER에 무날짜 일정 공시 룰 명시) → ③`scoreLegacy` 백필·**MV 상향 시 전건 재채점**(요약 `a`·`w`는 재사용 → 토큰 낭비 없음). **`ruleM`은 title+`a`를 함께 본다** → MV 3 재채점 때 과거 기사는 이미 한글 요약이 있어 무날짜 일정 공시가 결정적으로 컷된다(LITE 등 5건 실측). 신규 기사는 preScreen에서 제목만 보므로, 제목에 일정어가 약한 영문 기사(예: "AMD to Report … Results")는 ②의 LLM(LADDER)이 m=0을 매긴다. 사다리·정규식·티어의 **단일 소스 = `scripts/news-screen.mjs`**. `news.json`·`archive/{TK}.json`은 **m≥1만 적재**, m=0은 `news_archive.json`에 **전건 보존(삭제 아님)**.
 **규율:** 스크리닝은 **표시 대상만** 정한다. 판단·숫자 파일은 건드리지 않는다(narrative≠numbers).
 
-**교차 점검 규율 — 01 갱신 시 02·03·05 동반 확인(2026-07-15 신설):** 01 시장 모니터링 정보를 갱신할 때는 **매번** 아래 3개 메뉴에서 해당분이 있는지 확인하고, 있으면 같은 세션에서 반영한다. **단, narrative≠numbers·게이트 AND 규율은 그대로** — 일정·발표·뉴스 자체는 `signal_log`/캘린더 **표시일 뿐**, 숫자·판단 파일 변경은 §1 트리거를 통과해야 한다.
+**교차 점검 규율 — 01 갱신 시 02·03·06 동반 확인(2026-07-15 신설):** 01 시장 모니터링 정보를 갱신할 때는 **매번** 아래 3개 메뉴에서 해당분이 있는지 확인하고, 있으면 같은 세션에서 반영한다. **단, narrative≠numbers·게이트 AND 규율은 그대로** — 일정·발표·뉴스 자체는 `signal_log`/캘린더 **표시일 뿐**, 숫자·판단 파일 변경은 §1 트리거를 통과해야 한다.
 
 | 대상 | 무엇을 교차 확인 | 반영 방향 |
 |---|---|---|
-| **05 캘린더** | 예정 거시·실적 이벤트(FOMC·CPI/PCE·금통위·메가이벤트·워치리스트·실적)가 **경과**했는지 | 경과분 → 01(관련 기사·매크로 렌즈)에서 파악 · 05에선 해당 일정 **경과 처리·다음 회차 갱신**. 예: 어제 US CPI 발표 → 01 매크로 축에 반영, 05 일정 소거→다음 CPI로 |
+| **06 캘린더** | 예정 거시·실적 이벤트(FOMC·CPI/PCE·금통위·메가이벤트·워치리스트·실적)가 **경과**했는지 | 경과분 → 01(관련 기사·매크로 렌즈)에서 파악 · 06에선 해당 일정 **경과 처리·다음 회차 갱신**. 예: 어제 US CPI 발표 → 01 매크로 축에 반영, 05 일정 소거→다음 CPI로 |
 | **02 궁금한 것** | 01 데이터·병목 뉴스(지수·메모리 가격·capex·L3~L8 병목)가 **반도체 사이클(E군집)·주도주 사분면·γ·stage**에 함의가 있는지 | 메모리 가격 롤오버·병목 조임/완화 → 02 `cycle`·`gamma` stage 렌즈 점검. **숫자 변경은 §1 트리거 통과 시만**(가격 상승 자체는 플래그) |
 | **03 관점** | 01 종목·매크로 뉴스의 **확정 사건(m≥1)**이 채택 관점·`signal_log`로 이어지는지 | 확정 사건 → 03 관점 아래 `signal_log.json` EOF append(§6-5). 관점은 「반영 대기」 유지, 숫자는 §1 트리거 |
 
@@ -135,7 +135,22 @@
 **등급은 파생·표시 전용** — 유사한 내용이 다른 자료에서 반복 채택될수록 자동 승격될 뿐, 숫자 파일·라우트를 바꾸지 않는다(narrative ≠ numbers 무관).
 **시그널 로그는 독립 화면이 아니다** — 관점의 누적 컨텍스트(§0-4)라 관점 밑에 산다. 구 `#v-siglog` 는 6탭 재편 때 nav 탭을 잃은 **고아 뷰**였고, `insight.js` `mount()` 가 런타임 제거한다. 기록은 여전히 `signal_log.json` EOF append 수동(§6-5).
 
-### 04 리밸런싱 (`v-decision`)
+### 04 전문가 원탁 (`v-council`)
+
+| 정보 | 자동/수동 | 주기 | 소스 |
+|---|---|---|---|
+| 전문가 페르소나(이름·전문분야·이력·주요관점·stance·레이어칩) | 수동 | 관점 갱신 시 | index.html `window.COUNCIL` embedded `EXPERTS`(6석: 실존 5인 + 「알파맵」좌장 · 좌장/논제/가격·규율 3벤치) |
+| 관점 갱신 — 유튜브 링크 | 반자동 | 요청 시 | worker `/api/yt-view`(Gemini 3.5-flash · fileData URL 인입 = NotebookLM 방식 · 공개영상·프리뷰 무료·하루 8h) |
+| 관점 갱신 — 텍스트·파일(txt/md/srt/vtt/csv/docx/pdf) | 반자동 | 요청 시 | worker `/api/council-summary`(Claude opus-4-8 요약). 파일은 클라이언트 파싱(자막 타임스탬프 제거 · docx/pdf는 site 추출기 존재 시) |
+| 원탁 토론 진단(결론·보드·합의·이견·액션·스틸맨) | 반자동 | 요청 시 | worker `/api/council`(Claude opus-4-8 · web_search 미사용 비스트리밍) |
+| 관점 갱신 감사 로그(언제·전문가·소스·참조·내용·stance) | 자동 | 반영 시 | worker `/api/council-log`(POST append · GET 조회) · R2 `council_log.json`. 뷰어: 04 상단 「관점 갱신 이력」 버튼 |
+| 토론 이력(결론·보드·합의·이견·액션·스틸맨) | 자동 | 토론 시 | worker `/api/council-discussions`(POST append · GET) · R2 `council_discussions.json`. 04 「토론 이력」 `.rvw` 아코디언(최신순) |
+| 현 상황 라이브 주입 | 자동 | 진입 시 | `buildLiveSituation()` — `holdings`·`gamma`·`signals`·`cycle`·`signal_log` 동일오리진 페치 조립(SAMPLE 폴백)·「라이브 갱신」. 알파맵 SoT석 전제 |
+
+**규율:** narrative≠numbers — 관점 텍스트·stance만 갱신, `earnings/judgment/stage/holdings` 숫자 파일 불변. 현 상황 입력은 편집 가능(운영 시 라이브 게이트·보유 주입 예정). 카드는 `.mkt-grid` 복제 · 렌즈칩(§6-4 관행) 부착.
+**운영자 조치:** `npx wrangler secret put GEMINI_API_KEY`(AI Studio) — 없으면 `/api/yt-view` 503.
+
+### 05 리밸런싱 (`v-decision`)
 
 | 정보명 | 자동/수동 | 주기 | 소스 |
 |---|---|---|---|
@@ -145,27 +160,14 @@
 | 매매 타이밍 (매크로 게이트 lamp) | 자동 | 매일 06:37 KST | `signals.json` (VIX·S&P·CNN F&G·나스닥 드로다운·40주선) |
 | γ · stage | 혼합 | g 매일 / stage 판단 시 | `gamma.json` (`fetch-gamma.mjs`) |
 
-### 전문가 원탁 (`v-council`) — 네비 04
-
-| 정보 | 자동/수동 | 주기 | 소스 |
-|---|---|---|---|
-| 전문가 페르소나(이름·전문분야·이력·주요관점·stance·레이어칩) | 수동 | 관점 갱신 시 | index.html `window.COUNCIL` embedded `EXPERTS`(7인, 논제/가격·규율 2벤치) |
-| 관점 갱신 — 유튜브 링크 | 반자동 | 요청 시 | worker `/api/yt-view`(Gemini 3.5-flash · fileData URL 인입 = NotebookLM 방식 · 공개영상·프리뷰 무료·하루 8h) |
-| 관점 갱신 — 텍스트·파일(txt/md/srt/vtt/csv/docx/pdf) | 반자동 | 요청 시 | worker `/api/council-summary`(Claude opus-4-8 요약). 파일은 클라이언트 파싱(자막 타임스탬프 제거 · docx/pdf는 site 추출기 존재 시) |
-| 원탁 토론 진단(결론·보드·합의·이견·액션·스틸맨) | 반자동 | 요청 시 | worker `/api/council`(Claude opus-4-8 · web_search 미사용 비스트리밍) |
-| 관점 갱신 감사 로그(언제·전문가·소스·참조·내용·stance) | 자동 | 반영 시 | worker `/api/council-log`(POST append · GET 조회) · R2 `council_log.json`. 뷰어: 04 상단 「관점 갱신 이력」 버튼 |
-
-**규율:** narrative≠numbers — 관점 텍스트·stance만 갱신, `earnings/judgment/stage/holdings` 숫자 파일 불변. 현 상황 입력은 편집 가능(운영 시 라이브 게이트·보유 주입 예정). 카드는 `.mkt-grid` 복제 · 렌즈칩(§6-4 관행) 부착.
-**운영자 조치:** `npx wrangler secret put GEMINI_API_KEY`(AI Studio) — 없으면 `/api/yt-view` 503.
-
-### 05 캘린더 (`v-cal`)
+### 06 캘린더 (`v-cal`)
 
 | 정보명 | 자동/수동 | 주기 | 소스 |
 |---|---|---|---|
 | 거시·실적·이벤트 일정 (FOMC·CPI/PCE·금통위·메가이벤트·워치리스트) | 수동(정적) | 콘텐츠 변경 시 (`VIEW_UPDATED`) | `index.html` 인라인 (→ `calendar.json`·`derive-calendar.mjs` 동적화 진행) |
 | 실적 D-N 카운트다운·펄스링 | 날짜연동 | 실시간 표시 | `earnings.json` `playbook` (확정=굵게·추정=점선) |
 
-### 06 메모 (`v-memo`)
+### 07 메모 (`v-memo`)
 
 | 정보명 | 자동/수동 | 주기 | 소스 |
 |---|---|---|---|
@@ -295,12 +297,13 @@
 11. **01 전 지표 1일 2회 — 저녁 크론 운영자 대기(2026-07-14).** `.github/workflows/` 403이라 수동. ①`update-prices.yml` schedule에 `- cron: '37 9 * * *'`(18:37 KST) 추가 → 시세·지수·스파크라인 저녁 반영(가드 없음·멱등). ②`update-news.yml` schedule에 `- cron: '12,42 9 * * *'` + `- cron: '12 10 * * *'`(18:12·18:42·19:12 KST) 추가 → 뉴스 저녁 세션(가드 6h<12h라 아침·저녁 각각 실행). 반영 전까지 시세·뉴스는 **아침 1회**로 돈다(문서가 앞섬 — 충돌 시 라이브가 이기는 값). 유가·10년물은 런타임이라 대상 아님.
 12. **`index.html` 잔여 죽은 코드(07-14 이관 후)** — `#v-siglog` 마크업·`renderSignalLog()`·호출이 남아 있다. `mount()` 가 섹션을 런타임 제거하고 렌더러는 `if(!el)return;` 가드라 **무해**. 다음 `index.html` 패치 때 함께 걷어낸다(단독 패치는 b64 리스크만 산다 — §6-3).
 13. **patches/ 루트 잔여 .b64 23건(스테일)** — 과거 실패 런·미이관 잔여물. `git apply --check` 실패분이라 push 트리거엔 무해하나, 수동 dispatch 폴백에서 자동 보관 처리됨 → **운영자 1회 dispatch로 일괄 정리 권장**. 재적용 위험이 있던 5건(worker 인사이트 중복·구버전 뉴스 mjs·OPS 부분수정)은 2026-07-14 `patches/applied/`로 이관 완료.
-10. **전문가 원탁(v-council · 네비 04) — Stage 2 빌드 완료·커밋 대기.** worker 3라우트(`/api/yt-view` Gemini · `/api/council`·`/api/council-summary` Claude) + index.html(네비 04 삽입·05/06 재번호·라우터 훅·`#v-council` 뷰) + 본 §3 서브섹션. **운영자 조치: `GEMINI_API_KEY` 시크릿 + 배포 후 시각 스모크 테스트.** 미결정: §3 내부번호 vs 네비번호 정합(교차점검 규율이 §3번호 참조 → SimpleorNothing 확정 필요).
+10. **전문가 원탁(v-council · 네비 04) — Stage 2 빌드 완료·커밋 대기.** worker 3라우트(`/api/yt-view` Gemini · `/api/council`·`/api/council-summary` Claude) + index.html(네비 04 삽입·05/06 재번호·라우터 훅·`#v-council` 뷰) + 본 §3 서브섹션. **운영자 조치: `GEMINI_API_KEY` 시크릿 + 배포 후 시각 스모크 테스트.** 해소(2026-07-17): §3 내부번호를 런타임 네비(insight.js `mount()`)에 정합 — 01 시장·02 궁금한 것·03 관점·**04 전문가 원탁·05 리밸런싱**·06 캘린더·07 메모. 교차점검 규율 05→06 동기화.
 
 ---
 
 ## 갱신 이력
 
+- 2026-07-17 · **OPS §3 번호 정합(런타임 네비 기준).** `insight.js`가 관점 탭 주입 + council을 리밸런싱 앞으로 이동 + 전 탭 재번호 → 실제 렌더=01 시장·02 궁금한 것·03 관점·04 전문가 원탁·05 리밸런싱·06 캘린더·07 메모. §3 서브섹션 재번호·재정렬(04 전문가 원탁을 05 리밸런싱 앞으로) · 인벤토리/※주석 갱신 · 교차점검 규율 05→06 · §8-10 미결 해소. 부수: 전문가 원탁 §3 표 6석·토론 이력·라이브 주입 행 반영. 문서 전용(코드·토큰 무변). SimpleorNothing 지시.
 - 2026-07-17 · **04 전문가 원탁 토론 이력 코너(인수인계서 §3).** 「토론 시작」 산출({at·members·diagnosis·board·consensus·tension·actions·steelman})을 worker `/api/council-discussions`(R2 `council_discussions.json`, POST append·GET 조회)로 저장. 04에 `.rvw` 아코디언(renderReviews 패턴 재사용·최신순 `<details>`)으로 표시 + 「새로고침」. 토론 직후 자동 append·갱신. narrative≠numbers: 판단 기록일 뿐 숫자 파일 불변. 미결: §3 번호정합. SimpleorNothing 지시.
 - 2026-07-17 · **04 전문가 원탁 Stage 3 — 라이브 현 상황 자동 주입(알파맵 SoT석 사양).** 현 상황 텍스트를 샘플 하드코딩 → 라이브 조립으로 대체: `buildLiveSituation()`이 `holdings`(비중)·`gamma`(MU γ·open/closed)·`signals`(매크로 게이트 raw: 나스닥DD·VIX·F&G)·`cycle`(신호등 D~A)·`signal_log`(최근)을 동일 오리진 페치해 조립, 마운트 시 clCtx에 주입(SAMPLE 폴백)·「라이브 갱신」 버튼. worker 무변경(클라이언트 페치). narrative≠numbers: 전제 표시일 뿐 숫자 파일 불변. 미결: 토론 이력 코너·§3 번호정합. SimpleorNothing 지시.
 - 2026-07-17 · **04 전문가 원탁 로스터 확정(인수인계서 반영).** 가상 7인 → 실존 공개 인물 5인(김정호·김장열·오건영·김효진·이광수) + 「알파맵」좌장(SoT·비인간). 실존 인물 가드레일: 사진 미사용(일러스트) · 카드 관점=공개 도메인 렌즈 중립 요약(구체 발언 날조 금지 · 실제 관점은 관점 갱신으로 반영) · 면책 문구 + 토론 프롬프트를 「공개 관점 시뮬레이션·가짜 인용 금지」로 재프레이밍. 좌장 벤치 신설. narrative≠numbers 불변. 미결: Stage 3 라이브 주입(알파맵석 사양)·토론 이력 코너·§3 번호정합. SimpleorNothing 지시.
