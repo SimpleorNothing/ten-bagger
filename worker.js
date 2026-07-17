@@ -370,6 +370,40 @@ async function handleCouncilSummary(request, env) {
   return json({ content: data.content || [] }, 200);
 }
 
+// ===== 07 자문단 — 관점 갱신 감사 로그(R2 · council_log.json) =====
+const COUNCIL_LOG_KEY = "council_log.json";
+async function handleCouncilLogGet(env) {
+  if (!env.MEMO_BUCKET) return memoJson({ error: "MEMO_BUCKET not configured" }, 503);
+  const obj = await env.MEMO_BUCKET.get(COUNCIL_LOG_KEY);
+  const v = obj ? await obj.text() : "";
+  return new Response(v && v.trim() ? v : "[]", {
+    status: 200, headers: { "content-type": "application/json", "cache-control": "no-store" },
+  });
+}
+async function handleCouncilLogPost(request, env) {
+  if (!env.MEMO_BUCKET) return memoJson({ error: "MEMO_BUCKET not configured" }, 503);
+  let e;
+  try { e = await request.json(); } catch { return memoJson({ error: "invalid json" }, 400); }
+  if (!e || !e.expert || !e.view) return memoJson({ error: "entry(expert,view) required" }, 400);
+  const obj = await env.MEMO_BUCKET.get(COUNCIL_LOG_KEY);
+  let arr = [];
+  if (obj) { try { arr = JSON.parse(await obj.text()); } catch (_) { arr = []; } }
+  if (!Array.isArray(arr)) arr = [];
+  arr.push({
+    at: (typeof e.at === "string" && e.at) ? e.at : new Date().toISOString(),
+    expertId: String(e.expertId || ""),
+    expert: String(e.expert || ""),
+    field: String(e.field || ""),
+    source: String(e.source || ""),
+    ref: String(e.ref || "").slice(0, 500),
+    stance: String(e.stance || ""),
+    view: String(e.view || "").slice(0, 2000),
+  });
+  if (arr.length > 5000) arr = arr.slice(-5000);
+  await env.MEMO_BUCKET.put(COUNCIL_LOG_KEY, JSON.stringify(arr), { httpMetadata: { contentType: "application/json" } });
+  return memoJson({ ok: true, count: arr.length }, 200);
+}
+
 // ===== 메모 저장 — Cloudflare R2 (MEMO_BUCKET) · DA Space 방식 =====
 // 메모 노트 JSON 을 R2 오브젝트("notes.json")로 보관. KV 의 25MiB 단일값 한도가 없어
 // 이미지(캡쳐) 누적에도 여유가 크다. 클라이언트(/api/memo)는 백엔드를 모른 채 그대로 동작.
@@ -921,6 +955,11 @@ export default {
       }
       if (request.method === "POST" && url.pathname === "/api/council-summary") {
         return handleCouncilSummary(request, env);
+      }
+      if (url.pathname === "/api/council-log") {
+        if (request.method === "GET") return handleCouncilLogGet(env);
+        if (request.method === "POST") return handleCouncilLogPost(request, env);
+        return memoJson({ error: "method not allowed" }, 405);
       }
       // 저장 원문 영구 링크(채택 관점 → 근거 추적) — /api/insights 보다 먼저 매칭
       if (request.method === "GET" && url.pathname === "/api/insights/raw") {

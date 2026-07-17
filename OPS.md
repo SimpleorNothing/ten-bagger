@@ -153,6 +153,7 @@
 | 관점 갱신 — 유튜브 링크 | 반자동 | 요청 시 | worker `/api/yt-view`(Gemini 3.5-flash · fileData URL 인입 = NotebookLM 방식 · 공개영상·프리뷰 무료·하루 8h) |
 | 관점 갱신 — 텍스트·파일(txt/md/srt/vtt/csv/docx/pdf) | 반자동 | 요청 시 | worker `/api/council-summary`(Claude opus-4-8 요약). 파일은 클라이언트 파싱(자막 타임스탬프 제거 · docx/pdf는 site 추출기 존재 시) |
 | 원탁 토론 진단(결론·보드·합의·이견·액션·스틸맨) | 반자동 | 요청 시 | worker `/api/council`(Claude opus-4-8 · web_search 미사용 비스트리밍) |
+| 관점 갱신 감사 로그(언제·전문가·소스·참조·내용·stance) | 자동 | 반영 시 | worker `/api/council-log`(POST append · GET 조회) · R2 `council_log.json`. 뷰어: 04 상단 「관점 갱신 이력」 버튼 |
 
 **규율:** narrative≠numbers — 관점 텍스트·stance만 갱신, `earnings/judgment/stage/holdings` 숫자 파일 불변. 현 상황 입력은 편집 가능(운영 시 라이브 게이트·보유 주입 예정). 카드는 `.mkt-grid` 복제 · 렌즈칩(§6-4 관행) 부착.
 **운영자 조치:** `npx wrangler secret put GEMINI_API_KEY`(AI Studio) — 없으면 `/api/yt-view` 503.
@@ -300,6 +301,7 @@
 
 ## 갱신 이력
 
+- 2026-07-17 · **관점 갱신 감사 로그 신설(`/api/council-log` · R2 `council_log.json`).** 04 전문가 원탁에서 관점 반영 시 {at·전문가·소스(유튜브/텍스트/파일)·참조·view·stance}를 R2에 append. 04 상단 「관점 갱신 이력」 버튼으로 조회(최신순). narrative≠numbers. SimpleorNothing 지시.
 - 2026-07-17 09:23 · **전 화면 좌하단 update 배지 추가(`changelog.js`).** 01 헤더 배지(`.mkt-upd`)는 `#v-market`에만 마운트돼 04 전문가 원탁 등 다른 화면에선 변경 이력 접근 경로가 없었음(좌하단 빈 공간) → `footMount()`가 `body`에 고정 배지(`.mkt-foot-upd`)를 전역 마운트하고, 클릭 시 기존 `.cyc-pop` 모달·`open()`을 그대로 재사용. **신규 컴포넌트·토큰 0**(`.cyc-upd`/`.cyc-pop` 재사용 · CSS는 위치용 `.mkt-foot-upd` 1클래스만, design token 무추가). MKT_CHANGELOG에 사용자향 항목 2건 추가(04 전문가 원탁 신설 07-16 · 본 배지 07-17). `index.html` 무패치(`changelog.js`만 수정). §3 01 업데이트 이력 행 갱신.
 - 2026-07-17 · **전문가 원탁(v-council) Stage 2 빌드.** 네비 04 삽입(캘린더·메모 +1) · `#v-council` 뷰(01 `#v-market` 복제·`.mkt-grid`·`window.COUNCIL`) · worker 3라우트. 전문가=렌즈별 7인 페르소나, 유튜브/텍스트/파일 관점 갱신(narrative≠numbers). §3 서브섹션·§8-10. 커밋·시크릿·스모크 대기.
 - 2026-07-17 · **07 자문단 Stage 1 — worker 라우트 추가.** `/api/yt-view`(Gemini fileData URL 인입) · `/api/council`(Claude 원탁). 신규 라우트 2개 · 기존 라우트 불변 · 키 부재 시 503. 운영자 `GEMINI_API_KEY` 시크릿 등록 필요. 프런트(#v-council)는 Stage 2. §8-10.
