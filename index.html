@@ -2036,15 +2036,16 @@ window.CYCLE=(function(){
       var rows=urls.map(function(u){return {u:u,kind:isYt(u)?'YouTube':'기사',status:'대기',one:'',title:'',stance:'',ok:false};});
       var prev=document.getElementById('clPreview');
       function paint(head){prev.innerHTML='<div class="cl-blk" style="margin-top:12px"><div class="cl-eye">'+esc(head)+'</div>'+rows.map(srcRow).join('')+(notes?'<div style="margin-top:6px;font-size:12px;color:var(--faint)">메모: '+esc(notes.slice(0,120))+(notes.length>120?'…':'')+'</div>':'')+'</div>';}
-      paint('소스 인식 · '+rows.length+'건'+(notes?' + 메모':''));
-      for(var i=0;i<rows.length;i++){var r=rows[i];r.status='인식 중…';paint('소스 인식 · '+(i+1)+'/'+rows.length);
+      rows.forEach(function(r){r.status='인식 중…';});
+      var done=0;paint('소스 인식 · 0/'+rows.length);
+      await Promise.all(rows.map(async function(r){
         try{
           if(r.kind==='YouTube'){var j=await post('/api/yt-view',{url:r.u,expert:exp});var o=extractJSON(textOf(j));r.one=o.view||'';r.stance=normStance(o.stance);r.ok=!!(o.view&&o.view.trim());}
           else{var j2=await post('/api/council-read',{url:r.u,expert:exp});var o2=extractJSON(textOf(j2));r.one=o2.view||'';r.title=o2.title||'';r.stance=normStance(o2.stance);r.ok=!!(o2.view&&o2.view.trim());}
           r.status=r.ok?'완료':'본문 확보 실패';
         }catch(e){r.ok=false;r.status='실패: '+String(e.message||'').slice(0,40);}
-        paint('소스 인식 · '+(i+1)+'/'+rows.length);
-      }
+        done++;paint('소스 인식 · '+done+'/'+rows.length);
+      }));
       var good=rows.filter(function(r){return r.ok&&r.one;});
       if(!good.length){showErr('인식된 소스가 없습니다. 링크를 확인하거나 텍스트 탭에 본문을 붙여넣으세요.');setActions('run');return;}
       var combined=good.map(function(r,i){return '['+(i+1)+' · '+r.kind+(r.title?(' · '+r.title):'')+']\n'+r.one;}).join('\n\n')+(notes?('\n\n[메모]\n'+notes):'');

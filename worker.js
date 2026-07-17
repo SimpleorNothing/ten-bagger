@@ -336,8 +336,25 @@ async function handleCouncil(request, env) {
   return json({ content: data.content || [] }, 200);
 }
 
-// 기사·글 URL → 전문가 '주요 관점' 요약(Claude web_search). 유튜브는 /api/yt-view 사용.
-// 「여러 링크」관점 갱신에서 유튜브가 아닌 링크를 소스별로 읽는다. 실패는 view 빈 문자열로 반환(개별 처리).
+// 기사·글 URL → 전문가 '주요 관점' 요약. 유튜브는 /api/yt-view 사용.
+// 서버가 그 URL 본문을 '직접 페치'해 텍스트를 뽑고 Claude(비스트리밍)로 요약한다
+// (web_search 로 검색하지 않음 → 특정 URL을 빠르고 확실하게 읽는다).
+// 차단·JS 렌더·페이월로 본문이 얇으면 view 를 빈 문자열로 반환(개별 건너뜀).
+function stripHtmlToText(html) {
+  let t = String(html || "")
+    .replace(/<script[\s\S]*?<\/script>/gi, " ")
+    .replace(/<style[\s\S]*?<\/style>/gi, " ")
+    .replace(/<noscript[\s\S]*?<\/noscript>/gi, " ")
+    .replace(/<!--[\s\S]*?-->/g, " ")
+    .replace(/<(br|\/p|\/div|\/li|\/h[1-6])>/gi, "\n")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;/gi, " ").replace(/&amp;/gi, "&").replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">").replace(/&quot;/gi, '"').replace(/&#0?39;|&apos;/gi, "'")
+    .replace(/[ \t　]+/g, " ")
+    .replace(/\n\s*\n\s*/g, "\n")
+    .trim();
+  return t;
+}
 async function handleCouncilRead(request, env) {
   const json = (obj, status) => new Response(JSON.stringify(obj),
     { status, headers: { "content-type": "application/json" } });
@@ -349,18 +366,56 @@ async function handleCouncilRead(request, env) {
   const exp = (body && body.expert) ? body.expert : {};
   if (!/^https?:\/\//.test(url)) return json({ error: "url required" }, 400);
 
-  const prompt = [
-    "너는 투자 전문가의 공개 발언·기사를 그 전문가의 '주요 관점'으로 요약하는 도구다.",
-    "아래 URL 글의 내용을 web_search 로 찾아(원문 또는 신뢰 가능한 요약·보도) 발화자 '" + (exp.name || "") + "'(" + (exp.field || "") + ")의 핵심 투자 관점만 한국어로 요약하라.",
-    "narrative≠numbers: 관점 텍스트만 만들고 숫자 파일 변경은 제안하지 마라. 결론 먼저, 문장은 짧게.",
-    "본문·요약을 확보하지 못하면 view 를 빈 문자열로 두고 stance 는 '중립'.",
-    '반드시 JSON 객체 하나만 출력(코드펜스·서문·후기 금지): {"title":"글 제목(불명확하면 빈 문자열)","view":"2~3문장 관점 요약","stance":"강세|중립|약세"}',
-    "URL: " + url,
-  ].join("\n");
+  const emptyOut = (title) => json({ content: [{ type: "text", text: JSON.stringify({ title: title || "", view: "", stance: "중립" }) }] }, 200);
 
-  const r = await anthropicText(env, prompt, true, 900);
-  if (r.error) return json(r, 502);
-  return json({ content: [{ type: "text", text: r.text }], stop_reason: r.stop_reason }, 200);
+  // 1) 기사 본문 직접 페치 → 텍스트 추출
+  let pageText = "", pageTitle = "";
+  try {
+    const ac = new AbortController();
+    const to = setTimeout(() => ac.abort(), 12000);
+    const resp = await fetch(url, {
+      redirect: "follow",
+      signal: ac.signal,
+      headers: {
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
+        "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "accept-language": "ko,en-US;q=0.8,en;q=0.6",
+      },
+    });
+    clearTimeout(to);
+    const ct = (resp.headers.get("content-type") || "").toLowerCase();
+    if (resp.ok && /html|text|xml/.test(ct)) {
+      const html = (await resp.text()).slice(0, 800000);
+      const tm = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
+      pageTitle = tm ? tm[1].replace(/\s+/g, " ").trim().slice(0, 200) : "";
+      pageText = stripHtmlToText(html).slice(0, 16000);
+    }
+  } catch (_e) { /* 페치 실패 → 빈 본문 */ }
+
+  // 본문이 너무 짧으면(차단·JS 렌더·페이월) 확보 실패 → 개별 건너뜀
+  if (pageText.replace(/\s/g, "").length < 200) return emptyOut(pageTitle);
+
+  // 2) Claude 로 관점 요약 (비스트리밍 · 빠름)
+  const sys =
+    "너는 투자 전문가의 발언·기사를 그 전문가의 '주요 관점'으로 요약하는 도구다. 핵심 투자 관점만 한국어로. " +
+    "narrative≠numbers: 관점 텍스트만 만들고 숫자 파일 변경은 제안하지 마라. 결론 먼저, 문장은 짧게. " +
+    '반드시 JSON 객체 하나만 출력(코드펜스·서문·후기 금지): {"title":"글 제목(불명확하면 빈 문자열)","view":"2~3문장 관점 요약","stance":"강세|중립|약세"}';
+  const user = JSON.stringify({ expert: exp.name || "", field: exp.field || "", url: url, pageTitle: pageTitle, content: pageText });
+
+  let up;
+  try {
+    up = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "content-type": "application/json", "x-api-key": env.ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01" },
+      body: JSON.stringify({ model: "claude-opus-4-8", max_tokens: 700, system: sys, messages: [{ role: "user", content: user }] }),
+    });
+  } catch (e) {
+    return json({ error: "anthropic fetch failed", detail: String(e && e.message ? e.message : e) }, 502);
+  }
+  const t = await up.text();
+  if (!up.ok) return json({ error: describeAnthropicError(up.status, t), status: up.status }, 502);
+  let data; try { data = JSON.parse(t); } catch { return json({ error: "anthropic parse failed" }, 502); }
+  return json({ content: data.content || [] }, 200);
 }
 
 // 텍스트/파일 → 전문가 '주요 관점' 요약(Claude). 03 인테이크와 별개로 자문단 전용.
