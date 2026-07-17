@@ -1873,11 +1873,12 @@ window.CYCLE=(function(){
     <div class="cl-sheet" id="clSheet">
       <div style="display:flex;gap:10px;align-items:center">
         <span id="clMavatar"></span>
-        <div><div class="cl-nm" id="clMname"></div><div class="cl-field">유튜브·텍스트·파일에서 주요 관점을 요약해 반영</div></div>
+        <div><div class="cl-nm" id="clMname"></div><div class="cl-field">유튜브·기사 링크·텍스트·파일에서 주요 관점을 요약해 반영</div></div>
       </div>
       <div class="cl-tabs">
         <button class="cl-tab on" data-t="text">텍스트</button>
         <button class="cl-tab" data-t="yt">유튜브 링크</button>
+        <button class="cl-tab" data-t="links">여러 링크</button>
         <button class="cl-tab" data-t="file">파일</button>
       </div>
       <div id="clPane" style="margin-top:12px"></div>
@@ -1998,6 +1999,7 @@ window.CYCLE=(function(){
     }
     function renderPane(){var p=document.getElementById('clPane');
       if(mtab==='yt'){p.innerHTML='<input id="clYt" class="cl-in" placeholder="https://youtu.be/… 또는 watch?v=…"><div class="cl-note">링크만 넣으면 서버(/api/yt-view · Gemini)가 영상에서 관점을 추출합니다. 공개 영상만.</div>';}
+      else if(mtab==='links'){p.innerHTML='<textarea id="clLinks" class="cl-in" rows="6" placeholder="유튜브·기사 링크를 여러 개 붙여넣기 (한 줄에 하나 권장)\n메모를 함께 적으면 반영됩니다" style="line-height:1.6"></textarea><div class="cl-note">붙여넣은 글에서 링크를 자동으로 찾아 유형(유튜브/기사)을 인식하고, 각 소스를 요약해 <b>하나의 관점으로 통합</b>합니다. 유튜브는 Gemini 영상 인식, 기사는 서버가 본문을 읽어옵니다(실패한 링크는 건너뜁니다). 링크가 아닌 문장은 메모로 함께 반영됩니다.</div>';}
       else if(mtab==='file'){p.innerHTML='<input id="clFile" type="file" style="display:none" accept=".txt,.md,.srt,.vtt,.csv,.json,.docx,.pdf"><div class="cl-drop" id="clDrop">'+(mfileName?('선택됨: '+esc(mfileName)+(mfileText?(' · '+mfileText.length.toLocaleString()+'자'):'')):'클릭 또는 드래그 — txt · md · srt · vtt · csv · docx · pdf')+'</div>';}
       else{p.innerHTML='<textarea id="clScript" class="cl-in" rows="7" placeholder="블로그 기사·자막·발언 텍스트를 붙여넣기…" style="line-height:1.6"></textarea>';}
     }
@@ -2011,7 +2013,53 @@ window.CYCLE=(function(){
     async function onFile(file){if(!file)return;mfileName=file.name;mfileText='';renderPane();clearMsg();
       try{mfileText=await fileToText(file);renderPane();}catch(e){showErr(e.message);}
     }
-    async function recognize(){clearMsg();setActions('busy');
+    /* ── 여러 링크(유튜브·기사) 자동 인식 → 통합 관점 ── */
+    function parseLinks(raw){var urls=[],seen={},re=/https?:\/\/[^\s<>"')\]]+/g,m;while((m=re.exec(raw))){var u=m[0].replace(/[.,;]+$/,'');if(!seen[u]){seen[u]=1;urls.push(u);}}return urls;}
+    function isYt(u){return /youtu\.?be/.test(u);}
+    function hostOf(u){try{return new URL(u).hostname.replace(/^www\./,'');}catch(e){return String(u).slice(0,40);}}
+    function normStance(s){return(['강세','중립','약세'].indexOf(s)>=0)?s:'';}
+    function pill(st){var c=sc(st);return '<span class="cl-pill" style="color:'+c+';background:color-mix(in srgb,'+c+' 12%,transparent);border:1px solid color-mix(in srgb,'+c+' 45%,transparent)">'+esc(st)+'</span>';}
+    function srcRow(r){var body=r.one?esc(r.one):('<span style="color:var(--faint)">'+esc(r.status||'')+'</span>');
+      return '<div style="display:flex;gap:8px;align-items:baseline;margin:6px 0;font-size:13px"><span class="cl-chip">'+esc(r.kind)+'</span>'+
+        '<span style="flex:1;min-width:0"><span style="word-break:break-all;color:var(--faint)">'+esc(hostOf(r.u))+'</span>'+
+        (r.one?('<br><span style="color:var(--txt)">'+body+'</span>'):'')+'</span>'+
+        (r.stance?pill(r.stance):'<span style="font-size:11px;color:var(--faint)">'+esc(r.status||'')+'</span>')+'</div>';}
+    async function recognizeLinks(){clearMsg();
+      var raw=(document.getElementById('clLinks').value||'').trim();
+      if(!raw){showErr('링크를 붙여넣으세요');setActions('run');return;}
+      var urls=parseLinks(raw);
+      var notes=raw;urls.forEach(function(u){notes=notes.split(u).join(' ');});notes=notes.replace(/\s+/g,' ').trim();
+      if(!urls.length&&!notes){showErr('인식할 링크가 없습니다');setActions('run');return;}
+      if(!urls.length){showErr('링크를 찾지 못했습니다. 텍스트만이면 「텍스트」 탭을 사용하세요');setActions('run');return;}
+      setActions('busy');
+      var exp={name:modalFor.name,field:modalFor.field};
+      var rows=urls.map(function(u){return {u:u,kind:isYt(u)?'YouTube':'기사',status:'대기',one:'',title:'',stance:'',ok:false};});
+      var prev=document.getElementById('clPreview');
+      function paint(head){prev.innerHTML='<div class="cl-blk" style="margin-top:12px"><div class="cl-eye">'+esc(head)+'</div>'+rows.map(srcRow).join('')+(notes?'<div style="margin-top:6px;font-size:12px;color:var(--faint)">메모: '+esc(notes.slice(0,120))+(notes.length>120?'…':'')+'</div>':'')+'</div>';}
+      paint('소스 인식 · '+rows.length+'건'+(notes?' + 메모':''));
+      for(var i=0;i<rows.length;i++){var r=rows[i];r.status='인식 중…';paint('소스 인식 · '+(i+1)+'/'+rows.length);
+        try{
+          if(r.kind==='YouTube'){var j=await post('/api/yt-view',{url:r.u,expert:exp});var o=extractJSON(textOf(j));r.one=o.view||'';r.stance=normStance(o.stance);r.ok=!!(o.view&&o.view.trim());}
+          else{var j2=await post('/api/council-read',{url:r.u,expert:exp});var o2=extractJSON(textOf(j2));r.one=o2.view||'';r.title=o2.title||'';r.stance=normStance(o2.stance);r.ok=!!(o2.view&&o2.view.trim());}
+          r.status=r.ok?'완료':'본문 확보 실패';
+        }catch(e){r.ok=false;r.status='실패: '+String(e.message||'').slice(0,40);}
+        paint('소스 인식 · '+(i+1)+'/'+rows.length);
+      }
+      var good=rows.filter(function(r){return r.ok&&r.one;});
+      if(!good.length){showErr('인식된 소스가 없습니다. 링크를 확인하거나 텍스트 탭에 본문을 붙여넣으세요.');setActions('run');return;}
+      var combined=good.map(function(r,i){return '['+(i+1)+' · '+r.kind+(r.title?(' · '+r.title):'')+']\n'+r.one;}).join('\n\n')+(notes?('\n\n[메모]\n'+notes):'');
+      try{
+        var js=await post('/api/council-summary',{content:combined,expert:exp,source:'복수 소스 '+good.length+'건'});
+        var out=extractJSON(textOf(js));
+        var stance=normStance(out.stance)||modalFor.stance;
+        var refs=rows.filter(function(r){return r.ok;}).map(function(r){return {label:r.kind,url:r.u};});
+        window.__clPrev={view:out.view,stance:stance,source:'복수 소스 '+good.length+'건',ref:(refs[0]?refs[0].url:''),refs:refs};
+        prev.innerHTML='<div class="cl-blk" style="margin-top:12px"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span class="cl-eye">통합 관점 미리보기</span>'+pill(stance)+'<span style="font-size:11px;color:var(--faint)">'+good.length+'개 소스 통합'+(rows.length>good.length?(' · '+(rows.length-good.length)+'건 제외'):'')+'</span></div><p style="margin:8px 0 0;font-size:14px;line-height:1.6">'+esc(out.view)+'</p></div>'+
+          '<div class="cl-blk" style="margin-top:8px"><div class="cl-eye">소스별 한 줄</div>'+rows.map(srcRow).join('')+(notes?'<div style="margin-top:6px;font-size:12px;color:var(--faint)">메모 반영: '+esc(notes.slice(0,120))+(notes.length>120?'…':'')+'</div>':'')+'</div>';
+        setActions('preview');
+      }catch(err){showErr('통합 요약 실패: '+err.message);setActions('run');}
+    }
+    async function recognize(){if(mtab==='links')return recognizeLinks();clearMsg();setActions('busy');
       try{var out,source;
         if(mtab==='yt'){var u=(document.getElementById('clYt').value||'').trim();if(!/youtu\.?be/.test(u))throw new Error('유효한 유튜브 링크가 아닙니다');var j=await post('/api/yt-view',{url:u,expert:{name:modalFor.name,field:modalFor.field}});out=extractJSON(textOf(j));source='YouTube';}
         else if(mtab==='file'){if(!mfileText.trim())throw new Error('먼저 파일을 선택하세요');var j2=await post('/api/council-summary',{content:mfileText,expert:{name:modalFor.name,field:modalFor.field},source:'파일: '+mfileName});out=extractJSON(textOf(j2));source='파일 '+mfileName;}
@@ -2023,7 +2071,7 @@ window.CYCLE=(function(){
       }catch(err){showErr(err.message);setActions('run');}
     }
     async function applyPreview(){var pv=window.__clPrev;if(!pv||!modalFor)return;modalFor.view=pv.view;modalFor.stance=pv.stance;modalFor.updated='방금 · '+pv.source;renderCards();
-      try{await fetch('/api/council-log',{method:'POST',headers:{'content-type':'application/json'},credentials:'same-origin',body:JSON.stringify({at:nowLocal(),expertId:modalFor.id,expert:modalFor.name,field:modalFor.field,source:pv.source,ref:pv.ref||'',stance:pv.stance,view:pv.view})});}catch(_e){}
+      try{await fetch('/api/council-log',{method:'POST',headers:{'content-type':'application/json'},credentials:'same-origin',body:JSON.stringify({at:nowLocal(),expertId:modalFor.id,expert:modalFor.name,field:modalFor.field,source:pv.source,ref:pv.ref||'',refs:pv.refs||[],stance:pv.stance,view:pv.view})});}catch(_e){}
       closeModal();}
 
     function bind(){
@@ -2063,7 +2111,8 @@ window.CYCLE=(function(){
         arr.sort(function(a,b){return String(b.at||"").localeCompare(String(a.at||""));});
         document.getElementById("clLogCount").textContent="총 "+arr.length+"건";
         body.innerHTML=arr.length?arr.map(function(e){var c=sc(e.stance);
-          var ref=e.ref?('<div style="margin-top:4px;font-size:11px;word-break:break-all"><a href="'+esc(e.ref)+'" target="_blank" rel="noopener" style="color:var(--dawn)">'+esc(e.ref)+'</a></div>'):"";
+          var refsArr=(Array.isArray(e.refs)&&e.refs.length)?e.refs:(e.ref?[{label:"",url:e.ref}]:[]);
+          var ref=refsArr.length?('<div style="margin-top:4px;font-size:11px;display:flex;flex-direction:column;gap:2px">'+refsArr.map(function(x){return '<span style="word-break:break-all">'+(x.label?('<span style="color:var(--faint)">'+esc(x.label)+' · </span>'):"")+'<a href="'+esc(x.url)+'" target="_blank" rel="noopener" style="color:var(--dawn)">'+esc(x.url)+'</a></span>';}).join('')+'</div>'):"";
           return '<div class="cl-blk" style="margin-bottom:8px"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span style="font-family:var(--mono);font-size:12px;font-weight:700">'+esc(fmtAt(e.at))+'</span><span style="font-weight:700">'+esc(e.expert||"")+'</span><span class="cl-chip">'+esc(e.source||"")+'</span>'+(e.stance?'<span class="cl-pill" style="color:'+c+';background:color-mix(in srgb,'+c+' 12%,transparent);border:1px solid color-mix(in srgb,'+c+' 45%,transparent)">'+esc(e.stance)+'</span>':"")+'</div><p style="margin:6px 0 0;font-size:13.5px;line-height:1.6">'+esc(e.view||"")+'</p>'+ref+'</div>';
         }).join(""):'<div style="color:var(--faint);font-size:13px">아직 갱신 이력이 없습니다.</div>';
       }catch(err){body.innerHTML='<div class="cl-err">이력 불러오기 실패: '+esc(err.message)+'</div>';}

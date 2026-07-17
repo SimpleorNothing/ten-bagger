@@ -336,6 +336,33 @@ async function handleCouncil(request, env) {
   return json({ content: data.content || [] }, 200);
 }
 
+// 기사·글 URL → 전문가 '주요 관점' 요약(Claude web_search). 유튜브는 /api/yt-view 사용.
+// 「여러 링크」관점 갱신에서 유튜브가 아닌 링크를 소스별로 읽는다. 실패는 view 빈 문자열로 반환(개별 처리).
+async function handleCouncilRead(request, env) {
+  const json = (obj, status) => new Response(JSON.stringify(obj),
+    { status, headers: { "content-type": "application/json" } });
+  if (!env.ANTHROPIC_API_KEY) return json({ error: "ANTHROPIC_API_KEY not configured" }, 503);
+
+  let body;
+  try { body = await request.json(); } catch { return json({ error: "invalid json" }, 400); }
+  const url = (body && body.url ? String(body.url) : "").trim().slice(0, 500);
+  const exp = (body && body.expert) ? body.expert : {};
+  if (!/^https?:\/\//.test(url)) return json({ error: "url required" }, 400);
+
+  const prompt = [
+    "너는 투자 전문가의 공개 발언·기사를 그 전문가의 '주요 관점'으로 요약하는 도구다.",
+    "아래 URL 글의 내용을 web_search 로 찾아(원문 또는 신뢰 가능한 요약·보도) 발화자 '" + (exp.name || "") + "'(" + (exp.field || "") + ")의 핵심 투자 관점만 한국어로 요약하라.",
+    "narrative≠numbers: 관점 텍스트만 만들고 숫자 파일 변경은 제안하지 마라. 결론 먼저, 문장은 짧게.",
+    "본문·요약을 확보하지 못하면 view 를 빈 문자열로 두고 stance 는 '중립'.",
+    '반드시 JSON 객체 하나만 출력(코드펜스·서문·후기 금지): {"title":"글 제목(불명확하면 빈 문자열)","view":"2~3문장 관점 요약","stance":"강세|중립|약세"}',
+    "URL: " + url,
+  ].join("\n");
+
+  const r = await anthropicText(env, prompt, true, 900);
+  if (r.error) return json(r, 502);
+  return json({ content: [{ type: "text", text: r.text }], stop_reason: r.stop_reason }, 200);
+}
+
 // 텍스트/파일 → 전문가 '주요 관점' 요약(Claude). 03 인테이크와 별개로 자문단 전용.
 async function handleCouncilSummary(request, env) {
   const json = (obj, status) => new Response(JSON.stringify(obj),
@@ -397,6 +424,11 @@ async function handleCouncilLogPost(request, env) {
     field: String(e.field || ""),
     source: String(e.source || ""),
     ref: String(e.ref || "").slice(0, 500),
+    refs: Array.isArray(e.refs)
+      ? e.refs.slice(0, 24)
+          .map((x) => ({ label: String((x && x.label) || "").slice(0, 24), url: String((x && x.url) || "").slice(0, 500) }))
+          .filter((x) => x.url)
+      : [],
     stance: String(e.stance || ""),
     view: String(e.view || "").slice(0, 2000),
   });
@@ -987,6 +1019,9 @@ export default {
       }
       if (request.method === "POST" && url.pathname === "/api/council-summary") {
         return handleCouncilSummary(request, env);
+      }
+      if (request.method === "POST" && url.pathname === "/api/council-read") {
+        return handleCouncilRead(request, env);
       }
       if (url.pathname === "/api/council-log") {
         if (request.method === "GET") return handleCouncilLogGet(env);
