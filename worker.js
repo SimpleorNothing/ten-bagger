@@ -263,6 +263,8 @@ async function handleYtView(request, env) {
   const ytUrl = (body && body.url ? String(body.url) : "").trim();
   const exp = (body && body.expert) ? body.expert : {};
   if (!/youtu\.?be/.test(ytUrl)) return json({ error: "youtube url required" }, 400);
+  const _m = ytUrl.match(/(?:v=|youtu\.be\/|shorts\/|embed\/|live\/)([A-Za-z0-9_-]{11})/);
+  const ytCanon = _m ? ("https://www.youtube.com/watch?v=" + _m[1]) : ytUrl;
 
   const prompt =
     "이 유튜브 영상에서 발화자 '" + (exp.name || "") + "'(" + (exp.field || "") + ")의 " +
@@ -276,7 +278,7 @@ async function handleYtView(request, env) {
       { method: "POST",
         headers: { "content-type": "application/json", "x-goog-api-key": env.GEMINI_API_KEY },
         body: JSON.stringify({
-          contents: [{ parts: [ { text: prompt }, { file_data: { file_uri: ytUrl, mime_type: "video/mp4" } } ] }],
+          contents: [{ parts: [ { text: prompt }, { file_data: { file_uri: ytCanon } } ] }],
           generationConfig: { responseMimeType: "application/json", temperature: 0.2 },
         }),
       });
