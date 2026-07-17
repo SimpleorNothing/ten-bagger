@@ -301,6 +301,7 @@
 
 ## 갱신 이력
 
+- 2026-07-17 · **04 전문가 원탁 로스터 확정(인수인계서 반영).** 가상 7인 → 실존 공개 인물 5인(김정호·김장열·오건영·김효진·이광수) + 「알파맵」좌장(SoT·비인간). 실존 인물 가드레일: 사진 미사용(일러스트) · 카드 관점=공개 도메인 렌즈 중립 요약(구체 발언 날조 금지 · 실제 관점은 관점 갱신으로 반영) · 면책 문구 + 토론 프롬프트를 「공개 관점 시뮬레이션·가짜 인용 금지」로 재프레이밍. 좌장 벤치 신설. narrative≠numbers 불변. 미결: Stage 3 라이브 주입(알파맵석 사양)·토론 이력 코너·§3 번호정합. SimpleorNothing 지시.
 - 2026-07-17 10:12 · **update 배지를 전문가 원탁 헤더로 이전(`changelog.js`).** 직전 좌하단 고정 배지(`.mkt-foot-upd`, #366)가 04 하단 「토론 시작」 스티키 바와 겹쳐, SimpleorNothing 지시(스크린샷: 헤더 우상단 지정)로 **전문가 원탁 헤더 우상단**(`#v-council .vhead`)에 01과 동일한 `.mkt-upd` 배지로 재배치. `mount()`→`mountHead(sel,id)` 일반화로 01·council 공통 마운트(asOf 도착 시 `renderAll()`이 전 배지 재렌더) · `footMount`/`footRender`/`.mkt-foot-upd` 제거. 신규 컴포넌트·토큰 0(`.cyc-upd`/`.cyc-pop` 재사용) · `index.html` 무패치. §3 01 업데이트 이력 행 갱신.
 - 2026-07-17 · **관점 갱신 감사 로그 신설(`/api/council-log` · R2 `council_log.json`).** 04 전문가 원탁에서 관점 반영 시 {at·전문가·소스(유튜브/텍스트/파일)·참조·view·stance}를 R2에 append. 04 상단 「관점 갱신 이력」 버튼으로 조회(최신순). narrative≠numbers. SimpleorNothing 지시.
 - 2026-07-17 09:23 · **전 화면 좌하단 update 배지 추가(`changelog.js`).** 01 헤더 배지(`.mkt-upd`)는 `#v-market`에만 마운트돼 04 전문가 원탁 등 다른 화면에선 변경 이력 접근 경로가 없었음(좌하단 빈 공간) → `footMount()`가 `body`에 고정 배지(`.mkt-foot-upd`)를 전역 마운트하고, 클릭 시 기존 `.cyc-pop` 모달·`open()`을 그대로 재사용. **신규 컴포넌트·토큰 0**(`.cyc-upd`/`.cyc-pop` 재사용 · CSS는 위치용 `.mkt-foot-upd` 1클래스만, design token 무추가). MKT_CHANGELOG에 사용자향 항목 2건 추가(04 전문가 원탁 신설 07-16 · 본 배지 07-17). `index.html` 무패치(`changelog.js`만 수정). §3 01 업데이트 이력 행 갱신.
