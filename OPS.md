@@ -1,11 +1,11 @@
-**최종 갱신: 2026-07-17 16:03 (KST)**
+**최종 갱신: 2026-07-17 16:24 (KST)**
 
 # OPS — 알파맵 운영 가이드
 
 > 初入 Observatory · **운영 SoT = 이 파일(리포 `main`).**
 > **짝 문서 = `STYLE_GUIDE.md`(디자인).** 이 리포의 지속 갱신 문서는 **이 둘뿐**이다 — 화면을 어떻게 그리나=STYLE_GUIDE, 정보를 언제·어떻게 갱신하나=OPS.
 > `.assetsignore`에 `*.md` → 사이트 미배포·리포 전용.
-> 버전: **v3.2** (2문서 체계 · `INFO_SOURCES.md` 흡수 · 6탭 · 상단 타임스탬프 · **무날짜 실적 일정 공시 컷 규율 + MV 3**)
+> 버전: **v3.3** (2문서 체계 · `INFO_SOURCES.md` 흡수 · 6탭 · 상단 타임스탬프 · 무날짜 실적 일정 공시 컷 · MV 3 · **관점 라이프사이클 트리아지 §0-5·§3**)
 > **문서 맨 위 「최종 갱신」은 연월일+시분(KST). 이 문서를 고치면 그 줄을 반드시 함께 갱신한다.**
 
 ---
@@ -17,7 +17,8 @@
    raw 베이스 = `https://raw.githubusercontent.com/SimpleorNothing/ten-bagger/{기본브랜치}/{파일}?t=$(date +%s)`
 3. **분석·브리핑이면** 라이브 JSON 8종 재페치: `gamma`·`cycle`·`signals`·`judgment`·`holdings`·`earnings`·`prices`·`signal_log`. 스테일 캡처 외삽 금지.
 4. `signal_log.json`을 먼저 훑는다 — 아카이브가 아니라 **누적 판단 컨텍스트**(어느 층이 싸졌나/비싸졌나).
-5. **작업이 끝나면 같은 PR에서 이 문서(및 필요 시 STYLE_GUIDE)를 갱신**한다(§7). 문서 갱신 없는 코드 변경 = 미완료.
+5. **관점 트리아지(03).** 채택 관점 중 **지지(g2)↑만** 라이브 게이트·`gamma`·`signals`와 대조해 3분류한다 — **발동**(전제·발동조건 충족 + 게이트 AND → 05 리밸런싱 후보) · **만료**(`until` 트리거 or 전제 소멸 → 폐기·강등) · **유지**(변화 없음 → `review` 점검일만 갱신). 점검일 도래분(03 「점검 필요」 배지)이 우선. 후보·관찰은 승격 전까진 잠자는 재고 — 트리아지 대상 아님.
+6. **작업이 끝나면 같은 PR에서 이 문서(및 필요 시 STYLE_GUIDE)를 갱신**한다(§7). 문서 갱신 없는 코드 변경 = 미완료.
 
 ---
 
@@ -127,8 +128,10 @@
 
 | 정보명 | 자동/수동 | 주기 | 소스 |
 |---|---|---|---|
-| 관점 카드 (Insight) | 수동 | 판단·논제 시계 변화 시 | `insight.js` 인라인 `INSIGHTS` 배열(최신순). **하나의 insight = 하나의 채택 관점**. 관점에 `srcs`(출처)·`when`(적용 시점)·`until`(종료 트리거) 필드 |
+| 관점 카드 (Insight) | 수동 | 판단·논제 시계 변화 시 | R2 `/api/insights`(+localStorage 캐시). **하나의 채택 claim = 하나의 관점**. 필드: 출처(`src`)·`route`·N·I·C·`grade`(관찰→확신 자동 승격)·`applied`(숫자 route 반영 여부) + **라이프사이클 `hyp`(전제)·`trig`(발동조건)·`until`(폐기 트리거)·`review`(점검일, 신규 채택 시 +14d 기본)**. `review` 도래 시 03 「점검 필요」로 재부상 → §0-5 트리아지 |
 | 인사이트 자가 마운트 | 자동(런타임) | 페이지 로딩 시 | `insight.js`의 `mount()` 함수가 `#v-insight` 탭 + 헤더 배지 + `signal_log` 섹션을 런타임에 주입 |
+
+> **관점은 채택으로 끝나지 않는다.** `review`(점검일)가 강제 부여돼 도래 시 「점검 필요」로 재부상하고, §0-5 트리아지에서 발동/만료/유지로 처리된다. narrative는 여전히 숫자 파일을 못 바꾼다 — **발동 = 05 리밸런싱 후보로 올릴 뿐**이고, 숫자 변경은 §1 트리거(실적 비트·가이던스 상향·확정 수주) 별도.
 
 ### 04 전문가 원탁 (`v-council`)
 
@@ -168,6 +171,7 @@
 |---|---|---|
 | 일별 (06:12·18:12) | 뉴스 수집·스크리닝·요약·digest | signal_log 인테이크(narrative) |
 | 일별 (06:37·18:37) | 시세·차트·신호·알파 업데이트 | — |
+| 세션마다 | — | **관점 트리아지(§0-5)** — 지지↑ 관점 `until`·`review` 대조 → 발동/만료/유지 |
 | 주간 | — | holdings 동기화 · reviews.json 주간 리뷰 append |
 | 실적 시즌 | — | earnings.json 갱신 · γ·stage 재채점 |
 | 수시 | — | judgment override · signal_log 확정 사건 |
@@ -257,12 +261,14 @@
 
 - **E-군집 자동화** (`update-prices.yml` manual edit): GitHub App lacks workflows write scope (403) → 운영자 수동 dispatch 필요
 - **⏳ 저녁 fetch-prices 지연**: cron 18:37 KST가 실제로 19:xx~20:xx에 돌고 있음 — 원인 미확인(Actions 큐 지연 추정). 모니터링 중.
+- **관점 라이프사이클 LLM 자동 제안 미구현**: `hyp`·`until`을 `/api/insight`(worker) 추출 시 자동 채우면 신규 채택분이 처음부터 폐기 조건을 달고 태어난다. 현재는 운영자가 03 「🕔 라이프사이클」로 수동 입력 · 신규 채택은 `review`=+14d 자동. worker 프롬프트 편집은 후속 PR(③).
 - `prices.json.warn = lazr chart 43.47 vs quote 41.35` — LAZR 비보유·무시 가능
 
 ---
 
 ## 9. 갱신 이력
 
+- 2026-07-17 16:24 · **03 관점 라이프사이클 + 세션 트리아지 도입.** 채택 관점에 `hyp`·`trig`·`until`·`review` 필드 추가(`insight.js` `save()` · 카드 「🕔 라이프사이클」 편집기 · 「점검 필요」 필터/배지 · 신규 채택 `review`=오늘+14일 기본). §0-5 트리아지 프로토콜(지지↑ 관점을 라이브 게이트와 대조 → 발동/만료/유지) · §3 03 관점 필드 정정(구 「인라인 INSIGHTS 배열」 서술 → R2 `/api/insights` 실제 스키마) · §4 세션마다 케이던스 · §8 LLM 자동 제안 후속 과제. insight.css `:root` 미변경(check-docs 무관). SimpleorNothing 지시. narrative≠numbers 유지.
 - 2026-07-17 16:03 · **「여러 링크」 기사 읽기를 web_search→서버 직접 페치로 교체 + 소스 병렬 인식(버그픽스).** 첫 배포판은 기사 URL을 Claude web_search로 '검색'해 특정 URL(economist·namu·yes24·millie 등)을 못 찾고 느리게 맴돌아 인식이 멈춘 것처럼 보임 → `handleCouncilRead`가 **URL 본문을 직접 fetch(12s 타임아웃·브라우저 UA)→HTML 스트립(`stripHtmlToText`)→Claude 비스트리밍 요약**하도록 교체(빠르고 확실). 본문 <200자면 view 빈 문자열로 개별 건너뜀. 클라 `recognizeLinks`는 순차 루프→`Promise.all` 병렬로 전환(다건 체감속도 개선). worker.js·index.html만 변경, 신규 CSS·토큰 0.
 - 2026-07-17 13:38 · **04 전문가 원탁 관점 갱신에 「여러 링크」 탭 신설.** 유튜브·기사 링크를 한꺼번에 붙여넣으면 클라(`recognizeLinks`)가 URL 파싱→유형 분류→소스별 요약(유튜브 `/api/yt-view` · 기사 신설 `/api/council-read` = Claude web_search 본문 읽기, 기존 `/api/insight` useSearch 패턴 재사용)→`/api/council-summary`로 **하나의 통합 관점 합성**. 소스별 진행·한 줄 표시, 실패 링크는 개별 건너뜀. 로그(`council_log.json`)에 `refs[]`(복수 출처 `{label,url}`) 필드 추가 — 이력 모달이 각 출처를 링크로 표시. worker.js: 엔드포인트 1종(`/api/council-read`)+로그 refs 저장. index.html: 모달 컴포넌트 재사용(**신규 CSS·토큰 0** · check-docs 통과). §3 04 원탁 갱신.
 - 2026-07-17 · **04 자문단 관점 초기값 업데이트(공개 발언 기반).** 지식인사이드·신뢰 매체 보도 기준 카드 view 갱신 — 김정호(AI=메모리·HBM4 시스템통합·HBF, **강세**)·김장열(이익추정 20~30%↑·안전마진·MU 선행)·오건영(뉴노멀·K자 양극화·달러는 파동)·이광수(국장 전환점·저점매수 경계). 김효진은 개별 발언 미확보→도메인 렌즈·관점 갱신 권장. 실존 인물 가드레일 유지. narrative≠numbers. SimpleorNothing 지시.
