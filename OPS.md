@@ -1,4 +1,4 @@
-**최종 갱신: 2026-07-17 16:38 (KST)**
+**최종 갱신: 2026-07-17 17:12 (KST)**
 
 # OPS — 알파맵 운영 가이드
 
@@ -263,6 +263,8 @@
 
 ## 9. 갱신 이력
 
+- 2026-07-17 17:12 · **04 원탁 「여러 링크」 소스별 제외/복원(✕) + 재통합.** 인식 소스 행마다 ✕/복원 → 제외 시 남은 소스로 `/api/council-summary` 재호출(`recombine()`·`prev.__rows`/`__recombine` 위임 핸들러·`srcRow(r,i,del)`). 기존 `.cl-btn` 재사용(토큰 0). index.html patches/*.b64(apply-patch 경합으로 #389 미적용→#391 재적용).
+- 2026-07-17 17:12 · **04 전문가 관점 단일 SoT `council.json`(experts[]+synthesis) + `council-sot.js` 배선(#387).** flags.js가 인핸서 로드→카드 view/stance를 council.json으로 패치(KV 갱신분 라이브 우선)+`#clSynth` 관점 지형 렌더. 실제 공개발언 기반(소속 정정: 김장열=유니스토리·강세, 김효진=신영증권·강세, 오건영=신한 프리미어 단장). index·worker·인라인 COUNCIL 무편집. narrative≠numbers.
 - 2026-07-17 16:38 · **04 전문가 원탁에 「토론 주제」 입력 신설.** 「현 상황」 위 단일행 `#clTopic` — 비우면 현 상황 종합, 채우면 그 논제 중심. `/api/council`가 `topic`(≤300자) 수용→중심 논제로 강제. **신규 CSS·토큰 0** · check-docs 통과. §3·STYLE 동반 갱신.
 - 2026-07-17 16:03 · **「여러 링크」 기사 읽기를 web_search→서버 직접 페치로 교체 + 소스 병렬 인식(버그픽스).** 첫 배포판은 기사 URL을 Claude web_search로 '검색'해 특정 URL(economist·namu·yes24·millie 등)을 못 찾고 느리게 맴돌아 인식이 멈춘 것처럼 보임 → `handleCouncilRead`가 **URL 본문을 직접 fetch(12s 타임아웃·브라우저 UA)→HTML 스트립(`stripHtmlToText`)→Claude 비스트리밍 요약**하도록 교체(빠르고 확실). 본문 <200자면 view 빈 문자열로 개별 건너뜀. 클라 `recognizeLinks`는 순차 루프→`Promise.all` 병렬로 전환(다건 체감속도 개선). worker.js·index.html만 변경, 신규 CSS·토큰 0.
 - 2026-07-17 13:38 · **04 전문가 원탁 관점 갱신에 「여러 링크」 탭 신설.** 유튜브·기사 링크를 한꺼번에 붙여넣으면 클라(`recognizeLinks`)가 URL 파싱→유형 분류→소스별 요약(유튜브 `/api/yt-view` · 기사 신설 `/api/council-read` = Claude web_search 본문 읽기, 기존 `/api/insight` useSearch 패턴 재사용)→`/api/council-summary`로 **하나의 통합 관점 합성**. 소스별 진행·한 줄 표시, 실패 링크는 개별 건너뜀. 로그(`council_log.json`)에 `refs[]`(복수 출처 `{label,url}`) 필드 추가 — 이력 모달이 각 출처를 링크로 표시. worker.js: 엔드포인트 1종(`/api/council-read`)+로그 refs 저장. index.html: 모달 컴포넌트 재사용(**신규 CSS·토큰 0** · check-docs 통과). §3 04 원탁 갱신.
