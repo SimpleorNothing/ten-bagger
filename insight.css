@@ -94,3 +94,27 @@ a.ins-src-lk:hover,button.ins-src-lk:hover{text-decoration:underline}
 .ins-si.due{border-left-color:var(--st-hot)}
 .ins-lcbar{display:flex;gap:7px;flex-wrap:wrap;margin-top:7px}
 .ins-lcbar .ins-btn{padding:4px 9px;font-size:12px;font-weight:700}
+/* 라이프사이클 편집 모달(2026-07-17) — 필드별 '보기 칩' 선택식(수기 4연타 prompt 대체). 신규 :root 토큰 0(기존 변수 재사용) → check-docs 무영향. */
+.ins-lc-ov{position:fixed;inset:0;z-index:9997;background:rgba(0,0,0,.5);display:flex;align-items:flex-start;justify-content:center;padding:24px 14px;overflow:auto}
+.ins-lc-sheet{background:var(--panel);border:1px solid var(--line);border-radius:3px;width:100%;max-width:560px;margin:auto;box-shadow:0 10px 40px rgba(0,0,0,.25)}
+.ins-lc-hd{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 16px;border-bottom:1px solid var(--line)}
+.ins-lc-ti{font-size:16px;font-weight:700;color:var(--txt)}
+.ins-lc-x{background:none;border:0;font-size:16px;line-height:1;color:var(--faint);cursor:pointer;padding:2px 6px}
+.ins-lc-x:hover{color:var(--txt)}
+.ins-lc-claim{font-size:14px;font-weight:600;line-height:1.5;color:var(--txt);padding:11px 16px;background:var(--panel2);border-bottom:1px solid var(--line)}
+.ins-lc-claim span{display:block;font-family:var(--mono);font-size:12px;font-weight:400;color:var(--faint);margin-top:3px}
+.ins-lc-bd{padding:2px 16px;max-height:60vh;overflow:auto}
+.ins-lc-f{padding:12px 0;border-bottom:1px solid var(--line)}
+.ins-lc-f:last-child{border-bottom:0}
+.ins-lc-lb{display:block;font-size:14px;font-weight:700;color:var(--txt);margin-bottom:7px}
+.ins-lc-lb span{font-weight:400;color:var(--faint);font-size:12px;font-family:var(--mono)}
+.ins-lc-chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.ins-lc-chip{font-family:var(--mono);font-size:12px;font-weight:600;line-height:1.4;text-align:left;padding:5px 9px;border:1px solid var(--line2);border-radius:20px;background:var(--panel2);color:var(--dim);cursor:pointer}
+.ins-lc-chip:hover{border-color:var(--dawn);color:var(--dawn)}
+.ins-lc-chip.on{border-color:var(--dawn);color:var(--onacc);background:var(--dawn)}
+.ins-lc-chip.clear{border-style:dashed;color:var(--faint)}
+.ins-lc-chip.clear:hover{color:var(--txt);border-color:var(--line2)}
+.ins-lc-in{width:100%;font-family:var(--serif);font-size:14px;color:var(--txt);background:var(--panel2);border:1px solid var(--line);border-radius:3px;padding:8px 10px;box-sizing:border-box;line-height:1.55}
+textarea.ins-lc-in{min-height:46px;resize:vertical}
+.ins-lc-ft{display:flex;align-items:center;gap:9px;padding:13px 16px;border-top:1px solid var(--line);flex-wrap:wrap}
+.ins-lc-note{font-size:12px;color:var(--faint);flex:1 1 160px;font-family:var(--mono)}
