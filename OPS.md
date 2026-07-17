@@ -1,4 +1,4 @@
-**최종 갱신: 2026-07-16 22:41 (KST)**
+**최종 갱신: 2026-07-17 09:23 (KST)**
 
 # OPS — 알파맵 운영 가이드
 
@@ -64,7 +64,7 @@
 
 | 정보명 | 자동/수동 | 주기 | 소스 |
 |---|---|---|---|
-| 업데이트 이력(변경 로그) | 수동(인라인) | 사이트 변경 시 | `changelog.js` 인라인 `MKT_CHANGELOG`(`{d,t}` 최신순·자가 마운트=insight.js 패턴). 헤더 우상단 `.mkt-upd` 배지 → 클릭 시 `.cyc-pop` 모달. **사용자 향 변경만** 기록 · 신규 항목은 배열 맨 위 |
+| 업데이트 이력(변경 로그) | 수동(인라인) | 사이트 변경 시 | `changelog.js` 인라인 `MKT_CHANGELOG`(`{d,t}` 최신순·자가 마운트=insight.js 패턴). 헤더 우상단 `.mkt-upd` 배지(01 `#v-market` 한정) → 클릭 시 `.cyc-pop` 모달. **+ 전 화면 좌하단 고정 배지 `.mkt-foot-upd`(`footMount()`가 `body`에 전역 마운트·`.cyc-upd` 재사용) → 동일 모달**(04 전문가 원탁 등 `#v-market` 밖에서도 이력 접근). **사용자 향 변경만** 기록 · 신규 항목은 배열 맨 위 |
 | 코스피·S&P·나스닥 지수 | 자동 | 06:37·18:37 KST (1일 2회 · ⏳저녁 §8-11) | `charts.json` (`fetch-prices.mjs`, `^KS11·^GSPC·^IXIC` Yahoo 5Y). **meta 거래일을 시계열 끝에 강제 반영 + 이전 창과 union 병합** → `prices.json`과 갈라지지 않는다. 괴리>1%는 `prices.json.warn` |
 | 미 10년물 금리 | 자동 | 06:37·18:37 KST + 폴백 런타임 | **1순위 `charts.json` `us10y`**(`fetch-prices.mjs` `^TNX` Yahoo 5Y · 지수 카드와 동일 t/c → 기간버튼 1M~5Y 실동작 · `^TNX` 10× 스케일은 `>20→÷10`로 % 정규화). **폴백** worker `/api/us10y` → `history[].markets.ten_year`(외부 피드 ~2개월). ※구버전은 폴백만 써서 6M+ 기간 무반응 버그(2026-07-16 수리, PR #345) |
 | WTI 유가 | 자동 | 런타임 | worker `/api/wti` → **`points`** 배열 (Yahoo). `series` 로 읽으면 0건 |
@@ -300,6 +300,7 @@
 
 ## 갱신 이력
 
+- 2026-07-17 09:23 · **전 화면 좌하단 update 배지 추가(`changelog.js`).** 01 헤더 배지(`.mkt-upd`)는 `#v-market`에만 마운트돼 04 전문가 원탁 등 다른 화면에선 변경 이력 접근 경로가 없었음(좌하단 빈 공간) → `footMount()`가 `body`에 고정 배지(`.mkt-foot-upd`)를 전역 마운트하고, 클릭 시 기존 `.cyc-pop` 모달·`open()`을 그대로 재사용. **신규 컴포넌트·토큰 0**(`.cyc-upd`/`.cyc-pop` 재사용 · CSS는 위치용 `.mkt-foot-upd` 1클래스만, design token 무추가). MKT_CHANGELOG에 사용자향 항목 2건 추가(04 전문가 원탁 신설 07-16 · 본 배지 07-17). `index.html` 무패치(`changelog.js`만 수정). §3 01 업데이트 이력 행 갱신.
 - 2026-07-17 · **전문가 원탁(v-council) Stage 2 빌드.** 네비 04 삽입(캘린더·메모 +1) · `#v-council` 뷰(01 `#v-market` 복제·`.mkt-grid`·`window.COUNCIL`) · worker 3라우트. 전문가=렌즈별 7인 페르소나, 유튜브/텍스트/파일 관점 갱신(narrative≠numbers). §3 서브섹션·§8-10. 커밋·시크릿·스모크 대기.
 - 2026-07-17 · **07 자문단 Stage 1 — worker 라우트 추가.** `/api/yt-view`(Gemini fileData URL 인입) · `/api/council`(Claude 원탁). 신규 라우트 2개 · 기존 라우트 불변 · 키 부재 시 503. 운영자 `GEMINI_API_KEY` 시크릿 등록 필요. 프런트(#v-council)는 Stage 2. §8-10.
 - 2026-07-16 22:41 · **03 인테이크 PDF 추출에 OCR 폴백 추가(`insight.js`).** `pdfText()` 가 pdf.js 텍스트 레이어만 읽어, ToUnicode 가 깨진 PDF(실측 20260716_CXMT.pdf — Word 2019 Batang CID 폰트가 전 글자를 U+2014(—)로 매핑)는 「— — —」만 뽑히고 사이트가 「본문 공백」으로 판정하던 사각을 해소. 실글자(한글·영숫자) 수 < max(24, 페이지×8) 이면 `pdfOcr()` 로 폴백 — 페이지를 캔버스(scale 2.2)로 렌더해 **기존 이미지 OCR 워커(tesseract kor+eng)** 재사용(앞 20페이지 상한). 신규 의존성 0(pdf.js·tesseract 둘 다 이미 로드)·클라 전용·서버·숫자 파일 무변경(narrative≠numbers). 실측 검증: 깨진 레이어 실글자 0→폴백 발동, OCR 결과 7,509자→통과. §3 03 자료 입력 경로 행 갱신.

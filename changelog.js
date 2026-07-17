@@ -3,9 +3,12 @@
    매 뉴스 세션 자동 갱신). 클릭하면 **사이트 변경 이력**(아래 MKT_CHANGELOG)을 팝업으로 띄운다.
    ⚠️ 배지의 날짜/시각 = 데이터 신선도(자동) · 팝업 목록 = 코드 변경 로그(수동). 둘은 다른 시계다.
    index.html 의 기존 .cyc-upd(배지)·.cyc-pop(모달) CSS 를 재사용한다 — 신규 컴포넌트·토큰 없음.
+   추가로 전 화면 좌하단에 고정 배지(.mkt-foot-upd)를 마운트한다(#v-market 외 화면에서도 이력 접근).
    신규 변경 항목은 아래 MKT_CHANGELOG 맨 위에 {d:'YYYY-MM-DD',t:'주요내용'} 로 추가한다(최신순). */
 (function(){
   var MKT_CHANGELOG=[
+    {d:'2026-07-17',t:'전 화면 좌하단에 업데이트 배지 추가 — 어느 화면에서든 클릭하면 사이트 변경 이력을 한눈에'},
+    {d:'2026-07-16',t:'04 전문가 원탁 신설 — 반도체·매크로·상대가치 전문가 6인 관점으로 종목을 교차 토론하고 토론 이력을 남기는 화면'},
     {d:'2026-07-14',t:'종목 뉴스 차트: 기간을 여러 해로 넓히면 X축 날짜에 연도 표시(예 21-07-14 → 26-07-13) — 시작·끝이 몇 해 차인지 정확히'},
     {d:'2026-07-12',t:'03 관점과 정보 얻기 — 캡처 이미지를 붙여넣기(Ctrl/⌘+V)하거나 끌어다 놓으면 글자를 인식(OCR)해 자동 입력'},
     {d:'2026-07-12',t:'종목 뉴스 차트: 시작·마지막 값을 그래프 끝점에 붙여 표시 + 수치 표기 정리(10 미만 소수 1자리·10 이상 정수)'},
@@ -23,7 +26,9 @@
     +'white-space:nowrap;flex-wrap:nowrap;z-index:3}'
     +'.mkt-upd .mu-t{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}'
     +'.mkt-upd .his{flex:0 0 auto}'
-    +'@media(max-width:600px){.mkt-upd{position:static;margin:10px 0 0;max-width:100%}}';
+    +'@media(max-width:600px){.mkt-upd{position:static;margin:10px 0 0;max-width:100%}}'
+    +'.mkt-foot-upd{position:fixed;left:12px;bottom:12px;top:auto;right:auto;margin:0;'
+    +'max-width:min(70vw,340px);white-space:nowrap;z-index:40;cursor:pointer}';
   function injectCSS(){
     if(document.getElementById('mktUpdCss'))return;
     var s=document.createElement('style');s.id='mktUpdCss';s.textContent=CSS;
@@ -98,6 +103,25 @@
     render(n);      // 즉시 폴백(변경 로그 날짜) 렌더
     loadAsof(n);    // 데이터 asOf 도착 시 라이브 시각으로 재렌더
   }
+  // 전 화면 좌하단 고정 배지 — #v-market 밖(예: 04 전문가 원탁)에서도 이력 접근.
+  // 배지 텍스트 = 최신 사이트 변경일(팝업 목록 = 코드 변경 로그와 동일 시계). .cyc-upd 스타일 재사용.
+  function footRender(n){
+    var list=sorted();
+    if(!list.length){n.textContent='';return;}
+    n.innerHTML='update : '+fmtDate(list[0].d);
+    n.setAttribute('title','클릭 시 사이트 변경 이력');
+    wire(n);
+  }
+  function footMount(){
+    if(document.getElementById('mktFootUpd'))return;
+    injectCSS();
+    var n=document.createElement('span');
+    n.className='cyc-upd mkt-foot-upd';n.id='mktFootUpd';
+    n.setAttribute('role','button');n.setAttribute('tabindex','0');n.setAttribute('aria-haspopup','dialog');
+    document.body.appendChild(n);
+    footRender(n);
+  }
+  function boot(){mount();footMount();}
   document.addEventListener('keydown',function(e){if(e.key==='Escape')hide();});
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount);else mount();
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
 })();
