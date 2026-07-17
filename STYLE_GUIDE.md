@@ -1,4 +1,4 @@
-**최종 갱신: 2026-07-17 18:56 (KST)**
+**최종 갱신: 2026-07-17 20:02 (KST)**
 
 # STYLE_GUIDE — 알파맵 디자인 시스템
 
@@ -238,6 +238,7 @@ pantone.css :root       ← 현행 팔레트 (팬튼 A안, index.html 하단 <li
 
 ## 갱신 이력
 
+- 2026-07-17 20:02 · **03 라이프사이클 편집을 모달 + 필드별 「보기 칩」 선택식으로.** `window.prompt` 4연타 → 오버레이 모달 컴포넌트 신설(`.ins-lc-ov`/`.ins-lc-sheet`/`.ins-lc-hd`/`.ins-lc-claim`/`.ins-lc-bd`/`.ins-lc-f`/`.ins-lc-lb`/`.ins-lc-chips`/`.ins-lc-chip`(칩·`.on` 활성=`--dawn`·`.clear` 점선)/`.ins-lc-in` textarea·input/`.ins-lc-ft`/`.ins-lc-note`). 보기는 **클라 템플릿**(게이트 어휘·8레이어·관점 티커·thesis-break 패턴 즉시 생성 — 서버·외부호출 0). 칩 클릭=아래 칸 채우기(단일)·직접 수정 가능·Esc/배경/취소 닫기. **신규 `:root` 토큰 0**(기존 `--panel/--panel2/--line/--line2/--txt/--dim/--faint/--dawn/--onacc` 재사용) → TOKENS 무변·`check-docs` 통과. 면 radius 3px·칩 20px(§3 결 일치)·폼 14px·메타 12px(§2 하한). `#v-insight` 스코프. SimpleorNothing 지시. (OPS §3·§8·§9 동반)
 - 2026-07-17 18:56 · **06 캘린더 삭제 → 01 「다가오는 일정」 흡수.** SimpleorNothing 지시. nav `cal` 버튼 제거(메모 06→05·insight.js 런타임 재번호), 「임박 이벤트」 컴포넌트·`--cat-*`·3px목록을 `#v-cal`→`#v-market` 이관만(신규 클래스·토큰 0 → TOKENS 무변·check-docs 통과). v-cal은 v-port식 코드 잔존. §5·§6-1 갱신. Playwright 렌더 검증(nav 01~06·D-N 8·pageerror 0). (OPS §3·§9 동반)
 - 2026-07-17 17:12 · **04 「관점 지형」(`#clSynth`)·「여러 링크」 소스별 ✕ 제외/복원.** 관점 지형은 council.json synthesis를 `.cl-two`/`.cl-blk`/`.cl-eye`/`.cl-steel`/`.cl-rep` 재사용 렌더. 소스 ✕/복원은 기존 `.cl-btn`(면 3px)·제외 행 opacity .4+취소선. **신규 토큰·클래스 0** → TOKENS 무변·check-docs 통과. (OPS §3·§9 동반)
 - 2026-07-17 16:38 · **04 전문가 원탁에 「토론 주제」 입력창 추가.** 「현 상황」 위 단일행 주제 입력(`#clTopic`) — 비우면 현 상황 종합, 채우면 그 논제 중심. **신규 `:root` 토큰·CSS 클래스 0** — 폼 `.cl-in` 재사용, 안내 `.cl-note`·`h2.msec`+`span.mnote`. 리포트 논제 노출은 `.cl-eye`(`--dawn`) 인라인. TOKENS 무변 → `check-docs` 통과. narrative≠numbers. (OPS §3·§9 동반 갱신)

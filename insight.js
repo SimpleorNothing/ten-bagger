@@ -41,14 +41,101 @@ window.INSIGHT=(function(){
   b.push('점검일: '+(c.review?esc(c.review)+(lcDue(c)?' · ⚠ 점검 필요':''):'미설정'));
   return '<div class="ins-vf'+(lcDue(c)?' due':'')+'">🕔 '+b.join(' · ')+'</div>';
  }
+ /* 라이프사이클 편집 = 모달 + 필드별 '보기 칩'(수기 4연타 prompt 대체, 2026-07-17).
+    보기는 클라 템플릿 — 게이트 어휘(MU γ 3트리거·매크로 3중 AND)·8레이어·관점 티커·thesis-break 패턴으로 즉시 생성.
+    서버·외부호출 없음(오프라인·기존 채택분 전부 즉시). 칩 클릭 = 아래 칸 채우기(단일), 직접 수정 가능. */
+ var LAYN={L1:'모델·SW',L2:'컴퓨트',L3:'메모리',L4:'패키징·장비',L5:'서버',L6:'옵티컬',L7:'전력·냉각',L8:'발전·그리드'};
+ function lcOpts(c){
+  var tk=(c.tickers||[]).filter(Boolean).join('·')||'이 종목';
+  var ln=LAYN[c.layer]||'이 레이어';
+  return {
+   hyp:[
+    tk+'의 '+ln+' 수요가 하이퍼스케일러 capex 확장에 연동돼 지속된다',
+    '이 우위(병목·점유·기술)가 대체기술·경쟁진입으로 훼손되지 않는다',
+    '발표·내러티브가 다음 분기 실적 비트·확정 수주로 확인된다',
+    '추정(FY+1/+2 EPS 리비전)이 주가 상승률보다 빠르게 오른다'
+   ],
+   trig:[
+    '매크로 게이트 3중 AND 해제(나스닥 드로다운·VIX·CNN F&G)',
+    tk+' 실적 비트·가이던스 상향·확정 수주 확인',
+    'MU γ-닫힘 3트리거 미점등 유지 + 바스켓 내 상대가치 우위',
+    ln+'이(가) 공포에 눌린 쪽으로 전환(첫 눌림 S5 확인)'
+   ],
+   until:[
+    tk+' 목표가 리비전 소진 + 주가가 새 평균목표가 추월',
+    '추정 뒷받침 없이 fwd P/E(NTM) 재팽창',
+    '병목 해소·공급 정상화(가격 롤오버)로 우위 소멸',
+    '다음 실적에서 숫자 확인 실패 / 내부자 매도·믹스 시프트 역전'
+   ]
+  };
+ }
+ function lcDates(){
+  function plus(n){var d=new Date();d.setDate(d.getDate()+n);return lcISO(d);}
+  return [{v:plus(7),l:'오늘+7'},{v:plus(14),l:'오늘+14 (기본)'},{v:plus(30),l:'오늘+30'},{v:plus(60),l:'오늘+60'}];
+ }
+ function lcChips(k,arr,cur){
+  return arr.map(function(v){
+   return '<button type="button" class="ins-lc-chip'+(cur&&cur===v?' on':'')+'" data-fill="'+k+'" data-v="'+esc(v)+'">'+esc(v)+'</button>';
+  }).join('')+'<button type="button" class="ins-lc-chip clear" data-fill="'+k+'" data-v="">비우기</button>';
+ }
+ function lcDateChips(cur){
+  return lcDates().map(function(o){
+   return '<button type="button" class="ins-lc-chip'+(cur===o.v?' on':'')+'" data-fill="review" data-v="'+o.v+'">'+esc(o.l)+' · '+o.v+'</button>';
+  }).join('')+'<button type="button" class="ins-lc-chip clear" data-fill="review" data-v="">비우기(→ 오늘+14)</button>';
+ }
+ function lcFieldHTML(k,ic,t,d,chips,cur,isDate,ph){
+  var field=isDate
+   ? '<input type="text" class="ins-lc-in" data-k="'+k+'" value="'+esc(cur||'')+'" placeholder="'+esc(ph)+'">'
+   : '<textarea class="ins-lc-in" data-k="'+k+'" rows="2" placeholder="'+esc(ph)+'">'+esc(cur||'')+'</textarea>';
+  return '<div class="ins-lc-f"><label class="ins-lc-lb">'+ic+' '+t+' <span>— '+esc(d)+'</span></label>'+
+   '<div class="ins-lc-chips">'+chips+'</div>'+field+'</div>';
+ }
+ function lcKey(e){if(e.key==='Escape')lcClose();}
+ function lcClose(){var o=document.getElementById('insLcOv');if(o&&o.parentNode)o.parentNode.removeChild(o);document.removeEventListener('keydown',lcKey);}
  function editLC(id){
   var o=flat().filter(function(x){return x.c.id===id;})[0];if(!o)return;var c=o.c;
-  var hyp=window.prompt('전제(hyp) — 이게 참이어야 관점이 성립:',c.hyp||'');if(hyp===null)return;
-  var trig=window.prompt('발동조건(trig) — 어느 게이트·신호가 켜지면 액션인가:',c.trig||'');if(trig===null)return;
-  var until=window.prompt('폐기 트리거(until) — 이 조건이 소멸하면 관점 폐기:',c.until||'');if(until===null)return;
-  var review=window.prompt('점검일(review, YYYY-MM-DD · 빈칸=오늘+14일):',c.review||'');if(review===null)return;
-  c.hyp=hyp.trim();c.trig=trig.trim();c.until=until.trim();c.review=review.trim()||lcPlus14();
-  persist();
+  lcClose();
+  var opt=lcOpts(c);
+  var meta=[c.layer?(LAYN[c.layer]?c.layer+' '+LAYN[c.layer]:c.layer):'',RT[c.route]||c.route,(c.tickers||[]).join('·')].filter(Boolean).join(' · ');
+  var body=lcFieldHTML('hyp','🎯','전제','이게 참이어야 관점이 성립',lcChips('hyp',opt.hyp,c.hyp),c.hyp,false,'예: 이 우위가 대체기술로 무너지지 않는다')+
+   lcFieldHTML('trig','⚡','발동조건','어느 게이트·신호가 켜지면 액션인가',lcChips('trig',opt.trig,c.trig),c.trig,false,'예: 매크로 게이트 3중 AND 해제')+
+   lcFieldHTML('until','🗑','폐기 트리거','이 조건이 소멸하면 관점 폐기',lcChips('until',opt.until,c.until),c.until,false,'예: 목표가 리비전 소진 + 주가가 평균목표가 추월')+
+   lcFieldHTML('review','🕔','점검일','YYYY-MM-DD · 빈칸=오늘+14일',lcDateChips(c.review),c.review,true,'YYYY-MM-DD');
+  var ov=document.createElement('div');
+  ov.className='ins-lc-ov';ov.id='insLcOv';
+  ov.innerHTML='<div class="ins-lc-sheet" role="dialog" aria-modal="true" aria-label="라이프사이클 편집">'+
+   '<div class="ins-lc-hd"><div class="ins-lc-ti">🕔 라이프사이클 — 관점을 조건부 주문으로</div>'+
+    '<button type="button" class="ins-lc-x" data-x aria-label="닫기">✕</button></div>'+
+   '<div class="ins-lc-claim">'+esc(c.text||'')+(meta?'<span>'+esc(meta)+'</span>':'')+'</div>'+
+   '<div class="ins-lc-bd">'+body+'</div>'+
+   '<div class="ins-lc-ft"><button type="button" class="ins-btn primary" data-save>저장</button>'+
+    '<button type="button" class="ins-btn" data-x>취소</button>'+
+    '<span class="ins-lc-note">칩을 누르면 아래 칸에 채워집니다 · 직접 수정 가능</span></div>'+
+   '</div>';
+  document.body.appendChild(ov);
+  ov.addEventListener('click',function(e){if(e.target===ov)lcClose();});
+  Array.prototype.forEach.call(ov.querySelectorAll('[data-x]'),function(b){b.onclick=lcClose;});
+  Array.prototype.forEach.call(ov.querySelectorAll('[data-fill]'),function(b){
+   b.onclick=function(){
+    var k=b.getAttribute('data-fill'),v=b.getAttribute('data-v');
+    var inp=ov.querySelector('[data-k="'+k+'"]');if(inp)inp.value=v;
+    Array.prototype.forEach.call(ov.querySelectorAll('[data-fill="'+k+'"]'),function(x){x.classList.remove('on');});
+    if(v)b.classList.add('on');
+   };});
+  Array.prototype.forEach.call(ov.querySelectorAll('[data-k]'),function(inp){
+   inp.addEventListener('input',function(){
+    var k=inp.getAttribute('data-k');
+    Array.prototype.forEach.call(ov.querySelectorAll('[data-fill="'+k+'"]'),function(x){
+     x.classList.toggle('on',x.getAttribute('data-v')===inp.value&&inp.value!=='');});
+   });});
+  var sv=ov.querySelector('[data-save]');
+  if(sv)sv.onclick=function(){
+   function val(k){var e=ov.querySelector('[data-k="'+k+'"]');return e?e.value.trim():'';}
+   c.hyp=val('hyp');c.trig=val('trig');c.until=val('until');c.review=val('review')||lcPlus14();
+   lcClose();persist();
+  };
+  document.addEventListener('keydown',lcKey);
+  var f=ov.querySelector('[data-k="hyp"]');if(f)f.focus();
  }
 
  /* --- 등급(승격) — 관점·정보의 확신도. 기본 점수(N·I·C) + 유사 관점 보강 횟수로 산정.
