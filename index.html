@@ -1805,6 +1805,33 @@ window.CYCLE=(function(){
   #v-council .cl-note{font-size:12px;color:var(--faint);line-height:1.5;margin-top:6px}
   #v-council .cl-err{color:var(--st-hot,#b4472f);font-size:12.5px;margin-top:10px}
   @media(max-width:760px){#v-council .cl-two{grid-template-columns:1fr}}
+  /* ── 원탁 음성 토론 재생(플레이어) · 신규 토큰 0 · 면 radius 3px ── */
+  #v-council .cl-playbtn{display:inline-flex;align-items:center;gap:6px}
+  #v-council .cl-play{position:fixed;inset:0;background:rgba(61,57,53,.5);display:flex;align-items:flex-end;justify-content:center;z-index:130}
+  #v-council .cl-play[hidden]{display:none}
+  #v-council .cl-psheet{width:100%;max-width:620px;height:88vh;display:flex;flex-direction:column;background:var(--ink,#F0EFEB);border:1px solid var(--line2);border-radius:3px 3px 0 0;overflow:hidden}
+  #v-council .cl-phead{display:flex;align-items:center;gap:8px;padding:12px 14px;background:var(--panel);border-bottom:1px solid var(--line)}
+  #v-council .cl-ptitle{font-size:14px;font-weight:700;color:var(--txt);flex:1;line-height:1.4;min-width:0}
+  #v-council .cl-pchat{flex:1;overflow:auto;padding:14px;display:flex;flex-direction:column;gap:12px}
+  #v-council .cl-pmsg{display:flex;gap:10px;max-width:90%}
+  #v-council .cl-pmsg.me{align-self:center;max-width:96%}
+  #v-council .cl-pav{flex:0 0 40px;line-height:0}
+  #v-council .cl-pbody{min-width:0}
+  #v-council .cl-pmeta{display:flex;align-items:center;gap:6px;margin-bottom:3px;flex-wrap:wrap}
+  #v-council .cl-pnm{font-size:13px;font-weight:700;color:var(--txt)}
+  #v-council .cl-pbub{background:var(--panel);border:1px solid var(--line);border-radius:3px;padding:10px 12px;font-size:14px;line-height:1.6;color:var(--txt);word-break:keep-all;transition:border-color .15s,box-shadow .15s}
+  #v-council .cl-pmsg.me .cl-pbub{background:var(--panel2)}
+  #v-council .cl-pbub.on{border-color:var(--dawn);box-shadow:0 0 0 1px var(--dawn)}
+  #v-council .cl-pcall{align-self:stretch;background:var(--panel2);border:1px solid var(--line);border-radius:3px;padding:10px 12px}
+  #v-council .cl-pcall.agree{border-left:3px solid var(--st-dawn,#2f7d63)}
+  #v-council .cl-pcall.tension{border-left:3px solid var(--st-mature,#9a7b2f)}
+  #v-council .cl-ptype{display:inline-flex;gap:4px;padding:11px 13px;background:var(--panel);border:1px solid var(--line);border-radius:3px}
+  #v-council .cl-ptype i{width:6px;height:6px;border-radius:20px;background:var(--faint);animation:clblink 1.2s infinite both}
+  #v-council .cl-ptype i:nth-child(2){animation-delay:.2s}
+  #v-council .cl-ptype i:nth-child(3){animation-delay:.4s}
+  @keyframes clblink{0%,80%,100%{opacity:.3}40%{opacity:1}}
+  #v-council .cl-pfoot{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--panel);border-top:1px solid var(--line)}
+  #v-council .cl-pstat{flex:1;font-size:12px;color:var(--dim);min-width:0}
   </style>
 
   <h2 class="msec">현 상황 <span class="mnote">라이브 게이트·보유·γ·사이클 자동 주입 (알파맵 SoT) · 편집 가능</span> <button class="cl-btn" id="clLiveBtn" style="margin-left:8px;vertical-align:middle">라이브 갱신</button></h2>
@@ -1938,6 +1965,7 @@ window.CYCLE=(function(){
         var j=await post('/api/council',{personas:personas,situation:document.getElementById('clCtx').value});
         var d=extractJSON(textOf(j));
         res.innerHTML=reportHTML(d);
+        (function(){var pb=res.querySelector('.cl-playbtn');if(pb)pb.addEventListener('click',function(){playReport(d);});})();
         await saveDiscussion({at:nowLocal(),members:personas.map(function(p){return p.name;}),diagnosis:d.diagnosis||'',board:(d.board||[]).map(function(b){var ex=EXPERTS.filter(function(e){return e.id===b.id;})[0]||{};return {id:b.id,name:ex.name||b.id,call:b.call,take:b.take};}),consensus:d.consensus||[],tension:d.tension||[],actions:d.actions||[],steelman:d.steelman||''});
         loadDiscussions();
       }catch(err){res.innerHTML='<div class="cl-err" style="margin-top:20px">토론 생성 실패: '+esc(err.message)+'</div>';}
@@ -1947,7 +1975,7 @@ window.CYCLE=(function(){
     function reportHTML(d){
       var board=(d.board||[]).map(function(b){var ex=EXPERTS.filter(function(e){return e.id===b.id;})[0]||{};var c=sc(b.call);
         return '<div class="cl-brow">'+(ex.cfg?avatar(ex.cfg,44):'')+'<div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span class="cl-nm" style="font-size:14px">'+esc(ex.name||b.id)+'</span><span class="cl-pill" style="color:'+c+';background:color-mix(in srgb,'+c+' 12%,transparent);border:1px solid color-mix(in srgb,'+c+' 45%,transparent)">'+esc(b.call)+'</span>'+(ex.chip?'<span class="cl-chip">'+esc(ex.chip)+'</span>':'')+'</div><p style="margin:6px 0 0;font-size:14px;line-height:1.6">'+esc(b.take)+'</p></div></div>';}).join('');
-      return '<div class="cl-rep"><div class="cl-eye">원탁 진단 리포트</div><div class="cl-diag">'+esc(d.diagnosis||'')+'</div>'+board+
+      return '<div class="cl-rep"><div class="cl-eye">원탁 진단 리포트</div><div class="cl-diag">'+esc(d.diagnosis||'')+'</div><button type="button" class="cl-btn cl-playbtn" style="margin:0 0 4px">▶ 음성 토론 재생</button>'+board+
         '<div class="cl-two">'+list('합의점','var(--st-dawn,#2f7d63)',d.consensus)+list('이견 · 긴장','var(--st-mature,#9a7b2f)',d.tension)+'</div>'+
         ((d.actions&&d.actions.length)?'<div style="margin-top:14px"><div class="cl-eye">액션 (게이트 조건부)</div><ul style="margin:8px 0 0;padding-left:18px;line-height:1.8;font-size:14px">'+d.actions.map(function(a){return '<li>'+esc(a)+'</li>';}).join('')+'</ul></div>':'')+
         (d.steelman?'<div class="cl-steel"><div class="cl-eye">스틸맨 반론</div><p style="margin:6px 0 0;font-size:14px;line-height:1.7">'+esc(d.steelman)+'</p></div>':'')+'</div>';
@@ -2075,8 +2103,78 @@ window.CYCLE=(function(){
         if(changed)renderCards();
       }catch(_e){}
     }
+    /* ── 원탁 음성 토론 재생(플레이어) ── */
+    var _koVoice=null,_clAudioOn=true,_clPlaying=false,_clSeq=[],_clIx=0,_clHost=null;
+    function clLoadVoice(){try{var vs=speechSynthesis.getVoices();function sco(v){var n=((v.name||'')+' '+(v.voiceURI||'')).toLowerCase();var s=/ko/i.test(v.lang)?100:0;if(/natural|neural/.test(n))s+=70;if(/google/.test(n))s+=55;if(/enhanced|premium|siri/.test(n))s+=45;if(v.localService===false)s+=12;return s;}var ko=vs.filter(function(v){return /ko/i.test(v.lang);}).sort(function(a,b){return sco(b)-sco(a);});_koVoice=ko[0]||null;}catch(e){}}
+    if(typeof speechSynthesis!=='undefined'){clLoadVoice();try{speechSynthesis.onvoiceschanged=clLoadVoice;}catch(e){}}
+    var CLV={chair:[0.98,1.0],kimjh:[1.03,0.95],kimjy:[1.0,1.06],ohgy:[0.97,0.85],kimhj:[1.0,1.2],leegs:[0.99,1.08]};
+    function clSpeak(text,vid,onEnd){
+      if(!_clAudioOn||typeof speechSynthesis==='undefined'){return void setTimeout(onEnd,Math.min(6000,1200+text.length*55));}
+      try{speechSynthesis.cancel();}catch(e){}
+      var u=new SpeechSynthesisUtterance(text);u.lang='ko-KR';if(_koVoice)u.voice=_koVoice;var v=CLV[vid]||[1,1];u.rate=v[0];u.pitch=v[1];
+      var done=false,wd=setTimeout(function(){fin();},Math.min(16000,2200+text.length*95));
+      function fin(){if(done)return;done=true;clearTimeout(wd);onEnd();}
+      u.onend=fin;u.onerror=fin;try{speechSynthesis.speak(u);}catch(e){fin();}
+    }
+    function clExpert(id){return EXPERTS.filter(function(e){return e.id===id;})[0]||{name:id};}
+    function clStrip(s){return String(s||'').replace(/^(합의점을 좁히겠습니다\. |이견과 긴장을 짚겠습니다\. |스틸맨 반론입니다\. )/,'');}
+    function buildSeq(d){var seq=[],chair=clExpert('chair');
+      if(d.diagnosis)seq.push({vid:'chair',name:'알파맵',cfg:chair.cfg,chip:'좌장 · SoT',say:String(d.diagnosis),me:true});
+      (d.board||[]).forEach(function(b){var ex=clExpert(b.id);seq.push({vid:b.id,name:ex.name||b.id,cfg:ex.cfg,chip:ex.chip,call:b.call,say:String(b.take||'')});});
+      if(d.consensus&&d.consensus.length)seq.push({vid:'chair',me:true,kind:'agree',title:'좌장 정리 · 합의점',items:d.consensus,say:'합의점을 좁히겠습니다. '+d.consensus.join('. ')});
+      if(d.tension&&d.tension.length)seq.push({vid:'chair',me:true,kind:'tension',title:'좌장 정리 · 이견 · 긴장',items:d.tension,say:'이견과 긴장을 짚겠습니다. '+d.tension.join('. ')});
+      if(d.steelman)seq.push({vid:'chair',name:'알파맵',cfg:chair.cfg,chip:'스틸맨',me:true,say:'스틸맨 반론입니다. '+d.steelman});
+      return seq;
+    }
+    function clCallout(m){var col=m.kind==='agree'?'var(--st-dawn,#2f7d63)':'var(--st-mature,#9a7b2f)';
+      return '<div class="cl-pcall '+m.kind+'"><div class="cl-eye" style="color:'+col+'">'+esc(m.title||'')+'</div><ul style="margin:6px 0 0;padding-left:16px;font-size:14px;line-height:1.6">'+(m.items||[]).map(function(x){return '<li style="margin-bottom:3px">'+esc(x)+'</li>';}).join('')+'</ul></div>';}
+    function clStep(){
+      if(!_clPlaying)return;
+      if(_clIx>=_clSeq.length){clFinish();return;}
+      var m=_clSeq[_clIx++],chat=_clHost.querySelector('.cl-pchat');
+      var ty=document.createElement('div');ty.className='cl-pmsg'+(m.me?' me':'');
+      ty.innerHTML='<div class="cl-pav">'+(m.cfg?avatar(m.cfg,40):'')+'</div><div class="cl-ptype"><i></i><i></i><i></i></div>';
+      chat.appendChild(ty);chat.scrollTop=chat.scrollHeight;
+      setTimeout(function(){
+        ty.remove();var el=document.createElement('div');
+        if(m.kind){el.className='cl-pmsg me';el.innerHTML=clCallout(m);}
+        else{el.className='cl-pmsg'+(m.me?' me':'');
+          var pill=m.call?'<span class="cl-pill" style="color:'+sc(m.call)+';background:color-mix(in srgb,'+sc(m.call)+' 12%,transparent);border:1px solid color-mix(in srgb,'+sc(m.call)+' 45%,transparent)">'+esc(m.call)+'</span>':'';
+          var chip=m.chip?'<span class="cl-chip">'+esc(m.chip)+'</span>':'';
+          el.innerHTML='<div class="cl-pav">'+(m.cfg?avatar(m.cfg,40):'')+'</div><div class="cl-pbody"><div class="cl-pmeta"><span class="cl-pnm">'+esc(m.name)+'</span>'+pill+chip+'</div><div class="cl-pbub">'+esc(clStrip(m.say))+'</div></div>';}
+        chat.appendChild(el);chat.scrollTop=chat.scrollHeight;
+        var bub=el.querySelector('.cl-pbub');if(bub)bub.classList.add('on');
+        var st=_clHost.querySelector('.cl-pstat');if(st)st.textContent=(m.name||'알파맵')+' 발언 중…';
+        clSpeak(m.say,m.vid,function(){if(bub)bub.classList.remove('on');if(_clPlaying)setTimeout(clStep,420);});
+      },m.me?520:820);
+    }
+    function clStop(){_clPlaying=false;if(typeof speechSynthesis!=='undefined'){try{speechSynthesis.cancel();}catch(e){}}}
+    function clFinish(){_clPlaying=false;var tg=_clHost&&_clHost.querySelector('[data-a=toggle]');if(tg)tg.textContent='▶ 다시';var st=_clHost&&_clHost.querySelector('.cl-pstat');if(st)st.textContent='토론 종료 · 다시 눌러 재생';}
+    function playReport(d){
+      _clSeq=buildSeq(d);if(!_clSeq.length)return;_clIx=0;
+      if(!_clHost){
+        _clHost=document.createElement('div');_clHost.id='clPlay';_clHost.className='cl-play';_clHost.hidden=true;
+        _clHost.innerHTML='<div class="cl-psheet"><div class="cl-phead"><span class="cl-ptitle">원탁 음성 토론</span><button type="button" class="cl-btn" data-a="mute" title="음성 켜기/끄기">🔊</button><button type="button" class="cl-btn" data-a="close">닫기</button></div><div class="cl-pchat"></div><div class="cl-pfoot"><button type="button" class="cl-btnp" data-a="toggle">⏸ 일시정지</button><span class="cl-pstat"></span></div></div>';
+        document.getElementById('v-council').appendChild(_clHost);
+        _clHost.addEventListener('click',function(e){var t=e.target.closest('[data-a]');if(!t)return;var a=t.getAttribute('data-a');
+          if(a==='close'){clStop();_clHost.hidden=true;}
+          else if(a==='mute'){_clAudioOn=!_clAudioOn;t.textContent=_clAudioOn?'🔊':'🔇';if(!_clAudioOn&&typeof speechSynthesis!=='undefined'){try{speechSynthesis.cancel();}catch(_e){}}}
+          else if(a==='toggle'){
+            if(_clPlaying){_clPlaying=false;if(typeof speechSynthesis!=='undefined'){try{speechSynthesis.cancel();}catch(_e){}}t.textContent='▶ 재생';var s1=_clHost.querySelector('.cl-pstat');if(s1)s1.textContent='일시정지';}
+            else{if(_clIx>=_clSeq.length){_clHost.querySelector('.cl-pchat').innerHTML='';_clIx=0;}_clPlaying=true;t.textContent='⏸ 일시정지';clStep();}
+          }
+        });
+      }
+      _clHost.querySelector('.cl-pchat').innerHTML='';
+      _clHost.querySelector('.cl-ptitle').textContent='원탁 음성 토론'+(d.diagnosis?' — '+String(d.diagnosis).slice(0,36)+'…':'');
+      var tg=_clHost.querySelector('[data-a=toggle]');if(tg)tg.textContent='⏸ 일시정지';
+      _clHost.hidden=false;_clPlaying=true;
+      try{if(typeof speechSynthesis!=='undefined'){var uu=new SpeechSynthesisUtterance(' ');uu.volume=0;speechSynthesis.speak(uu);clLoadVoice();}}catch(e){}
+      clStep();
+    }
+
     function render(){if(!mounted){mounted=true;var ta=document.getElementById('clCtx');if(!ta.value)ta.value=SAMPLE;renderCards();bind();loadLiveCtx();loadDiscussions();restoreCards();}}
-    return {render:render};
+    return {render:render,playReport:playReport};
   })();
   </script>
 </section>

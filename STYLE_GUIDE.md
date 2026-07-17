@@ -1,4 +1,4 @@
-**최종 갱신: 2026-07-16 22:44 (KST)**
+**최종 갱신: 2026-07-17 11:45 (KST)**
 
 # STYLE_GUIDE — 알파맵 디자인 시스템
 
@@ -232,6 +232,8 @@ pantone.css :root       ← 현행 팔레트 (팬튼 A안, index.html 하단 <li
 ---
 
 ## 갱신 이력
+
+- 2026-07-17 11:45 · **04 전문가 원탁 「음성 토론 재생」 플레이어 컴포넌트(`.cl-p*`).** 원탁 진단 리포트를 화자별 브라우저 TTS 메신저형으로 극화하는 오버레이(`.cl-play`/`.cl-psheet`/`.cl-pmsg`/`.cl-pbub`/`.cl-pcall`/`.cl-ptype`). **신규 `:root` 토큰 0**(전역 토큰만 — `--panel`/`--line`/`--txt`/`--dawn`/`--st-dawn`/`--st-mature`) → TOKENS 구역 무변, `check-docs` 통과. **면(sheet·bubble·callout·typing)=radius 3px 직접 지정**(§3 — 전역 3px 셀렉터 목록 미편집, 이미 3px라 결 일치)·**부표(stance pill·타이핑 점)=radius 20px**·아바타=기존 `avatar()` SVG 재사용. 말풍선 본문 14px·메타 12·13px(§2 하한 준수). 발언 강조=`--dawn` 보더. 화자 구분은 색이 아니라 톤(`CLV` rate·pitch)·이름·stance pill. `#v-council` 스코프. (OPS §3 동반 갱신)
 
 - 2026-07-17 · **신규 뷰 `#v-council`(04 전문가 원탁) 등록.** §7 체크리스트 준수 — `.mkt-grid` 복제 · `#v-council` 스코프 스타일(신규 `:root` 토큰 0 → TOKENS 무변) · 레이어칩(§6-4 관행) · stance는 기능색(`--st-dawn/-mature/-hot`) 재사용. 카드=면 radius 3px · 뱃지=pill 20px. check-docs 통과.
 
