@@ -303,6 +303,7 @@
 
 ## 갱신 이력
 
+- 2026-07-17 · **04 라이브 주입 「기타」 중복 표시 수리(`buildLiveSituation`).** holdings에 `layer:'기타'` 항목이 둘(테슬라·지수채권혼합)이라 「기타 5.3% · 기타 5%」로 구분 불가였음 → L1~L8·현금은 그대로, 그 외(기타)는 `label`(괄호 앞) 병기 「기타(테슬라)·기타(지수·채권혼합)」로 disambiguate. 표시 전용(데이터·숫자 무변). SimpleorNothing 지시.
 - 2026-07-17 · **04 전문가 원탁 카드↔이력 정합(`restoreCards`).** 관점 갱신은 감사 로그(R2)엔 영구 저장되나 카드는 새로고침 시 초기(중립·"관점 갱신 대기")로 휘발했음 → 마운트 시 `/api/council-log`에서 **전문가별 최신 항목**(expertId 기준)을 카드 `view/stance/updated`에 복원. 갱신 관점이 새로고침 후에도 유지. 로그 없으면 무동작(폴백). narrative≠numbers 불변. SimpleorNothing 지시.
 - 2026-07-17 · **`GEMINI_MODEL` env 추상화(`/api/yt-view`).** 하드코딩 `gemini-3.5-flash` → `env.GEMINI_MODEL || "gemini-3.5-flash"`. 모델 deprecate/차단 시(이번 2.5-flash 404 사례) **코드 재배포 없이 `wrangler secret put GEMINI_MODEL`(또는 대시보드 var)만으로 교체**. 미설정 시 기존 기본 폴백(동작 무변). §3 유튜브 행·운영자 조치 갱신. SimpleorNothing 지시.
 - 2026-07-17 · **OPS §3 번호 정합(런타임 네비 기준).** `insight.js`가 관점 탭 주입 + council을 리밸런싱 앞으로 이동 + 전 탭 재번호 → 실제 렌더=01 시장·02 궁금한 것·03 관점·04 전문가 원탁·05 리밸런싱·06 캘린더·07 메모. §3 서브섹션 재번호·재정렬(04 전문가 원탁을 05 리밸런싱 앞으로) · 인벤토리/※주석 갱신 · 교차점검 규율 05→06 · §8-10 미결 해소. 부수: 전문가 원탁 §3 표 6석·토론 이력·라이브 주입 행 반영. 문서 전용(코드·토큰 무변). SimpleorNothing 지시.
