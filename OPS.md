@@ -140,7 +140,7 @@
 | 정보 | 자동/수동 | 주기 | 소스 |
 |---|---|---|---|
 | 전문가 페르소나(이름·전문분야·이력·주요관점·stance·레이어칩) | 수동 | 관점 갱신 시 | index.html `window.COUNCIL` embedded `EXPERTS`(6석: 실존 5인 + 「알파맵」좌장 · 좌장/논제/가격·규율 3벤치) |
-| 관점 갱신 — 유튜브 링크 | 반자동 | 요청 시 | worker `/api/yt-view`(Gemini 3.5-flash · fileData URL 인입 = NotebookLM 방식 · 공개영상·프리뷰 무료·하루 8h) |
+| 관점 갱신 — 유튜브 링크 | 반자동 | 요청 시 | worker `/api/yt-view`(Gemini = `env.GEMINI_MODEL`, 기본 `gemini-3.5-flash` · fileData URL 인입 = NotebookLM 방식 · 공개영상·프리뷰 무료·하루 8h) |
 | 관점 갱신 — 텍스트·파일(txt/md/srt/vtt/csv/docx/pdf) | 반자동 | 요청 시 | worker `/api/council-summary`(Claude opus-4-8 요약). 파일은 클라이언트 파싱(자막 타임스탬프 제거 · docx/pdf는 site 추출기 존재 시) |
 | 원탁 토론 진단(결론·보드·합의·이견·액션·스틸맨) | 반자동 | 요청 시 | worker `/api/council`(Claude opus-4-8 · web_search 미사용 비스트리밍) |
 | 관점 갱신 감사 로그(언제·전문가·소스·참조·내용·stance) | 자동 | 반영 시 | worker `/api/council-log`(POST append · GET 조회) · R2 `council_log.json`. 뷰어: 04 상단 「관점 갱신 이력」 버튼 |
@@ -148,7 +148,7 @@
 | 현 상황 라이브 주입 | 자동 | 진입 시 | `buildLiveSituation()` — `holdings`·`gamma`·`signals`·`cycle`·`signal_log` 동일오리진 페치 조립(SAMPLE 폴백)·「라이브 갱신」. 알파맵 SoT석 전제 |
 
 **규율:** narrative≠numbers — 관점 텍스트·stance만 갱신, `earnings/judgment/stage/holdings` 숫자 파일 불변. 현 상황 입력은 편집 가능(운영 시 라이브 게이트·보유 주입 예정). 카드는 `.mkt-grid` 복제 · 렌즈칩(§6-4 관행) 부착.
-**운영자 조치:** `npx wrangler secret put GEMINI_API_KEY`(AI Studio) — 없으면 `/api/yt-view` 503.
+**운영자 조치:** `npx wrangler secret put GEMINI_API_KEY`(AI Studio) — 없으면 `/api/yt-view` 503. **모델 교체 시** `npx wrangler secret put GEMINI_MODEL`(또는 대시보드 var)로 **코드 재배포 없이** override — 미설정 시 `gemini-3.5-flash` 폴백.
 
 ### 05 리밸런싱 (`v-decision`)
 
@@ -303,6 +303,7 @@
 
 ## 갱신 이력
 
+- 2026-07-17 · **`GEMINI_MODEL` env 추상화(`/api/yt-view`).** 하드코딩 `gemini-3.5-flash` → `env.GEMINI_MODEL || "gemini-3.5-flash"`. 모델 deprecate/차단 시(이번 2.5-flash 404 사례) **코드 재배포 없이 `wrangler secret put GEMINI_MODEL`(또는 대시보드 var)만으로 교체**. 미설정 시 기존 기본 폴백(동작 무변). §3 유튜브 행·운영자 조치 갱신. SimpleorNothing 지시.
 - 2026-07-17 · **OPS §3 번호 정합(런타임 네비 기준).** `insight.js`가 관점 탭 주입 + council을 리밸런싱 앞으로 이동 + 전 탭 재번호 → 실제 렌더=01 시장·02 궁금한 것·03 관점·04 전문가 원탁·05 리밸런싱·06 캘린더·07 메모. §3 서브섹션 재번호·재정렬(04 전문가 원탁을 05 리밸런싱 앞으로) · 인벤토리/※주석 갱신 · 교차점검 규율 05→06 · §8-10 미결 해소. 부수: 전문가 원탁 §3 표 6석·토론 이력·라이브 주입 행 반영. 문서 전용(코드·토큰 무변). SimpleorNothing 지시.
 - 2026-07-17 · **04 전문가 원탁 토론 이력 코너(인수인계서 §3).** 「토론 시작」 산출({at·members·diagnosis·board·consensus·tension·actions·steelman})을 worker `/api/council-discussions`(R2 `council_discussions.json`, POST append·GET 조회)로 저장. 04에 `.rvw` 아코디언(renderReviews 패턴 재사용·최신순 `<details>`)으로 표시 + 「새로고침」. 토론 직후 자동 append·갱신. narrative≠numbers: 판단 기록일 뿐 숫자 파일 불변. 미결: §3 번호정합. SimpleorNothing 지시.
 - 2026-07-17 · **04 전문가 원탁 Stage 3 — 라이브 현 상황 자동 주입(알파맵 SoT석 사양).** 현 상황 텍스트를 샘플 하드코딩 → 라이브 조립으로 대체: `buildLiveSituation()`이 `holdings`(비중)·`gamma`(MU γ·open/closed)·`signals`(매크로 게이트 raw: 나스닥DD·VIX·F&G)·`cycle`(신호등 D~A)·`signal_log`(최근)을 동일 오리진 페치해 조립, 마운트 시 clCtx에 주입(SAMPLE 폴백)·「라이브 갱신」 버튼. worker 무변경(클라이언트 페치). narrative≠numbers: 전제 표시일 뿐 숫자 파일 불변. 미결: 토론 이력 코너·§3 번호정합. SimpleorNothing 지시.
