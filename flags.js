@@ -179,3 +179,16 @@
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
   else init();
 })();
+
+/* ── 04 전문가 원탁: council.json 관점 SoT 배선 로더 (별도 관심사·자가 실행) ──
+   worker 미편집 — 이미 주입되는 flags.js 에서 신규 정적 파일 /council-sot.js 를
+   동적 로드(Workers Assets 자동 서빙)해 window.COUNCIL 을 council.json 기반
+   강화판으로 재할당한다(로드 실패 시 index.html 인라인 COUNCIL 이 폴백). */
+(function () {
+  if (window.__councilSot) return;
+  window.__councilSot = 1;
+  var s = document.createElement("script");
+  s.src = "/council-sot.js";
+  s.defer = true;
+  document.head.appendChild(s);
+})();
