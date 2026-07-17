@@ -3421,7 +3421,10 @@ window.MARKET=(function(){
   var wait='<div class="mkt-nm">DXI 메모리 현물</div>'+lensDxiWait()+'<div class="mkt-ph">현물 수집 대기</div>';
   try{var r=await fetch('dxi.json?t='+Date.now(),{cache:'no-store'});var j=await r.json();
    var sr=(j.series||[]).filter(function(x){return x&&x.v!=null&&isFinite(x.v);});
-   var vals=slice6(sr.map(function(x){return +x.v;})),dts=slice6(sr.map(function(x){return x.t;}));
+   var DW={'1M':31,'6M':186,'1Y':372,'3Y':1105,'5Y':1840},win=DW[RG.k]||186;
+   var endT=Date.parse(sr[sr.length-1].t),cut=endT-win*86400000;
+   var fr=sr.filter(function(x){return Date.parse(x.t)>=cut;});if(fr.length<2)fr=sr.slice(-2);
+   var vals=fr.map(function(x){return +x.v;}),dts=fr.map(function(x){return x.t;});
    el.innerHTML=vals.length>=2?card('DXI 메모리 현물','$'+vals[vals.length-1].toFixed(1),pct(vals),vals,null,lensDxi(j,vals),{dates:dts,fmtV:function(x){return '$'+fmtNum(x);},dod:false}):wait;}
   catch(e){el.innerHTML=wait;}
  }
