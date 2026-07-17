@@ -1760,6 +1760,7 @@ window.CYCLE=(function(){
   <div class="vhead">
     <div class="vkick">Council · 전문가 원탁</div>
     <h1 class="vtitle">전문가 <em>원탁</em> — 골라 앉히면 현 상황을 토론식으로 진단</h1>
+    <button class="cl-btn" id="clLogBtn" style="margin-top:8px">관점 갱신 이력</button>
   </div>
 
   <style>
@@ -1824,6 +1825,16 @@ window.CYCLE=(function(){
   </div>
 
   <p class="cl-note" style="margin-top:14px">전문가는 렌즈별 페르소나입니다. 「관점 갱신」으로 유튜브 링크·텍스트·파일에서 주요 관점을 요약해 반영합니다(관점 텍스트만 갱신 · 숫자 파일 불변).</p>
+
+  <div class="cl-modal" id="clLogModal" hidden>
+    <div class="cl-sheet" id="clLogSheet" style="max-width:640px">
+      <div style="display:flex;align-items:center;gap:8px">
+        <span class="cl-eye">관점 갱신 이력</span><span id="clLogCount" style="font-size:12px;color:var(--faint)"></span>
+        <span style="flex:1"></span><button class="cl-btn" id="clLogClose">닫기</button>
+      </div>
+      <div id="clLogBody" style="margin-top:12px">불러오는 중…</div>
+    </div>
+  </div>
 
   <div class="cl-modal" id="clModal" hidden>
     <div class="cl-sheet" id="clSheet">
@@ -1969,12 +1980,14 @@ window.CYCLE=(function(){
         else if(mtab==='file'){if(!mfileText.trim())throw new Error('먼저 파일을 선택하세요');var j2=await post('/api/council-summary',{content:mfileText,expert:{name:modalFor.name,field:modalFor.field},source:'파일: '+mfileName});out=extractJSON(textOf(j2));source='파일 '+mfileName;}
         else{var sc2=(document.getElementById('clScript').value||'').trim();if(!sc2)throw new Error('텍스트를 입력하세요');var j3=await post('/api/council-summary',{content:sc2,expert:{name:modalFor.name,field:modalFor.field},source:'텍스트'});out=extractJSON(textOf(j3));source='텍스트';}
         var stance=(['강세','중립','약세'].indexOf(out.stance)>=0)?out.stance:modalFor.stance;
-        window.__clPrev={view:out.view,stance:stance,source:source};
+        window.__clPrev={view:out.view,stance:stance,source:source,ref:(mtab==='yt'?((document.getElementById('clYt')||{}).value||''):(mtab==='file'?mfileName:''))};
         document.getElementById('clPreview').innerHTML='<div class="cl-blk" style="margin-top:12px"><div style="display:flex;align-items:center;gap:8px"><span class="cl-eye">요약된 관점 미리보기</span><span class="cl-pill" style="color:'+sc(stance)+';background:color-mix(in srgb,'+sc(stance)+' 12%,transparent);border:1px solid color-mix(in srgb,'+sc(stance)+' 45%,transparent)">'+esc(stance)+'</span><span style="font-size:11px;color:var(--faint)">출처: '+esc(source)+'</span></div><p style="margin:8px 0 0;font-size:14px;line-height:1.6">'+esc(out.view)+'</p></div>';
         setActions('preview');
       }catch(err){showErr(err.message);setActions('run');}
     }
-    function applyPreview(){var pv=window.__clPrev;if(!pv||!modalFor)return;modalFor.view=pv.view;modalFor.stance=pv.stance;modalFor.updated='방금 · '+pv.source;renderCards();closeModal();}
+    async function applyPreview(){var pv=window.__clPrev;if(!pv||!modalFor)return;modalFor.view=pv.view;modalFor.stance=pv.stance;modalFor.updated='방금 · '+pv.source;renderCards();
+      try{await fetch('/api/council-log',{method:'POST',headers:{'content-type':'application/json'},credentials:'same-origin',body:JSON.stringify({at:nowLocal(),expertId:modalFor.id,expert:modalFor.name,field:modalFor.field,source:pv.source,ref:pv.ref||'',stance:pv.stance,view:pv.view})});}catch(_e){}
+      closeModal();}
 
     function bind(){
       var root=document.getElementById('v-council');
@@ -1984,6 +1997,10 @@ window.CYCLE=(function(){
       });
       root.addEventListener('keydown',function(e){var card=e.target.closest('.cl-card');if(card&&(e.key==='Enter'||e.key===' ')){e.preventDefault();toggle(card.dataset.id);}});
       document.getElementById('clRun').addEventListener('click',runDiscussion);
+      document.getElementById('clLogBtn').addEventListener('click',openLog);
+      var _lm=document.getElementById('clLogModal');
+      _lm.addEventListener('click',function(e){if(e.target===_lm)_lm.hidden=true;});
+      document.getElementById('clLogClose').addEventListener('click',function(){_lm.hidden=true;});
       // modal
       var modal=document.getElementById('clModal');
       modal.addEventListener('click',function(e){if(e.target===modal)closeModal();});
@@ -1995,6 +2012,22 @@ window.CYCLE=(function(){
       document.getElementById('clSheet').addEventListener('change',function(e){if(e.target.id==='clFile')onFile(e.target.files&&e.target.files[0]);});
       document.getElementById('clSheet').addEventListener('dragover',function(e){if(e.target.closest('#clDrop'))e.preventDefault();});
       document.getElementById('clSheet').addEventListener('drop',function(e){var d=e.target.closest('#clDrop');if(d){e.preventDefault();onFile(e.dataTransfer.files&&e.dataTransfer.files[0]);}});
+    }
+    function nowLocal(){var d=new Date();function z(n){return(n<10?"0":"")+n;}return d.getFullYear()+"-"+z(d.getMonth()+1)+"-"+z(d.getDate())+"T"+z(d.getHours())+":"+z(d.getMinutes());}
+    function fmtAt(s){if(!s)return "";var m=String(s).match(/(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})/);return m?(m[1]+"."+m[2]+"."+m[3]+" "+m[4]+":"+m[5]):String(s).slice(0,10).replace(/-/g,".");}
+    async function openLog(){
+      var modal=document.getElementById("clLogModal"),body=document.getElementById("clLogBody");
+      document.getElementById("clLogCount").textContent=""; body.innerHTML="불러오는 중…"; modal.hidden=false;
+      try{
+        var r=await fetch("/api/council-log",{credentials:"same-origin",cache:"no-store"});
+        var arr=r.ok?await r.json():[]; if(!Array.isArray(arr))arr=[];
+        arr.sort(function(a,b){return String(b.at||"").localeCompare(String(a.at||""));});
+        document.getElementById("clLogCount").textContent="총 "+arr.length+"건";
+        body.innerHTML=arr.length?arr.map(function(e){var c=sc(e.stance);
+          var ref=e.ref?('<div style="margin-top:4px;font-size:11px;word-break:break-all"><a href="'+esc(e.ref)+'" target="_blank" rel="noopener" style="color:var(--dawn)">'+esc(e.ref)+'</a></div>'):"";
+          return '<div class="cl-blk" style="margin-bottom:8px"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span style="font-family:var(--mono);font-size:12px;font-weight:700">'+esc(fmtAt(e.at))+'</span><span style="font-weight:700">'+esc(e.expert||"")+'</span><span class="cl-chip">'+esc(e.source||"")+'</span>'+(e.stance?'<span class="cl-pill" style="color:'+c+';background:color-mix(in srgb,'+c+' 12%,transparent);border:1px solid color-mix(in srgb,'+c+' 45%,transparent)">'+esc(e.stance)+'</span>':"")+'</div><p style="margin:6px 0 0;font-size:13.5px;line-height:1.6">'+esc(e.view||"")+'</p>'+ref+'</div>';
+        }).join(""):'<div style="color:var(--faint);font-size:13px">아직 갱신 이력이 없습니다.</div>';
+      }catch(err){body.innerHTML='<div class="cl-err">이력 불러오기 실패: '+esc(err.message)+'</div>';}
     }
     function render(){if(!mounted){mounted=true;var ta=document.getElementById('clCtx');if(!ta.value)ta.value=SAMPLE;renderCards();bind();}}
     return {render:render};
