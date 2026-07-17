@@ -588,6 +588,9 @@ window.INSIGHT=(function(){
    b.innerHTML='<span class="n"></span>관점과 정보 얻기';
    var port=nav.querySelector('.tab[data-v="port"]');
    if(port)nav.insertBefore(b,port);else nav.appendChild(b);
+   /* 전문가 원탁(council)을 리밸런싱(port) 앞으로 → 04 전문가 원탁 · 05 리밸런싱 (SimpleorNothing 지시 2026-07-17) */
+   var council=nav.querySelector('.tab[data-v="council"]');
+   if(council&&port)nav.insertBefore(council,port);
    Array.prototype.forEach.call(nav.querySelectorAll('.tab'),function(t,i){
     var n=t.querySelector('.n');if(n)n.textContent=(i+1<10?'0':'')+(i+1);});
    nav.addEventListener('click',function(e){
