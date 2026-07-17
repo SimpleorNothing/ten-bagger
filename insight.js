@@ -27,6 +27,30 @@ window.INSIGHT=(function(){
  function score(c){return (c.novelty||0)+(c.impact||0)+(c.confidence||0);}
  function recommend(c){return c.route!=='none'&&score(c)>=4&&(c.impact||0)>=1;}   /* 기본 체크 = 추천일 뿐, 결정은 사람 */
 
+ /* --- 라이프사이클(관점 활용) — 관점을 '조건부 주문'으로: 전제·발동조건·폐기트리거·점검일.
+    채택만 하고 쌓이지 않도록 review(점검일)를 강제 부여 → 도래 시 '점검 필요'로 재부상(OPS §0 트리아지). */
+ function lcISO(d){return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2);}
+ function lcToday(){return lcISO(new Date());}
+ function lcPlus14(){var d=new Date();d.setDate(d.getDate()+14);return lcISO(d);}
+ function lcDue(c){return !!c.review&&c.review<=lcToday();}
+ function lcLine(c){
+  var b=[];
+  if(c.hyp)b.push('전제: '+esc(c.hyp));
+  if(c.trig)b.push('발동: '+esc(c.trig));
+  if(c.until)b.push('폐기: '+esc(c.until));
+  b.push('점검일: '+(c.review?esc(c.review)+(lcDue(c)?' · ⚠ 점검 필요':''):'미설정'));
+  return '<div class="ins-vf'+(lcDue(c)?' due':'')+'">🕔 '+b.join(' · ')+'</div>';
+ }
+ function editLC(id){
+  var o=flat().filter(function(x){return x.c.id===id;})[0];if(!o)return;var c=o.c;
+  var hyp=window.prompt('전제(hyp) — 이게 참이어야 관점이 성립:',c.hyp||'');if(hyp===null)return;
+  var trig=window.prompt('발동조건(trig) — 어느 게이트·신호가 켜지면 액션인가:',c.trig||'');if(trig===null)return;
+  var until=window.prompt('폐기 트리거(until) — 이 조건이 소멸하면 관점 폐기:',c.until||'');if(until===null)return;
+  var review=window.prompt('점검일(review, YYYY-MM-DD · 빈칸=오늘+14일):',c.review||'');if(review===null)return;
+  c.hyp=hyp.trim();c.trig=trig.trim();c.until=until.trim();c.review=review.trim()||lcPlus14();
+  persist();
+ }
+
  /* --- 등급(승격) — 관점·정보의 확신도. 기본 점수(N·I·C) + 유사 관점 보강 횟수로 산정.
     같은 얘기가 다른 자료에서 반복 채택될수록(보강) 등급이 오른다. narrative≠numbers 규율과 무관 — 표시 전용. */
  var GRD=['관찰','후보','지지','확립','확신'];   /* g0..g4 */
@@ -195,7 +219,7 @@ window.INSIGHT=(function(){
   if(!cur)return;
   var picked=cur.claims.filter(function(c){return c.pick;}).map(function(c){
    return {id:c.id,text:c.text||'',layer:c.layer||'',tickers:c.tickers,type:c.type,novelty:c.novelty,impact:c.impact,
-           confidence:c.confidence,route:c.route,why:c.why||'',verify:c.verify||'',applied:false};});
+           confidence:c.confidence,route:c.route,why:c.why||'',verify:c.verify||'',applied:false,hyp:c.hyp||'',trig:c.trig||'',until:c.until||'',review:c.review||lcPlus14()};});
   if(!picked.length){setMsg('채택한 관점이 없습니다 — 하나 이상 체크하세요.');return;}
   recs.unshift({id:cur.id,t:cur.t,src:cur.src,summary:cur.summary,steelman:cur.steelman,raw:cur.raw||'',rawcut:cur.rawcut||0,claims:picked});
   cur=null;renderResult();persist();
@@ -301,12 +325,16 @@ window.INSIGHT=(function(){
  /* --- 저장 목록 --- */
  function claimLine(r,c,showBtn){
   var pend=NUM[c.route]&&!c.applied;
-  return '<div class="ins-si'+(pend?' pend':'')+'">'+gradeBadge(c.grade||0,c.reinf)+' '+esc(c.text)+
+  return '<div class="ins-si'+(pend?' pend':'')+(lcDue(c)?' due':'')+'">'+gradeBadge(c.grade||0,c.reinf)+' '+esc(c.text)+
    '<span class="m">'+(c.layer?esc(c.layer)+' · ':'')+esc(RT[c.route]||c.route)+' · N'+c.novelty+'I'+c.impact+'C'+c.confidence+
    (c.reinf?' · 유사 '+c.reinf+'건 보강':'')+
    (NUM[c.route]?(c.applied?' · 반영 완료':' · 반영 대기(자동 변경 없음)'):'')+'</span>'+
    claimSrc(r,false)+
-   (showBtn&&NUM[c.route]?'<button class="ins-btn" style="margin-top:7px;padding:4px 9px;font-size:12px" data-ap="'+c.id+'">'+(c.applied?'대기로 되돌리기':'반영 완료 표시')+'</button>':'')+
+   lcLine(c)+
+   (showBtn?'<div class="ins-lcbar">'+
+     (NUM[c.route]?'<button class="ins-btn" data-ap="'+c.id+'">'+(c.applied?'대기로 되돌리기':'반영 완료 표시')+'</button>':'')+
+     '<button class="ins-btn" data-lc="'+c.id+'">🕔 라이프사이클</button>'+
+    '</div>':'')+
    sigBlock(c)+
    '</div>';
  }
@@ -315,6 +343,7 @@ window.INSIGHT=(function(){
   var qq=q.toLowerCase();
   var html=recs.map(function(r){
    var cs=(r.claims||[]).filter(function(c){
+    if(filt==='due')return lcDue(c);
     if(filt==='pending')return !!NUM[c.route]&&!c.applied;
     if(/^g[0-4]$/.test(filt))return (c.grade||0)===+filt.slice(1);
     if(filt)return c.route===filt;
@@ -337,7 +366,7 @@ window.INSIGHT=(function(){
     cs.map(function(c){return claimLine(r,c,true);}).join('')+'</div>';
   }).filter(Boolean).join('');
   L.innerHTML=html||'<div class="ins-noise">해당하는 관점이 없습니다. 위에 자료를 넣고 <b>관점 뽑기</b>를 누르세요.</div>';
-  var cnt=$('insCount');if(cnt)cnt.textContent=recs.length?(flat().length+'개 관점 · 자료 '+recs.length+'건'):'';
+  var cnt=$('insCount');if(cnt){var _due=flat().filter(function(o){return lcDue(o.c);}).length;cnt.textContent=recs.length?(flat().length+'개 관점 · 자료 '+recs.length+'건'+(_due?' · ⚠ 점검 필요 '+_due+'건':'')):'';}
   Array.prototype.forEach.call(L.querySelectorAll('[data-rid]'),function(b){
    b.onclick=function(){
     if(!window.confirm('이 자료에서 채택한 관점을 모두 삭제할까요?'))return;
@@ -348,6 +377,8 @@ window.INSIGHT=(function(){
     var id=b.getAttribute('data-ap');
     flat().forEach(function(o){if(o.c.id===id)o.c.applied=!o.c.applied;});
     persist();};});
+  Array.prototype.forEach.call(L.querySelectorAll('[data-lc]'),function(b){
+   b.onclick=function(){editLC(b.getAttribute('data-lc'));};});
   Array.prototype.forEach.call(L.querySelectorAll('[data-raw]'),function(b){
    b.onclick=function(){
     var id=b.getAttribute('data-raw'), box=document.getElementById('raw-'+id);if(!box)return;
@@ -545,7 +576,8 @@ window.INSIGHT=(function(){
   '<p class="vsub">증권사 리포트·기사·유튜브(링크 또는 스크립트)를 넣으면 8레이어·단계 프레임으로 관점과 정보를 구조화해 뽑는다. '+
   '<b>뽑는 것과 반영하는 것은 분리한다</b> — 체크해 채택한 관점만 다른 메뉴에 뜬다. 숫자 파일(실적·판단·단계·비중)은 자동으로 바뀌지 않는다(narrative ≠ numbers). '+
   '채택 관점은 <b>등급</b>(관찰→후보→지지→확립→확신)을 갖고, 다른 자료에서 유사한 내용이 보강될수록 자동 승격된다. '+
-  '<b>시그널 로그</b>는 관련 관점 밑에 붙어 그 관점의 누적 컨텍스트가 된다 — 티커가 겹치면 종목 기준, 없으면 레이어 기준으로 매칭된다.</p></div>'+
+  '<b>시그널 로그</b>는 관련 관점 밑에 붙어 그 관점의 누적 컨텍스트가 된다 — 티커가 겹치면 종목 기준, 없으면 레이어 기준으로 매칭된다. '+
+  '채택 관점은 <b>라이프사이클</b>(전제·발동조건·폐기트리거·점검일)을 달고, 점검일이 도래하면 <b>점검 필요</b>로 재부상해 발동/만료/유지를 트리아지한다.</p></div>'+
   '<div class="ins-wrap">'+
    '<div class="ins-card">'+
     '<div class="ins-row"><input class="ins-in" id="insUrl" placeholder="URL (선택 — 본문이 없으면 URL만으로 웹검색해 시도)"></div>'+
@@ -563,7 +595,7 @@ window.INSIGHT=(function(){
     '<div class="ins-bar" style="margin:0 0 8px">'+
      '<input class="ins-in" id="insSearch" style="flex:1 1 200px" placeholder="검색 (내용·종목·출처)">'+
      '<select class="ins-sel" id="insFilter" style="flex:0 0 170px">'+
-      '<option value="">전체</option><option value="pending">숫자 반영 대기</option>'+
+      '<option value="">전체</option><option value="due">점검 필요</option><option value="pending">숫자 반영 대기</option>'+
       '<option value="signal_log">시그널 로그</option><option value="macro">시장 모니터링</option><option value="calendar">캘린더</option>'+
      '</select>'+
     '</div><div class="ins-gboard" id="insGradeBoard"></div><div id="insList"></div></div>'+
