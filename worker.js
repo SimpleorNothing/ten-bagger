@@ -265,6 +265,7 @@ async function handleYtView(request, env) {
   if (!/youtu\.?be/.test(ytUrl)) return json({ error: "youtube url required" }, 400);
   const _m = ytUrl.match(/(?:v=|youtu\.be\/|shorts\/|embed\/|live\/)([A-Za-z0-9_-]{11})/);
   const ytCanon = _m ? ("https://www.youtube.com/watch?v=" + _m[1]) : ytUrl;
+  const geminiModel = env.GEMINI_MODEL || "gemini-3.5-flash";  // 모델 교체 = 시크릿/var만(코드 재배포 불요)
 
   const prompt =
     "이 유튜브 영상에서 발화자 '" + (exp.name || "") + "'(" + (exp.field || "") + ")의 " +
@@ -274,7 +275,7 @@ async function handleYtView(request, env) {
   let up;
   try {
     up = await fetch(
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent",
+      "https://generativelanguage.googleapis.com/v1beta/models/" + geminiModel + ":generateContent",
       { method: "POST",
         headers: { "content-type": "application/json", "x-goog-api-key": env.GEMINI_API_KEY },
         body: JSON.stringify({
