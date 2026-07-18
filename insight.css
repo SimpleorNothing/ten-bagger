@@ -118,3 +118,17 @@ a.ins-src-lk:hover,button.ins-src-lk:hover{text-decoration:underline}
 textarea.ins-lc-in{min-height:46px;resize:vertical}
 .ins-lc-ft{display:flex;align-items:center;gap:9px;padding:13px 16px;border-top:1px solid var(--line);flex-wrap:wrap}
 .ins-lc-note{font-size:12px;color:var(--faint);flex:1 1 160px;font-family:var(--mono)}
+
+/* --- 표시 레벨(뎁스) 선택 (2026-07-18) — L1 자료 · L2 관점 · L3 시그널. 03 목록을 3단계 아웃라인으로 접는다(기본 L1).
+   면(버튼)=radius 3px(§3 탭 결) · 활성=주 버튼(--dawn/--onacc, §4). 신규 :root 토큰 0(기존 변수 재사용) → check-docs 무영향. */
+.ins-lv{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:0 0 10px}
+.ins-lv-lb{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--faint);letter-spacing:.05em;margin-right:2px}
+.ins-lvbtn{font-family:var(--serif);font-size:14px;font-weight:700;color:var(--dim);background:var(--panel2);border:1px solid var(--line2);border-radius:3px;padding:6px 12px;cursor:pointer;transition:border-color .12s,box-shadow .12s}
+.ins-lvbtn span{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--faint);margin-left:3px}
+.ins-lvbtn:hover{border-color:var(--line2);box-shadow:0 4px 14px rgba(22,36,45,.06)}
+.ins-lvbtn:focus-visible{outline:2px solid var(--st-accel);outline-offset:2px}
+.ins-lvbtn.on{background:var(--dawn);border-color:var(--dawn);color:var(--onacc)}
+.ins-lvbtn.on span{color:var(--onacc)}
+/* 접힘 안내 — L1 자료 카드 밑 건수(관점·시그널), L2 관점 밑 시그널 건수 힌트. 메타 12px mono. */
+.ins-lvhint{font-family:var(--mono);font-size:12px;color:var(--faint);letter-spacing:.03em;margin-top:7px}
+.ins-sighint{font-family:var(--mono);font-size:12px;color:var(--faint);letter-spacing:.03em;margin-top:7px;padding-left:10px;border-left:2px solid var(--line2)}
