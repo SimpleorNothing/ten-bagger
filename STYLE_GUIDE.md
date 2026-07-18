@@ -1,4 +1,4 @@
-**최종 갱신: 2026-07-18 15:18 (KST)**
+**최종 갱신: 2026-07-18 16:10 (KST)**
 
 # STYLE_GUIDE — 알파맵 디자인 시스템
 
@@ -240,6 +240,7 @@ pantone.css :root       ← 현행 팔레트 (팬튼 A안, index.html 하단 <li
 
 ## 갱신 이력
 
+- 2026-07-18 16:10 · **02 인사이트 찾기 「채택한 관점」 목록에 표시 레벨(뎁스) 접기 — L1 자료·L2 관점·L3 시그널(기본 L1).** SimpleorNothing 지시. 「채택한 관점」 목록을 3단계 아웃라인으로 접는다 — L1=자료(소스) 카드만(접힌 관점·시그널 건수 힌트) · L2=+관점(claims, 시그널은 건수 힌트) · L3=+관련 시그널 로그·미연결 시그널 펼침. 상단 `.ins-lv` 버튼군(`.ins-lvbtn` — 면 radius 3px §3 탭 결 · 활성=주 버튼 `--dawn`/`--onacc` §4 · 서브라벨 mono 12px). 접힘 안내 `.ins-lvhint`(L1 자료 밑)·`.ins-sighint`(L2 관점 밑 · 좌측 2px `--line2` 룰로 종속 표시, `.ins-sig` 결 일치). 등급 보드·검색·라우트 필터와 **직교**(무엇을 펼칠지만). **신규 `:root` 토큰 0**(기존 `--panel2`/`--line2`/`--dawn`/`--onacc`/`--dim`/`--faint`/`--mono`/`--st-accel` 재사용) → TOKENS 무변·`check-docs` 통과. `insight.js`(`renderLevel()`·`renderList` 뎁스 분기·`claimLine` `showSig` 파라미터·`sigHint()`·`renderSigRest` lvl 게이트)·`insight.css`만 편집, index.html 무패치. `node --check` 통과·jsdom 3단계 렌더 검증. narrative≠numbers. (코드는 #432 선반영 · squash 92ded49 · 문서 후속 착지)
 - 2026-07-18 15:18 · **상단 메뉴 재배열·개명(01 시장 모니터링 · 02 인사이트 찾기 · 03 전문가 원탁 · 04 시장과 실적 전망 · 05 리밸런싱 · 06 메모).** SimpleorNothing 지시. **`index.html` 무편집** — `insight.js mount()`가 정적 nav(market·cycle·port·council·memo)를 런타임 재구성(`insight` 탭 `market` 뒤 주입 · `council`을 `cycle` 앞 이동 · `cycle` 라벨 「궁금한 것」→「시장과 실적 전망」 개명 · index 순 재번호). 탭 라벨 「인사이트 찾기」·`vkick` 「Insight · 인사이트 찾기」. 04 뷰 제목 개명 불필요(#424가 옛 vhead 삭제). **신규 `:root` 토큰·CSS 0** → TOKENS 무변·`check-docs` 통과. jsdom nav 렌더 검증(6탭 순서·번호·라벨). §6-1 스트립 서술 번호 정정 · §2 예시 번호 정정. (OPS §0-5·§3·§9 동반) narrative≠numbers.
 - 2026-07-18 15:15 · **05 드로어 「01~04 라이브 참고」 + aisd v6 선행 시그널(문서 재착지).** 드로어=기존 `.dr-sec`/`.cgrid`/`.cbox` 재사용 · 행 칩=`.t-sub` 인라인 mono 12px · aisd v6=`.ds-dtxt` 텍스트만. **신규 :root 토큰·클래스 0** → TOKENS 무변·check-docs 통과. (OPS §3·§9 동반)
 - 2026-07-18 14:35 · **05 리밸런싱 추정 리비전 트래커에 「기대수익 점수」 컬럼(`raer.js` 자가 마운트 · PR #423).** SimpleorNothing 지시. `#probEst .pe-tbl`에 위험조정 기대수익(RAER = 여력×실현확률÷리스크, 14행 상대 0–100) 컬럼을 종목 다음(2번째)에 주입, 점수 내림차순 재정렬, **현금 행**을 종목으로 추가. index.html·worker.js·pantone.css 무편집 — 이미 로드되는 `changelog.js` 부트스트랩이 `loadRaer()`로 `<script defer src="/raer.js">` 주입(flags.js·aisd.js 패턴). CSS는 JS 주입(`.raer-sc`/`.raer-bar` — `pe-bar` 결 계승·면/부표 radius 규약 준수). 점수 tier 색은 기능색 재사용(≥60 `--st-dawn`·≥40 `--st-mature`·<40 `--st-hot`·현금 `--faint` — insight 등급·aisd 판정 선례). **신규 `:root` 토큰 0** → TOKENS 무변·check-docs 통과. 값 15px·메타 12px(§2 하한). MutationObserver로 트래커 재렌더 시 컬럼 유지. narrative≠numbers·관측 휴리스틱(예측·투자권유 아님). (OPS §3·§9 동반)
