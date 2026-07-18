@@ -1,4 +1,4 @@
-**최종 갱신: 2026-07-18 16:10 (KST)**
+**최종 갱신: 2026-07-18 21:30 (KST)**
 
 # STYLE_GUIDE — 알파맵 디자인 시스템
 
@@ -150,7 +150,7 @@ pantone.css :root       ← 현행 팔레트 (팬튼 A안, index.html 하단 <li
 ```
 
 - **섹션 리듬:** `h2.msec`(20px/700, margin `26px 0 12px`) + 조건 배지 = 「제목 + 조건(기간·정렬)」. 조건이 **고정 텍스트**면 `span.mnote`(mono 11px `--faint`, .04em), **선택형**이면 `span.mrng`(세그먼트 버튼군 — `.rbtn` 5개 = 1M/6M/1Y/3Y/5Y, 활성 `.on`). 부제 문단을 길게 쓰지 않는다.
-  - 기간 선택군(`.mrng`)은 지표·보유 두 헤더에 각각 두되 **공통 상태(`RG`)** 로 동기화 — 한쪽을 누르면 두 그룹 배지·모든 카드가 함께 재슬라이스된다. 거래일 근사: 1M≈21·6M≈126·1Y≈252·3Y≈756·5Y≈1260, `slice6()` 단일 경로. charts.json은 `fetch-prices.mjs`가 **Yahoo/Naver 5Y 일봉**으로 채운다(매 실행 창 전체 교체) → 5Y 버튼까지 실데이터. 신규 상장 등 확보분이 창보다 짧으면 자동 클램프. WTI(`/api/wti`)는 2020~ · **US10Y도 `charts.json.us10y`(`^TNX` 5Y) 1순위 · `/api/us10y` 폴백**(외부 피드 ~2개월뿐이라 단독 사용 시 기간버튼 무반응 — 2026-07-16 수리, PR #345).
+  - 기간 선택군(`.mrng`)은 지표·보유 두 헤더에 각각 두되 **공통 상태(`RG`)** 로 동기화 — 한쪽을 누르면 두 그룹 배지·모든 카드가 함께 재슬라이스된다. 거래일 근사: 1M≈21·6M≈126·1Y≈252·3Y≈756·5Y≈1260, `slice6()` 단일 경로. charts.json은 `fetch-prices.mjs`가 **Yahoo/Naver 5Y 일봉**으로 채운다(매 실행 창 전체 교체) → 5Y 버튼까지 실데이터. WTI(`/api/wti`)는 2020~ · **US10Y도 `charts.json.us10y`(`^TNX` 5Y) 1순위 · `/api/us10y` 폴백**(외부 피드 ~2개월뿐이라 단독 사용 시 기간버튼 무반응 — 2026-07-16 수리, PR #345).
 - **02 인사이트 찾기의 채택 매크로 관점 스트립(`insStripMarket`)은 「관련 기사」 섹션 안에 산다(2026-07-18):** `insight.js mount()`가 `#v-market` 최상단(`.vhead` 뒤)이 아니라 **`#mktMacroNews` 바로 앞**(「관련 기사」 h2 아래·자동 수집 뉴스 위)에 마운트한다. 큐레이션 관점(등급·출처·라이프사이클 메타 보존)과 자동 매크로 뉴스가 한 묶음으로 읽힌다. 뉴스 `.arow`로 평탄화하지 않는다(narrative≠numbers · 스트립 컴포넌트 그대로). 빈 `insStripCal`(채택 일정 관점)은 종전대로 `.vhead` 뒤 잔존(비면 렌더 0).
 - 뷰 안에서 정보 밀도는 **섹션 4개 안팎**으로 끊는다.
 - **「다가오는 일정」(06 흡수, 2026-07-17):** `.cal-now`(4열·모바일 2열)+`.now-card`(D-N + `.when`·`.lbl`·`.meta` · 좌측 3px `--cat-*` 스트라이프·radius 3px). `renderCalNow()`가 `calendar.json`+`earnings.json` moves를 오늘 기준 병합·프루닝, 임박 8개. `.meta`가 프레임→게이트 판정을 나르므로 §6-4 렌즈에 부합(숫자만 카드 아님). `#v-cal`서 이동 — 신규 클래스 0.
@@ -240,6 +240,7 @@ pantone.css :root       ← 현행 팔레트 (팬튼 A안, index.html 하단 <li
 
 ## 갱신 이력
 
+- 2026-07-18 21:30 · **「숫자 반영 대기」 스트립(`insStripDec`)을 05 리밸런싱→04 시장과 실적 전망 최상단으로 이동.** SimpleorNothing 지시(ASML 2Q 실적 서프라이즈+매출 전망 상향 카드). `insight.js mount()` 앵커만 `#v-decision`(before `#decisionBoard`)→`#v-thread`(before 최상단 `.vhead`)로 변경 — 로드맵(`#dsAisd`) 아래·강물 탐색 위에 뜬다. **스트립 컴포넌트(`.ins-strip`/`.ins-si`)·신규 `:root` 토큰·CSS 0** → TOKENS 무변·check-docs 통과(토큰 24종). 스트립 note의 스테일 「03에서 반영 완료」→「02 인사이트 찾기에서 반영 완료」 정정. jsdom 렌더 검증(insStripDec `#v-thread` 내부·순서 일치). narrative≠numbers — 표시 위치만. (OPS §3·§9 동반)
 - 2026-07-18 16:10 · **02 인사이트 찾기 「채택한 관점」 목록에 표시 레벨(뎁스) 접기 — L1 자료·L2 관점·L3 시그널(기본 L1).** SimpleorNothing 지시. 「채택한 관점」 목록을 3단계 아웃라인으로 접는다 — L1=자료(소스) 카드만(접힌 관점·시그널 건수 힌트) · L2=+관점(claims, 시그널은 건수 힌트) · L3=+관련 시그널 로그·미연결 시그널 펼침. 상단 `.ins-lv` 버튼군(`.ins-lvbtn` — 면 radius 3px §3 탭 결 · 활성=주 버튼 `--dawn`/`--onacc` §4 · 서브라벨 mono 12px). 접힘 안내 `.ins-lvhint`(L1 자료 밑)·`.ins-sighint`(L2 관점 밑 · 좌측 2px `--line2` 룰로 종속 표시, `.ins-sig` 결 일치). 등급 보드·검색·라우트 필터와 **직교**(무엇을 펼칠지만). **신규 `:root` 토큰 0**(기존 `--panel2`/`--line2`/`--dawn`/`--onacc`/`--dim`/`--faint`/`--mono`/`--st-accel` 재사용) → TOKENS 무변·`check-docs` 통과. `insight.js`(`renderLevel()`·`renderList` 뎁스 분기·`claimLine` `showSig` 파라미터·`sigHint()`·`renderSigRest` lvl 게이트)·`insight.css`만 편집, index.html 무패치. `node --check` 통과·jsdom 3단계 렌더 검증. narrative≠numbers. (코드는 #432 선반영 · squash 92ded49 · 문서 후속 착지)
 - 2026-07-18 15:18 · **상단 메뉴 재배열·개명(01 시장 모니터링 · 02 인사이트 찾기 · 03 전문가 원탁 · 04 시장과 실적 전망 · 05 리밸런싱 · 06 메모).** SimpleorNothing 지시. **`index.html` 무편집** — `insight.js mount()`가 정적 nav(market·cycle·port·council·memo)를 런타임 재구성(`insight` 탭 `market` 뒤 주입 · `council`을 `cycle` 앞 이동 · `cycle` 라벨 「궁금한 것」→「시장과 실적 전망」 개명 · index 순 재번호). 탭 라벨 「인사이트 찾기」·`vkick` 「Insight · 인사이트 찾기」. 04 뷰 제목 개명 불필요(#424가 옛 vhead 삭제). **신규 `:root` 토큰·CSS 0** → TOKENS 무변·`check-docs` 통과. jsdom nav 렌더 검증(6탭 순서·번호·라벨). §6-1 스트립 서술 번호 정정 · §2 예시 번호 정정. (OPS §0-5·§3·§9 동반) narrative≠numbers.
 - 2026-07-18 15:15 · **05 드로어 「01~04 라이브 참고」 + aisd v6 선행 시그널(문서 재착지).** 드로어=기존 `.dr-sec`/`.cgrid`/`.cbox` 재사용 · 행 칩=`.t-sub` 인라인 mono 12px · aisd v6=`.ds-dtxt` 텍스트만. **신규 :root 토큰·클래스 0** → TOKENS 무변·check-docs 통과. (OPS §3·§9 동반)
