@@ -728,7 +728,10 @@ window.INSIGHT=(function(){
   var orphan=document.getElementById('v-siglog');
   if(orphan&&orphan.parentNode)orphan.parentNode.removeChild(orphan);
 
-  anchor('insStripMarket','#v-market','after','.vhead');
+  /* 채택한 매크로 관점 스트립 = 01 상단(.vhead 뒤)이 아니라 「관련 기사」 섹션 안으로.
+     자동 수집 뉴스(#mktMacroNews) 바로 위(관련 기사 h2 아래)에 붙어 큐레이션 관점이 관련 기사와 한 묶음이 된다.
+     narrative≠numbers — 등급·출처·라이프사이클 메타는 스트립 컴포넌트 그대로 유지(뉴스 .arow 로 평탄화하지 않는다). SimpleorNothing 지시 2026-07-18. */
+  anchor('insStripMarket','#v-market','before','#mktMacroNews');
   anchor('insStripDec','#v-decision','before','#decisionBoard');
   anchor('insStripCal','#v-market','after','.vhead');
   anchor('insStripThread','#v-thread','after','#instantAnswer');
