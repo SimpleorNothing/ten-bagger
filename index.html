@@ -664,6 +664,7 @@ table.tk th.c{text-align:center}
 .arow .aimp{display:flex;gap:5px;margin-top:4px;font-size:14px;color:var(--dim);line-height:1.5}
 .arow .aimp .aar{flex:0 0 auto;color:var(--dawn);font-weight:700}
 .arow.is-noise .asum{color:var(--faint);font-weight:400}
+.arow .anew{flex:0 0 auto;align-self:flex-start;margin-left:8px;margin-top:1px;font:700 11px var(--mono);letter-spacing:.04em;background:var(--dawn);color:var(--onacc);border-radius:20px;padding:1px 7px}
 .aempty{padding:11px 14px;border-top:1px solid var(--line);font-size:14px;color:var(--faint)}
 .amore{display:block;width:100%;padding:9px 14px;border:0;border-top:1px solid var(--line);background:var(--panel2);color:var(--dawn);font:600 14px var(--mono);text-align:center;cursor:pointer;transition:.12s}
 .amore:hover{background:var(--panel);color:var(--txt)}
@@ -3528,6 +3529,15 @@ window.MARKET=(function(){
    host.innerHTML=html;}
   catch(e){host.innerHTML='<div class="mkt-ph">수집 대기</div>';}
  }
+ // NEW 배지 — 최근 3일(72h 롤링) 기사 표시 · 3초 호버 or 클릭 시 제거(localStorage 영속)
+ var NEW_MS=3*864e5;
+ function isNewDt(dt){if(!dt)return false;var t=Date.parse(dt);return isFinite(t)&&(Date.now()-t)<NEW_MS;}
+ var NEWSEEN=(function(){var K='am_news_seen_v1',a;try{a=JSON.parse(localStorage.getItem(K)||'[]');}catch(e){a=[];}
+  var s=new Set(Array.isArray(a)?a:[]);
+  return{has:function(k){return !!k&&s.has(k);},
+   add:function(k){if(!k||s.has(k))return;s.add(k);try{localStorage.setItem(K,JSON.stringify(Array.from(s).slice(-3000)));}catch(e){}}};})();
+ function dismissNew(r){if(!r)return;NEWSEEN.add(r.getAttribute('data-nk'));
+  r.classList.remove('is-new');var b=r.querySelector('.anew');if(b)b.parentNode.removeChild(b);}
  async function loadStockNews(){
   var host=document.getElementById('mktDigest');if(!host)return;
   try{
@@ -3556,11 +3566,15 @@ window.MARKET=(function(){
     var tx=String(a||'').trim()||String(ttl||'');
     var im=String(w||'').trim();
     var noise=/무관|노이즈/.test(tx);
-    return '<a class="arow'+(noise?' is-noise':'')+'" href="'+esc(url||'#')+'" target="_blank" rel="noopener">'
+    var nk=(url&&url!=='#')?url:(String(dt||'')+'|'+String(ttl||''));   // 뉴스 식별키(dismiss 영속)
+    var isNew=isNewDt(dt)&&!NEWSEEN.has(nk);                            // 최근 3일 + 미열람만 NEW
+    return '<a class="arow'+(noise?' is-noise':'')+(isNew?' is-new':'')+'" data-nk="'+esc(nk)+'" href="'+esc(url||'#')+'" target="_blank" rel="noopener">'
      +'<span class="adt">'+esc(String(dt||'').slice(5,10))+'</span>'
      +'<span class="atx"><span class="asum">'+esc(tx)+'</span>'
      +(im&&!noise?'<span class="aimp"><span class="aar">\u2192</span><span>'+esc(im)+'</span></span>':'')
-     +'</span></a>';}
+     +'</span>'
+     +(isNew?'<span class="anew">NEW</span>':'')
+     +'</a>';}
    function artRows(k){var lst=(byTk[k]||[]).filter(function(it){
      var t=it.published?new Date(it.published).getTime():0;return !t||t>=cutT;}).slice(0,MAX_ROWS);
     if(!lst.length)return '<div class="aempty">최근 3개월 기사 없음</div>';
@@ -3605,7 +3619,17 @@ window.MARKET=(function(){
    if(!host._moreBound){host._moreBound=1;
     host.addEventListener('click',function(e){
      var b=e.target.closest?e.target.closest('.amore'):null;
-     if(b){e.preventDefault();window.__moreNews(b);}});}
+     if(b){e.preventDefault();window.__moreNews(b);return;}
+     var ar=e.target.closest?e.target.closest('.arow.is-new'):null;
+     if(ar)dismissNew(ar);});   // 클릭 = NEW 제거(링크는 새 탭으로 그대로 열림)
+    var hvT=null,hvR=null;      // 3초 이상 호버 = NEW 제거
+    host.addEventListener('mouseover',function(e){
+     var r=e.target.closest?e.target.closest('.arow.is-new'):null;
+     if(!r||r===hvR)return;hvR=r;clearTimeout(hvT);
+     hvT=setTimeout(function(){dismissNew(r);hvR=null;},3000);});
+    host.addEventListener('mouseout',function(e){
+     if(!hvR)return;var to=e.relatedTarget;if(to&&hvR.contains(to))return;   // 같은 행 내부 이동은 유지
+     clearTimeout(hvT);hvT=null;hvR=null;});}
    iSC(CH,AVG);}
   catch(e){host.innerHTML='<div class="mkt-ph">뉴스 대기</div>';}
  }

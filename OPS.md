@@ -1,4 +1,4 @@
-**최종 갱신: 2026-07-18 12:16 (KST)**
+**최종 갱신: 2026-07-18 12:37 (KST)**
 
 # OPS — 알파맵 운영 가이드
 
@@ -75,6 +75,7 @@
 | **카드 렌즈 요약 2줄** (그래프마다 프레임→판정) | 자동(런타임 파생) | gamma·signals 일별 / holdings 주간에 편승 | `gamma.json`(γ·stage·flagged) + `signals.json`(**`window.macroEval` 단일소스 재사용**) + `holdings.json`(layer·평단) + `charts.json` |
 | 종목 뉴스 (종목 블록형 + 기사별 **일자 + 두 점**[명사형 요약 `a` / `→` 의미·주가영향 `w`] + 우측 주가 차트) | 자동 | **뉴스·digest 06:12·18:12 (1일 2회)** / 차트 06:37·18:37 | `news_digest.json`(claude-sonnet-4-6) + `news.json`(**물질성 m≥1만**) + `charts.json` |
 | ↳ 표시 규칙 | — | — | **최근 3개월(92일) 창 · 종목당 최신 5건.** 초과분은 「더 보기」 → `archive/{TK}.json` **온디맨드 로드**(첫 로딩 페이로드 상수 유지) |
+| ↳ **`NEW` 배지(신선도 큐)** | 자동(런타임 파생) | 매 렌더 | 최근 3일(72h·`isNewDt`)+미열람 기사에 `.arow .anew` 부표(디자인=STYLE_GUIDE §6-5). **3초 호버 or 클릭 시 제거**→localStorage `am_news_seen_v1`(키=link) 영속·재렌더 재출현 없음. `rowHTML()` 경로(종목+「더 보기」). narrative≠numbers |
 | 관련 기사 (매크로 · 토픽 블록형 + **기사별 일자 + 두 점**[명사형 요약 `a` / `→` 레이어·게이트 함의 `w`] — 종목 뉴스와 동일 형식) | 자동 | **06:12·18:12 KST** | `news_digest.json` `macro`(블록 상단 축 요약 `s`) + `news.json` `MACRO`. **LLM 물질성 채점(m)은 여전히 미적용**(축 자체가 관측 대상 · 하드룰만) 이나, **기사별 두 점 요약 `a·w`는 `summarizeMacro()`가 생성**(신규만 증분 · 과거치 재요약 없음). `w`는 개별 주가가 아니라 8레이어·매크로 게이트·상류 수요 관점의 함의. 렌더는 `.arow`(종목 뉴스 컴포넌트 재사용) · `a` 없으면 제목 폴백. **이 섹션 상단(자동 뉴스 위)에 03 채택 매크로 관점 스트립(`insStripMarket`)이 함께 렌더된다**(2026-07-18 상단→여기 이동 · `insight.js mount()` 앵커 `#mktMacroNews` 앞 · 큐레이션 관점=narrative, 뉴스와 별 컴포넌트) |
 | ↳ **매크로 축 = 고정 아님·매 실행 자동 발굴** | 자동 | 실행마다 | `discoverMacroTopics()` — 광역 헤드라인 스캔(증시·stock market·economy·BUSINESS) → LLM이 **지금 도는 매크로 축 3개** 선별(금리·지정학·관세·전력·환율·capex 중 서로 다른 축) → 그 검색어로 수집. 실패 시 직전 축 승계 → 시드 폴백. 채택 축 = `news.json` `macroTopics`. **토픽명 하드코딩 금지**(사이트는 `it.name` 사용) |
 | ↳ **병목축(고정 5축)** — L3 DRAM/HBM 가격·공급 · L4 패키징 캐파 · L6 옵티컬 리드타임 · L7·L8 전력 · 상류 하이퍼스케일러 capex | 자동 | 실행마다 | `BOTTLENECK_TOPICS`(`news-screen.mjs` 고정) → 매크로 레인(`ticker='MACRO'`)으로 렌더. **리밸런싱은 종목 뉴스가 아니라 '어느 레이어 병목이 조였나'에서 나온다** → 트렌딩 발굴에 맡기지 않고 상시 관측. digest가 **조임/완화 방향**을 명시 |
@@ -266,6 +267,7 @@
 
 ## 9. 갱신 이력
 
+- 2026-07-18 12:37 · **01 종목 뉴스 행 `NEW` 배지(신선도 큐).** SimpleorNothing 지시. 최근 3일(72h·`isNewDt`)+미열람 기사에 `.arow .anew` 부표, **3초 호버 or 클릭 시 제거**→localStorage `am_news_seen_v1` 영속(키=link·재렌더 재출현 없음). `loadStockNews` `rowHTML()` 경로(종목+「더 보기」)·`#mktDigest` 위임. 매크로는 별도 템플릿이라 미적용(범위=보유 종목). 신규 :root 토큰 0→check-docs 통과. narrative≠numbers. §3 표시규칙 행·STYLE_GUIDE §6-5·이력 동반.
 - 2026-07-18 12:16 · **02 aisd.js v3+v4 — ③ 통합·④ 구성요소별 재편·티어별 손익(ROI 점검) 스트립.** SimpleorNothing 지시 3건 일괄. ①③의 두 섹션(CAPEX·업체 투자계획) 한 항목 통합. ②④를 메모리 단독 → **Factory 구성요소별 5행 매트릭스**(컴퓨트 NVDA·AMD·인텔 L2 / 메모리 3사 L3 / 통신 Broadcom·Marvell·옵티컬 L6 / 냉각 Vertiv L7 / 전력 CEG·VST·Bloom L7–L8 · 합산행=병목 이동 추적)로 재편. ③**밸류체인 각 티어 카드에 손익 스트립**(매출·투자/비용·이익·전망 리비전) — ①지불↑·효용 검증 진행형 / ②랩 합산 ~$40B± 급성장·컴퓨트 비용>매출·**적자 ROI 미증명** / ③AI 증분 ~$150B±·CAPEX ~$700B·본업 흑자나 AI 증분 미증명·**capex>매출 갭 확대=경고** / ④**유일 확실 흑자**(NVDA 순마진 ~50%·HBM 고마진). 관측 위치 박스에 손익 지도 결론(이익은 ④에만 고임 · ①~③ ROI 증명이 ④ 지속성의 선행 지표). 수치=공개 관측 방향성·분기 캡처 갱신. 신규 :root 토큰 0. (STYLE_GUIDE 동반)
 - 2026-07-18 11:17 · **02 「AI 수요·공급 로드맵」 v2 — 밸류체인 구조도 통합·티어 재구성(aisd.js · PR #413).** SimpleorNothing 지시. 판정 보드 아래 **밸류체인 4티어**(①수요자[B2C·B2B·B2G]→②AI 판매자[범용·특화]→③컴퓨팅 판매자[하이퍼스케일러·뉴클라우드]→④Factory[반도체 L2–L6·전력 L7–L8]) + 층간 돈의 흐름(구독료→컴퓨팅 비용→CAPEX) + 알파맵 관측 위치(④ ~80% 집중 근거) 신설. 기존 섹션을 티어로 재편(①진화 · ③CAPEX·4사 · ④3사·중국) — **② AI 판매자 연도 매트릭스 신규**(OpenAI·Anthropic·Gemini·DeepSeek·특화 — 공개 관측 방향성·비상장 다수 확정치 아님 명시). 스틸맨에 밸류체인측(효율화 vs Jevons·병목 이동) 추가. 신규 :root 토큰 0. 문서 패치는 #412 경합으로 재생성(3차). (STYLE_GUIDE 동반)
 - 2026-07-18 10:37 · **01 「채택한 매크로 관점」 스트립을 상단→「관련 기사」 섹션으로 이동.** `insight.js mount()` 앵커 `insStripMarket`을 `#v-market` `.vhead` 뒤 → `#mktMacroNews` 앞으로 변경(관련 기사 h2 아래·자동 뉴스 위). 큐레이션 관점(등급·출처·라이프사이클)은 스트립 컴포넌트 그대로 — 뉴스 `.arow`로 평탄화 안 함(narrative≠numbers). 신규 토큰·CSS 0·index.html 무패치(insight.js만) · jsdom 배치 검증. §3 관련 기사 행·03 자가 마운트 행 갱신 · STYLE_GUIDE §6-1·이력 동반. SimpleorNothing 지시.

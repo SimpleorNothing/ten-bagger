@@ -1,4 +1,4 @@
-**최종 갱신: 2026-07-18 12:16 (KST)**
+**최종 갱신: 2026-07-18 12:37 (KST)**
 
 # STYLE_GUIDE — 알파맵 디자인 시스템
 
@@ -200,6 +200,7 @@ pantone.css :root       ← 현행 팔레트 (팬튼 A안, index.html 하단 <li
 | `.stk-blk` | 종목 블록 = `.stk-hd`(`--panel2` 머리) + `.stk-sum`(요약) + `.arow`×N(기사) + `.amore`(더보기) |
 | **종목 순서** | **보유 종목 뉴스 블록 = `holdings.json` `detail[].w`(보유 비중) 내림차순.** `byHeld()`가 렌더 시점에 재정렬 — digest 원순서·크론 재생성과 무관. 미보유는 비중0으로 원순서 유지(안정 정렬) → 워치리스트·기타 그룹 보존 |
 | `.arow` | `.adt`(날짜 40px) + `.asum`(내용 12.5px/600) + `.aimp`(의미·영향 — `.aar` 화살표 `--dawn`/700) |
+| **`.arow .anew` (NEW 배지)** | 최근 3일(72h · `isNewDt`) + 미열람 기사 우상단 `NEW` 부표. **pill 20px**(§3) · `--dawn`/`--onacc`(mono 700 11px) — 단계색 `--st-*` 금지(신선도 큐). **3초 호버 or 클릭**(`dismissNew`)→`NEWSEEN`(localStorage `am_news_seen_v1`·키=link) 영속. `#mktDigest` 위임. 신규 `:root` 토큰 0 |
 | `.stk-body` | 좌 `.stk-left`(62%) / 우 `.stk-chart`(36%, 좌측 보더 · `justify-content:flex-start` = **상단 정렬**, 카드 최상단부터 그래프 배치). 차트 열 = `.stk-cv`(캔버스) 단독. **캔버스는 190px 고정**(`.stk-cv{flex:0 0 190px}`) — 기사 수에 따라 늘어나지 않는다(종목 간 그래프 높이 통일). `@media(max-width:700px)` → 세로 스택, 캔버스 150px 고정 |
 | 차트 값 오버레이 | `dr()`가 캔버스 내부에 직접 그린다. **처음·마지막 값은 각 끝점에 붙여 위/아래**(`lblY()` — 상단 근접이면 아래 `+12`, 아니면 위 `−5`로 캔버스 밖 클리핑 방지) · `fv()`·`bold`·라인 색. 처음=시작점 좌(left-align x=6) / 마지막=끝점 우(right-align w−6). **모든 캔버스 텍스트 라벨은 `halo()` (흰 외곽선 `lineWidth 3` → 채움)로 그려 라인 위에 겹쳐도 읽힌다** — 끝점 값·호버 툴팁·평단 공통(빨/청 라인 위 같은 색 글씨가 묻히는 문제 방지). **기간별 증감률(%·N일)은 좌상단**(라인 색). **하단 눈금줄(`H−4`)엔 시작·끝 날짜만**(`fd()`·`#868e96`) — 창이 여러 해에 걸치면(`spanYr`) `YY-MM-DD`, 한 해 안이면 `MM-DD`(호버 툴팁 공통). **수치 포맷 `fv()` = 10 미만 소수 1자리 / 10 이상 정수(콤마)** — 처음·마지막·호버·평단 공통. Ctrl+휠·호버 시 창과 함께 동기 갱신. 라인 색 = 상승 `--st-hot` / 하락 `--st-accel`. **Ctrl+휠 안내 텍스트는 두지 않는다**(기능은 유지) |
 | ↳ 중간 고점 MDD | 창 내부(첫·끝 아닌)에 최고가 + 현재가 고점 대비 1%+ 밀림(`mxi>0&&mxi<k-1&&dd≤−1`) → 고점 점 + `고점 {정수} ({정수%})`(소수점 없음·`--st-accel`·`halo`·점 아래 +12·좌우 클램프). 낙폭(MDD)=`Math.round((v[k-1]/mx−1)*100)`(가격 시계). 호버 중 숨김(평단·툴팁 양보) |
@@ -239,6 +240,7 @@ pantone.css :root       ← 현행 팔레트 (팬튼 A안, index.html 하단 <li
 
 ## 갱신 이력
 
+- 2026-07-18 12:37 · **01 종목 뉴스 행 `NEW` 배지(`.arow .anew`).** 최근 3일(72h·`isNewDt`)+미열람 기사에 `--dawn`/`--onacc` pill 20px(단계색 미사용=신선도 큐). **3초 호버 or 클릭 시 제거**(`dismissNew`→localStorage `am_news_seen_v1` 영속·키=link·재렌더 재출현 없음). `loadStockNews` `rowHTML()` 경로(종목+「더 보기」)·`#mktDigest` 위임. 매크로 「관련 기사」는 별도 템플릿이라 미적용(범위=보유 종목). 신규 `:root` 토큰 0→check-docs 통과. §6-5 행 신설. SimpleorNothing 지시. (OPS §3·§9)
 - 2026-07-18 12:16 · **02 aisd.js v3+v4 — ③ 통합·④ 구성요소별·티어 손익 스트립(`.ds-vces`).** ③은 한 `ds-sec` 아래 렌즈 2조+카드 2장. ④ plan 테이블 행을 구성요소(업체군 `small`+`ds-lb` 레이어 배지)로 교체. 티어 카드 하단 **손익 스트립 `.ds-vces`**(점선 상단 룰 · `.k` mono 12px 라벨 · 흑자=`.pf-ok`(st-dawn)·적자=`.pf-no`(st-hot)·중립=`.pf-mid`(st-mature) — 기능색 재사용, 리비전 ▲▼는 등락색 규약). **신규 :root 토큰 0** → TOKENS 무변·check-docs 통과. 본문 14px/메타 12~13px. (OPS §3·§9 동반)
 - 2026-07-18 11:17 · **02 aisd.js v2 — 밸류체인 구조도(`ds-vc*`)·② AI 판매자 매트릭스 추가(PR #413).** 티어 카드(`.ds-vct.t1~t4` — 좌측 3px 단계색 룰·기능색 재사용) + 층간 흐름 행(`.ds-vcf`) + 그룹(`.ds-vcg` panel2 면 3px) + 칩(`.ds-chip` 20px 부표·보유=`--dawn` 테두리) + 레이어 배지(`.ds-lb` sem/pow) + 관측 위치 박스(`.ds-vco` 점선). **신규 :root 토큰 0** → TOKENS 무변·check-docs 통과. 본문 14px/메타 12px·모바일 760px 세로 스택. (OPS §3·§9 동반)
 - 2026-07-18 10:37 · **01 「채택한 매크로 관점」 스트립을 상단→「관련 기사」 섹션으로 이동.** `insight.js mount()` 앵커 `insStripMarket`을 `#v-market` `.vhead` 뒤(최상단)에서 `#mktMacroNews` 앞(관련 기사 h2 아래)으로 변경 — 큐레이션 관점이 자동 매크로 뉴스와 한 묶음. **신규 `:root` 토큰·CSS 0**(스트립 컴포넌트·insight.css 재사용) → TOKENS 무변·check-docs 무영향. jsdom 배치 검증(prev=관련 기사 h2·next=#mktMacroNews·상단 미잔존). §6-1 규칙 추가. SimpleorNothing 지시. narrative≠numbers 유지. (OPS §3·§9 동반)
