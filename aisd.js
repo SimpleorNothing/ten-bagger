@@ -126,6 +126,13 @@ var CSS=`#dsAisd{margin:2px 0 38px}
 #dsAisd .ds-vcfm{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--st-hot)}
 #dsAisd .ds-vco{margin-top:10px;background:var(--ink2);border:1px dashed var(--line2);border-radius:3px;padding:11px 13px;font-size:14px;color:var(--dim);line-height:1.55}
 #dsAisd .ds-vco b{color:var(--txt)}
+#dsAisd .ds-vces{margin-top:9px;border-top:1px dashed var(--line);padding-top:8px;display:flex;gap:6px 18px;flex-wrap:wrap;font-size:13px;color:var(--dim);line-height:1.5}
+#dsAisd .ds-vces span{white-space:nowrap}
+#dsAisd .ds-vces .k{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--faint);margin-right:4px;letter-spacing:.03em}
+#dsAisd .ds-vces b{color:var(--txt);font-variant-numeric:tabular-nums}
+#dsAisd .ds-vces .pf-ok{color:var(--st-dawn);font-weight:700}
+#dsAisd .ds-vces .pf-no{color:var(--st-hot);font-weight:700}
+#dsAisd .ds-vces .pf-mid{color:var(--st-mature);font-weight:700}
 #dsAisd .ds-steel{border-left:2px solid var(--line2);padding:3px 0 3px 13px;color:var(--dim);font-size:14px;margin-top:8px;line-height:1.55}
 #dsAisd .ds-steel b{color:var(--txt)}
 #dsAisd .ds-fn{font-family:var(--mono);font-size:12px;color:var(--faint);margin-top:8px;text-align:right}
@@ -177,6 +184,7 @@ var HTML=`<div style="position:relative">
 <div class="ds-lens">
   <div class="ds-l1"><b>구조 · 돈의 강</b> 각 층의 지불이 아래층의 매출 — 병목은 돈이 몰리는데 공급이 못 따라오는 층에서 열린다</div>
   <div class="ds-l2">현재 병목 = <span class="ds-wn">④ Factory(반도체·전력)</span> · 상류 지불이 꺾이면(리비전 ▼) 하류 매출이 시차를 두고 꺾인다 → <span class="ds-nt">위 판정 보드와 연동</span></div>
+  <div class="ds-l2"><b style="color:var(--txt)">ROI 점검</b> — 각 티어 하단에 매출·투자/비용·이익·전망: 이익은 아직 <span class="ds-ok">④에만 고인다</span> · ①~③의 ROI 증명이 지연되면 ④ 수요의 지속성이 꺾인다 → <span class="ds-nt">티어별 매출 리비전으로 감시</span></div>
 </div>
 <div class="ds-vct t1">
   <div class="ds-vch"><span class="ds-tno">①</span><span class="ds-vcn">AI 수요자</span><span class="ds-vce">Demand</span>
@@ -185,6 +193,11 @@ var HTML=`<div style="position:relative">
     <div class="ds-vcg"><div class="ds-vcgt">일반 소비자<small>B2C</small></div><div class="ds-chips"><span class="ds-chip">구독(챗봇·앱)</span><span class="ds-chip">디바이스 AI</span></div></div>
     <div class="ds-vcg"><div class="ds-vcgt">기업<small>B2B</small></div><div class="ds-chips"><span class="ds-chip">API·토큰</span><span class="ds-chip">코파일럿·에이전트</span><span class="ds-chip">자체 구축</span></div></div>
     <div class="ds-vcg"><div class="ds-vcgt">정부·공공<small>B2G</small></div><div class="ds-chips"><span class="ds-chip">소버린 AI</span><span class="ds-chip">국방·행정</span></div></div>
+  </div>
+  <div class="ds-vces">
+    <span><span class="k">지불</span>글로벌 AI 지출 <b>▲ 급증</b>(기업 예산 편성 확대)</span>
+    <span><span class="k">효용</span><span class="pf-mid">검증 진행형</span> — 파일럿→정착 전환율이 관건</span>
+    <span><span class="k">전망</span>지불 의사 리비전 <b style="color:var(--st-hot)">▲</b> · 꺾이면 전체 사슬의 최상류 경보</span>
   </div>
 </div>
 <div class="ds-vcf"><span class="ds-vcfa">▼</span><span class="ds-vcft"><b>구독료·API 요금·라이선스</b> 지불</span><span class="ds-vcfm">$ 수요의 원천</span></div>
@@ -195,6 +208,12 @@ var HTML=`<div style="position:relative">
     <div class="ds-vcg"><div class="ds-vcgt">범용 AI 모델<small>Frontier</small></div><div class="ds-chips"><span class="ds-chip">OpenAI</span><span class="ds-chip">Anthropic</span><span class="ds-chip">Gemini</span><span class="ds-chip">DeepSeek</span></div></div>
     <div class="ds-vcg"><div class="ds-vcgt">특화 AI 모델·응용 서비스<small>Vertical · App</small></div><div class="ds-chips"><span class="ds-chip">구글 서비스</span><span class="ds-chip">MS(Copilot)</span><span class="ds-chip">오라클</span><span class="ds-chip">버티컬 SaaS</span></div></div>
   </div>
+  <div class="ds-vces">
+    <span><span class="k">매출</span>랩 합산 run-rate <b>~$40B±</b> · <b style="color:var(--st-hot)">▲</b> 연 2~3× 급성장</span>
+    <span><span class="k">비용</span>컴퓨트·학습비가 <b>매출 상회</b>(OpenAI 연 손실 수십억$ 관측)</span>
+    <span><span class="k">이익</span><span class="pf-no">적자 — ROI 미증명</span> · 성장으로 정당화 중</span>
+    <span><span class="k">전망</span>매출 리비전 <b style="color:var(--st-hot)">▲</b> · 흑자 시점은 <b style="color:var(--st-accel)">▼ 후퇴</b></span>
+  </div>
 </div>
 <div class="ds-vcf"><span class="ds-vcfa">▼</span><span class="ds-vcft"><b>컴퓨팅 비용</b> 지불(클라우드 임대·추론 토큰 원가)</span><span class="ds-vcfm">$ 매출→원가 전환</span></div>
 <div class="ds-vct t3">
@@ -203,6 +222,12 @@ var HTML=`<div style="position:relative">
   <div class="ds-vcb">
     <div class="ds-vcg"><div class="ds-vcgt">하이퍼스케일러<small>4사 = CAPEX 최상류 신호</small></div><div class="ds-chips"><span class="ds-chip">AWS</span><span class="ds-chip">Azure</span><span class="ds-chip">GCP</span><span class="ds-chip">Meta(자가)</span></div></div>
     <div class="ds-vcg"><div class="ds-vcgt">뉴클라우드·소버린<small>임대→주권 강물</small></div><div class="ds-chips"><span class="ds-chip">CoreWeave</span><span class="ds-chip">Oracle OCI</span><span class="ds-chip">국가 DC</span></div></div>
+  </div>
+  <div class="ds-vces">
+    <span><span class="k">매출</span>클라우드 AI 증분 <b>~$150B±/년</b> · <b style="color:var(--st-hot)">▲</b> 두 자릿수 성장</span>
+    <span><span class="k">투자</span>CAPEX <b>~$700B</b>(2026E) — 매출 증분을 크게 상회</span>
+    <span><span class="k">이익</span><span class="pf-mid">클라우드 본업 흑자(마진 25~35%)</span> · AI 증분 ROI는 미증명 — 감가상각 파도 2027~</span>
+    <span><span class="k">전망</span>capex <b style="color:var(--st-hot)">▲</b> &gt; AI 매출 <b style="color:var(--st-hot)">▲</b> → <span class="pf-no">갭 확대 = 경고 플래그</span></span>
   </div>
 </div>
 <div class="ds-vcf"><span class="ds-vcfa">▼</span><span class="ds-vcft"><b>CAPEX</b> — 컴퓨팅을 만들기 위한 <b>Factory 건설</b>(2026E 합산 ~$700B)</span><span class="ds-vcfm">$ 아래 ③ CAPEX 차트</span></div>
@@ -215,8 +240,14 @@ var HTML=`<div style="position:relative">
     <div class="ds-vcg"><div class="ds-vcgt">전력<span class="ds-lb pow">L7–L8</span></div>
       <div class="ds-chips"><span class="ds-chip hold">전력·냉각 L7 · VRT·BE</span><span class="ds-chip hold">발전·그리드 L8 · CEG·VST</span></div></div>
   </div>
+  <div class="ds-vces">
+    <span><span class="k">매출</span>NVDA <b>~$200B+/년</b> · HBM·전력기기 <b style="color:var(--st-hot)">▲</b> 급증</span>
+    <span><span class="k">투자</span>메모리 3사 <b>~$575B</b>(~2027) · 팹·캐파 경쟁</span>
+    <span><span class="k">이익</span><span class="pf-ok">밸류체인 유일 확실 흑자</span> — NVDA 순마진 ~50%·HBM 고마진</span>
+    <span><span class="k">전망</span>마진 피크 논쟁 진행 · 리비전은 아직 <b style="color:var(--st-hot)">▲</b></span>
+  </div>
 </div>
-<div class="ds-vco"><b>알파맵의 관측 위치</b> — 돈은 ①→④로 내려가지만, 관측소는 <b>④ Factory(반도체·전력)에 ~80% 집중</b>한다. ①~③은 승자 판별이 어렵고(모델 경쟁·마진 미검증), ④는 <b>누가 이기든 팔리는 곡괭이·삽</b>이기 때문. 상류 수요 신호(③의 CAPEX 리비전)로 하류를 판정한다 — 위 판정 보드가 그 도구.</div>
+<div class="ds-vco"><b>알파맵의 관측 위치</b> — 돈은 ①→④로 내려가지만, 관측소는 <b>④ Factory(반도체·전력)에 ~80% 집중</b>한다. ①~③은 승자 판별이 어렵고(모델 경쟁·마진 미검증), ④는 <b>누가 이기든 팔리는 곡괭이·삽</b>이기 때문. <b>손익 지도도 같은 그림</b> — ② 적자·③ AI 증분 미증명·④만 확실 흑자. ①~③의 ROI 증명(매출 리비전)이 ④ 수요 지속성의 선행 지표다 — 위 판정 보드가 그 도구. <span style="font-family:var(--mono);font-size:12px;color:var(--faint)">· 티어 손익 수치는 공개 관측 기반 방향성(분기 캡처 갱신)</span></div>
 
 <div class="ds-sec">① 수요 — AI의 진화 <span class="ds-note">방향만 · 추정 · 연도는 대략치</span></div>
 <div class="ds-lens">
@@ -269,7 +300,7 @@ var HTML=`<div style="position:relative">
   <div class="ds-fn">매출·계획은 공개 관측 기반 방향성(비상장 다수 · 확정치 아님) — narrative 층</div>
 </div>
 
-<div class="ds-sec">③ 컴퓨팅 판매자 — 하이퍼스케일러 CAPEX <span class="ds-note">4사 합산 · $B · 2027E &gt;$1T · 2028E 애널 추정(컨센서스 희박)</span></div>
+<div class="ds-sec">③ 컴퓨팅 판매자 — CAPEX · 주요 업체 투자계획 <span class="ds-note">4사 합산 · $B · 2027E &gt;$1T · 2028E 컨센서스 희박 · 업체 클릭 = 연도별 상세</span></div>
 <div class="ds-lens">
   <div class="ds-l1"><b>상류 · 수요 선행</b> 하이퍼스케일러 capex = 8레이어 전체 수요의 최상류 신호</div>
   <div class="ds-l2">2025 ~$460B(실적) → 2026E ~$700B → 2027E <span class="ds-wn">$1T 돌파 전망</span> → 2028E ~$1.2T · 우상향 지속 = 고점 미점등, 추정 리비전 확인 필요</div>
@@ -302,8 +333,7 @@ var HTML=`<div style="position:relative">
   <div class="ds-fn">채워진 막대=실적 · 테두리=추정(E) · 점선=컨센서스 희박 · 리비전 트랙은 캡처 축적 전 예시 — 연동 시 분기 스냅샷 비교로 자동 파생</div>
 </div>
 
-<div class="ds-sec">③ 컴퓨팅 판매자 — 주요 업체 투자계획 <span class="ds-note">연도별 CAPEX · $B · 업체 클릭 = 연도별 상세</span></div>
-<div class="ds-lens">
+<div class="ds-lens" style="margin-top:14px">
   <div class="ds-l1"><b>수요 · 4사 분해</b> 누가 얼마를 · 어느 방향으로 늘리나</div>
   <div class="ds-l2">4사 모두 동시 증액 = 경쟁적 과투자 국면 · <span class="ds-nt">capex/매출 갭 확대는 가격시계 경고 플래그</span></div>
 </div>
@@ -348,32 +378,42 @@ var HTML=`<div style="position:relative">
   <div class="ds-fn"><span class="ds-rev up">▲</span>/<span class="ds-rev dn">▼</span> = 직전 컨센서스 캡처(분기) 대비 상향/하향 · <span class="ds-rev fl">→</span> = 변동 없음 — 리비전 방향이 상단 판정 보드의 입력</div>
 </div>
 
-<div class="ds-sec">④ Factory — 반도체 캐파 투자계획 <span class="ds-note">공급 · 메모리 3사(L3) · HBM/DRAM 중심 · 전력(L7–L8)은 01·05 모니터링</span></div>
+<div class="ds-sec">④ Factory — 구성요소별 투자 <span class="ds-note">공급 · 컴퓨팅을 만드는 Factory의 부품 — L2~L8 · 연도별</span></div>
 <div class="ds-lens">
-  <div class="ds-l1"><b>L3 · 병목</b> 메모리(HBM) 캐파가 상류 수요를 못 따라오면 γ open 유지</div>
-  <div class="ds-l2">3사 합산 투자 ~$575B(2027까지) · Samsung HBM +50%·SK +$15B 추가팹 → <span class="ds-ok">공급 확대 중이나 여전히 타이트</span></div>
+  <div class="ds-l1"><b>④ · L2–L8</b> Factory 구성요소별 — 병목이 어느 요소로 이동하나</div>
+  <div class="ds-l2">컴퓨트는 공급 완화 방향 · 메모리(HBM) 타이트 지속 · <span class="ds-wn">전력·냉각 리드타임이 새 병목 후보</span> → 병목은 사슬 아래로 이동 중</div>
 </div>
 <div class="ds-card">
   <table class="ds-mtx plan">
     <thead><tr><th style="width:14%">업체</th><th style="width:20%">~2025</th><th class="est" style="width:23%">2026E</th><th class="est" style="width:22%">2027E</th><th class="est" style="width:21%">2028E~</th></tr></thead>
     <tbody>
-      <tr><td class="ds-co">SK하이닉스<span class="ds-role lead">HBM 선두</span></td>
-        <td>HBM 시장 주도 · HBM3E 독점적 공급 · 청주 <b>M15X 착공</b></td>
-        <td><b>+$15B 추가 팹 투자</b>(M15X 램프·용인 클러스터) · <b>HBM4 선제 양산</b> — 단 DDR5 수익성 위해 램프 속도 조절 관측</td>
-        <td>용인 클러스터 1기 가동 목표 · HBM4/4E 주도권 방어 · 사이클 연장 국면의 최대 수혜 축</td>
-        <td>용인 1기 램프 · <b>HBM4E→HBM5 전환</b> 개시 · M15X 풀가동 — 계획 미확정 구간</td></tr>
-      <tr><td class="ds-co">삼성전자<span class="ds-role chase">HBM 추격</span></td>
-        <td>HBM3E 퀄 진통 · 평택 증설 재개</td>
-        <td><b>HBM 캐파 +50%</b> 계획 · <b>HBM4 퀄 통과</b>가 관건 · P4/P5 팹 증설로 DRAM 전반 확대</td>
-        <td>P4/P5 램프 본격화 · HBM4 퀄 성패가 점유 회복의 갈림길</td>
-        <td>P5 가동 · HBM4E 경쟁 합류 여부가 분수령 — 퀄 실패 시 격차 고착</td></tr>
-      <tr><td class="ds-co">Micron<span class="ds-role chase">HBM 추격</span></td>
-        <td>HBM3E 점유 확대 개시 · 보이시(아이다호) 착공</td>
-        <td>싱가포르 <b>HBM 패키징 신설</b> · HBM 점유 목표 상향 · DRAM 캐파 증설</td>
-        <td><b>아이다호 신규 팹 가동</b> · 미국 내 생산 비중 확대(보조금 연동)</td>
-        <td>아이다호 램프 본격화 · 뉴욕 팹 착공 검토 — 미국 생산 축 확립</td></tr>
-      <tr class="sumrow"><td class="ds-co">3사 합산</td>
-        <td colspan="4">투자 사이클 <b>2027까지 연장</b>(2028은 계획 미확정) — 합산 <b>~$575B</b> <span class="ds-rev up">▲</span>(직전 캡처 ~$520B). 캐파는 늘지만 선단(1c·HBM4) 램프가 병목 → HBM 타이트 지속 · <b>공급 추정 ▲상향 = 과잉 리스크 감시</b> · 2028E 신규 캐파 동시 램프 = 과잉 리스크 최대 구간</td></tr>
+      <tr><td class="ds-co">컴퓨트 반도체<small>NVDA · AMD · 인텔</small><span class="ds-lb sem">L2</span></td>
+        <td>NVIDIA <b>Blackwell 램프</b> · 점유 ~90% · AMD MI300/350 추격 · 인텔 Gaudi 부진</td>
+        <td>NVIDIA <b>Rubin 출시</b> · AMD MI400(대형 수주 확보) · 인텔 가속기 재편</td>
+        <td>Rubin Ultra · 자체칩(TPU·Trainium) 경쟁 심화 — 점유 잠식 변수</td>
+        <td>세대 교체 주기 단축 지속 — 컴퓨트 공급은 완화 방향, 수급 균형이 관건</td></tr>
+      <tr><td class="ds-co">메모리<small>삼성 · SK하이닉스 · Micron</small><span class="ds-lb sem">L3</span></td>
+        <td>HBM3E 타이트 · SK 독주 · 3사 캐파 경쟁 개시</td>
+        <td>SK <b>+$15B 팹</b>(M15X·용인) · 삼성 <b>HBM +50%</b>·HBM4 퀄 · Micron 싱가포르 패키징 — 합산 <b>~$575B</b>(2027까지) <span class="ds-rev up">▲</span></td>
+        <td>용인 1기·P4/P5·아이다호 가동 — 공급 확대에도 선단(1c·HBM4) 타이트</td>
+        <td>신규 캐파 동시 램프 = <b>과잉 리스크 최대 구간</b> · HBM4E→HBM5 전환</td></tr>
+      <tr><td class="ds-co">통신·네트워킹<small>Broadcom · Marvell · 옵티컬(LITE·Coherent)</small><span class="ds-lb sem">L6</span></td>
+        <td><b>800G 광모듈 램프</b> · 커스텀 ASIC(TPU·Trainium) 수주 급증</td>
+        <td><b>1.6T 전환 개시</b> · CPO(co-packaged optics) 상용화 시동</td>
+        <td>스케일업/아웃 네트워크 재편 — 대역폭 병목으로 옵티컬 비중 확대</td>
+        <td>CPO 표준화가 광모듈 업체 마진의 분수령</td></tr>
+      <tr><td class="ds-co">냉각<small>Vertiv 등</small><span class="ds-lb pow">L7</span></td>
+        <td>공랭→<b>수랭(liquid) 전환 가속</b> · 랙당 전력밀도 급등</td>
+        <td>리퀴드 쿨링 표준화(GB300급) — 수주잔고 확대</td>
+        <td>신축 DC 대부분 수랭 설계 — 냉각이 건설 리드타임 변수</td>
+        <td>2상 냉각·침지 등 차세대 방식 경쟁</td></tr>
+      <tr><td class="ds-co">전력·발전<small>CEG · VST · Bloom · 그리드</small><span class="ds-lb pow">L7–L8</span></td>
+        <td>DC 전력 계약(원전 PPA) <b>선점 경쟁</b></td>
+        <td>가스터빈·변압기 <b>리드타임 병목</b> — 연료전지(온사이트)로 우회 수요</td>
+        <td>신규 원전·SMR 착공 · 그리드 증설 본격화</td>
+        <td><b>전력이 Factory 증설의 최종 상한</b> — 병목의 종착지 후보</td></tr>
+      <tr class="sumrow"><td class="ds-co">병목 이동</td>
+        <td colspan="4">컴퓨트(완화 방향) → <b>메모리(타이트 지속)</b> → 통신(1.6T·CPO 전환) → <b>냉각·전력(새 병목 부상)</b> — 층 고정이 아니라 <b>병목 추적</b>이 알파의 원천 · 메모리 상세는 γ-닫힘 3트리거(MU)·01 DXI로 라이브 감시</td></tr>
     </tbody>
   </table>
 </div>
