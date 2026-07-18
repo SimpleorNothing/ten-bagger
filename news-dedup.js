@@ -70,8 +70,9 @@
     var host=document.getElementById('mktMacroNews');if(!host)return;
     if(busy)return;busy=true;if(OBS)OBS.disconnect();
     try{
-      var h=host.previousElementSibling;   /* h2 「관련 기사」→「토픽 레이더」(1회) */
-      if(h&&h.classList&&h.classList.contains('msec')&&!h.getAttribute('data-radar')){
+      var h=host.previousElementSibling;   /* h2 「관련 기사」→「토픽 레이더」 — insight.js가 host 앞에 #insStripMarket을 끼우므로 h2.msec 만날 때까지 역행 */
+      while(h&&!(h.classList&&h.classList.contains('msec')))h=h.previousElementSibling;
+      if(h&&!h.getAttribute('data-radar')){
         h.setAttribute('data-radar','1');
         h.innerHTML='토픽 레이더 <span class="mnote">매크로 관점 · 토픽별</span>';}
       var ins=document.getElementById('insStripMarket');   /* insight.js 상단 스트립 숨김(우리 것은 #trStripRest) */
