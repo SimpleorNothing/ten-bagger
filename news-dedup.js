@@ -31,7 +31,7 @@
    ① window.INSIGHT.adopted()에서 route=macro 채택 관점을 읽어(insight.js 내부 미의존 — 공개 API만),
       같은 축(ax) 토픽 블록의 .stk-sum 아래 [data-macviews]에 .ins-si로 **렌더**한다(노드 이동 아님 → loadMacroNews 블록 재생성에도 유실 0).
    ② 축 미매칭/해당 축 토픽 부재 시 → #mktMacroNews 맨 마지막 공통 컨테이너(#trStripRest, 2열 폭).
-   ③ h2 「관련 기사」→「토픽 레이더」 리네임 · insight.js의 상단 매크로 스트립(#insStripMarket)은 숨김.
+   ③ h2 「관련 기사」→「토픽 레이더」 리네임 · insight.js의 상단 매크로 스트립(#insStripMarket)은 숨김 · 「채택한 일정 관점」(#insStripCal)은 토픽 레이더 h2 아래로 이동.
    narrative≠numbers — .ins-si 컴포넌트 그대로(뉴스 .arow로 평탄화 안 함 · 숫자 파일 불변).
    index.html·insight.js·CSS 무편집(이 소형 파일에서 DOM 배치만 · .ins-si/.ins-strip/.sh는 insight.css 톱레벨 룰 재사용).
    AXR·렌더 포맷은 index.html loadMacroNews()·insight.js와 동일 소스 — 셋이 갈라지면 어긋난다(변경 시 동기 유지). */
@@ -75,6 +75,8 @@
       if(h&&!h.getAttribute('data-radar')){
         h.setAttribute('data-radar','1');
         h.innerHTML='토픽 레이더 <span class="mnote">매크로 관점 · 토픽별</span>';}
+      var cal=document.getElementById('insStripCal');   /* 「채택한 일정 관점」 스트립을 상단(.vhead 뒤)→토픽 레이더 h2 바로 아래로 이동. insight.js는 id로 채우므로 옷겨도 계속 렌더됨(anchor는 이미 존재 시 재생성 안 함) */
+      if(cal&&h&&h.nextElementSibling!==cal)h.parentNode.insertBefore(cal,h.nextElementSibling);
       var ins=document.getElementById('insStripMarket');   /* insight.js 상단 스트립 숨김(우리 것은 #trStripRest) */
       if(ins&&ins.id!=='trStripRest')ins.style.display='none';
       Array.prototype.forEach.call(host.querySelectorAll('[data-macviews]'),function(n){if(n.parentNode)n.parentNode.removeChild(n);});
