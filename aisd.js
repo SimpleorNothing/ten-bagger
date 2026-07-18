@@ -83,6 +83,13 @@ var CSS=`#dsAisd{margin:2px 0 38px}
 #dsAisd .ds-mtx tr.dtl{display:none}
 #dsAisd .ds-mtx tr.dtl.on{display:table-row}
 #dsAisd .ds-mtx tr.dtl td,#dsAisd .ds-mtx tr.dtl:hover td{padding:0;background:var(--panel2)}
+#dsAisd .ds-dtxt{padding:11px 14px;font-size:14px;color:var(--dim);text-align:left;line-height:1.6;font-variant-numeric:normal;font-family:inherit}
+#dsAisd .ds-dtxt b{color:var(--txt)}
+#dsAisd .ds-jd{font-family:var(--mono);font-size:12px;font-weight:700;padding:2px 9px;border-radius:20px;color:var(--onacc);white-space:nowrap;display:inline-block}
+#dsAisd .ds-jd.st{background:var(--st-dawn)}
+#dsAisd .ds-jd.mx{background:var(--st-mature)}
+#dsAisd .ds-jd.cy{background:var(--st-accel)}
+#dsAisd .ds-jd.no{background:var(--faint)}
 #dsAisd .ds-yrp{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--line);border-top:1px solid var(--line)}
 #dsAisd .ds-yc{background:var(--panel2);padding:10px 12px;text-align:left}
 #dsAisd .ds-yy{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--dawn)}
@@ -248,6 +255,31 @@ var HTML=`<div style="position:relative">
   </div>
 </div>
 <div class="ds-vco"><b>알파맵의 관측 위치</b> — 돈은 ①→④로 내려가지만, 관측소는 <b>④ Factory(반도체·전력)에 ~80% 집중</b>한다. ①~③은 승자 판별이 어렵고(모델 경쟁·마진 미검증), ④는 <b>누가 이기든 팔리는 곡괭이·삽</b>이기 때문. <b>손익 지도도 같은 그림</b> — ② 적자·③ AI 증분 미증명·④만 확실 흑자. ①~③의 ROI 증명(매출 리비전)이 ④ 수요 지속성의 선행 지표다 — 위 판정 보드가 그 도구. <span style="font-family:var(--mono);font-size:12px;color:var(--faint)">· 티어 손익 수치는 공개 관측 기반 방향성(분기 캡처 갱신)</span></div>
+
+<div class="ds-sec">이익률 추이 — 병목의 온도계 <span class="ds-note">영업이익률 · 회계연도 근사 · 공개 실적 기반 방향성 · 행 클릭 = 왜 높은가·구조성 판정</span></div>
+<div class="ds-lens">
+  <div class="ds-l1"><b>판독법</b> 이익률이 높은 층 = 병목이 있는 층 — 수요&gt;공급이 만든 가격결정력이 마진으로 드러난다</div>
+  <div class="ds-l2">현재 지도: <span class="ds-wn">④ NVDA ~60%·메모리 ~50%</span> ≫ ③ 클라우드 ~30% &gt; ② 랩 적자 = <b>병목이 ④에 있다는 수치 증거</b> · <span class="ds-nt">마진 역전이 시작되면 병목 이동의 1차 텔</span></div>
+</div>
+<div class="ds-card">
+  <table class="ds-mtx">
+    <thead><tr><th style="width:19%">티어 · 업체</th><th>2023</th><th>2024</th><th>2025</th><th class="est">2026E</th><th class="nt" style="width:26%">판정 — 구조적 vs 일시적</th></tr></thead>
+    <tbody>
+      <tr class="exp" tabindex="0"><td class="ds-co">② AI 판매자<small>프런티어 랩 합산</small></td><td class="dim">적자</td><td class="dim">적자</td><td class="dim">적자</td><td class="dim">적자(개선)</td><td class="nt"><span class="ds-jd no">병목 아님</span> 가격결정력 약함 — 경쟁 심화</td></tr>
+      <tr class="dtl"><td colspan="6"><div class="ds-dtxt"><b>왜 낮은가:</b> 추론 매출총이익률은 ~50%±로 개선 중(토큰 단가 인하 vs 원가 하락 경쟁)이나, 학습비·인재비가 영업적자를 지속시킨다. 모델이 상호 대체 가능(범용 4강 + 오픈모델)해 가격결정력이 약함 = <b>이 층에 병목이 없다는 뜻.</b> <b>구조성 판정:</b> 프런티어 경쟁이 지속되는 한 구조적 저마진 — 에이전트 락인·업무 데이터 축적이 생기면 반전 후보. 매출 리비전 ▲는 유지 중이라 「적자지만 성장」 국면.</div></td></tr>
+      <tr class="exp" tabindex="0"><td class="ds-co">③ 컴퓨팅 판매자<small>클라우드 부문</small></td><td>~28%</td><td>~32%</td><td>~33%</td><td class="dim">~30%±</td><td class="nt"><span class="ds-jd st">본업 구조적</span> AI 증분은 미증명 — 감가상각 압력</td></tr>
+      <tr class="dtl"><td colspan="6"><div class="ds-dtxt"><b>왜 중간인가:</b> 3사 과점이라 본업 마진은 구조적으로 확보. 그러나 AI 증분은 GPU 감가상각(4~6년)·전력 원가가 무거워 마진을 희석 — capex 파도가 2027~ 손익계산서에 도달한다. <b>구조성 판정:</b> 이 층은 병목이 아니라 <b>병목(④)에 지불하는 층</b> — ④ 마진이 꺾여야 ③ 마진이 펴진다(원가 하락). AI 증분 ROI 증명 여부가 2027 이후 마진 방향 결정.</div></td></tr>
+      <tr class="exp" tabindex="0"><td class="ds-co">④ NVIDIA<small>컴퓨트 가속기 L2</small></td><td>~54%</td><td>~62%</td><td>~60%±</td><td class="dim">~60% 공방</td><td class="nt"><span class="ds-jd mx">혼합</span> 생태계=구조 · 부족 프리미엄=사이클</td></tr>
+      <tr class="dtl"><td colspan="6"><div class="ds-dtxt"><b>왜 높은가:</b> ① CUDA·NVLink 생태계 락인(<b>구조적</b>) ② 1년 주기 세대 교체로 경쟁 추격 차단(<b>구조적 성격</b>) ③ 공급 부족(CoWoS·HBM) 프리미엄(<b>일시적 — 캐파 확충 시 소멸</b>). <b>잠식 경로:</b> 자체칩(TPU·Trainium) 비중 확대 · AMD MI400 · 추론의 저가화(추론 비중↑ = ASIC 침투 여지↑). <b>판정:</b> 60%대 유지 여부가 병목 이동의 1차 텔 — <b>마진 하락 시작 = 컴퓨트 병목 해소 신호</b>, ④ 안에서 메모리·전력으로 병목 재배치.</div></td></tr>
+      <tr class="exp" tabindex="0"><td class="ds-co">④ 메모리<small>SK 기준 · 3사 방향 동일</small></td><td class="dim">적자</td><td>~35%</td><td>~50%±</td><td class="dim">고마진 공방</td><td class="nt"><span class="ds-jd cy">기본 사이클</span> HBM 주문형 전환이 구조성 부여 중</td></tr>
+      <tr class="dtl"><td colspan="6"><div class="ds-dtxt"><b>왜 높은가:</b> ① HBM 수요&gt;공급(캐파 타이트) ② 선단 기술 격차(1c·HBM4 수율 — SK 우위) ③ 사실상 3사 과점 + HBM은 장기계약·주문형 생산(「메모리의 파운드리화」). <b>구조성 판정:</b> 역사적으로 메모리 마진은 사이클(2018 ~50% → 2019 붕괴 전례) — <b>기본 가정은 일시적(사이클)</b>. 반론: HBM 비중 확대·장기계약이 진폭을 줄인다(구조 전환론). <b>시험대 = 2028E 신규 캐파 동시 램프</b> — γ-닫힘 3트리거(목표가 리비전·fwd P/E·DRAM 가격 롤오버)와 같은 감시선. 이 판정이 알파맵 L3 비중의 핵심 변수.</div></td></tr>
+      <tr class="exp" tabindex="0"><td class="ds-co">④ 통신·전력<small>Broadcom · Vertiv · 발전</small></td><td class="dim">—</td><td>~60/20%</td><td>~63/21%</td><td class="dim">↑ 방향</td><td class="nt"><span class="ds-jd st">과점 구조적</span> 병목 이동의 다음 수혜 후보</td></tr>
+      <tr class="dtl"><td colspan="6"><div class="ds-dtxt"><b>왜 높은가:</b> Broadcom ~60%대(커스텀 ASIC·네트워킹 과점 — <b>구조적</b>), Vertiv ~20%(냉각 수주잔고 — 수요 초과), 발전은 PPA 프리미엄(전력 부족 — <b>리드타임이 만든 일시적+정책 변수</b>). <b>판정:</b> 컴퓨트·메모리 마진이 꺾일 때 이 층 마진이 오르면 병목이 사슬 아래로 이동했다는 확인 — <b>④ 내부의 마진 순환이 알파맵 레이어 회전(비싸진 쪽→눌린 쪽)의 신호.</b></div></td></tr>
+      <tr class="sumrow"><td class="ds-co">온도계 판독</td><td colspan="5">이익률 서열(④≫③&gt;②)이 곧 병목 위치의 수치 증거 — <b>서열이 바뀌는 순간이 레이어 회전 타이밍</b>. 감시: NVDA 마진 꺾임(컴퓨트 해소) · 메모리 마진 롤오버(γ-닫힘 연동) · 통신·전력 마진 상승(병목 남하) — 분기 실적마다 이 표를 캡처 갱신</td></tr>
+    </tbody>
+  </table>
+  <div class="ds-fn">영업이익률 · 공개 실적 기반 방향성(회계연도·부문 정의 차 존재) · 분기 캡처 갱신 — narrative 층</div>
+</div>
 
 <div class="ds-sec">① 수요 — AI의 진화 <span class="ds-note">방향만 · 추정 · 연도는 대략치</span></div>
 <div class="ds-lens">
