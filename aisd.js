@@ -389,14 +389,15 @@ var HTML=`<div style="position:relative">
         <div class="ds-yc"><div class="ds-yy est">2027E</div><div class="ds-yv">↑ 지속</div><div class="ds-yt">자체칩(TPU) 비중 확대 = NVIDIA 의존 일부 완화 변수</div></div>
         <div class="ds-yc"><div class="ds-yy est">2028E</div><div class="ds-yv">컨센 희박</div><div class="ds-yt">TPU 세대 교체 주기 지속 전제 — 추론 트래픽이 규모 결정</div></div>
       </div></td></tr>
-      <tr class="exp" tabindex="0"><td class="ds-co">Meta</td><td>39</td><td>~72</td><td class="dim">~125 <span class="ds-rev up">▲10</span></td><td class="dim">↑ <span class="ds-rev fl">→</span></td><td class="dim">↑</td><td class="nt">추론·자체 클러스터 집중</td></tr>
+      <tr class="exp" tabindex="0"><td class="ds-co">Meta</td><td>39</td><td>~72</td><td class="dim">~125 <span class="ds-rev up">▲10</span></td><td class="dim">↑ <span class="ds-rev fl">→</span></td><td class="dim">↑</td><td class="nt">추론·자체 클러스터 집중 · Hyperion 5GW 확정</td></tr>
       <tr class="dtl"><td colspan="7"><div class="ds-yrp">
         <div class="ds-yc"><div class="ds-yy">2024</div><div class="ds-yv">$39B</div><div class="ds-yt">Llama 학습 · 추천 시스템 GPU 확충</div></div>
         <div class="ds-yc"><div class="ds-yy">2025</div><div class="ds-yv">~$72B</div><div class="ds-yt">추론 캐파 집중 · 자체 DC 건설 가속</div></div>
-        <div class="ds-yc"><div class="ds-yy est">2026E</div><div class="ds-yv">~$125B</div><div class="ds-yt">기가와트급 클러스터(Hyperion·Prometheus) 착공·램프</div></div>
-        <div class="ds-yc"><div class="ds-yy est">2027E</div><div class="ds-yv">↑ 지속</div><div class="ds-yt">수년간 기가와트 단위 증설 로드맵 공언 — 전력이 제약</div></div>
-        <div class="ds-yc"><div class="ds-yy est">2028E</div><div class="ds-yv">↑ 로드맵</div><div class="ds-yt">Hyperion 5GW급 완공 목표 구간 — 전력·부지 확보가 상한</div></div>
-      </div></td></tr>
+        <div class="ds-yc"><div class="ds-yy est">2026E</div><div class="ds-yv">~$125B</div><div class="ds-yt">Hyperion <b>2GW→5GW 확정</b>($50B·07-14 발표) · Prometheus 병행 램프</div></div>
+        <div class="ds-yc"><div class="ds-yy est">2027E</div><div class="ds-yv">↑ 지속</div><div class="ds-yt">수년간 기가와트 단위 증설 로드맵 공언 — 전력이 제약 · Hyperion 단계 가동 개시</div></div>
+        <div class="ds-yc"><div class="ds-yy est">2028E</div><div class="ds-yv">↑ 로드맵</div><div class="ds-yt">Hyperion <b>5GW 완공 목표(~2030)</b> · 부지 ~93만㎡ — 전력·부지 확보가 상한</div></div>
+      </div>
+      <div class="ds-vco"><b>Hyperion 조달 구조 (2026-07-14 발표 · narrative)</b> — 5GW·$50B 프로젝트를 Meta가 <b>보유하지 않는다</b>: Blue Owl 80% / Meta 20%의 <b>SPV·JV</b>가 소유, PIMCO $18B·BlackRock 계열 $3B 채권(A+) 인수로 자금 조달. Meta는 건설·운영 관리 후 <b>장기 임차</b>(초기 계약 ~4년) 지급. 당초 2GW·$100억 → ~$270억 → <b>$500억</b>으로 2년 내 5배 증액.<br>▸ <b>읽는 법 ①</b> 하이퍼스케일러 capex의 상한이 자기자본·현금흐름에서 <b>민간 신용시장</b>으로 이동 = 수요 시계를 연장하는 요인(자산 비보유 → 신용등급 방어 + 현금은 GPU로).<br>▸ <b>② 새 취약점</b> 리스 만기(~4년)·금리·크레딧 사이클이 AI capex의 새 취약 고리 — 리비전 하향의 방아쇠가 실적이 아니라 <b>조달</b>에서 나올 수 있다.<br>▸ <b>③ L8 읽기</b> Entergy 신규 가스발전 7기·그리드급 배터리 3기·원전 uprate 동반 = 전력 병목의 실물 확인(④ 전력·발전 행과 정합).</div></td></tr>
       <tr class="exp" tabindex="0"><td class="ds-co">Microsoft<small>Azure/OpenAI</small></td><td>44</td><td>~80</td><td class="dim">~120 <span class="ds-rev up">▲5</span></td><td class="dim">↑ <span class="ds-rev fl">→</span></td><td class="dim">~</td><td class="nt">OpenAI 연동 · 임대+자가 혼합</td></tr>
       <tr class="dtl"><td colspan="7"><div class="ds-yrp">
         <div class="ds-yc"><div class="ds-yy">2024</div><div class="ds-yv">$44B</div><div class="ds-yt">Azure AI 인프라 — OpenAI 학습·서빙 수요</div></div>

@@ -240,6 +240,7 @@ pantone.css :root       ← 현행 팔레트 (팬튼 A안, index.html 하단 <li
 
 ## 갱신 이력
 
+- 2026-07-18 14:20 · **02 aisd.js ③ Meta 상세에 조달 구조 박스.** 신규 컴포넌트 없음 — 기존 `.ds-vco`(점선 박스)를 `tr.dtl` 내 `.ds-yrp` 아래에 재사용, 본문은 `<b>`+`<br>▸` 3줄 구조. 매트릭스 `.nt`·`.ds-yt` 텍스트만 갱신. **신규 CSS·`:root` 토큰 0 → check-docs 무관.** (OPS 동반)
 - 2026-07-18 12:49 · **02 aisd.js v5 — 이익률 추이 매트릭스(병목의 온도계).** `ds-mtx`+`tr.exp/dtl` 재사용 — 상세 셀 `.ds-dtxt`(패딩 텍스트) · 판정 배지 `.ds-jd`(pill 20px · 구조적=st-dawn·혼합=st-mature·사이클=st-accel·병목 아님=faint — 기능색 재사용). **신규 :root 토큰 0** → TOKENS 무변·check-docs 통과. (OPS §3·§9 동반)
 - 2026-07-18 12:37 · **01 종목 뉴스 행 `NEW` 배지(`.arow .anew`).** 최근 3일(72h·`isNewDt`)+미열람 기사에 `--dawn`/`--onacc` pill 20px(단계색 미사용=신선도 큐). **3초 호버 or 클릭 시 제거**(`dismissNew`→localStorage `am_news_seen_v1` 영속·키=link·재렌더 재출현 없음). `loadStockNews` `rowHTML()` 경로(종목+「더 보기」)·`#mktDigest` 위임. 매크로 「관련 기사」는 별도 템플릿이라 미적용(범위=보유 종목). 신규 `:root` 토큰 0→check-docs 통과. §6-5 행 신설. SimpleorNothing 지시. (OPS §3·§9)
 - 2026-07-18 12:16 · **02 aisd.js v3+v4 — ③ 통합·④ 구성요소별·티어 손익 스트립(`.ds-vces`).** ③은 한 `ds-sec` 아래 렌즈 2조+카드 2장. ④ plan 테이블 행을 구성요소(업체군 `small`+`ds-lb` 레이어 배지)로 교체. 티어 카드 하단 **손익 스트립 `.ds-vces`**(점선 상단 룰 · `.k` mono 12px 라벨 · 흑자=`.pf-ok`(st-dawn)·적자=`.pf-no`(st-hot)·중립=`.pf-mid`(st-mature) — 기능색 재사용, 리비전 ▲▼는 등락색 규약). **신규 :root 토큰 0** → TOKENS 무변·check-docs 통과. 본문 14px/메타 12~13px. (OPS §3·§9 동반)
