@@ -4,7 +4,7 @@
  *       점수 내림차순으로 행을 재정렬하며, 현금 행을 종목으로 추가한다.
  * 왜:   "백지 재투자 시 향후 상승 가능성"을 여력만이 아니라 실현확률·리스크로 보정해
  *       한 눈에 순위화한다. 기간은 점수로 쪼개지 않는다(촉매=별개 관측).
- * 원칙: index.html 무편집(flags.js/aisd.js 패턴 — worker.js <script defer> 주입).
+ * 원칙: index.html·worker.js 무편집 — 이미 로드되는 changelog.js 부트스트랩이 <script defer>로 주입.
  *       gamma.json 단일 소스 재사용. 신규 :root 토큰 0(check-docs 무관).
  *       관측·휴리스틱 스코어이며 예측·투자권유 아님.
  *
@@ -146,7 +146,7 @@
         var G=GM&&GM.gamma?GM.gamma:null; if(!G) return;
         _scores=compute(G);
         tick();
-        // 트래커가 늦게/다시 렌더돼도 컬럼을 유지
+        // 트래커가 늘게/다시 렌더돼도 컬럼을 유지
         var host=document.getElementById('probEst');
         if(host){
           var mo=new MutationObserver(function(){ tick(); });
