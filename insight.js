@@ -217,11 +217,46 @@ window.INSIGHT=(function(){
  function byScore(a,b){return score(b.c)-score(a.c)||b.r.t-a.r.t;}
 
  /* --- 추출 --- */
+ function isYt(u){return /youtu\.?be/.test(String(u||''));}
+ /* 유튜브 URL만 있고 본문이 비면 → 먼저 /api/yt-view(Gemini 영상 인식, mode:insight)로 스크립트를 뽑아
+    textarea 를 채운 뒤 그 스크립트로 관점 추출을 이어간다(04 전문가 원탁과 동일 경로).
+    /api/insight 의 URL-웹검색은 유튜브 영상을 실제로 보지 못하므로, 실패 시에만 그 경로로 폴백한다. */
+ function ytExtract(url){
+  var t0=Date.now(),tmr=null;
+  function tick(){var s=Math.floor((Date.now()-t0)/1000);setMsg('유튜브 영상 인식 중(Gemini)… '+s+'초 · 최대 1~2분');}
+  tick();tmr=setInterval(tick,1000);
+  fetch('/api/yt-view',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({url:url,mode:'insight'})})
+   .then(function(r){return r.json().then(function(j){return {ok:r.ok,st:r.status,j:j};});})
+   .then(function(o){
+    if(tmr){clearInterval(tmr);tmr=null;}
+    if(!o.ok||o.j.error)throw new Error(o.j.error||('HTTP '+o.st));
+    var raw=((o.j.content||[]).map(function(b){return b.text||'';}).join('')||'').trim();
+    var i=raw.indexOf('{'),n=raw.lastIndexOf('}'),scr='';
+    if(i>=0&&n>=0){
+     try{var yj=JSON.parse(raw.slice(i,n+1));scr=(yj.transcript||'').trim();
+      var hd=[yj.title,yj.channel].filter(Boolean).join(' · ');if(hd&&scr)scr='['+hd+']\n'+scr;
+     }catch(x){scr=raw;}
+    }else scr=raw;
+    if(!scr)throw new Error('영상에서 스크립트를 뽑지 못했습니다 — 공개 영상인지 확인하거나 스크립트를 직접 붙여넣으세요');
+    $('insText').value=scr;                       /* 뽑은 스크립트를 보이게 채운다(원문 raw 로 저장됨) */
+    setMsg('영상 인식 완료 — 관점 분석을 이어갑니다');
+    doExtract(scr,url);                           /* busy 유지 → 이어서 관점 추출 */
+   })
+   .catch(function(e){
+    if(tmr){clearInterval(tmr);tmr=null;}
+    setMsg('영상 인식 실패 — URL 웹검색으로 대체 시도: '+(e&&e.message?e.message:e));
+    doExtract('',url);                            /* 폴백: 구 동작(URL 웹검색) */
+   });
+ }
  function run(){
   if(busy)return;
   var text=($('insText').value||'').trim(), url=($('insUrl').value||'').trim();
   if(!text&&!url){setMsg('본문이나 URL 중 하나는 있어야 합니다.');return;}
   busy=true;$('insRun').disabled=true;
+  if(!text&&isYt(url)){ytExtract(url);return;}    /* 유튜브 링크만 → 스크립트 먼저 뽑기 */
+  doExtract(text,url);
+ }
+ function doExtract(text,url){
   // 서버(/api/insight)는 단일 비스트리밍 호출이라 실제 서버 내부 진척은 알 수 없다.
   // 사용자에게 "멈춘 게 아니다"를 알리려 클라 단계(전송→분석→정리) + 경과초 카운터를 돌린다.
   var isUrl=!text;
@@ -667,8 +702,8 @@ window.INSIGHT=(function(){
   '채택 관점은 <b>라이프사이클</b>(전제·발동조건·폐기트리거·점검일)을 달고, 점검일이 도래하면 <b>점검 필요</b>로 재부상해 발동/만료/유지를 트리아지한다.</p></div>'+
   '<div class="ins-wrap">'+
    '<div class="ins-card">'+
-    '<div class="ins-row"><input class="ins-in" id="insUrl" placeholder="URL (선택 — 본문이 없으면 URL만으로 웹검색해 시도)"></div>'+
-    '<textarea class="ins-ta" id="insText" style="margin-top:8px" placeholder="본문·스크립트를 붙여넣으세요. 캡처 이미지를 붙여넣으면(Ctrl/⌘+V) 글자를 인식해 채웁니다. 종류·출처·제목은 내용에서 자동 판별합니다. 유튜브는 자막 스크립트를 넣는 편이 URL만 주는 것보다 정확합니다."></textarea>'+
+    '<div class="ins-row"><input class="ins-in" id="insUrl" placeholder="URL (선택 — 유튜브 링크는 Gemini가 영상을 인식해 스크립트를 뽑고, 그 외 URL은 본문이 없으면 웹검색해 시도)"></div>'+
+    '<textarea class="ins-ta" id="insText" style="margin-top:8px" placeholder="본문·스크립트를 붙여넣으세요. 캡처 이미지를 붙여넣으면(Ctrl/⌘+V) 글자를 인식해 채웁니다. 종류·출처·제목은 내용에서 자동 판별합니다. 유튜브는 위 URL 칸에 링크만 넣으면 영상 스크립트를 자동 인식하며, 자막 스크립트를 직접 붙여넣으면 더 정확합니다."></textarea>'+
     '<input type="file" id="insFile" accept=".pdf,.txt,.md,.csv,.json,.png,.jpg,.jpeg,.gif,.bmp,.webp,image/*" multiple hidden>'+
     '<div class="ins-drop" id="insDrop" role="button" tabindex="0">PDF·TXT·이미지 파일을 끌어다 놓거나 클릭해 선택 · 캡처 이미지는 붙여넣기(Ctrl/⌘+V)만 해도 글자를 인식합니다</div>'+
     '<div class="ins-bar">'+

@@ -262,15 +262,24 @@ async function handleYtView(request, env) {
   try { body = await request.json(); } catch { return json({ error: "invalid json" }, 400); }
   const ytUrl = (body && body.url ? String(body.url) : "").trim();
   const exp = (body && body.expert) ? body.expert : {};
+  // mode='insight' → 03 관점과 정보 얻기가 부르는 '스크립트 추출' 모드. 04 전문가 원탁은 mode 무전달(기본).
+  const mode = (body && body.mode) ? String(body.mode) : "";
+  const insightMode = mode === "insight";
   if (!/youtu\.?be/.test(ytUrl)) return json({ error: "youtube url required" }, 400);
   const _m = ytUrl.match(/(?:v=|youtu\.be\/|shorts\/|embed\/|live\/)([A-Za-z0-9_-]{11})/);
   const ytCanon = _m ? ("https://www.youtube.com/watch?v=" + _m[1]) : ytUrl;
   const geminiModel = env.GEMINI_MODEL || "gemini-3.5-flash";  // 모델 교체 = 시크릿/var만(코드 재배포 불요)
 
-  const prompt =
-    "이 유튜브 영상에서 발화자 '" + (exp.name || "") + "'(" + (exp.field || "") + ")의 " +
-    "핵심 투자 관점을 한국어로 요약해줘. 반드시 JSON만 출력하고 다른 말은 하지 마. " +
-    '스키마: {"view":"2~3문장 관점 요약","stance":"강세|중립|약세","transcript":"핵심 발언 원문 발췌(2~4문장)"}';
+  // 04 전문가 원탁: 한 발화자의 관점을 압축 요약(view+stance).
+  // 03 관점과 정보 얻기: 영상 내용을 '스크립트에 가깝게' 충실히 전사 → 다운스트림 /api/insight 가 8레이어·단계로 재구조화.
+  const prompt = insightMode
+    ? ("이 유튜브 영상의 내용을 한국어로 최대한 충실하게 전사·정리해줘. 요약이 아니라 스크립트에 가깝게 — " +
+       "발화자의 투자 관점·논거와 언급한 종목·티커, 8레이어(L1 모델/SW · L2 컴퓨트 · L3 메모리 · L4 패키징/장비 · L5 서버 · L6 옵티컬 · L7 전력/냉각 · L8 발전/그리드), 수치·전망을 시간 순으로 빠짐없이 담아라. " +
+       "반드시 JSON만 출력하고 다른 말은 하지 마. " +
+       '스키마: {"title":"영상 제목 추정","channel":"채널명 추정","transcript":"영상 내용 상세 전사·정리(문단 여러 개, 충실히)","view":"발화자 핵심 관점 2~3문장","stance":"강세|중립|약세"}')
+    : ("이 유튜브 영상에서 발화자 '" + (exp.name || "") + "'(" + (exp.field || "") + ")의 " +
+       "핵심 투자 관점을 한국어로 요약해줘. 반드시 JSON만 출력하고 다른 말은 하지 마. " +
+       '스키마: {"view":"2~3문장 관점 요약","stance":"강세|중립|약세","transcript":"핵심 발언 원문 발췌(2~4문장)"}');
 
   let up;
   try {
@@ -280,7 +289,7 @@ async function handleYtView(request, env) {
         headers: { "content-type": "application/json", "x-goog-api-key": env.GEMINI_API_KEY },
         body: JSON.stringify({
           contents: [{ parts: [ { text: prompt }, { file_data: { file_uri: ytCanon } } ] }],
-          generationConfig: { responseMimeType: "application/json", temperature: 0.2 },
+          generationConfig: { responseMimeType: "application/json", temperature: 0.2, maxOutputTokens: insightMode ? 8192 : 2048 },
         }),
       });
   } catch (e) {
