@@ -1,4 +1,4 @@
-**최종 갱신: 2026-07-18 14:24 (KST)**
+**최종 갱신: 2026-07-18 15:15 (KST)**
 
 # OPS — 알파맵 운영 가이드
 
@@ -118,7 +118,7 @@
 
 | 정보명 | 자동/수동 | 주기 | 소스 |
 |---|---|---|---|
-| **AI 수요·공급 로드맵** (02 맨위 · 판정 보드 + 밸류체인 구조도(①~④·돈의 흐름·티어별 손익 스트립·관측 위치) + **이익률 추이 매트릭스(병목의 온도계 — ②랩·③클라우드·④NVDA·④메모리·④통신/전력 연도별 영업이익률 + 행 클릭=왜 높은가·구조적 vs 일시적 판정)** + ①진화 · ②AI 판매자 매트릭스 · ③컴퓨팅 통합(CAPEX 리비전 트랙+4사) · ④Factory 구성요소별 · ④중국) | 수동 | 분기(실적 시즌 캡처) | `aisd.js` 자가 마운트(#dsAisd · flags.js 패턴 — worker.js `<script defer>` 주입 · v-thread 최상단). 전역 토큰만·`ds-*` 스코프·신규 :root 토큰 0. 수치=컨센서스·공개 실적 방향성, **리비전 트랙·손익·이익률은 캡처 축적 전 예시 표시**. narrative 층 — 숫자 파일 무관. 재판정 트리거: ①추정 ▼하향 ②DDR5 현물<계약 롤오버 ③가격>리비전 속도 · **이익률 서열 역전 = 레이어 회전 신호** |
+| **AI 수요·공급 로드맵** (02 맨위 · 판정 보드 + 밸류체인 구조도(①~④·돈의 흐름·티어별 손익 스트립·관측 위치) + **이익률 추이 매트릭스(병목의 온도계 — ②랩·③클라우드·④NVDA·④메모리·④통신/전력 연도별 영업이익률 + 행 클릭=요인·구조성·**선행 시그널**[가격·리드타임·캐파·경쟁 진입 4종 — 마진 후행 보정] 판정)** + ①진화 · ②AI 판매자 매트릭스 · ③컴퓨팅 통합(CAPEX 리비전 트랙+4사) · ④Factory 구성요소별 · ④중국) | 수동 | 분기(실적 시즌 캡처) | `aisd.js` 자가 마운트(#dsAisd · flags.js 패턴 — worker.js `<script defer>` 주입 · v-thread 최상단). 전역 토큰만·`ds-*` 스코프·신규 :root 토큰 0. 수치=컨센서스·공개 실적 방향성, **리비전 트랙·손익·이익률은 캡처 축적 전 예시 표시**. narrative 층 — 숫자 파일 무관. 재판정 트리거: ①추정 ▼하향 ②DDR5 현물<계약 롤오버 ③가격>리비전 속도 · **이익률 서열 역전 = 레이어 회전 신호** |
 | 즉답 요약 (전선·단계분포·상대가치·트림게이트γ·다음재채점·오늘시그널) | 혼합 | 런타임 파생 | `gamma`·`holdings`+`TARGETS`·`signal_log` (`renderInstantAnswer`) / 전선·다음재채점만 `IA_CFG` 수동 |
 | 반도체 사이클 3차트 (D CAPEX · D₂ 메모리매출 · C DDR5) + 종합 판정 1줄 | 혼합 (E 자동) | E: 런타임 / 나머지: 판단 시 | `cycle.json` + worker `/api/fred` (E군집 = `derive-cycle-e.mjs` 파생). ※ 「현재값·임계값 신호 요약」 표는 2026-07-12 제거 — E·B·A는 차트 없이 `cycVerdict` 램프 집계로만 반영 |
 | 주도주 4사분면 | 혼합 | alpha 주1회 + 판단 시 | `alpha` → `earnings` → `judgment` · 상단 렌즈 2줄(사분면 분포+`MACRO_GRADE`) · 크기 토글(비중↔적정밴드 갭 `TARGETS`) · **가로축 토글(예상 ↔ 실현 3M `charts.json` 63거래일 초과수익)** · **무게중심 토글(L1~L8 비중가중 평균 좌표 + 오버→언더 한계자본 회전 화살표)** · **궤적 토글(스냅샷들→현재 위치 점선 꼬리, 예상 좌표·라이브 뷰만 — ①↔③ 강등/회복 가시화)** · 각주 기준일 = `alpha.asOf` 자동연동 |
@@ -155,6 +155,7 @@
 |---|---|---|---|
 | 결정 보드 | 혼합 | 리밸런싱 실행 시 | `judgment.json` (`decisions` 배열). 매매 방향·게이트·근거·사후 추적 |
 | 포트폴리오 테이블 | 자동 + 수동 | holdings 주간 + prices 일별 | `holdings.json` × `prices.json` |
+| **종목 채점 라이브 참고(01~04 접속)** — 드로어 「01~04 라이브 참고」 박스(02 스택→종목 클릭 시) + 트래커 행 칩(v-tracker 잔존 뷰) | 자동(런타임) | 드로어 열 때 | `gamma.json`(γ갭·g·stage·override why·**EPS 리비전30d vs 가격30d → 두 시계 판정**·애널 컨센서스·최근 액션) + `signals`(매크로 게이트 G) + `council.json`(종목 레이어 매치 전문가 스탠스·상/하방) + `/api/insights`(티커 매치 채택 관점 수·최신). **초입 5신호 채점은 수동 유지(불변 규율)** — 라이브는 「채점 전 확인」 참고용. GAMMA 로드 후 `renderTracker` 재렌더 훅 |
 
 ### 06 메모 (`v-memo`)
 
@@ -269,6 +270,8 @@
 
 ## 9. 갱신 이력
 
+- 2026-07-18 15:15 · **05 종목 채점에 01~04 라이브 참고 접속(index.html).** SimpleorNothing 지시. 초입 5신호 채점 드로어에 「01~04 라이브 참고 — 채점 전 확인」: 02 γ(갭·g·stage·override) · 02 두 시계(EPS 리비전30d vs 가격30d → γ open 유지/성숙 압력 — 단계 강등 룰 종목별 라이브화) · 02 애널 컨센서스 · 01 매크로 게이트 · 04 원탁(레이어 매치) · 03 채택 관점(티커 매치). 트래커 행 컴팩트 칩. 채점(S1~S5)은 수동 유지. GAMMA 로드 후 renderTracker 재렌더 훅. 문서 패치 경합 3회(#421·#424) 후 재생성 착지.
+- 2026-07-18 15:15 · **02 aisd.js v6 문서 재착지 — 이익률 「결정 요인 → 선행 시그널」.** (#422 코드 반영 완료 — 문서만 경합 중단분.) 렌즈 후행 보정 원칙(시그널 4종: 가격>리드타임>캐파>경쟁 진입). 행별 선행 시그널: ②토큰 단가·백로그 / ③GPU 임대료·RPO·감가상각 연수 변경 / ④NVDA=CoWoS·HBM 캐파·ASIC 수주·리드타임 / ④메모리=DDR5 현물vs계약·DXI·HBM4 퀄·WFE·DIO / ④통신·전력=CPO·수주잔고·터빈 리드타임·PPA. 합산행 최우선 감시 3종.
 - 2026-07-18 14:24 · **02 간소화 — 박스1(즉답 요약) 삭제·v-cycle·v-alpha 렌더 제외.** SimpleorNothing. 탭 매핑 `cycle:['thread']`(v-cycle·v-alpha 비활성 orphan)·v-thread vhead+`#instantAnswer` DOM 삭제·insight.js `insStripThread` 앵커 제거(원본 03 유지)·line3276 CYCLE.render/renderInstantAnswer 제거(drawSCurve 유지)·#dsAisd 유지. check-docs·Playwright(pageerror0) 통과. STYLE 동반.
 - 2026-07-18 14:20 · **02 aisd.js — ③ Meta 상세 갱신(하이페리온 5GW·$50B) + 조달 구조 박스.** SimpleorNothing 지시(디일렉 07-14 기사). 수요 4사 매트릭스 Meta 행: note에 「Hyperion 5GW 확정」, 2026E=2GW→5GW 확정($50B), 2027E=단계 가동 개시, 2028E=5GW 완공(~2030)·부지 ~93만㎡. 상세 카드 아래 `ds-vco` 재사용 조달 구조 박스 신설 — Blue Owl 80%/Meta 20% SPV·JV 소유, PIMCO $18B·BlackRock 계열 $3B 채권(A+), Meta는 장기 임차(초기 ~4년). 읽는 법 3종: ①capex 상한이 자기자본→**민간 신용시장** 이동=수요 시계 연장 ②리스 만기·크레딧 사이클=새 취약 고리(리비전 하향 방아쇠가 조달에서 나올 수 있음) ③L8 읽기=Entergy 가스발전 7기·그리드 배터리 3기·원전 uprate=전력 병목 실물 확인. **narrative≠numbers — `signal_log.json` 2엔트리 append(L8·L2), gamma·judgment·holdings·earnings 불변.** 신규 CSS·:root 토큰 0. (STYLE_GUIDE 동반)
 - 2026-07-18 13:45 · **03 관점과 정보 얻기에 유튜브 URL 스크립트 추출 이식(04 전문가 원탁과 동일 경로).** SimpleorNothing 지시. 03 「관점 뽑기」에서 URL 칸에 유튜브 링크만 넣고 본문이 비면 클라(`insight.js` `ytExtract`)가 먼저 `/api/yt-view`(**신규 `mode:'insight'` 분기** · Gemini 영상 인식)로 영상을 상세 전사→`insText` 채움(원문 raw 저장)→그 스크립트로 `/api/insight` 관점 추출로 이어감. 04는 기본 모드(발화자 관점 압축 요약) 불변, 03은 `mode:'insight'`(상세 전사 프롬프트·`maxOutputTokens` 2048→8192). 실패·`GEMINI_API_KEY` 부재(503)면 URL web_search로 폴백(구 동작). `worker.js`·`insight.js`만 편집(index.html 무패치·insight.js 자가 마운트) · **신규 :root 토큰·CSS 0**→`check-docs` 통과 · `node --check` 통과. narrative≠numbers — 스크립트는 인테이크 입력일 뿐 숫자 파일 불변. §3 03·04 인벤토리 갱신 · STYLE_GUIDE 이력 동반.

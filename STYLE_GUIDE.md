@@ -1,4 +1,4 @@
-**최종 갱신: 2026-07-18 14:24 (KST)**
+**최종 갱신: 2026-07-18 15:15 (KST)**
 
 # STYLE_GUIDE — 알파맵 디자인 시스템
 
@@ -240,6 +240,7 @@ pantone.css :root       ← 현행 팔레트 (팬튼 A안, index.html 하단 <li
 
 ## 갱신 이력
 
+- 2026-07-18 15:15 · **05 드로어 「01~04 라이브 참고」 + aisd v6 선행 시그널(문서 재착지).** 드로어=기존 `.dr-sec`/`.cgrid`/`.cbox` 재사용 · 행 칩=`.t-sub` 인라인 mono 12px · aisd v6=`.ds-dtxt` 텍스트만. **신규 :root 토큰·클래스 0** → TOKENS 무변·check-docs 통과. (OPS §3·§9 동반)
 - 2026-07-18 14:24 · **02 간소화 — 박스1(즉답 요약+관점 스트립) 삭제·v-cycle·v-alpha 뷰 렌더 제외.** SimpleorNothing 지시(박스1 삭제·박스2 유지·박스3 이하 삭제). 탭 매핑 `cycle:['thread']`(orphan 잔존)·`#instantAnswer` DOM 삭제·`insStripThread` 앵커 제거·#dsAisd 유지. 신규 토큰·CSS 0. (OPS 동반)
 - 2026-07-18 14:20 · **02 aisd.js ③ Meta 상세에 조달 구조 박스.** 신규 컴포넌트 없음 — 기존 `.ds-vco`(점선 박스)를 `tr.dtl` 내 `.ds-yrp` 아래에 재사용, 본문은 `<b>`+`<br>▸` 3줄 구조. 매트릭스 `.nt`·`.ds-yt` 텍스트만 갱신. **신규 CSS·`:root` 토큰 0 → check-docs 무관.** (OPS 동반)
 - 2026-07-18 13:45 · **03 관점과 정보 얻기에 유튜브 URL 스크립트 추출(04 원탁 경로 이식).** UI 카피만 변경 — `insUrl`·`insText` placeholder를 「유튜브 링크는 Gemini가 영상을 인식해 스크립트를 뽑는다」로 갱신, 「관점 뽑기」에서 유튜브 URL만 넣으면 `insight.js ytExtract`가 `/api/yt-view`(`mode:'insight'`)로 영상을 전사→textarea 채움→관점 추출. **신규 `:root` 토큰·CSS 클래스 0**(기존 `.ins-in`/`.ins-ta`/`.ins-msg` 재사용, 새 컴포넌트 없음) → TOKENS 무변·`check-docs` 통과. index.html·insight.css 무편집(insight.js/worker.js만). 진행·폴백 안내는 기존 `.ins-msg` 인라인 문구. SimpleorNothing 지시. narrative≠numbers. (OPS §3·§9 동반)

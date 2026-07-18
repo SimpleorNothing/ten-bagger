@@ -3088,6 +3088,44 @@ const DIGEST_GATE='GOOGL 7/22 capex';  /* 다음 밴드 검토 게이트 — 실
 function fmtMoney(v,cur){if(v==null)return '';if(cur==='KRW')return '₩'+Math.round(v).toLocaleString();if(cur==='JPY')return '¥'+Math.round(v).toLocaleString();if(cur==='TWD')return 'NT$'+Math.round(v).toLocaleString();return '$'+Math.round(v).toLocaleString();}
 function priceHTML(c){const q=PRICES[c.id];if(!q||q.price==null)return '';const ch=q.changePct;const col=ch==null?'var(--dim)':ch>=0?'var(--dawn)':'var(--hot)';const sg=ch==null?'':(' '+(ch>=0?'▲':'▼')+Math.round(Math.abs(ch))+'%');return `<span style="font-family:var(--mono);font-weight:600;white-space:nowrap;color:${col}">${fmtMoney(q.price,q.currency)}${sg}</span>`;}
 function pricePill(c){const h=priceHTML(c);return h?`<span class="pill">${h}</span>`:'';}
+
+/* ===== 05 라이브 참고 — 리밸런싱 종목 스코어 판단에 01~04 라이브 정보 접속 (초입 5신호 채점 자체는 수동 유지 · 불변 규율) ===== */
+const LREF={p:null,cn:null,ins:null};
+function lrefLoad(){if(!LREF.p){LREF.p=Promise.all([
+ fetch('./council.json',{cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null),
+ fetch('/api/insights',{cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null)
+]).then(rr=>{LREF.cn=rr[0];LREF.ins=rr[1];});}return LREF.p;}
+function lrefJ(G){try{const rv=G.rev.eps.fy1.c30,px=G.rev.px.c30;if(rv==null||px==null)return null;return{rv:rv,px:px,ok:rv>=px};}catch(e){return null;}}
+function lrefRow(c){/* 트래커 행 라이브 칩 — 동기 데이터(GAMMA·게이트)만 */
+ const G=(window.GAMMA||{})[c.ticker];const b=[];
+ if(G){b.push(`<b style="color:var(--dawn)">02 γ ${G.pct!=null?'+'+G.pct+'%':'—'} ${G.g}</b>`);
+  const j=lrefJ(G);if(j)b.push(`<span style="color:${j.ok?'var(--st-dawn)':'var(--st-hot)'};font-weight:600">추정30 ${j.rv>0?'+':''}${j.rv}% vs 가격 ${j.px>0?'+':''}${j.px}% → ${j.ok?'논제 유지':'가격 추월'}</span>`);}
+ if(typeof window.MACRO_GRADE==='number')b.push(window.MACRO_GRADE===0?'<span style="color:var(--st-hot)">게이트 G0 잠김</span>':`게이트 G${window.MACRO_GRADE} 점등`);
+ return b.length?`<div class="t-sub" style="font-family:var(--mono);font-size:12px;color:var(--faint);margin-top:2px">${b.join(' · ')}</div>`:'';
+}
+function lrefDrawer(){return `<div class="dr-sec"><h5>01~04 라이브 참고 <span style="font-weight:400;font-size:12px;color:var(--faint)">— 채점 전 확인</span></h5><div id="drLive" class="cgrid"></div><p id="drLiveX" style="font-family:var(--mono);font-size:12px;color:var(--faint);margin-top:6px">불러오는 중…</p></div>`;}
+function lrefFill(c){
+ const G=(window.GAMMA||{})[c.ticker],host=document.getElementById('drLive'),xt=document.getElementById('drLiveX');if(!host)return;
+ const box=(k,v)=>`<div class="cbox"><div class="k">${k}</div><div class="v" style="font-size:13px;line-height:1.5;font-weight:500">${v}</div></div>`;
+ let h='';
+ if(G){const j=lrefJ(G);
+  h+=box('02 · γ(가격÷목표가)',`갭 ${G.pct!=null?'+'+G.pct+'%':'—'} · ${G.g}${G.lock?' · 락':''} · ${G.stage}${G.why?`<br><span style="color:var(--dim);font-weight:400">override: ${G.why}</span>`:''}`);
+  if(j)h+=box('02 · 두 시계(30d)',`추정 ${j.rv>0?'+':''}${j.rv}% vs 가격 ${j.px>0?'+':''}${j.px}% → <b style="color:${j.ok?'var(--st-dawn)':'var(--st-hot)'}">${j.ok?'추정이 빠름 = γ open 유지':'가격이 추정 추월 = 성숙 압력'}</b>`);
+  if(G.rating&&G.rating.mean!=null)h+=box('02 · 애널 컨센서스',`평균 ${G.rating.mean} (n=${G.rating.n})${(G.actions&&G.actions[0])?`<br><span style="color:var(--dim);font-weight:400">최근 ${G.actions[0].d} ${G.actions[0].firm} → ${G.actions[0].to}</span>`:''}`);
+ }
+ if(typeof window.MACRO_GRADE==='number')h+=box('01 · 매크로 게이트',window.MACRO_GRADE===0?'<b style="color:var(--st-hot)">G0 잠김</b> — 신규매수 금지 · 사전승인 트림만':`<b>G${window.MACRO_GRADE}</b> 점등 — 언더레이어 증액 가능(개별 락 별도)`);
+ host.innerHTML=h;
+ lrefLoad().then(()=>{
+  let ex='';const Lid=((typeof LMAP!=='undefined'&&LMAP[c.layer])||{}).id||c.layer;
+  try{const es=((LREF.cn&&LREF.cn.experts)||[]).filter(e=>e.cfg&&((e.cfg.up&&e.cfg.up.l===Lid)||(e.cfg.down&&e.cfg.down.l===Lid)));
+   if(es.length)ex+=box('04 · 원탁 ('+Lid+' 언급)',es.map(e=>`${e.name} <span style="color:var(--dim);font-weight:400">${e.stance||''}${e.cfg.up&&e.cfg.up.l===Lid?' · 상방 '+(e.cfg.up.d||''):''}${e.cfg.down&&e.cfg.down.l===Lid?' · 하방 '+(e.cfg.down.d||''):''}</span>`).join('<br>'));}catch(e){}
+  try{const arr=Array.isArray(LREF.ins)?LREF.ins:((LREF.ins&&LREF.ins.items)||[]);
+   const rs=arr.filter(r=>(r.tickers||[]).indexOf(c.ticker)>=0);
+   if(rs.length){const r0=rs[rs.length-1];ex+=box('03 · 채택 관점',`${rs.length}건 보유 <span style="color:var(--dim);font-weight:400">· 최신: ${String(r0.text||'').slice(0,64)}…</span>`);}}catch(e){}
+  if(ex)host.innerHTML+=ex;
+  if(xt)xt.textContent='02 γ·리비전=gamma.json · 01 게이트=signals · 04=council.json · 03=/api/insights — 라이브 참고용 · 초입 5신호 채점은 수동(규율)';
+ });
+}
 function fmtKST(iso){if(!iso)return '—';const d=new Date(iso);if(isNaN(d))return '—';const k=new Date(d.getTime()+9*3600000);const p=n=>String(n).padStart(2,'0');return `${k.getUTCFullYear()}-${p(k.getUTCMonth()+1)}-${p(k.getUTCDate())} ${p(k.getUTCHours())}:${p(k.getUTCMinutes())} KST`;}
 function infoAsof(){if(!SIGNAL_LOG||!SIGNAL_LOG.length)return null;let best=null,bestT=0;for(const e of SIGNAL_LOG){const t=new Date(e.at||e.date).getTime();if(t>bestT){bestT=t;best=e;}}return best?(best.at||best.date):null;}
 /* ===== 메뉴별 업데이트 시점 배지 =====
@@ -4794,6 +4832,7 @@ function openDrawer(id){
     <div class="cbox" style="margin-top:8px"><div class="k">포트폴리오 중복도</div>
       <div class="v" style="color:${overlap(c.layer)==='High'?'var(--hot)':overlap(c.layer)==='Mid'?'var(--mature)':'var(--dawn)'}">${overlap(c.layer)} <span style="color:var(--dim);font-weight:400;font-size:13px">· ${L.id} 보유 ${heldWeight(c.layer).toFixed(1)}%</span></div></div>
   </div>
+  ${lrefDrawer()}
   <div class="dr-sec"><h5>초입 5신호 · 클릭해 채점</h5>
     ${SIGNALS.map(([k,t,desc])=>{const key=k.toLowerCase(),v=c.S[key]||0;
       return `<div class="srow"><div class="skey">${k}</div><div class="stext"><b>${t}</b>${desc}</div>
@@ -4801,6 +4840,7 @@ function openDrawer(id){
   <div class="dr-sec"><h5>폐기 트리거</h5><ol class="kill">${c.kill.map(k=>`<li>${k}</li>`).join('')}</ol></div>
   <div class="dr-sec"><h5>점검 기록</h5><p style="font-family:var(--mono);font-size:13px;color:var(--dim)">마지막: ${c.lastChecked||'—'} &nbsp;<button class="checkbtn" onclick="markChecked('${c.id}')">오늘로 점검</button></p></div>`;
  d.querySelectorAll('.sscore').forEach(g=>g.addEventListener('click',e=>{const b=e.target.closest('.sbtn');if(!b)return;setS(g.dataset.id,g.dataset.s,+b.dataset.n);openDrawer(g.dataset.id);}));
+ lrefFill(c);
  document.getElementById('drawerBg').classList.add('on');d.classList.add('on');
 }
 function closeDrawer(){document.getElementById('drawer').classList.remove('on');document.getElementById('drawerBg').classList.remove('on');}
@@ -5035,7 +5075,7 @@ function renderTracker(){
  document.getElementById('tkBody').innerHTML=rows.map(c=>{const col=STAGE_HEX[c.stage],sc=score(c),L=LMAP[c.layer]||{color:'#7048e8'};
   const cell=k=>{const v=c.S[k]||0;return `<td class="c"><div class="lbar"><div class="lcell" data-id="${c.id}" data-s="${k}" data-v="${v}" title="클릭=+1"></div></div></td>`;};
   return `<tr class="trow" style="border-left-color:${col}">
-   <td><div class="t-nm">${c.name} <span class="t-tk">${c.ticker}</span>${c.held?' <span style="color:var(--mature)">★</span>':''}${priceHTML(c)}</div><div class="t-sub" style="color:${L.color}">${c.layer}${c.layer2?'/'+c.layer2:''} · ${c.sub.split('→')[0].trim()}</div></td>
+   <td><div class="t-nm">${c.name} <span class="t-tk">${c.ticker}</span>${c.held?' <span style="color:var(--mature)">★</span>':''}${priceHTML(c)}</div><div class="t-sub" style="color:${L.color}">${c.layer}${c.layer2?'/'+c.layer2:''} · ${c.sub.split('→')[0].trim()}</div>${lrefRow(c)}</td>
    ${cell('s1')}${cell('s2')}${cell('s3')}${cell('s4')}${cell('s5')}
    <td class="c"><span class="score-badge" style="background:${scoreCol(sc)}22;color:${scoreCol(sc)}">${sc}</span></td>
    <td class="c"><span class="t-stage" style="background:${col}22;color:${col}">${c.stage}</span></td>
@@ -5517,7 +5557,7 @@ Promise.all([getJSON('alpha.json'),getJSON('earnings.json'),getJSON('judgment.js
  window.GAMMA=gmm||{};
  // 4) 시점 스냅샷(snapshots.json) — 라이브 머지 후 현재 배치를 보존하고 셀렉터 구성.
  captureLive();SNAPS=(sn&&Array.isArray(sn.snapshots))?sn.snapshots:[];initSnapSel();
-}).finally(()=>{paint(); renderCalib(); if(typeof renderSignalLog==='function')renderSignalLog(); if(typeof renderReviews==='function')renderReviews(); if(typeof renderStack==='function')renderStack(); if(typeof renderInstantAnswer==='function')renderInstantAnswer(); if(typeof renderPortfolio==='function')renderPortfolio(); if(typeof updateAsof==='function')updateAsof(); if(typeof renderCalNow==='function')renderCalNow(); if(typeof loadDigest==='function')loadDigest(); if(typeof applyStackDeepLink==='function')applyStackDeepLink();});
+}).finally(()=>{paint(); renderCalib(); if(typeof renderSignalLog==='function')renderSignalLog(); if(typeof renderReviews==='function')renderReviews(); if(typeof renderStack==='function')renderStack(); if(typeof renderInstantAnswer==='function')renderInstantAnswer(); if(typeof renderPortfolio==='function')renderPortfolio(); if(typeof renderTracker==='function')renderTracker(); if(typeof updateAsof==='function')updateAsof(); if(typeof renderCalNow==='function')renderCalNow(); if(typeof loadDigest==='function')loadDigest(); if(typeof applyStackDeepLink==='function')applyStackDeepLink();});
 })();
 </script>
 <script>
