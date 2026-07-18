@@ -75,7 +75,7 @@
       if(h&&!h.getAttribute('data-radar')){
         h.setAttribute('data-radar','1');
         h.innerHTML='토픽 레이더 <span class="mnote">매크로 관점 · 토픽별</span>';}
-      var cal=document.getElementById('insStripCal');   /* 「채택한 일정 관점」 스트립을 상단(.vhead 뒤)→토픽 레이더 h2 바로 아래로 이동. insight.js는 id로 채우므로 옆기도 계속 렌더됨(anchor는 이미 존재 시 재생성 안 함) */
+      var cal=document.getElementById('insStripCal');   /* 「채택한 일정 관점」 스트립을 상단(.vhead 뒤)→토픽 레이더 h2 바로 아래로 이동. insight.js는 id로 채우므로 옷겨도 계속 렌더됨(anchor는 이미 존재 시 재생성 안 함) */
       if(cal&&h&&h.nextElementSibling!==cal)h.parentNode.insertBefore(cal,h.nextElementSibling);
       var ins=document.getElementById('insStripMarket');   /* insight.js 상단 스트립 숨김(우리 것은 #trStripRest) */
       if(ins&&ins.id!=='trStripRest')ins.style.display='none';
