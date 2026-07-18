@@ -429,10 +429,15 @@ window.INSIGHT=(function(){
   return '<div class="ins-sig"><div class="ins-sig-h">관련 시그널 로그 · '+list.length+'건</div>'+
    list.map(sigItem).join('')+'</div>';
  }
- /* L2(관점) 레벨 = 시그널 본문은 접고 건수만 힌트로. L3에서 sigBlock 으로 펼친다. */
- function sigHint(c){
+ /* 시그널 섹션 = 클릭 토글 힌트 + 접이식 로그 본문. L2에선 기본 접힘·클릭 펼침 / L3에선 기본 펼침(개별 접기 가능).
+    전체 표시 레벨(lvl)과 독립 — 자료 카드 밑 힌트를 눌러 그 자리에서 편다(SimpleorNothing 지시 2026-07-18). */
+ function sigSection(c,open){
+  var body=sigBlock(c);
+  if(!body)return '';
   var n=sigFor(c,SIGCTX.all).length;
-  return n?'<div class="ins-sighint">관련 시그널 로그 '+n+'건 · L3에서 펼치기</div>':'';
+  return '<div class="ins-sighint" data-sig="'+esc(c.id)+'" role="button" tabindex="0" aria-expanded="'+(open?'true':'false')+'">'+
+    '관련 시그널 로그 '+n+'건 · <span class="ins-sig-cta">'+(open?'접기 ▴':'펼치기 ▾')+'</span></div>'+
+    '<div class="ins-sigwrap" id="sigw-'+esc(c.id)+'"'+(open?'':' hidden')+'>'+body+'</div>';
  }
  /* 미연결 시그널 — 관점이 아직 안 붙은 로그. 로그는 삭제되지 않는다. */
  function renderSigRest(){
@@ -464,7 +469,7 @@ window.INSIGHT=(function(){
      (NUM[c.route]?'<button class="ins-btn" data-ap="'+c.id+'">'+(c.applied?'대기로 되돌리기':'반영 완료 표시')+'</button>':'')+
      '<button class="ins-btn" data-lc="'+c.id+'">🕔 라이프사이클</button>'+
     '</div>':'')+
-   (showSig?sigBlock(c):sigHint(c))+
+   sigSection(c,showSig)+
    '</div>';
  }
  function renderList(){
@@ -516,6 +521,14 @@ window.INSIGHT=(function(){
     persist();};});
   Array.prototype.forEach.call(L.querySelectorAll('[data-lc]'),function(b){
    b.onclick=function(){editLC(b.getAttribute('data-lc'));};});
+  Array.prototype.forEach.call(L.querySelectorAll('[data-sig]'),function(b){
+   var tg=function(){
+    var id=b.getAttribute('data-sig'), w=document.getElementById('sigw-'+id);if(!w)return;
+    var cta=b.querySelector('.ins-sig-cta'), op=w.hidden;
+    w.hidden=!op;b.setAttribute('aria-expanded',op?'true':'false');
+    if(cta)cta.textContent=op?'접기 ▴':'펼치기 ▾';};
+   b.onclick=tg;
+   b.onkeydown=function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();tg();}};});
   Array.prototype.forEach.call(L.querySelectorAll('[data-raw]'),function(b){
    b.onclick=function(){
     var id=b.getAttribute('data-raw'), box=document.getElementById('raw-'+id);if(!box)return;
