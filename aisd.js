@@ -269,7 +269,7 @@ var HTML=`<div style="position:relative">
   <div class="ds-fn">매출·계획은 공개 관측 기반 방향성(비상장 다수 · 확정치 아님) — narrative 층</div>
 </div>
 
-<div class="ds-sec">③ 컴퓨팅 판매자 — 하이퍼스케일러 CAPEX <span class="ds-note">4사 합산 · $B · 2027E &gt;$1T · 2028E 애널 추정(컨센서스 희박)</span></div>
+<div class="ds-sec">③ 컴퓨팅 판매자 — CAPEX · 주요 업체 투자계획 <span class="ds-note">4사 합산 · $B · 2027E &gt;$1T · 2028E 컨센서스 희박 · 업체 클릭 = 연도별 상세</span></div>
 <div class="ds-lens">
   <div class="ds-l1"><b>상류 · 수요 선행</b> 하이퍼스케일러 capex = 8레이어 전체 수요의 최상류 신호</div>
   <div class="ds-l2">2025 ~$460B(실적) → 2026E ~$700B → 2027E <span class="ds-wn">$1T 돌파 전망</span> → 2028E ~$1.2T · 우상향 지속 = 고점 미점등, 추정 리비전 확인 필요</div>
@@ -302,8 +302,7 @@ var HTML=`<div style="position:relative">
   <div class="ds-fn">채워진 막대=실적 · 테두리=추정(E) · 점선=컨센서스 희박 · 리비전 트랙은 캡처 축적 전 예시 — 연동 시 분기 스냅샷 비교로 자동 파생</div>
 </div>
 
-<div class="ds-sec">③ 컴퓨팅 판매자 — 주요 업체 투자계획 <span class="ds-note">연도별 CAPEX · $B · 업체 클릭 = 연도별 상세</span></div>
-<div class="ds-lens">
+<div class="ds-lens" style="margin-top:14px">
   <div class="ds-l1"><b>수요 · 4사 분해</b> 누가 얼마를 · 어느 방향으로 늘리나</div>
   <div class="ds-l2">4사 모두 동시 증액 = 경쟁적 과투자 국면 · <span class="ds-nt">capex/매출 갭 확대는 가격시계 경고 플래그</span></div>
 </div>
@@ -348,32 +347,42 @@ var HTML=`<div style="position:relative">
   <div class="ds-fn"><span class="ds-rev up">▲</span>/<span class="ds-rev dn">▼</span> = 직전 컨센서스 캡처(분기) 대비 상향/하향 · <span class="ds-rev fl">→</span> = 변동 없음 — 리비전 방향이 상단 판정 보드의 입력</div>
 </div>
 
-<div class="ds-sec">④ Factory — 반도체 캐파 투자계획 <span class="ds-note">공급 · 메모리 3사(L3) · HBM/DRAM 중심 · 전력(L7–L8)은 01·05 모니터링</span></div>
+<div class="ds-sec">④ Factory — 구성요소별 투자 <span class="ds-note">공급 · 컴퓨팅을 만드는 Factory의 부품 — L2~L8 · 연도별</span></div>
 <div class="ds-lens">
-  <div class="ds-l1"><b>L3 · 병목</b> 메모리(HBM) 캐파가 상류 수요를 못 따라오면 γ open 유지</div>
-  <div class="ds-l2">3사 합산 투자 ~$575B(2027까지) · Samsung HBM +50%·SK +$15B 추가팹 → <span class="ds-ok">공급 확대 중이나 여전히 타이트</span></div>
+  <div class="ds-l1"><b>④ · L2–L8</b> Factory 구성요소별 — 병목이 어느 요소로 이동하나</div>
+  <div class="ds-l2">컴퓨트는 공급 완화 방향 · 메모리(HBM) 타이트 지속 · <span class="ds-wn">전력·냉각 리드타임이 새 병목 후보</span> → 병목은 사슬 아래로 이동 중</div>
 </div>
 <div class="ds-card">
   <table class="ds-mtx plan">
     <thead><tr><th style="width:14%">업체</th><th style="width:20%">~2025</th><th class="est" style="width:23%">2026E</th><th class="est" style="width:22%">2027E</th><th class="est" style="width:21%">2028E~</th></tr></thead>
     <tbody>
-      <tr><td class="ds-co">SK하이닉스<span class="ds-role lead">HBM 선두</span></td>
-        <td>HBM 시장 주도 · HBM3E 독점적 공급 · 청주 <b>M15X 착공</b></td>
-        <td><b>+$15B 추가 팹 투자</b>(M15X 램프·용인 클러스터) · <b>HBM4 선제 양산</b> — 단 DDR5 수익성 위해 램프 속도 조절 관측</td>
-        <td>용인 클러스터 1기 가동 목표 · HBM4/4E 주도권 방어 · 사이클 연장 국면의 최대 수혜 축</td>
-        <td>용인 1기 램프 · <b>HBM4E→HBM5 전환</b> 개시 · M15X 풀가동 — 계획 미확정 구간</td></tr>
-      <tr><td class="ds-co">삼성전자<span class="ds-role chase">HBM 추격</span></td>
-        <td>HBM3E 퀄 진통 · 평택 증설 재개</td>
-        <td><b>HBM 캐파 +50%</b> 계획 · <b>HBM4 퀄 통과</b>가 관건 · P4/P5 팹 증설로 DRAM 전반 확대</td>
-        <td>P4/P5 램프 본격화 · HBM4 퀄 성패가 점유 회복의 갈림길</td>
-        <td>P5 가동 · HBM4E 경쟁 합류 여부가 분수령 — 퀄 실패 시 격차 고착</td></tr>
-      <tr><td class="ds-co">Micron<span class="ds-role chase">HBM 추격</span></td>
-        <td>HBM3E 점유 확대 개시 · 보이시(아이다호) 착공</td>
-        <td>싱가포르 <b>HBM 패키징 신설</b> · HBM 점유 목표 상향 · DRAM 캐파 증설</td>
-        <td><b>아이다호 신규 팹 가동</b> · 미국 내 생산 비중 확대(보조금 연동)</td>
-        <td>아이다호 램프 본격화 · 뉴욕 팹 착공 검토 — 미국 생산 축 확립</td></tr>
-      <tr class="sumrow"><td class="ds-co">3사 합산</td>
-        <td colspan="4">투자 사이클 <b>2027까지 연장</b>(2028은 계획 미확정) — 합산 <b>~$575B</b> <span class="ds-rev up">▲</span>(직전 캡처 ~$520B). 캐파는 늘지만 선단(1c·HBM4) 램프가 병목 → HBM 타이트 지속 · <b>공급 추정 ▲상향 = 과잉 리스크 감시</b> · 2028E 신규 캐파 동시 램프 = 과잉 리스크 최대 구간</td></tr>
+      <tr><td class="ds-co">컴퓨트 반도체<small>NVDA · AMD · 인텔</small><span class="ds-lb sem">L2</span></td>
+        <td>NVIDIA <b>Blackwell 램프</b> · 점유 ~90% · AMD MI300/350 추격 · 인텔 Gaudi 부진</td>
+        <td>NVIDIA <b>Rubin 출시</b> · AMD MI400(대형 수주 확보) · 인텔 가속기 재편</td>
+        <td>Rubin Ultra · 자체칩(TPU·Trainium) 경쟁 심화 — 점유 잠식 변수</td>
+        <td>세대 교체 주기 단축 지속 — 컴퓨트 공급은 완화 방향, 수급 균형이 관건</td></tr>
+      <tr><td class="ds-co">메모리<small>삼성 · SK하이닉스 · Micron</small><span class="ds-lb sem">L3</span></td>
+        <td>HBM3E 타이트 · SK 독주 · 3사 캐파 경쟁 개시</td>
+        <td>SK <b>+$15B 팹</b>(M15X·용인) · 삼성 <b>HBM +50%</b>·HBM4 퀄 · Micron 싱가포르 패키징 — 합산 <b>~$575B</b>(2027까지) <span class="ds-rev up">▲</span></td>
+        <td>용인 1기·P4/P5·아이다호 가동 — 공급 확대에도 선단(1c·HBM4) 타이트</td>
+        <td>신규 캐파 동시 램프 = <b>과잉 리스크 최대 구간</b> · HBM4E→HBM5 전환</td></tr>
+      <tr><td class="ds-co">통신·네트워킹<small>Broadcom · Marvell · 옵티컬(LITE·Coherent)</small><span class="ds-lb sem">L6</span></td>
+        <td><b>800G 광모듈 램프</b> · 커스텀 ASIC(TPU·Trainium) 수주 급증</td>
+        <td><b>1.6T 전환 개시</b> · CPO(co-packaged optics) 상용화 시동</td>
+        <td>스케일업/아웃 네트워크 재편 — 대역폭 병목으로 옵티컬 비중 확대</td>
+        <td>CPO 표준화가 광모듈 업체 마진의 분수령</td></tr>
+      <tr><td class="ds-co">냉각<small>Vertiv 등</small><span class="ds-lb pow">L7</span></td>
+        <td>공랭→<b>수랭(liquid) 전환 가속</b> · 랙당 전력밀도 급등</td>
+        <td>리퀴드 쿨링 표준화(GB300급) — 수주잔고 확대</td>
+        <td>신축 DC 대부분 수랭 설계 — 냉각이 건설 리드타임 변수</td>
+        <td>2상 냉각·침지 등 차세대 방식 경쟁</td></tr>
+      <tr><td class="ds-co">전력·발전<small>CEG · VST · Bloom · 그리드</small><span class="ds-lb pow">L7–L8</span></td>
+        <td>DC 전력 계약(원전 PPA) <b>선점 경쟁</b></td>
+        <td>가스터빈·변압기 <b>리드타임 병목</b> — 연료전지(온사이트)로 우회 수요</td>
+        <td>신규 원전·SMR 착공 · 그리드 증설 본격화</td>
+        <td><b>전력이 Factory 증설의 최종 상한</b> — 병목의 종착지 후보</td></tr>
+      <tr class="sumrow"><td class="ds-co">병목 이동</td>
+        <td colspan="4">컴퓨트(완화 방향) → <b>메모리(타이트 지속)</b> → 통신(1.6T·CPO 전환) → <b>냉각·전력(새 병목 부상)</b> — 층 고정이 아니라 <b>병목 추적</b>이 알파의 원천 · 메모리 상세는 γ-닫힘 3트리거(MU)·01 DXI로 라이브 감시</td></tr>
     </tbody>
   </table>
 </div>
