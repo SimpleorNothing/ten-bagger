@@ -1113,6 +1113,7 @@ export default {
           .on("body", { element(el) {
             el.append('<script src="/hover-chart.js" defer></scr' + 'ipt>', { html: true });
             el.append('<script src="/flags.js" defer></scr' + 'ipt>', { html: true });
+            el.append('<script src="/aisd.js" defer></scr' + 'ipt>', { html: true });
           } })
           .transform(res);
         // 대시보드 HTML 은 캐시 금지 — Workers Assets 기본 캐시 헤더 때문에 새 배포가
