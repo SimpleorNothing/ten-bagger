@@ -1,4 +1,4 @@
-**최종 갱신: 2026-07-18 09:53 (KST)**
+**최종 갱신: 2026-07-18 09:46 (KST)**
 
 # STYLE_GUIDE — 알파맵 디자인 시스템
 
@@ -151,7 +151,6 @@ pantone.css :root       ← 현행 팔레트 (팬튼 A안, index.html 하단 <li
 
 - **섹션 리듬:** `h2.msec`(20px/700, margin `26px 0 12px`) + 조건 배지 = 「제목 + 조건(기간·정렬)」. 조건이 **고정 텍스트**면 `span.mnote`(mono 11px `--faint`, .04em), **선택형**이면 `span.mrng`(세그먼트 버튼군 — `.rbtn` 5개 = 1M/6M/1Y/3Y/5Y, 활성 `.on`). 부제 문단을 길게 쓰지 않는다.
   - 기간 선택군(`.mrng`)은 지표·보유 두 헤더에 각각 두되 **공통 상태(`RG`)** 로 동기화 — 한쪽을 누르면 두 그룹 배지·모든 카드가 함께 재슬라이스된다. 거래일 근사: 1M≈21·6M≈126·1Y≈252·3Y≈756·5Y≈1260, `slice6()` 단일 경로. charts.json은 `fetch-prices.mjs`가 **Yahoo/Naver 5Y 일봉**으로 채운다(매 실행 창 전체 교체) → 5Y 버튼까지 실데이터. 신규 상장 등 확보분이 창보다 짧으면 자동 클램프. WTI(`/api/wti`)는 2020~ · **US10Y도 `charts.json.us10y`(`^TNX` 5Y) 1순위 · `/api/us10y` 폴백**(외부 피드 ~2개월뿐이라 단독 사용 시 기간버튼 무반응 — 2026-07-16 수리, PR #345).
-- **03 채택 매크로 관점 스트립(`insStripMarket`)은 「관련 기사」 섹션 안에 산다(2026-07-18):** `insight.js mount()`가 `#v-market` 최상단(`.vhead` 뒤)이 아니라 **`#mktMacroNews` 바로 앞**(「관련 기사」 h2 아래·자동 수집 뉴스 위)에 마운트한다. 큐레이션 관점(등급·출처·라이프사이클 메타 보존)과 자동 매크로 뉴스가 한 묶음으로 읽힌다. 뉴스 `.arow`로 평탄화하지 않는다(narrative≠numbers · 스트립 컴포넌트 그대로). 빈 `insStripCal`(채택 일정 관점)은 종전대로 `.vhead` 뒤 잔존(비면 렌더 0).
 - 뷰 안에서 정보 밀도는 **섹션 4개 안팎**으로 끊는다.
 - **「다가오는 일정」(06 흡수, 2026-07-17):** `.cal-now`(4열·모바일 2열)+`.now-card`(D-N + `.when`·`.lbl`·`.meta` · 좌측 3px `--cat-*` 스트라이프·radius 3px). `renderCalNow()`가 `calendar.json`+`earnings.json` moves를 오늘 기준 병합·프루닝, 임박 8개. `.meta`가 프레임→게이트 판정을 나르므로 §6-4 렌즈에 부합(숫자만 카드 아님). `#v-cal`서 이동 — 신규 클래스 0.
 
@@ -239,7 +238,7 @@ pantone.css :root       ← 현행 팔레트 (팬튼 A안, index.html 하단 <li
 
 ## 갱신 이력
 
-- 2026-07-18 09:53 · **01 「채택한 매크로 관점」 스트립을 상단→「관련 기사」 섹션으로 이동.** `insight.js mount()` 앵커 `insStripMarket`을 `#v-market` `.vhead` 뒤(최상단)에서 `#mktMacroNews` 앞(관련 기사 h2 아래)으로 변경 — 큐레이션 관점이 자동 매크로 뉴스와 한 묶음. **신규 `:root` 토큰·CSS 0**(스트립 컴포넌트·insight.css 재사용) → TOKENS 무변·check-docs 무영향. jsdom 배치 검증(prev=관련 기사 h2·next=#mktMacroNews·상단 미잔존). §6-1 규칙 추가. SimpleorNothing 지시. narrative≠numbers 유지. (OPS §3·§9 동반)
+- 2026-07-18 09:46 · **01 다가오는 일정 카드 틴트 강도 상향.** 바탕 8→18%·테두리 24→48%(카테고리 구별성). 신규 토큰·CSS 0·check-docs 통과. SimpleorNothing 지시.
 - 2026-07-18 08:46 · **01 다가오는 일정 카드 배경을 카테고리색 틴트로.** `.now-card` 바탕 `--panel`→`color-mix(var(--c) 8%)`·테두리 `var(--c) 24%`(6색=§5 카테고리 인코딩). 신규 `:root` 토큰·CSS 0 → TOKENS 무변·check-docs 통과. 3px 스트라이프 유지. index=`patches/*.b64`(md5 왕복). SimpleorNothing 지시.
 - 2026-07-17 21:43 · **01 「CNN 공포·탐욕」 카드 반원 게이지(니들) 추가.** `fgGauge()` SVG · 역발상 색(공포=`--st-dawn`·탐욕=`--st-hot`·중립=`--st-mature`) · 신규 `:root` 토큰·CSS 0 · check-docs 통과 · index=`patches/*.b64`(봇 `94b283c`). SimpleorNothing 지시.
 - 2026-07-17 21:10 · **01 지표 6번째 카드 「DXI 메모리 현물」 추가.** §6 레퍼런스 복제 — `.mkt-card`+`card()`/`chart()`/`lens()` 재사용(`loadDxi`/`lensDxi`), 렌즈 2줄(l1=L3·메모리·γ-닫힘 ③ / l2=DDR4 현물·주간% → 판정). **신규 `:root` 토큰·CSS 0** → TOKENS 무변·check-docs 통과. 주간 카드라 `card()` `dod:false`(전일대비 억제) 옵션(하위호환). 등락색 규약 유지. 데이터=`dxi.json`(포털 게이트라 매주 금요일 append, OPS §3·§4·§8). (OPS §9 동반)
