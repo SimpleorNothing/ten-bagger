@@ -1,4 +1,4 @@
-**최종 갱신: 2026-07-18 12:37 (KST)**
+**최종 갱신: 2026-07-18 13:01 (KST)**
 
 # OPS — 알파맵 운영 가이드
 
@@ -133,6 +133,8 @@
 | 정보명 | 자동/수동 | 주기 | 소스 |
 |---|---|---|---|
 | 관점 카드 (Insight) | 수동 | 판단·논제 시계 변화 시 | R2 `/api/insights`(+localStorage 캐시). **하나의 채택 claim = 하나의 관점**. 필드: 출처(`src`)·`route`·N·I·C·`grade`(관찰→확신 자동 승격)·`applied`(숫자 route 반영 여부) + **라이프사이클 `hyp`(전제)·`trig`(발동조건)·`until`(폐기 트리거)·`review`(점검일, 신규 채택 시 +14d 기본)**. `review` 도래 시 03 「점검 필요」로 재부상 → §0-5 트리아지. **편집기 = 카드 「🕔 라이프사이클」 → 모달 + 필드별 「보기 칩」 선택식**(클라 템플릿이 게이트·레이어·티커 기반 후보·날짜 프리셋 제시 · 칩 클릭=채우기·직접 수정 가능). |
+| 관점 추출 (인테이크) | 수동(운영자 입력) | 인테이크 시 | 「관점 뽑기」 → `/api/insight`(worker→Claude). 본문(스크립트/기사) 있으면 그대로, URL만 있으면 web_search로 시도. 8레이어·단계 프레임으로 claims 후보 정렬(뽑기≠반영 · 채택은 사람이 체크). 캡처 이미지=클라 OCR(Tesseract)·PDF/TXT/파일=클라 추출로 textarea 채움 |
+| ↳ **유튜브 링크 스크립트 추출**(2026-07-18 신설) | 자동(입력 보조) | 인테이크 시 | URL 칸에 **유튜브 링크만** 넣고 본문이 비면 클라(`ytExtract`)가 먼저 `/api/yt-view`(**`mode:'insight'`** · Gemini 영상 인식)로 영상을 **상세 전사**→`insText` textarea 채움(원문 raw 저장)→그 스크립트로 `/api/insight` 관점 추출로 이어감. **04 전문가 원탁과 동일 엔드포인트**(04=발화자 관점 압축 요약 / 03=`mode:'insight'` 상세 전사 분기·`maxOutputTokens` 상향). 실패·`GEMINI_API_KEY` 부재(503)면 **URL web_search로 폴백**(구 동작). narrative≠numbers — 스크립트는 인테이크 입력일 뿐 숫자 파일 불변. 신규 CSS·토큰 0(index.html 무패치·insight.js/worker.js만) |
 | 인사이트 자가 마운트 | 자동(런타임) | 페이지 로딩 시 | `insight.js`의 `mount()` 함수가 `#v-insight` 탭 + 헤더 배지 + `signal_log` 섹션을 런타임에 주입. **채택 관점 반영 스트립(`insStripMarket`/`insStripCal`→01 · `insStripThread`→02 · `insStripDec`→05)도 `mount()`가 각 뷰에 앵커링** — 매크로 관점 스트립은 01 「관련 기사」 섹션(`#mktMacroNews` 앞)에 붙는다(2026-07-18 상단→이동, §01 관련 기사 행) |
 
 > **관점은 채택으로 끝나지 않는다.** `review`(점검일)가 강제 부여돼 도래 시 「점검 필요」로 재부상하고, §0-5 트리아지에서 발동/만료/유지로 처리된다. narrative는 여전히 숫자 파일을 못 바꾼다 — **발동 = 05 리밸런싱 후보로 올릴 뿐**이고, 숫자 변경은 §1 트리거(실적 비트·가이던스 상향·확정 수주) 별도.
@@ -142,7 +144,7 @@
 | 정보명 | 자동/수동 | 주기 | 소스 |
 |---|---|---|---|
 | 원탁 토론 | 수동 | 필요 시 | 전문가 2인+ → 「토론 시작」 → `/api/council`(Claude). **토론 주제(`#clTopic`) 선택 입력**(2026-07-17) — 비우면 현 상황 종합, 채우면 그 논제 중심. `narrative≠numbers` |
-| 전문가 관점 갱신 | 수동(운영자 입력) | 필요 시 | 각 전문가 카드 「관점 갱신」 모달 4탭 — **텍스트**(`/api/council-summary` Claude) · **유튜브 링크**(`/api/yt-view` Gemini 영상 인식) · **여러 링크**(신설) · **파일**(txt·md·srt·vtt·csv·docx·pdf → council-summary). 관점 텍스트·stance만 갱신, **숫자 파일 불변**(narrative≠numbers). 반영분은 R2 감사 로그 `council_log.json`(`/api/council-log`)에 누적 → 카드 복원·「관점 갱신 이력」 모달 |
+| 전문가 관점 갱신 | 수동(운영자 입력) | 필요 시 | 각 전문가 카드 「관점 갱신」 모달 4탭 — **텍스트**(`/api/council-summary` Claude) · **유튜브 링크**(`/api/yt-view` Gemini 영상 인식 · 기본 모드=발화자 관점 압축 요약, 03은 `mode:'insight'` 상세 전사 분기 공유) · **여러 링크**(신설) · **파일**(txt·md·srt·vtt·csv·docx·pdf → council-summary). 관점 텍스트·stance만 갱신, **숫자 파일 불변**(narrative≠numbers). 반영분은 R2 감사 로그 `council_log.json`(`/api/council-log`)에 누적 → 카드 복원·「관점 갱신 이력」 모달 |
 | ↳ **여러 링크 자동 인식·통합**(2026-07-17 신설) | 수동(운영자 입력) | 필요 시 | 유튜브·기사 링크를 **한꺼번에 붙여넣으면** 클라(`recognizeLinks`)가 URL을 파싱→유형 자동 분류(유튜브/기사)→소스별 요약(유튜브=`/api/yt-view` Gemini 영상 인식 · 기사=`/api/council-read` **서버가 URL 본문을 직접 페치→HTML 스트립→Claude 비스트리밍 요약**, web_search 아님 → 특정 URL을 빠르고 확실하게 읽음)→**하나의 통합 관점으로 합성**(`/api/council-summary` 재사용). **소스는 병렬 인식**(`Promise.all` — 다건도 동시 처리). 링크 아닌 문장은 메모로 반영. 소스별 진행·한 줄 요약 표시, **실패·본문 얇음(차단·JS 렌더·페이월)은 건너뜀**(개별 처리 · view 빈 문자열). 모든 출처 링크는 로그 `refs[]`(신규 필드 · `{label,url}`)에 함께 저장·이력 모달에서 각각 링크로 표시. 신규 CSS·토큰 0(모달 컴포넌트 재사용) |
 | 원탁 음성 토론 재생 | 클라이언트(브라우저 TTS) | 재생 시 | 원탁 진단 리포트(diagnosis·board·consensus·tension·steelman)를 화자별 브라우저 TTS로 메신저형 극화 재생하는 인앱 플레이어(`#v-council`, 「▶ 음성 토론 재생」 버튼 · `window.COUNCIL.playReport`). 서버·데이터 페치 무관(리포트 재사용·오프라인). 고품질 Gemini AI 음성판은 사이트 밖 로컬 도구(`claude/roundtable`)로 별도 |
 | 원탁 업데이트 배지 | 자동(런타임) | 로딩 시 | `changelog.js` `mountHead()` — 01 시장 모니터링과 동일 `.mkt-upd` 배지 재사용 |
@@ -267,6 +269,7 @@
 
 ## 9. 갱신 이력
 
+- 2026-07-18 13:01 · **03 관점과 정보 얻기에 유튜브 URL 스크립트 추출 이식(04 전문가 원탁과 동일 경로).** SimpleorNothing 지시. 03 「관점 뽑기」에서 URL 칸에 유튜브 링크만 넣고 본문이 비면 클라(`insight.js` `ytExtract`)가 먼저 `/api/yt-view`(**신규 `mode:'insight'` 분기** · Gemini 영상 인식)로 영상을 상세 전사→`insText` 채움(원문 raw 저장)→그 스크립트로 `/api/insight` 관점 추출로 이어감. 04는 기본 모드(발화자 관점 압축 요약) 불변, 03은 `mode:'insight'`(상세 전사 프롬프트·`maxOutputTokens` 2048→8192). 실패·`GEMINI_API_KEY` 부재(503)면 URL web_search로 폴백(구 동작). `worker.js`·`insight.js`만 편집(index.html 무패치·insight.js 자가 마운트) · **신규 :root 토큰·CSS 0**→`check-docs` 통과 · `node --check` 통과. narrative≠numbers — 스크립트는 인테이크 입력일 뿐 숫자 파일 불변. §3 03·04 인벤토리 갱신 · STYLE_GUIDE 이력 동반.
 - 2026-07-18 12:37 · **01 종목 뉴스 행 `NEW` 배지(신선도 큐).** SimpleorNothing 지시. 최근 3일(72h·`isNewDt`)+미열람 기사에 `.arow .anew` 부표, **3초 호버 or 클릭 시 제거**→localStorage `am_news_seen_v1` 영속(키=link·재렌더 재출현 없음). `loadStockNews` `rowHTML()` 경로(종목+「더 보기」)·`#mktDigest` 위임. 매크로는 별도 템플릿이라 미적용(범위=보유 종목). 신규 :root 토큰 0→check-docs 통과. narrative≠numbers. §3 표시규칙 행·STYLE_GUIDE §6-5·이력 동반.
 - 2026-07-18 12:16 · **02 aisd.js v3+v4 — ③ 통합·④ 구성요소별 재편·티어별 손익(ROI 점검) 스트립.** SimpleorNothing 지시 3건 일괄. ①③의 두 섹션(CAPEX·업체 투자계획) 한 항목 통합. ②④를 메모리 단독 → **Factory 구성요소별 5행 매트릭스**(컴퓨트 NVDA·AMD·인텔 L2 / 메모리 3사 L3 / 통신 Broadcom·Marvell·옵티컬 L6 / 냉각 Vertiv L7 / 전력 CEG·VST·Bloom L7–L8 · 합산행=병목 이동 추적)로 재편. ③**밸류체인 각 티어 카드에 손익 스트립**(매출·투자/비용·이익·전망 리비전) — ①지불↑·효용 검증 진행형 / ②랩 합산 ~$40B± 급성장·컴퓨트 비용>매출·**적자 ROI 미증명** / ③AI 증분 ~$150B±·CAPEX ~$700B·본업 흑자나 AI 증분 미증명·**capex>매출 갭 확대=경고** / ④**유일 확실 흑자**(NVDA 순마진 ~50%·HBM 고마진). 관측 위치 박스에 손익 지도 결론(이익은 ④에만 고임 · ①~③ ROI 증명이 ④ 지속성의 선행 지표). 수치=공개 관측 방향성·분기 캡처 갱신. 신규 :root 토큰 0. (STYLE_GUIDE 동반)
 - 2026-07-18 11:17 · **02 「AI 수요·공급 로드맵」 v2 — 밸류체인 구조도 통합·티어 재구성(aisd.js · PR #413).** SimpleorNothing 지시. 판정 보드 아래 **밸류체인 4티어**(①수요자[B2C·B2B·B2G]→②AI 판매자[범용·특화]→③컴퓨팅 판매자[하이퍼스케일러·뉴클라우드]→④Factory[반도체 L2–L6·전력 L7–L8]) + 층간 돈의 흐름(구독료→컴퓨팅 비용→CAPEX) + 알파맵 관측 위치(④ ~80% 집중 근거) 신설. 기존 섹션을 티어로 재편(①진화 · ③CAPEX·4사 · ④3사·중국) — **② AI 판매자 연도 매트릭스 신규**(OpenAI·Anthropic·Gemini·DeepSeek·특화 — 공개 관측 방향성·비상장 다수 확정치 아님 명시). 스틸맨에 밸류체인측(효율화 vs Jevons·병목 이동) 추가. 신규 :root 토큰 0. 문서 패치는 #412 경합으로 재생성(3차). (STYLE_GUIDE 동반)
