@@ -598,7 +598,7 @@ window.INSIGHT=(function(){
   strip('insStripCal',f.filter(function(o){return o.c.route==='calendar';}).sort(byScore).slice(0,4),'관점과 정보 — 채택한 일정 관점');
   strip('insStripThread',f.filter(function(o){return /^L[1-8]$/.test(o.c.layer||'')&&o.c.route!=='none';}).sort(byScore).slice(0,4),'관점과 정보 — 채택한 레이어 관점');
   strip('insStripDec',f.filter(function(o){return !!NUM[o.c.route]&&!o.c.applied;}).sort(byScore).slice(0,5),'관점과 정보 — 숫자 반영 대기',
-   '실적·판단·단계·비중 파일은 자동으로 바뀌지 않습니다. 검증 후 반영하고 03에서 <b>반영 완료</b>로 표시하세요.');
+   '실적·판단·단계·비중 파일은 자동으로 바뀌지 않습니다. 검증 후 반영하고 02 인사이트 찾기에서 <b>반영 완료</b>로 표시하세요.');
  }
  function stamp(){
   var e=$('updIns');if(!e)return;
@@ -819,7 +819,10 @@ window.INSIGHT=(function(){
      자동 수집 뉴스(#mktMacroNews) 바로 위(관련 기사 h2 아래)에 붙어 큐레이션 관점이 관련 기사와 한 묶음이 된다.
      narrative≠numbers — 등급·출처·라이프사이클 메타는 스트립 컴포넌트 그대로 유지(뉴스 .arow 로 평탄화하지 않는다). SimpleorNothing 지시 2026-07-18. */
   anchor('insStripMarket','#v-market','before','#mktMacroNews');
-  anchor('insStripDec','#v-decision','before','#decisionBoard');
+  /* 숫자 반영 대기 스트립 = 05 리밸런싱(#v-decision) → 04 시장과 실적 전망(#v-thread) 최상단으로 이동.
+     실적 비트·가이던스 상향은 '실적 전망' 주제 → 로드맵(#dsAisd) 아래·강물 탐색(.vhead) 위에 뜬다.
+     SimpleorNothing 지시 2026-07-18. narrative≠numbers — route·필터 불변, 앵커만 이동. */
+  anchor('insStripDec','#v-thread','before','.vhead');
   anchor('insStripCal','#v-market','after','.vhead');
   /* insStripThread(02 채택한 레이어 관점 스트립) 앵커 제거 — 02 박스1(#instantAnswer+관점 스트립) 삭제 지시(2026-07-18 SimpleorNothing). 관점 원본은 03 관점과 정보에 유지. strip()은 #insStripThread 부재 시 if(!e)return no-op. */
  }
