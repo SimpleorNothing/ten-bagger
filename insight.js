@@ -1,4 +1,4 @@
-/* ===== 03 관점과 정보 얻기 — 인테이크(Claude 추출) · 선별 · 반영 =====
+/* ===== 02 인사이트 찾기 — 인테이크(Claude 추출) · 선별 · 반영 =====
    규율: 뽑기 ≠ 반영. 서버(/api/insight)는 '후보 정렬'까지만 하고, 채택은 사람이 체크한다.
    · narrative 는 숫자 라우트(earnings/judgment/stage/holdings)로 못 간다 → 클라에서 signal_log 로 강등(clamp).
    · 채택돼도 숫자 파일은 자동 변경 없음 — '반영 대기'로만 04 리밸런싱에 뜬다(수기 검증 후 반영 완료 표시).
@@ -663,6 +663,7 @@ window.INSIGHT=(function(){
    }catch(e){setMsg(name+(img?' 글자 인식 실패: ':' 추출 실패: ')+(e&&e.message?e.message:e));}
   }
  }
+
  function pasteImgs(e){
   var items=((e.clipboardData||window.clipboardData||{}).items)||[],imgs=[];
   for(var i=0;i<items.length;i++){
@@ -692,7 +693,7 @@ window.INSIGHT=(function(){
 
  /* --- 자가 마운트 --- index.html 은 <script src="/insight.js"> 한 줄만 추가하고,
     탭·섹션·반영 스트립 앵커는 여기서 DOM 으로 생성한다(대용량 index.html 패치 최소화). */
- var SECTION_HTML='<div class="vhead" style="position:relative"><div class="vkick">Insight Intake · 관점과 정보</div>'+
+ var SECTION_HTML='<div class="vhead" style="position:relative"><div class="vkick">Insight · 인사이트 찾기</div>'+
   '<h1 class="vtitle">자료에서 <em>유의미한 것</em>만 — 그리고 선별 반영</h1>'+
   '<span class="updstamp abs" id="updIns"></span>'+
   '<p class="vsub">증권사 리포트·기사·유튜브(링크 또는 스크립트)를 넣으면 8레이어·단계 프레임으로 관점과 정보를 구조화해 뽑는다. '+
@@ -739,12 +740,21 @@ window.INSIGHT=(function(){
   var nav=document.getElementById('nav');
   if(nav&&!nav.querySelector('.tab[data-v="insight"]')){
    var b=el('button','tab');b.setAttribute('data-v','insight');
-   b.innerHTML='<span class="n"></span>관점과 정보 얻기';
-   var port=nav.querySelector('.tab[data-v="port"]');
-   if(port)nav.insertBefore(b,port);else nav.appendChild(b);
-   /* 전문가 원탁(council)을 리밸런싱(port) 앞으로 → 04 전문가 원탁 · 05 리밸런싱 (SimpleorNothing 지시 2026-07-17) */
+   b.innerHTML='<span class="n"></span>인사이트 찾기';
+   /* 상단 메뉴 재구성 — index.html 정적 nav 무편집(대용량 패치 최소화 = 자가 마운트 패턴)
+      정적 nav : market · cycle · port · council · memo
+      목표     : 01 시장 모니터링 · 02 인사이트 찾기 · 03 전문가 원탁 · 04 시장과 실적 전망 · 05 리밸런싱 · 06 메모
+      (SimpleorNothing 지시 2026-07-18 · data-v·뷰·데이터 소스는 불변, 라벨·순서만 재구성) */
+   var market=nav.querySelector('.tab[data-v="market"]');
    var council=nav.querySelector('.tab[data-v="council"]');
-   if(council&&port)nav.insertBefore(council,port);
+   var cycle=nav.querySelector('.tab[data-v="cycle"]');
+   /* ① 인사이트 찾기 = 시장 모니터링(market) 뒤 주입 */
+   if(market)nav.insertBefore(b,market.nextSibling);else nav.appendChild(b);
+   /* ② 전문가 원탁(council)을 시장과 실적 전망(cycle) 앞으로 이동 → …insight·council·cycle·port·memo */
+   if(council&&cycle)nav.insertBefore(council,cycle);
+   /* ③ 시장과 실적 전망 = 구 「궁금한 것」(cycle) 라벨 개명 */
+   if(cycle)cycle.innerHTML='<span class="n"></span>시장과 실적 전망';
+   /* ④ index 순 재번호 → 01~06 */
    Array.prototype.forEach.call(nav.querySelectorAll('.tab'),function(t,i){
     var n=t.querySelector('.n');if(n)n.textContent=(i+1<10?'0':'')+(i+1);});
    nav.addEventListener('click',function(e){
