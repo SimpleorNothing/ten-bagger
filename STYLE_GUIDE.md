@@ -1,4 +1,4 @@
-**최종 갱신: 2026-07-18 11:17 (KST)**
+**최종 갱신: 2026-07-18 12:16 (KST)**
 
 # STYLE_GUIDE — 알파맵 디자인 시스템
 
@@ -239,6 +239,7 @@ pantone.css :root       ← 현행 팔레트 (팬튼 A안, index.html 하단 <li
 
 ## 갱신 이력
 
+- 2026-07-18 12:16 · **02 aisd.js v3+v4 — ③ 통합·④ 구성요소별·티어 손익 스트립(`.ds-vces`).** ③은 한 `ds-sec` 아래 렌즈 2조+카드 2장. ④ plan 테이블 행을 구성요소(업체군 `small`+`ds-lb` 레이어 배지)로 교체. 티어 카드 하단 **손익 스트립 `.ds-vces`**(점선 상단 룰 · `.k` mono 12px 라벨 · 흑자=`.pf-ok`(st-dawn)·적자=`.pf-no`(st-hot)·중립=`.pf-mid`(st-mature) — 기능색 재사용, 리비전 ▲▼는 등락색 규약). **신규 :root 토큰 0** → TOKENS 무변·check-docs 통과. 본문 14px/메타 12~13px. (OPS §3·§9 동반)
 - 2026-07-18 11:17 · **02 aisd.js v2 — 밸류체인 구조도(`ds-vc*`)·② AI 판매자 매트릭스 추가(PR #413).** 티어 카드(`.ds-vct.t1~t4` — 좌측 3px 단계색 룰·기능색 재사용) + 층간 흐름 행(`.ds-vcf`) + 그룹(`.ds-vcg` panel2 면 3px) + 칩(`.ds-chip` 20px 부표·보유=`--dawn` 테두리) + 레이어 배지(`.ds-lb` sem/pow) + 관측 위치 박스(`.ds-vco` 점선). **신규 :root 토큰 0** → TOKENS 무변·check-docs 통과. 본문 14px/메타 12px·모바일 760px 세로 스택. (OPS §3·§9 동반)
 - 2026-07-18 10:37 · **01 「채택한 매크로 관점」 스트립을 상단→「관련 기사」 섹션으로 이동.** `insight.js mount()` 앵커 `insStripMarket`을 `#v-market` `.vhead` 뒤(최상단)에서 `#mktMacroNews` 앞(관련 기사 h2 아래)으로 변경 — 큐레이션 관점이 자동 매크로 뉴스와 한 묶음. **신규 `:root` 토큰·CSS 0**(스트립 컴포넌트·insight.css 재사용) → TOKENS 무변·check-docs 무영향. jsdom 배치 검증(prev=관련 기사 h2·next=#mktMacroNews·상단 미잔존). §6-1 규칙 추가. SimpleorNothing 지시. narrative≠numbers 유지. (OPS §3·§9 동반)
 - 2026-07-18 10:20 · **02 궁금한 것 맨위 「AI 수요·공급 로드맵」 블록(`aisd.js` 자가 마운트 · `#dsAisd`).** **신규 `:root` 토큰 0**(전역 토큰만 · `ds-*` 스코프 CSS를 JS가 주입) → TOKENS 무변·check-docs 통과. 면(카드·테이블·트랙)=3px · 부표(역할·단계 배지)=20px(§3) · 등락 규약(상향 ▲=`--st-hot`·하향 ▼=`--st-accel`) · 렌즈 2줄(§6-4) 각 섹션 적용 · 본문 14px/메타 12px(§2) · 모바일 760px 1열·열 축약. 업체 클릭 확장 행은 focus-visible·키보드 토글 포함. index.html·pantone.css 무편집(worker 주입 = flags.js 패턴). (OPS §3·§9 동반)
