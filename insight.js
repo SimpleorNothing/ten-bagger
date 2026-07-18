@@ -6,6 +6,7 @@
 window.INSIGHT=(function(){
  var GEN='/api/insight', STORE='/api/insights', CK='ins_cache_v1';
  var recs=[], cur=null, busy=false, q='', filt='', putTimer=null;
+ var lvl=1;   /* 03 표시 레벨(뎁스) — L1 자료(소스 카드만) · L2 관점(+claims) · L3 시그널(+signal_log). 기본 L1(SimpleorNothing 지시 2026-07-18). */
  var MAXRAW=20000;   /* 원문 저장 상한(자) — R2 배열·localStorage 캐시 비대 방지. 초과분은 rawcut에 전체 길이 기록 */
  function $(id){return document.getElementById(id);}
  function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
@@ -53,7 +54,7 @@ window.INSIGHT=(function(){
     tk+'의 '+ln+' 수요가 하이퍼스케일러 capex 확장에 연동돼 지속된다',
     '이 우위(병목·점유·기술)가 대체기술·경쟁진입으로 훼손되지 않는다',
     '발표·내러티브가 다음 분기 실적 비트·확정 수주로 확인된다',
-    '추정(FY+1/+2 EPS 리비전)이 주가 상승률보다 빠르게 오른다'
+    '추정(FY+1/+2 EPS 리비전)이 주가 상승률보다 빨리 오른다'
    ],
    trig:[
     '매크로 게이트 3중 AND 해제(나스닥 드로다운·VIX·CNN F&G)',
@@ -428,9 +429,15 @@ window.INSIGHT=(function(){
   return '<div class="ins-sig"><div class="ins-sig-h">관련 시그널 로그 · '+list.length+'건</div>'+
    list.map(sigItem).join('')+'</div>';
  }
+ /* L2(관점) 레벨 = 시그널 본문은 접고 건수만 힌트로. L3에서 sigBlock 으로 펼친다. */
+ function sigHint(c){
+  var n=sigFor(c,SIGCTX.all).length;
+  return n?'<div class="ins-sighint">관련 시그널 로그 '+n+'건 · L3에서 펼치기</div>':'';
+ }
  /* 미연결 시그널 — 관점이 아직 안 붙은 로그. 로그는 삭제되지 않는다. */
  function renderSigRest(){
   var e=$('insSigRest');if(!e)return;
+  if(lvl<3){e.innerHTML='';return;}   /* 미연결 시그널도 시그널 레벨(L3)에서만 노출 */
   var rest=SIGCTX.all.filter(function(s){return !SIGCTX.used[s.key];});
   if(!SIGCTX.all.length){e.innerHTML='';return;}
   if(!rest.length){
@@ -445,7 +452,7 @@ window.INSIGHT=(function(){
  }
 
  /* --- 저장 목록 --- */
- function claimLine(r,c,showBtn){
+ function claimLine(r,c,showBtn,showSig){
   var pend=NUM[c.route]&&!c.applied;
   return '<div class="ins-si'+(pend?' pend':'')+(lcDue(c)?' due':'')+'">'+gradeBadge(c.grade||0,c.reinf)+' '+esc(c.text)+
    '<span class="m">'+(c.layer?esc(c.layer)+' · ':'')+esc(RT[c.route]||c.route)+' · N'+c.novelty+'I'+c.impact+'C'+c.confidence+
@@ -457,7 +464,7 @@ window.INSIGHT=(function(){
      (NUM[c.route]?'<button class="ins-btn" data-ap="'+c.id+'">'+(c.applied?'대기로 되돌리기':'반영 완료 표시')+'</button>':'')+
      '<button class="ins-btn" data-lc="'+c.id+'">🕔 라이프사이클</button>'+
     '</div>':'')+
-   sigBlock(c)+
+   (showSig?sigBlock(c):sigHint(c))+
    '</div>';
  }
  function renderList(){
@@ -481,11 +488,19 @@ window.INSIGHT=(function(){
    var pl=r.raw?'<a class="ins-src-lk" href="'+rawUrl(r)+'" target="_blank" rel="noopener">저장 원문 ↗</a>':'';
    var bar=(lk||rb||pl)?'<div class="ins-srcbar">'+lk+rb+pl+'</div>':'';
    var rawbox=r.raw?'<pre class="ins-raw" id="raw-'+r.id+'" hidden></pre>':'';
+   /* 표시 레벨(뎁스): L1=자료 카드만 · L2=+관점(claims, 시그널은 힌트) · L3=+시그널 로그 펼침 */
+   var claimsHtml=lvl>=2?cs.map(function(c){return claimLine(r,c,true,lvl>=3);}).join(''):'';
+   var hint='';
+   if(lvl<2){   /* L1 — 관점을 접었으니 자료 카드 밑에 무엇이 접혔는지 건수로 안내 */
+    var ns=0;cs.forEach(function(c){ns+=sigFor(c,SIGCTX.all).length;});
+    var parts=['관점 '+cs.length+'건'];
+    if(ns)parts.push('시그널 '+ns+'건');
+    hint='<div class="ins-lvhint">'+parts.join(' · ')+' — L2·L3로 펼치기</div>';
+   }
    return '<div class="ins-rec"><button class="ins-del" data-rid="'+r.id+'">삭제</button>'+
     '<h4>'+esc(r.src.title||'(제목 없음)')+'</h4>'+
     '<div class="meta">'+esc(r.src.kind||'')+(r.src.publisher?' · '+esc(r.src.publisher):'')+' · '+new Date(r.t).toLocaleDateString('ko-KR')+'</div>'+
-    bar+rawbox+
-    cs.map(function(c){return claimLine(r,c,true);}).join('')+'</div>';
+    bar+rawbox+claimsHtml+hint+'</div>';
   }).filter(Boolean).join('');
   L.innerHTML=html||'<div class="ins-noise">해당하는 관점이 없습니다. 위에 자료를 넣고 <b>관점 뽑기</b>를 누르세요.</div>';
   var cnt=$('insCount');if(cnt){var _due=flat().filter(function(o){return lcDue(o.c);}).length;cnt.textContent=recs.length?(flat().length+'개 관점 · 자료 '+recs.length+'건'+(_due?' · ⚠ 점검 필요 '+_due+'건':'')):'';}
@@ -516,6 +531,19 @@ window.INSIGHT=(function(){
    };});
   /* 중첩된 시그널 로그 본문의 종목명·티커 → 밸류체인 호버 팝업(index.html 전역 재사용) */
   try{if(window.vcDecorate)window.vcDecorate(L);}catch(x){}
+ }
+
+ /* --- 표시 레벨(뎁스) 선택 — L1 자료(소스 카드) · L2 관점 · L3 시그널. 상단 버튼군, 기본 L1.
+    등급 보드·검색·라우트 필터와 직교(어느 것을 '펼칠지'만 정한다). SimpleorNothing 지시 2026-07-18. --- */
+ function renderLevel(){
+  var e=$('insLv');if(!e)return;
+  var defs=[[1,'L1','자료'],[2,'L2','관점'],[3,'L3','시그널']];
+  e.innerHTML='<span class="ins-lv-lb">레벨</span>'+defs.map(function(d){
+   return '<button type="button" class="ins-lvbtn'+(lvl===d[0]?' on':'')+'" data-lv="'+d[0]+'">'+d[1]+' <span>'+d[2]+'</span></button>';
+  }).join('');
+  Array.prototype.forEach.call(e.querySelectorAll('[data-lv]'),function(b){
+   b.onclick=function(){lvl=+b.getAttribute('data-lv');renderLevel();renderList();renderSigRest();};
+  });
  }
 
  /* --- 등급 보드 — 채택 관점을 등급별 집계, 칸 클릭 시 그 등급으로 필터 --- */
@@ -564,7 +592,7 @@ window.INSIGHT=(function(){
   var t=0;recs.forEach(function(r){if(r.t>t)t=r.t;});
   e.textContent=t?('update : '+new Date(t).toLocaleString('ko-KR',{hour12:false})):'';
  }
- function renderAll(){recomputeGrades();SIGCTX=sigCtx();renderGradeBoard();renderList();renderSigRest();renderStrips();stamp();}
+ function renderAll(){recomputeGrades();SIGCTX=sigCtx();renderLevel();renderGradeBoard();renderList();renderSigRest();renderStrips();stamp();}
 
  /* --- 파일(PDF·TXT) → 텍스트 --- */
  var _pdfP=null;
@@ -715,6 +743,7 @@ window.INSIGHT=(function(){
    '</div>'+
    '<div class="ins-card" id="insResult" hidden></div>'+
    '<div><h2 class="ins-h2">채택한 관점 <span class="n" id="insCount"></span></h2>'+
+    '<div class="ins-lv" id="insLv"></div>'+
     '<div class="ins-bar" style="margin:0 0 8px">'+
      '<input class="ins-in" id="insSearch" style="flex:1 1 200px" placeholder="검색 (내용·종목·출처)">'+
      '<select class="ins-sel" id="insFilter" style="flex:0 0 170px">'+
