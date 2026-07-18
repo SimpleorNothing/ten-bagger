@@ -769,7 +769,7 @@ window.INSIGHT=(function(){
   anchor('insStripMarket','#v-market','before','#mktMacroNews');
   anchor('insStripDec','#v-decision','before','#decisionBoard');
   anchor('insStripCal','#v-market','after','.vhead');
-  anchor('insStripThread','#v-thread','after','#instantAnswer');
+  /* insStripThread(02 채택한 레이어 관점 스트립) 앵커 제거 — 02 박스1(#instantAnswer+관점 스트립) 삭제 지시(2026-07-18 SimpleorNothing). 관점 원본은 03 관점과 정보에 유지. strip()은 #insStripThread 부재 시 if(!e)return no-op. */
  }
 
  function init(){mount();if(!document.getElementById('insList'))return;bind();load();sigLoad();}

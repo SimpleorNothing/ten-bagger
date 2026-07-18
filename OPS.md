@@ -1,4 +1,4 @@
-**최종 갱신: 2026-07-18 13:45 (KST)**
+**최종 갱신: 2026-07-18 14:24 (KST)**
 
 # OPS — 알파맵 운영 가이드
 
@@ -114,7 +114,7 @@
 | **02 궁금한 것** | 01 데이터·병목 뉴스(지수·메모리 가격·capex·L3~L8 병목)가 **반도체 사이클(E군집)·주도주 사분면·γ·stage**에 함의가 있는지 | 메모리 가격 롤오버·병목 조임/완화 → 02 `cycle`·`gamma` stage 렌즈 점검. **숫자 변경은 §1 트리거 통과 시만**(가격 상승 자체는 플래그) |
 | **03 관점** | 01 종목·매크로 뉴스의 **확정 사건(m≥1)**이 채택 관점·`signal_log`로 이어지는지 | 확정 사건 → 03 관점 아래 `signal_log.json` EOF append(§6-5). 관점은 「반영 대기」 유지, 숫자는 §1 트리거 |
 
-### 02 궁금한 것 (`v-cycle` + `v-alpha` + `v-thread`)
+### 02 궁금한 것 (`v-thread`만 렌더 · `v-cycle`·`v-alpha` 2026-07-18 렌더 제외)
 
 | 정보명 | 자동/수동 | 주기 | 소스 |
 |---|---|---|---|
@@ -269,6 +269,7 @@
 
 ## 9. 갱신 이력
 
+- 2026-07-18 14:24 · **02 간소화 — 박스1(즉답 요약) 삭제·v-cycle·v-alpha 렌더 제외.** SimpleorNothing. 탭 매핑 `cycle:['thread']`(v-cycle·v-alpha 비활성 orphan)·v-thread vhead+`#instantAnswer` DOM 삭제·insight.js `insStripThread` 앵커 제거(원본 03 유지)·line3276 CYCLE.render/renderInstantAnswer 제거(drawSCurve 유지)·#dsAisd 유지. check-docs·Playwright(pageerror0) 통과. STYLE 동반.
 - 2026-07-18 14:20 · **02 aisd.js — ③ Meta 상세 갱신(하이페리온 5GW·$50B) + 조달 구조 박스.** SimpleorNothing 지시(디일렉 07-14 기사). 수요 4사 매트릭스 Meta 행: note에 「Hyperion 5GW 확정」, 2026E=2GW→5GW 확정($50B), 2027E=단계 가동 개시, 2028E=5GW 완공(~2030)·부지 ~93만㎡. 상세 카드 아래 `ds-vco` 재사용 조달 구조 박스 신설 — Blue Owl 80%/Meta 20% SPV·JV 소유, PIMCO $18B·BlackRock 계열 $3B 채권(A+), Meta는 장기 임차(초기 ~4년). 읽는 법 3종: ①capex 상한이 자기자본→**민간 신용시장** 이동=수요 시계 연장 ②리스 만기·크레딧 사이클=새 취약 고리(리비전 하향 방아쇠가 조달에서 나올 수 있음) ③L8 읽기=Entergy 가스발전 7기·그리드 배터리 3기·원전 uprate=전력 병목 실물 확인. **narrative≠numbers — `signal_log.json` 2엔트리 append(L8·L2), gamma·judgment·holdings·earnings 불변.** 신규 CSS·:root 토큰 0. (STYLE_GUIDE 동반)
 - 2026-07-18 13:45 · **03 관점과 정보 얻기에 유튜브 URL 스크립트 추출 이식(04 전문가 원탁과 동일 경로).** SimpleorNothing 지시. 03 「관점 뽑기」에서 URL 칸에 유튜브 링크만 넣고 본문이 비면 클라(`insight.js` `ytExtract`)가 먼저 `/api/yt-view`(**신규 `mode:'insight'` 분기** · Gemini 영상 인식)로 영상을 상세 전사→`insText` 채움(원문 raw 저장)→그 스크립트로 `/api/insight` 관점 추출로 이어감. 04는 기본 모드(발화자 관점 압축 요약) 불변, 03은 `mode:'insight'`(상세 전사 프롬프트·`maxOutputTokens` 2048→8192). 실패·`GEMINI_API_KEY` 부재(503)면 URL web_search로 폴백(구 동작). `worker.js`·`insight.js`만 편집(index.html 무패치·insight.js 자가 마운트) · **신규 :root 토큰·CSS 0**→`check-docs` 통과 · `node --check` 통과. narrative≠numbers — 스크립트는 인테이크 입력일 뿐 숫자 파일 불변. §3 03·04 인벤토리 갱신 · STYLE_GUIDE 이력 동반.
 - 2026-07-18 12:49 · **02 aisd.js v5 — 「이익률 추이 — 병목의 온도계」 매트릭스 신설.** SimpleorNothing 지시. 밸류체인 구조도 아래 티어·업체별 영업이익률 추이(2023~2026E · 공개 실적 방향성): ②랩 적자(병목 아님 — 가격결정력 약함) / ③클라우드 ~28→33%(본업 구조적·AI 증분 미증명) / ④NVDA ~54→62→60%±(혼합 — CUDA 생태계=구조적·공급 부족 프리미엄=사이클) / ④메모리 적자→35→50%±(기본 사이클 — HBM 주문형 전환이 구조성 부여 중·2028E 캐파 램프가 시험대=γ-닫힘 감시선) / ④통신·전력 ~60/20%(과점 구조적·병목 남하 수혜 후보). 각 행 클릭=왜 높은가·구조성 판정 상세(tr.exp/dtl 재사용). 판독법 렌즈=이익률 높은 층이 병목·서열(④≫③>②) 역전=레이어 회전 타이밍, 합산행=감시 항목 3종(NVDA 마진 꺾임·메모리 롤오버·통신/전력 상승). 분기 실적마다 캡처 갱신. 신규 :root 토큰 0. (STYLE_GUIDE 동반)

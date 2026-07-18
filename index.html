@@ -939,12 +939,8 @@ header::after{
 
 <!-- 03 THREAD (알파 찾기) -->
 <section class="view" id="v-thread">
-  <!-- ★ 즉답 요약 (답-먼저 재편) — 값은 gamma/holdings/TARGETS/signal_log 런타임, 전선·다음재채점만 수동판단 IA_CFG -->
-  <div class="vhead" style="position:relative"><h1 class="vtitle">지금 궁금한 것 — <em>바로 보는 답</em></h1><span class="updstamp abs" id="updIA"></span>
-    <p class="vsub" style="margin-top:2px">클릭 없이 결론부터 — 값은 라이브(gamma·holdings·signal_log) 구동. 판단 도구는 아래 <b>더 파보기</b>로 내렸습니다.</p></div>
-  <div id="instantAnswer"><div class="ia-ph" style="color:var(--faint);font-size:13px;padding:12px 0">불러오는 중…</div></div>
-
-  <div class="vhead" style="margin-top:36px;border-top:1px solid var(--line);padding-top:26px">
+  <!-- 박스1(즉답 요약 #instantAnswer + insStripThread 관점 스트립) 삭제 · 2026-07-18 SimpleorNothing 지시 — #dsAisd(aisd.js firstChild)는 유지 -->
+  <div class="vhead">
     <div class="vkick">더 파보기 · 강물 탐색</div>
     <p class="vsub">아래 <b>강물 후보</b>를 선택하면, 그 후보에 대해 <b>① 강물 흐름·현재 전선</b> → <b>② 8레이어 스택</b>이 펼쳐집니다.</p></div>
 
@@ -3269,11 +3265,11 @@ async function loadPrices(){try{const r=await fetch('./prices.json',{cache:'no-s
 /* ===== TABS ===== */
 document.getElementById('nav').addEventListener('click',e=>{const b=e.target.closest('.tab');if(!b)return;
  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));document.querySelectorAll('.view').forEach(v=>v.classList.remove('on'));
- b.classList.add('on');(({cycle:['cycle','alpha','thread'],port:['decision']})[b.dataset.v]||[b.dataset.v]).forEach(function(_i){var _e=document.getElementById('v-'+_i);if(_e)_e.classList.add('on');});
+ b.classList.add('on');(({cycle:['thread'],port:['decision']})[b.dataset.v]||[b.dataset.v]).forEach(function(_i){var _e=document.getElementById('v-'+_i);if(_e)_e.classList.add('on');});
  var _ab=document.getElementById('asofBox');if(_ab)_ab.style.display=(b.dataset.v==='memo'||b.dataset.v==='council')?'none':'';
  if(b.dataset.v==='thread'){drawSCurve();drawRiverCurves();}
  if(b.dataset.v==='us10y'){if(window.US10Y)window.US10Y.render();}
- if(b.dataset.v==='cycle'){if(window.CYCLE)window.CYCLE.render();drawSCurve();drawRiverCurves();if(typeof renderInstantAnswer==='function')renderInstantAnswer();}
+ if(b.dataset.v==='cycle'){drawSCurve();drawRiverCurves();}  /* 박스3 이하(v-cycle 반도체 사이클·v-alpha 보유종목 4사분면) 렌더 제외 · 박스1 #instantAnswer 삭제 → CYCLE.render·renderInstantAnswer 호출 제거, 박스2 강물 S곡선(drawSCurve/drawRiverCurves)만 유지 · 2026-07-18 */
  if(b.dataset.v==='market'){if(window.MARKET)window.MARKET.render();}
  if(b.dataset.v==='council'){if(window.COUNCIL)window.COUNCIL.render();}});
 setTimeout(function(){var _t0=document.querySelector('#nav .tab.on');if(_t0)_t0.click();},0);
