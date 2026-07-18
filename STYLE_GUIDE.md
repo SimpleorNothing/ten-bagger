@@ -1,4 +1,4 @@
-**최종 갱신: 2026-07-18 08:46 (KST)**
+**최종 갱신: 2026-07-18 09:46 (KST)**
 
 # STYLE_GUIDE — 알파맵 디자인 시스템
 
@@ -238,6 +238,7 @@ pantone.css :root       ← 현행 팔레트 (팬튼 A안, index.html 하단 <li
 
 ## 갱신 이력
 
+- 2026-07-18 09:46 · **01 다가오는 일정 카드 틴트 강도 상향.** 바탕 8→18%·테두리 24→48%(카테고리 구별성). 신규 토큰·CSS 0·check-docs 통과. SimpleorNothing 지시.
 - 2026-07-18 08:46 · **01 다가오는 일정 카드 배경을 카테고리색 틴트로.** `.now-card` 바탕 `--panel`→`color-mix(var(--c) 8%)`·테두리 `var(--c) 24%`(6색=§5 카테고리 인코딩). 신규 `:root` 토큰·CSS 0 → TOKENS 무변·check-docs 통과. 3px 스트라이프 유지. index=`patches/*.b64`(md5 왕복). SimpleorNothing 지시.
 - 2026-07-17 21:43 · **01 「CNN 공포·탐욕」 카드 반원 게이지(니들) 추가.** `fgGauge()` SVG · 역발상 색(공포=`--st-dawn`·탐욕=`--st-hot`·중립=`--st-mature`) · 신규 `:root` 토큰·CSS 0 · check-docs 통과 · index=`patches/*.b64`(봇 `94b283c`). SimpleorNothing 지시.
 - 2026-07-17 21:10 · **01 지표 6번째 카드 「DXI 메모리 현물」 추가.** §6 레퍼런스 복제 — `.mkt-card`+`card()`/`chart()`/`lens()` 재사용(`loadDxi`/`lensDxi`), 렌즈 2줄(l1=L3·메모리·γ-닫힘 ③ / l2=DDR4 현물·주간% → 판정). **신규 `:root` 토큰·CSS 0** → TOKENS 무변·check-docs 통과. 주간 카드라 `card()` `dod:false`(전일대비 억제) 옵션(하위호환). 등락색 규약 유지. 데이터=`dxi.json`(포털 게이트라 매주 금요일 append, OPS §3·§4·§8). (OPS §9 동반)
