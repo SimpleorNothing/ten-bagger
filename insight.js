@@ -493,19 +493,23 @@ window.INSIGHT=(function(){
    var pl=r.raw?'<a class="ins-src-lk" href="'+rawUrl(r)+'" target="_blank" rel="noopener">저장 원문 ↗</a>':'';
    var bar=(lk||rb||pl)?'<div class="ins-srcbar">'+lk+rb+pl+'</div>':'';
    var rawbox=r.raw?'<pre class="ins-raw" id="raw-'+r.id+'" hidden></pre>':'';
-   /* 표시 레벨(뎁스): L1=자료 카드만 · L2=+관점(claims, 시그널은 힌트) · L3=+시그널 로그 펼침 */
-   var claimsHtml=lvl>=2?cs.map(function(c){return claimLine(r,c,true,lvl>=3);}).join(''):'';
-   var hint='';
-   if(lvl<2){   /* L1 — 관점을 접었으니 자료 카드 밑에 무엇이 접혔는지 건수로 안내 */
+   /* 표시 레벨(뎁스): L1=자료 카드만(관점 힌트 클릭 펼침) · L2=+관점(claims) · L3=+시그널 로그 펼침 */
+   var mid;
+   if(lvl>=2){
+    mid=cs.map(function(c){return claimLine(r,c,true,lvl>=3);}).join('');
+   }else{   /* L1 — 관점은 접고, 자료 카드 밑 힌트를 클릭하면 그 자리에서 편다(전체 레벨 독립) */
     var ns=0;cs.forEach(function(c){ns+=sigFor(c,SIGCTX.all).length;});
     var parts=['관점 '+cs.length+'건'];
     if(ns)parts.push('시그널 '+ns+'건');
-    hint='<div class="ins-lvhint">'+parts.join(' · ')+' — L2·L3로 펼치기</div>';
+    var claimsHtml=cs.map(function(c){return claimLine(r,c,true,false);}).join('');
+    mid='<div class="ins-lvhint" data-rec="'+esc(r.id)+'" role="button" tabindex="0" aria-expanded="false">'+
+     parts.join(' · ')+' — <span class="ins-lv-cta">펼치기 ▾</span></div>'+
+     '<div class="ins-recwrap" id="recw-'+esc(r.id)+'" hidden>'+claimsHtml+'</div>';
    }
    return '<div class="ins-rec"><button class="ins-del" data-rid="'+r.id+'">삭제</button>'+
     '<h4>'+esc(r.src.title||'(제목 없음)')+'</h4>'+
     '<div class="meta">'+esc(r.src.kind||'')+(r.src.publisher?' · '+esc(r.src.publisher):'')+' · '+new Date(r.t).toLocaleDateString('ko-KR')+'</div>'+
-    bar+rawbox+claimsHtml+hint+'</div>';
+    bar+rawbox+mid+'</div>';
   }).filter(Boolean).join('');
   L.innerHTML=html||'<div class="ins-noise">해당하는 관점이 없습니다. 위에 자료를 넣고 <b>관점 뽑기</b>를 누르세요.</div>';
   var cnt=$('insCount');if(cnt){var _due=flat().filter(function(o){return lcDue(o.c);}).length;cnt.textContent=recs.length?(flat().length+'개 관점 · 자료 '+recs.length+'건'+(_due?' · ⚠ 점검 필요 '+_due+'건':'')):'';}
@@ -525,6 +529,14 @@ window.INSIGHT=(function(){
    var tg=function(){
     var id=b.getAttribute('data-sig'), w=document.getElementById('sigw-'+id);if(!w)return;
     var cta=b.querySelector('.ins-sig-cta'), op=w.hidden;
+    w.hidden=!op;b.setAttribute('aria-expanded',op?'true':'false');
+    if(cta)cta.textContent=op?'접기 ▴':'펼치기 ▾';};
+   b.onclick=tg;
+   b.onkeydown=function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();tg();}};});
+  Array.prototype.forEach.call(L.querySelectorAll('[data-rec]'),function(b){
+   var tg=function(){
+    var id=b.getAttribute('data-rec'), w=document.getElementById('recw-'+id);if(!w)return;
+    var cta=b.querySelector('.ins-lv-cta'), op=w.hidden;
     w.hidden=!op;b.setAttribute('aria-expanded',op?'true':'false');
     if(cta)cta.textContent=op?'접기 ▴':'펼치기 ▾';};
    b.onclick=tg;
