@@ -129,8 +129,8 @@ button{font-family:var(--serif);cursor:pointer;border:1px solid var(--line);back
 <script>
 /* ── 화자 ─────────────────────────────────────────────── */
 const SPK={
-  host:{name:'진행자', av:'진', pref:'f', rate:1.0,  pitch:1.04},
-  ana :{name:'알파맵 애널리스트', av:'애', pref:'m', rate:0.98, pitch:0.98},
+  host:{name:'진행자', av:'진', pref:'f', rate:1.12, pitch:1.14},   // 「The Energetic Co-Host」 — 밝고 경쾌한 리드
+  ana :{name:'알파맵 애널리스트', av:'애', pref:'m', rate:1.06, pitch:1.0},   // 조금 차분하되 생동감 유지
 };
 const qs=new URLSearchParams(location.search);
 const DATE=/^\d{4}-\d{2}-\d{2}$/.test(qs.get('d')||'')?qs.get('d'):null;
@@ -215,7 +215,7 @@ function speak(it,bub,done){
   u.lang='ko-KR';
   if(sp.voice) u.voice=sp.voice;
   u.rate=Math.min(1.7,sp.rate*rate);
-  u.pitch=(SPK.host.voice===SPK.ana.voice)?sp.pitch:1;
+  u.pitch=Math.min(1.6,sp.pitch);   // 두 보이스가 달라도 늘 적용 — 활기찬 톤·화자 분리
   setStat(sp.name,'발언 중 …');
   /* 일부 브라우저가 onend 를 흘린다 → 길이 기반 워치독 */
   const wd=setTimeout(end, Math.min(60000, 2500+it.say.length*130)/rate);

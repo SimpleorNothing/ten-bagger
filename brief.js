@@ -93,9 +93,11 @@ window.BRIEF = (function () {
     '텍스트(p0)·대담 전반(p1)·후반(p2)이 각각 그날 처음 열람할 때 한 번 만들어져 저장된다 — 이후 재열람은 무료다. ' +
     '「다시 만들기」는 그날치를 새 라이브 값으로 덮어쓴다.</div></div>';
 
+  // 「The Energetic Co-Host」 톤 — 밝고 경쾌한 공동 진행. 진행자는 살짝 빠르고 높게(들뜬 리드),
+  // 애널리스트는 조금 차분하되 여전히 생동감 있게. 배속(rate)·피치는 늘 적용해 두 채널을 분리한다.
   var SPK = {
-    host: { nm: '진행자', av: '진', pref: 'f', rate: 1.0, pitch: 1.04 },
-    ana:  { nm: '알파맵 애널리스트', av: '애', pref: 'm', rate: 0.98, pitch: 0.98 }
+    host: { nm: '진행자', av: '진', pref: 'f', rate: 1.12, pitch: 1.14 },
+    ana:  { nm: '알파맵 애널리스트', av: '애', pref: 'm', rate: 1.06, pitch: 1.0 }
   };
 
   var cur = null;          // 현재 보고 있는 날짜(null = 오늘)
@@ -215,7 +217,7 @@ window.BRIEF = (function () {
     u.lang = 'ko-KR';
     if (sp.voice) u.voice = sp.voice;
     u.rate = Math.min(1.7, sp.rate * rate);
-    u.pitch = (SPK.host.voice === SPK.ana.voice) ? sp.pitch : 1;
+    u.pitch = Math.min(1.6, sp.pitch);   // 두 보이스가 달라도 늘 적용 — 활기찬 톤·화자 분리
     stat(sp.nm, '발언 중 …');
     var wd = setTimeout(end, Math.min(60000, 2500 + it.say.length * 130) / rate);
     u.onend = function () { clearTimeout(wd); end(); };
