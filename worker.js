@@ -578,6 +578,50 @@ async function handleCouncilDiscPost(request, env) {
   return memoJson({ ok: true, count: arr.length }, 200);
 }
 
+// ===== 원탁 로스터(패널 명단) — R2(MEMO_BUCKET) · 추가·삭제·편집 SoT =====
+// 전문가 카드 명단(누가 앉나 + 정체성 필드)의 서버 저장소. 존재하면 인라인 기본 6인을
+// 대체한다(클라 council-roster.js 가 병합). 관점 텍스트 갱신은 여전히 council_log 가 덮는다.
+// narrative≠numbers — 관점·명단 텍스트일 뿐 숫자 파일 불변.
+const COUNCIL_ROSTER_KEY = "council_roster.json";
+async function handleCouncilRosterGet(env) {
+  if (!env.MEMO_BUCKET) return memoJson({ error: "MEMO_BUCKET not configured" }, 503);
+  const obj = await env.MEMO_BUCKET.get(COUNCIL_ROSTER_KEY);
+  const v = obj ? await obj.text() : "";
+  return new Response(v && v.trim() ? v : "{}", { status: 200, headers: { "content-type": "application/json", "cache-control": "no-store" } });
+}
+function sanitizeRosterExpert(e) {
+  if (!e || typeof e !== "object") return null;
+  const s = (x, n) => String(x == null ? "" : x).slice(0, n);
+  const id = s(e.id, 40).trim();
+  const name = s(e.name, 40).trim();
+  if (!id || !name) return null;
+  const bench = (["chair", "thesis", "price"].indexOf(e.bench) >= 0) ? e.bench : "thesis";
+  const stance = (["강세", "중립", "약세"].indexOf(e.stance) >= 0) ? e.stance : "중립";
+  const cfg = (e.cfg && typeof e.cfg === "object") ? e.cfg : {};
+  const cfgOut = {};
+  ["id", "skin", "hair", "style", "disc", "shirt"].forEach((k) => { if (typeof cfg[k] === "string") cfgOut[k] = String(cfg[k]).slice(0, 16); });
+  ["glasses", "beard", "emblem"].forEach((k) => { if (typeof cfg[k] === "boolean") cfgOut[k] = cfg[k]; });
+  if (!cfgOut.id) cfgOut.id = "g" + id.slice(0, 8);
+  return { id, bench, name, chip: s(e.chip, 40), field: s(e.field, 80), stance, updated: s(e.updated, 80) || "수동 편집", view: s(e.view, 1500), cfg: cfgOut, custom: e.custom === true };
+}
+async function handleCouncilRosterPost(request, env) {
+  if (!env.MEMO_BUCKET) return memoJson({ error: "MEMO_BUCKET not configured" }, 503);
+  let b;
+  try { b = await request.json(); } catch { return memoJson({ error: "invalid json" }, 400); }
+  const inList = (b && Array.isArray(b.experts)) ? b.experts : null;
+  if (!inList) return memoJson({ error: "experts[] required" }, 400);
+  const seen = {}; const experts = [];
+  for (const raw of inList.slice(0, 40)) {
+    const e = sanitizeRosterExpert(raw);
+    if (!e || seen[e.id]) continue;
+    seen[e.id] = 1; experts.push(e);
+    if (experts.length >= 24) break;
+  }
+  const out = { asOf: new Date().toISOString().slice(0, 10), experts };
+  await env.MEMO_BUCKET.put(COUNCIL_ROSTER_KEY, JSON.stringify(out), { httpMetadata: { contentType: "application/json" } });
+  return memoJson({ ok: true, count: experts.length }, 200);
+}
+
 // ===== 메모 저장 — Cloudflare R2 (MEMO_BUCKET) · DA Space 방식 =====
 // 메모 노트 JSON 을 R2 오브젝트("notes.json")로 보관. KV 의 25MiB 단일값 한도가 없어
 // 이미지(캡쳐) 누적에도 여유가 크다. 클라이언트(/api/memo)는 백엔드를 모른 채 그대로 동작.
@@ -1146,6 +1190,11 @@ export default {
         if (request.method === "POST") return handleCouncilDiscPost(request, env);
         return memoJson({ error: "method not allowed" }, 405);
       }
+      if (url.pathname === "/api/council-roster") {
+        if (request.method === "GET") return handleCouncilRosterGet(env);
+        if (request.method === "POST") return handleCouncilRosterPost(request, env);
+        return memoJson({ error: "method not allowed" }, 405);
+      }
       // 저장 원문 영구 링크(채택 관점 → 근거 추적) — /api/insights 보다 먼저 매칭
       if (request.method === "GET" && url.pathname === "/api/insights/raw") {
         return handleInsightRaw(url, env);
@@ -1171,6 +1220,7 @@ export default {
             el.append('<script src="/flags.js" defer></scr' + 'ipt>', { html: true });
             el.append('<script src="/aisd.js" defer></scr' + 'ipt>', { html: true });
             el.append('<script src="/council-ask.js" defer></scr' + 'ipt>', { html: true });
+            el.append('<script src="/council-roster.js" defer></scr' + 'ipt>', { html: true });
           } })
           .transform(res);
         // 대시보드 HTML 은 캐시 금지 — Workers Assets 기본 캐시 헤더 때문에 새 배포가

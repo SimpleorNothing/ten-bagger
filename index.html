@@ -2233,7 +2233,10 @@ window.CYCLE=(function(){
     }
 
     function render(){if(!mounted){mounted=true;var ta=document.getElementById('clCtx');if(!ta.value)ta.value=SAMPLE;renderCards();bind();loadLiveCtx();loadDiscussions();restoreCards();}}
-    return {render:render,playReport:playReport};
+    return {render:render,playReport:playReport,
+      getExperts:function(){return EXPERTS;},
+      setExperts:function(a){if(Array.isArray(a)&&a.length){EXPERTS=a;if(mounted){renderCards();restoreCards();}}},
+      reRender:function(){if(mounted)renderCards();}};
   })();
   </script>
 </section>
