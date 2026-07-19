@@ -1,0 +1,44 @@
+# 주간 브리핑 — 토 09:00 KST
+#
+# ⚠️ 제안본이다. GitHub App 은 `.github/workflows/` 쓰기가 403 이라 PR 로 배치할 수 없다.
+#    운영자가 이 파일을 `.github/workflows/weekly-brief-slack.yml` 로 직접 복사해야 크론이 돈다.
+#    그 전까지도 토요일에 06 탭을 `?span=w` 로 열면 그날 회차는 생성된다(크론은 결번 방지·링크용).
+#
+# 시각 근거: 06:37 signals·prices(금요일 미국 종가) → 08:30 compute-alpha(alpha.json)
+#            → 09:00 주간 회차. 08:00 에 돌리면 alpha 가 한 주 스테일이다.
+name: Weekly brief (Slack)
+
+on:
+  schedule:
+    - cron: "0 0 * * 6" # 토 00:00 UTC = 토 09:00 KST
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: weekly-brief
+  cancel-in-progress: false
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: 주간 회차 워밍 + 슬랙 전송
+        run: node scripts/weekly-brief-slack.mjs
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          SLACK_DM_CHANNEL: ${{ secrets.SLACK_DM_CHANNEL }}
+          # 게이트(비밀번호) 뒤라 러너가 직접 로그인해야 /api/brief 를 칠 수 있다.
+          # 없으면 워밍만 조용히 건너뛰고 슬랙 링크는 그대로 나간다.
+          SITE_PASSWORD: ${{ secrets.SITE_PASSWORD }}
+          # 주간 대담(w1·w2) 대본까지 미리 굽는다. 첫 재생 지연이 사라지는 대신
+          # 주 1회 8분치 생성비가 발생한다. 빼면 첫 재생 때 생성된다.
+          WEEKLY_WARM_PODCAST: "1"
