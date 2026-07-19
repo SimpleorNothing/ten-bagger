@@ -99,6 +99,7 @@ window.BRIEF = (function () {
     '<div class="br-top">' +
     '<button class="br-btn p" id="brListen">▶ 오늘 브리핑 듣기</button>' +
     '<button class="br-btn" id="brRegen">다시 만들기</button>' +
+    '<button class="br-btn" id="brRelisten">대담 다시 굽기</button>' +
     '<span class="br-date" id="brDate"></span>' +
     '</div>' +
     '<div id="brPlayer"></div>' +
@@ -106,7 +107,7 @@ window.BRIEF = (function () {
     '<div class="br-card"><div class="br-eye">지난 호 · 저장분</div><div id="brArch">불러오는 중 …</div>' +
     '<div class="br-note">보관은 R2(<code>brief_{날짜}_p{0,1,2}.json</code>). ' +
     '텍스트(p0)·대담 전반(p1)·후반(p2)이 각각 그날 처음 열람할 때 한 번 만들어져 저장된다 — 이후 재열람은 무료다. ' +
-    '「다시 만들기」는 그날치를 새 라이브 값으로 덮어쓴다.</div></div>';
+    '「다시 만들기」는 텍스트(p0)를, 「대담 다시 굽기」는 대담(p1·2)과 오디오를 새 라이브 값으로 덮어쓴다.</div></div>';
 
   // 「The Energetic Co-Host」 톤 — 밝고 경쾌한 공동 진행. 진행자는 살짝 빠르고 높게(들뜬 리드),
   // 애널리스트는 조금 차분하되 여전히 생동감 있게. 배속(rate)·피치는 늘 적용해 두 채널을 분리한다.
@@ -120,6 +121,9 @@ window.BRIEF = (function () {
   var p2pend = null, p2done = false, voices = [];
   // 고품질(Gemini) 오디오 — 준비되면 브라우저 TTS 대신 이걸로 재생. 실패 시 자동 폴백.
   var mode = 'tts', aud = null, aURL = {}, SEG = {}, aPart = 0, aT0 = [];
+  // 「대담 다시 굽기」 세션 플래그 — 켜지면 대담 대본(p1·2)·오디오 WAV 를 강제 재생성한다.
+  // openPlayer(true) 에서만 set, 일반 「듣기」(openPlayer(false)) 에서는 항상 false.
+  var regenPlay = false;
 
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]; }); }
   function $(id) { return document.getElementById(id); }
@@ -360,13 +364,16 @@ window.BRIEF = (function () {
   /* ── 고품질(Gemini) 오디오 재생 ─────────────────────────
      워커가 대담 대본을 「The Energetic Co-Host」 톤 WAV 로 구워 준다(/api/brief-audio · R2 캐시).
      파트 단위 스트림이라 말풍선 하이라이트는 발언 글자수 비례로 근사한다. 실패하면 브라우저 TTS 로 폴백. */
-  function audUrl(part) {
+  function audUrl(part, regen) {
     var p = new URLSearchParams(); p.set('part', String(part)); if (cur) p.set('d', cur);
+    if (regen) p.set('regen', '1');
     return '/api/brief-audio?' + p.toString();
   }
   function ensureAudio(part) {                 // → Promise<bool> (blob URL 준비됨)
     if (aURL[part]) return Promise.resolve(true);
-    return fetch(audUrl(part), { credentials: 'same-origin' }).then(function (r) {
+    // regenPlay 세션이면 각 파트 최초 1회 fetch 에 regen=1 을 실어 WAV 를 새로 굽는다
+    // (aURL 캐시가 파트당 재요청을 막으므로 이중 과금 없음).
+    return fetch(audUrl(part, regenPlay), { credentials: 'same-origin' }).then(function (r) {
       var ct = r.headers.get('content-type') || '';
       if (!r.ok || ct.indexOf('audio') < 0) return false;
       return r.blob().then(function (b) { aURL[part] = URL.createObjectURL(b); return true; });
@@ -458,9 +465,10 @@ window.BRIEF = (function () {
     });
   }
 
-  function openPlayer() {
+  function openPlayer(regen) {
     var p = $('brPlayer'); if (!p) return;
     SCRIPT = []; idx = -1; playing = false; busy = false; p2done = false; p2pend = null; resetAudio();
+    regenPlay = !!regen;   // 「대담 다시 굽기」 = 대본(p1·2)·오디오 강제 재생성 · 일반 「듣기」 = false
     p.innerHTML = '<div class="br-play"><div class="br-eye">2인 대담 · 약 5분</div><div id="brChat"></div>' +
       '<div class="br-ctl">' +
       '<button class="br-btn p" id="brPlay">▶</button>' +
@@ -487,10 +495,10 @@ window.BRIEF = (function () {
       var u = new SpeechSynthesisUtterance(' '); u.volume = 0; speechSynthesis.speak(u); loadVoices();
     }
 
-    api(1).then(function (d1) {
+    api(1, regenPlay).then(function (d1) {
       if (d1.error) { stat('중단', d1.error); return; }
       addMsgs(d1.script || []); SEG[1] = { a: 0, b: SCRIPT.length };
-      p2pend = api(2).then(function (d2) {
+      p2pend = api(2, regenPlay).then(function (d2) {
         if (d2 && !d2.error && d2.script) { var a = SCRIPT.length; addMsgs(d2.script); SEG[2] = { a: a, b: SCRIPT.length }; }
         p2done = true;
       }).catch(function () { p2done = true; });
@@ -562,10 +570,17 @@ window.BRIEF = (function () {
       sec.innerHTML = SECTION;
       var mv = document.getElementById('v-memo');
       if (mv) main.insertBefore(sec, mv); else main.appendChild(sec);
-      var lb = $('brListen'); if (lb) lb.onclick = openPlayer;
+      var lb = $('brListen'); if (lb) lb.onclick = function () { openPlayer(false); };
       var rb = $('brRegen'); if (rb) rb.onclick = function () {
         rb.disabled = true;
         loadText(true).then(function () { rb.disabled = false; loadArch(); });
+      };
+      // 「대담 다시 굽기」 — 텍스트는 그대로 두고 대담 대본(p1·2)·오디오만 강제 재생성.
+      // 매 클릭마다 Claude 대담 + Gemini TTS 비용이 드는 액션이라 「다시 만들기」와 분리해 둔다.
+      var xb = $('brRelisten'); if (xb) xb.onclick = function () {
+        xb.disabled = true;
+        openPlayer(true);
+        setTimeout(function () { xb.disabled = false; }, 3000);   // 연타 이중 과금 방지용 짧은 잠금
       };
     }
   }
