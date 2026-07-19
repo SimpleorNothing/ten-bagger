@@ -103,6 +103,8 @@ window.BRIEF = (function () {
   var cur = null;          // 현재 보고 있는 날짜(null = 오늘)
   var SCRIPT = [], idx = -1, playing = false, busy = false, rate = 1, muted = false;
   var p2pend = null, p2done = false, voices = [];
+  // 고품질(Gemini) 오디오 — 준비되면 브라우저 TTS 대신 이걸로 재생. 실패 시 자동 폴백.
+  var mode = 'tts', aud = null, aURL = {}, SEG = {}, aPart = 0, aT0 = [];
 
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]; }); }
   function $(id) { return document.getElementById(id); }
@@ -246,6 +248,90 @@ window.BRIEF = (function () {
   function play() { if (playing) return; playing = true; var pb = $('brPlay'); if (pb) pb.textContent = '❚❚'; step(); }
   function pause() { playing = false; busy = false; stop(); var pb = $('brPlay'); if (pb) pb.textContent = '▶'; stat('일시정지', '재생을 누르면 이어서 듣습니다'); }
 
+  /* ── 고품질(Gemini) 오디오 재생 ─────────────────────────
+     워커가 대담 대본을 「The Energetic Co-Host」 톤 WAV 로 구워 준다(/api/brief-audio · R2 캐시).
+     파트 단위 스트림이라 말풍선 하이라이트는 발언 글자수 비례로 근사한다. 실패하면 브라우저 TTS 로 폴백. */
+  function audUrl(part) {
+    var p = new URLSearchParams(); p.set('part', String(part)); if (cur) p.set('d', cur);
+    return '/api/brief-audio?' + p.toString();
+  }
+  function ensureAudio(part) {                 // → Promise<bool> (blob URL 준비됨)
+    if (aURL[part]) return Promise.resolve(true);
+    return fetch(audUrl(part), { credentials: 'same-origin' }).then(function (r) {
+      var ct = r.headers.get('content-type') || '';
+      if (!r.ok || ct.indexOf('audio') < 0) return false;
+      return r.blob().then(function (b) { aURL[part] = URL.createObjectURL(b); return true; });
+    }).catch(function () { return false; });
+  }
+  function calcT0(part, D) {                    // 발언별 시작시각(글자수 비례 근사)
+    var seg = SEG[part]; if (!seg || !D) return [];
+    var tot = 0, i; for (i = seg.a; i < seg.b; i++) tot += Math.max(1, ((SCRIPT[i] || {}).say || '').length);
+    var t0 = [], acc = 0; for (i = seg.a; i < seg.b; i++) { t0.push(tot ? (acc / tot) * D : 0); acc += Math.max(1, ((SCRIPT[i] || {}).say || '').length); }
+    return t0;                                  // k → SCRIPT[seg.a+k] 시작시각
+  }
+  function hi(i) {
+    var chat = $('brChat'); if (!chat) return;
+    Array.prototype.forEach.call(chat.querySelectorAll('.br-msg'), function (m) {
+      var j = Number(m.getAttribute('data-i')), bub = m.querySelector('.br-bub'); if (!bub) return;
+      if (j < i) { bub.classList.remove('on'); bub.classList.add('done'); }
+      else if (j === i) { bub.classList.add('on'); bub.classList.remove('done'); if (m.scrollIntoView) { try { m.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) {} } }
+      else bub.classList.remove('on');
+    });
+    var sp = SPK[(SCRIPT[i] || {}).s] || SPK.ana; stat(sp.nm, '고음질 발언 중 …');
+  }
+  function playPart(part) {
+    aPart = part;
+    if (aud) { try { aud.pause(); } catch (e) {} }
+    aud = new Audio(aURL[part]);
+    aud.playbackRate = rate; aud.muted = muted;
+    aT0 = []; var lastK = -1;
+    aud.onloadedmetadata = function () { aT0 = calcT0(part, aud.duration || 0); };
+    aud.ontimeupdate = function () {
+      if (!aT0.length) aT0 = calcT0(part, aud.duration || 0);
+      var ct = aud.currentTime, k = -1, i; for (i = 0; i < aT0.length; i++) { if (aT0[i] <= ct) k = i; else break; }
+      if (k >= 0 && k !== lastK) { lastK = k; hi(SEG[part].a + k); }
+    };
+    aud.onended = function () { onPartEnd(part); };
+    playing = true; var pb = $('brPlay'); if (pb) pb.textContent = '❚❚';
+    aud.play().catch(function () { /* 자동재생 차단 등 — 버튼으로 재개 */ });
+  }
+  function onPartEnd(part) {
+    var seg = SEG[part];
+    if (seg) { var last = $('brChat') && $('brChat').querySelector('.br-msg[data-i="' + (seg.b - 1) + '"] .br-bub'); if (last) { last.classList.remove('on'); last.classList.add('done'); } }
+    if (part === 1) {
+      var go = function () { ensureAudio(2).then(function (ok) { if (!playing) return; if (ok && SEG[2]) playPart(2); else finishHi(); }); };
+      if (SEG[2]) go(); else if (p2pend) { stat('', '후반부 오디오를 받는 중입니다 …'); p2pend.then(go); } else finishHi();
+    } else finishHi();
+  }
+  function finishHi() {
+    playing = false; var pb = $('brPlay'); if (pb) pb.textContent = '▶';
+    stat('브리핑 종료', '말풍선을 누르면 그 대목부터 다시 들을 수 있습니다');
+  }
+  function seekHi(i) {
+    var part = (SEG[2] && i >= SEG[2].a) ? 2 : 1;
+    ensureAudio(part).then(function (ok) {
+      if (!ok || !SEG[part]) return;
+      var apply = function () {
+        var t0 = calcT0(part, aud.duration || 0), k = i - SEG[part].a, t = (t0[k] != null) ? t0[k] : 0;
+        try { aud.currentTime = t; } catch (e) {}
+        playing = true; var pb = $('brPlay'); if (pb) pb.textContent = '❚❚'; aud.play().catch(function () {});
+      };
+      if (aPart === part && aud) { if (aud.duration) apply(); else aud.addEventListener('loadedmetadata', apply, { once: true }); }
+      else { playPart(part); aud.addEventListener('loadedmetadata', apply, { once: true }); }
+    });
+  }
+  function toggleHi() {
+    if (playing) { playing = false; if (aud) { try { aud.pause(); } catch (e) {} } var pb = $('brPlay'); if (pb) pb.textContent = '▶'; stat('일시정지', '재생을 누르면 이어서 듣습니다'); }
+    else if (aud) { playing = true; var pb2 = $('brPlay'); if (pb2) pb2.textContent = '❚❚'; aud.play().catch(function () {}); }
+    else playPart(1);
+  }
+  function toggle() { if (mode === 'hifi') toggleHi(); else (playing ? pause() : play()); }
+  function resetAudio() {
+    if (aud) { try { aud.pause(); } catch (e) {} }
+    Object.keys(aURL).forEach(function (k) { try { URL.revokeObjectURL(aURL[k]); } catch (e) {} });
+    aud = null; aURL = {}; SEG = {}; aPart = 0; aT0 = []; mode = 'tts';
+  }
+
   function addMsgs(list) {
     var chat = $('brChat'); if (!chat) return;
     list.forEach(function (it) {
@@ -257,6 +343,7 @@ window.BRIEF = (function () {
                     '<div class="br-bub">' + esc(it.say) + '</div></div>';
       chat.appendChild(d);
       d.querySelector('.br-bub').addEventListener('click', function () {
+        if (mode === 'hifi') { seekHi(Number(d.getAttribute('data-i'))); return; }
         if (busy) return; stop(); say(it, d.querySelector('.br-bub'), function () {});
       });
     });
@@ -264,7 +351,7 @@ window.BRIEF = (function () {
 
   function openPlayer() {
     var p = $('brPlayer'); if (!p) return;
-    SCRIPT = []; idx = -1; playing = false; busy = false; p2done = false; p2pend = null;
+    SCRIPT = []; idx = -1; playing = false; busy = false; p2done = false; p2pend = null; resetAudio();
     p.innerHTML = '<div class="br-play"><div class="br-eye">2인 대담 · 약 8분</div><div id="brChat"></div>' +
       '<div class="br-ctl">' +
       '<button class="br-btn p" id="brPlay">▶</button>' +
@@ -276,12 +363,13 @@ window.BRIEF = (function () {
       '<button class="br-btn br-sp" data-r="1.5">1.5×</button>' +
       '</div><div class="br-stat" id="brStat">대본을 받는 중입니다 …</div></div>';
 
-    $('brPlay').onclick = function () { playing ? pause() : play(); };
-    $('brMute').onclick = function () { muted = !muted; $('brMute').textContent = muted ? '🔇' : '🔊'; if (muted) stop(); };
-    $('brX').onclick = function () { pause(); p.innerHTML = ''; };
+    $('brPlay').onclick = toggle;
+    $('brMute').onclick = function () { muted = !muted; $('brMute').textContent = muted ? '🔇' : '🔊'; if (mode === 'hifi') { if (aud) aud.muted = muted; } else if (muted) stop(); };
+    $('brX').onclick = function () { pause(); resetAudio(); p.innerHTML = ''; };
     Array.prototype.forEach.call(p.querySelectorAll('.br-sp'), function (b) {
       b.onclick = function () {
         rate = parseFloat(b.getAttribute('data-r'));
+        if (mode === 'hifi' && aud) aud.playbackRate = rate;
         Array.prototype.forEach.call(p.querySelectorAll('.br-sp'), function (x) { x.classList.toggle('p', x === b); });
       };
     });
@@ -292,12 +380,18 @@ window.BRIEF = (function () {
 
     api(1).then(function (d1) {
       if (d1.error) { stat('중단', d1.error); return; }
-      addMsgs(d1.script || []);
-      play();
+      addMsgs(d1.script || []); SEG[1] = { a: 0, b: SCRIPT.length };
       p2pend = api(2).then(function (d2) {
-        if (d2 && !d2.error && d2.script) addMsgs(d2.script);
+        if (d2 && !d2.error && d2.script) { var a = SCRIPT.length; addMsgs(d2.script); SEG[2] = { a: a, b: SCRIPT.length }; }
         p2done = true;
       }).catch(function () { p2done = true; });
+      // 고품질(Gemini) 음성 우선 — 준비되면 그걸로, 실패하면 브라우저 TTS 로 폴백.
+      stat('', '고품질 음성을 준비하는 중입니다 … (최초 1회 약 20~40초 · 이후 즉시)');
+      ensureAudio(1).then(function (ok) {
+        if (idx >= 0) return;                         // 그새 사용자가 TTS 로 먼저 재생했으면 두지 않는다
+        if (ok) { mode = 'hifi'; playPart(1); }
+        else { mode = 'tts'; stat('', '기기 내장 음성으로 재생합니다 …'); play(); }
+      });
     }).catch(function (e) { stat('중단', String(e && e.message || e)); });
   }
 
@@ -322,7 +416,7 @@ window.BRIEF = (function () {
         bt.onclick = function () {
           var d = bt.getAttribute('data-d');
           cur = (d === today) ? null : d;
-          var p = $('brPlayer'); if (p) { pause(); p.innerHTML = ''; }
+          var p = $('brPlayer'); if (p) { pause(); resetAudio(); p.innerHTML = ''; }
           loadText(false).then(loadArch);
         };
       });

@@ -143,6 +143,8 @@ const ov=document.getElementById('ov');
 
 let SCRIPT=[], idx=-1, playing=false, muted=false, rate=1, koVoices=[], busy=false;
 let part2Loaded=false, part2Pending=null, finished=false;
+// 고품질(Gemini) 오디오 — 준비되면 브라우저 TTS 대신 이걸로. 실패 시 자동 폴백.
+let hifiMode=false, aud=null, aURL={}, SEG={}, aPart=0, aT0=[], hiCur=0, started=false;
 
 /* ── 음성 선별 ────────────────────────────────────────── */
 const F_HINT=/(sunhi|heami|yuna|jimin|soonbok|yujin|female|여성|여자|가영|서연|지연|나리)/i;
@@ -191,6 +193,7 @@ function renderMsg(it,i){
               '<div class="bubble">'+deco(it.say)+'</div></div>';
   chat.appendChild(d);
   d.querySelector('.bubble').addEventListener('click',()=>{
+    if(hifiMode){ seekHi(Number(d.dataset.i)); return; }
     if(busy) return; stop(); speak(it,d.querySelector('.bubble'),()=>{});
   });
   return d;
@@ -246,17 +249,95 @@ function step(){
 function play(){ if(playing) return; playing=true; playBtn.textContent='❚❚'; if(finished){finished=false;} step(); }
 function pause(){ playing=false; busy=false; playBtn.textContent='▶'; stop(); setStat('일시정지','재생을 누르면 이어서 듣습니다'); }
 
-playBtn.onclick=()=>playing?pause():play();
-document.getElementById('prev').onclick=()=>{const was=playing;pause();idx=Math.max(-1,idx-2);updProg();if(was)play();};
-document.getElementById('next').onclick=()=>{const was=playing;pause();if(was)play();else{idx=Math.min(SCRIPT.length-1,idx+1);updProg();}};
-muteBtn.onclick=()=>{muted=!muted;muteBtn.textContent=muted?'🔇':'🔊';muteBtn.classList.toggle('on',!muted);if(muted)stop();};
+/* ── 고품질(Gemini) 오디오 재생 ─────────────────────────
+   워커가 대담 대본을 「The Energetic Co-Host」 톤 WAV 로 구워 준다(/api/brief-audio · R2 캐시).
+   파트 단위 스트림이라 말풍선 하이라이트는 발언 글자수 비례로 근사. 실패하면 브라우저 TTS 로 폴백. */
+function audUrl(part){ const p=new URLSearchParams(); p.set('part',String(part)); if(DATE)p.set('d',DATE); return '/api/brief-audio?'+p.toString(); }
+function ensureAudio(part){
+  if(aURL[part]) return Promise.resolve(true);
+  return fetch(audUrl(part),{credentials:'same-origin'}).then(r=>{
+    const ct=r.headers.get('content-type')||'';
+    if(!r.ok||ct.indexOf('audio')<0) return false;
+    return r.blob().then(b=>{aURL[part]=URL.createObjectURL(b);return true;});
+  }).catch(()=>false);
+}
+function calcT0(part,D){
+  const seg=SEG[part]; if(!seg||!D) return [];
+  let tot=0,i; for(i=seg.a;i<seg.b;i++) tot+=Math.max(1,((SCRIPT[i]||{}).say||'').length);
+  const t0=[]; let acc=0; for(i=seg.a;i<seg.b;i++){ t0.push(tot?(acc/tot)*D:0); acc+=Math.max(1,((SCRIPT[i]||{}).say||'').length); }
+  return t0;
+}
+function hiA(i){
+  hiCur=i;
+  [...chat.querySelectorAll('.msg')].forEach(m=>{
+    const j=Number(m.dataset.i), bub=m.querySelector('.bubble'); if(!bub) return;
+    if(j<i){bub.classList.remove('on');bub.classList.add('done');}
+    else if(j===i){bub.classList.add('on');bub.classList.remove('done');if(m.scrollIntoView)try{m.scrollIntoView({behavior:'smooth',block:'center'});}catch(e){}}
+    else bub.classList.remove('on');
+  });
+  idx=i; updProg();
+  const sp=SPK[(SCRIPT[i]||{}).s]||SPK.ana; setStat(sp.name,'고음질 발언 중 …');
+}
+function playPart(part){
+  aPart=part;
+  if(aud){try{aud.pause();}catch(e){}}
+  aud=new Audio(aURL[part]); aud.playbackRate=rate; aud.muted=muted;
+  aT0=[]; let lastK=-1;
+  aud.onloadedmetadata=()=>{ aT0=calcT0(part,aud.duration||0); };
+  aud.ontimeupdate=()=>{
+    if(!aT0.length) aT0=calcT0(part,aud.duration||0);
+    const ct=aud.currentTime; let k=-1,i; for(i=0;i<aT0.length;i++){ if(aT0[i]<=ct) k=i; else break; }
+    if(k>=0&&k!==lastK){ lastK=k; hiA(SEG[part].a+k); }
+  };
+  aud.onended=()=>onPartEnd(part);
+  playing=true; finished=false; playBtn.textContent='❚❚';
+  aud.play().catch(()=>{});
+}
+function onPartEnd(part){
+  const seg=SEG[part];
+  if(seg){ const last=chat.querySelector('.msg[data-i="'+(seg.b-1)+'"] .bubble'); if(last){last.classList.remove('on');last.classList.add('done');} }
+  if(part===1){
+    const go=()=>ensureAudio(2).then(ok=>{ if(!playing) return; if(ok&&SEG[2]) playPart(2); else finishHi(); });
+    if(SEG[2]) go(); else if(part2Pending){ setStat('','후반부 오디오를 받는 중입니다 …'); part2Pending.then(go); } else finishHi();
+  } else finishHi();
+}
+function finishHi(){ playing=false; finished=true; playBtn.textContent='▶'; setStat('브리핑 종료','말풍선을 누르면 그 대목부터 다시 들을 수 있습니다'); }
+function seekHi(i){
+  const part=(SEG[2]&&i>=SEG[2].a)?2:1;
+  ensureAudio(part).then(ok=>{
+    if(!ok||!SEG[part]) return;
+    const apply=()=>{ const t0=calcT0(part,aud.duration||0), k=i-SEG[part].a, t=(t0[k]!=null)?t0[k]:0; try{aud.currentTime=t;}catch(e){} playing=true; playBtn.textContent='❚❚'; aud.play().catch(()=>{}); };
+    if(aPart===part&&aud){ if(aud.duration) apply(); else aud.addEventListener('loadedmetadata',apply,{once:true}); }
+    else { playPart(part); aud.addEventListener('loadedmetadata',apply,{once:true}); }
+  });
+}
+function toggleHi(){
+  if(playing){ playing=false; if(aud){try{aud.pause();}catch(e){}} playBtn.textContent='▶'; setStat('일시정지','재생을 누르면 이어서 듣습니다'); }
+  else if(aud){ playing=true; playBtn.textContent='❚❚'; aud.play().catch(()=>{}); }
+  else playPart(1);
+}
+function beginPlayback(){
+  if(started) return; started=true;
+  setStat('','고품질 음성을 준비하는 중입니다 … (최초 1회 약 20~40초 · 이후 즉시)');
+  ensureAudio(1).then(ok=>{
+    if(idx>=0) return;                          // 그새 TTS 로 먼저 재생됐으면 두지 않는다
+    if(ok){ hifiMode=true; playPart(1); }
+    else { hifiMode=false; setStat('','기기 내장 음성으로 재생합니다 …'); play(); }
+  });
+}
+
+playBtn.onclick=()=>{ if(hifiMode) toggleHi(); else (playing?pause():play()); };
+document.getElementById('prev').onclick=()=>{ if(hifiMode){ seekHi(Math.max(0,hiCur-1)); return; } const was=playing;pause();idx=Math.max(-1,idx-2);updProg();if(was)play(); };
+document.getElementById('next').onclick=()=>{ if(hifiMode){ seekHi(Math.min(SCRIPT.length-1,hiCur+1)); return; } const was=playing;pause();if(was)play();else{idx=Math.min(SCRIPT.length-1,idx+1);updProg();} };
+muteBtn.onclick=()=>{muted=!muted;muteBtn.textContent=muted?'🔇':'🔊';muteBtn.classList.toggle('on',!muted); if(hifiMode){ if(aud)aud.muted=muted; } else if(muted) stop();};
 document.getElementById('spd').addEventListener('click',e=>{
   const b=e.target.closest('button'); if(!b) return;
   rate=parseFloat(b.dataset.r);
+  if(hifiMode&&aud) aud.playbackRate=rate;
   [...e.currentTarget.children].forEach(x=>x.classList.toggle('on',x===b));
 });
 window.addEventListener('beforeunload',stop);
-document.addEventListener('visibilitychange',()=>{ if(document.hidden&&playing) pause(); });
+document.addEventListener('visibilitychange',()=>{ if(document.hidden&&playing){ if(hifiMode) toggleHi(); else pause(); } });
 
 /* ── 데이터 ───────────────────────────────────────────── */
 function api(part){
@@ -277,6 +358,7 @@ function appendPart(data,partNo){
   if(partNo===2) renderSeg('후반 · 종목 · 액션 · 스틸맨');
   const base=SCRIPT.length;
   data.script.forEach((it,i)=>{ SCRIPT.push(it); renderMsg(it, base+i); });
+  SEG[partNo]={a:base,b:SCRIPT.length};
   updProg();
 }
 
@@ -307,8 +389,8 @@ document.getElementById('start').onclick=()=>{
   if(typeof speechSynthesis!=='undefined'){
     const u=new SpeechSynthesisUtterance(' '); u.volume=0; speechSynthesis.speak(u); loadVoices();
   }
-  if(SCRIPT.length) play(); else setStat('','대본이 준비되면 자동으로 시작합니다 …');
-  const iv=setInterval(()=>{ if(SCRIPT.length){clearInterval(iv); if(!playing&&!finished) play();} },500);
+  if(SCRIPT.length) beginPlayback(); else setStat('','대본이 준비되면 자동으로 시작합니다 …');
+  const iv=setInterval(()=>{ if(SCRIPT.length){clearInterval(iv); beginPlayback();} },500);
   setTimeout(()=>clearInterval(iv),120000);
 };
 </script>

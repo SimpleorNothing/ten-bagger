@@ -1347,6 +1347,120 @@ async function handleBrief(request, env) {
   return json(out, 200);
 }
 
+// ===== 06 모닝 브리핑 — 고품질 오디오(Gemini 멀티스피커 TTS) · /api/brief-audio =====
+// 워커가 이미 가진 GEMINI_API_KEY 로, R2 에 캐시된 대담 대본(brief_{날짜}_p{1,2}.json)을
+// 「The Energetic Co-Host」 톤 오디오로 구워 브라우저 플레이어에 그대로 준다.
+// 슬랙·SITE_PASSWORD·워크플로 없이 사이트 안에서 바로 재생된다. 결과 WAV 는 R2 에 날짜 캐시.
+// 실패는 항상 비-200 JSON → 클라이언트가 브라우저 TTS 로 자동 폴백(무해).
+// 키 접두는 `briefaud_` — 「지난 호」 목록의 `brief_..._p{n}.json` 정규식과 충돌하지 않는다.
+const BRIEF_AUD_KEY = (d, p) => `briefaud_${d}_p${p}.wav`;
+const BRIEF_TTS_STYLE =
+  "당신은 활기찬 팟캐스트 공동 진행자 두 명입니다. 밝고 에너지 넘치는 구어체로, 서로 맞장구치며 " +
+  "리듬감 있게 주고받으세요. 과장은 피하되 톤은 지루하지 않게 생동감 있게 — 숫자와 판정은 정확히 전달합니다.";
+const BRIEF_TTS_VOICE = { host: "Puck", ana: "Kore" };   // 경쾌한 리드 · 또렷한 분석
+const BRIEF_TTS_LABEL = { host: "진행자", ana: "애널리스트" };
+
+// PCM(s16le) → WAV(44B 헤더). Cloudflare Workers 에 ffmpeg 이 없으므로 WAV 로 서빙(브라우저 재생 가능).
+function wavFromPcm(pcm, rate) {
+  const hdr = new Uint8Array(44);
+  const dv = new DataView(hdr.buffer);
+  const w = (o, s) => { for (let i = 0; i < s.length; i++) dv.setUint8(o + i, s.charCodeAt(i)); };
+  const len = pcm.length;
+  w(0, "RIFF"); dv.setUint32(4, 36 + len, true); w(8, "WAVE");
+  w(12, "fmt "); dv.setUint32(16, 16, true); dv.setUint16(20, 1, true); dv.setUint16(22, 1, true);
+  dv.setUint32(24, rate, true); dv.setUint32(28, rate * 2, true); dv.setUint16(32, 2, true); dv.setUint16(34, 16, true);
+  w(36, "data"); dv.setUint32(40, len, true);
+  const out = new Uint8Array(44 + len);
+  out.set(hdr, 0); out.set(pcm, 44);
+  return out;
+}
+
+async function handleBriefAudio(request, env) {
+  const json = (obj, status) => new Response(JSON.stringify(obj),
+    { status, headers: { "content-type": "application/json", "cache-control": "no-store" } });
+  if (!env.GEMINI_API_KEY) return json({ error: "GEMINI_API_KEY not configured" }, 503);
+  if (!env.MEMO_BUCKET) return json({ error: "MEMO_BUCKET not configured" }, 503);
+
+  const url = new URL(request.url);
+  const d = /^\d{4}-\d{2}-\d{2}$/.test(url.searchParams.get("d") || "") ? url.searchParams.get("d") : kstDate();
+  const part = url.searchParams.get("part") === "2" ? 2 : 1;
+  const regen = url.searchParams.get("regen") === "1";
+  const audHeaders = { "content-type": "audio/wav", "cache-control": "no-store" };
+
+  // 1) 오디오 캐시 — 같은 날 같은 파트는 한 번만 굽는다(열 때마다 TTS 과금되지 않게).
+  if (!regen) {
+    try {
+      const c = await env.MEMO_BUCKET.get(BRIEF_AUD_KEY(d, part));
+      if (c) return new Response(c.body, { headers: audHeaders });
+    } catch { /* 캐시 조회 실패는 무시하고 생성 */ }
+  }
+
+  // 2) 대담 대본(R2)이 있어야 굽는다. 없으면 409 → 클라이언트가 /api/brief 로 먼저 만든다.
+  let scriptObj;
+  try {
+    const o = await env.MEMO_BUCKET.get(BRIEF_KEY(d, part));
+    if (!o) return json({ error: "script not ready" }, 409);
+    scriptObj = await o.json();
+  } catch { return json({ error: "script read failed" }, 502); }
+  const lines = (scriptObj && Array.isArray(scriptObj.script) ? scriptObj.script : []).filter((x) => x && x.say);
+  if (!lines.length) return json({ error: "script empty" }, 409);
+
+  // 3) Gemini 멀티스피커 TTS — 「The Energetic Co-Host」 톤. TTS 모델은 별도(YouTube용 GEMINI_MODEL 과 다름).
+  const ttsModel = env.GEMINI_TTS_MODEL || "gemini-3.1-flash-tts-preview";
+  const prompt = BRIEF_TTS_STYLE + "\n\n다음 대담을 읽어 주세요.\n\n"
+    + lines.map((l) => `${BRIEF_TTS_LABEL[l.s] || BRIEF_TTS_LABEL.ana}: ${l.say}`).join("\n");
+  const body = {
+    contents: [{ parts: [{ text: prompt }] }],
+    generationConfig: {
+      responseModalities: ["AUDIO"],
+      speechConfig: {
+        multiSpeakerVoiceConfig: {
+          speakerVoiceConfigs: [
+            { speaker: BRIEF_TTS_LABEL.host, voiceConfig: { prebuiltVoiceConfig: { voiceName: env.GEMINI_VOICE_HOST || BRIEF_TTS_VOICE.host } } },
+            { speaker: BRIEF_TTS_LABEL.ana,  voiceConfig: { prebuiltVoiceConfig: { voiceName: env.GEMINI_VOICE_ANA  || BRIEF_TTS_VOICE.ana } } },
+          ],
+        },
+      },
+    },
+  };
+
+  let up;
+  try {
+    up = await fetch("https://generativelanguage.googleapis.com/v1beta/models/" + ttsModel + ":generateContent",
+      { method: "POST",
+        headers: { "content-type": "application/json", "x-goog-api-key": env.GEMINI_API_KEY },
+        body: JSON.stringify(body) });
+  } catch (e) {
+    return json({ error: "gemini tts fetch failed", detail: String(e && e.message ? e.message : e) }, 502);
+  }
+  const g = await up.json().catch(() => null);
+  if (!up.ok || !g) {
+    const dd = (g && g.error && g.error.message) ? g.error.message : "";
+    return json({ error: "gemini tts failed (" + up.status + ")" + (dd ? ": " + dd.slice(0, 200) : "") }, 502);
+  }
+  const gParts = (g.candidates && g.candidates[0] && g.candidates[0].content && g.candidates[0].content.parts) || [];
+  const inl = gParts.map((p) => p.inlineData || p.inline_data).find((x) => x && x.data);
+  if (!inl || !inl.data) return json({ error: "gemini tts: 오디오 없음" }, 502);
+  const rateM = /rate=(\d+)/.exec(inl.mimeType || inl.mime_type || "");
+  const rate = rateM ? Number(rateM[1]) : 24000;
+
+  // base64 PCM(s16le) → 바이트 → WAV
+  let pcm;
+  try {
+    const bin = atob(inl.data);
+    pcm = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) pcm[i] = bin.charCodeAt(i);
+  } catch { return json({ error: "audio decode failed" }, 502); }
+  const wav = wavFromPcm(pcm, rate);
+
+  // 4) R2 캐시(WAV). 저장 실패해도 이번 응답엔 영향 없음.
+  try {
+    await env.MEMO_BUCKET.put(BRIEF_AUD_KEY(d, part), wav, { httpMetadata: { contentType: "audio/wav" } });
+  } catch { /* 캐시 저장 실패 무시 */ }
+
+  return new Response(wav, { headers: audHeaders });
+}
+
 export default {
   async fetch(request, env) {
     const password = env.SITE_PASSWORD;
@@ -1444,6 +1558,10 @@ export default {
       // 06 모닝 브리핑 — 저장된 회차 날짜 목록
       if (request.method === "GET" && url.pathname === "/api/briefs") {
         return handleBriefList(env);
+      }
+      // 06 모닝 브리핑 — 고품질 오디오(Gemini 멀티스피커 TTS · 대본 R2 캐시를 WAV 로)
+      if (request.method === "GET" && url.pathname === "/api/brief-audio") {
+        return handleBriefAudio(request, env);
       }
       if (url.pathname === "/api/council-roster") {
         if (request.method === "GET") return handleCouncilRosterGet(env);
