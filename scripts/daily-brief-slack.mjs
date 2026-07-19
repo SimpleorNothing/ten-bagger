@@ -35,12 +35,55 @@ async function applianceNews() {
 // 팟캐스트 플레이어 — 사이트 비밀번호 게이트 안이라 첫 접속 시 1회 로그인이 필요하다.
 const BRIEF_URL = process.env.BRIEF_URL || "https://simpleornothing.com/brief.html";
 const SITE_URL = process.env.SITE_URL || "https://simpleornothing.com";
+const SITE_PW = process.env.SITE_PASSWORD;
+
+/* ── 06 회차 워밍(아침 자동 발행) ───────────────────────────────────────────
+   브리핑 텍스트(p0)·대담(p1·p2)은 워커가 "첫 열람 시" 생성해 R2에 날짜별 캐시한다.
+   아침에 아무도 사이트를 안 열면 그날 회차가 안 생겨 「지난 호」에 결번이 뚫린다.
+   그래서 이 크론이 직접 게이트를 넘어(/__auth 로그인) /api/brief?part=0 을 쳐서
+   오늘 회차를 미리 만들어 둔다. 게이트 통과에는 리포 시크릿 SITE_PASSWORD 가 필요하다
+   (워크플로 env 로 넘겨줘야 한다 — 안 넘어오면 조용히 건너뛰고 본문·링크는 그대로 나간다).
+   기본은 텍스트(p0)만 — 결번을 막는 최소분이자 어차피 첫 열람 때 생길 생성을 당길 뿐이라
+   추가 비용이 사실상 0. 팟캐스트(p1·p2)까지 미리 구우려면 BRIEF_WARM_PODCAST=1. */
+async function warmLogin() {
+  const res = await fetch(`${SITE_URL}/__auth`, {
+    method: "POST",
+    headers: { "content-type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({ password: SITE_PW }).toString(),
+    redirect: "manual",
+    signal: AbortSignal.timeout(15000),
+  });
+  const sc = res.headers.get("set-cookie");
+  if (!sc) throw new Error(`사이트 로그인 실패 (${res.status}) — SITE_PASSWORD 확인`);
+  return sc.split(";")[0]; // "tb_auth=<hash>"
+}
+
+async function warmBrief() {
+  if (!SITE_PW) { console.log("[warm] SITE_PASSWORD 없음 — 06 회차 워밍 건너뜀"); return; }
+  try {
+    const cookie = await warmLogin();
+    const parts = process.env.BRIEF_WARM_PODCAST ? [0, 1, 2] : [0];
+    for (const p of parts) {
+      try {
+        const r = await fetch(`${SITE_URL}/api/brief?part=${p}`, {
+          headers: { cookie }, signal: AbortSignal.timeout(120000),
+        });
+        const j = await r.json().catch(() => ({}));
+        if (j.error) console.log(`[warm] part${p} 실패: ${j.error}`);
+        else console.log(`[warm] part${p} ok`, p === 0 ? `제${j.no ?? "?"}호 · ${j.headline ?? ""}` : "");
+      } catch (e) { console.log(`[warm] part${p} 생략:`, e.message); }
+    }
+  } catch (e) {
+    console.log("[warm] 06 회차 워밍 생략:", e.message);
+  }
+}
 
 /* ── 뉴스레터 본문 = 게이트 보드 + 레이어 갭 ────────────────────────────────
-   러너는 비밀번호 게이트를 못 넘어 /api/brief 를 못 읽는다(SITE_PASSWORD 미설정 · OPS §8).
-   그래서 LLM 문장이 아니라 **결정론적 판정**을 직접 계산해 싣는다.
+   슬랙 본문은 /api/brief(게이트 뒤·LLM 생성)를 읽지 않는다 — 대신 **결정론적 판정**을
+   러너 로컬 리포 파일에서 직접 계산해 싣는다(게이트·LLM 비용과 무관하게 매일 안정적으로 나가게).
    임계·밴드·판정식은 절대 여기서 다시 정의하지 않는다 — index.html(단일 SoT)에서 통째로 뽑아 쓴다.
-   (OPS §1 「임계 중복 정의 금지」. 파싱 실패 시 조용히 본문만 생략하고 지표·링크는 그대로 나간다.) */
+   (OPS §1 「임계 중복 정의 금지」. 파싱 실패 시 조용히 본문만 생략하고 지표·링크는 그대로 나간다.)
+   ※ 사이트 06 회차 생성(워밍)은 별개다 — 위 warmBrief() 가 로그인해 /api/brief 를 친다. */
 function liveFrame() {
   try {
     const idx = readFileSync("index.html", "utf8");
@@ -93,10 +136,13 @@ function layerBlock(fr) {
 
 const pct = (n, p) => `${n >= p ? "▲" : "▼"}${Math.abs((n - p) / p * 100).toFixed(2)}%`;
 
+// 06 회차 워밍은 지표 수집과 동시에 돌린다. best-effort(내부 try/catch) — 실패해도 슬랙은 그대로 나간다.
+const warming = warmBrief();
 const [ndx, tnx, wti, ks, news] = await Promise.all(
   [yahoo("^IXIC"), yahoo("^TNX"), yahoo("CL=F"), yahoo("^KS11"), applianceNews()]
 );
 const fg = fng();
+await warming;
 
 // 판정 블록(게이트·레이어) — 파싱 실패 시 조용히 생략한다(지표·뉴스·링크는 그대로).
 const FR = liveFrame();
