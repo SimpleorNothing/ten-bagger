@@ -163,14 +163,44 @@ function describeAnthropicError(status, bodyText) {
   return "anthropic api failed (" + status + (hint ? " · " + hint : "") + ")" + (msg ? ": " + msg.slice(0, 200) : "");
 }
 
+// ── 로컬 σ·μ 산출 (Yahoo 일봉 1y) — LLM·web_search 없이 결정론 계산 ─────────────
+// API 비용 규율(OPS §6-6): 시세·통계는 무료 피드에서 직접 계산한다.
+// LLM 은 심볼 해석 실패(회사명 입력·비상장 등) 시 폴백 경로에서만 쓴다.
+async function localVolDrift(sym) {
+  const u = "https://query1.finance.yahoo.com/v8/finance/chart/" +
+    encodeURIComponent(sym) + "?interval=1d&range=1y";
+  const r = await fetch(u, { headers: { "user-agent": "Mozilla/5.0 (compatible; alphamap/1.0)" } });
+  if (!r.ok) return null;
+  const j = await r.json();
+  const res = j && j.chart && j.chart.result && j.chart.result[0];
+  const q = res && res.indicators && res.indicators.quote && res.indicators.quote[0];
+  const closes = q && q.close;
+  if (!Array.isArray(closes)) return null;
+  const c = closes.filter((v) => typeof v === "number" && isFinite(v) && v > 0);
+  if (c.length < 60) return null;
+  const lr = [];
+  for (let i = 1; i < c.length; i++) lr.push(Math.log(c[i] / c[i - 1]));
+  const mean = lr.reduce((a, b) => a + b, 0) / lr.length;
+  const varr = lr.reduce((a, b) => a + (b - mean) * (b - mean), 0) / (lr.length - 1);
+  const vol = Math.sqrt(varr) * Math.sqrt(252) * 100;
+  if (!isFinite(vol) || vol <= 0) return null;
+  const cagr = (Math.pow(c[c.length - 1] / c[0], 252 / lr.length) - 1) * 100;
+  // 드리프트는 '합리적 가정'이지 실현수익률이 아니다 → 시장 베이스(8%)로 수축·클램프.
+  const drift = Math.max(-10, Math.min(20, 0.3 * (isFinite(cagr) ? cagr : 0) + 0.7 * 8));
+  const meta = res.meta || {};
+  return {
+    ticker: meta.symbol || sym,
+    name: meta.longName || meta.shortName || sym,
+    annualizedVolPct: +vol.toFixed(1),
+    suggestedDriftPct: +drift.toFixed(1),
+    note: "\uCD5C\uADFC 1\uB144 \uC77C\uBD09 \uB85C\uADF8\uC218\uC775\uB960\uB85C \uC9C1\uC811 \uC0B0\uCD9C(\uBB34\uB8CC \uD53C\uB4DC\u00B7LLM \uBBF8\uC0AC\uC6A9) \u00B7 \uB4DC\uB9AC\uD504\uD2B8\uB294 \uC2DC\uC7A5 8%\uB85C \uC218\uCD95.",
+  };
+}
+
 // σ·μ 추정 — Anthropic Messages API 프록시 (브라우저 직접 호출은 CORS·키 부재로 실패하므로 서버측에서 중계)
 async function handleEstimate(request, env) {
   const json = (obj, status) => new Response(JSON.stringify(obj),
     { status, headers: { "content-type": "application/json" } });
-
-  if (!env.ANTHROPIC_API_KEY) {
-    return json({ error: "ANTHROPIC_API_KEY not configured" }, 503);
-  }
 
   let body;
   try { body = await request.json(); }
@@ -178,6 +208,16 @@ async function handleEstimate(request, env) {
 
   const tk = (body && body.ticker ? String(body.ticker) : "").trim();
   if (!tk) return json({ error: "ticker required" }, 400);
+
+  // ① 결정론 경로 — 무료 일봉으로 직접 계산(비용 0·검색 0회).
+  try {
+    const loc = await localVolDrift(tk.toUpperCase());
+    if (loc) return json({ content: [{ type: "text", text: JSON.stringify(loc) }], src: "local" }, 200);
+  } catch (_e) { /* ② LLM 폴백으로 */ }
+
+  if (!env.ANTHROPIC_API_KEY) {
+    return json({ error: "ANTHROPIC_API_KEY not configured" }, 503);
+  }
 
   const prompt = 'You are a quant. For the stock/ETF ticker or name "' + tk + '", estimate its ANNUALIZED volatility (%) from recent ~1y daily returns, and a reasonable ANNUAL expected drift (%) assumption. Use web search for recent data. Respond with ONLY a compact JSON object, no prose, no markdown fences: {"ticker":"","name":"","annualizedVolPct":number,"suggestedDriftPct":number,"note":"one short sentence in Korean"}';
 
@@ -191,15 +231,16 @@ async function handleEstimate(request, env) {
         "anthropic-version": "2023-06-01",
       },
       body: JSON.stringify({
-        model: "claude-opus-4-8",
-        max_tokens: 1500,
+        // 비용 규율: 숫자 회수은 Sonnet + 검색 3회 상한 (판단계 호출만 Opus)
+        model: "claude-sonnet-5",
+        max_tokens: 800,
         // 스트리밍 — Opus + web_search(서버툴)는 비스트리밍 시 첫 바이트까지
         // 오래 걸려 api.anthropic.com(Cloudflare) 의 ~100s 한도를 넘기면 524 가 떴다
         // (워커는 이를 502 "anthropic api failed" 로 전달). 스트리밍은 ping/델타로
         // 연결을 유지해 타임아웃을 막는다. 서버측에서 텍스트를 재조립해 동일 형태로 반환.
         stream: true,
         messages: [{ role: "user", content: prompt }],
-        tools: [{ type: "web_search_20260209", name: "web_search" }],
+        tools: [{ type: "web_search_20260209", name: "web_search", max_uses: 3 }],
       }),
     });
   } catch (e) {
@@ -462,7 +503,7 @@ async function handleCouncilRead(request, env) {
     up = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: { "content-type": "application/json", "x-api-key": env.ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01" },
-      body: JSON.stringify({ model: "claude-opus-4-8", max_tokens: 700, system: sys, messages: [{ role: "user", content: user }] }),
+      body: JSON.stringify({ model: "claude-sonnet-5", max_tokens: 700, system: sys, messages: [{ role: "user", content: user }] }),
     });
   } catch (e) {
     return json({ error: "anthropic fetch failed", detail: String(e && e.message ? e.message : e) }, 502);
@@ -497,7 +538,7 @@ async function handleCouncilSummary(request, env) {
     up = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: { "content-type": "application/json", "x-api-key": env.ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01" },
-      body: JSON.stringify({ model: "claude-opus-4-8", max_tokens: 700, system: sys, messages: [{ role: "user", content: user }] }),
+      body: JSON.stringify({ model: "claude-sonnet-5", max_tokens: 700, system: sys, messages: [{ role: "user", content: user }] }),
     });
   } catch (e) {
     return json({ error: "anthropic fetch failed", detail: String(e && e.message ? e.message : e) }, 502);
@@ -784,7 +825,8 @@ async function anthropicText(env, prompt, useSearch, maxTokens) {
     stream: true,
     messages: [{ role: "user", content: prompt }],
   };
-  if (useSearch) payload.tools = [{ type: "web_search_20260209", name: "web_search" }];
+  // 검색 턴마다 전체 컨텍스트가 재전송된다(입력 2차식 증가) → 상한 고정.
+  if (useSearch) payload.tools = [{ type: "web_search_20260209", name: "web_search", max_uses: 3 }];
 
   let upstream;
   try {
