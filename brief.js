@@ -41,7 +41,16 @@ window.BRIEF = (function () {
     '#v-brief ul.br-l{margin:0;padding-left:17px}#v-brief ul.br-l li{margin:0 0 7px;font-size:14px;line-height:1.62}',
     '#v-brief .br-steel{border-left:2px solid var(--line2);padding-left:12px;color:var(--dim);font-size:13.5px;line-height:1.68}',
     '#v-brief .br-note{font-size:11.5px;color:var(--faint);line-height:1.55;margin-top:12px}',
-    '#v-brief .br-arch{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}',
+    '#v-brief .br-issues{display:flex;flex-direction:column;margin-top:6px}',
+    '#v-brief .br-iss{display:flex;gap:10px;align-items:baseline;width:100%;text-align:left;font-family:inherit;',
+    ' background:transparent;border:0;border-bottom:1px solid var(--line);padding:10px 2px;cursor:pointer;color:var(--txt)}',
+    '#v-brief .br-iss:last-child{border-bottom:0}',
+    '#v-brief .br-iss:hover{background:var(--panel2)}',
+    '#v-brief .br-iss.on .no,#v-brief .br-iss.on .ti{color:var(--dawn)}',
+    '#v-brief .br-iss .no{flex:0 0 auto;font-size:12px;font-weight:700;color:var(--dim);min-width:46px}',
+    '#v-brief .br-iss .dt{flex:0 0 auto;font-size:12px;color:var(--faint)}',
+    '#v-brief .br-iss .ti{flex:1 1 auto;font-size:13.5px;font-weight:600;line-height:1.5;min-width:0}',
+    '@media(max-width:700px){#v-brief .br-iss{flex-wrap:wrap;gap:4px 9px}#v-brief .br-iss .ti{flex:1 0 100%}}',
     '#v-brief .br-ad{font-size:12.5px;font-weight:600;padding:6px 11px;border-radius:3px;background:var(--panel2);',
     ' border:1px solid var(--line);color:var(--dim);cursor:pointer}',
     '#v-brief .br-ad.on{background:var(--dawn);border-color:var(--dawn);color:var(--onacc)}',
@@ -79,7 +88,7 @@ window.BRIEF = (function () {
     '</div>' +
     '<div id="brPlayer"></div>' +
     '<div id="brBody"></div>' +
-    '<div class="br-card"><div class="br-eye">지난 브리핑 · 저장분</div><div id="brArch">불러오는 중 …</div>' +
+    '<div class="br-card"><div class="br-eye">지난 호 · 저장분</div><div id="brArch">불러오는 중 …</div>' +
     '<div class="br-note">보관은 R2(<code>brief_{날짜}_p{0,1,2}.json</code>). ' +
     '텍스트(p0)·대담 전반(p1)·후반(p2)이 각각 그날 처음 열람할 때 한 번 만들어져 저장된다 — 이후 재열람은 무료다. ' +
     '「다시 만들기」는 그날치를 새 라이브 값으로 덮어쓴다.</div></div>';
@@ -181,7 +190,7 @@ window.BRIEF = (function () {
     }
     b.innerHTML = h;
     var dt = $('brDate');
-    if (dt) dt.textContent = '기준일 ' + (d.asOf || cur || kst()) + (cur ? ' · 보관분' : ' · 오늘');
+    if (dt) dt.textContent = (d.no ? '제' + d.no + '호 · ' : '') + (d.asOf || cur || kst()) + (cur ? ' · 보관분' : ' · 오늘');
   }
 
   function loadText(regen) {
@@ -290,21 +299,26 @@ window.BRIEF = (function () {
     }).catch(function (e) { stat('중단', String(e && e.message || e)); });
   }
 
-  /* ── 보관분 목록 ──────────────────────────────────────── */
+  /* ── 보관분 목록 ──────────────────────────────────────
+     뉴스레터 「지난 호」처럼 **회차 번호 + 날짜 + 제목** 한 줄씩. 클릭 = 그 호 열람. */
   function loadArch() {
     var a = $('brArch'); if (!a) return;
     fetch('/api/briefs', { credentials: 'same-origin' }).then(function (r) { return r.json(); }).then(function (j) {
       var ds = (j && j.dates) || [];
-      if (!ds.length) { a.innerHTML = '<span style="font-size:13px;color:var(--faint)">아직 저장된 브리핑이 없습니다 — 오늘 것이 첫 회차입니다.</span>'; return; }
+      if (!ds.length) { a.innerHTML = '<span style="font-size:13px;color:var(--faint)">아직 저장된 회차가 없습니다 — 오늘이 제1호입니다.</span>'; return; }
       var today = kst();
-      a.innerHTML = '<div class="br-arch">' + ds.map(function (x) {
-        var d = x.d || x;
-        var on = (cur ? cur === d : d === today);
-        return '<button class="br-ad' + (on ? ' on' : '') + '" data-d="' + esc(d) + '">' + esc(d) + '</button>';
+      a.innerHTML = '<div class="br-issues">' + ds.map(function (x) {
+        var d = x.d, on = (cur ? cur === d : d === today);
+        var no = x.no ? ('제' + x.no + '호') : '—';
+        var t = x.title || (x.parts && x.parts.indexOf(0) < 0 ? '(텍스트 미생성 · 대담만 저장)' : '(제목 없음)');
+        return '<button class="br-iss' + (on ? ' on' : '') + '" data-d="' + esc(d) + '">' +
+               '<span class="no">' + esc(no) + '</span>' +
+               '<span class="dt">' + esc(d) + '</span>' +
+               '<span class="ti">' + esc(t) + '</span></button>';
       }).join('') + '</div>';
-      Array.prototype.forEach.call(a.querySelectorAll('.br-ad'), function (b) {
-        b.onclick = function () {
-          var d = b.getAttribute('data-d');
+      Array.prototype.forEach.call(a.querySelectorAll('.br-iss'), function (bt) {
+        bt.onclick = function () {
+          var d = bt.getAttribute('data-d');
           cur = (d === today) ? null : d;
           var p = $('brPlayer'); if (p) { pause(); p.innerHTML = ''; }
           loadText(false).then(loadArch);

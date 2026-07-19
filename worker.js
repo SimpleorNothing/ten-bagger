@@ -1209,29 +1209,55 @@ const BRIEF_PART = {
   2: "이번엔 **후반부**만 쓴다(약 4분·발언 14~18개). 전반부 대본이 입력으로 주어지니 **같은 말을 반복하지 마라**. 흐름: 종목별 감마·단계 판정(닫힘 트리거 점등 여부를 명시) → 다가오는 일정과 D-N 게이트 → 최근 시그널 로그가 누적으로 말해주는 것 → **오늘의 액션 아이템**(전부 조건부·AND) → 마지막에 반드시 **스틸맨 반론**(오늘 결론이 틀렸다면 무엇 때문인가) → 클로징. badges 는 빈 배열로 둔다.",
 };
 
-// 저장된 브리핑 날짜 목록 — 06 모닝 브리핑의 「지난 브리핑」. R2 키에서 날짜만 뽑는다.
+// 저장된 브리핑 회차 목록 — 06 「지난 브리핑」. 뉴스레터처럼 **회차 번호 + 제목**으로 낸다.
+// 회차 번호(no)는 p0 생성 시점에 박아 저장하므로 이후 목록이 바뀌어도 불변이다.
+// 옛 회차(no 없이 저장된 것)는 날짜 오름차순 순번으로 폴백한다.
+const BRIEF_LIST_CAP = 60;
+
+async function briefDateMap(env) {
+  const seen = {};
+  let cursor;
+  for (let i = 0; i < 5; i++) {
+    const r = await env.MEMO_BUCKET.list({ prefix: "brief_", limit: 1000, cursor });
+    (r.objects || []).forEach((o) => {
+      const m = /^brief_(\d{4}-\d{2}-\d{2})_p(\d)\.json$/.exec(o.key || "");
+      if (!m) return;
+      (seen[m[1]] = seen[m[1]] || []).push(Number(m[2]));
+    });
+    if (!r.truncated) break;
+    cursor = r.cursor;
+  }
+  return seen;
+}
+
 async function handleBriefList(env) {
   const json = (obj, status) => new Response(JSON.stringify(obj),
     { status, headers: { "content-type": "application/json", "cache-control": "no-store" } });
   if (!env.MEMO_BUCKET) return json({ dates: [] }, 200);
-  const seen = {};
-  try {
-    let cursor;
-    for (let i = 0; i < 5; i++) {
-      const r = await env.MEMO_BUCKET.list({ prefix: "brief_", limit: 1000, cursor });
-      (r.objects || []).forEach((o) => {
-        const m = /^brief_(\d{4}-\d{2}-\d{2})_p(\d)\.json$/.exec(o.key || "");
-        if (!m) return;
-        (seen[m[1]] = seen[m[1]] || []).push(Number(m[2]));
-      });
-      if (!r.truncated) break;
-      cursor = r.cursor;
-    }
-  } catch (e) {
-    return json({ dates: [], error: String(e && e.message ? e.message : e) }, 200);
-  }
-  const dates = Object.keys(seen).sort().reverse()
-    .map((d) => ({ d, parts: seen[d].sort() }));
+
+  let seen;
+  try { seen = await briefDateMap(env); }
+  catch (e) { return json({ dates: [], error: String(e && e.message ? e.message : e) }, 200); }
+
+  const asc = Object.keys(seen).sort();                       // 오래된 순 = 회차 순
+  const recent = asc.slice(-BRIEF_LIST_CAP);
+  const titles = {};
+  await Promise.all(recent.map(async (d) => {
+    if ((seen[d] || []).indexOf(0) < 0) return;               // 텍스트 회차가 없으면 제목도 없다
+    try {
+      const o = await env.MEMO_BUCKET.get(BRIEF_KEY(d, 0));
+      if (!o) return;
+      const j = await o.json();
+      titles[d] = { title: j.headline || "", no: j.no || null };
+    } catch { /* 개별 실패는 제목 없이 통과 */ }
+  }));
+
+  const dates = asc.map((d, i) => ({
+    d,
+    no: (titles[d] && titles[d].no) || (i + 1),               // 폴백 = 날짜 오름차순 순번
+    title: (titles[d] && titles[d].title) || "",
+    parts: seen[d].sort(),
+  })).reverse();                                              // 표시는 최신순
   return json({ dates }, 200);
 }
 
@@ -1295,6 +1321,14 @@ async function handleBrief(request, env) {
     if (!out || !out.headline) return json({ error: "brief text missing" }, 502);
     out.asOf = d;
     out.part = 0;
+    // 회차 번호 = 기존 텍스트 회차 수 + 1. 생성 시점에 고정해 저장(이후 불변).
+    if (env.MEMO_BUCKET) {
+      try {
+        const map = await briefDateMap(env);
+        const prior = Object.keys(map).filter((k) => k !== d && (map[k] || []).indexOf(0) >= 0).length;
+        out.no = prior + 1;
+      } catch { /* 실패해도 목록이 순번으로 폴백한다 */ }
+    }
   } else {
     if (!out || !Array.isArray(out.script)) return json({ error: "brief script missing" }, 502);
     out.asOf = d;
