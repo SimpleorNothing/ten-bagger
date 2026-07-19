@@ -1,4 +1,4 @@
-**최종 갱신: 2026-07-19 21:40 (KST)**
+**최종 갱신: 2026-07-19 23:05 (KST)**
 
 # OPS — 알파맵 운영 가이드
 
@@ -57,8 +57,8 @@
 > 범례 — **자동**: cron 워크플로 or worker 런타임 API · **수동**: 편집→PR→deploy · **혼합**: 자동값 위에 판단이 덮음 · **날짜연동**: 클라가 날짜 기준 자동 표시.
 > 메뉴·정보명·소스·주기가 바뀌면 **같은 PR에서 이 절을 갱신**한다(§7).
 
-### 현행 메뉴 (6탭 · 런타임 렌더 순)
-`01 시장 모니터링(v-market)` · `02 인사이트 찾기(v-insight · insight.js 자가 마운트)` · `03 전문가 원탁(v-council)` · `04 시장과 실적 전망(v-thread · v-cycle·v-alpha 2026-07-18 렌더 제외)` · `05 리밸런싱(v-decision)` · `06 메모(v-memo)`
+### 현행 메뉴 (7탭 · 런타임 렌더 순)
+`01 시장 모니터링(v-market)` · `02 인사이트 찾기(v-insight · insight.js 자가 마운트)` · `03 전문가 원탁(v-council)` · `04 시장과 실적 전망(v-thread · v-cycle·v-alpha 2026-07-18 렌더 제외)` · `05 리밸런싱(v-decision)` · **`06 모닝 브리핑(v-brief · brief.js 자가 마운트 · 2026-07-19 신설)`** · `07 메모(v-memo)`
 ※ 위는 **런타임 렌더 순**(§3 내부번호 = 이 순서). `nav` 정적 버튼은 5개(market·cycle·port·council·memo · **index.html 무편집**)이고, `insight.js` `mount()`가 런타임에 ①`insight` 탭을 `market` 뒤 주입 ②`council`을 `cycle` 앞으로 이동 ③`cycle` 라벨 「궁금한 것」→「시장과 실적 전망」 개명 ④전 탭 index 순 재번호 → 위 순서 확정(정적 폴백은 마운트 전 구 5탭 · `insight.js` 로드 전 잠깐). **`data-v`·뷰 id·데이터 소스는 불변 — 라벨·순서만 재구성**(2026-07-18). ※ 04 뷰 제목은 #424가 옛 `#instantAnswer` vhead(「지금 궁금한 것」)를 삭제해 별도 개명 불필요 — v-thread 최상단은 `#dsAisd`(AI 수요·공급 로드맵). `v-port`·`v-tracker`·`v-macro`·`v-cal`은 **뷰서 제외·코드 잔존**(v-cal은 2026-07-17 06 캘린더 삭제로 합류 — 임박 이벤트는 01로 흡수, `#v-cal` CSS는 비활성 잔존).
 
 ### 01 시장 모니터링 (`v-market`)
@@ -162,7 +162,19 @@
 | 시장 모멘텀 전망 + 추정 리비전 트래커 (`#momOutlook`·`#probEst`) | 자동(런타임) | gamma·signals·charts 일별 | index.html 인라인 IIFE. `renderMom`=signals+삼성 프록시 레짐 · `renderRev`=`gamma.json` `rev`(TP·EPS·주가 리비전·애널·강등 게이트 d30). **강등 게이트 = 30d 주가 − 30d EPS(FY+1) 리비전율**(양수=가격 추월·성숙 강등 후보 / 음수=추정 앞섬·γ open). 관측치·예측 아님 |
 | ↳ **「기대수익 점수」 컬럼** (`raer.js` 자가 마운트) | 자동(런타임 파생) | gamma 로드 시 | 추정 리비전 트래커에 위험조정 기대수익(**RAER = 여력 × 실현확률 ÷ 리스크**, 14행 상대 0–100) 컬럼을 종목 다음에 주입 + 점수 내림차순 재정렬 + **현금 행** 추가. 실현확률=EPS 리비전(90d·30d)·애널 상향폭·γ 건전성(하향이면 급감) / 리스크=단계(성숙 1.2·과열 1.45)·90d 급등·γ 소진·고변동 가산. 현금=무위험(한은 기준금리 `RF` 상수)·상승 기대수익 바닥·게이트 잠김 시 배분 실탄. `changelog.js` 부트스트랩이 `loadRaer()`로 `<script defer src="/raer.js">` 주입·index.html·worker.js 무편집·신규 :root 토큰 0·jsdom 배치 검증. **기간은 점수로 안 나눔 — 「언제」는 촉매(실적 D-N)가 답함.** 관측 휴리스틱·예측/투자권유 아님(narrative≠numbers) |
 
-### 06 메모 (`v-memo`)
+### 06 모닝 브리핑 (`v-brief` · `brief.js` 자가 마운트)
+
+| 정보명 | 자동/수동 | 주기 | 소스 |
+|---|---|---|---|
+| **텍스트 브리핑** (결론 → 매크로 게이트 보드 3중 AND → 레이어 갭 표 → 오늘 볼 것 → 액션 아이템 → **스틸맨 반론**) | 자동(열 때 생성·R2 날짜 캐시) | 하루 1회분 | `GET /api/brief?part=0` (worker `handleBrief` · `BRIEF_TEXT_SYS`). 대담(part 1·2)과 **같은 라이브 입력**(`signals`·`gamma`·`holdings`·`calendar`·`signal_log`·`judgment`)을 쓰되 낭독 대본이 아니라 **훑어보는 구조**로 낸다. `gate[].s`는 충족/미충족만 · `layers[].state`는 오버/언더/적정 · `actions`는 전부 조건부 AND |
+| **오늘 브리핑 듣기** (2인 대담 · 약 8분) | 자동(열 때 생성·R2 캐시) | 하루 1회분 | 「▶ 오늘 브리핑 듣기」 → `part=1` 먼저 재생 · `part=2`는 재생 중 수신·이어붙임(§ 외부 채널 동일 엔드포인트 재사용). 낭독 = 브라우저 TTS 2보이스 · 말풍선 클릭 = 그 대목만 재낭독 · 배속·음소거 |
+| **지난 브리핑 (저장분)** | 자동 | 상시 | `GET /api/briefs` → R2 `brief_` 접두 키에서 날짜 추출(`{d, parts[]}` 최신순). 날짜 클릭 = 그날 텍스트·대담 열람(`?d=YYYY-MM-DD`). **보관 자체가 캐시** — 따로 커밋하지 않는다(리포에 파일이 늘지 않음) |
+| ↳ 「다시 만들기」 | 수동 | 필요 시 | `?regen=1` — 그날치를 새 라이브 값으로 덮어쓴다(텍스트만 재생성 · 대담은 다음 열람 때) |
+
+> **저장 시점 = 첫 열람.** 크론 워밍(아침에 미리 만들어 두기)은 러너가 비밀번호 게이트를 통과해야 해서 **`SITE_PASSWORD` 시크릿 추가가 선행**(A안과 같은 조건 · §8). 그 전까지 아침에 안 열면 그날 회차는 만들어지지 않는다.
+> **narrative ≠ numbers** — 브리핑은 라이브 값을 읽어 말할 뿐 `gamma`·`judgment`·`holdings`·`earnings` 어느 것도 쓰지 않는다.
+
+### 07 메모 (`v-memo`)
 
 | 정보명 | 자동/수동 | 주기 | 소스 |
 |---|---|---|---|
@@ -280,6 +292,7 @@
 - **관점 라이프사이클 LLM 자동 제안 미구현(부분 완화)**: 03 「🕔 라이프사이클」 편집은 **모달 + 필드별 「보기 칩」 선택식**으로, 클라 템플릿(게이트 어휘·8레이어·관점 티커·thesis-break 패턴)이 `hyp`·`trig`·`until` 후보와 `review` 날짜 프리셋을 즉시 제시한다(수동 4연타 부담 해소·오프라인·기존 채택분 전부). 다만 이는 **템플릿**이라 관점 고유 맥락은 못 맞춘다 — `/api/insight`(worker) 추출 시 `hyp`·`until`을 LLM으로 관점별 맞춤 자동 채우는 건 여전히 후속 PR(③). 신규 채택은 `review`=+14d 자동 유지.
 - **DXI 자동 피드 없음(2026-07-17)**: DXI 지수는 포털 게이트라 무료 피드 없음 → 매주 금요일 스케줄이 TrendForce 현물가로 `dxi.json` append.
 - **브리핑 팟캐스트 오디오판(A안) 대기(2026-07-19)**: MP3를 슬랙에 직접 첨부하려면 ①슬랙 봇 **`files:write`** 스코프 추가 후 재설치 ②리포 시크릿 **`SITE_PASSWORD`** ③리포 시크릿 **`GEMINI_API_KEY`** ④`.github/workflows/` 배치 — **전부 운영자 수동**(App workflows write 403). 제안본은 `scripts/proposed-workflows/daily-brief-podcast-audio.md` 체크리스트. 그 전까지는 링크형(B안)만 가동.
+- **모닝 브리핑 크론 워밍 미가동(2026-07-19)**: 06 회차는 **첫 열람 때** 만들어져 저장된다 → 아침에 안 열면 그날 회차가 빈다. 자동 워밍은 `SITE_PASSWORD` 시크릿(운영자 수동) + `daily-brief-slack.mjs`에서 `/api/brief?part=0,1,2` 선호출 1줄이면 해소.
 - **브리핑 링크는 비밀번호 게이트 뒤**: 슬랙에서 처음 열면 워커 로그인 화면이 뜬다(기기·인앱 브라우저별 1회). 쿠키 `Max-Age` 만료 시 재로그인.
 - `prices.json.warn = lazr chart 43.47 vs quote 41.35` — LAZR 비보유·무시 가능
 
@@ -287,6 +300,7 @@
 
 ## 9. 갱신 이력
 
+- 2026-07-19 23:05 · **06 모닝 브리핑 신설(`brief.js` 자가 마운트 + `/api/brief?part=0` + `/api/briefs`) — 메뉴 7탭으로.** SimpleorNothing 지시("알파맵에 06 모닝 브리핑 추가 · 매일 브리핑한 내용 저장 · 텍스트로 정리 + 오늘 브리핑 듣기"). 직전(21:40)에 만든 팟캐스트는 **사이트 밖 단독 페이지**라 매일 쌓이는 기록이 안 됐다 → 사이트 메뉴로 승격하고 보관을 붙였다. ①**텍스트 판 `part=0` 신설**(`BRIEF_TEXT_SYS`) — 대담과 같은 라이브 입력으로 결론·게이트 보드·레이어 갭 표·볼 것·액션·**스틸맨**을 구조화 JSON으로. 낭독 대본(part 1·2)과 **엔드포인트·캐시 스키마 공유**(`brief_{날짜}_p{0,1,2}.json`). ②`GET /api/briefs` — R2 `brief_` 접두 키에서 날짜 추출(페이지네이션 5회 상한) → 「지난 브리핑」 목록·날짜 클릭 열람. **보관이 곧 캐시라 리포에 파일이 늘지 않는다.** ③`brief.js` 자가 마운트 — nav에 `data-v="brief"` 탭을 **메모 앞**에 넣고 01~07 재번호(insight.js 재번호 뒤에 도는 멱등 루프), `#v-brief` 섹션을 `#v-memo` 앞에 주입. 「▶ 오늘 브리핑 듣기」는 인뷰 플레이어(말풍선·배속·음소거·클릭 재낭독). **index.html 무편집**(worker `<script defer src="/brief.js">` 주입 1줄) · **신규 :root 토큰 0**(스코프 `.br-*` 스타일만 JS가 주입). `node --check`(worker·brief) 통과 · check-docs 통과(토큰 24종 무변) · jsdom 스모크(탭 순서 01~07·뷰 위치·게이트 3칸·레이어 오버/언더 색·액션/스틸맨·보관분 2건·대담 4발언 이어붙임·보관분 클릭 전환) 통과. narrative≠numbers — 브리핑은 라이브 값을 읽어 말할 뿐 숫자·판단 파일 불변. §3 06 인벤토리 신설·메모 07로 이동 · §8 이슈 1건 · STYLE_GUIDE §4-1 동반. **크론 워밍(아침 자동 생성)은 `SITE_PASSWORD` 선행 · 주간 다이제스트는 후속 과제.**
 - 2026-07-19 21:40 · **데일리 브리핑 「팟캐스트(2인 대담·약 8분)」 신설 — 링크형(B) 가동 + 오디오판(A) 제안본.** SimpleorNothing 지시("매일 슬랙으로 문자 요약 받는데 팟캐스트 형식으로"). 운영자 결정 3: **둘 다 준비 · 2인(진행자+애널리스트) · 8분(스틸맨까지)**. ①worker `handleBrief`(+`/api/brief` 라우팅) 신설 — 라이브 `signals`·`gamma`·`holdings`·`calendar`·`signal_log`·`judgment`를 `env.ASSETS`로 읽어 상황 요약을 만들고 opus-4-8로 2인 대담 대본 생성, **R2 `brief_{날짜}_p{1,2}.json` 날짜 캐시**(열 때마다 과금되지 않게). **part 1/2 분할** = 8분치 비스트리밍 1회는 ~100s 한도에 걸림 → 전반부 먼저 재생·후반부는 재생 중 수신. ②단독 페이지 `brief.html`(index.html 무편집) — 말풍선 대담 UI + 브라우저 TTS 2보이스 + 재생/이전/다음/배속/음소거·말풍선 클릭 재낭독. ③`scripts/daily-brief-slack.mjs`에 링크 1줄 **병기**(텍스트 대체 아님 — 스캔은 텍스트, 이동 중엔 음성). ④오디오판(A)은 `scripts/proposed-workflows/daily-brief-podcast-audio.{yml,md}`+`brief-tts.mjs` 제안본으로만 — 선행 3건 운영자 수동(§8). **워크플로 무편집**(403 회피) — 기존 `daily-brief-slack.yml`이 그대로 호출하는 스크립트만 고쳤다. `node --check`(worker·slack·tts) 통과 · check-docs 통과(토큰 24종 무변). **narrative≠numbers** — 대본은 라이브 값을 읽어 말할 뿐 숫자·판단 파일 불변. §3 외부 채널 소절 신설 · §8 이슈 2건 추가 · STYLE_GUIDE §4-1 동반. **오디오판 승격·과거 회차 목록 페이지는 후속 과제.**
 - 2026-07-19 10:56 · **03 전문가 원탁에 「패널 관리」(로스터 추가·삭제·편집) 신설(`council-roster.js` 자가 마운트 + `/api/council-roster` R2).** SimpleorNothing 지시("전문가 패널 변경가능한 메뉴 추가 — 패널 추가·삭제 등"). 운영자 결정 3: **기본 6인 포함 전체 CRUD · 서버(R2) 공유 · 토론+자문 모두 완전 동작.** 인라인 `EXPERTS`가 하드코딩이라 데이터화가 필요 → 인라인 COUNCIL에 훅 3개(`getExperts`/`setExperts`/`reRender`)만 추가하고, 자가 마운트 `council-roster.js`가 vhead 「패널 관리」 버튼·모달로 명단을 편집한다. 저장 = R2 `council_roster.json`(`/api/council-roster` GET/POST · `sanitizeRosterExpert` 상한 24인·필드 길이컷). 로스터 존재 시 `setExperts`로 기본 6인을 대체 렌더 → **토론 시작·1인 심층 자문 양쪽이 커스텀/편집 명단으로 동작**. 뷰·스탠스 편집은 **council_log 채널에도 흘려**(`/api/council-log`) council-sot(council.json 재패치)의 덮어쓰기를 피하고 관점 SoT를 일원화. 아바타=프리셋 6종(인라인 `avatar()` cfg 재사용). 삭제는 최소 1인 유지·「기본 6인 복원」 = base 재주입. worker.js(핸들러 2 + 라우팅 + 주입 1줄)·신규 `council-roster.js`·index.html(훅 3개)·문서만 변경 — **신규 :root 토큰·CSS 0**(기존 `.cl-*`·`.cl-modal` 재사용) → `node --check`(worker·roster·인라인 10블록) 통과·check-docs 통과(토큰 24종 무변)·jsdom 스모크(버튼·추가[roster+log POST·setExperts]·삭제·편집 프리필·기본 복원) 통과·`git apply --check` clean main. narrative≠numbers — 명단·관점 텍스트일 뿐 숫자 파일 불변, 실존 인물 렌즈 시뮬레이션(투자자문 아님). §3 03 인벤토리 행 신설 · STYLE_GUIDE §9 동반. **아바타 커스텀 색상 직접 지정·명단 순서 드래그는 후속 과제.**
 - 2026-07-19 09:37 · **03 전문가 원탁에 「1인 심층 자문」 신설(`council-ask.js` 자가 마운트 + `/api/council-ask`).** SimpleorNothing 지시("토론도 하지만 한 명한테 물어보면 깊이 있는 진단·조언이 되도록"). 현행 원탁은 `personas>=2` 하드검증으로 1인 진단 불가 → 전문가 **1인만 선택**하면 하단 바에 「심층 자문」 버튼이 떠 `/api/council-ask`(신규 · opus-4-8 · `max_tokens` 3500)로 **그 전문가 렌즈만 순수하게**(좌장 오버레이 없음 — 운영자 결정) 심층 진단·**직접 실행 조언**·자기 반증(`watch`)을 받는다. 출력 `{diagnosis, basis[], advice[], watch[], answer, stance}` → `#clResult`에 기존 `.cl-*`(cl-rep·cl-diag·cl-blk·cl-two·cl-steel) 재사용 렌더. **좌장 스틸맨 대신 그 렌즈 자신의 리스크 규율을 `watch`로 강제**해 편향 진단을 렌즈 내부로 방어(예: 김효진 자문이면 "반도체 사이클 트리거가 꺾이면 이 강세는 무효"). `#clTopic`=질문·`#clCtx`=라이브 situation 재사용, 결과는 토론 이력에 `[심층 자문]` 접두로 누적(advice→actions·watch→steelman). **자가 마운트** — worker `<script defer src="/council-ask.js">` 주입(flags/aisd 패턴), index.html 무편집. 카드 선택 상태는 `.cl-card.on` DOM 감지(MutationObserver), 전문가 데이터는 선택 카드 DOM에서 읽어 council-sot/restoreCards 라이브 오버라이드 자동 반영. 음성은 `window.COUNCIL.playReport` 재사용(diagnosis 비우고 board를 전문가 목소리로 몰아 순수 렌즈). worker.js(핸들러+라우팅+주입 1줄)·신규 `council-ask.js`만 변경 — **신규 :root 토큰·CSS 0** → `node --check` 통과·check-docs 통과(토큰 24종 무변경)·jsdom 스모크(버튼 1명 노출·2명 숨김·페이로드·리포트·이력·순수 렌즈 음성) 통과. narrative≠numbers — 관점 텍스트일 뿐 숫자 파일 불변, 실존 인물 렌즈 시뮬레이션(투자자문 아님·05 라이브 게이트 재대조 고지). §3 03 인벤토리 행 신설 · STYLE_GUIDE §9 이력 동반. **음성 재생 1인 전용 플레이어·질문 프리셋은 후속 과제.**
