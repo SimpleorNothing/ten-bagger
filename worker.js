@@ -1100,6 +1100,169 @@ async function handleFred(url) {
   });
 }
 
+// ===== 데일리 브리핑 팟캐스트(2인 대담) — /api/brief =====
+// 슬랙 텍스트 요약의 '듣는 판'. 라이브 JSON(gamma·signals·holdings·calendar·signal_log)으로
+// 진행자·애널리스트 2인 대담 대본을 만든다. narrative≠numbers — 대본은 관점 텍스트일 뿐
+// 숫자·판단 파일을 절대 바꾸지 않는다(게이트 판정은 라이브 값을 그대로 읽어 말할 뿐).
+//
+// 8분 분량은 비스트리밍 1회 호출로는 api.anthropic.com(~100s)에 걸린다 → part 1/2 분할.
+// part1(전반: 게이트·레이어)을 먼저 반환해 재생을 시작하고, part2(후반: 종목·스틸맨)는
+// 재생 중 뒤에서 받아 이어붙인다. 각 part 는 R2(MEMO_BUCKET)에 날짜별로 캐시된다.
+const BRIEF_KEY = (d, p) => `brief_${d}_p${p}.json`;
+
+function kstDate(ts) {
+  return new Date((ts || Date.now()) + 9 * 3600 * 1000).toISOString().slice(0, 10);
+}
+
+// 라이브 자산 읽기(자기 자신의 ASSETS 바인딩) — 실패해도 브리핑은 계속된다.
+async function briefAsset(env, request, path) {
+  try {
+    const res = await env.ASSETS.fetch(new Request(new URL(path, request.url).toString()));
+    if (!res.ok) return null;
+    return await res.json();
+  } catch { return null; }
+}
+
+// 라이브 상황 요약 — LLM 입력. 토큰을 아끼려고 판단에 쓰이는 값만 추린다.
+async function briefSituation(env, request) {
+  const [sig, gam, hol, cal, log, jud] = await Promise.all([
+    briefAsset(env, request, "/signals.json"),
+    briefAsset(env, request, "/gamma.json"),
+    briefAsset(env, request, "/holdings.json"),
+    briefAsset(env, request, "/calendar.json"),
+    briefAsset(env, request, "/signal_log.json"),
+    briefAsset(env, request, "/judgment.json"),
+  ]);
+
+  const macro = sig ? {
+    asOf: sig.asOf, vix: sig.vix, fearGreed: sig.fearGreed,
+    nasdaqDrawdownPct: sig.nasdaqDrawdownPct, spDailyPct: sig.spDailyPct,
+  } : null;
+
+  const G = (gam && gam.gamma) || {};
+  const gamma = Object.keys(G).slice(0, 24).map((k) => {
+    const v = G[k] || {};
+    return { tk: k, g: v.g, stage: v.stage, gapPct: v.pct, trend: v.trend, flagged: !!v.flagged, why: v.why || "" };
+  });
+
+  const layers = (hol && Array.isArray(hol.holdings))
+    ? hol.holdings.map((h) => ({ layer: h.layer, w: h.w, label: h.label })) : [];
+  const names = (hol && Array.isArray(hol.detail))
+    ? hol.detail.slice(0, 20).map((d) => ({ nm: d.nm || d.name || d.label, w: d.w })) : [];
+
+  const today = kstDate();
+  const events = (cal && Array.isArray(cal.events))
+    ? cal.events.filter((e) => e.d >= today).slice(0, 8).map((e) => ({ d: e.d, lbl: e.lbl, meta: e.meta })) : [];
+
+  const recent = (log && Array.isArray(log.log))
+    ? log.log.slice(-4).map((e) => ({ date: e.date, source: String(e.source || "").slice(0, 320) })) : [];
+
+  const overrides = (jud && Array.isArray(jud.overrides))
+    ? jud.overrides.slice(0, 10).map((o) => ({ tk: o.tk || o.ticker, why: String(o.why || "").slice(0, 160) })) : [];
+
+  return {
+    asOf: today,
+    macroGate: macro,
+    gammaStage: gamma,
+    layerWeights: layers,
+    topNames: names,
+    upcoming: events,
+    recentSignals: recent,
+    judgmentOverrides: overrides,
+    portfolioTotalMKRW: hol ? hol.total : null,
+  };
+}
+
+const BRIEF_SYS_BASE =
+  "너는 '알파맵' AI 인프라 투자 관측소의 **데일리 브리핑 팟캐스트 대본 작가**다. " +
+  "화자는 딱 둘 — `host`(진행자: 질문하고 흐름을 끌고 요약한다) 와 `ana`(알파맵 애널리스트: 라이브 데이터로 답한다). " +
+  "실제 팟캐스트처럼 자연스러운 구어체 대화로 쓴다(문어체 보고서 금지). 한 발언은 2~5문장. " +
+  "규율(절대): ①**결론 먼저** ②**게이트는 전부 AND** — 하나라도 미충족이면 실행 불가라고 명시한다 " +
+  "③**narrative ≠ numbers** — 뉴스·발표는 숫자 파일을 바꾸지 않는다 ④**두 시계 분리**(논제 시계=펀더멘털·EPS 리비전 / 가격 시계=센티먼트) " +
+  "⑤**단계 강등 트리거는 가격 상승 그 자체가 아니라 '가격 상승률 vs FY+1/+2 EPS 리비전 속도'** ⑥매매 권유가 아니라 프레임 도출이다. " +
+  "숫자는 입력된 라이브 값만 쓴다 — 없는 수치를 지어내지 마라. 모르면 '그 값은 오늘 데이터에 없습니다'라고 말한다. " +
+  "한국어. 종결어는 '~하겠습니다/~할게요/~입니다'. '및' 을 쓰지 않는다. " +
+  "`say` 는 **음성 낭독용 평문**이라 기호를 말로 푼다(γ→'감마', → '로', % → '퍼센트', L3 → '레이어 3', VIX → '빅스'). " +
+  "반드시 아래 JSON만 출력한다(코드펜스·설명 금지).\n" +
+  'JSON: {"title":"오늘 브리핑 헤드라인 한 줄","badges":[["라벨","값"]],"script":[{"s":"host|ana","say":"발언 평문"}]}';
+
+const BRIEF_PART = {
+  1: "이번엔 **전반부**만 쓴다(약 4분·발언 14~18개). 흐름: 오프닝 인사와 오늘 한 줄 결론 → 매크로 게이트 3중 AND 점등 상태(나스닥 드로다운·빅스·공포탐욕)와 그래서 지금 무엇이 금지·허용인지 → 8레이어 비중 갭(오버웨이트·언더웨이트 어디인가, 목표 대비) → 유한자본 관점의 상대가치(비싸진 층에서 공포에 눌린 층으로). badges 는 4~5개(나스닥 드로다운·빅스·공포탐욕·게이트 점등·최대 비중 레이어). 마지막 발언은 후반부로 넘기는 진행자의 한마디로 끝낸다.",
+  2: "이번엔 **후반부**만 쓴다(약 4분·발언 14~18개). 전반부 대본이 입력으로 주어지니 **같은 말을 반복하지 마라**. 흐름: 종목별 감마·단계 판정(닫힘 트리거 점등 여부를 명시) → 다가오는 일정과 D-N 게이트 → 최근 시그널 로그가 누적으로 말해주는 것 → **오늘의 액션 아이템**(전부 조건부·AND) → 마지막에 반드시 **스틸맨 반론**(오늘 결론이 틀렸다면 무엇 때문인가) → 클로징. badges 는 빈 배열로 둔다.",
+};
+
+async function handleBrief(request, env) {
+  const json = (obj, status) => new Response(JSON.stringify(obj),
+    { status, headers: { "content-type": "application/json", "cache-control": "no-store" } });
+  if (!env.ANTHROPIC_API_KEY) return json({ error: "ANTHROPIC_API_KEY not configured" }, 503);
+
+  const url = new URL(request.url);
+  const d = /^\d{4}-\d{2}-\d{2}$/.test(url.searchParams.get("d") || "") ? url.searchParams.get("d") : kstDate();
+  const part = url.searchParams.get("part") === "2" ? 2 : 1;
+  const regen = url.searchParams.get("regen") === "1";
+
+  // 1) R2 캐시 — 같은 날 같은 파트는 한 번만 만든다(열 때마다 과금되지 않게).
+  if (env.MEMO_BUCKET && !regen) {
+    try {
+      const obj = await env.MEMO_BUCKET.get(BRIEF_KEY(d, part));
+      if (obj) return new Response(obj.body, { headers: { "content-type": "application/json", "cache-control": "no-store" } });
+    } catch { /* 캐시 실패는 무시하고 생성 */ }
+  }
+
+  const situation = await briefSituation(env, request);
+
+  // 후반부는 전반부 대본을 받아 이어 쓴다(중복 방지).
+  let prev = null;
+  if (part === 2 && env.MEMO_BUCKET) {
+    try {
+      const p1 = await env.MEMO_BUCKET.get(BRIEF_KEY(d, 1));
+      if (p1) prev = await p1.json();
+    } catch { /* 없으면 전반부 없이 후반부만 */ }
+  }
+
+  const sys = BRIEF_SYS_BASE + "\n\n" + BRIEF_PART[part];
+  const payload = {
+    date: d,
+    situation: situation,
+    previousPart: prev && Array.isArray(prev.script) ? prev.script.map((x) => x.say).join(" ").slice(0, 4000) : "",
+  };
+
+  let up;
+  try {
+    up = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "content-type": "application/json", "x-api-key": env.ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01" },
+      body: JSON.stringify({
+        model: "claude-opus-4-8", max_tokens: 4000, system: sys,
+        messages: [{ role: "user", content: JSON.stringify(payload) }],
+      }),
+    });
+  } catch (e) {
+    return json({ error: "anthropic fetch failed", detail: String(e && e.message ? e.message : e) }, 502);
+  }
+  const t = await up.text();
+  if (!up.ok) return json({ error: describeAnthropicError(up.status, t), status: up.status }, 502);
+
+  let data; try { data = JSON.parse(t); } catch { return json({ error: "anthropic parse failed" }, 502); }
+  const raw = ((data.content || []).map((c) => c.text || "").join("")).trim().replace(/^```(?:json)?|```$/g, "").trim();
+  let out; try { out = JSON.parse(raw); } catch { return json({ error: "brief parse failed", raw: raw.slice(0, 400) }, 502); }
+  if (!out || !Array.isArray(out.script)) return json({ error: "brief script missing" }, 502);
+
+  out.asOf = d;
+  out.part = part;
+  out.script = out.script
+    .filter((x) => x && x.say)
+    .map((x) => ({ s: x.s === "host" ? "host" : "ana", say: String(x.say).slice(0, 1200) }));
+
+  if (env.MEMO_BUCKET) {
+    try {
+      await env.MEMO_BUCKET.put(BRIEF_KEY(d, part), JSON.stringify(out),
+        { httpMetadata: { contentType: "application/json" } });
+    } catch { /* 캐시 저장 실패는 응답에 영향 없음 */ }
+  }
+  return json(out, 200);
+}
+
 export default {
   async fetch(request, env) {
     const password = env.SITE_PASSWORD;
@@ -1189,6 +1352,10 @@ export default {
         if (request.method === "GET") return handleCouncilDiscGet(env);
         if (request.method === "POST") return handleCouncilDiscPost(request, env);
         return memoJson({ error: "method not allowed" }, 405);
+      }
+      // 데일리 브리핑 팟캐스트(2인 대담 대본) — 파트 분할 생성·R2 날짜 캐시
+      if (request.method === "GET" && url.pathname === "/api/brief") {
+        return handleBrief(request, env);
       }
       if (url.pathname === "/api/council-roster") {
         if (request.method === "GET") return handleCouncilRosterGet(env);

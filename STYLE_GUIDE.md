@@ -1,4 +1,4 @@
-**최종 갱신: 2026-07-19 11:02 (KST)**
+**최종 갱신: 2026-07-19 21:40 (KST)**
 
 # STYLE_GUIDE — 알파맵 디자인 시스템
 
@@ -112,6 +112,22 @@ pantone.css :root       ← 현행 팔레트 (팬튼 A안, index.html 하단 <li
 | 모바일 | 카드 그리드 → 2열 또는 세로 스택. 표는 **가로 스크롤 금지**, 열 축약. |
 
 **등락색 규약(절대):** **상승 = `--st-hot`(적) · 하락 = `--st-accel`(청)** — 한국식. 미국식으로 뒤집지 않는다(`.mkt-chg.up/.dn`).
+
+---
+
+### 4-1. 단독 페이지 (`brief.html` · `prob.html`)
+
+`index.html` 밖에 사는 단일 문서다. 탭 골격(`section.view`)·`pantone.css` 링크가 없으므로 **`:root` 를 자체 선언**하되 규약은 같다.
+
+| 항목 | 규약 |
+|---|---|
+| 토큰 | §1 토큰 표의 **값을 그대로 복제**한다. **신규 토큰을 만들지 않는다**(만들면 `check-docs` 대상 밖이라 조용히 갈라진다) |
+| 서체 | Pretendard Variable(jsDelivr dynamic-subset) — index와 동일 링크 |
+| 폭 | 단독 페이지는 **읽기 폭 720px**(index의 1340px 격자가 없으므로) · padding `0 16px` |
+| 카드·버튼·hover·포커스 | §4 전역 관행 그대로(면 `--panel`/`--line`, 주 버튼 `--dawn`/`--onacc`) |
+| 하단 고정 바 | `padding-bottom: calc(12px + env(safe-area-inset-bottom))` — 모바일 홈 인디케이터 회피 |
+
+**`brief.html`(데일리 브리핑 팟캐스트) 고유 규약:** 화자 2인은 **정렬로 구분**한다(`.msg.host` = 우측 정렬 `--panel2`/`--line2` · `.msg.ana` = 좌측 `--panel`/`--line`), 아바타 색은 `--dawn`(진행자)·`--mature`(애널리스트). 낭독 중 말풍선은 `--dawn` 인셋 링, 끝난 말풍선은 `opacity:.72`. 말풍선 본문은 **음성 원문 그대로**를 쓰되 숫자·퍼센트·규율어(`매크로 게이트`·`스틸맨`)만 `<b>` 로 자동 강조한다(화면용 별도 대본을 두지 않아 음성·화면이 갈라지지 않는다).
 
 ---
 
@@ -240,6 +256,7 @@ pantone.css :root       ← 현행 팔레트 (팬튼 A안, index.html 하단 <li
 
 ## 갱신 이력
 
+- 2026-07-19 21:40 · **§4-1 「단독 페이지」 규약 신설 + 데일리 브리핑 팟캐스트 `brief.html`.** SimpleorNothing 지시(슬랙 문자 요약 → 팟캐스트 형식). index.html 밖 단독 문서(`brief.html`·기존 `prob.html`)가 `pantone.css` 없이 `:root` 를 자체 선언하는 탓에 **토큰이 조용히 갈라질 수 있는 사각**이 있었다 → §1 토큰 값 복제·신규 토큰 금지·읽기 폭 720px·safe-area 하단 바를 규약으로 명문화. `brief.html` 고유: 화자 2인을 **정렬로 구분**(`.msg.host` 우측 `--panel2`/`--line2` · `.msg.ana` 좌측 `--panel`/`--line`), 아바타 `--dawn`/`--mature`, 낭독 중 `--dawn` 인셋 링·완료 `opacity:.72`, 말풍선은 **음성 원문 그대로** + 숫자·규율어만 `<b>` 자동 강조(음성·화면 대본 이원화 방지). **신규 `:root` 토큰 0**(§1 값 복제) · index.html·pantone.css·insight.css 무편집 → TOKENS 무변·`check-docs` 통과. narrative≠numbers. (OPS §3 외부 채널·§8·§9 동반)
 - 2026-07-19 10:56 · **03 전문가 원탁 「패널 관리」 모달(`council-roster.js` 자가 마운트).** SimpleorNothing 지시(전문가 패널 추가·삭제·편집). vhead 「패널 관리」(`#clRosterBtn` = 기존 `.cl-btn`)로 여는 관리 모달은 **기존 `.cl-modal`/`.cl-sheet`(면 3px)·`.cl-blk`(목록 행)·`.cl-eye`(라벨)·`.cl-pill`(stance 기능색)·`.cl-chip`(태그·시계·추가 배지)·`.cl-in`/`.cl-ta`(폼)·`.cl-btn`/`.cl-btnp`(액션) 전면 재사용** — 신규 컴포넌트 0. 아바타는 렌더된 카드 SVG 클론(없으면 disc 색+이니셜 폴백), 프리셋 선택은 disc 색 원형 버튼(부표 radius 20px §3). 폼 라벨=`.cl-eye` 12px·입력=14px(§2 하한). 목록/폼은 모달 본문 토글(별도 시트 없음). **신규 `:root` 토큰·CSS 클래스 0** — index.html은 인라인 COUNCIL 반환에 훅 3개(`getExperts`/`setExperts`/`reRender`)만 추가(마크업·CSS 무변), worker가 `<script defer src="/council-roster.js">` 주입 → TOKENS 무변·`check-docs` 통과·`node --check`(인라인 10블록 포함) 통과·jsdom 스모크(버튼·추가·삭제·편집·복원). 로스터는 R2 `council_roster.json`(OPS §3)·뷰/스탠스는 council_log 채널로 일원화. narrative≠numbers. (OPS §3·§9 동반)
 - 2026-07-19 09:37 · **03 전문가 원탁 「1인 심층 자문」 리포트(`council-ask.js` 자가 마운트).** SimpleorNothing 지시. 카드 1인 선택 시 하단 바(`#clBar`)에 뜨는 「심층 자문」(`#clAsk` = 기존 `.cl-btnp` 주 버튼 재사용)으로 `/api/council-ask` 결과를 `#clResult`에 렌더 — **기존 `.cl-*` 전면 재사용**: `.cl-rep`(면 3px) 컨테이너·`.cl-eye`(라벨)·아바타 SVG(선택 카드에서 클론)·`.cl-pill`(stance 기능색 `--st-*`)·`.cl-diag`(진단)·`.cl-blk`/`.cl-two`(진단 근거·실행 조언 2열)·`.cl-steel`(자기 반증 `watch`·질문 답 — 좌측 3px 보더, 답은 `--dawn` 강조)·`.cl-note`(고지). 실행 조언 블록은 stance 기능색 좌측 3px 보더로 렌즈 정체성 표시. 본문 14px·라벨(`.cl-eye`) 12px(§2 하한). **신규 `:root` 토큰·CSS 클래스 0** — index.html·pantone.css·insight.css 무편집, worker가 `<script defer src="/council-ask.js">` 주입(flags/aisd 패턴) → TOKENS 무변·`check-docs` 통과·`node --check` 통과·jsdom 스모크(버튼 노출/숨김·리포트 렌더·순수 렌즈 음성). 카드 선택 상태는 `.cl-card.on` DOM으로 감지(신규 UI 요소는 버튼 1개뿐). 음성은 `window.COUNCIL.playReport` 재사용(diagnosis 비워 좌장 배제·board를 그 전문가 목소리로). narrative≠numbers. (OPS §3·§9 동반)
 - 2026-07-18 22:18 · **「숫자 반영 대기」 스트립(`insStripDec`)을 05 리밸런싱→04 시장과 실적 전망 최상단으로 이동.** SimpleorNothing 지시(ASML 2Q 실적 서프라이즈+매출 전망 상향 카드). `insight.js mount()` 앵커만 `#v-decision`(before `#decisionBoard`)→`#v-thread`(before 최상단 `.vhead`)로 변경 — 로드맵(`#dsAisd`) 아래·강물 탐색 위에 뜬다. **스트립 컴포넌트(`.ins-strip`/`.ins-si`)·신규 `:root` 토큰·CSS 0** → TOKENS 무변·check-docs 통과(토큰 24종). 스트립 note의 스테일 「03에서 반영 완료」→「02 인사이트 찾기에서 반영 완료」 정정. jsdom 렌더 검증(insStripDec `#v-thread` 내부·순서 일치). narrative≠numbers — 표시 위치만. (OPS §3·§9 동반)
