@@ -5,7 +5,7 @@
  *
  * 하는 일
  *   ① 텍스트 브리핑  — /api/brief?part=0 (결론·게이트 보드·레이어 갭·볼 것·액션·스틸맨)
- *   ② 오늘 브리핑 듣기 — /api/brief?part=1,2 (2인 대담 8분) 브라우저 TTS 재생
+ *   ② 오늘 브리핑 듣기 — /api/brief?part=1,2 (2인 대담 5분) 고품질 오디오·브라우저 TTS 재생
  *   ③ 지난 브리핑 저장 — /api/briefs (R2 보관분 날짜 목록) → 날짜 클릭 = 그날 것 열람·재생
  *
  * 규율: narrative ≠ numbers. 여기서 만드는 건 전부 '읽어서 말하는' 관점 텍스트이며
@@ -352,7 +352,7 @@ window.BRIEF = (function () {
   function openPlayer() {
     var p = $('brPlayer'); if (!p) return;
     SCRIPT = []; idx = -1; playing = false; busy = false; p2done = false; p2pend = null; resetAudio();
-    p.innerHTML = '<div class="br-play"><div class="br-eye">2인 대담 · 약 8분</div><div id="brChat"></div>' +
+    p.innerHTML = '<div class="br-play"><div class="br-eye">2인 대담 · 약 5분</div><div id="brChat"></div>' +
       '<div class="br-ctl">' +
       '<button class="br-btn p" id="brPlay">▶</button>' +
       '<button class="br-btn" id="brMute">🔊</button>' +

@@ -162,9 +162,9 @@ const text =
   `• CNN F&G: *${fg.score}*${fg.rating ? ` (${fg.rating})` : ""}\n\n` +
   frameBlock +
   `*🏠 가전 주요뉴스*  _(mi.samsungda.net)_\n${news}\n\n` +
-  // 8분 2인 대담 팟캐스트 — 대본은 열 때 워커(/api/brief)가 라이브 JSON으로 생성·R2 날짜 캐시.
+  // 5분 2인 대담 팟캐스트 — 대본은 열 때 워커(/api/brief)가 라이브 JSON으로 생성·R2 날짜 캐시.
   // 텍스트를 대체하지 않고 병기한다(스캔은 텍스트, 이동 중엔 음성).
-  `🎧 <${BRIEF_URL}|오늘 브리핑 듣기 (2인 대담 · 약 8분)>  ·  ` +
+  `🎧 <${BRIEF_URL}|오늘 브리핑 듣기 (2인 대담 · 약 5분)>  ·  ` +
   `📄 <${SITE_URL}/#v-brief|06 모닝 브리핑 (지난 호 보기)>`;
 
 const r = await fetch("https://slack.com/api/chat.postMessage", {
