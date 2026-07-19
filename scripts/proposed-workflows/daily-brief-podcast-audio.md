@@ -3,7 +3,8 @@
 **현재 가동 중인 것(B안)은 링크형이다.** 슬랙 텍스트 브리핑 맨 아래 「🎧 오늘 브리핑 듣기」 링크 →
 `/brief.html` 이 `/api/brief` 로 2인 대담 대본을 받아 브라우저 음성으로 읽는다. 키·스코프·워크플로 편집이 하나도 필요 없다.
 
-A안은 그 대본을 **Gemini 멀티스피커 TTS 로 MP3 로 구워 슬랙 DM 에 파일로 올리는** 판이다.
+A안은 그 대본을 **Gemini 멀티스피커 TTS(`gemini-3.1-flash-tts-preview` · AI Studio 「The Energetic Co-Host」 팟캐스트 톤)로 MP3 로 구워 슬랙 DM 에 파일로 올리는** 판이다.
+모델·보이스·스타일은 `brief-tts.mjs` 상단 상수 또는 env(`GEMINI_TTS_MODEL`·`GEMINI_VOICE_HOST`·`GEMINI_VOICE_ANA`·`GEMINI_TTS_STYLE`)로 스튜디오에서 고른 값과 맞춘다.
 잠금화면 재생·이어폰 이동 청취가 되는 대신 아래 3가지가 선행돼야 한다 — **전부 운영자 수동**(GitHub App 은 `.github/workflows/` 403).
 
 ## 선행 조건 3
@@ -40,3 +41,4 @@ A안은 그 대본을 **Gemini 멀티스피커 TTS 로 MP3 로 구워 슬랙 DM 
 ## 갱신 이력
 
 - 2026-07-19 최초 작성 — 링크형(B) 가동에 맞춰 오디오판(A) 제안본 배치.
+- 2026-07-19 TTS 를 AI Studio 「The Energetic Co-Host」 팟캐스트판으로 맞춤 — 모델 `gemini-3.1-flash-tts-preview`·활기찬 공동 진행 톤·보이스 Puck/Kore(전부 env 오버라이드). SimpleorNothing 지시(스튜디오 스크린샷).

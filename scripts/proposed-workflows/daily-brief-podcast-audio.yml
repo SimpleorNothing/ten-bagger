@@ -5,7 +5,8 @@
 #    GitHub App 은 workflows 스코프가 없어 403 → **운영자가 직접 배치**해야 한다.
 #    배치 전 준비물은 같은 폴더 `daily-brief-podcast-audio.md` 체크리스트 참고.
 #
-# 하는 일: /api/brief 로 만든 2인 대담 대본을 Gemini 멀티스피커 TTS 로 읽혀 MP3 로 만들고,
+# 하는 일: /api/brief 로 만든 2인 대담 대본을 Gemini 멀티스피커 TTS(gemini-3.1-flash-tts-preview ·
+#          AI Studio 「The Energetic Co-Host」 팟캐스트 톤)로 읽혀 MP3 로 만들고,
 #          슬랙 DM 에 파일로 올린다(인앱 재생·잠금화면 재생 가능).
 #          기존 텍스트 브리핑(daily-brief-slack.yml)은 그대로 둔다 — 오디오는 병기다.
 # ──────────────────────────────────────────────────────────────────────────
@@ -34,5 +35,10 @@ jobs:
           SITE_URL:          https://simpleornothing.com
           SITE_PASSWORD:     ${{ secrets.SITE_PASSWORD }}      # 워커 비밀번호 게이트 통과용
           GEMINI_API_KEY:    ${{ secrets.GEMINI_API_KEY }}     # 멀티스피커 TTS
+          # 아래는 선택 — 스튜디오에서 고른 값으로 덮어쓸 때만. 없으면 스크립트 기본값 사용.
+          GEMINI_TTS_MODEL:  gemini-3.1-flash-tts-preview      # 「The Energetic Co-Host」 모델
+          # GEMINI_VOICE_HOST: Puck                            # 진행자 보이스
+          # GEMINI_VOICE_ANA:  Kore                            # 애널리스트 보이스
+          # GEMINI_TTS_STYLE:  "활기찬 공동 진행 톤 …"          # 연출 지시 재정의
           SLACK_BOT_TOKEN:   ${{ secrets.SLACK_BOT_TOKEN }}    # files:write 스코프 필요
           SLACK_DM_CHANNEL:  U0BED4031U6

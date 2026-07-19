@@ -5,7 +5,8 @@
 // 흐름
 //   1) POST /__auth 로 사이트 쿠키 획득(워커 비밀번호 게이트)
 //   2) GET /api/brief?part=1, part=2 → 2인 대담 대본(R2 날짜 캐시라 재호출도 저렴)
-//   3) 대본을 청크로 나눠 Gemini 멀티스피커 TTS(진행자·애널리스트 2보이스) → PCM
+//   3) 대본을 청크로 나눠 Gemini 멀티스피커 TTS(gemini-3.1-flash-tts-preview ·
+//      「The Energetic Co-Host」 팟캐스트 톤 · 진행자·애널리스트 2보이스) → PCM
 //   4) PCM 이어붙여 WAV → ffmpeg 로 MP3(48kbps mono ≈ 8분 3MB)
 //   5) 슬랙 files.getUploadURLExternal → PUT → completeUploadExternal 로 DM 첨부
 //
@@ -19,12 +20,19 @@ const PW = process.env.SITE_PASSWORD;
 const GKEY = process.env.GEMINI_API_KEY;
 const SLACK = process.env.SLACK_BOT_TOKEN;
 const DM = process.env.SLACK_DM_CHANNEL;
-const TTS_MODEL = process.env.GEMINI_TTS_MODEL || "gemini-2.5-flash-preview-tts";
+// AI Studio 「The Energetic Co-Host(Podcast style)」 템플릿 기준.
+// 모델·보이스·스타일 모두 env 로 덮어쓸 수 있다(운영자가 스튜디오에서 고른 값으로 교체).
+const TTS_MODEL = process.env.GEMINI_TTS_MODEL || "gemini-3.1-flash-tts-preview";
 const SR = 24000;
 
-// 화자 → Gemini 프리셋 보이스 (원탁 자산 claude/roundtable 과 톤을 맞춘다)
-const VOICE = { host: "Kore", ana: "Charon" };
+// 화자 → Gemini 프리셋 보이스. 활기찬 공동 진행 톤(Puck=경쾌 · Kore=또렷)으로 두 채널을 분리한다.
+const VOICE = { host: process.env.GEMINI_VOICE_HOST || "Puck", ana: process.env.GEMINI_VOICE_ANA || "Kore" };
 const LABEL = { host: "진행자", ana: "애널리스트" };
+
+// 「The Energetic Co-Host」 연출 지시 — 밝고 에너지 있는 팟캐스트 대담 톤.
+const STYLE = process.env.GEMINI_TTS_STYLE ||
+  "당신은 활기찬 팟캐스트 공동 진행자 두 명입니다. 밝고 에너지 넘치는 구어체로, 서로 맞장구치며 " +
+  "리듬감 있게 주고받으세요. 과장은 피하되 톤은 지루하지 않게 생동감 있게 — 숫자와 판정은 정확히 전달합니다.";
 
 const need = (v, n) => { if (!v) throw new Error(`${n} 미설정`); return v; };
 need(PW, "SITE_PASSWORD"); need(GKEY, "GEMINI_API_KEY"); need(SLACK, "SLACK_BOT_TOKEN");
@@ -60,7 +68,7 @@ async function fetchBrief(cookie) {
 function chunk(arr, n) { const out = []; for (let i = 0; i < arr.length; i += n) out.push(arr.slice(i, i + n)); return out; }
 
 async function ttsChunk(lines) {
-  const prompt = "다음은 두 사람의 팟캐스트 대담입니다. 각자 자연스러운 구어체로, 또박또박 읽어 주세요.\n\n"
+  const prompt = STYLE + "\n\n다음 대담을 읽어 주세요.\n\n"
     + lines.map((l) => `${LABEL[l.s] || LABEL.ana}: ${l.say}`).join("\n");
   const body = {
     contents: [{ parts: [{ text: prompt }] }],
