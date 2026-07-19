@@ -347,6 +347,50 @@ async function handleCouncil(request, env) {
   return json({ content: data.content || [] }, 200);
 }
 
+// 1인 심층 자문 — 지목한 전문가 한 명의 렌즈로 깊은 진단·직접 실행 조언.
+// 원탁 토론(다인 합의/이견)과 별개다: 좌장 오버레이 없이 그 전문가 렌즈만 순수하게 쓰되,
+// 그 렌즈 자체의 리스크 규율을 watch(자기 반증)로 강제한다. narrative≠numbers(관점 텍스트일 뿐 숫자 파일 불변).
+async function handleCouncilAsk(request, env) {
+  const json = (obj, status) => new Response(JSON.stringify(obj),
+    { status, headers: { "content-type": "application/json" } });
+  if (!env.ANTHROPIC_API_KEY) return json({ error: "ANTHROPIC_API_KEY not configured" }, 503);
+
+  let body;
+  try { body = await request.json(); } catch { return json({ error: "invalid json" }, 400); }
+  const expert = (body && body.expert && typeof body.expert === "object") ? body.expert : null;
+  if (!expert || !expert.name) return json({ error: "expert required" }, 400);
+  const situation = (body && body.situation) ? String(body.situation) : "";
+  const question = (body && body.question) ? String(body.question).slice(0, 300).trim() : "";
+
+  const sys =
+    "너는 '알파맵' AI 인프라 투자 관측소 자문단 중 지목된 전문가 한 명의 '공개 발언·콘텐츠 기반 관점(field/view)'을 깊이 있게 대변하는 1인 심층 자문가다. " +
+    "여러 명의 토론이 아니라 이 한 전문가의 렌즈로만 답한다 — 다른 패널·좌장(알파맵 SoT)의 게이트 판정을 끌어오지 말고, 오직 이 인물의 field/view 관점을 '현 상황(situation)'과 'question'에 깊게 적용한다. " +
+    "그의 실제 발언을 지어내지 마라 — 공개된 분석 렌즈를 적용해 '이 관점에서 깊이 보면 …' 식으로 해석한다(가짜 인용·구체적 미발화 예측 금지). 관점 시뮬레이션이며 투자자문이 아니다. " +
+    "얕게 요약하지 말고 깊게 진단하라 — 필요하면 AI 인프라 8레이어(L1 모델/SW→L2 컴퓨트→L3 메모리→L4 패키징/장비→L5 서버→L6 옵티컬→L7 전력/냉각→L8 발전/그리드) 프레임으로 근거를 전개한다. " +
+    "question 이 있으면 그 물음에 직접 답하고(answer), 없으면 answer 는 빈 문자열로 두고 이 렌즈로 본 현 상황 심층 진단을 낸다. " +
+    "advice 는 이 전문가라면 취할 '직접적이고 구체적인 실행 조언'까지 낸다(무엇을 어느 조건에서 늘리고 줄이나) — 다만 이 렌즈의 판단일 뿐 확정 매매 지시가 아니다. " +
+    "watch 는 '이 렌즈가 틀리거나 꺾이는 트리거' = 이 전문가 자신이 인정하는 반증 조건(자기 스틸맨)이며 반드시 채운다. " +
+    "규율: 결론 먼저 · narrative≠numbers(관점 텍스트일 뿐 숫자 파일 변경 제안 금지) · 한국어, 종결어 '~하겠습니다/~할게' · '및' 회피 · 모바일 친화. " +
+    "반드시 아래 JSON만 출력(코드펜스·설명 금지).\n" +
+    'JSON: {"diagnosis":"이 렌즈의 심층 진단 3~6문장","basis":["근거(레이어·논점) 3~5개"],"advice":["직접 실행 조언 2~4개"],"watch":["이 렌즈가 꺾이는 자기 반증 트리거 2~3개"],"answer":"question 이 있으면 그 물음에 대한 직접 답, 없으면 빈 문자열","stance":"강세|중립|약세"}';
+
+  let up;
+  try {
+    up = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "content-type": "application/json", "x-api-key": env.ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01" },
+      body: JSON.stringify({ model: "claude-opus-4-8", max_tokens: 3500, system: sys,
+        messages: [{ role: "user", content: JSON.stringify({ expert: { name: expert.name, field: expert.field || "", stance: expert.stance || "", view: expert.view || "" }, question: question, situation: situation }) }] }),
+    });
+  } catch (e) {
+    return json({ error: "anthropic fetch failed", detail: String(e && e.message ? e.message : e) }, 502);
+  }
+  const t = await up.text();
+  if (!up.ok) return json({ error: describeAnthropicError(up.status, t), status: up.status }, 502);
+  let data; try { data = JSON.parse(t); } catch { return json({ error: "anthropic parse failed" }, 502); }
+  return json({ content: data.content || [] }, 200);
+}
+
 // 기사·글 URL → 전문가 '주요 관점' 요약. 유튜브는 /api/yt-view 사용.
 // 서버가 그 URL 본문을 '직접 페치'해 텍스트를 뽑고 Claude(비스트리밍)로 요약한다
 // (web_search 로 검색하지 않음 → 특정 URL을 빠르고 확실하게 읽는다).
@@ -1086,6 +1130,9 @@ export default {
       if (request.method === "POST" && url.pathname === "/api/council-summary") {
         return handleCouncilSummary(request, env);
       }
+      if (request.method === "POST" && url.pathname === "/api/council-ask") {
+        return handleCouncilAsk(request, env);
+      }
       if (request.method === "POST" && url.pathname === "/api/council-read") {
         return handleCouncilRead(request, env);
       }
@@ -1123,6 +1170,7 @@ export default {
             el.append('<script src="/hover-chart.js" defer></scr' + 'ipt>', { html: true });
             el.append('<script src="/flags.js" defer></scr' + 'ipt>', { html: true });
             el.append('<script src="/aisd.js" defer></scr' + 'ipt>', { html: true });
+            el.append('<script src="/council-ask.js" defer></scr' + 'ipt>', { html: true });
           } })
           .transform(res);
         // 대시보드 HTML 은 캐시 금지 — Workers Assets 기본 캐시 헤더 때문에 새 배포가
