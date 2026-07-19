@@ -121,9 +121,6 @@ window.BRIEF = (function () {
   var p2pend = null, p2done = false, voices = [];
   // 고품질(Gemini) 오디오 — 준비되면 브라우저 TTS 대신 이걸로 재생. 실패 시 자동 폴백.
   var mode = 'tts', aud = null, aURL = {}, SEG = {}, aPart = 0, aT0 = [];
-  // 「대담 다시 굽기」 세션 플래그 — 켜지면 대담 대본(p1·2)·오디오 WAV 를 강제 재생성한다.
-  // openPlayer(true) 에서만 set, 일반 「듣기」(openPlayer(false)) 에서는 항상 false.
-  var regenPlay = false;
 
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]; }); }
   function $(id) { return document.getElementById(id); }
@@ -371,9 +368,9 @@ window.BRIEF = (function () {
   }
   function ensureAudio(part) {                 // → Promise<bool> (blob URL 준비됨)
     if (aURL[part]) return Promise.resolve(true);
-    // regenPlay 세션이면 각 파트 최초 1회 fetch 에 regen=1 을 실어 WAV 를 새로 굽는다
-    // (aURL 캐시가 파트당 재요청을 막으므로 이중 과금 없음).
-    return fetch(audUrl(part, regenPlay), { credentials: 'same-origin' }).then(function (r) {
+    // 재생용 조회는 항상 캐시 우선(regen 없음). 대본·오디오 재생성은 「대담 다시 굽기」가
+    // regenDialogue() 로 두 파트를 미리 완주시켜 R2 를 덮어두므로, 여기선 그 새 캐시를 읽기만 한다.
+    return fetch(audUrl(part), { credentials: 'same-origin' }).then(function (r) {
       var ct = r.headers.get('content-type') || '';
       if (!r.ok || ct.indexOf('audio') < 0) return false;
       return r.blob().then(function (b) { aURL[part] = URL.createObjectURL(b); return true; });
@@ -465,10 +462,28 @@ window.BRIEF = (function () {
     });
   }
 
-  function openPlayer(regen) {
+  // 「대담 다시 굽기」 실체 — 재생 흐름과 분리해 대본·오디오를 확실히 다시 굽는다.
+  // 순서가 중요: 오디오(brief-audio)는 R2 의 대본을 읽어 굽기 때문에 대본(p1→p2)을 먼저
+  // 재생성한 뒤 오디오(p1,p2)를 굽는다. 각 fetch 를 끝까지 기다려(worker 가 R2 put 을 마친 뒤
+  // 응답하므로) 두 파트의 WAV 가 새 순서로 확실히 덮이게 한 다음에야 플레이어를 연다(캐시 우선).
+  // 이로써 "대본만 새로 나오고 오디오는 옛것"이던 문제(part2 오디오가 재생 완료 후에야 굽히고,
+  // part1 굽기가 재생 중단으로 끊길 수 있던 결함)를 없앤다.
+  function regenDialogue(btn) {
+    var orig = btn ? btn.textContent : '';
+    if (btn) { btn.disabled = true; btn.textContent = '굽는 중…'; }
+    var drain = function (r) { return (r && r.arrayBuffer) ? r.arrayBuffer().catch(function () {}) : null; };
+    var done = function () { if (btn) { btn.disabled = false; btn.textContent = orig; } };
+    return api(1, true)
+      .then(function () { return api(2, true); })
+      .then(function () { return fetch(audUrl(1, true), { credentials: 'same-origin' }).then(drain).catch(function () {}); })
+      .then(function () { return fetch(audUrl(2, true), { credentials: 'same-origin' }).then(drain).catch(function () {}); })
+      .then(function () { done(); loadArch(); openPlayer(); })
+      .catch(function () { done(); });
+  }
+
+  function openPlayer() {
     var p = $('brPlayer'); if (!p) return;
     SCRIPT = []; idx = -1; playing = false; busy = false; p2done = false; p2pend = null; resetAudio();
-    regenPlay = !!regen;   // 「대담 다시 굽기」 = 대본(p1·2)·오디오 강제 재생성 · 일반 「듣기」 = false
     p.innerHTML = '<div class="br-play"><div class="br-eye">2인 대담 · 약 5분</div><div id="brChat"></div>' +
       '<div class="br-ctl">' +
       '<button class="br-btn p" id="brPlay">▶</button>' +
@@ -495,10 +510,10 @@ window.BRIEF = (function () {
       var u = new SpeechSynthesisUtterance(' '); u.volume = 0; speechSynthesis.speak(u); loadVoices();
     }
 
-    api(1, regenPlay).then(function (d1) {
+    api(1).then(function (d1) {
       if (d1.error) { stat('중단', d1.error); return; }
       addMsgs(d1.script || []); SEG[1] = { a: 0, b: SCRIPT.length };
-      p2pend = api(2, regenPlay).then(function (d2) {
+      p2pend = api(2).then(function (d2) {
         if (d2 && !d2.error && d2.script) { var a = SCRIPT.length; addMsgs(d2.script); SEG[2] = { a: a, b: SCRIPT.length }; }
         p2done = true;
       }).catch(function () { p2done = true; });
@@ -570,18 +585,14 @@ window.BRIEF = (function () {
       sec.innerHTML = SECTION;
       var mv = document.getElementById('v-memo');
       if (mv) main.insertBefore(sec, mv); else main.appendChild(sec);
-      var lb = $('brListen'); if (lb) lb.onclick = function () { openPlayer(false); };
+      var lb = $('brListen'); if (lb) lb.onclick = function () { openPlayer(); };
       var rb = $('brRegen'); if (rb) rb.onclick = function () {
         rb.disabled = true;
         loadText(true).then(function () { rb.disabled = false; loadArch(); });
       };
       // 「대담 다시 굽기」 — 텍스트는 그대로 두고 대담 대본(p1·2)·오디오만 강제 재생성.
       // 매 클릭마다 Claude 대담 + Gemini TTS 비용이 드는 액션이라 「다시 만들기」와 분리해 둔다.
-      var xb = $('brRelisten'); if (xb) xb.onclick = function () {
-        xb.disabled = true;
-        openPlayer(true);
-        setTimeout(function () { xb.disabled = false; }, 3000);   // 연타 이중 과금 방지용 짧은 잠금
-      };
+      var xb = $('brRelisten'); if (xb) xb.onclick = function () { regenDialogue(xb); };
     }
   }
 

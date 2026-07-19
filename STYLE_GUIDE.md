@@ -1,4 +1,4 @@
-**최종 갱신: 2026-07-20 13:10 (KST)**
+**최종 갱신: 2026-07-20 14:30 (KST)**
 
 # STYLE_GUIDE — 알파맵 디자인 시스템
 
@@ -258,6 +258,7 @@ pantone.css :root       ← 현행 팔레트 (팬튼 A안, index.html 하단 <li
 
 ## 갱신 이력
 
+- 2026-07-20 14:30 · **06 「대담 다시 굽기」 신뢰성 수정 — 대본만 새로 나오고 오디오는 옛것이던 문제 해소.** SimpleorNothing 리포트(대본은 새 순서인데 듣기는 기존 오디오). 원인 = 앞 버전이 재생 흐름에 얹혀 **part2 오디오는 재생 완료 후에야 굽히고**(끝까지 안 들으면 옛 WAV 잔존) **part1 굽기도 재생 중단으로 끊길 수 있어** 대본 캐시만 갱신되고 WAV 는 옛것이 남았다. 수정 = `regenDialogue()` 로 재생과 분리 — 대본(`part=1→2 regen`)·오디오(`brief-audio part=1,2 regen`)를 **순서대로 각 fetch 완주**(worker 가 R2 put 후 응답)시켜 두 파트 WAV 를 확실히 덮은 **뒤에야** 플레이어를 연다(캐시 우선). 버튼은 굽는 동안 「굽는 중…」·disabled. `openPlayer(regen)`/`regenPlay` 세션 플래그는 제거(더는 재생 경로가 regen 하지 않음) · `ensureAudio` 는 항상 캐시 우선. **신규 `:root` 토큰 0** · check-docs 통과 · node --check 통과 · DOM 스텁 스모크(대담 다시 굽기=대본 p1·2 + 오디오 p1·2 전부 regen=1 순차 · 듣기=regen 없음) 통과. narrative≠numbers. (OPS §3 동반)
 - 2026-07-20 13:10 · **06 듣기 «대담 다시 굽기» 버튼 신설 — 대담(p1·2)·오디오만 강제 재생성(텍스트 「다시 만들기」와 분리).** SimpleorNothing 지시. 대담 대본·오디오 WAV 는 그날 최초 열람 때 한 번만 구워져 R2 캐시되고 이를 다시 굽는 UI 가 없었다(worker 프롬프트를 바꿔 배포해도 옛 순서 캐시가 그대로 재생됨). 상단 바에 `.br-btn`(기존 클래스 재사용·**신규 `:root` 토큰 0**) 버튼을 추가하고, `openPlayer(regen)` 세션 플래그 `regenPlay` 로 `api(1·2, true)`(대본)와 `audUrl(part,true)`(WAV) 에 `regen=1` 을 실어 강제 재생성한다 — 파트당 `aURL` 캐시가 재요청을 막아 이중 과금 없음. 비용(Claude 대담+Gemini TTS)이 드는 액션이라 텍스트 「다시 만들기」에 합치지 않고 **분리 버튼**으로 둔다. 부수로 `brListen.onclick = openPlayer`(이벤트 객체가 첫 인자로 넘어가 regen 이 항상 truthy 가 되던 잠재 버그)를 `openPlayer(false)` 래핑으로 수정. `brief.html`·`pantone.css`·index.html 무편집 → TOKENS 무변·`check-docs` 통과·`node --check` 통과. narrative≠numbers. (OPS §3·§9 동반)
 - 2026-07-20 12:40 · **06 듣기 대담 = 텍스트 회차와 같은 7섹션 순서(대본 규약만·화면 무변).** SimpleorNothing 지시. 말풍선·플레이어·「2인 대담 · 약 5분」 라벨·배속·음소거 UI 는 **그대로**이고, 바뀐 건 `BRIEF_PART[1·2]` 대본 흐름뿐이다 — 듣기(음성)와 훑기(텍스트)가 **같은 순서를 말하도록** 맞춘 것이라 화면 규약·토큰·스타일 변경이 없다. `brief.js`·`brief.html`·`pantone.css` 무편집 · **신규 `:root` 토큰 0** → TOKENS 무변·`check-docs` 통과. narrative≠numbers. (OPS §3·§9 동반)
 - 2026-07-20 11:20 · **06 모닝 브리핑 9섹션 개편 — 맥박 카드 그리드·표 재사용·등락 색 규약.** SimpleorNothing 지시(수기 브리핑 구성을 정식 회차 포맷으로). 신설 섹션(지수·보유 마감·뉴스·일정·리밸런싱)은 **새 표 컴포넌트를 만들지 않고 `.br-t` 하나를 재사용**한다 — 열 수만 다르다. 맥박 리스크 보드만 카드 그리드(`.br-risks`/`.br-r` · `minmax(232px,1fr)`)이고 방향 배지 `.br-dir` 는 위험 `--st-mature` · 기회 `--st-dawn` · 중립 `--dim` 무채색. 등락 셀은 **부호가 있을 때만** 색(`.up`=`--st-dawn`·`.dn`=`--st-mature`) — 부호 없는 값에 방향색을 입히면 없는 판단을 만든다. 리밸런싱 판정 줄 `.br-verdict.warn`(실행 불가 = `--st-mature`), 결론 근거 불릿 `.br-lead`, 보유 전체 요약 `.br-sum`. **신규 `:root` 토큰 0** — `.br-*` 스코프 스타일만 추가(`brief.js` `<style id="brief-css">` 주입 유지) → TOKENS 무변·`check-docs` 통과·`node --check` 통과·jsdom 스모크(섹션 9개·순서·색 클래스·구 스키마 하위호환·에러 경로). narrative≠numbers. (OPS §3·§9 동반)
