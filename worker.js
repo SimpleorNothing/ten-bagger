@@ -1532,9 +1532,16 @@ async function handleBrief(request, env) {
 const BRIEF_AUD_KEY = (d, p) => `briefaud_${d}_p${p}.wav`;
 const BRIEF_TTS_STYLE =
   "당신은 활기찬 팟캐스트 공동 진행자 두 명입니다. 밝고 에너지 넘치는 구어체로, 서로 맞장구치며 " +
-  "리듬감 있게 주고받으세요. 과장은 피하되 톤은 지루하지 않게 생동감 있게 — 숫자와 판정은 정확히 전달합니다.";
+  "리듬감 있게 주고받으세요. 과장은 피하되 톤은 지루하지 않게 생동감 있게 — 숫자와 판정은 정확히 전달합니다. " +
+  "첫 문장부터 마지막 문장까지 **같은 성량과 같은 말 속도**를 유지하세요. 뒤로 갈수록 목소리가 작아지거나 " +
+  "빨라져서는 안 됩니다. 마무리를 서두르지 말고 끝 문장도 처음과 같은 에너지로 또박또박 읽습니다.";
 const BRIEF_TTS_VOICE = { host: "Puck", ana: "Kore" };   // 경쾌한 리드 · 또렷한 분석
 const BRIEF_TTS_LABEL = { host: "진행자", ana: "애널리스트" };
+// 한 번에 굽는 대사 분량 상한(문자). 한 파트(9~11발언·약 2분 30초)를 단발 생성하면 뒤로 갈수록
+// 성량이 줄고 속도가 빨라지는 프로소디 드리프트가 생긴다 → 30초 안팎 청크로 쪼개 각각 스타일 지시와
+// 함께 새로 굽고, 청크 사이 성량을 정규화해 이어붙인다(총 문자 수는 같으므로 과금 변동 없음).
+const BRIEF_TTS_CHUNK_CHARS = 420;
+const BRIEF_TTS_GAP_MS = 140;            // 청크 이음매 무음(자연스러운 호흡)
 
 // PCM(s16le) → WAV(44B 헤더). Cloudflare Workers 에 ffmpeg 이 없으므로 WAV 로 서빙(브라우저 재생 가능).
 function wavFromPcm(pcm, rate) {
@@ -1548,6 +1555,61 @@ function wavFromPcm(pcm, rate) {
   w(36, "data"); dv.setUint32(40, len, true);
   const out = new Uint8Array(44 + len);
   out.set(hdr, 0); out.set(pcm, 44);
+  return out;
+}
+
+// 대사 → 청크(각 청크는 되도록 두 화자를 모두 포함해야 멀티스피커 설정이 온전히 먹는다).
+function briefTtsChunks(lines) {
+  const out = [];
+  let cur = [], chars = 0, spk = {};
+  for (const l of lines) {
+    cur.push(l); chars += String(l.say || "").length; spk[l.s] = 1;
+    if (chars >= BRIEF_TTS_CHUNK_CHARS && Object.keys(spk).length >= 2) {
+      out.push(cur); cur = []; chars = 0; spk = {};
+    }
+  }
+  if (cur.length) {
+    // 꼬리가 너무 짧거나 화자가 하나뿐이면 직전 청크에 합친다(단발 화자 청크 방지).
+    if (out.length && (chars < BRIEF_TTS_CHUNK_CHARS / 3 || Object.keys(spk).length < 2)) {
+      out[out.length - 1] = out[out.length - 1].concat(cur);
+    } else out.push(cur);
+  }
+  return out.length ? out : [lines];
+}
+
+// s16le PCM 의 RMS(부분 표본). 전 구간 순회를 피해 워커 CPU 를 아낀다.
+function pcmRms(pcm) {
+  const dv = new DataView(pcm.buffer, pcm.byteOffset, pcm.byteLength);
+  const n = Math.floor(pcm.byteLength / 2);
+  if (!n) return 0;
+  const step = Math.max(1, Math.floor(n / 60000));
+  let sum = 0, cnt = 0;
+  for (let i = 0; i < n; i += step) { const v = dv.getInt16(i * 2, true); sum += v * v; cnt++; }
+  return cnt ? Math.sqrt(sum / cnt) : 0;
+}
+
+// 청크 성량을 목표 RMS 로 맞춘다(피크 리미팅 포함). 차이가 3% 미만이면 손대지 않는다.
+function pcmGain(pcm, gain) {
+  if (!(gain > 0) || Math.abs(gain - 1) < 0.03) return pcm;
+  const g = Math.max(0.5, Math.min(4, gain));
+  const dv = new DataView(pcm.buffer, pcm.byteOffset, pcm.byteLength);
+  const n = Math.floor(pcm.byteLength / 2);
+  for (let i = 0; i < n; i++) {
+    let v = Math.round(dv.getInt16(i * 2, true) * g);
+    if (v > 32767) v = 32767; else if (v < -32768) v = -32768;
+    dv.setInt16(i * 2, v, true);
+  }
+  return pcm;
+}
+
+// 청크들을 무음 간격과 함께 이어붙인다.
+function pcmJoin(parts, rate) {
+  const gap = Math.max(0, Math.round(rate * (BRIEF_TTS_GAP_MS / 1000))) * 2;
+  let total = 0;
+  parts.forEach((p, i) => { total += p.length + (i ? gap : 0); });
+  const out = new Uint8Array(total);
+  let off = 0;
+  parts.forEach((p, i) => { if (i) off += gap; out.set(p, off); off += p.length; });
   return out;
 }
 
@@ -1582,52 +1644,64 @@ async function handleBriefAudio(request, env) {
   if (!lines.length) return json({ error: "script empty" }, 409);
 
   // 3) Gemini 멀티스피커 TTS — 「The Energetic Co-Host」 톤. TTS 모델은 별도(YouTube용 GEMINI_MODEL 과 다름).
+  //    한 파트를 단발로 굽지 않고 30초 안팎 청크로 나눠 **각각 스타일 지시와 함께** 새로 굽는다
+  //    (단발 장문 생성의 프로소디 드리프트 = 뒤로 갈수록 작아지고 빨라지는 현상 차단).
   const ttsModel = env.GEMINI_TTS_MODEL || "gemini-3.1-flash-tts-preview";
-  const prompt = BRIEF_TTS_STYLE + "\n\n다음 대담을 읽어 주세요.\n\n"
-    + lines.map((l) => `${BRIEF_TTS_LABEL[l.s] || BRIEF_TTS_LABEL.ana}: ${l.say}`).join("\n");
-  const body = {
-    contents: [{ parts: [{ text: prompt }] }],
-    generationConfig: {
-      responseModalities: ["AUDIO"],
-      speechConfig: {
-        multiSpeakerVoiceConfig: {
-          speakerVoiceConfigs: [
-            { speaker: BRIEF_TTS_LABEL.host, voiceConfig: { prebuiltVoiceConfig: { voiceName: env.GEMINI_VOICE_HOST || BRIEF_TTS_VOICE.host } } },
-            { speaker: BRIEF_TTS_LABEL.ana,  voiceConfig: { prebuiltVoiceConfig: { voiceName: env.GEMINI_VOICE_ANA  || BRIEF_TTS_VOICE.ana } } },
-          ],
-        },
-      },
-    },
-  };
+  const chunks = briefTtsChunks(lines);
+  const speakerVoiceConfigs = [
+    { speaker: BRIEF_TTS_LABEL.host, voiceConfig: { prebuiltVoiceConfig: { voiceName: env.GEMINI_VOICE_HOST || BRIEF_TTS_VOICE.host } } },
+    { speaker: BRIEF_TTS_LABEL.ana,  voiceConfig: { prebuiltVoiceConfig: { voiceName: env.GEMINI_VOICE_ANA  || BRIEF_TTS_VOICE.ana } } },
+  ];
 
-  let up;
-  try {
-    up = await fetch("https://generativelanguage.googleapis.com/v1beta/models/" + ttsModel + ":generateContent",
+  async function bakeChunk(ck, i) {
+    const head = BRIEF_TTS_STYLE
+      + (chunks.length > 1
+        ? `\n\n(이것은 한 대담의 ${i + 1}/${chunks.length} 구간입니다. 앞뒤 구간과 이어 붙일 것이므로 `
+          + "구간 시작·끝에서 톤을 바꾸지 말고, 인사나 마무리 멘트를 새로 지어내지 마세요. "
+          + "**앞 구간과 완전히 같은 성량·같은 속도**로 읽습니다.)"
+        : "")
+      + "\n\n다음 대담을 읽어 주세요.\n\n"
+      + ck.map((l) => `${BRIEF_TTS_LABEL[l.s] || BRIEF_TTS_LABEL.ana}: ${l.say}`).join("\n");
+    const body = {
+      contents: [{ parts: [{ text: head }] }],
+      generationConfig: {
+        responseModalities: ["AUDIO"],
+        speechConfig: { multiSpeakerVoiceConfig: { speakerVoiceConfigs } },
+      },
+    };
+    const up = await fetch("https://generativelanguage.googleapis.com/v1beta/models/" + ttsModel + ":generateContent",
       { method: "POST",
         headers: { "content-type": "application/json", "x-goog-api-key": env.GEMINI_API_KEY },
         body: JSON.stringify(body) });
-  } catch (e) {
-    return json({ error: "gemini tts fetch failed", detail: String(e && e.message ? e.message : e) }, 502);
-  }
-  const g = await up.json().catch(() => null);
-  if (!up.ok || !g) {
-    const dd = (g && g.error && g.error.message) ? g.error.message : "";
-    return json({ error: "gemini tts failed (" + up.status + ")" + (dd ? ": " + dd.slice(0, 200) : "") }, 502);
-  }
-  const gParts = (g.candidates && g.candidates[0] && g.candidates[0].content && g.candidates[0].content.parts) || [];
-  const inl = gParts.map((p) => p.inlineData || p.inline_data).find((x) => x && x.data);
-  if (!inl || !inl.data) return json({ error: "gemini tts: 오디오 없음" }, 502);
-  const rateM = /rate=(\d+)/.exec(inl.mimeType || inl.mime_type || "");
-  const rate = rateM ? Number(rateM[1]) : 24000;
-
-  // base64 PCM(s16le) → 바이트 → WAV
-  let pcm;
-  try {
+    const g = await up.json().catch(() => null);
+    if (!up.ok || !g) {
+      const dd = (g && g.error && g.error.message) ? g.error.message : "";
+      throw new Error("gemini tts failed (" + up.status + ")" + (dd ? ": " + dd.slice(0, 200) : ""));
+    }
+    const gParts = (g.candidates && g.candidates[0] && g.candidates[0].content && g.candidates[0].content.parts) || [];
+    const inl = gParts.map((p) => p.inlineData || p.inline_data).find((x) => x && x.data);
+    if (!inl || !inl.data) throw new Error("gemini tts: 오디오 없음");
+    const rateM = /rate=(\d+)/.exec(inl.mimeType || inl.mime_type || "");
     const bin = atob(inl.data);
-    pcm = new Uint8Array(bin.length);
-    for (let i = 0; i < bin.length; i++) pcm[i] = bin.charCodeAt(i);
-  } catch { return json({ error: "audio decode failed" }, 502); }
-  const wav = wavFromPcm(pcm, rate);
+    const pcm = new Uint8Array(bin.length);
+    for (let k = 0; k < bin.length; k++) pcm[k] = bin.charCodeAt(k);
+    return { pcm, rate: rateM ? Number(rateM[1]) : 24000 };
+  }
+
+  let baked;
+  try {
+    baked = await Promise.all(chunks.map((ck, i) => bakeChunk(ck, i)));   // 병렬 — 체감 지연은 최장 청크 하나
+  } catch (e) {
+    return json({ error: String(e && e.message ? e.message : e) }, 502);
+  }
+  const rate = baked[0].rate || 24000;
+
+  // 청크 간 성량 정규화 — 가장 큰 청크에 맞춰 올린다(뒤로 갈수록 작아지는 잔여 편차 제거).
+  const rmss = baked.map((b) => pcmRms(b.pcm));
+  const target = Math.max.apply(null, rmss.filter((r) => r > 0).concat([0]));
+  if (target > 0) baked.forEach((b, i) => { if (rmss[i] > 0) pcmGain(b.pcm, target / rmss[i]); });
+
+  const wav = wavFromPcm(pcmJoin(baked.map((b) => b.pcm), rate), rate);
 
   // 4) R2 캐시(WAV). 저장 실패해도 이번 응답엔 영향 없음.
   try {
