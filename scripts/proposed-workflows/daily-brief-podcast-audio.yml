@@ -1,0 +1,38 @@
+# ──────────────────────────────────────────────────────────────────────────
+# 제안본 — 데일리 브리핑 팟캐스트 「오디오(MP3) 슬랙 첨부」판 (A안)
+#
+# ⚠️ 이 파일은 아직 `.github/workflows/` 에 있지 않다.
+#    GitHub App 은 workflows 스코프가 없어 403 → **운영자가 직접 배치**해야 한다.
+#    배치 전 준비물은 같은 폴더 `daily-brief-podcast-audio.md` 체크리스트 참고.
+#
+# 하는 일: /api/brief 로 만든 2인 대담 대본을 Gemini 멀티스피커 TTS 로 읽혀 MP3 로 만들고,
+#          슬랙 DM 에 파일로 올린다(인앱 재생·잠금화면 재생 가능).
+#          기존 텍스트 브리핑(daily-brief-slack.yml)은 그대로 둔다 — 오디오는 병기다.
+# ──────────────────────────────────────────────────────────────────────────
+name: daily-brief-podcast-audio
+
+on:
+  schedule:
+    - cron: '50 22 * * 1-5'   # 22:50 UTC = 07:50 KST(익일) · 텍스트 브리핑 5분 뒤
+  workflow_dispatch: {}
+
+concurrency:
+  group: daily-brief-podcast
+  cancel-in-progress: false
+
+jobs:
+  podcast:
+    runs-on: ubuntu-latest    # ffmpeg 사전 설치됨 (별도 apt 불필요)
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+
+      - name: Build & upload podcast
+        run: node scripts/proposed-workflows/brief-tts.mjs
+        env:
+          SITE_URL:          https://simpleornothing.com
+          SITE_PASSWORD:     ${{ secrets.SITE_PASSWORD }}      # 워커 비밀번호 게이트 통과용
+          GEMINI_API_KEY:    ${{ secrets.GEMINI_API_KEY }}     # 멀티스피커 TTS
+          SLACK_BOT_TOKEN:   ${{ secrets.SLACK_BOT_TOKEN }}    # files:write 스코프 필요
+          SLACK_DM_CHANNEL:  U0BED4031U6

@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>알파맵 데일리 브리핑 · 팟캐스트</title>
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+/* 토큰은 pantone.css(전역 SoT)와 동일값을 그대로 복제한다 — 이 페이지는 index.html 밖 단독 문서라
+   :root 를 자체 선언하되 신규 토큰은 만들지 않는다(STYLE_GUIDE 토큰 표와 1:1). */
+:root{
+  --ink:#F0EFEB; --ink2:#ECEAE3;
+  --panel:#ffffff; --panel2:#E9E7E0;
+  --line:#dedbd3; --line2:#cbc7bd;
+  --txt:#3d3935; --dim:#746F69; --faint:#989292;
+  --dawn:#496176; --accel:#496176; --hot:#496176; --nascent:#496176; --mature:#746F69;
+  --onacc:#ffffff;
+  --serif:'Pretendard Variable','Pretendard',system-ui,-apple-system,'Segoe UI',Roboto,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--ink);color:var(--txt);font-family:var(--serif);-webkit-font-smoothing:antialiased}
+body{padding:0 0 168px;line-height:1.62;font-size:15px}
+.wrap{max-width:720px;margin:0 auto;padding:0 16px}
+header{position:sticky;top:0;z-index:20;background:rgba(240,239,235,.93);backdrop-filter:saturate(180%) blur(12px);border-bottom:1px solid var(--line)}
+.hin{max-width:720px;margin:0 auto;padding:14px 16px 12px}
+.kick{font-size:11px;font-weight:700;letter-spacing:.14em;color:var(--dawn);text-transform:uppercase}
+h1{font-size:19px;font-weight:700;letter-spacing:-.4px;margin:6px 0 0;line-height:1.35;color:var(--txt)}
+.badges{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.badge{font-size:11px;font-weight:600;color:var(--dim);background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:3px 9px}
+.badge b{color:var(--txt);font-weight:700;margin-left:3px}
+.note{font-size:11.5px;color:var(--faint);margin-top:9px;line-height:1.5}
+
+.chat{padding-top:18px;display:flex;flex-direction:column;gap:14px}
+.msg{display:flex;gap:9px;align-items:flex-start;opacity:0;transform:translateY(6px);animation:in .28s ease forwards}
+@keyframes in{to{opacity:1;transform:none}}
+.msg.host{flex-direction:row-reverse}
+.av{flex:0 0 30px;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    font-size:12px;font-weight:700;color:var(--onacc);background:var(--dawn);margin-top:2px}
+.msg.ana .av{background:var(--mature)}
+.body{min-width:0;max-width:82%}
+.meta{font-size:10.5px;font-weight:700;color:var(--faint);letter-spacing:.03em;margin:0 2px 4px}
+.msg.host .meta{text-align:right}
+.bubble{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:10px 13px;font-size:14.5px;
+        line-height:1.68;letter-spacing:-.15px;cursor:pointer;transition:border-color .18s,background .18s}
+.msg.host .bubble{background:var(--panel2);border-color:var(--line2)}
+.bubble.on{border-color:var(--dawn);box-shadow:inset 0 0 0 1px var(--dawn)}
+.bubble.done{opacity:.72}
+
+.seg{display:flex;align-items:center;gap:9px;margin:8px 0 2px;color:var(--faint);font-size:10.5px;font-weight:700;letter-spacing:.1em}
+.seg::before,.seg::after{content:'';flex:1;height:1px;background:var(--line)}
+.load{padding:26px 0;text-align:center;color:var(--dim);font-size:13px}
+.spin{display:inline-block;width:13px;height:13px;border:2px solid var(--line2);border-top-color:var(--dawn);border-radius:50%;animation:sp .8s linear infinite;vertical-align:-2px;margin-right:7px}
+@keyframes sp{to{transform:rotate(360deg)}}
+.err{background:var(--panel);border:1px solid var(--line2);border-radius:12px;padding:13px;font-size:13px;color:var(--txt);margin-top:16px}
+.err b{color:var(--hot)}
+
+.bar{position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(240,239,235,.96);backdrop-filter:blur(12px);
+     border-top:1px solid var(--line);padding:10px 16px calc(12px + env(safe-area-inset-bottom))}
+.bin{max-width:720px;margin:0 auto}
+.prog{height:3px;background:var(--ink2);border-radius:2px;overflow:hidden;margin-bottom:11px}
+.pfill{height:100%;width:0;background:var(--dawn);transition:width .3s}
+.row{display:flex;align-items:center;gap:8px}
+button{font-family:var(--serif);cursor:pointer;border:1px solid var(--line);background:var(--panel);color:var(--txt);border-radius:10px}
+.play{width:46px;height:46px;border-radius:50%;background:var(--dawn);color:var(--onacc);border:0;font-size:16px;flex:0 0 46px}
+.ic{width:38px;height:38px;font-size:14px;color:var(--dim)}
+.ic.on{border-color:var(--dawn);color:var(--dawn)}
+.sp{flex:1}
+.spd{display:flex;gap:0;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--panel)}
+.spd button{border:0;border-radius:0;font-size:11.5px;font-weight:700;padding:8px 8px;color:var(--dim);background:transparent}
+.spd button.on{background:var(--dawn);color:var(--onacc)}
+.stat{font-size:11.5px;color:var(--faint);margin-top:9px;line-height:1.45}
+.stat b{color:var(--dawn);font-weight:700}
+
+.ov{position:fixed;inset:0;z-index:50;background:var(--ink);display:flex;align-items:center;justify-content:center;padding:24px}
+.ovc{max-width:400px;text-align:center}
+.ovc h2{font-size:22px;font-weight:700;letter-spacing:-.5px;margin:16px 0 8px}
+.ovc p{font-size:13.5px;color:var(--dim);margin:0 0 20px;line-height:1.65}
+.avs{display:flex;gap:8px;justify-content:center}
+.avs span{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:var(--onacc)}
+.go{background:var(--dawn);color:var(--onacc);border:0;border-radius:12px;padding:14px 30px;font-size:15px;font-weight:700;width:100%}
+.sub{margin-top:12px;font-size:11.5px;color:var(--faint)}
+.lnk{display:inline-block;margin-top:14px;font-size:12px;color:var(--dawn);font-weight:600;text-decoration:none;border-bottom:1px solid var(--line2)}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hin">
+    <div class="kick">Alpha Map · Daily Brief</div>
+    <h1 id="ttl">오늘의 브리핑을 준비하고 있습니다</h1>
+    <div class="badges" id="badges"></div>
+    <div class="note">2인 대담 · 브라우저 음성 낭독 · 말풍선을 누르면 그 대목만 다시 읽습니다. <b>narrative ≠ numbers</b> — 대본은 관점 텍스트일 뿐 숫자·판단 파일을 바꾸지 않습니다.</div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="chat" id="chat"></div>
+  <div class="load" id="load"><span class="spin"></span>라이브 데이터로 대본을 쓰는 중입니다 … <span id="el">0</span>초</div>
+</div>
+
+<div class="bar">
+  <div class="bin">
+    <div class="prog"><div class="pfill" id="pf"></div></div>
+    <div class="row">
+      <button class="play" id="play" aria-label="재생/일시정지">▶</button>
+      <button class="ic" id="prev" title="이전">⏮</button>
+      <button class="ic" id="next" title="다음">⏭</button>
+      <div class="sp"></div>
+      <div class="spd" id="spd">
+        <button data-r="0.9">0.9×</button><button data-r="1" class="on">1×</button><button data-r="1.25">1.25×</button><button data-r="1.5">1.5×</button>
+      </div>
+      <button class="ic on" id="mute" title="음성 켜기/끄기">🔊</button>
+    </div>
+    <div class="stat" id="stat"><b>준비</b> · 재생을 누르면 진행자가 오늘의 결론부터 엽니다</div>
+  </div>
+</div>
+
+<div class="ov" id="ov">
+  <div class="ovc">
+    <div class="avs"><span style="background:var(--dawn)">진</span><span style="background:var(--mature)">애</span></div>
+    <h2>알파맵 데일리 브리핑</h2>
+    <p>진행자와 애널리스트 2인이 오늘의 매크로 게이트·레이어 갭·액션 아이템을 8분 대담으로 짚습니다. 마지막엔 스틸맨 반론까지 답니다.</p>
+    <button class="go" id="start">▶ 브리핑 듣기</button>
+    <div class="sub">소리가 안 나오면 기기 무음 스위치를 확인해 주세요 · Chrome·Safari·Edge 권장</div>
+    <a class="lnk" id="ovback" href="/">← 알파맵으로 돌아가기</a>
+  </div>
+</div>
+
+<script>
+/* ── 화자 ─────────────────────────────────────────────── */
+const SPK={
+  host:{name:'진행자', av:'진', pref:'f', rate:1.0,  pitch:1.04},
+  ana :{name:'알파맵 애널리스트', av:'애', pref:'m', rate:0.98, pitch:0.98},
+};
+const qs=new URLSearchParams(location.search);
+const DATE=/^\d{4}-\d{2}-\d{2}$/.test(qs.get('d')||'')?qs.get('d'):null;
+const REGEN=qs.get('regen')==='1';
+
+const chat=document.getElementById('chat'), loadEl=document.getElementById('load');
+const playBtn=document.getElementById('play'), pf=document.getElementById('pf');
+const statEl=document.getElementById('stat'), muteBtn=document.getElementById('mute');
+const ov=document.getElementById('ov');
+
+let SCRIPT=[], idx=-1, playing=false, muted=false, rate=1, koVoices=[], busy=false;
+let part2Loaded=false, part2Pending=null, finished=false;
+
+/* ── 음성 선별 ────────────────────────────────────────── */
+const F_HINT=/(sunhi|heami|yuna|jimin|soonbok|yujin|female|여성|여자|가영|서연|지연|나리)/i;
+const M_HINT=/(injoon|hyunsu|bongjin|gookmin|guy|male|남성|남자|현수|인준|봉진|국민)/i;
+function scoreVoice(v){
+  const n=((v.name||'')+' '+(v.voiceURI||'')).toLowerCase(); let s=0;
+  if(/^ko(-|_|$)/i.test(v.lang)||/ko-kr/i.test(v.lang)) s+=100;
+  if(/natural|neural/.test(n)) s+=70;
+  if(/google/.test(n)) s+=55;
+  if(/enhanced|premium|siri/.test(n)) s+=45;
+  if(v.localService===false) s+=12;
+  if(/compact|espeak/.test(n)) s-=40;
+  return s;
+}
+function gender(v){const n=((v.name||'')+' '+(v.voiceURI||'')).toLowerCase();
+  return F_HINT.test(n)?'f':M_HINT.test(n)?'m':'?';}
+function loadVoices(){
+  if(typeof speechSynthesis==='undefined') return;
+  koVoices=speechSynthesis.getVoices().filter(v=>/ko/i.test(v.lang))
+    .map(v=>({v,s:scoreVoice(v),g:gender(v)})).sort((a,b)=>b.s-a.s);
+  if(!koVoices.length){SPK.host.voice=SPK.ana.voice=null;return;}
+  const f=koVoices.filter(x=>x.g==='f'), m=koVoices.filter(x=>x.g==='m'), u=koVoices.filter(x=>x.g==='?');
+  SPK.host.voice=(f[0]||u[0]||koVoices[0]).v;
+  SPK.ana.voice =(m[0]||u[1]||u[0]||koVoices[1]||koVoices[0]).v;
+  /* 같은 음성이 배정되면 pitch 로만 구분한다 */
+}
+loadVoices();
+if(typeof speechSynthesis!=='undefined'){
+  speechSynthesis.onvoiceschanged=loadVoices;
+  setTimeout(loadVoices,400); setTimeout(loadVoices,1400);
+}
+
+/* ── 렌더 ─────────────────────────────────────────────── */
+function esc(s){return String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
+/* 화면용 강조 — 숫자·퍼센트·티커는 눈으로 잡히게(음성 원문은 그대로 둔다) */
+function deco(s){
+  return esc(s)
+    .replace(/(-?\d[\d,.]*\s?(?:퍼센트|%|배|조|억|원|달러|포인트))/g,'<b>$1</b>')
+    .replace(/(매크로 게이트|스틸맨|게이트는 전부 AND|AND 게이트)/g,'<b>$1</b>');
+}
+function renderMsg(it,i){
+  const sp=SPK[it.s]||SPK.ana;
+  const d=document.createElement('div');
+  d.className='msg '+it.s; d.dataset.i=i;
+  d.innerHTML='<div class="av">'+sp.av+'</div><div class="body"><div class="meta">'+sp.name+'</div>'+
+              '<div class="bubble">'+deco(it.say)+'</div></div>';
+  chat.appendChild(d);
+  d.querySelector('.bubble').addEventListener('click',()=>{
+    if(busy) return; stop(); speak(it,d.querySelector('.bubble'),()=>{});
+  });
+  return d;
+}
+function renderSeg(t){const d=document.createElement('div');d.className='seg';d.textContent=t;chat.appendChild(d);}
+function setStat(who,txt){statEl.innerHTML=(who?'<b>'+esc(who)+'</b> · ':'')+txt;}
+function scrollDown(){window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'});}
+function updProg(){const n=SCRIPT.length||1;pf.style.width=Math.max(0,Math.min(100,((idx+1)/n)*100))+'%';}
+
+/* ── 낭독 ─────────────────────────────────────────────── */
+function stop(){if(typeof speechSynthesis!=='undefined')speechSynthesis.cancel();}
+function speak(it,bub,done){
+  const sp=SPK[it.s]||SPK.ana; let fin=false;
+  const end=()=>{if(fin)return;fin=true;bub&&bub.classList.remove('on');bub&&bub.classList.add('done');done&&done();};
+  bub&&bub.classList.add('on');
+  if(muted||typeof speechSynthesis==='undefined'){
+    setStat(sp.name, muted?'낭독(음소거) …':'낭독 …');
+    return void setTimeout(end, Math.min(9000,1200+it.say.length*52)/rate);
+  }
+  stop();
+  const u=new SpeechSynthesisUtterance(it.say);
+  u.lang='ko-KR';
+  if(sp.voice) u.voice=sp.voice;
+  u.rate=Math.min(1.7,sp.rate*rate);
+  u.pitch=(SPK.host.voice===SPK.ana.voice)?sp.pitch:1;
+  setStat(sp.name,'발언 중 …');
+  /* 일부 브라우저가 onend 를 흘린다 → 길이 기반 워치독 */
+  const wd=setTimeout(end, Math.min(60000, 2500+it.say.length*130)/rate);
+  u.onend=()=>{clearTimeout(wd);end();};
+  u.onerror=()=>{clearTimeout(wd);end();};
+  speechSynthesis.speak(u);
+}
+
+function step(){
+  if(!playing) return;
+  if(idx+1>=SCRIPT.length){
+    if(!part2Loaded && part2Pending){
+      setStat('','후반부 대본을 받는 중입니다 …');
+      part2Pending.then(()=>{ if(playing) step(); });
+      return;
+    }
+    playing=false; finished=true; playBtn.textContent='▶';
+    setStat('브리핑 종료','오늘 분량을 모두 들었습니다 · 말풍선을 누르면 그 대목만 다시 들을 수 있습니다');
+    return;
+  }
+  idx++; updProg();
+  const it=SCRIPT[idx];
+  const el=chat.querySelector('.msg[data-i="'+idx+'"]');
+  if(el&&el.scrollIntoView) try{el.scrollIntoView({behavior:'smooth',block:'center'});}catch(e){}
+  busy=true;
+  speak(it, el&&el.querySelector('.bubble'), ()=>{busy=false; if(playing) setTimeout(step,180);});
+}
+function play(){ if(playing) return; playing=true; playBtn.textContent='❚❚'; if(finished){finished=false;} step(); }
+function pause(){ playing=false; busy=false; playBtn.textContent='▶'; stop(); setStat('일시정지','재생을 누르면 이어서 듣습니다'); }
+
+playBtn.onclick=()=>playing?pause():play();
+document.getElementById('prev').onclick=()=>{const was=playing;pause();idx=Math.max(-1,idx-2);updProg();if(was)play();};
+document.getElementById('next').onclick=()=>{const was=playing;pause();if(was)play();else{idx=Math.min(SCRIPT.length-1,idx+1);updProg();}};
+muteBtn.onclick=()=>{muted=!muted;muteBtn.textContent=muted?'🔇':'🔊';muteBtn.classList.toggle('on',!muted);if(muted)stop();};
+document.getElementById('spd').addEventListener('click',e=>{
+  const b=e.target.closest('button'); if(!b) return;
+  rate=parseFloat(b.dataset.r);
+  [...e.currentTarget.children].forEach(x=>x.classList.toggle('on',x===b));
+});
+window.addEventListener('beforeunload',stop);
+document.addEventListener('visibilitychange',()=>{ if(document.hidden&&playing) pause(); });
+
+/* ── 데이터 ───────────────────────────────────────────── */
+function api(part){
+  const p=new URLSearchParams(); p.set('part',String(part));
+  if(DATE) p.set('d',DATE);
+  if(REGEN) p.set('regen','1');
+  return fetch('/api/brief?'+p.toString(),{credentials:'same-origin'}).then(r=>r.json());
+}
+function fail(msg,detail){
+  loadEl.style.display='none';
+  const d=document.createElement('div'); d.className='err';
+  d.innerHTML='<b>대본을 만들지 못했습니다.</b><br>'+esc(msg)+(detail?'<br><span style="color:var(--faint);font-size:11.5px">'+esc(detail)+'</span>':'')+
+              '<br><br>잠시 뒤 새로고침하거나, 슬랙 텍스트 요약으로 확인해 주세요.';
+  chat.appendChild(d);
+  setStat('중단','대본 생성 실패');
+}
+function appendPart(data,partNo){
+  if(partNo===2) renderSeg('후반 · 종목 · 액션 · 스틸맨');
+  const base=SCRIPT.length;
+  data.script.forEach((it,i)=>{ SCRIPT.push(it); renderMsg(it, base+i); });
+  updProg();
+}
+
+let sec=0;
+const tick=setInterval(()=>{document.getElementById('el').textContent=String(++sec);},1000);
+
+api(1).then(d=>{
+  clearInterval(tick); loadEl.style.display='none';
+  if(d.error) return fail(d.error, d.detail||d.raw||'');
+  document.getElementById('ttl').textContent=d.title||'오늘의 알파맵 브리핑';
+  (d.badges||[]).forEach(b=>{
+    const s=document.createElement('span'); s.className='badge';
+    s.innerHTML=esc(b[0])+' <b>'+esc(b[1])+'</b>';
+    document.getElementById('badges').appendChild(s);
+  });
+  renderSeg('전반 · 게이트 · 레이어');
+  appendPart(d,1);
+  /* 후반부는 재생 중 뒤에서 받는다 */
+  part2Pending=api(2).then(d2=>{
+    if(d2 && !d2.error && Array.isArray(d2.script)) appendPart(d2,2);
+    part2Loaded=true;
+  }).catch(()=>{part2Loaded=true;});
+}).catch(e=>{clearInterval(tick);fail('네트워크 오류', String(e&&e.message||e));});
+
+/* 시작 오버레이 — 사용자 제스처로 iOS 오디오 언락 */
+document.getElementById('start').onclick=()=>{
+  ov.style.display='none';
+  if(typeof speechSynthesis!=='undefined'){
+    const u=new SpeechSynthesisUtterance(' '); u.volume=0; speechSynthesis.speak(u); loadVoices();
+  }
+  if(SCRIPT.length) play(); else setStat('','대본이 준비되면 자동으로 시작합니다 …');
+  const iv=setInterval(()=>{ if(SCRIPT.length){clearInterval(iv); if(!playing&&!finished) play();} },500);
+  setTimeout(()=>clearInterval(iv),120000);
+};
+</script>
+</body>
+</html>

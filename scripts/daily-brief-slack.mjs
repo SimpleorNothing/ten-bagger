@@ -32,6 +32,8 @@ async function applianceNews() {
   return pick.map(i => `• <${i.url}|${i.headline}>  _${i.grade}·${i.lens}·${i.source?.name ?? ""}_`).join("\n")
     || "· 최근 24h 신규 없음";
 }
+// 팟캐스트 플레이어 — 사이트 비밀번호 게이트 안이라 첫 접속 시 1회 로그인이 필요하다.
+const BRIEF_URL = process.env.BRIEF_URL || "https://simpleornothing.com/brief.html";
 const pct = (n, p) => `${n >= p ? "▲" : "▼"}${Math.abs((n - p) / p * 100).toFixed(2)}%`;
 
 const [ndx, tnx, wti, ks, news] = await Promise.all(
@@ -46,7 +48,10 @@ const text =
   `• WTI: *$${wti.price.toFixed(2)}* (${pct(wti.price, wti.prev)})\n` +
   `• 코스피(전일): *${ks.price.toLocaleString()}* (${pct(ks.price, ks.prev)})\n` +
   `• CNN F&G: *${fg.score}*${fg.rating ? ` (${fg.rating})` : ""}\n\n` +
-  `*🏠 가전 주요뉴스*  _(mi.samsungda.net)_\n${news}`;
+  `*🏠 가전 주요뉴스*  _(mi.samsungda.net)_\n${news}\n\n` +
+  // 8분 2인 대담 팟캐스트 — 대본은 열 때 워커(/api/brief)가 라이브 JSON으로 생성·R2 날짜 캐시.
+  // 텍스트를 대체하지 않고 병기한다(스캔은 텍스트, 이동 중엔 음성).
+  `🎧 <${BRIEF_URL}|오늘 브리핑 듣기 (2인 대담 · 약 8분)>  _게이트·레이어 갭·액션·스틸맨_`;
 
 const r = await fetch("https://slack.com/api/chat.postMessage", {
   method: "POST",
