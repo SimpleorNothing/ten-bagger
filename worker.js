@@ -1123,15 +1123,55 @@ async function briefAsset(env, request, path) {
   } catch { return null; }
 }
 
+// 텍스트 자산(=index.html) 로더. 밴드 추출용 — JSON 이 아니라 원문이 필요하다.
+async function briefText(env, request, path) {
+  try {
+    const res = await env.ASSETS.fetch(new Request(new URL(path, request.url).toString()));
+    if (!res.ok) return "";
+    return await res.text();
+  } catch { return ""; }
+}
+
+// 적정밴드 = index.html `let TARGETS` 단일소스. 브리핑에 임계·밴드를 다시 정의하지 않는다(§1).
+// Workers 는 동적 코드 평가(new Function)가 막혀 있으므로 슬랙 러너와 달리 **정규식 파싱**으로 읽는다.
+function briefBands(idxHtml) {
+  const blk = /let TARGETS=\[[\s\S]*?\n\];/.exec(idxHtml || "");
+  if (!blk) return [];
+  const out = [];
+  const re = /\{\s*layer:'([^']+)'\s*,\s*lo:\s*([\d.]+)\s*,\s*hi:\s*([\d.]+)\s*,\s*dir:'([^']+)'\s*,\s*gate:'((?:[^'\\]|\\.)*)'/g;
+  let m;
+  while ((m = re.exec(blk[0]))) {
+    out.push({ layer: m[1], lo: Number(m[2]), hi: Number(m[3]), dir: m[4], gate: m[5].replace(/\\'/g, "'").slice(0, 120) });
+  }
+  return out;
+}
+
+// charts.json 시계열 → 마지막 종가·전일대비·5거래일. 값이 모자라면 null 로 두고 지어내지 않는다.
+function briefSeries(series, key) {
+  const s = series && series[key];
+  if (!s || !Array.isArray(s.c) || s.c.length < 2) return null;
+  const c = s.c, t = s.t || [];
+  const last = c[c.length - 1], prev = c[c.length - 2];
+  const back = c.length > 6 ? c[c.length - 6] : c[0];
+  const day = Array.isArray(t) && t.length
+    ? new Date((t[t.length - 1]) * 86400000).toISOString().slice(0, 10) : "";
+  const pc = (a, b) => (b ? Math.round(((a / b) - 1) * 10000) / 100 : null);
+  return { d: day, close: last, d1Pct: pc(last, prev), d5Pct: pc(last, back) };
+}
+
 // 라이브 상황 요약 — LLM 입력. 토큰을 아끼려고 판단에 쓰이는 값만 추린다.
 async function briefSituation(env, request) {
-  const [sig, gam, hol, cal, log, jud] = await Promise.all([
+  const [sig, gam, hol, cal, log, jud, pul, chr, ear, idx] = await Promise.all([
     briefAsset(env, request, "/signals.json"),
     briefAsset(env, request, "/gamma.json"),
     briefAsset(env, request, "/holdings.json"),
     briefAsset(env, request, "/calendar.json"),
     briefAsset(env, request, "/signal_log.json"),
     briefAsset(env, request, "/judgment.json"),
+    briefAsset(env, request, "/pulse.json"),
+    briefAsset(env, request, "/charts.json"),
+    briefAsset(env, request, "/earnings.json"),
+    briefText(env, request, "/index.html"),
   ]);
 
   const macro = sig ? {
@@ -1155,18 +1195,74 @@ async function briefSituation(env, request) {
     ? cal.events.filter((e) => e.d >= today).slice(0, 8).map((e) => ({ d: e.d, lbl: e.lbl, meta: e.meta })) : [];
 
   const recent = (log && Array.isArray(log.log))
-    ? log.log.slice(-4).map((e) => ({ date: e.date, source: String(e.source || "").slice(0, 320) })) : [];
+    ? log.log.slice(-6).map((e) => ({
+        date: e.date,
+        source: String(e.source || "").slice(0, 320),
+        tags: (Array.isArray(e.items) ? e.items : []).slice(0, 3)
+          .map((it) => ({ tag: String(it.tag || "").slice(0, 40), layer: it.layer || "" })),
+      })) : [];
 
   const overrides = (jud && Array.isArray(jud.overrides))
     ? jud.overrides.slice(0, 10).map((o) => ({ tk: o.tk || o.ticker, why: String(o.why || "").slice(0, 160) })) : [];
 
+  // ① 시장 맥박(01 리스크 카드) = pulse.json 동인. 방향·렌즈·귀결만 — 기사 링크는 브리핑에 안 쓴다.
+  const pulse = (pul && Array.isArray(pul.drivers))
+    ? pul.drivers.slice(0, 8).map((p) => ({
+        ax: p.name, dir: p.dir, layer: p.layer || "",
+        lens: String(p.l1 || "").slice(0, 180), verdict: String(p.verdict || "").slice(0, 120),
+      })) : [];
+
+  // ② 한·미 종합지수 + ③ 보유종목 마감 — 둘 다 charts.json 시계열에서 파생한다.
+  const SER = (chr && chr.series) || {};
+  const indices = [
+    { k: "코스피", ...(briefSeries(SER, "ks11") || {}) },
+    { k: "나스닥", ...(briefSeries(SER, "ixic") || {}) },
+    { k: "S&P500", ...(briefSeries(SER, "gspc") || {}) },
+  ].filter((x) => x.close != null);
+  // 美 10년물은 '지수'가 아니고 등락률(%의 %)이 오독을 부른다 → 수준값만 별도로 넘긴다.
+  const us10y = briefSeries(SER, "us10y");
+
+  const GM = (gam && gam.gamma) || {};
+  const closes = (hol && Array.isArray(hol.detail))
+    ? hol.detail
+        .filter((x) => x.priceKey && x.w)
+        .sort((a, b) => (b.w || 0) - (a.w || 0))
+        .slice(0, 12)
+        .map((x) => {
+          const s = briefSeries(SER, x.priceKey) || {};
+          const g = GM[x.ticker] || {};
+          return {
+            nm: x.name, tk: x.ticker, layer: x.layer, w: x.w,
+            d: s.d || "", close: s.close != null ? s.close : null,
+            d1Pct: s.d1Pct != null ? s.d1Pct : null, d5Pct: s.d5Pct != null ? s.d5Pct : null,
+            g: g.g || "", stage: g.stage || "",
+          };
+        }) : [];
+
+  // ④ 적정밴드 — 리밸런싱 제안의 근거. index.html TARGETS 단일소스.
+  const bands = briefBands(idx);
+
+  // ⑤ 임박 실적 — calendar.json 이 안 담는 보유종목 실적일은 earnings.json 이 소스다.
+  const moves = (ear && ear.moves) || {};
+  const earnings = Object.keys(moves)
+    .map((k) => ({ tk: k, d: moves[k].date || "", movePct: moves[k].pct, basis: moves[k].basis || "" }))
+    .filter((e) => e.d && e.d >= today)
+    .sort((a, b) => (a.d < b.d ? -1 : 1))
+    .slice(0, 8);
+
   return {
     asOf: today,
     macroGate: macro,
+    marketPulse: pulse,
+    indices: indices,
+    us10yPct: us10y ? { d: us10y.d, level: us10y.close } : null,
     gammaStage: gamma,
     layerWeights: layers,
+    layerBands: bands,
+    holdingCloses: closes,
     topNames: names,
     upcoming: events,
+    upcomingEarnings: earnings,
     recentSignals: recent,
     judgmentOverrides: overrides,
     portfolioTotalMKRW: hol ? hol.total : null,
@@ -1195,15 +1291,38 @@ const BRIEF_TEXT_SYS =
   "규율(절대): ①**결론 먼저** ②**게이트는 전부 AND** — 하나라도 미충족이면 실행 불가라고 명시한다 " +
   "③**narrative ≠ numbers** — 뉴스·발표는 숫자 파일을 바꾸지 않는다 ④**두 시계 분리**(논제 시계=펀더멘털·EPS 리비전 / 가격 시계=센티먼트) " +
   "⑤**단계 강등 트리거는 가격 상승 그 자체가 아니라 '가격 상승률 vs FY+1/+2 EPS 리비전 속도'** ⑥매매 권유가 아니라 프레임 도출이다. " +
-  "숫자는 입력된 라이브 값만 쓴다 — 없는 수치를 지어내지 마라. " +
+  "숫자는 입력된 라이브 값만 쓴다 — 없는 수치를 지어내지 마라. 입력에 없으면 그 칸을 비운다. " +
+  "구성은 아래 순서로 고정한다: **①결론 ②시장 맥박(리스크 보드) ③매크로 게이트 ④한·미 종합지수 " +
+  "⑤보유종목 마감(전체 → 주요) ⑥보유종목 주요 뉴스 ⑦다가오는 일정 ⑧오늘 리밸런싱 한다면 ⑨스틸맨**. " +
+  "`bullets` 는 결론을 받치는 핵심 3~5줄(게이트 상태·오늘 최대 이벤트 포함). " +
+  "`risks` 는 입력 `marketPulse` 를 그대로 옮긴다 — `dir` 는 'risk'→'위험'·'opp'→'기회'·그 외 '중립'. 축을 지어내지 마라. " +
   "`gate` 는 매크로 게이트 3축(나스닥 드로다운·VIX·CNN 공포탐욕)을 각각 한 칸씩, `s` 는 '충족' 또는 '미충족'으로만 쓴다. " +
   "`gateVerdict` 는 '몇/3 · 그래서 지금 무엇이 금지·허용인가' 한 줄. " +
-  "`layers` 는 보유 레이어를 비중 큰 순으로, `state` 는 '오버'·'언더'·'적정' 중 하나. 적정밴드를 모르면 band 는 빈 문자열. " +
+  "`indices` 는 입력 `indices` 를 옮기되 `note` 에 마감일이 오늘과 다르면 휴장·시차를 밝힌다(예: '한국 마지막 거래일'). " +
+  "美 10년물(`us10yPct`)은 지수가 아니므로 표에 넣지 말고 `bullets` 나 맥박 문장에서 **수준값(%)** 으로만 언급한다. " +
+  "`holdSummary` 는 보유 전체 현황 2~3문장(어느 통화·레이어가 눌렸나·방어했나). " +
+  "`holdings` 는 비중 상위 중 **움직임이 유의미한 6~9개만** 고른다(전 종목 나열 금지). `chg` 는 전일대비, `chg5` 는 5거래일. " +
+  "`layers` 는 보유 레이어를 비중 큰 순으로, `state` 는 '오버'·'언더'·'적정' 중 하나. 밴드는 입력 `layerBands` 의 lo~hi 를 쓰고 없으면 빈 문자열. " +
+  "`news` 는 입력 `recentSignals` 기반 3~6건, `note` 에 어느 레이어로 읽히는지와 **narrative 라 숫자 파일은 불변**임을 명시한다. " +
+  "`upcoming` 은 `upcoming`·`upcomingEarnings` 를 합쳐 날짜순 4~7건, `dn` 은 오늘 기준 'D-n'. " +
+  "`rebalance` 는 **오늘 실제로 실행 가능한가**를 먼저 판정(`verdict`)하고, `rows` 에 우선순위별로 " +
+  "`act`(무엇을) · `size`(밴드 갭 %p 또는 금액) · `cond`(선결 AND 조건)를 쓴다. 게이트가 잠겨 있으면 " +
+  "'조건이 갖춰진다면'의 가정형임을 `verdict` 에 못박는다 — 매매 지시로 읽히게 쓰지 마라. " +
+  "언더웨이트 레이어의 한계 자본이 오버웨이트보다 우선이라는 유한자본 규율을 `rows` 순서에 반영한다. " +
   "`actions` 는 전부 조건부(AND)로 쓴다. `steelman` 은 오늘 결론이 틀렸다면 무엇 때문인지 한 단락. " +
   "한국어. 종결어는 '~하겠습니다/~입니다'. '및' 을 쓰지 않는다. 모바일에서 읽기 좋게 문장을 짧게 끊는다. " +
+  "각 칸은 짧게 — 표의 note 는 한 줄을 넘기지 않는다. " +
   "반드시 아래 JSON만 출력한다(코드펜스·설명 금지).\n" +
-  'JSON: {"headline":"오늘 한 줄 결론","gate":[{"k":"축 이름","v":"현재값","s":"충족|미충족"}],"gateVerdict":"n/3 · 그래서 무엇","' +
-  'layers":[{"l":"L3","w":"43.2%","band":"30~32%","state":"오버|언더|적정","note":"한 줄"}],' +
+  'JSON: {"headline":"오늘 한 줄 결론","bullets":["결론 근거 3~5줄"],' +
+  '"risks":[{"ax":"축 이름","dir":"위험|기회|중립","layer":"레이어 태그","lens":"한 줄","verdict":"귀결 국면"}],' +
+  '"gate":[{"k":"축 이름","v":"현재값","s":"충족|미충족"}],"gateVerdict":"n/3 · 그래서 무엇",' +
+  '"indices":[{"k":"코스피","v":"6,820.60","chg":"-6.37%","note":"한 줄"}],' +
+  '"holdSummary":"보유 전체 현황 2~3문장",' +
+  '"holdings":[{"n":"종목","l":"L3","w":"16.5%","px":"106,895","chg":"-9.57%","chg5":"-9.3%","g":"open·성숙"}],' +
+  '"layers":[{"l":"L3","w":"43.2%","band":"30~32%","state":"오버|언더|적정","note":"한 줄"}],' +
+  '"news":[{"d":"07-14","t":"제목","note":"레이어 리드스루 · narrative"}],' +
+  '"upcoming":[{"dn":"D-3","d":"07-22","e":"이벤트","note":"대응 한 줄"}],' +
+  '"rebalance":{"verdict":"오늘 실행 가능/불가 + 이유 한 줄","rows":[{"act":"무엇을","size":"규모","cond":"선결 AND 조건"}]},' +
   '"watch":["오늘 볼 것 3~5개"],"actions":["조건부 액션 2~4개"],"steelman":"반론 한 단락"}';
 
 const BRIEF_PART = {
@@ -1306,7 +1425,8 @@ async function handleBrief(request, env) {
       method: "POST",
       headers: { "content-type": "application/json", "x-api-key": env.ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01" },
       body: JSON.stringify({
-        model: "claude-opus-4-8", max_tokens: 4000, system: sys,
+        // 텍스트 회차(part 0)는 섹션이 9개라 4000 으로는 잘린다. 대담(1·2)은 100s 한도 여유를 위해 그대로 둔다.
+        model: "claude-opus-4-8", max_tokens: part === 0 ? 6500 : 4000, system: sys,
         messages: [{ role: "user", content: JSON.stringify(payload) }],
       }),
     });

@@ -40,6 +40,21 @@ window.BRIEF = (function () {
     '#v-brief .br-t .over{color:var(--st-mature);font-weight:700}#v-brief .br-t .under{color:var(--st-dawn);font-weight:700}',
     '#v-brief ul.br-l{margin:0;padding-left:17px}#v-brief ul.br-l li{margin:0 0 7px;font-size:14px;line-height:1.62}',
     '#v-brief .br-steel{border-left:2px solid var(--line2);padding-left:12px;color:var(--dim);font-size:13.5px;line-height:1.68}',
+    '#v-brief .br-lead{margin:0;padding-left:17px}#v-brief .br-lead li{margin:0 0 6px;font-size:14px;line-height:1.6;color:var(--txt)}',
+    '#v-brief .br-risks{display:grid;grid-template-columns:repeat(auto-fit,minmax(232px,1fr));gap:10px;margin-top:4px}',
+    '#v-brief .br-r{background:var(--panel2);border:1px solid var(--line);padding:11px 12px}',
+    '#v-brief .br-r .ax{font-size:13.5px;font-weight:700;color:var(--txt);line-height:1.45}',
+    '#v-brief .br-r .lm{font-size:11.5px;color:var(--faint);margin-top:3px}',
+    '#v-brief .br-r .ln{font-size:12.5px;color:var(--dim);line-height:1.6;margin-top:6px}',
+    '#v-brief .br-r .vd{font-size:12.5px;font-weight:700;margin-top:6px;color:var(--dawn)}',
+    '#v-brief .br-dir{float:right;font-size:11px;font-weight:700;padding:1px 7px;border-radius:20px;',
+    ' background:var(--panel);border:1px solid var(--line2);color:var(--dim);margin-left:8px}',
+    '#v-brief .br-dir.risk{color:var(--st-mature);border-color:var(--st-mature)}',
+    '#v-brief .br-dir.opp{color:var(--st-dawn);border-color:var(--st-dawn)}',
+    '#v-brief .br-t td.up{color:var(--st-dawn);font-weight:700;white-space:nowrap}',
+    '#v-brief .br-t td.dn{color:var(--st-mature);font-weight:700;white-space:nowrap}',
+    '#v-brief .br-sum{font-size:13.5px;line-height:1.68;color:var(--dim);margin:0 0 11px}',
+    '#v-brief .br-verdict.warn{color:var(--st-mature)}',
     '#v-brief .br-note{font-size:11.5px;color:var(--faint);line-height:1.55;margin-top:12px}',
     '#v-brief .br-issues{display:flex;flex-direction:column;margin-top:6px}',
     '#v-brief .br-iss{display:flex;gap:10px;align-items:baseline;width:100%;text-align:left;font-family:inherit;',
@@ -108,6 +123,13 @@ window.BRIEF = (function () {
 
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]; }); }
   function $(id) { return document.getElementById(id); }
+  // 등락 문자열 → 색. 부호가 없거나 0이면 색을 입히지 않는다(지어낸 방향 표시 방지).
+  function sgn(v) {
+    var s = String(v == null ? '' : v);
+    if (/^\s*[+]|상승|↑/.test(s)) return 'up';
+    if (/^\s*[-−]|하락|↓/.test(s)) return 'dn';
+    return '';
+  }
   function kst() { return new Date(Date.now() + 9 * 3600 * 1000).toISOString().slice(0, 10); }
 
   /* ── 음성 ─────────────────────────────────────────────── */
@@ -156,7 +178,27 @@ window.BRIEF = (function () {
       return;
     }
     var h = '';
-    h += '<div class="br-card"><div class="br-eye">결론</div><p class="br-head">' + esc(d.headline || '') + '</p></div>';
+    h += '<div class="br-card"><div class="br-eye">결론</div><p class="br-head">' + esc(d.headline || '') + '</p>';
+    if (Array.isArray(d.bullets) && d.bullets.length) {
+      h += '<ul class="br-lead" style="margin-top:11px">' +
+        d.bullets.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>';
+    }
+    h += '</div>';
+
+    // ② 시장 맥박 — 01 리스크 카드(pulse.json)를 브리핑 앞단으로 끌어온다.
+    if (Array.isArray(d.risks) && d.risks.length) {
+      h += '<div class="br-card"><div class="br-eye">시장 맥박 · 리스크 보드</div><div class="br-risks">';
+      d.risks.forEach(function (r) {
+        var dir = String(r.dir || '');
+        var cls = /위험|risk/.test(dir) ? 'risk' : /기회|opp/.test(dir) ? 'opp' : '';
+        h += '<div class="br-r"><div class="ax"><span class="br-dir ' + cls + '">' + esc(dir || '중립') + '</span>' +
+             esc(r.ax || '') + '</div>' +
+             (r.layer ? '<div class="lm">' + esc(r.layer) + '</div>' : '') +
+             (r.lens ? '<div class="ln">' + esc(r.lens) + '</div>' : '') +
+             (r.verdict ? '<div class="vd">→ ' + esc(r.verdict) + '</div>' : '') + '</div>';
+      });
+      h += '</div></div>';
+    }
 
     if (Array.isArray(d.gate) && d.gate.length) {
       h += '<div class="br-card"><div class="br-eye">매크로 게이트 · 3중 AND</div><div class="br-gate">';
@@ -170,6 +212,35 @@ window.BRIEF = (function () {
       h += '</div>';
     }
 
+    // ④ 한·미 종합지수
+    if (Array.isArray(d.indices) && d.indices.length) {
+      h += '<div class="br-card"><div class="br-eye">한·미 종합지수</div>' +
+           '<table class="br-t"><thead><tr><th>지수</th><th>종가</th><th>등락</th><th>메모</th></tr></thead><tbody>';
+      d.indices.forEach(function (x) {
+        h += '<tr><td class="n">' + esc(x.k) + '</td><td class="n">' + esc(x.v) + '</td>' +
+             '<td class="' + sgn(x.chg) + '">' + esc(x.chg || '—') + '</td><td>' + esc(x.note || '') + '</td></tr>';
+      });
+      h += '</tbody></table></div>';
+    }
+
+    // ⑤ 보유종목 마감 — 전체 현황 한 단락 + 주요 종목만
+    if (d.holdSummary || (Array.isArray(d.holdings) && d.holdings.length)) {
+      h += '<div class="br-card"><div class="br-eye">보유종목 마감 · 전체 → 주요</div>';
+      if (d.holdSummary) h += '<p class="br-sum">' + esc(d.holdSummary) + '</p>';
+      if (Array.isArray(d.holdings) && d.holdings.length) {
+        h += '<table class="br-t"><thead><tr><th>종목</th><th>L</th><th>비중</th><th>종가</th><th>전일</th><th>5일</th><th>γ·단계</th></tr></thead><tbody>';
+        d.holdings.forEach(function (x) {
+          h += '<tr><td class="n">' + esc(x.n) + '</td><td>' + esc(x.l || '') + '</td><td class="n">' + esc(x.w || '') + '</td>' +
+               '<td class="n">' + esc(x.px || '') + '</td>' +
+               '<td class="' + sgn(x.chg) + '">' + esc(x.chg || '—') + '</td>' +
+               '<td class="' + sgn(x.chg5) + '">' + esc(x.chg5 || '—') + '</td>' +
+               '<td>' + esc(x.g || '') + '</td></tr>';
+        });
+        h += '</tbody></table>';
+      }
+      h += '</div>';
+    }
+
     if (Array.isArray(d.layers) && d.layers.length) {
       h += '<div class="br-card"><div class="br-eye">레이어 갭 · 비중 vs 적정밴드</div>' +
            '<table class="br-t"><thead><tr><th>레이어</th><th>비중</th><th>밴드</th><th>상태</th><th>메모</th></tr></thead><tbody>';
@@ -179,6 +250,44 @@ window.BRIEF = (function () {
              '</td><td class="' + cls + '">' + esc(l.state || '—') + '</td><td>' + esc(l.note || '') + '</td></tr>';
       });
       h += '</tbody></table></div>';
+    }
+
+    // ⑥ 보유종목 주요 뉴스 — 전부 narrative(숫자 파일 불변)
+    if (Array.isArray(d.news) && d.news.length) {
+      h += '<div class="br-card"><div class="br-eye">보유종목 주요 뉴스 · narrative</div>' +
+           '<table class="br-t"><thead><tr><th>날짜</th><th>건</th><th>리드스루</th></tr></thead><tbody>';
+      d.news.forEach(function (x) {
+        h += '<tr><td class="n">' + esc(x.d || '') + '</td><td>' + esc(x.t || '') + '</td><td>' + esc(x.note || '') + '</td></tr>';
+      });
+      h += '</tbody></table></div>';
+    }
+
+    // ⑦ 다가오는 일정
+    if (Array.isArray(d.upcoming) && d.upcoming.length) {
+      h += '<div class="br-card"><div class="br-eye">다가오는 일정</div>' +
+           '<table class="br-t"><thead><tr><th>D-N</th><th>날짜</th><th>이벤트</th><th>대응</th></tr></thead><tbody>';
+      d.upcoming.forEach(function (x) {
+        h += '<tr><td class="n">' + esc(x.dn || '') + '</td><td class="n">' + esc(x.d || '') + '</td>' +
+             '<td>' + esc(x.e || '') + '</td><td>' + esc(x.note || '') + '</td></tr>';
+      });
+      h += '</tbody></table></div>';
+    }
+
+    // ⑧ 오늘 리밸런싱 한다면 — 게이트가 잠겨 있으면 가정형임을 판정 줄에 못박는다.
+    if (d.rebalance && (d.rebalance.verdict || (Array.isArray(d.rebalance.rows) && d.rebalance.rows.length))) {
+      var rb = d.rebalance;
+      var lock = /불가|금지|잠김|아니/.test(String(rb.verdict || ''));
+      h += '<div class="br-card"><div class="br-eye">오늘 리밸런싱 한다면 · 전부 조건부 AND</div>';
+      if (rb.verdict) h += '<div class="br-verdict' + (lock ? ' warn' : '') + '" style="margin:0 0 11px">' + esc(rb.verdict) + '</div>';
+      if (Array.isArray(rb.rows) && rb.rows.length) {
+        h += '<table class="br-t"><thead><tr><th>순위</th><th>액션</th><th>규모</th><th>선결조건</th></tr></thead><tbody>';
+        rb.rows.forEach(function (x, i) {
+          h += '<tr><td class="n">' + (i + 1) + '</td><td class="n">' + esc(x.act || '') + '</td>' +
+               '<td>' + esc(x.size || '') + '</td><td>' + esc(x.cond || '') + '</td></tr>';
+        });
+        h += '</tbody></table>';
+      }
+      h += '</div>';
     }
 
     if (Array.isArray(d.watch) && d.watch.length) {
