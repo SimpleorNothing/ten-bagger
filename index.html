@@ -3327,6 +3327,7 @@ document.addEventListener('click',function(e){var j=e.target.closest('.cal-jump'
  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('on');});
  document.querySelectorAll('.view').forEach(function(v){v.classList.remove('on');});
  var el=document.getElementById(to);if(el)el.classList.add('on');
+ if(to==='v-cal'&&typeof foldPastCal==='function')foldPastCal();
  var ab=document.getElementById('asofBox');if(ab)ab.style.display='';
  if(to==='v-market'){var mt=document.querySelector('#nav .tab[data-v="market"]');if(mt)mt.classList.add('on');if(window.MARKET&&window.MARKET.render)window.MARKET.render();}
  window.scrollTo(0,0);});

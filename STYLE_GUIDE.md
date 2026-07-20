@@ -1,4 +1,4 @@
-**최종 갱신: 2026-07-20 21:20 (KST)**
+**최종 갱신: 2026-07-20 22:02 (KST)**
 
 # STYLE_GUIDE — 알파맵 디자인 시스템
 
@@ -257,6 +257,8 @@ pantone.css :root       ← 현행 팔레트 (팬튼 A안, index.html 하단 <li
 ---
 
 ## 갱신 이력
+
+- 2026-07-20 22:02 · **06 투자 캘린더(`#v-cal`) 「지나간 일정 접기」 복원 — orphan 됐던 `foldPastCal()` 재배선.** SimpleorNothing 지시(지난 일정 접고 클릭 시 펼침). 기능·CSS(`.cal-fold-bar`·`.cal-past{display:none}`·`.cal-open`)·헬퍼(`calChipEnd`/`calDDiff`)는 이미 있었으나 06 탭 삭제(2026-07-17) 때 호출부가 사라져 미동작이었음 → `.cal-jump` 위임 핸들러가 `#v-cal`을 열 때 `foldPastCal()` 호출(멱등 가드 있음). 오늘(KST) 기준 과거 행에 `.cal-past` 부여·기본 접힘, 「지나간 일정 N건 · 펼치기」 바 클릭 토글. **신규 `:root` 토큰·CSS·함수 0**(1줄 배선) → TOKENS 무변·check-docs 통과 · Playwright 스모크(과거 26건 접힘·6월 past·12월 미래·바 토글·pageerror 0) 통과. (OPS §9 동반)
 
 - 2026-07-20 21:20 · **01 「다가오는 일정」 헤더 우측 「전체 캘린더 →」 링크(`.cal-jump`) — 삭제(nav 제외)된 06 투자 캘린더(`#v-cal`) 상세 타임라인 재연결.** SimpleorNothing 지시. `.msec` 우측 `--dawn`/`--mono` 링크 + v-cal 하단 「← 01」 역링크 · `document` 위임 핸들러로 `.tab`/`.view` 토글. 신규 `:root` 토큰 0 → check-docs 통과 · Playwright 스모크 통과. (OPS §9 동반)
 
