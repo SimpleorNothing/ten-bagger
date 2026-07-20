@@ -1,30 +1,30 @@
 {
-  "asOf": "2026-07-19T22:05:35.902Z",
+  "asOf": "2026-07-20T11:54:22.140Z",
   "source": "Google News RSS · 종목축 + 시그널축 + 병목축 (기사별 한 줄 요약 + 물질성 스크리닝)",
   "note": "사이트 종목 카드의 \"일자 + 요약\" 행 소스. 최근 95일 창 · 종목당 최신 5건(첫 로딩 페이로드 상한) · **물질성 스크리닝 통과분만**(items[].m>=1 — 2=논제/펀더멘털, 1=리비전·수급 실사건, 0=사후 등락 서술·홍보·추측·콘텐츠팜으로 제외). 탈락 기사는 삭제가 아니라 news_archive.json 에 전건 보존. 나머지 3개월치는 archive/{티커}.json 을 '더 보기'로 온디맨드 로드. 신호/소음 판단과 SIGNAL_LOG 반영은 사람/Claude의 몫 — 채점·차트에는 쓰이지 않는다.",
-  "count": 184,
+  "count": 190,
   "macroTopics": [
-    {
-      "id": "macro_중국_ai_경쟁_충격_0",
-      "ticker": "MACRO",
-      "name": "중국 AI 경쟁 충격",
-      "q": "중국 AI 키미 K3 딥시크 기술주 나스닥 반도체",
-      "mkt": "US",
-      "ax": "china"
-    },
     {
       "id": "macro_하이퍼스케일러_ai_capex_검증_1",
       "ticker": "MACRO",
       "name": "하이퍼스케일러 AI Capex 검증",
-      "q": "big tech earnings AI capex spending Alphabet Tesla AMD results",
+      "q": "Big Tech earnings AI capex hyperscaler 2025",
       "mkt": "US",
       "ax": "capex"
+    },
+    {
+      "id": "macro_증시_레버리지_변동성_1",
+      "ticker": "MACRO",
+      "name": "韓증시 레버리지 변동성",
+      "q": "코스피 레버리지 ETF 변동성 삼성전자 SK하이닉스",
+      "mkt": "KOSPI",
+      "ax": "x_증시레버리지변동성"
     },
     {
       "id": "macro_미_이란_지정학_리스크_1",
       "ticker": "MACRO",
       "name": "미·이란 지정학 리스크",
-      "q": "IEA Hormuz shipping crisis oil Middle East escalation energy supply",
+      "q": "US Iran oil price geopolitical risk energy",
       "mkt": "US",
       "ax": "energy"
     }
@@ -67,37 +67,226 @@
     }
   ],
   "archive": "news_archive.json",
-  "archiveCount": 1210,
+  "archiveCount": 1256,
   "shardDir": "archive",
   "winCounts": {
-    "353200": 24,
+    "353200": 26,
+    "005930": 23,
+    "089030": 17,
+    "009150": 22,
+    "CEG": 14,
+    "QCOM": 13,
     "0522": 8,
-    "PLTR": 12,
+    "PLTR": 13,
     "CBRS": 18,
     "ALAB": 10,
-    "BESI": 14,
+    "BESI": 15,
     "AMD": 14,
-    "QCOM": 12,
     "COHR": 9,
-    "CEG": 13,
     "TSLA": 9,
     "VICR": 10,
-    "VRT": 10,
+    "VRT": 11,
     "LITE": 7,
-    "009150": 21,
     "TER": 2,
     "SNDK": 7,
     "MRVL": 5,
     "BE": 13,
     "SMCI": 16,
-    "005930": 22,
     "RMBS": 13,
-    "089030": 14,
+    "APH": 3,
     "OKLO": 2,
-    "APH": 2,
     "MU": 4
   },
   "items": [
+    {
+      "id": "ddk",
+      "ticker": "353200",
+      "name": "대덕전자",
+      "title": "대덕전자, 4970억원 신규 투자 발표…고부가 기판에 1.3조 투입 - 디일렉",
+      "link": "https://news.google.com/rss/articles/CBMiZkFVX3lxTFBwMTk3LXBiOWdqWEpFTml6MDJJTlVVaDJKNkVNRFk2MDM4NmxWclFBZW91Q0ROUkMwUVJZd0FDNUlsTG5tVHBCMzJDYUpud19TcWtOQ25fcW02eDVhOUxzaHNwVU5LZw?oc=5",
+      "published": "2026-07-20T09:45:53.000Z",
+      "source": "디일렉",
+      "st": 2,
+      "m": 2,
+      "a": "대덕전자, 4970억원 규모 신규 투자 발표 및 고부가 기판 분야 총 1.3조원 투입 계획 공개",
+      "w": "대규모 증설 투자 확정으로 펀더멘털 성장 가시성이 높아졌으며, 중장기 매출·이익 확대 기대감에 뚜렷한 호재로 작용할 관측.",
+      "mv": 3
+    },
+    {
+      "id": "sec",
+      "ticker": "005930",
+      "name": "삼성전자",
+      "title": "[반도체] 삼성전자·SK하이닉스, 'HBM 이후' AI 메모리 경쟁 본격화…차세대 CXL 상용화 속도 - 굿모닝베트남미디어",
+      "link": "https://news.google.com/rss/articles/CBMicEFVX3lxTE1qODlfUG5sRURiNTNwLWNBd1VJTXBScl9WU3pvcFJubkxPTENaTXdvYWlCOUU4dV94ZzZYV2prNWVHTldMTThodndxV3RUcGJ0U3JneW52MVI2UmZiMG9IWGtaa09neUFMNkZVN2pwdEM?oc=5",
+      "published": "2026-07-20T09:45:20.000Z",
+      "source": "굿모닝베트남미디어",
+      "st": 3,
+      "m": 1,
+      "a": "삼성전자·SK하이닉스, HBM 이후 차세대 CXL 메모리 상용화 경쟁 본격화 전망 제기",
+      "w": "CXL 상용화 시점과 수주 규모가 아직 미확정인 만큼 현 시점에서는 펀더멘털 시그널보다는 산업 방향성 관련 센티먼트 자료에 그침.",
+      "mv": 3
+    },
+    {
+      "id": "macro_미_이란_지정학_리스크_1",
+      "ticker": "MACRO",
+      "name": "미·이란 지정학 리스크",
+      "ax": "energy",
+      "title": "Can European Markets Withstand Rising US-Iran Tensions? - Modern Diplomacy",
+      "link": "https://news.google.com/rss/articles/CBMimAFBVV95cUxPWkp5V2N6aWg2eHV2Y0NYTHZDem9hUjMwcVdtazl4WVUycGdyVGhHZ2ZOWVd2anpHRkdWZWhtcHJYNm1DRDlkNGVlNlZya2MtTWpFTDAtZVUwYkJWZnp2OFEzNTlzMDJ6NXQ0cl94eVZZUF9iY3JCRnVLTUU5NXRNSG5XZ1ZPVkRvcW1ob1U0VFRnaVhKR245aA?oc=5",
+      "published": "2026-07-20T09:44:08.000Z",
+      "source": "Modern Diplomacy",
+      "st": 3,
+      "a": "미·이란 갈등 고조에 따른 유럽 금융시장 충격 내성 점검",
+      "w": "지정학 리스크 프리미엄 상승은 VIX 매크로 게이트를 자극해 AI 인프라 리스크자산 전반의 밸류에이션 할인 압력으로 작용 가능."
+    },
+    {
+      "id": "macro_증시_레버리지_변동성_1",
+      "ticker": "MACRO",
+      "name": "韓증시 레버리지 변동성",
+      "ax": "x_증시레버리지변동성",
+      "title": "역대급 변동성 롤러코스피···단일종목 레버리지 규제강화에 진정될까 By 투데이코리아 - Investing.com 한국어",
+      "link": "https://news.google.com/rss/articles/CBMicEFVX3lxTE1kS1JVS0E3NlNTUm9lcmFaakpYdTFiTERqOG5SOFhLYi1uNC1xcGVMMl9YVFRPMl9ySXRwZTFpOEcxWFJCNElLa083UTg3clhQNW9YZzQ2SGxkZWJhWmZQT3R6amRYTjF0S3BEd1dIb3o?oc=5",
+      "published": "2026-07-20T09:05:00.000Z",
+      "source": "Investing.com 한국어",
+      "st": 3,
+      "a": "한국 증시 단일종목 레버리지 ETF 급등락에 금융당국 규제 강화 검토",
+      "w": "L6(HBM·반도체 제조) 핵심 종목 수급 왜곡이 규제 개입으로 진정될 경우 하이퍼스케일러 메모리 조달 비용 가시성에 단기 영향 가능."
+    },
+    {
+      "id": "ddk",
+      "ticker": "353200",
+      "name": "대덕전자",
+      "title": "대덕전자, 4970억원 규모 반도체 생산설비 신규 투자 - 아시아경제",
+      "link": "https://news.google.com/rss/articles/CBMiYEFVX3lxTE9JdlpwU1diNzVrQ29WeFN0Umk4RmUtVUxtNWE2aEVGVEFvZ1JFOGRUbnotZWFmSldFYXZhSm4wb0hFbi1xVFJNVHB5ZlJDOHVOUFZoblZGRHNFOERXMGRvYg?oc=5",
+      "published": "2026-07-20T08:22:49.000Z",
+      "source": "아시아경제",
+      "st": 3,
+      "m": 2,
+      "a": "대덕전자 4970억원 규모 반도체 생산설비 신규 투자 결정 공시",
+      "w": "0번 기사와 동일 사건의 공식 공시로, 증설 투자 확정은 중장기 생산능력 확대 및 매출 성장에 직결되는 펀더멘털 호재.",
+      "mv": 3
+    },
+    {
+      "id": "macro_증시_레버리지_변동성_1",
+      "ticker": "MACRO",
+      "name": "韓증시 레버리지 변동성",
+      "ax": "x_증시레버리지변동성",
+      "title": "\"삼전닉스 레버리지, 변동성 높였다\"...카지노판 된 증시? 외신 쓴소리 - 머니투데이 - 머니투데이",
+      "link": "https://news.google.com/rss/articles/CBMiaEFVX3lxTE5BUGtJRWxGM1g0cF9pYXRzM3cyWWpNWGxhdnMtOHRfOWc3ekp4ZWo1TDU5clIyMVJsUDU1dTlWU1ZtUWphSUlOM2EtcVloOUFCeEliQUkzZ0lHcldtMmNEVEttZG9FWG1q0gFuQVVfeXFMTVB0cFNFbmpfcjhORVByb3pJcnQtMGpCYlRYVmJkUGpteEhiRlMxa2hDV1Q0dFNENlZxc1FKZnF5WW5EZ0Y4ZENuMnd5UHhSbFBvek5sQ2hqVFhzSlZVZ3RnWHAwdjhBcHctcEo4WWc?oc=5",
+      "published": "2026-07-20T07:00:09.000Z",
+      "source": "머니투데이",
+      "st": 1,
+      "a": "삼전·닉스 레버리지 ETF가 개별 종목 변동성을 구조적으로 확대한다는 외신 비판 집중",
+      "w": "L6 핵심 HBM 공급사 주가 변동성 증폭은 글로벌 AI 인프라 투자심리(F&G 게이트) 훼손 경로로 연결 가능."
+    },
+    {
+      "id": "macro_미_이란_지정학_리스크_1",
+      "ticker": "MACRO",
+      "name": "미·이란 지정학 리스크",
+      "ax": "energy",
+      "title": "Oil Climbs Above $90 as U.S.-Iran Conflict Deepens, Raising Global Supply Concerns - Kurdistan24",
+      "link": "https://news.google.com/rss/articles/CBMivwFBVV95cUxNUEphd0pRZnpuZnJJUkRmd20yRllmOHlDSHZnWmJTVC1Vck1McnpETkRSc01jVmRIQU9SQjNCRFBoSmZZU1ItSk9fbmZhWU01QkhZd0Ryc2RxMzVuby0xRld6Q3ZaMXVZb0ZvQUVteUY3Y0dtUlFkQ2NUMXE1eG1GMFBRRXNKOWF2WF94ajRyN0hhTVUtUDhmLVFmZ214OV8xN3dXUWNhNGdUQnd4MEJKdnQyRVJZMGx6Zk11X0VVTQ?oc=5",
+      "published": "2026-07-20T06:53:00.000Z",
+      "source": "Kurdistan24",
+      "st": 3,
+      "a": "미·이란 분쟁 심화로 브렌트유 90달러 돌파, 글로벌 공급 우려 부각",
+      "w": "에너지 가격 급등은 L8(발전·그리드) 운영비용을 끌어올려 데이터센터 전력 조달 단가 상승 압력으로 직결."
+    },
+    {
+      "id": "twng",
+      "ticker": "089030",
+      "name": "테크윙",
+      "title": "테크윙, 마이크론에 검사 장비 공급…106.7억 규모 - 디일렉",
+      "link": "https://news.google.com/rss/articles/CBMiZkFVX3lxTE8ydlNWOHpabjc3cUN3d1pvdHBOVW5hVE84YVlMNzc0OHNxYnQwd1ZWLV8tVXhlOHcyVVNQRXMzUmFvcng5T2dXejdfTVNnbHo4MkZ3TGlPbE9zUGRLRTlPWnJqbEhyZw?oc=5",
+      "published": "2026-07-20T06:52:26.000Z",
+      "source": "디일렉",
+      "st": 2,
+      "m": 2,
+      "a": "테크윙, 마이크론에 106.7억원 규모 검사 장비 공급 계약 체결",
+      "w": "글로벌 메모리 고객사 마이크론과의 신규 수주 확정으로 단기 매출 인식 및 고객 다변화 측면에서 명확한 펀더멘털 호재.",
+      "mv": 3
+    },
+    {
+      "id": "macro_증시_레버리지_변동성_1",
+      "ticker": "MACRO",
+      "name": "韓증시 레버리지 변동성",
+      "ax": "x_증시레버리지변동성",
+      "title": "“삼전닉스 레버리지 ETF, 무법천지 카지노 만들어” 외신 비난 봇물 - 매일경제",
+      "link": "https://news.google.com/rss/articles/CBMiUkFVX3lxTE4taVRraVBkbENaOHJ4LWNRcmtrTHZzSkxyMWFuMExlSGRNQjB4dGV0THlMVk5GVkY4M0hpMmgzSFBueUtCNTc1bU40eF9ubHZRSFE?oc=5",
+      "published": "2026-07-20T02:36:47.000Z",
+      "source": "매일경제",
+      "st": 1,
+      "a": "삼전·닉스 레버리지 ETF가 한국 증시를 카지노화한다는 외신 비판 잇따름",
+      "w": "L6 반도체 공급망 핵심 기업의 시장 신뢰도 훼손은 하이퍼스케일러 capex 계획의 HBM 조달 리스크 인식을 높일 수 있음."
+    },
+    {
+      "id": "twng",
+      "ticker": "089030",
+      "name": "테크윙",
+      "title": "테크윙, Micron Memory Malaysia SDN. BHD. 110억원 계약 체결…전년 매출 대비 6.70% - 데일리인베스트",
+      "link": "https://news.google.com/rss/articles/CBMib0FVX3lxTFBaT2FycW15TTlULUxmQjctYlBZZ2JXN3ZsbTduQmdWZ1RQeERCeWxES2RUQVk0WFdkeTdtNEcwZDd5OWJEVEJ2RHh5SXZfaUdvMFJkTExjS1JxdjEzbnFURXkzZWNVeHlld0ZPTjhqVdIBb0FVX3lxTFBaT2FycW15TTlULUxmQjctYlBZZ2JXN3ZsbTduQmdWZ1RQeERCeWxES2RUQVk0WFdkeTdtNEcwZDd5OWJEVEJ2RHh5SXZfaUdvMFJkTExjS1JxdjEzbnFURXkzZWNVeHlld0ZPTjhqVQ?oc=5",
+      "published": "2026-07-20T02:16:29.000Z",
+      "source": "데일리인베스트",
+      "st": 3,
+      "m": 2,
+      "a": "테크윙, Micron Memory Malaysia와 110억원 규모 계약 체결(전년 매출 대비 6.70%)",
+      "w": "3번 기사와 동일 계약의 추가 보도로, 마이크론향 수주 확정은 펀더멘털 호재이며 매출 기여 비중 수치가 구체적으로 확인됨.",
+      "mv": 3
+    },
+    {
+      "id": "macro_증시_레버리지_변동성_1",
+      "ticker": "MACRO",
+      "name": "韓증시 레버리지 변동성",
+      "ax": "x_증시레버리지변동성",
+      "title": "삼성전자·SK하이닉스 레버리지 ETF ‘변동성 확대’ 논란에… 금융당국, 신규 상장 중단 등 긴급 처방 - 글로벌이코노믹",
+      "link": "https://news.google.com/rss/articles/CBMihwFBVV95cUxOOFhBYWl5eUc1bU5KSWxnNTN2YWJrSy1RbjEwbnJlWFgzcjBNSG1yWmNjX09MZ0o1cFRsVlQ5ZjNhbXVYZzFxd2pYbV9EU0Z6MWpkOXp6RnZUREpQejR5TzM3czBBbkxfRzZUSHdoTGNPbTcxd2Y0U0ZuenkzRkxRX0k0UlpSNXM?oc=5",
+      "published": "2026-07-20T02:13:55.000Z",
+      "source": "글로벌이코노믹",
+      "st": 3,
+      "a": "금융당국이 삼전·닉스 레버리지 ETF 신규 상장 중단 등 긴급 규제 조치 시행",
+      "w": "규제 개입으로 L6 HBM 공급사 수급 왜곡이 완화되면 반도체 섹터 변동성 게이트 압력이 단기 감소 가능."
+    },
+    {
+      "id": "macro_증시_레버리지_변동성_1",
+      "ticker": "MACRO",
+      "name": "韓증시 레버리지 변동성",
+      "ax": "x_증시레버리지변동성",
+      "title": "삼성전자 SK하이닉스 ETF가 증시 변동성 키워, 모간스탠리 \"금융당국 대응 효과 제한적\" - 비즈니스포스트",
+      "link": "https://news.google.com/rss/articles/CBMic0FVX3lxTE5PVURYdGpVdXZfa2JGUFY3MGI5NUlUNEhTV2RNZVpoOWJJMDN2MUU2ckVuUUc0OENwcVNtb1RlNm5FcWxGRE40LW1mN0ZXX080TGswaGJyOWpLNHItNUY3UTlSRGVIUjhKenZPTjB5TlVPZDA?oc=5",
+      "published": "2026-07-20T02:10:07.000Z",
+      "source": "비즈니스포스트",
+      "st": 3,
+      "a": "모건스탠리, 삼전·닉스 ETF발 변동성에 금융당국 대응 효과 제한적이라고 평가",
+      "w": "L6 공급망 핵심 종목의 구조적 변동성 지속은 AI 인프라 투자 결정 시 수요 예측 불확실성을 높이는 매크로 노이즈로 작동."
+    },
+    {
+      "id": "sem",
+      "ticker": "009150",
+      "name": "삼성전기",
+      "title": "삼성전기, 40% 하락에도 반등 온다…목표가 300만원 전망-하나 - edaily.co.kr",
+      "link": "https://news.google.com/rss/articles/CBMigAFBVV95cUxQNGhpT0t6MVc4amcyNlo4dGN0aXVrM25sWHE4RDhld2JReUxKVzYxS0hmTDExRUZXTFR2NHgwRjUyUFNFam9UazlqSlpFeUZ6cXFuMlBHVkpCRDdjSzdOMjZQR2phYmV2RTBWSi1EeEdlNkE5MTk3T3JsTmdFNnB6Zg?oc=5",
+      "published": "2026-07-19T22:42:23.000Z",
+      "source": "edaily.co.kr",
+      "st": 3,
+      "m": 1,
+      "a": "하나증권, 삼성전기에 대해 40% 하락 후 반등 전망 및 목표가 300만원 제시",
+      "w": "애널리스트 목표가 상향 및 투자의견 제시로 단기 수급·센티먼트에 긍정적 영향을 줄 수 있으나, 펀더멘털 변화가 수반되지 않아 가격 시계 노이즈에 해당.",
+      "mv": 3
+    },
+    {
+      "id": "ceg",
+      "ticker": "CEG",
+      "name": "Constellation",
+      "title": "Constellation Invests in Blue Energy as Nuclear Demand From AI Data Centers Surges. Here's What CEG Investors Need to Know. - The Motley Fool",
+      "link": "https://news.google.com/rss/articles/CBMi9gFBVV95cUxQU0VyaEFFUXdTM2EyLXMzcUdRNk1vZjN2TGpfV0lIdnFJM2txTUY5Z1dCeDRaRUswRDhOcDFrX2drWElyd004R0tZMUQzQjQzd3FGUG5fRFZqYTNUTHlTa0F4MGFOS2tPNXVlYlQ3X2hZR0tsZkxkcllLeXY5UWpQa24yVXhyQVd2Ymg0MzVDWGUweFJUYk9aUzZTcjM4dHBqSXBjUWhMRTFHOHBLOEV1c2g0azhsM3Z1SVQxbUdtYTBkcVJKaTZxLThqQ3lkaHgzd1kyLVJ4c0h4am9tYUd1SUVGZTVvTWNpUUFqZXFpbXp5TGVFbnc?oc=5",
+      "published": "2026-07-19T15:44:00.000Z",
+      "source": "The Motley Fool",
+      "st": 9,
+      "m": 2,
+      "a": "Constellation Energy, AI 데이터센터 전력 수요 급증에 대응해 블루 에너지(블루수소·가스) 분야 투자 결정 공개",
+      "w": "원자력 외 에너지원 다각화 투자 확정으로 장기 전력 공급 포트폴리오 확장 측면에서 펀더멘털 호재로 관측되나, 구체적 규모·일정 미확인 시 강도는 제한적.",
+      "mv": 3
+    },
     {
       "id": "macro_하이퍼스케일러_ai_capex_검증_1",
       "ticker": "MACRO",
@@ -216,6 +405,20 @@
       "mv": 3
     },
     {
+      "id": "twng",
+      "ticker": "089030",
+      "name": "테크윙",
+      "title": "기관 '원익IPS'·외인 '테크윙'·개인 '알테오젠' 1위 [주간 코스닥 순매수- 2026년 7월13일~7월16일] - 한국금융신문",
+      "link": "https://news.google.com/rss/articles/CBMifEFVX3lxTE9PenFySUpBcUFSQmg3bXhVUFN2LVFJN1ZVdGFpS0pJVEU2aUNXMlZLb1hZRTJ2Z044a2lDanBwMzhWMkRwWkJsNzVtdmhhY0QtUGRkQ0FSTVpxbFNEUHprRlZKcE8yMEhhQUw3Wm9jZGZqc2dTa3JpZ1EyV08?oc=5",
+      "published": "2026-07-19T03:00:00.000Z",
+      "source": "한국금융신문",
+      "st": 3,
+      "m": 1,
+      "a": "7월 13~16일 주간 코스닥 외국인 순매수 1위 테크윙 기록",
+      "w": "단기 외국인 수급 집중은 가격 시계 노이즈이며, 펀더멘털 변화와 무관하나 단기 주가 모멘텀에 긍정적 영향을 줄 수 있다는 관측.",
+      "mv": 3
+    },
+    {
       "id": "bneck_l4_pkg",
       "ticker": "MACRO",
       "name": "L4 · 패키징 캐파",
@@ -290,6 +493,20 @@
       "st": 3,
       "a": "중국 Kimi K3 출시 충격으로 반도체 칩 관련주 약세장 진입",
       "w": "L1 모델 레이어에서 중국산 고효율 모델이 연속 등장하며 서방 하이퍼스케일러의 GPU 집약적 capex 정당성에 의문을 제기, 상류 수요 전망 하향 압력 가중."
+    },
+    {
+      "id": "qcom",
+      "ticker": "QCOM",
+      "name": "Qualcomm",
+      "title": "Qualcomm (QCOM) Research Report - StockStory",
+      "link": "https://news.google.com/rss/articles/CBMiV0FVX3lxTE9wR3YtQ0F1THBRNzBIRV81bGVNamhFalZrVEZyNFJ6bEVwejItMXV3QndybnNJSFJDVkk2R0R6VGZaZm5uWUFPaVV6U2R2ODQyWDhOZmRXMA?oc=5",
+      "published": "2026-07-18T02:21:00.000Z",
+      "source": "StockStory",
+      "st": 3,
+      "m": 1,
+      "a": "StockStory, Qualcomm에 대한 리서치 리포트 발간",
+      "w": "리포트 내 구체적 투자의견·목표가 변경 여부 불명확하여 정보량이 제한적이며, 확인되는 범위에서 센티먼트 영향에 그침.",
+      "mv": 3
     },
     {
       "id": "asmpt",
@@ -438,19 +655,6 @@
       "w": "분쟁 지역화는 글로벌 에너지 공급망 불안정을 심화시켜 L8 발전·그리드 비용 상승과 AI 데이터센터 전력 조달 계획에 직접적 불확실성 추가."
     },
     {
-      "id": "macro_미_이란_지정학_리스크_1",
-      "ticker": "MACRO",
-      "name": "미·이란 지정학 리스크",
-      "ax": "energy",
-      "title": "Big-time oil price hikes loom in the third week of July as the United States and Iran battled over the vital Strait of Hormuz in the renewed Middle East war, the Department of Energy said. | via ANC 24/7 Link to full story in the comment section. - facebook.com",
-      "link": "https://news.google.com/rss/articles/CBMi1wFBVV95cUxOU3JoYzFMc3FRWnp0bVh5VHVRcXdVU29rUGc1QkRaVjFKZzFjaE5XWXZZUmdrME9QZnhRVjVIUnlZR0RIYzNaQzRGN040MENZRUh5b2I5SHV0Z25MbEN2cVNVR1FDa1VZVHptWkxiODBrNlBVSnlvcEVMVDBDcms3MG5vTTloTTd3VkxlYkhfbklYUlRqSXJWZXpQUGgzeTUzLWduOUEzeEl4VEN2RFY0Ql82dXY1UUJFWlB6d2VHaHU3Nk10QlkzMXpuMFlsaUNQZDVDR1g3Zw?oc=5",
-      "published": "2026-07-17T16:00:39.000Z",
-      "source": "facebook.com",
-      "st": 3,
-      "a": "미·이란 간 호르무즈 해협 분쟁 재점화로 미국 에너지부가 3주차 유가 급등 가능성을 경고",
-      "w": "호르무즈 봉쇄 리스크는 LNG·경유 가격 상승을 통해 L8 데이터센터 발전 비용을 압박하고, 에너지 가격 변동성 확대가 매크로 VIX 게이트를 상방으로 자극."
-    },
-    {
       "id": "besi",
       "ticker": "BESI",
       "name": "BE Semiconductor",
@@ -585,6 +789,20 @@
       "mv": 3
     },
     {
+      "id": "besi",
+      "ticker": "BESI",
+      "name": "BE Semiconductor",
+      "title": "BE Semiconductor raises long-term revenue, profitability targets on AI boost - MSN",
+      "link": "https://news.google.com/rss/articles/CBMixgFBVV95cUxNS04wbmZQZTdoV2ZTdTlOWTNIX0toVWRPUnlteGZNc0o1Q2t5X0haVzNyXzYyTjZsT3Zjbi1DSENHTHFlblgtalJYQk9fYUFnRVBvekpvX0EwM2tjV0VOSEJqOVdveXRTeXFQX2JOd1Q2Wm5OcUw1azcyX2ZiQTYta3Y2RmpCZ1gxZkdidzB6XzNVMHdPYjM1X0dadDZTU0JGUmdFTDhaR1k0THJXek9fSjd2Ml9mbmtzSU9iTlIwQjFyQU8xRHc?oc=5",
+      "published": "2026-07-17T08:49:44.000Z",
+      "source": "MSN",
+      "st": 3,
+      "m": 2,
+      "a": "BE Semiconductor, AI 수요 기반으로 장기 매출 및 수익성 목표 상향 조정 공개",
+      "w": "회사가 직접 제시한 장기 가이던스 상향으로, 하이브리드 본딩 수요 증가를 반영한 펀더멘털 호재이며 주가에 긍정적 영향 예상.",
+      "mv": 3
+    },
+    {
       "id": "tsla",
       "ticker": "TSLA",
       "name": "테슬라",
@@ -625,19 +843,6 @@
       "a": "Vertiv, 데이터센터 수요에 낙관적 전망 피력했으나 Q1 실적이 투자자 기대치 하회",
       "w": "가이던스는 긍정적이나 직전 분기 실적 미달이 확인된 상황으로, 펀더멘털상 혼재 신호이며 단기 투자심리에는 중립~소폭 부정적.",
       "mv": 3
-    },
-    {
-      "id": "macro_미_이란_지정학_리스크_1",
-      "ticker": "MACRO",
-      "name": "미·이란 지정학 리스크",
-      "ax": "energy",
-      "title": "Oil prices rise after Kuwait says Iran attacked water desalination and power plant - CNBC",
-      "link": "https://news.google.com/rss/articles/CBMib0FVX3lxTFBQMXN4ZXNiODlXYWFTakk0MmFJZC1COWRISlM5azVsYVZXWHNqV242eVFPdFNVcUtxODlVSndoTHdrdFlld29hS3JlMzVqR0tFSFNGanE1dXhNakxoTmwtZnRTRmFoNVhsVzhSNnVGTdIBdEFVX3lxTE1SMFRwN01INEh6b1BrbVU3MkI0amVfT1ltdldYd205SGtsSVFyVGh3NDNYQU0tcEdxeGZkb0lLNUJ2czJ4QXpXZXkwOUZWSWotamU4dmFoanM3cC1zcy1iVEFONUQtYzNzWnFLMzc5cDAwSHRz?oc=5",
-      "published": "2026-07-17T01:51:00.000Z",
-      "source": "CNBC",
-      "st": 3,
-      "a": "이란이 쿠웨이트 해수담수화·발전소를 공격했다는 쿠웨이트 발표 이후 국제 유가 상승",
-      "w": "중동 에너지 인프라 타격이 L8 전력 비용 상방 압력을 높이고 지정학 리스크 게이트(VIX 상승·원유 스파이크)를 통해 AI 인프라 전 레이어의 capex 불확실성을 동시에 자극"
     },
     {
       "id": "lite",
@@ -863,20 +1068,6 @@
       "mv": 3
     },
     {
-      "id": "besi",
-      "ticker": "BESI",
-      "name": "BE Semiconductor",
-      "title": "Taiwan Semiconductor Earnings: Lifting Fair Value Estimate After a Beat-and-Raise Quarter - Morningstar",
-      "link": "https://news.google.com/rss/articles/CBMiygFBVV95cUxNT1ZsTXQwNmsxRVA5b0ozVFlZNjdjTDZtZjI3Wk9USHJTQ3BCVWNveGhWNXRodkJxSGtOUHBWT0Y3UHZ0c0p1eUlrOEpGTG42ME1mU3VkdnhCX1plSjVvZm91V1VHNUExZjFUSmQ3WFBfM1J2a1Z5Y1RrMTZFSElaSGt5OVZjdXRfcEJINmRfVThwV04wUXE5UVZ2U3RTamxjbDIwbkp3dDRiQ0xhRHhnTWg2QTkxdjJUajFfZVRPcVRSXzRLU0xHZlZR?oc=5",
-      "published": "2026-07-16T16:18:39.000Z",
-      "source": "Morningstar",
-      "st": 3,
-      "m": 1,
-      "a": "BESI 추적 종목과 무관한 TSMC 실적 어닝비트·가이던스 상향 및 공정가치 추정 상향",
-      "w": "TSMC 실적 호조는 반도체 장비 수요 간접 호재이나 BESI 직접 수주·실적 변화는 아님.",
-      "mv": 3
-    },
-    {
       "id": "mrvl",
       "ticker": "MRVL",
       "name": "Marvell",
@@ -942,6 +1133,20 @@
       "m": 2,
       "a": "Blue Energy, Constellation Energy로부터 신형 원전 상업화·조선소 제조·프로젝트 파이낸싱 가속화를 위한 전략적 투자 유치 공식 발표",
       "w": "기사 4번과 동일 사건의 공식 보도로, 원전 신기술 투자 집행 확정은 CEG 장기 성장 포트폴리오에 긍정적 펀더멘털 신호.",
+      "mv": 3
+    },
+    {
+      "id": "vrt",
+      "ticker": "VRT",
+      "name": "Vertiv",
+      "title": "Vertiv rated Outperform in new coverage at Baird on data center demand - Seeking Alpha",
+      "link": "https://news.google.com/rss/articles/CBMirAFBVV95cUxOMGMzZjBPQ0RqWDZqTk9hQ0pMNFdoVnBOUWpsZnFvUG0zUlBmWWtPaF9pMzFPMGZpeTVMWGtzU2p3d1Z2ZERISWxVZ0YwMjhRTW5mbXZFdk92RG1XbGNBVWpsLUxtOGlkcXUtSC1WdVF5blJrd0toY2YzdjNCSzRHQUszOUFMTzdmRGN3QlpQdmtYWFRVMUdEWktZemZndlRJbGcxTE4tcDUxNzNB?oc=5",
+      "published": "2026-07-16T14:17:35.000Z",
+      "source": "Seeking Alpha",
+      "st": 3,
+      "m": 1,
+      "a": "Baird, Vertiv에 대해 데이터센터 수요 근거로 신규 커버리지 개시 및 Outperform 의견 부여",
+      "w": "신규 커버리지 개시 및 긍정 투자의견 제시는 수급·센티먼트에 단기 호재이나, 실적·수주 확정 없는 애널리스트 코멘트에 그침.",
       "mv": 3
     },
     {
@@ -1260,20 +1465,6 @@
       "mv": 3
     },
     {
-      "id": "sem",
-      "ticker": "009150",
-      "name": "삼성전기",
-      "title": "IBK증권, 삼성전기 목표가↑…\"폭락장에도 외인 지분율 확대중\" - v.daum.net",
-      "link": "https://news.google.com/rss/articles/CBMiRkFVX3lxTFA5T0xtWkhtTjA5dVZYMV9oQ2hlSk9VTE5DVDZlQzN1SWU1Nm5VNnZiRzJ2eFhtM2FVdkgtSk1JeHZ5ZkdWZWc?oc=5",
-      "published": "2026-07-15T23:16:38.000Z",
-      "source": "v.daum.net",
-      "st": 3,
-      "m": 1,
-      "a": "IBK증권, 삼성전기 목표주가 상향·폭락장에서도 외국인 지분율 확대 흐름 주목",
-      "w": "목표가 상향과 외국인 순매수 지속은 단기 수급·센티먼트에 긍정적이나 펀더멘털 확정 사실은 아니어서 가격 시계 이벤트.",
-      "mv": 3
-    },
-    {
       "id": "amd",
       "ticker": "AMD",
       "name": "AMD",
@@ -1327,20 +1518,6 @@
       "m": 1,
       "a": "법무법인 Kaplan Fox, Cerebras Systems 투자자 대상 증권 조사 착수 경고 공지",
       "w": "증권 조사 착수는 법적·규제 리스크 신호로 단기 주가 하방 압박 요인이나, 조사 결과 미확정 단계의 관측.",
-      "mv": 3
-    },
-    {
-      "id": "qcom",
-      "ticker": "QCOM",
-      "name": "Qualcomm",
-      "title": "Qualcomm Earnings Preview: A Lot Of Growth Potential Not Baked In Yet (Rating Upgrade) - Seeking Alpha",
-      "link": "https://news.google.com/rss/articles/CBMiwgFBVV95cUxOOWVCQlB6VmNWS0NudXBHRDZqdzhnaHRDNWFJelZWQ0p0Qk9SWVdLSDhMR3Y4OUZBMWM0Tm0wMXdJRzNZQnBPakFXdTE0cmFWOW9HdV83Z0pZWHYyNVBoSng4OG5HeVJHUFRpTUVGSFctX2d3ak1kQ1Yzc2otTnN4Sk1nbDZZbDlsWGlEbnV0WExrSDh5cGRxSDdFU3NMYzZrU3VqdHVYdlQ4VUVHZXZoQlp0cUltMWdpVXBIVDVPblVEZw?oc=5",
-      "published": "2026-07-15T16:52:00.000Z",
-      "source": "Seeking Alpha",
-      "st": 3,
-      "m": 1,
-      "a": "Seeking Alpha, 퀄컴 실적 발표 앞두고 성장 잠재력 저평가 주장하며 투자의견 상향",
-      "w": "애널리스트 등급 상향은 단기 수급·센티먼트에 긍정적이나, 실적 확인 전 관측 수준의 가격 시계 이벤트.",
       "mv": 3
     },
     {
@@ -1509,20 +1686,6 @@
       "mv": 3
     },
     {
-      "id": "ddk",
-      "ticker": "353200",
-      "name": "대덕전자",
-      "title": "대덕전자 투자분석 2026. 07. 15 - 주달",
-      "link": "https://news.google.com/rss/articles/CBMic0FVX3lxTE5KWnQzemtuQXc4U0pxc0IxanlwWFVVWGQ0MTE3SWNhM01SZkhnZkZfeW9WeFE5ckhLQjBBX3RPUVRCR0YzUzRfVlAxWE83UUs2amVtY2NyRUswOWtkWTBjTEdfM1NwVmlXTFIzbHRDajhCNWs?oc=5",
-      "published": "2026-07-15T09:13:13.000Z",
-      "source": "주달",
-      "st": 3,
-      "m": 1,
-      "a": "대덕전자 투자 분석 리포트 게재 (2026.07.15 기준)",
-      "w": "구체적 목표가·투자의견 변경 내용 미확인 상태로 추가 확인 전에는 가격 시계 관련 정보로만 처리.",
-      "mv": 3
-    },
-    {
       "id": "cbrs",
       "ticker": "CBRS",
       "name": "Cerebras",
@@ -1548,20 +1711,6 @@
       "m": 1,
       "a": "D램·낸드에 이어 HBM 부문도 삼성전자의 글로벌 1위 복귀 전망 제기",
       "w": "복수 매체의 동일 논조 반복은 센티먼트 개선 효과는 있으나, 구체적 수주·고객 확보 확정 없이 관측에 그침.",
-      "mv": 3
-    },
-    {
-      "id": "sec",
-      "ticker": "005930",
-      "name": "삼성전자",
-      "title": "상장 앞둔 中 CXMT… 전문가 “삼성·SK와 격차 크지만 HBM 잠재적 위협” - 아시아투데이",
-      "link": "https://news.google.com/rss/articles/CBMibkFVX3lxTE9wRHZuWE4wcklibU5WXzQtNVZEdnlVbk5peXRxQ3laSkN2OGotdVFOZC1pdGFPZVFMTFNqMGJrWXFMNXVSemtCVFk1VTh4VzlaNm9fYVRkbFlCalZSYlNiRThUN29EWDFaVFRXYzJB?oc=5",
-      "published": "2026-07-15T08:50:38.000Z",
-      "source": "아시아투데이",
-      "st": 3,
-      "m": 1,
-      "a": "중국 CXMT 상장 앞두고 전문가들이 삼성·SK 대비 격차는 있으나 HBM 잠재 위협으로 평가",
-      "w": "중장기 HBM 경쟁 심화 리스크 관측으로 삼성전자 HBM 마진·점유율에 잠재적 악재이나 현재 확정 사실 아님.",
       "mv": 3
     },
     {
@@ -1776,20 +1925,6 @@
       "w": "투자 슬럼프가 L6(서버·랙 조립)·L7(데이터센터 건설) 수요의 중국 내 회복 지연으로 이어질 수 있다는 관측."
     },
     {
-      "id": "ddk",
-      "ticker": "353200",
-      "name": "대덕전자",
-      "title": "[리포트 브리핑]대덕전자, '낮아진 주가, 높아진 실적' 목표가 230,000원 - 다올투자증권 - 뉴스핌",
-      "link": "https://news.google.com/rss/articles/CBMiXEFVX3lxTE9hVC1vZ21pQ2U1d3dCRTIyV3JObGtEcnhpSHoxZDM0TWpaMi1CRkZJTUx5ajlFbTFuUy0wT3o2QkJPd2pfeDVhaFhuMVJtYU1PZllPRlN1LWFKMFBY?oc=5",
-      "published": "2026-07-15T01:49:00.000Z",
-      "source": "뉴스핌",
-      "st": 3,
-      "m": 1,
-      "a": "다올투자증권, 대덕전자 목표주가 230,000원 제시·주가 저평가 및 실적 개선 동시 부각",
-      "w": "목표가 신규 제시와 실적 개선 전망 병기로 밸류에이션 재평가 기대 형성—단기 센티먼트 긍정적이나 확정 수치 아님.",
-      "mv": 3
-    },
-    {
       "id": "tsla",
       "ticker": "TSLA",
       "name": "테슬라",
@@ -1804,17 +1939,17 @@
       "mv": 3
     },
     {
-      "id": "ceg",
-      "ticker": "CEG",
-      "name": "Constellation",
-      "title": "GAIN vouchers go to Constellation, Nano Nuclear, and NuCube -- ANS / Nuclear Newswire - American Nuclear Society -- ANS",
-      "link": "https://news.google.com/rss/articles/CBMinAFBVV95cUxNa0xDS1ZZR0N6UDdoWkRHeWlGTGRkd2VmWl9sZzg1T3E4UjJQQ0RMQ1lzZExSSEZnVV9HUm4tSXhWYXQxY2VnQW1JMTFWVFhPQ0dWZ1Bva3ZVa21mZmdja3p3WXp5c2VNSC1zY0RhSG1HQmdZYlhFVDl5ZVJLVFlKTGpXSmZ3Y2NJcXRxaHAzdU5pVGthWEFEVWJhU1U?oc=5",
-      "published": "2026-07-14T23:37:03.000Z",
-      "source": "American Nuclear Society -- ANS",
+      "id": "aph",
+      "ticker": "APH",
+      "name": "암페놀",
+      "title": "Amphenol (APH) Stock Fair Value Edges Higher After AI Demand And Analyst Target Changes - Yahoo Finance",
+      "link": "https://news.google.com/rss/articles/CBMimgFBVV95cUxQRWRfTU00MVdHTkdlZUxDYWhDaWN6X04tUmJiODZQemZ4T21kTjAwY3oxUFE1WWR0ZlRXQnVIMFdTQUxoQ1ZIeGItNDlGU3NpY0RtX0xnWFlnUGZhTE8zVDB2bVJ6dmFBSzhBWGZQTTZabFF4SkdGcmVnc3NPTzhLSk13ejVfTTZpM3d3WWR3UE00VDhPYVN5SGFn?oc=5",
+      "published": "2026-07-14T20:10:41.000Z",
+      "source": "Yahoo Finance",
       "st": 3,
-      "m": 2,
-      "a": "미국 에너지부 GAIN 바우처, Constellation·Nano Nuclear·NuCube 3사에 지급 결정",
-      "w": "정부 지원 바우처 수혜는 Constellation의 차세대 원자력 개발 비용 경감 호재이나 규모·금액 미확정으로 영향 제한적.",
+      "m": 1,
+      "a": "Amphenol, AI 수요 및 애널리스트 목표가 변경 반영 후 적정주가 소폭 상향 산출",
+      "w": "애널리스트 목표가 변경에 따른 수급·센티먼트 영향이 주이며, 펀더멘털 확정 사실이 수반되지 않아 가격 시계 노이즈에 해당.",
       "mv": 3
     },
     {
@@ -1829,6 +1964,20 @@
       "m": 1,
       "a": "Stifel, 광부품 섹터 내 Lumentum 선호 의견 제시",
       "w": "Stifel의 섹터 내 선호 종목 지정은 단기 수급·센티먼트에 긍정적이나, 목표가 변경 수반 여부 미확인으로 m=1 수준.",
+      "mv": 3
+    },
+    {
+      "id": "pltr",
+      "ticker": "PLTR",
+      "name": "Palantir",
+      "title": "SBA enters ‘new phase’ with Palantir on anti-fraud efforts - FedScoop",
+      "link": "https://news.google.com/rss/articles/CBMiggFBVV95cUxPT3Fyc2FRMUZmalhoN1RWcUdPMkNNQzVTRWRBQVdPUFZwTGF3MnhEbk95WXFtUWF5dnVtMzNQMmExeVpCZEdQaGZ6Z3VfU3NzaTdIQndFNUh3bDB0Ri1pZW00LXoxWV9JQ1pob19BZlhVdXhtQm9zN3k2MTFlM0g3LW1B?oc=5",
+      "published": "2026-07-14T19:23:08.000Z",
+      "source": "FedScoop",
+      "st": 3,
+      "m": 2,
+      "a": "미국 SBA(중소기업청), Palantir와 사기 방지 관련 협력 '새 단계' 진입 공식화",
+      "w": "연방정부 기관과의 계약 심화·확장 확정은 정부 부문 매출 확대 가시성을 높이는 펀더멘털 호재로 관측.",
       "mv": 3
     },
     {
@@ -2022,20 +2171,6 @@
       "mv": 3
     },
     {
-      "id": "twng",
-      "ticker": "089030",
-      "name": "테크윙",
-      "title": "[IB토마토]대신PE 발목 잡은 테크윙 EB, '리픽싱 제로' 부메랑 - 뉴스토마토",
-      "link": "https://news.google.com/rss/articles/CBMiYEFVX3lxTE5zS18yeFlxcDJudHd5cEdqRTV4bTBJMURvZ0NoOFlaWmZ6Wjd1dEViR3dJMkY5ZkR1MHFZbnQzckZzNDc0QXFpWnZuWTYxR1dzV1VhcFYzaGdXV0pHM0QyXw?oc=5",
-      "published": "2026-07-13T21:00:00.000Z",
-      "source": "뉴스토마토",
-      "st": 3,
-      "m": 1,
-      "a": "대신프라이빗에쿼티가 보유한 테크윙 교환사채(EB) 리픽싱 제로 조항이 투자 회수에 부메랑으로 작용",
-      "w": "EB 리픽싱 제한으로 대신PE 엑시트 부담 가중—오버행 우려로 수급 측면 소폭 부정적 시그널이라는 관측.",
-      "mv": 3
-    },
-    {
       "id": "sndk",
       "ticker": "SNDK",
       "name": "SanDisk",
@@ -2223,34 +2358,6 @@
       "mv": 3
     },
     {
-      "id": "twng",
-      "ticker": "089030",
-      "name": "테크윙",
-      "title": "테크윙 2분기 영업익 125억…전년比 96% '껑충' - 한국신용신문",
-      "link": "https://news.google.com/rss/articles/CBMiakFVX3lxTE9RZE84ekV0UjNKcGRFMVRuQUdjRW92UkxJWkZyNGpKRl9lMnhWc01zT3d0ZW41VGdvUUx6RUs5M3JyZ01sZHhrWjRBV3dsUEg4dkloNmF1YnNEZnROcW5ZcEo4WnAwWTN4dUE?oc=5",
-      "published": "2026-07-13T06:14:00.000Z",
-      "source": "한국신용신문",
-      "st": 3,
-      "m": 2,
-      "a": "테크윙 2분기 영업이익 125억 원, 전년 동기 대비 96% 급증 잠정 실적 발표",
-      "w": "HBM 테스트 장비 수요 본격화로 영업이익이 컨센서스 대비 큰 폭 상회한 어닝 서프라이즈로, 펀더멘털 관점에서 강한 호재.",
-      "mv": 3
-    },
-    {
-      "id": "twng",
-      "ticker": "089030",
-      "name": "테크윙",
-      "title": "HBM 병목 해결사 통했다…테크윙, 2분기 '깜짝 실적' - 경제타임스",
-      "link": "https://news.google.com/rss/articles/CBMiU0FVX3lxTE1IN2xMaEpZVjJfOUFiOWlxS3pXUVZrNlBiWkt0dXk0RzJ0UDNKNUU2dmp4NkhPRUgySVQ4S2tRUEpqcE1ZZjRkS2lMZDlFRXdPMlhV?oc=5",
-      "published": "2026-07-13T06:13:58.000Z",
-      "source": "경제타임스",
-      "st": 3,
-      "m": 2,
-      "a": "테크윙 2분기 HBM 핸들러 수요 호조로 깜짝 실적 달성",
-      "w": "HBM 병목 해소 핸들러 수요 증가가 실적으로 확인되어 HBM 장비 싸이클 수혜 지속 가능성을 뒷받침하는 강한 펀더멘털 호재.",
-      "mv": 3
-    },
-    {
       "id": "alab",
       "ticker": "ALAB",
       "name": "Astera Labs",
@@ -2276,20 +2383,6 @@
       "m": 1,
       "a": "CNBC, 월가 애널리스트들이 장기 보유 유망주로 Marvell 등 3개 종목 선정 보도",
       "w": "매수 추천·베스트 리스트 성격의 센티먼트 기사로 확정 펀더멘털 변화 없음.",
-      "mv": 3
-    },
-    {
-      "id": "vrt",
-      "ticker": "VRT",
-      "name": "Vertiv",
-      "title": "How Vertiv (VRT) Is Expanding Its AI Data Center Cooling Platform Through the ThermoKey Acquisition - Yahoo Finance",
-      "link": "https://news.google.com/rss/articles/CBMilwFBVV95cUxOTzYwV181TGJtMEZZTWxWdy1Dd2xNUmU1OTFMN3ozdjNRM0VMdWxaRlUzQ251czhESExaNnZQZmhCbGhnQmNEWkNadXN2VHVLajlVRG80SFVMVnNMZHVsSmNNM0pnSTh0NW9YenE1V1JkXy03ckNEckFCWXpNdXliUHk1dmFpbHBMeE9OQkcyTzJZVGdnTmtZ?oc=5",
-      "published": "2026-07-11T19:59:01.000Z",
-      "source": "Yahoo Finance",
-      "a": "Vertiv, ThermoKey 인수를 통한 AI 데이터센터 냉각 플랫폼 확장",
-      "w": "냉각 솔루션 포트폴리오 강화라는 펀더멘털 호재이나, 인수 규모·재무 영향 미공개로 실질 강도는 제한적이라는 관측.",
-      "m": 2,
-      "st": 3,
       "mv": 3
     },
     {
@@ -2466,20 +2559,6 @@
       "w": "공공 계약 수주 차질 가능성은 단기 펀더멘털 리스크 요인이나 PLTR의 정부 계약 다변화 전략상 영향 강도는 제한적이라는 관측.",
       "m": 2,
       "st": 1,
-      "mv": 3
-    },
-    {
-      "id": "pltr",
-      "ticker": "PLTR",
-      "name": "Palantir",
-      "title": "MPs urge Labour to ditch £330m Palantir software contract with NHS - The Guardian",
-      "link": "https://news.google.com/rss/articles/CBMitAFBVV95cUxQcHFYVk5rQlRUU2NIVm5GR3FjUXBXVGNrOC1PSHdSRFhzVHNyNTRjWW5LZkRNTGNLMkQtazlUZWpnMmpJcEFPVDNrdjhMVDVydHhmMFVzY3dRTDFsR2JXWmZkVE5jRHBROEdLQmtOYTkyc3Eydmd2N1h0eW9LN2tRY1N3N2VOYU1MckEyQklFTzBHMWRuRm5mRFJrSGJhV2E1ZTc0UUZZTktSaFVYSEFiUnI2czk?oc=5",
-      "published": "2026-07-09T12:16:00.000Z",
-      "source": "The Guardian",
-      "st": 3,
-      "m": 2,
-      "a": "영국 의원들, NHS와 체결된 3억 3000만 파운드 규모 Palantir 소프트웨어 계약 철회 촉구",
-      "w": "정부 계약 철회 압력은 Palantir 공공부문 수주 리스크 현실화 가능성을 높이는 펀더멘털 악재 시그널로, 계약 유지 여부 추이 모니터링 필요.",
       "mv": 3
     },
     {
