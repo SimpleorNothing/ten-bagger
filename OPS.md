@@ -1,4 +1,4 @@
-**최종 갱신: 2026-07-20 16:20 (KST)**
+**최종 갱신: 2026-07-20 22:10 (KST)**
 
 # OPS — 알파맵 운영 가이드
 
@@ -149,6 +149,8 @@
 | 인사이트 자가 마운트 | 자동(런타임) | 페이지 로딩 시 | `insight.js`의 `mount()` 함수가 `#v-insight` 탭(**01 시장 모니터링 뒤·03 전문가 원탁 앞에 주입** · 정적 nav 무편집 런타임 재구성 · 2026-07-18) + 헤더 배지 + `signal_log` 섹션을 런타임에 주입. **채택 관점 반영 스트립(`insStripMarket`/`insStripCal`→01 · `insStripDec`→**04** · 2026-07-18 05→04 이동, 로드맵 `#dsAisd` 아래·강물 탐색 `.vhead` 위)도 `mount()`가 각 뷰에 앵커링**(`insStripThread`는 2026-07-18 #424 「02 박스1 삭제」로 앵커 제거 — `strip()`은 `#insStripThread` 부재 시 no-op) — 매크로 관점 스트립은 01 「관련 기사」 섹션(`#mktMacroNews` 앞)에 붙는다(2026-07-18 상단→이동, §01 관련 기사 행) |
 
 > **관점은 채택으로 끝나지 않는다.** `review`(점검일)가 강제 부여돼 도래 시 「점검 필요」로 재부상하고, §0-5 트리아지에서 발동/만료/유지로 처리된다. narrative는 여전히 숫자 파일을 못 바꾼다 — **발동 = 05 리밸런싱 후보로 올릴 뿐**이고, 숫자 변경은 §1 트리거(실적 비트·가이던스 상향·확정 수주) 별도.
+
+> **02 헤더·인테이크 표시 정리(2026-07-20):** 전 페이지 공통 `#asofBox`(시세/정보 스탬프)는 **02에서만 숨긴다** — `insight.js mount()`의 nav 클릭 리스너가 insight 탭일 때 `#asofBox`를 `display:none`으로 덮어쓴다(자가 마운트라 index.html 탭 핸들러보다 **뒤에 등록** → 나중 값이 이김 · **index.html 무편집** · `#asofBox`가 DOM에서 `#v-insight`보다 **앞**이라 CSS `~`도 불가). 우상단 `updIns`(인사이트 전용 update 스탬프)는 유지. 뷰 설명(`.vsub`)은 `.vhead`에서 빼 **뷰 맨 아래**(`#insSigRest` 뒤·`.ins-wrap` 막내)로 이동(`GUIDE_HTML` 분리·`border-top var(--line)` 구분). 인테이크 3입력(`insUrl`·`insText`·`insDrop`)의 예시·힌트 placeholder는 최소 라벨만 남기고 삭제. `insight.js`만 편집(index.html·insight.css 무편집) · 신규 :root 토큰 0. SimpleorNothing 지시.
 
 ### 03 전문가 원탁 (`v-council`)
 
@@ -346,6 +348,8 @@
 ---
 
 ## 9. 갱신 이력
+
+- 2026-07-20 22:10 · **02 인사이트 찾기 헤더 정리 — 시세/정보 스탬프 02 숨김·설명 문단 하단 이동·인테이크 placeholder 예시 삭제.** SimpleorNothing 지시(스크린샷 3점: ①업데이트 시점 삭제 ②설명 맨 아래로 ③예시·힌트 삭제). ①전 페이지 공통 `#asofBox`(시세/정보 스탬프)를 **02에서만 숨김** — `insight.js mount()` nav 리스너가 insight 탭일 때만 `#asofBox`를 `display:none`으로 덮어씀(자가 마운트 = index.html 탭 핸들러 뒤 등록 → 나중 값 우선 · **index.html 무편집** · `#asofBox`가 `#v-insight`보다 **앞**이라 CSS `~` 불가). 우상단 `updIns`는 유지(운영자 확인 = 시세/정보 블록 한정). ②뷰 설명 `.vsub`를 `.vhead`에서 빼 **뷰 맨 아래**(`#insSigRest` 뒤·`.ins-wrap` 막내)로 이동(`GUIDE_HTML` 분리·`border-top:1px solid var(--line)` 구분·문단 내용 불변). ③인테이크 URL·본문·드롭 안내 placeholder의 예시·힌트를 최소 라벨(「URL (선택)」·「본문·스크립트를 붙여넣으세요」·「PDF·TXT·이미지 파일 끌어놓기 또는 클릭」)로 축소. `insight.js`만 편집(index.html·insight.css 무편집) · **신규 :root 토큰 0** → `check-docs` 통과(토큰 24종 무변)·`node --check` 통과. narrative≠numbers — 표시 방식·위치만, 숫자·판단 파일 불변. §3 02 인벤토리 주석 · STYLE_GUIDE §9 동반.
 
 - 2026-07-20 22:02 · **06 투자 캘린더 「지나간 일정 접기」 복원 — `foldPastCal()` 재배선.** SimpleorNothing 지시. 06 탭 삭제 때 호출부가 사라져 미동작이던 것을 `.cal-jump`가 `#v-cal` 열 때 호출(멱등). 과거 행 기본 접힘·「지나간 일정 N건」 바 클릭 펼침. 숫자·데이터 불변(표시만). STYLE_GUIDE §갱신이력 동반 · check-docs·Playwright 통과.
 

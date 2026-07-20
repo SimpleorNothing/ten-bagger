@@ -746,20 +746,22 @@ window.INSIGHT=(function(){
 
  /* --- 자가 마운트 --- index.html 은 <script src="/insight.js"> 한 줄만 추가하고,
     탭·섹션·반영 스트립 앵커는 여기서 DOM 으로 생성한다(대용량 index.html 패치 최소화). */
- var SECTION_HTML='<div class="vhead" style="position:relative"><div class="vkick">Insight · 인사이트 찾기</div>'+
-  '<h1 class="vtitle">자료에서 <em>유의미한 것</em>만 — 그리고 선별 반영</h1>'+
-  '<span class="updstamp abs" id="updIns"></span>'+
-  '<p class="vsub">증권사 리포트·기사·유튜브(링크 또는 스크립트)를 넣으면 8레이어·단계 프레임으로 관점과 정보를 구조화해 뽑는다. '+
+ /* vsub 설명 문단 = 뷰 맨 아래로(SimpleorNothing 지시 2026-07-20) · placeholder 예시·힌트 제거(동일 지시) */
+ var GUIDE_HTML='<p class="vsub" style="border-top:1px solid var(--line);margin-top:24px;padding-top:16px">'+
+  '증권사 리포트·기사·유튜브(링크 또는 스크립트)를 넣으면 8레이어·단계 프레임으로 관점과 정보를 구조화해 뽑는다. '+
   '<b>뽑는 것과 반영하는 것은 분리한다</b> — 체크해 채택한 관점만 다른 메뉴에 뜬다. 숫자 파일(실적·판단·단계·비중)은 자동으로 바뀌지 않는다(narrative ≠ numbers). '+
   '채택 관점은 <b>등급</b>(관찰→후보→지지→확립→확신)을 갖고, 다른 자료에서 유사한 내용이 보강될수록 자동 승격된다. '+
   '<b>시그널 로그</b>는 관련 관점 밑에 붙어 그 관점의 누적 컨텍스트가 된다 — 티커가 겹치면 종목 기준, 없으면 레이어 기준으로 매칭된다. '+
-  '채택 관점은 <b>라이프사이클</b>(전제·발동조건·폐기트리거·점검일)을 달고, 점검일이 도래하면 <b>점검 필요</b>로 재부상해 발동/만료/유지를 트리아지한다.</p></div>'+
+  '채택 관점은 <b>라이프사이클</b>(전제·발동조건·폐기트리거·점검일)을 달고, 점검일이 도래하면 <b>점검 필요</b>로 재부상해 발동/만료/유지를 트리아지한다.</p>';
+ var SECTION_HTML='<div class="vhead" style="position:relative"><div class="vkick">Insight · 인사이트 찾기</div>'+
+  '<h1 class="vtitle">자료에서 <em>유의미한 것</em>만 — 그리고 선별 반영</h1>'+
+  '<span class="updstamp abs" id="updIns"></span></div>'+
   '<div class="ins-wrap">'+
    '<div class="ins-card">'+
-    '<div class="ins-row"><input class="ins-in" id="insUrl" placeholder="URL (선택 — 유튜브 링크는 Gemini가 영상을 인식해 스크립트를 뽑고, 그 외 URL은 본문이 없으면 웹검색해 시도)"></div>'+
-    '<textarea class="ins-ta" id="insText" style="margin-top:8px" placeholder="본문·스크립트를 붙여넣으세요. 캡처 이미지를 붙여넣으면(Ctrl/⌘+V) 글자를 인식해 채웁니다. 종류·출처·제목은 내용에서 자동 판별합니다. 유튜브는 위 URL 칸에 링크만 넣으면 영상 스크립트를 자동 인식하며, 자막 스크립트를 직접 붙여넣으면 더 정확합니다."></textarea>'+
+    '<div class="ins-row"><input class="ins-in" id="insUrl" placeholder="URL (선택)"></div>'+
+    '<textarea class="ins-ta" id="insText" style="margin-top:8px" placeholder="본문·스크립트를 붙여넣으세요"></textarea>'+
     '<input type="file" id="insFile" accept=".pdf,.txt,.md,.csv,.json,.png,.jpg,.jpeg,.gif,.bmp,.webp,image/*" multiple hidden>'+
-    '<div class="ins-drop" id="insDrop" role="button" tabindex="0">PDF·TXT·이미지 파일을 끌어다 놓거나 클릭해 선택 · 캡처 이미지는 붙여넣기(Ctrl/⌘+V)만 해도 글자를 인식합니다</div>'+
+    '<div class="ins-drop" id="insDrop" role="button" tabindex="0">PDF·TXT·이미지 파일 끌어놓기 또는 클릭</div>'+
     '<div class="ins-bar">'+
      '<button class="ins-btn primary" id="insRun">관점 뽑기</button>'+
      '<button class="ins-btn" id="insClear">비우기</button>'+
@@ -777,6 +779,7 @@ window.INSIGHT=(function(){
      '</select>'+
     '</div><div class="ins-gboard" id="insGradeBoard"></div><div id="insList"></div></div>'+
    '<div id="insSigRest"></div>'+
+   GUIDE_HTML+
   '</div>';
  function el(tag,cls,id){var e=document.createElement(tag);if(cls)e.className=cls;if(id)e.id=id;return e;}
  function anchor(id,parentSel,mode,refSel){
@@ -812,8 +815,13 @@ window.INSIGHT=(function(){
    Array.prototype.forEach.call(nav.querySelectorAll('.tab'),function(t,i){
     var n=t.querySelector('.n');if(n)n.textContent=(i+1<10?'0':'')+(i+1);});
    nav.addEventListener('click',function(e){
-    var t=e.target.closest?e.target.closest('.tab'):null;
-    if(t&&t.getAttribute('data-v')==='insight')renderAll();});
+    var t=e.target.closest?e.target.closest('.tab'):null;if(!t)return;
+    var on=t.getAttribute('data-v')==='insight';
+    /* 02 인사이트 찾기에선 전 페이지 공통 #asofBox(시세/정보 스탬프)를 숨긴다(SimpleorNothing 지시 2026-07-20).
+       index.html 탭 핸들러가 비 memo/council 뷰엔 asofBox display=''를 주지만, 이 리스너는 자가 마운트라
+       나중에 등록돼 insight일 때만 none으로 덮어쓴다 → index.html 무편집(#asofBox가 #v-insight보다 앞이라 CSS `~`도 불가). */
+    var ab=document.getElementById('asofBox');if(ab&&on)ab.style.display='none';
+    if(on)renderAll();});
   }
   var main=document.querySelector('main.wrap');
   if(main&&!document.getElementById('v-insight')){
