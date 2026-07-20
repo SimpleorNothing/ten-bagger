@@ -620,14 +620,25 @@ window.INSIGHT=(function(){
  function renderAll(){recomputeGrades();SIGCTX=sigCtx();renderLevel();renderGradeBoard();renderList();renderSigRest();renderStrips();stamp();}
 
  /* --- 파일(PDF·TXT) → 텍스트 --- */
+ /* pdf.js 버전·CDN 경로를 한 곳으로 묶는다 — 로더 스크립트·워커·cMap 이 같은 릴리스를 쓰도록.
+    cMap = 한글 CID 폰트(Adobe-Korea1 등, ToUnicode 없음)를 유니코드로 디코드하는 번들 테이블.
+    이게 없으면 pdf.js 가 CID 한글을 통째로 못 읽어 빈 텍스트를 준다 → 실글자 0 판정 →
+    불필요한 OCR 폴백 → 거의 백지로 렌더된 페이지를 OCR 해 쓰레기 텍스트가 나온다.
+    실측(미래에셋 리포트 · KoPubDotum CID · Identity-H · 임베드 · ToUnicode 없음):
+    cMap 미지정 → 실글자 0(OCR 폴백) / cMap 지정 → 4,100 실글자 클린 추출(OCR 미발동).
+    pdf.min.js·worker 를 이미 같은 cdnjs 에서 받으므로 CDN 의존은 새로 생기지 않는다 —
+    cMap 이 안 받아지면 딱 수정 전 동작(OCR 폴백)으로 되돌아갈 뿐 더 나빠지지 않는다. */
+ var PDFJS_VER='3.11.174';
+ var PDFJS_CDN='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/'+PDFJS_VER;
+ var PDFJS_CMAP=PDFJS_CDN+'/cmaps/';
  var _pdfP=null;
  function pdfjs(){
   if(window.pdfjsLib)return Promise.resolve(window.pdfjsLib);
   if(_pdfP)return _pdfP;
   _pdfP=new Promise(function(res,rej){
    var s=document.createElement('script');
-   s.src='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
-   s.onload=function(){try{window.pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';}catch(e){}res(window.pdfjsLib);};
+   s.src=PDFJS_CDN+'/pdf.min.js';
+   s.onload=function(){try{window.pdfjsLib.GlobalWorkerOptions.workerSrc=PDFJS_CDN+'/pdf.worker.min.js';}catch(e){}res(window.pdfjsLib);};
    s.onerror=function(){_pdfP=null;rej(new Error('pdf.js 로드 실패'));};
    document.head.appendChild(s);});
   return _pdfP;
@@ -640,7 +651,10 @@ window.INSIGHT=(function(){
  async function pdfText(file){
   var lib=await pdfjs();
   var buf=await file.arrayBuffer();
-  var doc=await lib.getDocument({data:buf}).promise;
+  /* cMapUrl+cMapPacked = 한글 CID(ToUnicode 없음) 정상 디코드 → 텍스트 레이어 있는
+     증권사 리포트가 OCR 폴백으로 새지 않고 바로 추출된다. 스캔본·ToUnicode 파손 PDF 만
+     실글자 판정에서 걸러 OCR 로 넘어간다(아래 realLetters 컷). */
+  var doc=await lib.getDocument({data:buf, cMapUrl:PDFJS_CMAP, cMapPacked:true}).promise;
   var out=[],N=Math.min(doc.numPages,40);
   for(var i=1;i<=N;i++){
    var pg=await doc.getPage(i);
