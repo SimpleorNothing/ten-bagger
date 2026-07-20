@@ -143,6 +143,50 @@ var CSS=`#dsAisd{margin:2px 0 38px}
 #dsAisd .ds-steel{border-left:2px solid var(--line2);padding:3px 0 3px 13px;color:var(--dim);font-size:14px;margin-top:8px;line-height:1.55}
 #dsAisd .ds-steel b{color:var(--txt)}
 #dsAisd .ds-fn{font-family:var(--mono);font-size:12px;color:var(--faint);margin-top:8px;text-align:right}
+/* 밸류체인 헤더 우측 「L1↔L2 관계도」 버튼 + 모달 팝업 (신규 :root 토큰 0 · ds- 스코프 · 면 3px/부표 20px) */
+#dsAisd .ds-mapbtn{margin-left:auto;font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.03em;color:var(--txt);background:var(--panel2);border:1px solid var(--line2);border-radius:3px;padding:5px 11px;cursor:pointer;transition:border-color .12s,box-shadow .12s;white-space:nowrap}
+#dsAisd .ds-mapbtn:hover{border-color:var(--dawn);box-shadow:0 4px 14px rgba(22,36,45,.06)}
+#dsAisd .ds-mapbtn:focus-visible{outline:2px solid var(--st-accel);outline-offset:2px}
+.ds-mov{position:fixed;inset:0;background:rgba(29,32,35,.55);display:none;align-items:center;justify-content:center;z-index:9000;padding:20px}
+.ds-mov.on{display:flex}
+.ds-msheet{background:var(--panel);border:1px solid var(--line2);border-radius:3px;max-width:1020px;width:100%;max-height:92vh;overflow:auto;padding:20px 22px;box-shadow:0 20px 60px rgba(22,36,45,.28);color:var(--txt)}
+.ds-mhd{display:flex;align-items:flex-start;gap:12px;margin-bottom:4px}
+.ds-mkick{font-family:var(--mono);font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:var(--dim)}
+.ds-mtitle{font-size:20px;font-weight:700;letter-spacing:-.3px;margin:2px 0 0}
+.ds-mtitle em{font-style:normal;color:var(--dawn)}
+.ds-mx{margin-left:auto;flex:0 0 auto;width:32px;height:32px;border-radius:3px;border:1px solid var(--line2);background:var(--panel2);color:var(--txt);font-size:17px;line-height:1;cursor:pointer}
+.ds-mx:hover{border-color:var(--dawn)}
+.ds-mx:focus-visible{outline:2px solid var(--st-accel);outline-offset:2px}
+.ds-msub{font-size:14px;color:var(--dim);margin:6px 0 14px;line-height:1.55;max-width:900px}
+.ds-msub b{color:var(--txt)}
+.ds-mlg{display:flex;flex-wrap:wrap;gap:9px 16px;margin:0 0 12px;font-family:var(--mono);font-size:12px;color:var(--dim)}
+.ds-mlg span{display:inline-flex;align-items:center;gap:6px}
+.ds-mlg i{width:22px;height:0;border-top:3px solid;display:inline-block}
+.ds-mlg i.dsh{border-top-style:dashed}
+.ds-mlg i.dot{width:11px;height:11px;border-top:0;border-radius:3px}
+.ds-msvg{width:100%;height:auto;display:block;border:1px solid var(--line);border-radius:3px;background:var(--panel)}
+.ds-msvg .mm-col{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.06em;fill:var(--faint)}
+.ds-msvg .mm-nl{font-size:15px;font-weight:700;fill:var(--txt)}
+.ds-msvg .mm-ns{font-family:var(--mono);font-size:12px;fill:var(--faint)}
+.ds-msvg .mm-el{font-family:var(--mono);font-size:12px;font-weight:600;fill:var(--dim)}
+.ds-msvg .nd{fill:var(--panel)}
+.ds-msvg .nd-l1{stroke:var(--dawn);stroke-width:1.6}
+.ds-msvg .nd-l2{stroke:var(--st-accel);stroke-width:1.6}
+.ds-msvg .ed{fill:none}
+.ds-msvg .ed-sup{stroke:var(--st-accel)}
+.ds-msvg .ed-inv{stroke:var(--st-dawn)}
+.ds-msvg .ed-ver{stroke:var(--st-mature)}
+.ds-msvg .ed-riv{stroke:var(--st-hot)}
+.ds-msvg .el-riv{fill:var(--st-hot)}
+.ds-msvg .el-ver{fill:var(--st-mature)}
+.ds-msvg .mk-sup{fill:var(--st-accel)}
+.ds-msvg .mk-inv{fill:var(--st-dawn)}
+.ds-msvg .mk-ver{fill:var(--st-mature)}
+.ds-msvg .mk-riv{fill:var(--st-hot)}
+.ds-mnote{font-size:14px;color:var(--dim);margin:14px 0 0;line-height:1.6;border-top:1px dashed var(--line);padding-top:12px}
+.ds-mnote b{color:var(--txt)}
+.ds-mnote .stl{border-left:2px solid var(--line2);padding-left:12px;display:block;margin-top:9px;color:var(--dim)}
+.ds-mfn{font-family:var(--mono);font-size:12px;color:var(--faint);margin-top:10px}
 @media(max-width:760px){
  #dsAisd .ds-vd{grid-template-columns:1fr}
  #dsAisd .ds-vcr{margin-left:0;text-align:left;width:100%}
@@ -156,6 +200,9 @@ var CSS=`#dsAisd{margin:2px 0 38px}
  #dsAisd .ds-mtx.plan thead th:nth-child(2),#dsAisd .ds-mtx.plan tbody tr:not(.sumrow) td:nth-child(2){display:none}
  #dsAisd .ds-rt{gap:7px}
  #dsAisd .ds-rtv{margin-left:0;width:100%}
+ .ds-msheet{padding:15px 14px}
+ .ds-mtitle{font-size:18px}
+ .ds-mlg{gap:7px 12px}
 }`;
 var HTML=`<div style="position:relative">
   <div class="ds-kick">AI Value Chain · Demand · Supply</div>
@@ -187,7 +234,7 @@ var HTML=`<div style="position:relative">
   </div>
 </div>
 
-<div class="ds-sec">밸류체인 — 전체 구조 <span class="ds-note">돈이 위에서 아래로 · 구조는 수동 판단</span></div>
+<div class="ds-sec">밸류체인 — 전체 구조 <span class="ds-note">돈이 위에서 아래로 · 구조는 수동 판단</span><button type="button" class="ds-mapbtn" id="dsMapBtn" aria-haspopup="dialog">L1↔L2 관계도 ↗</button></div>
 <div class="ds-lens">
   <div class="ds-l1"><b>구조 · 돈의 강</b> 각 층의 지불이 아래층의 매출 — 병목은 돈이 몰리는데 공급이 못 따라오는 층에서 열린다</div>
   <div class="ds-l2">현재 병목 = <span class="ds-wn">④ Factory(반도체·전력)</span> · 상류 지불이 꺾이면(리비전 ▼) 하류 매출이 시차를 두고 꺾인다 → <span class="ds-nt">위 판정 보드와 연동</span></div>
@@ -487,6 +534,87 @@ var HTML=`<div style="position:relative">
   <div class="ds-steel"><b>공급측:</b> Samsung +50%·SK +$15B·중국 ×2가 동시 램프되면 2027~2028 <b>공급 과잉·가격 롤오버</b> 위험. DDR5 현물이 계약 아래로 롤오버되면 사이클 후반 전환 텔.</div>
   <div class="ds-steel"><b>중국측:</b> 웨이퍼 캐파 접근 ≠ 승리. HBM4·1c·EUV 격차가 유지되는 한 선단 시장은 방어된다 — 위협은 레거시 마진 잠식에 국한될 수 있다.</div>
   <div class="ds-steel"><b>밸류체인측:</b> ②층이 효율화(DeepSeek式 저비용 추론)에 성공하면 ③→④로 내려오는 돈이 줄 수 있다(Jevons 반론: 싸지면 총수요가 더 는다 — 강물 2). ④ 안에서도 병목은 이동한다(컴퓨트→메모리→패키징→전력) — 층 고정이 아니라 <b>병목 추적</b>이 알파의 원천.</div>
+</div>
+
+<div class="ds-mov" id="dsMapOv" role="dialog" aria-modal="true" aria-label="L1 L2 관계도">
+  <div class="ds-msheet">
+    <div class="ds-mhd">
+      <div><div class="ds-mkick">L1 ↔ L2 · Model · Compute</div>
+        <h3 class="ds-mtitle">AI <em>서비스사 ↔ 컴퓨팅 공급사</em> 관계도</h3></div>
+      <button type="button" class="ds-mx" data-close aria-label="닫기">✕</button>
+    </div>
+    <p class="ds-msub">화살표 = 컴퓨팅이 흐르는 방향(공급사 → 서비스사). 밸류체인 <b>② AI 판매자(L1)</b>가 <b>③ 컴퓨팅 판매자(L2)</b>와 맺는 투자·공급·경쟁 관계를 편 그림 — 2026년 7월 기준.</p>
+    <div class="ds-mlg">
+      <span><i style="border-color:var(--st-accel)"></i>컴퓨팅 공급</span>
+      <span><i class="dsh" style="border-color:var(--st-dawn)"></i>지분 투자(+공급)</span>
+      <span><i style="border-color:var(--st-mature)"></i>수직통합(자체 인프라)</span>
+      <span><i style="border-color:var(--st-hot)"></i>경쟁사에서 구매</span>
+      <span><i class="dot" style="background:var(--dawn)"></i>AI 서비스(L1)</span>
+      <span><i class="dot" style="background:var(--st-accel)"></i>컴퓨팅(L2)</span>
+    </div>
+    <svg class="ds-msvg" viewBox="0 0 960 720" role="img" aria-label="AI 서비스사와 컴퓨팅 공급사 관계도">
+      <defs>
+        <marker id="mm-sup" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path class="mk-sup" d="M0,0 L7,3 L0,6 Z"/></marker>
+        <marker id="mm-inv" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path class="mk-inv" d="M0,0 L7,3 L0,6 Z"/></marker>
+        <marker id="mm-ver" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path class="mk-ver" d="M0,0 L7,3 L0,6 Z"/></marker>
+        <marker id="mm-riv" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path class="mk-riv" d="M0,0 L7,3 L0,6 Z"/></marker>
+      </defs>
+      <text x="130" y="30" text-anchor="middle" class="mm-col">AI 서비스 판매 · L1</text>
+      <text x="825" y="30" text-anchor="middle" class="mm-col">컴퓨팅 자원 판매 · L2</text>
+
+      <path class="ed ed-inv" d="M230,116 C430,116 560,98 720,98" stroke-width="3" stroke-dasharray="7 5" marker-end="url(#mm-inv)"/>
+      <text x="475" y="96" text-anchor="middle" class="mm-el">투자 $13B+·Azure 공급</text>
+      <path class="ed ed-sup" d="M230,128 C430,150 560,205 720,208" stroke-width="3" marker-end="url(#mm-sup)"/>
+      <text x="472" y="176" text-anchor="middle" class="mm-el">Stargate ~$300B</text>
+      <path class="ed ed-sup" d="M230,140 C400,220 560,315 720,318" stroke-width="2.4" marker-end="url(#mm-sup)"/>
+      <text x="424" y="258" text-anchor="middle" class="mm-el">CoreWeave 계약</text>
+
+      <path class="ed ed-inv" d="M230,318 C430,340 560,425 720,428" stroke-width="3.4" stroke-dasharray="7 5" marker-end="url(#mm-inv)"/>
+      <text x="476" y="372" text-anchor="middle" class="mm-el">투자 $80B+·Trainium 5GW</text>
+      <path class="ed ed-inv" d="M230,330 C430,420 560,535 720,538" stroke-width="3" stroke-dasharray="7 5" marker-end="url(#mm-inv)"/>
+      <text x="452" y="462" text-anchor="middle" class="mm-el">투자·TPU 수 GW</text>
+      <path class="ed ed-riv" d="M230,342 C380,520 560,640 720,646" stroke-width="2.6" marker-end="url(#mm-riv)"/>
+      <text x="398" y="566" text-anchor="middle" class="mm-el el-riv">경쟁사 컴퓨팅 ~$15B/년</text>
+
+      <path class="ed ed-ver" d="M230,500 C420,510 560,520 720,534" stroke-width="4" marker-end="url(#mm-ver)"/>
+      <text x="470" y="500" text-anchor="middle" class="mm-el el-ver">자체 인프라(TPU)</text>
+      <path class="ed ed-ver" d="M230,632 C400,650 560,648 720,650" stroke-width="4" marker-end="url(#mm-ver)"/>
+      <text x="470" y="676" text-anchor="middle" class="mm-el el-ver">자체 인프라(Colossus)</text>
+      <path class="ed ed-sup" d="M230,620 C420,470 560,235 720,214" stroke-width="2.2" stroke-dasharray="2 4" marker-end="url(#mm-sup)"/>
+      <text x="604" y="300" text-anchor="middle" class="mm-el">OCI 배포·확장</text>
+
+      <g>
+        <rect class="nd nd-l1" x="30" y="90" width="200" height="64" rx="12"/>
+        <text x="46" y="118" class="mm-nl">OpenAI</text><text x="46" y="138" class="mm-ns">ChatGPT · GPT</text>
+        <rect class="nd nd-l1" x="30" y="290" width="200" height="64" rx="12"/>
+        <text x="46" y="318" class="mm-nl">Anthropic</text><text x="46" y="338" class="mm-ns">Claude</text>
+        <rect class="nd nd-l1" x="30" y="470" width="200" height="60" rx="12"/>
+        <text x="46" y="497" class="mm-nl">Google Gemini</text><text x="46" y="516" class="mm-ns">모델·서비스 (Google 내부)</text>
+        <rect class="nd nd-l1" x="30" y="602" width="200" height="60" rx="12"/>
+        <text x="46" y="629" class="mm-nl">xAI · Grok</text><text x="46" y="648" class="mm-ns">모델·서비스</text>
+      </g>
+      <g>
+        <rect class="nd nd-l2" x="720" y="72" width="210" height="52" rx="11"/>
+        <text x="736" y="96" class="mm-nl">Microsoft Azure</text><text x="736" y="113" class="mm-ns">클라우드</text>
+        <rect class="nd nd-l2" x="720" y="182" width="210" height="52" rx="11"/>
+        <text x="736" y="206" class="mm-nl">Oracle OCI</text><text x="736" y="223" class="mm-ns">중립 컴퓨팅 허브</text>
+        <rect class="nd nd-l2" x="720" y="292" width="210" height="52" rx="11"/>
+        <text x="736" y="316" class="mm-nl">CoreWeave</text><text x="736" y="333" class="mm-ns">GPU 전문 클라우드</text>
+        <rect class="nd nd-l2" x="720" y="402" width="210" height="52" rx="11"/>
+        <text x="736" y="426" class="mm-nl">Amazon AWS</text><text x="736" y="443" class="mm-ns">클라우드 · Trainium</text>
+        <rect class="nd nd-l2" x="720" y="512" width="210" height="52" rx="11"/>
+        <text x="736" y="536" class="mm-nl">Google GCP</text><text x="736" y="553" class="mm-ns">클라우드 · TPU</text>
+        <rect class="nd nd-l2" x="720" y="620" width="210" height="52" rx="11"/>
+        <text x="736" y="644" class="mm-nl">xAI Colossus</text><text x="736" y="661" class="mm-ns">자체 데이터센터</text>
+      </g>
+    </svg>
+    <div class="ds-mnote">
+      <b>협력적 경쟁(co-opetition)이 핵심.</b> Microsoft·Amazon·Google은 자신이 컴퓨팅을 대주는 모델사와 <b>동시에 경쟁</b>한다(Copilot·Nova·Gemini). Google·xAI는 모델+칩+DC를 <b>수직통합</b>하고, Oracle·CoreWeave는 자체 모델 없는 <b>중립 공급자</b>다.
+      <span class="stl"><b>탈단일 클라우드·라이벌이 고객:</b> OpenAI는 Microsoft 독점에서 Oracle·CoreWeave로, Anthropic은 AWS·GCP에 더해 <b>경쟁사 xAI Colossus까지 연 ~$15B</b>에 사들인다 — GPU 물량이 최상위 병목(L2·L3)이라는 증거.</span>
+      <span class="stl"><b>스틸맨:</b> 이 그림은 계약·투자의 방향이지 <b>협상력의 방향</b>은 아니다 — 대규모 선약정·순환거래(round-tripping)가 얽히면 모델사가 클라우드의 앵커 고객이 되어 의존의 화살표가 역전될 수 있다.</span>
+    </div>
+    <div class="ds-mfn">2026-07 · 공개 보도 기준 근사치 · narrative 층(숫자 파일 무관)</div>
+  </div>
 </div>`;
 function mount(){
  var host=document.getElementById('v-thread');
@@ -499,6 +627,15 @@ function mount(){
   r.addEventListener('click',tg);
   r.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();tg();}});
  });
+ var mb=document.getElementById('dsMapBtn'),mov=document.getElementById('dsMapOv');
+ if(mb&&mov){
+  function escMap(e){if(e.key==='Escape')closeMap();}
+  function openMap(){mov.classList.add('on');document.addEventListener('keydown',escMap);var x=mov.querySelector('.ds-mx');if(x)x.focus();}
+  function closeMap(){mov.classList.remove('on');document.removeEventListener('keydown',escMap);mb.focus();}
+  mb.addEventListener('click',openMap);
+  mov.addEventListener('click',function(e){if(e.target===mov)closeMap();});
+  mov.querySelectorAll('[data-close]').forEach(function(b){b.addEventListener('click',closeMap);});
+ }
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount);else mount();
 })();
