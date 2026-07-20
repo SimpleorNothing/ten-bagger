@@ -600,6 +600,12 @@ table.tk th.c{text-align:center}
 /* ===== MARKET (01 market) ===== */
 #v-market .msec{font-size:20px;font-weight:700;letter-spacing:-.3px;margin:26px 0 12px;display:flex;align-items:center;gap:8px}
 #v-market .msec .mnote{font:500 12px var(--mono);color:var(--faint);letter-spacing:.04em}
+#v-market .msec .cal-jump{margin-left:auto;flex:none}
+.cal-jump{font:700 12px var(--mono);color:var(--dawn);text-decoration:none;letter-spacing:.02em;white-space:nowrap;cursor:pointer}
+.cal-jump:hover{text-decoration:underline}
+.cal-jump:focus-visible{outline:2px solid var(--st-accel);outline-offset:2px;border-radius:3px}
+#v-cal .cal-jump{display:inline-block;margin-top:12px}
+@media(max-width:600px){#v-market .msec{flex-wrap:wrap;row-gap:6px}}
 #v-market .mrng{display:inline-flex;flex-wrap:wrap;gap:2px;background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:2px}
 #v-market .rbtn{font:600 11.5px var(--mono);color:var(--faint);background:transparent;border:0;padding:4px 9px;border-radius:7px;cursor:pointer;transition:.15s;letter-spacing:.02em;line-height:1.2}
 #v-market .rbtn:hover{color:var(--dim)}
@@ -1150,6 +1156,7 @@ header::after{
     <h1 class="vtitle">타이밍을 <em>지도</em>로 — 거시·실적·이벤트 한 화면</h1>
     <p class="vsub">매크로 매매가 "충격이 오면 무엇을 할지"라면, 투자 캘린더는 "그 충격이 언제 올지"를 고정한다. 통화정책·물가·내 자산 실적·메가 이벤트·지정학 워치를 하나의 D-카운트다운으로 묶어, 다가오는 게이트를 놓치지 않는다. <b>확정 일정은 굵게, 추정(IR 미확정·기관 미확정)은 점선 태그로 표기.</b></p>
     <p class="vsub" style="margin-top:7px"><b>⏱ 모든 시각은 한국시간(KST) 기준.</b> 美 지표는 ET+13h(예: 08:30 ET = <b>21:30 KST</b>, 같은 날) · <b>FOMC 결정·실적 AMC는 익일 새벽 KST</b> · ECB는 CET+7h · BOJ·한국 금통위는 KST 그대로.</p>
+    <a class="cal-jump" id="calBackLk" href="#v-market" role="button">← 01 시장 모니터링으로</a>
   </div>
 
   <!-- 임박 이벤트·범례 → 01 시장 모니터링 「다가오는 일정」으로 이관(2026-07-17). v-cal은 뷰서 제외·코드 잔존 -->
@@ -1722,7 +1729,7 @@ window.CYCLE=(function(){
     <div class="vkick">Market · 시장 모니터링</div>
     <h1 class="vtitle">한눈에 보는 <em>시장</em> — 증시·금리·유가·뉴스</h1>
   </div>
-  <h2 class="msec">다가오는 일정 <span class="mnote">거시·실적 게이트 · D-카운트다운 · 기준일 <span id="calAsOf"></span> · 지난 이벤트 자동 제거</span></h2>
+  <h2 class="msec">다가오는 일정 <span class="mnote">거시·실적 게이트 · D-카운트다운 · 기준일 <span id="calAsOf"></span> · 지난 이벤트 자동 제거</span><a class="cal-jump" id="calFullLk" href="#v-cal" role="button">전체 캘린더 →</a></h2>
   <div class="cal-legend">
     <span class="lg"><span class="dot" style="background:var(--cat-macro)"></span>거시(Fed·ECB·BOJ·금통위)</span>
     <span class="lg"><span class="dot" style="background:var(--cat-infl)"></span>물가(CPI·PCE)</span>
@@ -3314,6 +3321,15 @@ document.getElementById('nav').addEventListener('click',e=>{const b=e.target.clo
  if(b.dataset.v==='market'){if(window.MARKET)window.MARKET.render();}
  if(b.dataset.v==='council'){if(window.COUNCIL)window.COUNCIL.render();}});
 setTimeout(function(){var _t0=document.querySelector('#nav .tab.on');if(_t0)_t0.click();},0);
+/* 01 「다가오는 일정」 ↔ 전체 투자 캘린더(#v-cal · nav서 제외·코드 잔존) 점프 링크 — 2026-07-20 */
+document.addEventListener('click',function(e){var j=e.target.closest('.cal-jump');if(!j)return;e.preventDefault();
+ var to=(j.getAttribute('href')==='#v-cal')?'v-cal':'v-market';
+ document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('on');});
+ document.querySelectorAll('.view').forEach(function(v){v.classList.remove('on');});
+ var el=document.getElementById(to);if(el)el.classList.add('on');
+ var ab=document.getElementById('asofBox');if(ab)ab.style.display='';
+ if(to==='v-market'){var mt=document.querySelector('#nav .tab[data-v="market"]');if(mt)mt.classList.add('on');if(window.MARKET&&window.MARKET.render)window.MARKET.render();}
+ window.scrollTo(0,0);});
 
 /* ===== MARKET (01 market) ===== */
 window.MARKET=(function(){
