@@ -160,7 +160,7 @@ var CSS=`#dsAisd{margin:2px 0 38px}
 var HTML=`<div style="position:relative">
   <div class="ds-kick">AI Value Chain · Demand · Supply</div>
   <h2 class="ds-title">AI <em>수요·공급</em> — 밸류체인으로 보는 상류·병목</h2>
-  <div class="ds-upd">update : 2026.07.18 · 컨센서스 방향성 추정 · 수동 갱신(분기 캡처) · 리비전 트랙은 캡처 축적 전 예시</div>
+  <div class="ds-upd">update : 2026.07.20 · 컨센서스 방향성 추정 · 수동 갱신(분기 캡처) · 리비전 트랙은 캡처 축적 전 예시</div>
 </div>
 
 <div class="ds-sec">판정 <span class="ds-note">이 블록이 답하는 질문 · 결론 먼저</span></div>
@@ -212,7 +212,7 @@ var HTML=`<div style="position:relative">
   <div class="ds-vch"><span class="ds-tno">②</span><span class="ds-vcn">AI 판매자</span><span class="ds-vce">Model · Service</span>
     <span class="ds-vcr">모델·서비스로 수요를 수취 = 8레이어의 <b>L1</b></span></div>
   <div class="ds-vcb">
-    <div class="ds-vcg"><div class="ds-vcgt">범용 AI 모델<small>Frontier</small></div><div class="ds-chips"><span class="ds-chip">OpenAI</span><span class="ds-chip">Anthropic</span><span class="ds-chip">Gemini</span><span class="ds-chip">DeepSeek</span></div></div>
+    <div class="ds-vcg"><div class="ds-vcgt">범용 AI 모델<small>Frontier</small></div><div class="ds-chips"><span class="ds-chip">OpenAI</span><span class="ds-chip">Anthropic</span><span class="ds-chip">Gemini</span><span class="ds-chip">xAI(Grok)</span><span class="ds-chip">DeepSeek</span><span class="ds-chip">문샷(Kimi)</span></div></div>
     <div class="ds-vcg"><div class="ds-vcgt">특화 AI 모델·응용 서비스<small>Vertical · App</small></div><div class="ds-chips"><span class="ds-chip">구글 서비스</span><span class="ds-chip">MS(Copilot)</span><span class="ds-chip">오라클</span><span class="ds-chip">버티컬 SaaS</span></div></div>
   </div>
   <div class="ds-vces">
@@ -318,11 +318,21 @@ var HTML=`<div style="position:relative">
         <td>추론 트래픽 폭증 — 자체칩으로 원가 방어</td>
         <td>유통(안드로이드·검색) 지렛대 극대화</td>
         <td>풀스택(모델+칩+클라우드) 수직통합 표준 후보</td></tr>
+      <tr><td class="ds-co">xAI<small>Grok</small><span class="ds-role lead">범용</span></td>
+        <td>Grok 4.x · X 통합 유통 · 매출 ~$350M(2025) · <b>Colossus</b> 자체 대형 클러스터(멤피스)</td>
+        <td>엔터프라이즈 티어($30/시트)·API 확장 · <b>SpaceX 합병</b>(합산 $1.25T) · 매출 목표 ~$2B · Colossus 2GW·55만 GPU</td>
+        <td>월 ~$1B 번레이트 — 매출−소진 갭 축소가 관건 · 월가·국방 B2B 수주</td>
+        <td>SpaceX·X 인프라 시너지 — 자체 컴퓨트 수직통합 · 흑자 경로 시험</td></tr>
       <tr><td class="ds-co">DeepSeek<span class="ds-role cn">범용·中</span></td>
         <td><b>저비용 오픈모델</b> 충격 · 중국 내수 중심</td>
         <td>효율화 압력 전파 — 토큰 단가 하락 주도</td>
         <td>수출 제약 속 국산 칩 결합</td>
         <td>중국 AI 스택 자립의 축</td></tr>
+      <tr><td class="ds-co">문샷<small>Kimi K3</small><span class="ds-role cn">범용·中</span></td>
+        <td>Kimi 오픈웨이트 시리즈(K2.x) · 롱컨텍스트·저비용 · Cursor·DoorDash 등 美 채택</td>
+        <td><b>Kimi K3</b> — 2.8T 오픈웨이트(최대 오픈모델) · GPT-5.6 상회·Fable 5 근접 · 저가 API($3/$15)</td>
+        <td>오픈웨이트 생태계 채택 확대 · 코딩·에이전트 강세 · 효율(칩 제약 하 스케일)로 원가 파괴</td>
+        <td>중국 오픈 스택의 축 — 저비용 추론이 <b>NVDA 수요 가정</b> 흔드는 변수</td></tr>
       <tr><td class="ds-co">특화·응용<small>MS·오라클 등</small><span class="ds-role chase">특화</span></td>
         <td>Copilot 시트당 과금 정착 실험 · OCI AI 수주</td>
         <td>에이전트 SaaS 확산 — <b>ROI 증명</b>이 관건</td>
