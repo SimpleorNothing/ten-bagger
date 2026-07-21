@@ -3547,7 +3547,12 @@ window.MARKET=(function(){
    function axOf(s){var t=String(s||'').toLowerCase().replace(/[^0-9a-z가-힣]/g,'');
     for(var i=0;i<AXR.length;i++)if(AXR[i][1].test(t))return AXR[i][0];
     return 'x_'+(t||'macro');}
-   function axIt(it){return axOf(it.name||it.id);}
+   // 병목축은 발굴 매크로축과 절대 병합되지 않는다(상시 관측이 존재 이유) → 서버가 실어보낸 ax 우선,
+   // 구 데이터(ax 이전)는 bneck_ id 로 같은 키를 파생해 전환기에도 블록이 쪼개지지 않게 한다.
+   function axIt(it){var a=String(it.ax||''),id=String(it.id||'');
+    if(a.indexOf('bn_')===0)return a;                      // 병목축만 서버 ax 신뢰
+    if(id.indexOf('bneck_')===0)return 'bn_'+id.slice(6);  // 구 병목 데이터(ax 이전)
+    return axOf(it.name||it.id);}                          // 발굴축은 종전대로 이름 병합(구 ax 는 스테일)
    var MX=5,byA={},byId={},seen={};
    items.forEach(function(it){var k=axIt(it);
     if(it.id&&!byId[it.id])byId[it.id]=k;
