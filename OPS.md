@@ -1,4 +1,4 @@
-**최종 갱신: 2026-07-21 (KST·선행지표)**
+**최종 갱신: 2026-07-21 21:00 (KST)**
 
 # OPS — 알파맵 운영 가이드
 
@@ -89,6 +89,7 @@
 
 | 정보명 | 자동/수동 | 주기 | 소스 |
 |---|---|---|---|
+| **시장 맥박**(동인 6축) | 자동(LLM) | `update-pulse.yml` | `pulse.json`(`fetch-pulse.mjs`). **근거 링크는 LLM 이 만들지 않는다** — 모델은 기사 번호(`si`)로 지목만, URL 은 `resolveSrcs()` 가 `news.json` 원본에서 채운다. 실패분 렌더 제외 |
 | **다가오는 일정** (거시·실적 게이트 D-N 카드+범례 · 2026-07-17 06서 흡수) | 혼합 | 데일리 프루닝·asOf / 큐레이션 수시 | `calendar.json` `events`(수기+`derive-calendar.mjs` 프루닝) + `earnings.json` moves(`CAL_EARN_MOVES`). `renderCalNow()`가 오늘 기준 경과 제거·D-N·임박 `CAL_NOW_MAX`(8) 렌더. `#calNow`·`--cat-*` `#v-market` 스코프. 크론 `update-calendar.yml`(운영자 수동) |
 | 업데이트 이력(변경 로그) | 수동(인라인) | 사이트 변경 시 | `changelog.js` 인라인 `MKT_CHANGELOG`(`{d,t}` 최신순·자가 마운트=insight.js 패턴). `mountHead()`가 **01 시장 모니터링(`#v-market`) + 전문가 원탁(`#v-council`) 헤더(`.vhead`) 우상단**에 각각 `.mkt-upd` 배지를 마운트 → 클릭 시 `.cyc-pop` 모달(`.cyc-upd`/`.cyc-pop` 재사용 · 신규 토큰 0). **사용자 향 변경만** 기록 · 신규 항목은 배열 맨 위 |
 | 코스피·S&P·나스닥 지수 | 자동 | 06:37·18:37 KST (1일 2회 · ⏳저녁 §8-11) | `charts.json` (`fetch-prices.mjs`, `^KS11·^GSPC·^IXIC` Yahoo 5Y). **meta 거래일을 시계열 끝에 강제 반영 + 이전 창과 union 병합** → `prices.json`과 갈라지지 않는다. 괴리>1%는 `prices.json.warn` |
@@ -350,6 +351,7 @@
 
 ## 9. 갱신 이력
 
+- 2026-07-21 21:00 · **01 시장 맥박 근거 기사 링크 안 열림 수정 — LLM 에게 URL 을 받지 않는다(`fetch-pulse.mjs`).** 원인은 CSS 가 아니라 데이터 — 불투명 base64 구글뉴스 URL 을 모델이 옮겨 적다 망가뜨렸다(07:16 판 12건 전부 `?oc=5` 탈락 + 4건 1~2자 손상, 20:24 판 0/12 재현). 모델은 기사 번호(`si`)로 지목만 하고 `resolveSrcs()` 가 원본 링크를 채운다(구판 `u` 는 3단 복구, 실패분은 버림). `max_tokens` 8192→4096. `node --check`·단위 스모크 통과. 라이브 `pulse.json` 은 다음 크론(06:12)이 재생성하며 자동 정상화. narrative≠numbers. **교훈: 불투명 식별자를 LLM 출력으로 왕복시키지 않는다.**
 - 2026-07-21 · **전방 관측 ④ — 월간 선행지표(FRED) 신설.** 자동층이 전부 일간 시세라 앞을 보는 축이 없던 공백. `fetch-signals.mjs` `fetchLead()` → `signals.json.lead` (반도체 생산지수·가동률·비국방 자본재 신규수주, mom3+yoy). 01은 `lead.js` 자가 마운트 카드(`changelog.js` 주입 · index.html 무편집 · 신규 토큰 0). 워크플로 편집 불요. 미착수 후보: TSMC 월매출, 관세청 10일 수출, 전력 지표.
 
 - 2026-07-21 · **전방 관측 ③ — 병목축 정규화 격리.** `AXIS_RULES` 이름 매칭이 병목축을 발굴축에 흡수(L3→chip·capex·신규 L2 전력효율→power)해 상시 관측이 잠식되던 문제 수리. 명시 `ax:'bn_*'` + `axIt()` 우선순위. 발굴축은 구 `ax`가 스테일이라 이름 병합 유지(그대로 신뢰 시 중국 축 5블록 파편화 — 시뮬레이션에서 회귀 확인 후 병목 한정으로 축소). 검증: 블록 11→13·병목 5축 독립·china 22건 단일 유지·check-docs 통과.

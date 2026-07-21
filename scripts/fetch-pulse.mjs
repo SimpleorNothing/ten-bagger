@@ -9,7 +9,7 @@
 //       gamma.json(stage) · holdings.json(레이어). 출력: pulse.json.
 // 실패 정책: 키 없음/LLM 실패 → 기존 pulse.json 유지(exit 0, 뉴스 커밋 비차단). 단 조용히 넘어가지 않고
 //       ::warning:: 로 Actions 요약에 원인을 남긴다(OPS §1 침묵하는 오류 방지).
-// max_tokens: 한국어 6드라이버 + 긴 srcs URL 은 4096 을 넘겨 절단됨(run 실측 pos 5596) → 8192.
+// 링크 규율(2026-07-21): LLM 에게 URL 을 받지 않는다. 모델은 기사 번호(si)로 지목만 하고 URL 은 news.json 원본에서 채운다. 상세=OPS §3·§9.
 // 비용: 실행 횟수에 비례(신규 기사 수 아님). Sonnet 4.6 기준 1회 ≈ $0.01~0.02.
 
 import fs from 'node:fs';
@@ -27,6 +27,31 @@ function extractJSON(text) {
   const e = noFence.lastIndexOf('}');
   if (s === -1 || e === -1 || e < s) throw new Error('no JSON object in response: ' + noFence.slice(0, 200));
   return noFence.slice(s, e + 1);
+}
+
+function hamming(a, b) { let d = 0; for (let i = 0; i < a.length; i++) if (a[i] !== b[i] && ++d > 3) return d; return d; }
+
+// si -> 원본 링크. 구판 u 는 완전일치/쿼리제외/1~3자 해밍으로 복구, 실패분은 버린다(죽은 링크 렌더 금지).
+function resolveSrcs(srcs, items) {
+  const pool = items.map((it) => String(it.link || '')).filter(Boolean);
+  const byBase = new Map();
+  pool.forEach((l) => { const b = l.split('?')[0]; if (!byBase.has(b)) byBase.set(b, l); });
+  const out = [];
+  (Array.isArray(srcs) ? srcs : []).forEach((s) => {
+    if (!s) return;
+    let link = '';
+    const si = Number(s.si);
+    if (Number.isInteger(si) && si >= 1 && si <= items.length) link = String(items[si - 1].link || '');
+    if (!link && s.u) {
+      const base = String(s.u).split('?')[0];
+      if (byBase.has(base)) link = byBase.get(base);
+      else for (const [b, full] of byBase) { if (b.length === base.length && hamming(b, base) <= 3) { link = full; break; } }
+    }
+    if (!/^https?:\/\//.test(link)) return;
+    const src = items.find((it) => it.link === link);
+    out.push({ t: String(s.t || (src && src.title) || '').slice(0, 120), u: link });
+  });
+  return out;
 }
 
 function buildPrompt(ctx) {
@@ -48,18 +73,18 @@ function buildPrompt(ctx) {
 - l1: 이 축에서 지금 벌어지는 일(프레임) 한 줄
 - l2: 라이브 상황·수치 요약(1~2문장)
 - verdict: → 뒤에 붙을 판정 한 조각(간결)
-- srcs: 아래 매크로 헤드라인 중 이 축과 맞는 기사 1~2개의 {t: 제목축약, u: 링크} (없으면 빈 배열)
+- srcs: 아래 헤드라인 중 이 축과 맞는 기사 1~2개를 번호로 지목: {t: 한국어 제목 축약, si: 기사번호} — URL 은 쓰지 않는다
 
 [라이브 게이지] VIX ${sig.vix ?? '--'} (3M ${sig.vix3m ?? '--'}) · CNN F&G ${sig.fearGreed ?? '--'} · 나스닥 드로다운 ${sig.nasdaqDrawdownPct ?? '--'}% · 40주선 ${sig.wma40SlopeUp ? '상승' : '하락'} · S&P 일간 ${sig.spDailyPct ?? '--'}% · KR 서킷 ${sig.circuitKR ? 'ON' : 'off'}/사이드카 ${sig.sidecarKR ? 'ON' : 'off'}
 [레이어 stage] ${stages || '(gamma 없음)'}
 [보유 레이어] ${layers || '(holdings 없음)'}
 ${digestMacro ? '[매크로 다이제스트 요약]\n' + digestMacro + '\n' : ''}
-[매크로 헤드라인 (축|이름|날짜|제목|링크)]
+[매크로 헤드라인 (번호|축|이름|날짜|제목)]
 ${macroLines || '(없음)'}
 
 다음 JSON만 출력하라(마크다운·설명 금지):
 {"headline":"오늘 시장을 한 문장으로(무엇이 위험선호를 눌렀나/밀었나)",
- "drivers":[{"ax":"geopolitics","name":"지정학 · ...","dir":"risk","layer":"지정학","l1":"...","l2":"...","verdict":"...","srcs":[{"t":"...","u":"https://..."}]}, ... 6개]}`;
+ "drivers":[{"ax":"geopolitics","name":"지정학 · ...","dir":"risk","layer":"지정학","l1":"...","l2":"...","verdict":"...","srcs":[{"t":"...","si":1}]}, ... 6개]}`;
 }
 
 async function main() {
@@ -73,8 +98,9 @@ async function main() {
   const holdings = readJSON('holdings.json', {});
 
   const macroItems = (news.items || []).filter((it) => it.ticker === 'MACRO');
+  const items0 = macroItems;
   const macroLines = macroItems
-    .map((it) => `${it.ax || ''}|${it.name || ''}|${(it.published || '').slice(0, 10)}|${it.title || ''}|${it.link || ''}`)
+    .map((it, i) => `${i + 1}|${it.ax || ''}|${it.name || ''}|${(it.published || '').slice(0, 10)}|${it.title || ''}`)
     .join('\n');
   const digestMacro = ((digest.macro || []).map((m) => `${m.id || ''}: ${m.s || ''}`).join('\n')) || '';
 
@@ -89,7 +115,7 @@ async function main() {
     const r = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: { 'content-type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01' },
-      body: JSON.stringify({ model: MODEL, max_tokens: 8192, messages: [{ role: 'user', content: prompt }] }),
+      body: JSON.stringify({ model: MODEL, max_tokens: 4096, messages: [{ role: 'user', content: prompt }] }),
     });
     if (!r.ok) {
       const body = await r.text().catch(() => '');
@@ -101,6 +127,15 @@ async function main() {
     const clean = extractJSON(text);
     const parsed = JSON.parse(clean);
     if (!parsed.headline || !Array.isArray(parsed.drivers) || !parsed.drivers.length) throw new Error('pulse shape invalid');
+    let nSrc = 0, nDrop = 0;
+    parsed.drivers.forEach((d) => {
+      if (!d) return;
+      const want = (Array.isArray(d.srcs) ? d.srcs : []).length;
+      d.srcs = resolveSrcs(d.srcs, items0);
+      nSrc += d.srcs.length; nDrop += Math.max(0, want - d.srcs.length);
+    });
+    console.log('pulse: link resolve ' + nSrc + (nDrop ? ' / dropped ' + nDrop : ''));
+    if (nDrop) console.log('::warning::pulse: 해소 실패 링크 ' + nDrop + '건 제외');
     // asOf 는 KST 분단위(사이트 표시용). new Date() → UTC → +9h.
     const kst = new Date(Date.now() + 9 * 3600 * 1000).toISOString().slice(0, 16);
     const out = { asOf: kst, gen: Date.now(), model: MODEL, headline: parsed.headline, drivers: parsed.drivers };
