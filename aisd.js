@@ -485,7 +485,7 @@ var HTML=`<div style="position:relative">
       <tr><td class="ds-co">메모리<small>삼성 · SK하이닉스 · Micron</small><span class="ds-lb sem">L3</span></td>
         <td>HBM3E 타이트 · SK 독주 · 3사 캐파 경쟁 개시</td>
         <td>SK <b>+$15B 팹</b>(M15X·용인) · 삼성 <b>HBM +50%</b>·HBM4 퀄 · Micron 싱가포르 패키징 — 합산 <b>~$575B</b>(2027까지) <span class="ds-rev up">▲</span></td>
-        <td>용인 1기·P4/P5·아이다호 가동 — 공급 확대에도 선단(1c·HBM4) 타이트</td>
+        <td>용인 1기·P4/P5·아이다호 가동 · <b>SK 웨이퍼 캐파 2배↑</b>·전남광주(삼성·SK <b>₩800조</b>) 신설 <span class="ds-rev up">▲</span> — 공급 확대에도 선단(1c·HBM4) 타이트</td>
         <td>신규 캐파 동시 램프 = <b>과잉 리스크 최대 구간</b> · HBM4E→HBM5 전환</td></tr>
       <tr><td class="ds-co">통신·네트워킹<small>Broadcom · Marvell · 옵티컬(LITE·Coherent)</small><span class="ds-lb sem">L6</span></td>
         <td><b>800G 광모듈 램프</b> · 커스텀 ASIC(TPU·Trainium) 수주 급증</td>
@@ -506,6 +506,42 @@ var HTML=`<div style="position:relative">
         <td colspan="4">컴퓨트(완화 방향) → <b>메모리(타이트 지속)</b> → 통신(1.6T·CPO 전환) → <b>냉각·전력(새 병목 부상)</b> — 층 고정이 아니라 <b>병목 추적</b>이 알파의 원천 · 메모리 상세는 γ-닫힘 3트리거(MU)·01 DXI로 라이브 감시</td></tr>
     </tbody>
   </table>
+</div>
+
+<div class="ds-sec">④ Factory — 칩 제조사별 Capex <span class="ds-note">공급 · 삼성전자·SK하이닉스·마이크론·TSMC · 캐파 로드맵 · 연도별 · 한경 2026-07-20</span></div>
+<div class="ds-lens">
+  <div class="ds-l1"><b>④ · 칩 제조사</b> 삼성전자·SK하이닉스·마이크론·TSMC — 누가 얼마를 언제 짓나(메모리 L3 · 파운드리 L2·L4)</div>
+  <div class="ds-l2">2026 전후 <span class="ds-wn">일제히 대규모 캐파 증설로 전환</span> · 메모리 3사 HBM D램 + TSMC 파운드리·CoWoS → 컴퓨트 병목 완화 신호 vs <span class="ds-nt">2028E 메모리 과잉 리스크</span></div>
+</div>
+<div class="ds-card">
+  <table class="ds-mtx plan">
+    <thead><tr><th style="width:14%">제조사</th><th style="width:20%">~2025</th><th class="est" style="width:23%">2026E</th><th class="est" style="width:22%">2027E</th><th class="est" style="width:21%">2028E~</th></tr></thead>
+    <tbody>
+      <tr><td class="ds-co">삼성전자<small>메모리 · 파운드리</small><span class="ds-lb sem">L3·L2</span></td>
+        <td>HBM3E SK 대비 추격 · 파운드리 가동률 회복 지연</td>
+        <td><b>HBM 캐파 +50%</b>·HBM4 퀄 통과 시도 · 평택·기흥 캐파 확대 <span class="ds-rev up">▲</span></td>
+        <td>전남광주 AI 메모리(HBM D램) 신설 착수 — <b>삼성·SK 합산 ₩800조</b> <span class="ds-rev up">▲</span></td>
+        <td>메모리·파운드리 동시 증설 — 과잉 리스크 공유 구간</td></tr>
+      <tr><td class="ds-co">SK하이닉스<small>메모리</small><span class="ds-lb sem">L3</span></td>
+        <td>HBM 독주 · HBM3E 점유 선두</td>
+        <td>M15X·용인 팹 <b>+$15B</b> 램프 · HBM4 선단 우위 유지</td>
+        <td>용인 1기 가동 · <b>웨이퍼 캐파 「5년 내 2배↑」</b> <span class="ds-rev up">▲</span> · 전남광주(삼성·SK ₩800조)</td>
+        <td>신규 캐파 동시 램프 = <b>과잉 리스크 최대 구간</b></td></tr>
+      <tr><td class="ds-co">마이크론<small>메모리 · Micron</small><span class="ds-lb sem">L3</span></td>
+        <td>HBM3E 3위 추격 · 싱가포르 패키징 개시</td>
+        <td>아이다호·싱가포르 램프 · <b>일본 히로시마 HBM 라인 ₩14조</b> <span class="ds-rev up">▲</span></td>
+        <td>미국 <b>「2035년까지 $250B(₩370조)」</b> 투자 착수 <span class="ds-rev up">▲</span></td>
+        <td>미·일 동시 캐파 — 선단(1c·HBM4) 타이트 지속</td></tr>
+      <tr><td class="ds-co">TSMC<small>파운드리 · CoWoS</small><span class="ds-lb sem">L2·L4</span></td>
+        <td>CoWoS 병목 · 대만 전공정 11·후공정 5(총 16 팹)</td>
+        <td>설비투자 <b>$60~64B로 상향</b>(기존 $52~56B) <span class="ds-rev up">▲</span> · 애리조나 <b>총 $265B(₩392조·+$100B)</b> <span class="ds-rev up">▲</span></td>
+        <td>대만 <b>5년간 25개 팹 착공</b> — 완공 시 캐파 <b>1.5배</b> <span class="ds-rev up">▲</span></td>
+        <td>CoWoS·선단 공정 캐파 대폭 확대 — 컴퓨트 공급 완화의 열쇠</td></tr>
+      <tr class="sumrow"><td class="ds-co">관통 판정</td>
+        <td colspan="4">4사 모두 대규모 캐파 증설 발표 — <b>캐파 증설 = 컴퓨트 부족 프리미엄 소멸의 선행 신호</b>(TSMC CoWoS·3사 HBM). 단 메모리는 <b>2028E 신규 캐파 동시 램프 = 과잉 리스크 최대 구간</b> → γ-닫힘 3트리거(MU 목표가 리비전·fwd P/E·DRAM 롤오버)·01 DXI로 라이브 감시. <span style="font-family:var(--mono);font-size:12px;color:var(--faint)">인텔 아일랜드 팹34 $57B 별도 · 발표·계획 = narrative(숫자 파일 미변경)</span></td></tr>
+    </tbody>
+  </table>
+  <div class="ds-fn">발표·로드맵 기준(확정 수주·실적 아님) · 출처 한국경제 2026-07-20 「TSMC도 증설 가세」 — <span class="ds-rev up">▲</span> = 이번 캡처에서 상향</div>
 </div>
 
 <div class="ds-sec">④ Factory — 중국 업체 확대 계획 <span class="ds-note">공급 · CXMT·YMTC·SMIC · 캐파 2배 시도 · 선단 격차 존재</span></div>
