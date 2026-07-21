@@ -1,4 +1,4 @@
-**최종 갱신: 2026-07-20 22:10 (KST)**
+**최종 갱신: 2026-07-21 (KST)**
 
 # OPS — 알파맵 운영 가이드
 
@@ -102,10 +102,10 @@
 | ↳ **`NEW` 배지(신선도 큐)** | 자동(런타임 파생) | 매 렌더 | 최근 3일(72h·`isNewDt`)+미열람 기사에 `.arow .anew` 부표(디자인=STYLE_GUIDE §6-5). **3초 호버 or 클릭 시 제거**→localStorage `am_news_seen_v1`(키=link) 영속·재렌더 재출현 없음. `rowHTML()` 경로(종목+「더 보기」). narrative≠numbers |
 | 관련 기사 (매크로 · 토픽 블록형 + **기사별 일자 + 두 점**[명사형 요약 `a` / `→` 레이어·게이트 함의 `w`] — 종목 뉴스와 동일 형식) | 자동 | **06:12·18:12 KST** | `news_digest.json` `macro`(블록 상단 축 요약 `s`) + `news.json` `MACRO`. **LLM 물질성 채점(m)은 여전히 미적용**(축 자체가 관측 대상 · 하드룰만) 이나, **기사별 두 점 요약 `a·w`는 `summarizeMacro()`가 생성**(신규만 증분 · 과거치 재요약 없음). `w`는 개별 주가가 아니라 8레이어·매크로 게이트·상류 수요 관점의 함의. 렌더는 `.arow`(종목 뉴스 컴포넌트 재사용) · `a` 없으면 제목 폴백. **이 섹션 상단(자동 뉴스 위)에 03 채택 매크로 관점 스트립(`insStripMarket`)이 함께 렌더된다**(2026-07-18 상단→여기 이동 · `insight.js mount()` 앵커 `#mktMacroNews` 앞 · 큐레이션 관점=narrative, 뉴스와 별 컴포넌트) |
 | ↳ **매크로 축 = 고정 아님·매 실행 자동 발굴** | 자동 | 실행마다 | `discoverMacroTopics()` — 광역 헤드라인 스캔(증시·stock market·economy·BUSINESS) → LLM이 **지금 도는 매크로 축 3개** 선별(금리·지정학·관세·전력·환율·capex 중 서로 다른 축) → 그 검색어로 수집. 실패 시 직전 축 승계 → 시드 폴백. 채택 축 = `news.json` `macroTopics`. **토픽명 하드코딩 금지**(사이트는 `it.name` 사용) |
-| ↳ **병목축(고정 5축)** — L3 DRAM/HBM 가격·공급 · L4 패키징 캐파 · L6 옵티컬 리드타임 · L7·L8 전력 · 상류 하이퍼스케일러 capex | 자동 | 실행마다 | `BOTTLENECK_TOPICS`(`news-screen.mjs` 고정) → 매크로 레인(`ticker='MACRO'`)으로 렌더. **리밸런싱은 종목 뉴스가 아니라 '어느 레이어 병목이 조였나'에서 나온다** → 트렌딩 발굴에 맡기지 않고 상시 관측. digest가 **조임/완화 방향**을 명시 |
+| ↳ **병목축(고정 7축)** — L3 DRAM/HBM · L4 패키징 캐파 · L6 옵티컬 · L7·L8 전력 · 상류 capex · **상류 빅테크 자체 실리콘** · **L2 커스텀 실리콘·전력효율** | 자동 | 실행마다 | `BOTTLENECK_TOPICS`(`news-screen.mjs` 고정) → 매크로 레인(`ticker='MACRO'`)으로 렌더. **리밸런싱은 종목 뉴스가 아니라 '어느 레이어 병목이 조였나'에서 나온다** → 트렌딩 발굴에 맡기지 않고 상시 관측. digest가 **조임/완화 방향**을 명시 |
 | ↳ **축 정규화 `ax` — 같은 축은 한 블록** | 자동 | 실행마다 + 런타임 | 발굴이 매 실행이라 같은 축이 다른 이름·id로 들어온다(중동 3종·capex 2종 → 8블록). 키워드 규칙 8종(`china`·`capex`·`chip`·`power`·`energy`·`trade`·`rates`·`fx` / 미매칭=정규화 이름)으로 축 키 `ax` 파생. `china` 규칙을 최선두에 두어 중국 관련 토픽(공급망·성장둔화·디플레·수요 등)이 단일 블록으로 병합됨 → `fetch-news.mjs`(축 중복 제거 · 직전 id·name 승계 · 5건 슬롯 축별 배정 · digest `macro[].id`=축) + `index.html loadMacroNews()`(축으로 블록 병합 · 링크 중복 제거 · 축당 5건 · 구 데이터도 즉시 병합). **축 키는 병합용 — 표시명은 라이브 `macroTopics[].name`** |
 
-**뉴스 수집 3축(`fetch-news.mjs`):** ①**종목축** = 종목명 검색 8건 · ②**시그널축** = 종목명 + 확정 사실 키워드(`실적·수주·계약·공급·증설` / `guidance·capex·contract·order·backlog·shipment·capacity`) 14일 창 4건 — *종목명 단독 검색은 SEO 콘텐츠팜을 부른다*("Why MU stock is down…") · ③**병목축** = 레이어 고정 5축(위 표).
+**뉴스 수집 3축(`fetch-news.mjs`):** ①**종목축** = 종목명 검색 8건 · ②**시그널축** = 종목명 + 확정 사실 키워드 14일 창 4건 · **방향 대칭(2026-07-21)**: 긍정(`실적·수주·계약·증설` / `guidance·capex·order·backlog`) + 부정(`취소·연기·지연·감산·축소·보류·중단` / `cancel·delay·postpone·push out·cut·halt`) — 사이클 전환은 부정 신호로 먼저 온다 — *종목명 단독 검색은 SEO 콘텐츠팜을 부른다*("Why MU stock is down…") · ③**병목축** = 레이어 고정 5축(위 표).
 
 **소스 티어(`items[].st`) — 구글 뉴스는 매체를 고르지 않으므로 우리가 고른다:**
 
@@ -348,6 +348,8 @@
 ---
 
 ## 9. 갱신 이력
+
+- 2026-07-21 · **전방 관측 ①② — 시그널축 방향 대칭 + 병목축 7축.** ①`SIG_TERMS`가 전부 긍정어라 사이클 전환을 늦게 봤다 → 부정 시그널 추가. ②병목축 5→7: `bneck_silicon`(빅테크 자체 실리콘 — GOOGL·MSFT·AMZN·META 추적 티커 부재로 관측창 없었음) · `bneck_asic`(커스텀 실리콘·전력효율 = L7·L8 수요 파괴 벡터). 계기 = 구글 「프로즌 v2」 미포착. `news-screen.mjs` 상수만 · UI·판단 파일 무변.
 
 - 2026-07-20 23:30 · **02 인사이트 찾기 PDF 추출 — pdf.js에 한글 CID cMap 지정(불필요한 OCR 폴백 차단).** 텍스트 레이어가 멀쩡한 증권사 리포트(미래에셋 KoPubDotum CID·Identity-H·임베드·**ToUnicode 없음**)가 OCR로 새어 「계미삐1111」류 쓰레기를 뱉던 문제 수정. 원인은 이미지 흐림이 아니라 `pdfText()`의 `getDocument({data})`에 `cMapUrl`이 없어 pdf.js가 한글 CID를 번들 cMap(Adobe-Korea1→유니코드)으로 디코드하지 못해 **빈 텍스트→실글자 0 판정→OCR 폴백→거의 백지로 렌더된 페이지 OCR**로 이어진 것. `insight.js`에 `PDFJS_VER`/`PDFJS_CDN`/`PDFJS_CMAP` 상수를 두어 로더 스크립트·워커·cMap을 같은 릴리스(`3.11.174`)로 묶고, `getDocument`에 `cMapUrl:PDFJS_CMAP`+`cMapPacked:true` 추가. 실측: cMap 미지정 5p·실글자 0 / cMap 지정 5,847자·실글자 4,100(OCR 미발동). OCR 폴백은 진짜 스캔본·ToUnicode 파손 PDF의 최후수단으로 `realLetters` 컷 뒤에 그대로 유지. pdf.min.js·worker를 이미 같은 cdnjs에서 받으므로 **CDN 의존은 새로 생기지 않고**, cMap 미수신 시 딱 수정 전 동작(OCR 폴백)으로 되돌아갈 뿐 더 나빠지지 않음(완전 자립은 cmap 동봉이 후속 카드). `insight.js`만 편집(index.html·insight.css 무편집) · **신규 :root 토큰 0** → `check-docs` 통과(토큰 24종 무변)·`node --check` 통과. narrative≠numbers — 추출 경로만, 숫자·판단 파일 불변. §3 02 인테이크 인벤토리 주석 동반.
 - 2026-07-20 22:10 · **02 인사이트 찾기 헤더 정리 — 시세/정보 스탬프 02 숨김·설명 문단 하단 이동·인테이크 placeholder 예시 삭제.** SimpleorNothing 지시(스크린샷 3점: ①업데이트 시점 삭제 ②설명 맨 아래로 ③예시·힌트 삭제). ①전 페이지 공통 `#asofBox`(시세/정보 스탬프)를 **02에서만 숨김** — `insight.js mount()` nav 리스너가 insight 탭일 때만 `#asofBox`를 `display:none`으로 덮어씀(자가 마운트 = index.html 탭 핸들러 뒤 등록 → 나중 값 우선 · **index.html 무편집** · `#asofBox`가 `#v-insight`보다 **앞**이라 CSS `~` 불가). 우상단 `updIns`는 유지(운영자 확인 = 시세/정보 블록 한정). ②뷰 설명 `.vsub`를 `.vhead`에서 빼 **뷰 맨 아래**(`#insSigRest` 뒤·`.ins-wrap` 막내)로 이동(`GUIDE_HTML` 분리·`border-top:1px solid var(--line)` 구분·문단 내용 불변). ③인테이크 URL·본문·드롭 안내 placeholder의 예시·힌트를 최소 라벨(「URL (선택)」·「본문·스크립트를 붙여넣으세요」·「PDF·TXT·이미지 파일 끌어놓기 또는 클릭」)로 축소. `insight.js`만 편집(index.html·insight.css 무편집) · **신규 :root 토큰 0** → `check-docs` 통과(토큰 24종 무변)·`node --check` 통과. narrative≠numbers — 표시 방식·위치만, 숫자·판단 파일 불변. §3 02 인벤토리 주석 · STYLE_GUIDE §9 동반.
