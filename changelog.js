@@ -111,11 +111,18 @@
     var s=document.createElement('script');s.id='raerJs';s.src='/raer.js';s.defer=true;
     (document.body||document.documentElement).appendChild(s);
   }
+  // 01 시장 모니터링 「월간 선행지표」 카드 로더(lead.js 자가 마운트).
+  function loadLead(){
+    if(document.getElementById('leadJs'))return;
+    var s=document.createElement('script');s.id='leadJs';s.src='/lead.js';s.defer=true;
+    (document.body||document.documentElement).appendChild(s);
+  }
   function boot(){
     mountHead('#v-market .vhead','mktUpd');        // 01 시장 모니터링 헤더 우상단
     mountHead('#v-council .vhead','mktUpdCouncil'); // 전문가 원탁 헤더 우상단
     loadAsof();
     loadRaer();                                     // 추정 리비전 트래커 기대수익 컬럼
+    loadLead();                                     // 01 월간 선행지표(FRED) 카드
   }
   document.addEventListener('keydown',function(e){if(e.key==='Escape')hide();});
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();

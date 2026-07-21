@@ -1,4 +1,4 @@
-**최종 갱신: 2026-07-21 (KST·축격리)**
+**최종 갱신: 2026-07-21 (KST·선행지표)**
 
 # OPS — 알파맵 운영 가이드
 
@@ -95,6 +95,7 @@
 | 미 10년물 금리 | 자동 | 06:37·18:37 KST + 폴백 런타임 | **1순위 `charts.json` `us10y`**(`fetch-prices.mjs` `^TNX` Yahoo 5Y · 지수 카드와 동일 t/c → 기간버튼 1M~5Y 실동작 · `^TNX` 10× 스케일은 `>20→÷10`로 % 정규화). **폴백** worker `/api/us10y` → `history[].markets.ten_year`(외부 피드 ~2개월). ※구버전은 폴백만 써서 6M+ 기간 무반응 버그(2026-07-16 수리, PR #345) |
 | WTI 유가 | 자동 | 런타임 | worker `/api/wti` → **`points`** 배열 (Yahoo). `series` 로 읽으면 0건 |
 | **DXI 메모리 현물** (신규 · 지표 6번째 카드) | 수동/주간 | **매주 금요일 장마감 후**(스케줄 태스크) | `dxi.json` `series[]`(DDR4 16Gb 3200 메인스트림 현물 $). DXI 지수는 DRAMeXchange 포털 게이트라 무료 피드 없음 → TrendForce 공개 현물가로 주간 1점 append. `loadDxi()`·`lensDxi()`=01 `card()`/`lens()` 복제(신규 토큰 0·`dod:false`로 전일대비 억제). narrative≠numbers — MU γ-닫힘 ③ 입력 참고용 |
+| **월간 선행지표** (FRED · `lead.js` 자가 마운트 · 관련 기사 앞) | 자동 | 신호 크론 편승(월 1회 갱신) | `signals.json` `lead`(`fetch-signals.mjs` `fetchLead()`). FRED 무키 CSV 3계열 — `IPG3344S` 반도체 생산지수(L3·L4) · `CAPUTLG3344S` 반도체 가동률(L4) · `NEWORDER` 비국방 자본재 신규수주 ex항공(상류). 판정 = **최근 3개월 평균 vs 직전 3개월(mom3)** + 전년동월비(yoy) → up/flat/down. 자동층이 전부 일간 시세(후행·동행)라 「미리 보는」 축이 없던 공백을 메움. 비치명(실패 시 직전 `lead` 보존)·워크플로 편집 불요(update-signals 가 signals.json 을 이미 커밋). 관측치 표시 전용 — narrative≠numbers |
 | 보유 종목 스파크라인 | 자동 | 06:37·18:37 KST (1일 2회 · ⏳저녁 §8-11) | `charts.json` (Yahoo/Naver 5Y 일봉 t/c · 기간버튼 1M~5Y) |
 | **카드 렌즈 요약 2줄** (그래프마다 프레임→판정) | 자동(런타임 파생) | gamma·signals 일별 / holdings 주간에 편승 | `gamma.json`(γ·stage·flagged) + `signals.json`(**`window.macroEval` 단일소스 재사용**) + `holdings.json`(layer·평단) + `charts.json` |
 | 종목 뉴스 (종목 블록형 + 기사별 **일자 + 두 점**[명사형 요약 `a` / `→` 의미·주가영향 `w`] + 우측 주가 차트) | 자동 | **뉴스·digest 06:12·18:12 (1일 2회)** / 차트 06:37·18:37 | `news_digest.json`(claude-sonnet-4-6) + `news.json`(**물질성 m≥1만**) + `charts.json` |
@@ -348,6 +349,8 @@
 ---
 
 ## 9. 갱신 이력
+
+- 2026-07-21 · **전방 관측 ④ — 월간 선행지표(FRED) 신설.** 자동층이 전부 일간 시세라 앞을 보는 축이 없던 공백. `fetch-signals.mjs` `fetchLead()` → `signals.json.lead` (반도체 생산지수·가동률·비국방 자본재 신규수주, mom3+yoy). 01은 `lead.js` 자가 마운트 카드(`changelog.js` 주입 · index.html 무편집 · 신규 토큰 0). 워크플로 편집 불요. 미착수 후보: TSMC 월매출, 관세청 10일 수출, 전력 지표.
 
 - 2026-07-21 · **전방 관측 ③ — 병목축 정규화 격리.** `AXIS_RULES` 이름 매칭이 병목축을 발굴축에 흡수(L3→chip·capex·신규 L2 전력효율→power)해 상시 관측이 잠식되던 문제 수리. 명시 `ax:'bn_*'` + `axIt()` 우선순위. 발굴축은 구 `ax`가 스테일이라 이름 병합 유지(그대로 신뢰 시 중국 축 5블록 파편화 — 시뮬레이션에서 회귀 확인 후 병목 한정으로 축소). 검증: 블록 11→13·병목 5축 독립·china 22건 단일 유지·check-docs 통과.
 

@@ -115,6 +115,54 @@ async function fetchKr() {
     sessionDate: yahooDate ?? chartDate, chartDate, src: `low ${lowPct ?? 'n/a'} · close ${closePct ?? 'n/a'}` };
 }
 
+// ── 월간 선행지표(lead) — FRED 무키 CSV ────────────────────────────
+// 알파맵 자동층은 전부 일간 시세(후행·동행)다. 「변화를 미리」 보려면 월간 선행 계열이 필요하다.
+// 수집: fredgraph.csv (키 불필요) · 판정: 최근 3개월 평균을 직전 3개월 평균과 비교(mom3) + 전년동월비(yoy).
+// 비치명 — 실패 시 직전 lead 보존. 워크플로 편집 불요(update-signals 가 signals.json 을 이미 커밋).
+const LEAD_SERIES = [
+  { id: 'IPG3344S', name: '반도체 생산지수', layer: 'L3·L4', unit: 'idx' },
+  { id: 'CAPUTLG3344S', name: '반도체 가동률', layer: 'L4', unit: '%' },
+  { id: 'NEWORDER', name: '비국방 자본재 신규수주(ex항공)', layer: '상류', unit: '$M' },
+];
+
+async function fredSeries(id) {
+  const u = 'https://fred.stlouisfed.org/graph/fredgraph.csv?id=' + encodeURIComponent(id) + '&cosd=2019-01-01';
+  const r = await fetch(u, { headers: UA });
+  if (!r.ok) throw new Error('fred HTTP ' + r.status);
+  const rows = [];
+  for (const line of (await r.text()).trim().split('\n').slice(1)) {
+    const [d, v] = line.split(',');
+    if (d && v && v !== '.' && !isNaN(+v)) rows.push([d.slice(0, 7), +v]);
+  }
+  if (rows.length < 15) throw new Error('too few points');
+  return rows;
+}
+
+function leadStat(rows) {
+  const n = rows.length, last = rows[n - 1];
+  const map = Object.fromEntries(rows);
+  const py = (+last[0].slice(0, 4) - 1) + last[0].slice(4);
+  const avg = (a) => a.reduce((x, y) => x + y, 0) / a.length;
+  const v = (i) => rows[i][1];
+  const cur3 = avg([v(n - 1), v(n - 2), v(n - 3)]);
+  const pre3 = avg([v(n - 4), v(n - 5), v(n - 6)]);
+  const r1 = (x) => (x == null || !isFinite(x) ? null : +x.toFixed(1));
+  const mom3 = pre3 > 0 ? r1((cur3 / pre3 - 1) * 100) : null;
+  const yoy = map[py] > 0 ? r1((last[1] / map[py] - 1) * 100) : null;
+  const dir = mom3 == null ? 'unknown' : mom3 > 0.5 ? 'up' : mom3 < -0.5 ? 'down' : 'flat';
+  return { ym: last[0], v: r1(last[1]), yoy, mom3, dir };
+}
+
+async function fetchLead() {
+  const items = [];
+  for (const s of LEAD_SERIES) {
+    try { items.push({ ...s, ...leadStat(await fredSeries(s.id)) }); }
+    catch (e) { console.log(`     lead SKIP ${s.id}: ${e.message}`); }
+  }
+  if (!items.length) throw new Error('no lead series');
+  return { asOf: new Date().toISOString().slice(0, 10), src: 'FRED', items };
+}
+
 async function main() {
   let prev = {};
   try { prev = JSON.parse(fs.readFileSync(OUT, 'utf8')); } catch { /* first run */ }
@@ -135,6 +183,7 @@ async function main() {
     sidecarKR: prev.sidecarKR ?? null,
     circuitKR: prev.circuitKR ?? null,
     sidecarDate: prev.sidecarDate ?? null,
+    lead: prev.lead ?? null,   // 월간 선행지표(FRED) — 아래 task 가 갱신, 실패 시 직전값 보존
     note: '통합 매수 게이트 입력. VIX 종가/장중·VIX3M·CNN F&G·S&P 일간·나스닥 드로다운(5y)·40주선 기울기/이격, 그리고 🇰🇷코스피 서킷(circuitKR −8%)/매도사이드카(sidecarKR −5% 프록시)를 자동 수집(1일 1회, 미 증시 마감 후=KST 익일 새벽). KR 값은 ^KS11 일중 저가와 charts.json(ks11) 확정 종가 중 더 나쁜 쪽으로 자동 파생하며, 폭락 당일 수동 입력(true + sidecarDate=asOf)으로 즉시 덮어쓰기 가능. sidecarDate===asOf 인 당일에만 점등.',
   };
 
@@ -156,6 +205,11 @@ async function main() {
       out.sidecarDate = today;
       const pf = (n) => (n == null ? 'n/a' : n.toFixed(2) + '%');
       return `KOSPI ${k.sessionDate ?? '?'} worst ${pf(k.lowPct)} (${k.src}) → circuit(−8) ${out.circuitKR ? '🔴' : '·'} · sidecar(−5) ${out.sidecarKR ? '🟡' : '·'}${fresh ? '' : ' [stale session, not lit]'}`;
+    }],
+    ['lead', async () => {
+      const L = await fetchLead();
+      out.lead = L;
+      return L.items.map((i) => `${i.name} ${i.ym} ${i.dir}(mom3 ${i.mom3 ?? '—'}% · yoy ${i.yoy ?? '—'}%)`).join(' | ');
     }],
   ];
   for (const [key, fn] of tasks) {
