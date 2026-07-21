@@ -1,4 +1,4 @@
-**최종 갱신: 2026-07-20 22:10 (KST)**
+**최종 갱신: 2026-07-21 22:29 (KST)**
 
 # STYLE_GUIDE — 알파맵 디자인 시스템
 
@@ -258,6 +258,7 @@ pantone.css :root       ← 현행 팔레트 (팬튼 A안, index.html 하단 <li
 
 ## 갱신 이력
 
+- 2026-07-21 22:29 · **02 AI 수요·공급 로드맵 ④에 「칩 제조사별 Capex」 표 추가(삼성·SK·마이크론·TSMC).** SimpleorNothing 지시(한경 07-20 기사 반영·칩 4사 구분). 신규 표는 §6-1 레퍼런스 결을 그대로 승계 — `ds-sec`+`ds-note` 헤더 · `ds-lens`(§6-4 렌즈 2줄 l1=프레임·l2=판정) · `ds-card` 면(3px) · `ds-mtx.plan` 표(기존 구성요소별 표와 동일 폭·모바일 ~2025 열 자동 숨김 상속). 회사 역할 구분은 `ds-co small`(메모리·파운드리) + `ds-lb.sem` 배지(L3·L2/L3/L2·L4)로 표기 — 등락 규약(상향 ▲=`--st-hot`=`.ds-rev.up`) 재사용. **신규 CSS 클래스·:root 토큰 0**(전부 기존 `ds-*` 재사용) → TOKENS 무변·`check-docs` 통과(토큰 24종)·`node --check` 통과·jsdom 스모크(4행+sumrow·셀 수·배지). narrative≠numbers — 발표·로드맵 텍스트일 뿐 숫자 파일 불변. (OPS §3·§9 동반)
 - 2026-07-20 22:10 · **02 인사이트 찾기 헤더 정리 — 뷰 설명(`.vsub`) 하단 이동·인테이크 placeholder 힌트 삭제·시세/정보 스탬프 02 숨김.** SimpleorNothing 지시(스크린샷 3점). 뷰 부제 `.vsub`(15px `--dim`)를 `.vhead`에서 빼 **뷰 맨 아래**(`#insSigRest` 뒤·`.ins-wrap` 막내)로 옮기고 `border-top:1px solid var(--line)`로 구분 — 문단 내용·15px 규약 불변(§2 하한 유지 · `.vhead`는 이제 `.vkick`+`.vtitle`+`updIns`만). 인테이크 URL·본문·드롭 placeholder는 예시·힌트를 지우고 최소 라벨만(폼 14px 하한 §2 유지). 전 페이지 공통 `#asofBox`는 02에서만 숨김(`insight.js mount()` nav 리스너가 insight 탭일 때 `display:none` · 자가 마운트라 index.html 핸들러 뒤 등록 → 우선 · **index.html 무편집** · `#asofBox`가 `#v-insight`보다 앞이라 CSS `~` 불가). **신규 `:root` 토큰·CSS 클래스 0**(인라인 `var(--line)` 구분선만 · `insight.css` 무편집) → TOKENS 무변·`check-docs` 통과·`node --check` 통과. narrative≠numbers. (OPS §3·§9 동반)
 
 - 2026-07-20 22:02 · **06 투자 캘린더(`#v-cal`) 「지나간 일정 접기」 복원 — orphan 됐던 `foldPastCal()` 재배선.** SimpleorNothing 지시(지난 일정 접고 클릭 시 펼침). 기능·CSS(`.cal-fold-bar`·`.cal-past{display:none}`·`.cal-open`)·헬퍼(`calChipEnd`/`calDDiff`)는 이미 있었으나 06 탭 삭제(2026-07-17) 때 호출부가 사라져 미동작이었음 → `.cal-jump` 위임 핸들러가 `#v-cal`을 열 때 `foldPastCal()` 호출(멱등 가드 있음). 오늘(KST) 기준 과거 행에 `.cal-past` 부여·기본 접힘, 「지나간 일정 N건 · 펼치기」 바 클릭 토글. **신규 `:root` 토큰·CSS·함수 0**(1줄 배선) → TOKENS 무변·check-docs 통과 · Playwright 스모크(과거 26건 접힘·6월 past·12월 미래·바 토글·pageerror 0) 통과. (OPS §9 동반)
