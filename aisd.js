@@ -207,7 +207,7 @@ var CSS=`#dsAisd{margin:2px 0 38px}
 var HTML=`<div style="position:relative">
   <div class="ds-kick">AI Value Chain · Demand · Supply</div>
   <h2 class="ds-title">AI <em>수요·공급</em> — 밸류체인으로 보는 상류·병목</h2>
-  <div class="ds-upd">update : 2026.07.20 · 컨센서스 방향성 추정 · 수동 갱신(분기 캡처) · 리비전 트랙은 캡처 축적 전 예시</div>
+  <div class="ds-upd">update : 2026.07.23 · 알파벳 Q2 실적 CAPEX 가이던스 확정 반영 · 컨센서스 방향성 추정 · 수동 갱신(분기 캡처) · 리비전 트랙은 캡처 축적 전 예시</div>
 </div>
 
 <div class="ds-sec">판정 <span class="ds-note">이 블록이 답하는 질문 · 결론 먼저</span></div>
@@ -439,11 +439,11 @@ var HTML=`<div style="position:relative">
         <div class="ds-yc"><div class="ds-yy est">2027E</div><div class="ds-yv">↑ 지속</div><div class="ds-yt">AWS AI 매출 성장 연동 증액 시사 · 구체 가이던스 미제시</div></div>
         <div class="ds-yc"><div class="ds-yy est">2028E</div><div class="ds-yv">컨센 희박</div><div class="ds-yt">AWS 매출·전력 확보 속도 연동 — 애널 소수 추정만 존재</div></div>
       </div></td></tr>
-      <tr class="exp" tabindex="0"><td class="ds-co">Google<small>Alphabet</small></td><td>53</td><td>~85</td><td class="dim">~185 <span class="ds-rev up">▲40</span></td><td class="dim">↑ <span class="ds-rev up">▲</span></td><td class="dim">↑</td><td class="nt">TPU·데이터센터 공격적 상향</td></tr>
+      <tr class="exp" tabindex="0"><td class="ds-co">Google<small>Alphabet</small></td><td>53</td><td>~85</td><td class="dim">~200 <span class="ds-rev up">▲15</span></td><td class="dim">↑ <span class="ds-rev up">▲</span></td><td class="dim">↑</td><td class="nt">Q2 확정 가이던스 $195~205B(상향)</td></tr>
       <tr class="dtl"><td colspan="7"><div class="ds-yrp">
         <div class="ds-yc"><div class="ds-yy">2024</div><div class="ds-yv">$53B</div><div class="ds-yt">TPU v5·DC 증설 — Gemini 학습 인프라</div></div>
         <div class="ds-yc"><div class="ds-yy">2025</div><div class="ds-yv">~$85B</div><div class="ds-yt">가이던스 반복 상향 · TPU 확대 · 클라우드 수요</div></div>
-        <div class="ds-yc"><div class="ds-yy est">2026E</div><div class="ds-yv">~$185B</div><div class="ds-yt">대폭 상향 — TPU 차세대 · Gemini 추론 트래픽 폭증 대응</div></div>
+        <div class="ds-yc"><div class="ds-yy est">2026E</div><div class="ds-yv">$195~205B</div><div class="ds-yt">Q2 실적서 가이던스 상향($180~190B→$195~205B) · Cloud +82% · TPU 차세대·Gemini 추론 대응 · 2027 추가 증액 시사</div></div>
         <div class="ds-yc"><div class="ds-yy est">2027E</div><div class="ds-yv">↑ 지속</div><div class="ds-yt">자체칩(TPU) 비중 확대 = NVIDIA 의존 일부 완화 변수</div></div>
         <div class="ds-yc"><div class="ds-yy est">2028E</div><div class="ds-yv">컨센 희박</div><div class="ds-yt">TPU 세대 교체 주기 지속 전제 — 추론 트래픽이 규모 결정</div></div>
       </div></td></tr>
