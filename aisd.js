@@ -424,6 +424,29 @@ var HTML=`<div style="position:relative">
 </div>
 
 <div class="ds-lens" style="margin-top:14px">
+  <div class="ds-l1"><b>CAPEX 실현 검증</b> 달러(입력)가 실제로 무엇을 사는가 — 3종 동행 지표로 물량·가격 시계 교차</div>
+  <div class="ds-l2">CAPEX는 <b>명목 달러 선행</b> · 아래 3종은 <span class="ds-ok">가속기(L2 실현)</span> · <span class="ds-nt">메모리(L3)</span> · <span class="ds-wn">전력(L8)</span> 을 각각 <b>동행 검증</b> — 셋이 함께 꺾여야 수요 피크 확증(하나만으론 플래그)</div>
+</div>
+<div class="ds-card">
+  <div class="ds-rt"><span class="ds-rtl">가속기 · L2 실현<br>NVDA DC매출 · 명목$ 시계</span>
+    <span class="ds-rts"><i>FY26Q2</i>$41B</span><span class="ds-rta">→</span>
+    <span class="ds-rts"><i>FY26Q3</i>$51.2B <span class="ds-rev up">▲25%</span></span><span class="ds-rta">→</span>
+    <span class="ds-rts"><i>FY26Q4E</i>~$58B</span>
+    <span class="ds-rtv up">▲ CAPEX→매출 실현 · YoY+66% · 가시성 ~$500B(BW+Rubin 누적)</span></div>
+  <div class="ds-rt"><span class="ds-rtl">메모리 · L3<br>HBM시장·비트·계약가 · 물량+가격 시계</span>
+    <span class="ds-rts"><i>25</i>$35B</span><span class="ds-rta">→</span>
+    <span class="ds-rts"><i>26E</i>~$50B <span class="ds-rev up">▲</span></span><span class="ds-rta">→</span>
+    <span class="ds-rts"><i>28E</i>$100B</span>
+    <span class="ds-rtv up">▲ 40%+CAGR · 비트~20% · 계약가↑ = MU γ 트리거③ 역감시선</span></div>
+  <div class="ds-rt"><span class="ds-rtl">전력 · L8<br>DC 신규계약 GW·PPA · 커밋 실물 시계</span>
+    <span class="ds-rts"><i>US수요</i>2027 2배</span><span class="ds-rta">→</span>
+    <span class="ds-rts"><i>26</i>+26%yoy</span><span class="ds-rta">→</span>
+    <span class="ds-rts"><i>글로벌</i>+165% by30</span>
+    <span class="ds-rtv up">▲ 리드타임 병목 = capex 최종 상한</span></div>
+  <div class="ds-fn">3종 = CAPEX 달러의 <b>실물 검증축</b> · 가속기=명목$ · 메모리=물량+가격 · 전력=커밋 실물 = 서로 다른 3시계 · 캡처 축적 전 예시(연동 시 분기 스냅샷 자동 파생) · 계약가 롤오버·비트 둔화·GW 지연이 동시 확인돼야 수요 피크 · 트리거 승격은 MU γ 3트리거·매크로 게이트 AND에만</div>
+</div>
+
+<div class="ds-lens" style="margin-top:14px">
   <div class="ds-l1"><b>수요 · 4사 분해</b> 누가 얼마를 · 어느 방향으로 늘리나</div>
   <div class="ds-l2">4사 모두 동시 증액 = 경쟁적 과투자 국면 · <span class="ds-nt">capex/매출 갭 확대는 가격시계 경고 플래그</span></div>
 </div>

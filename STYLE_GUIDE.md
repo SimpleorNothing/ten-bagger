@@ -1,4 +1,4 @@
-**최종 갱신: 2026-07-21 22:29 (KST)**
+**최종 갱신: 2026-07-24 00:10 (KST)**
 
 # STYLE_GUIDE — 알파맵 디자인 시스템
 
@@ -258,6 +258,7 @@ pantone.css :root       ← 현행 팔레트 (팬튼 A안, index.html 하단 <li
 
 ## 갱신 이력
 
+- 2026-07-24 00:10 · **02 aisd.js — ③ CAPEX 리비전 트랙 아래 「CAPEX 실현 검증 — 3종 동행 지표」 트랙 추가.** SimpleorNothing 지시(CAPEX 외 파악 지표 — 가속기·메모리 시장규모 등). §6-1 레퍼런스 결 승계 — `ds-lens`(§6-4 렌즈 2줄 l1=프레임·l2=판정) + `ds-card` 면(3px) 안에 기존 `ds-rt`(리비전 트랙) 3줄: 가속기 L2(NVDA DC매출·명목$ 시계)·메모리 L3(HBM시장·비트·계약가·물량+가격 시계)·전력 L8(GW·PPA·커밋 실물 시계). 각 트랙은 `ds-rtl`(라벨·`<br>` 부제) + `ds-rts`(캡처값·`<i>` 시점) + `ds-rta`(→) + `ds-rev.up`(▲ 상향=`--st-hot`) + `ds-rtv.up`(판정), 하단 `ds-fn`. 렌즈 l2의 3층 표기는 기능색 재사용(가속기=`ds-ok`/`--st-dawn`·메모리=`ds-nt`/`--st-mature`·전력=`ds-wn`/`--st-hot`). **신규 CSS 클래스·:root 토큰 0**(전부 기존 `ds-*` 재사용) → TOKENS 무변·`check-docs` 통과(토큰 24종)·`node --check` 통과·소스 스모크(ds-rt 6개=리비전3+신규3·트랙 위치·문자열). narrative≠numbers — 시장규모 방향성 텍스트일 뿐 숫자 파일 불변. (OPS §3·§9 동반)
 - 2026-07-21 22:29 · **02 AI 수요·공급 로드맵 ④에 「칩 제조사별 Capex」 표 추가(삼성·SK·마이크론·TSMC).** SimpleorNothing 지시(한경 07-20 기사 반영·칩 4사 구분). 신규 표는 §6-1 레퍼런스 결을 그대로 승계 — `ds-sec`+`ds-note` 헤더 · `ds-lens`(§6-4 렌즈 2줄 l1=프레임·l2=판정) · `ds-card` 면(3px) · `ds-mtx.plan` 표(기존 구성요소별 표와 동일 폭·모바일 ~2025 열 자동 숨김 상속). 회사 역할 구분은 `ds-co small`(메모리·파운드리) + `ds-lb.sem` 배지(L3·L2/L3/L2·L4)로 표기 — 등락 규약(상향 ▲=`--st-hot`=`.ds-rev.up`) 재사용. **신규 CSS 클래스·:root 토큰 0**(전부 기존 `ds-*` 재사용) → TOKENS 무변·`check-docs` 통과(토큰 24종)·`node --check` 통과·jsdom 스모크(4행+sumrow·셀 수·배지). narrative≠numbers — 발표·로드맵 텍스트일 뿐 숫자 파일 불변. (OPS §3·§9 동반)
 - 2026-07-20 22:10 · **02 인사이트 찾기 헤더 정리 — 뷰 설명(`.vsub`) 하단 이동·인테이크 placeholder 힌트 삭제·시세/정보 스탬프 02 숨김.** SimpleorNothing 지시(스크린샷 3점). 뷰 부제 `.vsub`(15px `--dim`)를 `.vhead`에서 빼 **뷰 맨 아래**(`#insSigRest` 뒤·`.ins-wrap` 막내)로 옮기고 `border-top:1px solid var(--line)`로 구분 — 문단 내용·15px 규약 불변(§2 하한 유지 · `.vhead`는 이제 `.vkick`+`.vtitle`+`updIns`만). 인테이크 URL·본문·드롭 placeholder는 예시·힌트를 지우고 최소 라벨만(폼 14px 하한 §2 유지). 전 페이지 공통 `#asofBox`는 02에서만 숨김(`insight.js mount()` nav 리스너가 insight 탭일 때 `display:none` · 자가 마운트라 index.html 핸들러 뒤 등록 → 우선 · **index.html 무편집** · `#asofBox`가 `#v-insight`보다 앞이라 CSS `~` 불가). **신규 `:root` 토큰·CSS 클래스 0**(인라인 `var(--line)` 구분선만 · `insight.css` 무편집) → TOKENS 무변·`check-docs` 통과·`node --check` 통과. narrative≠numbers. (OPS §3·§9 동반)
 
