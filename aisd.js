@@ -207,7 +207,7 @@ var CSS=`#dsAisd{margin:2px 0 38px}
 var HTML=`<div style="position:relative">
   <div class="ds-kick">AI Value Chain · Demand · Supply</div>
   <h2 class="ds-title">AI <em>수요·공급</em> — 밸류체인으로 보는 상류·병목</h2>
-  <div class="ds-upd">update : 2026.07.23 · 알파벳 Q2 실적 CAPEX 가이던스 확정 반영 · 컨센서스 방향성 추정 · 수동 갱신(분기 캡처) · 리비전 트랙은 캡처 축적 전 예시</div>
+  <div class="ds-upd">update : 2026.07.20 · 컨센서스 방향성 추정 · 수동 갱신(분기 캡처) · 리비전 트랙은 캡처 축적 전 예시</div>
 </div>
 
 <div class="ds-sec">판정 <span class="ds-note">이 블록이 답하는 질문 · 결론 먼저</span></div>
@@ -428,22 +428,40 @@ var HTML=`<div style="position:relative">
   <div class="ds-l2">CAPEX는 <b>명목 달러 선행</b> · 아래 3종은 <span class="ds-ok">가속기(L2 실현)</span> · <span class="ds-nt">메모리(L3)</span> · <span class="ds-wn">전력(L8)</span> 을 각각 <b>동행 검증</b> — 셋이 함께 꺾여야 수요 피크 확증(하나만으론 플래그)</div>
 </div>
 <div class="ds-card">
-  <div class="ds-rt"><span class="ds-rtl">가속기 · L2 실현<br>NVDA DC매출 · 명목$ 시계</span>
-    <span class="ds-rts"><i>FY26Q2</i>$41B</span><span class="ds-rta">→</span>
-    <span class="ds-rts"><i>FY26Q3</i>$51.2B <span class="ds-rev up">▲25%</span></span><span class="ds-rta">→</span>
-    <span class="ds-rts"><i>FY26Q4E</i>~$58B</span>
-    <span class="ds-rtv up">▲ CAPEX→매출 실현 · YoY+66% · 가시성 ~$500B(BW+Rubin 누적)</span></div>
-  <div class="ds-rt"><span class="ds-rtl">메모리 · L3<br>HBM시장·비트·계약가 · 물량+가격 시계</span>
-    <span class="ds-rts"><i>25</i>$35B</span><span class="ds-rta">→</span>
-    <span class="ds-rts"><i>26E</i>~$50B <span class="ds-rev up">▲</span></span><span class="ds-rta">→</span>
-    <span class="ds-rts"><i>28E</i>$100B</span>
-    <span class="ds-rtv up">▲ 40%+CAGR · 비트~20% · 계약가↑ = MU γ 트리거③ 역감시선</span></div>
-  <div class="ds-rt"><span class="ds-rtl">전력 · L8<br>DC 신규계약 GW·PPA · 커밋 실물 시계</span>
-    <span class="ds-rts"><i>US수요</i>2027 2배</span><span class="ds-rta">→</span>
-    <span class="ds-rts"><i>26</i>+26%yoy</span><span class="ds-rta">→</span>
-    <span class="ds-rts"><i>글로벌</i>+165% by30</span>
-    <span class="ds-rtv up">▲ 리드타임 병목 = capex 최종 상한</span></div>
-  <div class="ds-fn">3종 = CAPEX 달러의 <b>실물 검증축</b> · 가속기=명목$ · 메모리=물량+가격 · 전력=커밋 실물 = 서로 다른 3시계 · 캡처 축적 전 예시(연동 시 분기 스냅샷 자동 파생) · 계약가 롤오버·비트 둔화·GW 지연이 동시 확인돼야 수요 피크 · 트리거 승격은 MU γ 3트리거·매크로 게이트 AND에만</div>
+  <div class="ds-l1" style="margin-bottom:7px"><b>① 가속기 L2</b> NVDA 데이터센터 매출 · $B <span class="ds-note">명목$ 시계 · NVDA 회계연도(FY26=2025.2~2026.1) 캘린더 근사</span></div>
+  <div class="ds-bars" style="height:118px">
+    <div class="ds-bc"><span class="ds-bv">$47B</span><div class="ds-bar" style="height:13%"></div></div>
+    <div class="ds-bc"><span class="ds-bv">$115B</span><div class="ds-bar" style="height:32%"></div></div>
+    <div class="ds-bc"><span class="ds-bv">$194B</span><div class="ds-bar" style="height:54%"></div></div>
+    <div class="ds-bc"><span class="ds-bv">~$285B</span><div class="ds-bar est" style="height:79%"></div></div>
+    <div class="ds-bc"><span class="ds-bv">~$360B</span><div class="ds-bar est" style="height:100%"></div></div>
+    <div class="ds-bc"><span class="ds-bv">—</span></div>
+  </div>
+  <div class="ds-bx"><span>2023</span><span>2024</span><span>2025</span><span class="est">2026E</span><span class="est">2027E</span><span class="est">2028E</span></div>
+
+  <div class="ds-l1" style="margin:18px 0 7px"><b>② 메모리 L3</b> HBM 시장규모 · $B <span class="ds-note">물량+가격 시계 · 계약가 롤오버 = MU γ 트리거③ 역감시선</span></div>
+  <div class="ds-bars" style="height:118px">
+    <div class="ds-bc"><span class="ds-bv">$5.5B</span><div class="ds-bar" style="height:6%"></div></div>
+    <div class="ds-bc"><span class="ds-bv">$18B</span><div class="ds-bar" style="height:18%"></div></div>
+    <div class="ds-bc"><span class="ds-bv">$35B</span><div class="ds-bar" style="height:35%"></div></div>
+    <div class="ds-bc"><span class="ds-bv">~$55B</span><div class="ds-bar est" style="height:55%"></div></div>
+    <div class="ds-bc"><span class="ds-bv">~$70B</span><div class="ds-bar est" style="height:70%"></div></div>
+    <div class="ds-bc"><span class="ds-bv">~$100B</span><div class="ds-bar est" style="height:100%"></div></div>
+  </div>
+  <div class="ds-bx"><span>2023</span><span>2024</span><span>2025</span><span class="est">2026E</span><span class="est">2027E</span><span class="est">2028E</span></div>
+
+  <div class="ds-l1" style="margin:18px 0 7px"><b>③ 전력 L8</b> 글로벌 데이터센터 전력 · TWh <span class="ds-note">커밋 실물 시계 · IEA 2024 실적·2030 945TWh 궤적 보간</span></div>
+  <div class="ds-bars" style="height:118px">
+    <div class="ds-bc"><span class="ds-bv">—</span></div>
+    <div class="ds-bc"><span class="ds-bv">415</span><div class="ds-bar" style="height:58%"></div></div>
+    <div class="ds-bc"><span class="ds-bv">~480</span><div class="ds-bar est" style="height:67%"></div></div>
+    <div class="ds-bc"><span class="ds-bv">~550</span><div class="ds-bar est" style="height:76%"></div></div>
+    <div class="ds-bc"><span class="ds-bv">~630</span><div class="ds-bar est" style="height:88%"></div></div>
+    <div class="ds-bc"><span class="ds-bv">~720</span><div class="ds-bar est" style="height:100%"></div></div>
+  </div>
+  <div class="ds-bx"><span>2023</span><span>2024</span><span>2025</span><span class="est">2026E</span><span class="est">2027E</span><span class="est">2028E</span></div>
+
+  <div class="ds-fn">채운 막대=실적 · 테두리=추정(E)·보간 · <b>—</b>=데이터 공백 · 3종 = CAPEX 달러의 실물 검증축(명목$/물량+가격/커밋 실물 3시계) · 소스: NVDA 실적(FY26 DC $193.7B·FY→캘린더 근사·FY27~28 컨센 추정) · HBM TrendForce/BofA(26E $54.6B·28E $100B, 23~24 초기시장) · IEA Energy&AI(24 415TWh·30 945TWh, 25~28 궤적 보간) · 셋이 동시 꺾여야 수요 피크, 트리거 승격은 MU γ 3트리거·매크로 게이트 AND에만</div>
 </div>
 
 <div class="ds-lens" style="margin-top:14px">
@@ -462,11 +480,11 @@ var HTML=`<div style="position:relative">
         <div class="ds-yc"><div class="ds-yy est">2027E</div><div class="ds-yv">↑ 지속</div><div class="ds-yt">AWS AI 매출 성장 연동 증액 시사 · 구체 가이던스 미제시</div></div>
         <div class="ds-yc"><div class="ds-yy est">2028E</div><div class="ds-yv">컨센 희박</div><div class="ds-yt">AWS 매출·전력 확보 속도 연동 — 애널 소수 추정만 존재</div></div>
       </div></td></tr>
-      <tr class="exp" tabindex="0"><td class="ds-co">Google<small>Alphabet</small></td><td>53</td><td>~85</td><td class="dim">~200 <span class="ds-rev up">▲15</span></td><td class="dim">↑ <span class="ds-rev up">▲</span></td><td class="dim">↑</td><td class="nt">Q2 확정 가이던스 $195~205B(상향)</td></tr>
+      <tr class="exp" tabindex="0"><td class="ds-co">Google<small>Alphabet</small></td><td>53</td><td>~85</td><td class="dim">~185 <span class="ds-rev up">▲40</span></td><td class="dim">↑ <span class="ds-rev up">▲</span></td><td class="dim">↑</td><td class="nt">TPU·데이터센터 공격적 상향</td></tr>
       <tr class="dtl"><td colspan="7"><div class="ds-yrp">
         <div class="ds-yc"><div class="ds-yy">2024</div><div class="ds-yv">$53B</div><div class="ds-yt">TPU v5·DC 증설 — Gemini 학습 인프라</div></div>
         <div class="ds-yc"><div class="ds-yy">2025</div><div class="ds-yv">~$85B</div><div class="ds-yt">가이던스 반복 상향 · TPU 확대 · 클라우드 수요</div></div>
-        <div class="ds-yc"><div class="ds-yy est">2026E</div><div class="ds-yv">$195~205B</div><div class="ds-yt">Q2 실적서 가이던스 상향($180~190B→$195~205B) · Cloud +82% · TPU 차세대·Gemini 추론 대응 · 2027 추가 증액 시사</div></div>
+        <div class="ds-yc"><div class="ds-yy est">2026E</div><div class="ds-yv">~$185B</div><div class="ds-yt">대폭 상향 — TPU 차세대 · Gemini 추론 트래픽 폭증 대응</div></div>
         <div class="ds-yc"><div class="ds-yy est">2027E</div><div class="ds-yv">↑ 지속</div><div class="ds-yt">자체칩(TPU) 비중 확대 = NVIDIA 의존 일부 완화 변수</div></div>
         <div class="ds-yc"><div class="ds-yy est">2028E</div><div class="ds-yv">컨센 희박</div><div class="ds-yt">TPU 세대 교체 주기 지속 전제 — 추론 트래픽이 규모 결정</div></div>
       </div></td></tr>
