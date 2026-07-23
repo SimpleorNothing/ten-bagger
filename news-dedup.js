@@ -1,8 +1,17 @@
-/* news-dedup.js — 동일 내용(같은 사건) 기사 접기.
+/* news-dedup.js — 동일 내용(같은 사건) 기사 접기 + 유사 토픽 블록 병합.
    출처만 다른 근접 중복(예: VRT 「2분기 실적 컨퍼런스콜 7/29 확정」 = 「2분기 실적 발표일 및 컨퍼런스콜 공지」)이
    한 종목/토픽 블록에 나란히 뜨는 것을 렌더 직후 DOM에서 1건으로 접는다. 표시 전용 — 데이터 파일 무변경(narrative≠numbers).
    판정 = 표시 요약(.asum) char-bigram Jaccard ≥ 0.35(실측 news.json 217쌍: 같은 사건 17쌍 전부 ≥.35·다른 사건 <.25).
-   #mktDigest(종목 뉴스)·#mktMacroNews(관련 기사) 재렌더·「더 보기」 확장마다 MutationObserver로 재적용. */
+   #mktDigest(종목 뉴스)·#mktMacroNews(관련 기사) 재렌더·「더 보기」 확장마다 MutationObserver로 재적용.
+
+   ── 유사 토픽 병합(2026-07-23 · SimpleorNothing 지시 「유사한 주제는 하나로 묶어줘」) ──
+   loadMacroNews()는 이미 축(axis)으로 토픽 블록을 병합하지만, 8축에 안 걸리는 발굴 토픽은 x_<정규화제목> 키가
+   실행·일자마다 달라져 같은 사건이 두 블록으로 쪼개진다(예 2026-07-21: 「한국증시 레버리지청산」+「韓증시 레버리지 변동성」).
+   → #mktMacroNews 안에서 **블록 제목(.stk-hd .nm) char-bigram Jaccard ≥ 0.30**이면 나중 블록의 기사(.arow)를 앞 블록으로
+     옮기고 뒤 블록을 제거한다(표시 전용 · news.json 불변). 병합 후 기존 행 dedup이 완전 동일 기사만 접는다.
+   실측(news.json 2026-07-23, 발굴+병목 16블록): 레버리지 쌍 제목유사 0.42, 그다음 최대 0.19 → 0.30이 유일 병합점.
+   **병목축 블록(제목 「상류…」·「L<숫자>…」)은 제외** — 상시 관측이라 발굴 토픽과 절대 병합 안 함(loadMacroNews bn_ 불변 규율과 동치).
+   커플링: 축 판정은 loadMacroNews의 몫이므로 여기선 제목유사도만 본다(AXR 복제 불필요). 표시 이름·임계는 이 파일에만 존재. */
 (function(){
   function bigr(s){var n=String(s||'').toLowerCase().replace(/[^0-9a-z가-힣]/g,'');var g={};if(n.length<2){if(n)g[n]=1;return g;}for(var i=0;i<n.length-1;i++)g[n.substr(i,2)]=1;return g;}
   function sim(a,b){var ga=bigr(a),gb=bigr(b),ka=Object.keys(ga),kb=Object.keys(gb);if(!ka.length||!kb.length)return 0;var x=0;for(var i=0;i<ka.length;i++)if(gb[ka[i]])x++;var u=ka.length+kb.length-x;return u?x/u:0;}
@@ -16,7 +25,20 @@
       if(dup)a.remove(); else seen.push(t);
     });
   }
-  function run(){document.querySelectorAll('.stk-blk').forEach(dedupeBlock);}
+  var TH_TOPIC=0.30, BN=/^\s*(상류|L\s*\d)/;   /* 병목 레이어 태그 블록 제외 */
+  function titleOf(b){var nm=b.querySelector('.stk-hd .nm');return nm?String(nm.textContent||'').trim():'';}
+  function mergeTopics(){   /* #mktMacroNews 안 유사 토픽 블록 병합(표시 전용) */
+    var host=document.getElementById('mktMacroNews');if(!host)return;
+    var blks=[];
+    host.querySelectorAll('.stk-blk').forEach(function(b){var t=titleOf(b);if(t&&!BN.test(t)){b._mt=t;blks.push(b);}});
+    for(var i=0;i<blks.length;i++){var a=blks[i];if(!a.parentNode)continue;
+      for(var j=i+1;j<blks.length;j++){var b=blks[j];if(!b.parentNode||b===a)continue;
+        if(sim(a._mt,b._mt)>=TH_TOPIC){
+          var rows=b.querySelectorAll('.arow');
+          Array.prototype.forEach.call(rows,function(r){a.appendChild(r);});   /* 앞(최신) 블록 유지 · 뒤 블록 기사 이관 */
+          b.parentNode.removeChild(b);}}}
+  }
+  function run(){mergeTopics();document.querySelectorAll('.stk-blk').forEach(dedupeBlock);}
   function watch(id){
     var host=document.getElementById(id);if(!host)return;
     var mo=new MutationObserver(function(){clearTimeout(host._dd);host._dd=setTimeout(run,60);});
