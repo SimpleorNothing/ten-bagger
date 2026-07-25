@@ -978,8 +978,9 @@ async function handleUs10y() {
 }
 
 // WTI 일별 시계열(2020~현재) 프록시 — Yahoo Finance(CL=F) 우선, Stooq CSV 폴백.
+// sym/stooqSym 파라미터화 — /api/gasoline 이 동일 경로 재사용(RB=F RBOB 가솔린 선물, $/gal).
 // 서버사이드 fetch 라 브라우저 CORS 무관. 정규화 출력: {source, points:[["YYYY-MM-DD", close], ...]}
-async function handleWti() {
+async function handleWti(sym = "CL=F", stooqSym = "cl.f") {
   const okJson = (obj) => new Response(JSON.stringify(obj), {
     status: 200,
     headers: { "content-type": "application/json; charset=utf-8", "cache-control": "public, max-age=3600" },
@@ -990,7 +991,7 @@ async function handleWti() {
   // 1) Yahoo Finance v8 chart
   for (const host of ["query1.finance.yahoo.com", "query2.finance.yahoo.com"]) {
     try {
-      const u = `https://${host}/v8/finance/chart/CL=F?period1=${P1}&period2=${now}&interval=1d`;
+      const u = `https://${host}/v8/finance/chart/${encodeURIComponent(sym)}?period1=${P1}&period2=${now}&interval=1d`;
       const r = await fetch(u, { headers: { "user-agent": "Mozilla/5.0 (compatible; alphamap/1.0)" }, cf: { cacheTtl: 3600, cacheEverything: true } });
       if (r.ok) {
         const j = await r.json();
@@ -1011,7 +1012,7 @@ async function handleWti() {
 
   // 2) Stooq CSV 폴백 (Date,Open,High,Low,Close,Volume)
   try {
-    const r = await fetch("https://stooq.com/q/d/l/?s=cl.f&i=d&d1=20200101", { cf: { cacheTtl: 3600, cacheEverything: true } });
+    const r = await fetch(`https://stooq.com/q/d/l/?s=${stooqSym}&i=d&d1=20200101`, { cf: { cacheTtl: 3600, cacheEverything: true } });
     if (r.ok) {
       const t = await r.text();
       const lines = t.trim().split("\n");
@@ -1024,7 +1025,7 @@ async function handleWti() {
     }
   } catch (_) { /* 폴백 실패 */ }
 
-  return new Response(JSON.stringify({ error: "wti upstream unavailable" }),
+  return new Response(JSON.stringify({ error: sym + " upstream unavailable" }),
     { status: 502, headers: { "content-type": "application/json" } });
 }
 
@@ -1756,6 +1757,10 @@ export default {
       // WTI 일별 시계열(2020~현재) 프록시 (인증된 디바이스만 도달)
       if (request.method === "GET" && url.pathname === "/api/wti") {
         return handleWti();
+      }
+      // 미국 가솔린(RBOB RB=F, $/gal) 일별 시계열 — 01 지표 카드(런타임). handleWti 재사용 (인증된 디바이스만 도달)
+      if (request.method === "GET" && url.pathname === "/api/gasoline") {
+        return handleWti("RB=F", "rb.f");
       }
       // 원/달러 환율(USD/KRW) 일별 시계열 — 01 시장 맥박 환율 게이지(런타임). (인증된 디바이스만 도달)
       if (request.method === "GET" && url.pathname === "/api/fx") {
