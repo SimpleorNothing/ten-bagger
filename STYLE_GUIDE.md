@@ -1,4 +1,4 @@
-**최종 갱신: 2026-07-25 23:40 (KST)**
+**최종 갱신: 2026-07-26 05:45 (KST)**
 
 # STYLE_GUIDE — 알파맵 디자인 시스템
 
@@ -174,6 +174,7 @@ pantone.css :root       ← 현행 팔레트 (팬튼 A안, index.html 하단 <li
 - 뷰 안에서 정보 밀도는 **섹션 4개 안팎**으로 끊는다.
 - **「리스크 보드」(2026-07-25 · 구 「보유 종목」 스파크라인 자리):** 「무엇이 올랐나」가 아니라 **「무엇이 이 판을 끝낼 수 있나」**를 상시로 못 박는 자리다. `risk.js` 자가 마운트 — 런타임에 `보유 종목` h2+`#mktHoldings`를 제거하고 그 위치에 `h2.msec` + `#riskLens` + `.mkt-grid#riskBoard`(카드 3장)를 넣는다(**index.html 무편집**). 그리드는 텍스트 밀도가 높아 `minmax(300px,1fr)`로 스코프 오버라이드(600px 이하 1열). 카드 내부 순서 = `.rk-hd`(번호 `.rk-no` + `.mkt-nm` + 상태 배지 `.rk-st`) → **렌즈 2줄**(§6-4 · l1 칩=축 태그 + 프레임 / l2=판정) → 게이지 `.rk-g`(라벨 14px + 값 mono 14px `tabular-nums` + 주석 12px) → 점등 조건 `.rk-tr`(점선 상단) → 레이어 리드스루 `.rk-rd`(좌측 2px 룰 = 종속) → 「최근 반영 기사」 `.rk-nw`(**`.arow` 재사용** — 새 기사 행 컴포넌트를 만들지 않는다) → 근거 `.rk-src`. **상태 배지는 부표(pill 20px §3)이고 색은 판정 기능색만 재사용** — 점등 `--st-hot`(`wn`) · 연기 `--st-mature`(`nt`) · 완화·반전 `--st-dawn`(`ok`), §6-4 `.ok/.wn/.nt`와 같은 어휘라 렌즈와 배지가 갈라지지 않는다. 게이지 값은 등락색 규약(§4) 그대로 상승 적·하락 청. **보드 위 인사이트는 렌즈 2줄 컴포넌트를 그대로 쓰되 l1을 런타임 파생**(점등/연기/반전 집계 + 켜진 축 이름)해 보드와 문장이 어긋나지 않게 한다. 매칭 기사 0건이면 §6-6대로 대기 사유를 적는다. 신규 `:root` 토큰 0 · 스타일은 `risk.js`가 `<style id="risk-css">`로 주입하고 전 선택자를 `#riskBoard`/`#riskLens`로 스코프(brief.js 패턴).
 - **「다가오는 일정」(06 흡수, 2026-07-17):** `.cal-now`(4열·모바일 2열)+`.now-card`(D-N + `.when`·`.lbl`·`.meta` · 좌측 3px `--cat-*` 스트라이프·radius 3px). `renderCalNow()`가 `calendar.json`+`earnings.json` moves를 오늘 기준 병합·프루닝, 임박 8개. `.meta`가 프레임→게이트 판정을 나르므로 §6-4 렌즈에 부합(숫자만 카드 아님). `#v-cal`서 이동 — 신규 클래스 0.
+- **「다가오는 일정」 운영자 오버레이(2026-07-26):** 카드 롱프레스(600ms) → 우상단 `.now-del`(중립 칩 — `--panel2`/`--line2` · 기능색 미사용, §5 혼용 금지 준수), 그리드 막내 `.now-add`(점선 타일 · hover `--dawn`) → `#calEvModal`(`.cev-*` — `--panel` 시트 · 필드 `--panel2` · 주 버튼 `--dawn`/`--onacc` · 폼 14px·메타 12px §2 하한 준수). 카드에 `user-select:none`. 신규 `:root` 토큰·전역 클래스 0.
 
 ### 6-2. 카드 그리드
 
@@ -260,6 +261,7 @@ pantone.css :root       ← 현행 팔레트 (팬튼 A안, index.html 하단 <li
 
 ## 갱신 이력
 
+- 2026-07-26 05:45 · **01 「다가오는 일정」 운영자 오버레이 UI — 롱프레스 삭제 칩·「＋ 이벤트 추가」 점선 타일·입력 모달.** 전부 `#v-market` 스코프 CSS — 삭제 칩은 데이터 인코딩(`--cat-*`)·단계색과 분리된 중립 크롬, 모달은 기존 토큰만 사용. **신규 `:root` 토큰·전역 클래스 0** → TOKENS 무변·check-docs 통과. 카드에 `user-select:none`(롱프레스 오선택 방지). jsdom 스모크 10검사 통과. SimpleorNothing 지시. (OPS §3·§9 동반)
 - 2026-07-26 · **01 지표 7번째 카드 「미국 가솔린」 추가.** §6 레퍼런스 복제 — `.mkt-card`+`card()`/`chart()`/`lens()` 재사용(`loadGas`/`lensGas`), 렌즈 2줄(l1=인플레·WTI 하류 / l2=$/gal·기간% → 판정), WTI 카드 바로 다음 배치. 표기 소수 2자리($/gal). **신규 `:root` 토큰·CSS 0** → TOKENS 무변·check-docs 통과. 등락색·기간버튼(RG) 규약 유지. 데이터=worker `/api/gasoline`(RB=F, `handleWti` 재사용). (OPS §3·§9 동반)
 - 2026-07-25 14:20 · **01 「보유 종목」 스파크라인 삭제 → 「리스크 보드」(3축) 신설(`risk.js` 자가 마운트).** SimpleorNothing 지시. §6 레퍼런스 승계 — `h2.msec`+`.mnote` · `.mkt-grid`/`.mkt-card` 복제 · **렌즈 2줄**(§6-4) · 기사 행은 **`.arow` 재사용** · 빈 상태 문구(§6-6). 상태 배지 `.rk-st` = 부표 20px(§3), 색은 판정 기능색만(`--st-hot` 점등 · `--st-mature` 연기 · `--st-dawn` 반전 = `wn/nt/ok` 어휘 동일). 게이지 값 = 등락색 규약(§4) + `tabular-nums`. 면 `#riskLens` radius 3px 직접 지정. 그리드만 `minmax(300px,1fr)` 스코프 오버라이드(600px 이하 1열). §2 하한 준수(12px 미만 0). **신규 `:root` 토큰·전역 CSS 클래스 0** — `risk.js`가 `<style id="risk-css">` 주입·`#riskBoard`/`#riskLens` 스코프(brief.js 패턴), index.html·pantone.css·worker.js 무편집 → TOKENS 무변·check-docs 통과·jsdom 스모크 통과. narrative≠numbers. (OPS §3·§9 동반)
 - 2026-07-24 00:30 · **02 aisd.js — ③ 「CAPEX 실현 검증」 3종을 `ds-rt` 텍스트 트랙 → `ds-bars` 막대차트 3개로 교체.** SimpleorNothing 지시(막대그래프化·2023~2028). CAPEX 막대와 동일 컴포넌트 재사용 — 각 지표(가속기 NVDA DC매출 $B·HBM 시장 $B·글로벌 DC전력 TWh)를 `ds-l1`(라벨+`ds-note` 단위/시계) + `ds-bars`(높이 인라인 118px) + `ds-bc`/`ds-bv`/`ds-bar(.est)` 6막대 + `ds-bx`(2023~2028E 연도축)로. 채운 막대=실적·`.est` 테두리=추정/보간(CAPEX 막대 규약 계승)·빈칸은 `ds-bar` 없이 `ds-bv` `—`만(빈 `ds-bc`는 `justify-content:flex-end`로 축에 정렬). 단위가 지표마다 달라 **3개 독립 축**(막대 높이=지표별 최대값 정규화). **신규 CSS 클래스·:root 토큰 0**(전부 기존 `ds-*` 재사용·높이만 인라인) → TOKENS 무변·`check-docs` 통과(토큰 24종)·`node --check` 통과·소스 스모크(ds-bc 18·ds-bars 3·빈칸 2). narrative≠numbers. (OPS §3·§9 동반)

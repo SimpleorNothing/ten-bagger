@@ -534,6 +534,24 @@ table.tk th.c{text-align:center}
 #v-market .now-card .when{font-family:var(--mono);font-size:12px;color:var(--faint);margin-top:3px}
 #v-market .now-card .lbl{font-size:14px;font-weight:700;margin-top:8px;color:var(--txt)}
 #v-market .now-card .meta{font-size:12px;color:var(--dim);margin-top:2px}
+#v-market .now-card{user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+#v-market .now-card .now-del{position:absolute;right:8px;top:8px;display:none;font:inherit;font-size:12px;font-weight:700;color:var(--txt);background:var(--panel2);border:1px solid var(--line2);border-radius:8px;padding:4px 10px;cursor:pointer;z-index:2}
+#v-market .now-card.show-del .now-del{display:inline-block}
+#v-market .now-add{border:1px dashed var(--line2);border-radius:12px;min-height:96px;background:transparent;color:var(--dim);font:inherit;font-size:13px;font-weight:700;cursor:pointer}
+#v-market .now-add:hover{color:var(--dawn);border-color:var(--dawn)}
+#v-market #calEvModal{position:fixed;inset:0;background:rgba(22,36,45,.45);z-index:60;display:flex;align-items:flex-start;justify-content:center;padding:24px 16px;overflow:auto}
+#v-market #calEvModal[hidden]{display:none}
+#v-market .cev-sheet{background:var(--panel);border:1px solid var(--line2);border-radius:14px;max-width:560px;width:100%;padding:18px}
+#v-market .cev-sheet h3{margin:0;font-size:15px;color:var(--txt)}
+#v-market .cev-note{font-size:12px;color:var(--faint);margin:6px 0 4px}
+#v-market .cev-f{display:flex;flex-direction:column;gap:4px;margin-top:10px}
+#v-market .cev-f label{font-size:12px;color:var(--dim);font-weight:700}
+#v-market .cev-f input,#v-market .cev-f select,#v-market .cev-f textarea{font:inherit;font-size:14px;color:var(--txt);background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+#v-market .cev-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+#v-market .cev-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:14px}
+#v-market .cev-btn{font:inherit;font-size:13px;font-weight:700;border-radius:8px;padding:8px 14px;cursor:pointer;border:1px solid var(--line2);background:var(--panel2);color:var(--txt)}
+#v-market .cev-btn.pri{background:var(--dawn);border-color:var(--dawn);color:var(--onacc)}
+#v-market .cev-btn[disabled]{opacity:.55;cursor:default}
 #v-market .cal-legend{display:flex;gap:14px;flex-wrap:wrap;margin:8px 0 4px;font-family:var(--mono);font-size:13px}
 #v-market .cal-legend .lg{display:flex;align-items:center;gap:6px;color:var(--dim)}
 #v-market .cal-legend .dot{width:9px;height:9px;border-radius:50%;display:inline-block}
@@ -3297,6 +3315,14 @@ function foldPastCal(){
   refresh();
  }
 }
+/* ── 01 다가오는 일정: 운영자 오버레이(카드 추가·삭제) — R2 calevents.json(/api/calevents) 공유.
+   calendar.json(리포 SoT)은 불변 — 화면 추가·삭제분만 {added,removed}로 병합. narrative≠numbers(표시 큐레이션). */
+let CAL_OVR={added:[],removed:[]};
+function calEvKey(e){return (e.d||'')+'|'+(e.lbl||'');}
+function calAttr(s){return calEsc(s).replace(/"/g,'&quot;');}
+async function loadCalOvr(){try{const r=await fetch('/api/calevents',{cache:'no-store'});if(!r.ok)return;const o=await r.json();
+ if(o&&typeof o==='object'){CAL_OVR={added:Array.isArray(o.added)?o.added:[],removed:Array.isArray(o.removed)?o.removed:[]};renderCalNow();}}catch(e){}}
+async function saveCalOvr(){try{const r=await fetch('/api/calevents',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(CAL_OVR)});return r.ok;}catch(e){return false;}}
 function renderCalNow(){
  const today=calToday();
  const p=n=>String(n).padStart(2,'0');
@@ -3310,19 +3336,97 @@ function renderCalNow(){
   ev.push({d:m.date,cat:'earn',lbl:EARN_NAME[tk]||tk,tk:tk,
    meta:(EARN_NOTE[tk]?EARN_NOTE[tk]+' · ':'')+'실적'+pct+basis,when:m.date});
  });
+ CAL_OVR.added.forEach(o=>ev.push({...o,_ov:1}));
+ const rmk=new Set(CAL_OVR.removed);
  const cards=ev.map(e=>({...e,_n:calDDiff(e.d,today)}))
-  .filter(e=>e._n>=-CAL_NOW_GRACE)
+  .filter(e=>e._n>=-CAL_NOW_GRACE&&!rmk.has(calEvKey(e)))
   .sort((a,b)=>a._n-b._n)
   .slice(0,CAL_NOW_MAX);
  const box=document.getElementById('calNow');if(!box)return;
  box.innerHTML=cards.map(e=>{
   const tk=e.tk?` <span style="font-family:var(--mono);color:var(--faint);font-weight:600">${calEsc(e.tk)}</span>`:'';
-  return `<div class="now-card" data-d="${e.d}" style="--c:var(--cat-${e.cat})">`+
+  return `<div class="now-card" data-d="${e.d}" data-k="${calAttr(calEvKey(e))}"${e._ov?' data-ov="1"':''} style="--c:var(--cat-${e.cat})">`+
+   `<button type="button" class="now-del">삭제</button>`+
    `<div class="dn">${calDNText(e._n)}</div>`+
    `<div class="when">${calEsc(e.when||e.d)}</div>`+
    `<div class="lbl">${calEsc(e.lbl)}${tk}</div>`+
    `<div class="meta">${calEsc(e.meta||'')}</div></div>`;
- }).join('');
+ }).join('')+'<button type="button" class="now-add" id="calAddBtn">＋ 이벤트 추가</button>';
+}
+/* ── 카드 롱프레스(마우스·터치 600ms) → 삭제 버튼 / ＋ 타일 → 입력 모달 ── */
+(function calNowUI(){
+ var box=document.getElementById('calNow');if(!box||box._evui)return;box._evui=1;
+ var t=null,px=0,py=0;
+ function clearDel(){box.querySelectorAll('.now-card.show-del').forEach(function(c){c.classList.remove('show-del');});}
+ box.addEventListener('pointerdown',function(e){
+  var c=e.target.closest('.now-card');if(!c)return;px=e.clientX;py=e.clientY;
+  t=setTimeout(function(){t=null;clearDel();c.classList.add('show-del');},600);});
+ ['pointerup','pointercancel'].forEach(function(ev){box.addEventListener(ev,function(){if(t){clearTimeout(t);t=null;}});});
+ box.addEventListener('pointermove',function(e){if(t&&(Math.abs(e.clientX-px)>10||Math.abs(e.clientY-py)>10)){clearTimeout(t);t=null;}});
+ box.addEventListener('contextmenu',function(e){if(e.target.closest('.now-card'))e.preventDefault();});
+ document.addEventListener('click',function(e){if(!e.target.closest('#calNow .now-card'))clearDel();});
+ box.addEventListener('click',function(e){
+  var del=e.target.closest('.now-del');
+  if(del){var c=del.closest('.now-card'),k=c.getAttribute('data-k')||'';
+   if(!confirm('이 이벤트 카드를 삭제할까요?\n'+(k.split('|')[1]||k)))return;
+   if(c.getAttribute('data-ov')==='1'){CAL_OVR.added=CAL_OVR.added.filter(function(x){return calEvKey(x)!==k;});}
+   else if(CAL_OVR.removed.indexOf(k)<0)CAL_OVR.removed.push(k);
+   renderCalNow();
+   saveCalOvr().then(function(ok){if(!ok)alert('서버 저장 실패 — 새로고침 시 카드가 되돌아올 수 있습니다');});
+   return;}
+  if(e.target.closest('#calAddBtn'))calEvOpen();});
+})();
+function calEvModal(){
+ var m=document.getElementById('calEvModal');if(m)return m;
+ m=document.createElement('div');m.id='calEvModal';m.hidden=true;
+ m.innerHTML='<div class="cev-sheet">'
+  +'<h3>이벤트 추가</h3>'
+  +'<p class="cev-note">텍스트를 붙여넣고 「내용 파악」을 누르면 필드가 자동으로 채워집니다(뽑기≠반영 — 확인 후 저장). 모든 인증 기기 공유 · narrative≠numbers(표시 큐레이션일 뿐 숫자 파일 불변).</p>'
+  +'<div class="cev-f"><label for="cevRaw">내용 붙여넣기 (선택)</label><textarea id="cevRaw" rows="4" placeholder="일정·공시·뉴스 텍스트"></textarea></div>'
+  +'<div class="cev-btns" style="justify-content:flex-start;margin-top:8px"><button type="button" class="cev-btn" id="cevParse">내용 파악 (AI)</button><span class="cev-note" id="cevMsg" style="margin:0;align-self:center"></span></div>'
+  +'<div class="cev-row"><div class="cev-f"><label for="cevD">날짜</label><input type="date" id="cevD"></div>'
+  +'<div class="cev-f"><label for="cevCat">분류</label><select id="cevCat"><option value="macro">거시 (Fed·ECB·BOJ·금통위)</option><option value="infl">물가 (CPI·PCE)</option><option value="earn">실적</option><option value="event" selected>투자 이벤트</option><option value="pol">정치</option><option value="watch">글로벌 워치</option></select></div></div>'
+  +'<div class="cev-f"><label for="cevLbl">제목</label><input type="text" id="cevLbl" maxlength="120"></div>'
+  +'<div class="cev-row"><div class="cev-f"><label for="cevTk">티커 (선택)</label><input type="text" id="cevTk" maxlength="40"></div>'
+  +'<div class="cev-f"><label for="cevWhen">표시 일시 (선택)</label><input type="text" id="cevWhen" maxlength="60" placeholder="예 07-30 (목·03:00 KST)"></div></div>'
+  +'<div class="cev-f"><label for="cevMeta">렌즈 메모 (선택)</label><textarea id="cevMeta" rows="2" maxlength="400" placeholder="왜 보나 — 레이어 리드스루·게이트 연관"></textarea></div>'
+  +'<div class="cev-btns"><button type="button" class="cev-btn" id="cevClose">닫기</button><button type="button" class="cev-btn pri" id="cevSave">저장</button></div>'
+  +'</div>';
+ document.getElementById('v-market').appendChild(m);
+ m.addEventListener('click',function(e){if(e.target===m)m.hidden=true;});
+ m.querySelector('#cevClose').addEventListener('click',function(){m.hidden=true;});
+ m.querySelector('#cevParse').addEventListener('click',async function(){
+  var raw=m.querySelector('#cevRaw').value.trim(),msg=m.querySelector('#cevMsg'),btn=this;
+  if(!raw){msg.textContent='붙여넣은 내용이 없습니다';return;}
+  btn.disabled=true;msg.textContent='파악 중…';
+  try{const r=await fetch('/api/calevent-parse',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({text:raw})});
+   const o=await r.json();
+   if(!r.ok||!o.event){msg.textContent='실패: '+(o.error||r.status);return;}
+   var ev=o.event;
+   m.querySelector('#cevD').value=ev.d||'';m.querySelector('#cevCat').value=ev.cat||'event';
+   m.querySelector('#cevLbl').value=ev.lbl||'';m.querySelector('#cevTk').value=ev.tk||'';
+   m.querySelector('#cevWhen').value=ev.when||'';m.querySelector('#cevMeta').value=ev.meta||'';
+   msg.textContent='필드를 채웠습니다 — 확인 후 저장';
+  }catch(err){msg.textContent='실패: '+err;}finally{btn.disabled=false;}});
+ m.querySelector('#cevSave').addEventListener('click',function(){
+  var d=m.querySelector('#cevD').value,lbl=m.querySelector('#cevLbl').value.trim(),msg=m.querySelector('#cevMsg');
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(d)||!lbl){msg.textContent='날짜(YYYY-MM-DD)·제목은 필수입니다';return;}
+  var ev={d:d,cat:m.querySelector('#cevCat').value,lbl:lbl};
+  var tk=m.querySelector('#cevTk').value.trim();if(tk)ev.tk=tk;
+  var wh=m.querySelector('#cevWhen').value.trim();if(wh)ev.when=wh;
+  var mt=m.querySelector('#cevMeta').value.trim();if(mt)ev.meta=mt;
+  CAL_OVR.removed=CAL_OVR.removed.filter(function(k){return k!==calEvKey(ev);});
+  CAL_OVR.added=CAL_OVR.added.filter(function(x){return calEvKey(x)!==calEvKey(ev);});
+  CAL_OVR.added.push(ev);
+  renderCalNow();m.hidden=true;
+  saveCalOvr().then(function(ok){if(!ok)alert('서버 저장 실패 — 새로고침 시 카드가 사라질 수 있습니다');});});
+ return m;
+}
+function calEvOpen(){
+ var m=calEvModal();
+ ['cevRaw','cevLbl','cevTk','cevWhen','cevMeta'].forEach(function(id){m.querySelector('#'+id).value='';});
+ m.querySelector('#cevD').value='';m.querySelector('#cevCat').value='event';m.querySelector('#cevMsg').textContent='';
+ m.hidden=false;
 }
 function updateAsof(){const pe=document.getElementById('pxAsof');if(pe)pe.textContent=fmtKST(PRICES_ASOF);const ie=document.getElementById('infoAsof');if(ie)ie.textContent=fmtKST(infoAsof());}
 async function loadPrices(){try{const r=await fetch('./prices.json',{cache:'no-store'});if(!r.ok)return;const p=await r.json();PRICES=p.quotes||{};PRICES_ASOF=p.asOf||null;renderAll();updateAsof();}catch(e){}}
@@ -5152,7 +5256,7 @@ document.getElementById('filterSel').addEventListener('change',renderTracker);
 
 /* ===== INIT ===== */
 function renderAll(){renderSignalLog();renderThread();renderStack();renderPortfolio();renderTracker();}
-renderLegends();loadStore().then(renderAll);renderAll();updateAsof();loadPrices();stampStatics();renderCalNow();
+renderLegends();loadStore().then(renderAll);renderAll();updateAsof();loadPrices();stampStatics();renderCalNow();loadCalOvr();
 
 /* ===== 출력(인쇄/PDF) — 페이지별 버튼: 이 페이지만 / 전체 ===== */
 (function initPrint(){

@@ -732,6 +732,98 @@ async function handleCalflagsPut(request, env) {
   return memoJson({ ok: true, count: Object.keys(obj).length }, 200);
 }
 
+// ===== 01 다가오는 일정 — 운영자 이벤트 오버레이(추가·삭제) · R2 calevents.json =====
+// calendar.json(리포 SoT·크론 프루닝)은 그대로 두고, 화면에서 추가·삭제한 분만
+// {added:[이벤트…], removed:["d|lbl" 키…]} 로 R2 에 보관 → 모든 인증 기기 공유.
+// narrative≠numbers — 표시 큐레이션일 뿐, earnings·judgment 등 숫자 파일은 불변.
+const CALEVENTS_KEY = "calevents.json";
+const CALEV_CATS = ["macro", "infl", "earn", "event", "pol", "watch"];
+
+function calevClamp(e) {
+  if (!e || typeof e !== "object") return null;
+  const d = String(e.d || "").trim();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(d)) return null;
+  const lbl = String(e.lbl || "").trim().slice(0, 120);
+  if (!lbl) return null;
+  const out = { d, cat: CALEV_CATS.includes(e.cat) ? e.cat : "event", lbl };
+  if (e.tk) out.tk = String(e.tk).trim().slice(0, 40);
+  if (e.meta) out.meta = String(e.meta).trim().slice(0, 400);
+  if (e.when) out.when = String(e.when).trim().slice(0, 60);
+  return out;
+}
+
+async function handleCaleventsGet(env) {
+  if (!env.MEMO_BUCKET) return memoJson({ error: "MEMO_BUCKET not configured" }, 503);
+  const obj = await env.MEMO_BUCKET.get(CALEVENTS_KEY);
+  const v = obj ? await obj.text() : "";
+  return new Response(v && v.trim() ? v : '{"added":[],"removed":[]}', {
+    status: 200,
+    headers: { "content-type": "application/json", "cache-control": "no-store" },
+  });
+}
+
+async function handleCaleventsPut(request, env) {
+  if (!env.MEMO_BUCKET) return memoJson({ error: "MEMO_BUCKET not configured" }, 503);
+  let raw;
+  try { raw = await request.text(); }
+  catch { return memoJson({ error: "read failed" }, 400); }
+  if (raw.length > 512 * 1024) return memoJson({ error: "too large", bytes: raw.length }, 413);
+  let body;
+  try { body = JSON.parse(raw); }
+  catch { return memoJson({ error: "invalid json" }, 400); }
+  if (body === null || typeof body !== "object" || Array.isArray(body)) return memoJson({ error: "expected object" }, 400);
+  const added = (Array.isArray(body.added) ? body.added : []).map(calevClamp).filter(Boolean).slice(0, 200);
+  const removed = (Array.isArray(body.removed) ? body.removed : [])
+    .map((k) => String(k == null ? "" : k).slice(0, 200)).filter(Boolean).slice(0, 400);
+  const out = { added, removed };
+  await env.MEMO_BUCKET.put(CALEVENTS_KEY, JSON.stringify(out), {
+    httpMetadata: { contentType: "application/json" },
+  });
+  return memoJson({ ok: true, added: added.length, removed: removed.length }, 200);
+}
+
+// 붙여넣은 일정·뉴스 텍스트 → 카드 필드 자동 추출(Claude). 뽑기≠반영 — 저장은 사람이 누른다.
+async function handleCaleventParse(request, env) {
+  const json = (obj, status) => new Response(JSON.stringify(obj),
+    { status, headers: { "content-type": "application/json" } });
+  if (!env.ANTHROPIC_API_KEY) return json({ error: "ANTHROPIC_API_KEY not configured" }, 503);
+  let body;
+  try { body = await request.json(); } catch { return json({ error: "invalid json" }, 400); }
+  const text = (body && body.text) ? String(body.text).slice(0, 8000).trim() : "";
+  if (!text) return json({ error: "text required" }, 400);
+  const today = new Date(Date.now() + 9 * 3600000).toISOString().slice(0, 10);
+  const sys =
+    "너는 '알파맵' AI 인프라 투자 관측소의 01 「다가오는 일정」 카드 입력 파서다. 붙여넣은 일정·공시·뉴스 텍스트에서 이벤트 카드 필드를 뽑는다. 오늘(KST)=" + today + ". " +
+    "필드: d(이벤트 날짜 YYYY-MM-DD — 상대 표현은 오늘 기준 환산, 기간이면 시작일) · " +
+    "cat(macro=중앙은행·거시지표 | infl=CPI·PCE 물가 | earn=실적 | event=투자 이벤트·산업 발표 | pol=정치·정책 | watch=지정학 워치 — 하나만) · " +
+    "lbl(카드 제목 한 줄·한국어·간결) · tk(관련 티커, 없으면 빈 문자열) · " +
+    "when(표시용 일시 문자열 예 '07-30 (목·03:00 KST)', 불명이면 빈 문자열) · " +
+    "meta(한 줄 렌즈: 이 이벤트를 왜 보나 — 8레이어 리드스루·매크로/개별 게이트 연관. 발표·키노트류는 '발표=내러티브, 숫자 무변'을 명시 — narrative≠numbers). " +
+    "반드시 JSON 한 개만 출력(코드펜스·설명 금지). " +
+    'JSON: {"d":"YYYY-MM-DD","cat":"...","lbl":"...","tk":"...","when":"...","meta":"..."}';
+  let up;
+  try {
+    up = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "content-type": "application/json", "x-api-key": env.ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01" },
+      body: JSON.stringify({ model: "claude-opus-4-8", max_tokens: 400, system: sys,
+        messages: [{ role: "user", content: text }] }),
+    });
+  } catch (e) {
+    return json({ error: "anthropic fetch failed", detail: String(e && e.message ? e.message : e) }, 502);
+  }
+  const t = await up.text();
+  if (!up.ok) return json({ error: describeAnthropicError(up.status, t), status: up.status }, 502);
+  let data; try { data = JSON.parse(t); } catch { return json({ error: "anthropic parse failed" }, 502); }
+  let outTxt = "";
+  (data.content || []).forEach((c) => { if (c && c.type === "text") outTxt += c.text; });
+  outTxt = outTxt.replace(/```json|```/g, "").trim();
+  let ev; try { ev = JSON.parse(outTxt); } catch { return json({ error: "extract parse failed" }, 502); }
+  const clamped = calevClamp(ev);
+  if (!clamped) return json({ error: "extract invalid (d·lbl 필수)" }, 422);
+  return json({ event: clamped }, 200);
+}
+
 // ===== 03 관점과 정보 — 인사이트 저장(R2 · insights.json) =====
 // 증권사 리포트·기사·유튜브에서 뽑아낸 "관점 카드"를 모든 인증 기기가 공유하도록 R2 에 보관.
 // 채택(adopted)된 클레임만 다른 메뉴(01/02/04/05)에 에코된다 — 선별은 사람이 한다.
@@ -1837,6 +1929,14 @@ export default {
         if (request.method === "GET") return handleCalflagsGet(env);
         if (request.method === "PUT") return handleCalflagsPut(request, env);
         return memoJson({ error: "method not allowed" }, 405);
+      }
+      if (url.pathname === "/api/calevents") {
+        if (request.method === "GET") return handleCaleventsGet(env);
+        if (request.method === "POST") return handleCaleventsPut(request, env);
+        return memoJson({ error: "method not allowed" }, 405);
+      }
+      if (request.method === "POST" && url.pathname === "/api/calevent-parse") {
+        return handleCaleventParse(request, env);
       }
       const res = await env.ASSETS.fetch(request);
       // HTML 응답에 1Y 호버 차트 모듈 주입 (index.html 본문은 그대로 유지하기 위한 worker-side 주입).
