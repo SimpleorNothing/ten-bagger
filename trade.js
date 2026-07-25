@@ -1,8 +1,9 @@
 /* trade.js — 01 시장 모니터링 「한국 수출 (반도체 중심)」 섹션 자가 마운트 (index.html 무편집)
  *
  * 왜: 한국 반도체 수출(월간)은 L3 메모리 수요의 실시간 선행 읽기다. 수출이 계속 폭증 =
- *     DRAM/NAND 롤오버 미도래 → MU γ-닫힘 ③(공급 정상화)의 반증 신호. FRED 월간 선행지표
- *     (미국·lead.js) 옆에 한국 축을 나란히 세운다.
+ *     DRAM/NAND 롤오버 미도래 → MU γ-닫힘 ③(공급 정상화)의 반증 신호.
+ * 위치: 「지표」 그리드 바로 뒤(= 지표와 리스크 보드 사이). #mkt_dxi(지표 마지막 카드)의
+ *      부모 .mkt-grid 뒤에 삽입 — risk.js 로드 순서와 무관하게 지표→한국수출→리스크보드 보장.
  * 데이터: trade.json (산업통상부 월간 수출입 동향 · 매월 1일 발표 직후 스케줄 태스크가 1점 append).
  * 규율: 관측치 표시 전용 — 판단·숫자 파일 무관(narrative≠numbers). 신규 :root 토큰 0.
  * 디자인: STYLE_GUIDE §6 레퍼런스(01 mkt-grid/mkt-card + 렌즈 2줄 + 빈 상태 문구) 복제.
@@ -110,11 +111,20 @@
     host.innerHTML = semiCard(last, prev, ser) + expCard(last, prev) + balCard(last, prev);
   }
 
+  // 「지표」 그리드 = #mkt_dxi(지표 마지막 카드)를 품은 .mkt-grid.
+  function indicatorGrid() {
+    var dxi = document.getElementById('mkt_dxi');
+    if (!dxi) return null;
+    if (dxi.closest) return dxi.closest('.mkt-grid');
+    var p = dxi.parentNode;
+    return (p && p.classList && p.classList.contains('mkt-grid')) ? p : null;
+  }
+
   function mount() {
     if (document.getElementById(MOUNT_ID)) return true;
-    var lead = document.getElementById('mktLead');
+    var indGrid = indicatorGrid();
     var macro = document.getElementById('mktMacroNews');
-    if (!lead && !macro) return false;
+    if (!indGrid && !macro) return false;
 
     var h = document.createElement('h2');
     h.className = 'msec';
@@ -124,9 +134,9 @@
     grid.id = MOUNT_ID;
     grid.innerHTML = '<div class="mkt-ph" style="grid-column:1/-1">로딩…</div>';
 
-    if (lead) {
-      // 「월간 선행지표(FRED)」 그리드 바로 뒤 — 선행지표(미국)와 한국 수출을 나란히
-      lead.parentNode.insertBefore(h, lead.nextSibling);
+    if (indGrid) {
+      // 「지표」 그리드 바로 뒤 = 지표와 리스크 보드 사이(risk.js 로드 순서 무관)
+      indGrid.parentNode.insertBefore(h, indGrid.nextSibling);
       h.parentNode.insertBefore(grid, h.nextSibling);
     } else {
       // 폴백: 「관련 기사」 헤더 앞(뉴스보다 위)
