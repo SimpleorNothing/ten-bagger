@@ -928,6 +928,22 @@ header::after{
 }
 </style>
 <link rel="stylesheet" href="/pantone.css">
+<style id="nav-fouc-guard">
+/* nav 자가 마운트(insight.js·brief.js defer)가 정적 nav를 재구성하기 전
+   옛 라벨(구 「02 궁금한 것」 등) 정적 5탭이 순간 페인트되는 플래시(FOUC) 억제.
+   hydration 완료(DOMContentLoaded=전 defer 실행 완료)까지 숨겼다 .rdy 로 표시.
+   visibility 사용 → 레이아웃 시프트 0 · 스크립트 실패 시 3s 폴백 표시. SimpleorNothing 지시 2026-07-25 */
+#nav{visibility:hidden}
+#nav.rdy{visibility:visible}
+</style>
+<script>
+(function(){
+ function rdy(){var n=document.getElementById('nav');if(n)n.classList.add('rdy');}
+ if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',function(){requestAnimationFrame(rdy);});}
+ else{requestAnimationFrame(rdy);}
+ setTimeout(rdy,3000);
+})();
+</script>
 </head>
 <body>
 <header><div class="wrap bar">

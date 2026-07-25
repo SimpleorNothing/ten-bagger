@@ -1,4 +1,4 @@
-**최종 갱신: 2026-07-24 00:30 (KST)**
+**최종 갱신: 2026-07-25 22:00 (KST)**
 
 # STYLE_GUIDE — 알파맵 디자인 시스템
 
@@ -343,3 +343,5 @@ pantone.css :root       ← 현행 팔레트 (팬튼 A안, index.html 하단 <li
 - 2026-07-12 · **v3.** 지속 갱신 문서를 **2개(STYLE_GUIDE·OPS)** 로 확정 — 이 파일은 디자인 SoT. §3 해도 레이어(면 3px/배지 20px·radius 함정), §4 전역 관행(뷰 골격·updstamp·등락색 규약), §6 **01 시장 모니터링 레퍼런스 구현**(그리드·카드 내부 순서·렌즈 2줄·리스트/블록·빈 상태), §7 **신규 메뉴 체크리스트 11항** 신설. 토큰 구역은 무변경(실측 정합 유지).
 - 2026-07-12 · **v2 전면 재작성.** v1은 `--bg/--surface/--text/--muted/--border/--brand` 6토큰(흰 배경·`#1257d6` 파랑)을 기술했으나, 이는 현행 `index.html`·`pantone.css` 어디에도 없는 **폐기 팔레트**(04 알파맵 레거시 `--a-*`와만 일치)였다. 라이브 실측 기준으로 교체하고, `scripts/check-docs.mjs` 드리프트 검출기를 붙여 재발을 막는다.
 - (v1) · 기획 도구 모음 시절 디자인 토큰 문서 — 폐기.
+| nav 하이드레이션 가드 | `#nav{visibility:hidden}` → 자가 마운트(`insight.js`·`brief.js` defer) 재구성 후 인라인 스크립트가 `DOMContentLoaded`→`rAF`에 `.rdy` 부여해 표시. **정적 5탭(옛 라벨) 플래시(FOUC) 억제** · `visibility`라 레이아웃 시프트 0 · 3s 폴백. `</head>` 앞 `#nav-fouc-guard`. |
+- 2026-07-25 22:00 · **nav 새로고침 FOUC 억제.** 정적 `#nav` 5탭(옛 「02 궁금한 것」)이 `insight.js`·`brief.js`(defer) 재구성 전 순간 보이던 문제 → `</head>` 앞 `#nav-fouc-guard`(`#nav{visibility:hidden}`+`DOMContentLoaded`→`rAF` `.rdy`·3s 폴백). §4 「nav 하이드레이션 가드」 행 신설. (OPS §3·§9 동반)

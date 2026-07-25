@@ -1,4 +1,4 @@
-**최종 갱신: 2026-07-24 00:30 (KST)**
+**최종 갱신: 2026-07-25 22:00 (KST)**
 
 # OPS — 알파맵 운영 가이드
 
@@ -83,7 +83,7 @@
 
 ### 현행 메뉴 (7탭 · 런타임 렌더 순)
 `01 시장 모니터링(v-market)` · `02 인사이트 찾기(v-insight · insight.js 자가 마운트)` · `03 전문가 원탁(v-council)` · `04 시장과 실적 전망(v-thread · v-cycle·v-alpha 2026-07-18 렌더 제외)` · `05 리밸런싱(v-decision)` · **`06 모닝 브리핑(v-brief · brief.js 자가 마운트 · 2026-07-19 신설)`** · `07 메모(v-memo)`
-※ 위는 **런타임 렌더 순**(§3 내부번호 = 이 순서). `nav` 정적 버튼은 5개(market·cycle·port·council·memo · **index.html 무편집**)이고, `insight.js` `mount()`가 런타임에 ①`insight` 탭을 `market` 뒤 주입 ②`council`을 `cycle` 앞으로 이동 ③`cycle` 라벨 「궁금한 것」→「시장과 실적 전망」 개명 ④전 탭 index 순 재번호 → 위 순서 확정(정적 폴백은 마운트 전 구 5탭 · `insight.js` 로드 전 잠깐). **`data-v`·뷰 id·데이터 소스는 불변 — 라벨·순서만 재구성**(2026-07-18). ※ 04 뷰 제목은 #424가 옛 `#instantAnswer` vhead(「지금 궁금한 것」)를 삭제해 별도 개명 불필요 — v-thread 최상단은 `#dsAisd`(AI 수요·공급 로드맵). `v-port`·`v-tracker`·`v-macro`·`v-cal`은 **뷰서 제외·코드 잔존**(v-cal은 2026-07-17 06 캘린더 삭제로 합류 — 임박 이벤트는 01로 흡수, `#v-cal` CSS는 비활성 잔존).
+※ 위는 **런타임 렌더 순**(§3 내부번호 = 이 순서). `nav` 정적 버튼은 5개(market·cycle·port·council·memo · **index.html 무편집**)이고, `insight.js` `mount()`가 런타임에 ①`insight` 탭을 `market` 뒤 주입 ②`council`을 `cycle` 앞으로 이동 ③`cycle` 라벨 「궁금한 것」→「시장과 실적 전망」 개명 ④전 탭 index 순 재번호 → 위 순서 확정(정적 폴백은 마운트 전 구 5탭 · `insight.js` 로드 전 잠깐). **이 「잠깐」이 새로고침 플래시(FOUC)였고 `</head>` 앞 `#nav-fouc-guard`(`#nav{visibility:hidden}`→하이드레이션 후 `.rdy`)로 억제(2026-07-25·STYLE_GUIDE §4·§9).** **`data-v`·뷰 id·데이터 소스는 불변 — 라벨·순서만 재구성**(2026-07-18). ※ 04 뷰 제목은 #424가 옛 `#instantAnswer` vhead(「지금 궁금한 것」)를 삭제해 별도 개명 불필요 — v-thread 최상단은 `#dsAisd`(AI 수요·공급 로드맵). `v-port`·`v-tracker`·`v-macro`·`v-cal`은 **뷰서 제외·코드 잔존**(v-cal은 2026-07-17 06 캘린더 삭제로 합류 — 임박 이벤트는 01로 흡수, `#v-cal` CSS는 비활성 잔존).
 
 ### 01 시장 모니터링 (`v-market`)
 
@@ -416,3 +416,4 @@
 - 2026-07-12 16:20 · **매크로 토픽 축 정규화(`ax`)** — 매 실행 발굴로 같은 축이 다른 이름·id로 들어와 「관련 기사」가 8블록으로 쪼개짐. 파이프라인·렌더를 축 키 기준으로 통일 → **8→5블록**.
 - 2026-07-11 · v-port·v-tracker·v-macro 뷰서 제외(코드 잔존·결정보드 소비) · 6탭 확정 · 타임스탬프 신설
 - 2026-07-10 · INFO_SOURCES.md 흡수 → §3 정보 인벤토리로 통합 · 구 파일 삭제
+- 2026-07-25 22:00 · **nav 새로고침 FOUC 억제 가드.** 정적 `#nav` 5탭(옛 라벨)이 `insight.js`·`brief.js` 자가 마운트(defer) 재구성 전 순간 페인트되던 문제 → `</head>` 앞 `#nav-fouc-guard`(`#nav{visibility:hidden}`+`DOMContentLoaded`→`rAF` `.rdy`·3s 폴백). §3 현행 메뉴 주석·STYLE_GUIDE §4·§9 동반.
