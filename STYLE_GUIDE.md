@@ -1,4 +1,4 @@
-**최종 갱신: 2026-07-26 12:40 (KST)**
+**최종 갱신: 2026-07-26 14:35 (KST)**
 
 # STYLE_GUIDE — 알파맵 디자인 시스템
 
@@ -174,6 +174,7 @@ pantone.css :root       ← 현행 팔레트 (팬튼 A안, index.html 하단 <li
 - 뷰 안에서 정보 밀도는 **섹션 4개 안팎**으로 끊는다.
 - **「리스크 보드」(2026-07-25 · 구 「보유 종목」 스파크라인 자리):** 「무엇이 올랐나」가 아니라 **「무엇이 이 판을 끝낼 수 있나」**를 상시로 못 박는 자리다. `risk.js` 자가 마운트 — 런타임에 `보유 종목` h2+`#mktHoldings`를 제거하고 그 위치에 `h2.msec` + `#riskLens` + `.mkt-grid#riskBoard`(카드 3장)를 넣는다(**index.html 무편집**). 그리드는 텍스트 밀도가 높아 `minmax(300px,1fr)`로 스코프 오버라이드(600px 이하 1열). 카드 내부 순서 = `.rk-hd`(번호 `.rk-no` + `.mkt-nm` + 상태 배지 `.rk-st`) → **렌즈 2줄**(§6-4 · l1 칩=축 태그 + 프레임 / l2=판정) → 게이지 `.rk-g`(라벨 14px + 값 mono 14px `tabular-nums` + 주석 12px) → 점등 조건 `.rk-tr`(점선 상단) → 레이어 리드스루 `.rk-rd`(좌측 2px 룰 = 종속) → 「최근 반영 기사」 `.rk-nw`(**`.arow` 재사용** — 새 기사 행 컴포넌트를 만들지 않는다) → 근거 `.rk-src`. **상태 배지는 부표(pill 20px §3)이고 색은 판정 기능색만 재사용** — 점등 `--st-hot`(`wn`) · 연기 `--st-mature`(`nt`) · 완화·반전 `--st-dawn`(`ok`), §6-4 `.ok/.wn/.nt`와 같은 어휘라 렌즈와 배지가 갈라지지 않는다. 게이지 값은 등락색 규약(§4) 그대로 상승 적·하락 청. **보드 위 인사이트는 렌즈 2줄 컴포넌트를 그대로 쓰되 l1을 런타임 파생**(점등/연기/반전 집계 + 켜진 축 이름)해 보드와 문장이 어긋나지 않게 한다. 매칭 기사 0건이면 §6-6대로 대기 사유를 적는다. 신규 `:root` 토큰 0 · 스타일은 `risk.js`가 `<style id="risk-css">`로 주입하고 전 선택자를 `#riskBoard`/`#riskLens`로 스코프(brief.js 패턴).
 - **「다가오는 일정」(06 흡수, 2026-07-17):** `.cal-now`(4열·모바일 2열)+`.now-card`(D-N + `.when`·`.lbl`·`.meta` · 좌측 3px `--cat-*` 스트라이프·radius 3px). `renderCalNow()`가 `calendar.json`+`earnings.json` moves를 오늘 기준 병합·프루닝, 임박 8개. `.meta`가 프레임→게이트 판정을 나르므로 §6-4 렌즈에 부합(숫자만 카드 아님). `#v-cal`서 이동 — 신규 클래스 0.
+- **「오늘의 투자 명언」 스트립(2026-07-26 · `quote.js` 자가 마운트):** `#v-market` **첫 자식**(`.vhead` 위 = nav 바로 아래)에 `#mktQuote` 스트립을 끼운다(index.html 무편집 · 로더=changelog.js). 면 규약 = `--panel`+`1px --line`·**radius 3px 직접 지정**(§3). 명언 15px/600(`--txt`·따옴표 장식 `--dawn`) · 출처·레짐 칩 mono 12px `--faint`(§2 하한). 레짐 워드만 등락색 규약 준용 — 공포=하락측 청(`--st-accel`)·과열=상승측 적(`--st-hot`)·중립 무채(`--dim`), 기능색 `--st-*` 단계 의미로 쓰지 않는다. 클릭=같은 레짐 풀 안 랜덤 교체. ≤600px에서 칩은 줄바꿈 full-width. 신규 `:root` 토큰·전역 클래스 0(`<style id="quote-css">` 스코프).
 - **「다가오는 일정」 운영자 오버레이(2026-07-26):** 카드 롱프레스(600ms) → 우상단 `.now-del`(중립 칩 — `--panel2`/`--line2` · 기능색 미사용, §5 혼용 금지 준수), 그리드 막내 `.now-add`(점선 타일 · hover `--dawn`) → `#calEvModal`(`.cev-*` — `--panel` 시트 · 필드 `--panel2` · 주 버튼 `--dawn`/`--onacc` · 폼 14px·메타 12px §2 하한 준수). 카드에 `user-select:none`. 신규 `:root` 토큰·전역 클래스 0.
 
 ### 6-2. 카드 그리드
@@ -261,6 +262,7 @@ pantone.css :root       ← 현행 팔레트 (팬튼 A안, index.html 하단 <li
 
 ## 갱신 이력
 
+- 2026-07-26 14:35 · **01 뷰 최상단 「오늘의 투자 명언」 스트립(`#mktQuote` · `quote.js` 자가 마운트).** §6-1에 위치·면(3px)·타이포(15px/12px 하한)·레짐 칩 색 규약(등락색 준용 — 공포 청·과열 적·중립 무채) 명문화. 신규 `:root` 토큰·전역 클래스 0 → TOKENS 무변·check-docs 통과. (OPS §3·§9 동반)
 - 2026-07-26 12:40 · **#v-cal 모바일(≤640px) `.cal-row` 스택 레이아웃.** 3열 그리드 유지하되 `.cal-body`를 `grid-column:1/-1`로 내려 full-width, 날짜칩 좌정렬+D-N 인라인(`br` 숨김), 본문 폰트 상향(.ti 15.5px·.mt 14px·line-height 1.6), `word-break:keep-all`·`overflow-wrap:anywhere`. 데스크톱 무변·신규 토큰·클래스 0 → TOKENS 무변·check-docs 통과. SimpleorNothing 리포트(모바일 글자 세로 줄바꿈) 해소. (OPS §9 동반)
 - 2026-07-26 11:30 · **#v-cal에 동적 「다가오는 이벤트」 구역(`#calFull`·`renderCalFull()`) 신설 — 01 8칸(`CAL_NOW_MAX`) 밖 먼 일정 표시.** 소스는 renderCalNow와 동일(`CAL_NOW`+실적무브+`CAL_OVR.added`)이되 8칸 컷 없이 월별 렌더. `#v-cal` 기존 클래스 재사용 → 신규 토큰·클래스 0·check-docs 통과·jsdom 9검사. SimpleorNothing 리포트(9월 일정 미표시) 해소. (OPS §3·§9 동반)
 - 2026-07-26 05:45 · **01 「다가오는 일정」 운영자 오버레이 UI — 롱프레스 삭제 칩·「＋ 이벤트 추가」 점선 타일·입력 모달.** 전부 `#v-market` 스코프 CSS — 삭제 칩은 데이터 인코딩(`--cat-*`)·단계색과 분리된 중립 크롬, 모달은 기존 토큰만 사용. **신규 `:root` 토큰·전역 클래스 0** → TOKENS 무변·check-docs 통과. 카드에 `user-select:none`(롱프레스 오선택 방지). jsdom 스모크 10검사 통과. SimpleorNothing 지시. (OPS §3·§9 동반)
