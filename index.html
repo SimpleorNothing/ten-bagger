@@ -1195,7 +1195,11 @@ header::after{
 
   <!-- 임박 이벤트·범례 → 01 시장 모니터링 「다가오는 일정」으로 이관(2026-07-17). v-cal은 뷰서 제외·코드 잔존 -->
 
-  <div class="cal-sec">아젠다 타임라인 <span class="sub">· 2026 6월 → 12월</span><span class="updstamp" id="updCal" style="margin-left:auto"></span></div>
+  <!-- 다가오는 이벤트(동적) — 01 「다가오는 일정」의 8칸 제한을 넘겨 전부 표시. calendar.json(events) + 수기 추가(CAL_OVR.added) 라이브 소스. renderCalFull()가 #calFull 채움. 2026-07-26 -->
+  <div class="cal-sec">다가오는 이벤트 <span class="sub">· 01 「다가오는 일정」 전체 · 8칸 제한 없음 · calendar.json + 수기 추가</span></div>
+  <div id="calFull"><div class="mt" style="padding:10px 6px;color:var(--faint)">임박 이벤트 계산 대기 (calendar.json)</div></div>
+
+  <div class="cal-sec" style="margin-top:26px">아젠다 타임라인 <span class="sub">· 2026 6월 → 12월 · 상세 기록(수기)</span><span class="updstamp" id="updCal" style="margin-left:auto"></span></div>
 
   <div class="cal-month">6월 <span class="mo-sub">— AVGO·SpaceX·CPI·FOMC·MU + 메가테크 키노트가 몰린 고밀도 구간</span></div>
   <div class="cal-row"><div class="date-chip">06.01~05</div><div class="cat-dot" style="background:var(--cat-event)"></div><div class="cal-body"><div class="ti">엔비디아 Computex·GTC Taipei 키노트 <span class="tk">NVDA</span> <span class="mbadge" style="background:#e8590c22;color:#e8590c">내러티브</span></div><div class="mt">6/1 젠슨 황 키노트(Vera Rubin VR200·RTX Spark·피지컬 AI), Computex 6/2~5. 강물①·⑤ 수요 확인 — <b>레이어 수요 확정이지 종목 채점 아님</b>(I/O 2026과 동일 처리·추격 경고).</div></div></div>
@@ -3352,6 +3356,43 @@ function renderCalNow(){
    `<div class="lbl">${calEsc(e.lbl)}${tk}</div>`+
    `<div class="meta">${calEsc(e.meta||'')}</div></div>`;
  }).join('')+'<button type="button" class="now-add" id="calAddBtn">＋ 이벤트 추가</button>';
+ renderCalFull();
+}
+/* ── 「전체 캘린더」(#v-cal) 동적 구역 — 01 「다가오는 일정」의 8칸(CAL_NOW_MAX) 제한을 넘겨
+   오늘(KST) 이후 예정 이벤트를 전부 월별로 렌더. 소스는 renderCalNow와 동일(CAL_NOW + 실적무브 + CAL_OVR.added).
+   → 8칸에서 밀린 먼 일정(수기 추가 포함)이 전체 캘린더에서는 보인다. #v-cal 기존 클래스 재사용(신규 토큰·클래스 0). ── */
+function renderCalFull(){
+ const box=document.getElementById('calFull');if(!box)return;
+ const today=calToday();
+ const ev=CAL_NOW.map(e=>({...e}));
+ const mv=window.CAL_EARN_MOVES||null;
+ if(mv)Object.keys(mv).forEach(tk=>{const m=mv[tk];if(!m||!m.date)return;
+  const pct=Number.isFinite(m.pct)?` · ±${m.pct}%`:'';
+  const basis=m.basis==='event-iv'?' (IV)':m.basis==='hist'?' (추정)':'';
+  ev.push({d:m.date,cat:'earn',lbl:EARN_NAME[tk]||tk,tk:tk,
+   meta:(EARN_NOTE[tk]?EARN_NOTE[tk]+' · ':'')+'실적'+pct+basis,when:m.date});
+ });
+ CAL_OVR.added.forEach(o=>ev.push({...o,_ov:1}));
+ const rmk=new Set(CAL_OVR.removed);
+ const rows=ev.map(e=>({...e,_n:calDDiff(e.d,today)}))
+  .filter(e=>e._n>=-CAL_NOW_GRACE&&!rmk.has(calEvKey(e)))
+  .sort((a,b)=>a._n-b._n);
+ if(!rows.length){box.innerHTML='<div class="mt" style="padding:10px 6px;color:var(--faint)">예정 이벤트 없음</div>';return;}
+ const MON=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+ let out='',curMo='';
+ rows.forEach(e=>{
+  const dt=new Date(e.d+'T00:00:00Z');const mo=dt.getUTCFullYear()+'-'+dt.getUTCMonth();
+  if(mo!==curMo){curMo=mo;out+=`<div class="cal-month">${dt.getUTCFullYear()} ${MON[dt.getUTCMonth()]}</div>`;}
+  const md=(e.d||'').slice(5).replace('-','.');
+  const tk=e.tk?` <span class="tk">${calEsc(e.tk)}</span>`:'';
+  const wh=(e.when&&e.when!==e.d)?` <span class="tk">${calEsc(e.when)}</span>`:'';
+  const ov=e._ov?` <span class="tag-est">수기 추가</span>`:'';
+  out+=`<div class="cal-row"${e._ov?' data-ov="1"':''}><div class="date-chip">${md}<br><span style="color:var(--dawn);font-weight:800">${calDNText(e._n)}</span></div>`+
+   `<div class="cat-dot" style="background:var(--cat-${e.cat})"></div>`+
+   `<div class="cal-body"><div class="ti">${calEsc(e.lbl)}${tk}${wh}${ov}</div>`+
+   (e.meta?`<div class="mt">${calEsc(e.meta)}</div>`:'')+`</div></div>`;
+ });
+ box.innerHTML=out;
 }
 /* ── 카드 롱프레스(마우스·터치 600ms) → 삭제 버튼 / ＋ 타일 → 입력 모달 ── */
 (function calNowUI(){
@@ -3449,6 +3490,7 @@ document.addEventListener('click',function(e){var j=e.target.closest('.cal-jump'
  document.querySelectorAll('.view').forEach(function(v){v.classList.remove('on');});
  var el=document.getElementById(to);if(el)el.classList.add('on');
  if(to==='v-cal'&&typeof foldPastCal==='function')foldPastCal();
+ if(to==='v-cal'&&typeof renderCalFull==='function')renderCalFull();
  var ab=document.getElementById('asofBox');if(ab)ab.style.display='';
  if(to==='v-market'){var mt=document.querySelector('#nav .tab[data-v="market"]');if(mt)mt.classList.add('on');if(window.MARKET&&window.MARKET.render)window.MARKET.render();}
  window.scrollTo(0,0);});
