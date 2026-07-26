@@ -7,6 +7,7 @@
    신규 변경 항목은 아래 MKT_CHANGELOG 맨 위에 {d:'YYYY-MM-DD',t:'주요내용'} 로 추가한다(최신순). */
 (function(){
   var MKT_CHANGELOG=[
+    {d:'2026-07-26',t:'01 맨 위에 「오늘의 투자 명언」 — 그날 증시 체온(공포·중립·과열)을 반영해 랜덤 표시, 누르면 다른 명언'},
     {d:'2026-07-17',t:'전문가 원탁 화면 헤더에도 업데이트 배지 추가 — 우상단에서 클릭하면 사이트 변경 이력을 한눈에'},
     {d:'2026-07-16',t:'04 전문가 원탁 신설 — 반도체·매크로·상대가치 전문가 5인 + 「알파맵」좌장(라이브 데이터)으로 현 상황을 교차 토론하고 이력을 남기는 화면'},
     {d:'2026-07-14',t:'종목 뉴스 차트: 기간을 여러 해로 넓히면 X축 날짜에 연도 표시(예 21-07-14 → 26-07-13) — 시작·끝이 몇 해 차인지 정확히'},
@@ -130,6 +131,12 @@
     var s=document.createElement('script');s.id='tradeJs';s.src='/trade.js';s.defer=true;
     (document.body||document.documentElement).appendChild(s);
   }
+  // 01 시장 모니터링 상단 「오늘의 투자 명언」 스트립 로더(quote.js 자가 마운트).
+  function loadQuote(){
+    if(document.getElementById('quoteJs'))return;
+    var s=document.createElement('script');s.id='quoteJs';s.src='/quote.js';s.defer=true;
+    (document.body||document.documentElement).appendChild(s);
+  }
   function boot(){
     mountHead('#v-market .vhead','mktUpd');        // 01 시장 모니터링 헤더 우상단
     mountHead('#v-council .vhead','mktUpdCouncil'); // 전문가 원탁 헤더 우상단
@@ -138,6 +145,7 @@
     loadLead();                                     // 01 월간 선행지표(FRED) 카드
     loadRisk();                                     // 01 리스크 3축 보드
     loadTrade();                                    // 01 한국 수출(반도체 중심) 카드
+    loadQuote();                                    // 01 상단 투자 명언 스트립
   }
   document.addEventListener('keydown',function(e){if(e.key==='Escape')hide();});
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
