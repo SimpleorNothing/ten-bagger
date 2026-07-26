@@ -1,4 +1,4 @@
-**최종 갱신: 2026-07-26 14:35 (KST)**
+**최종 갱신: 2026-07-26 20:05 (KST)**
 
 # OPS — 알파맵 운영 가이드
 
@@ -353,6 +353,7 @@
 ---
 
 ## 9. 갱신 이력
+- 2026-07-26 20:05 · **#v-cal 모바일 칩 행 2차 픽스 — ≤640px grid·flex 폭 계산 제거(블록 플로).** 스크린샷 리포트: D-N 배지 하이픈 꺾임(「D-」/「31」)+분류점이 날짜 위 겹침. 원인=12:40 픽스의 `auto 12px 1fr`에서 auto 트랙<칩 폭이면 flex-shrink 개행+트랙 오버플로. 수정=`.cal-row` block(`:not(.cal-past)` 폴드 보존)·칩 inline·D-N `nowrap`·`.cat-dot` inline-block·본문 full-width. CSS 1줄·토큰 0·check-docs 통과·b64 md5 왕복. (STYLE_GUIDE 동반)
 
 - 2026-07-26 14:35 · **01 뷰 최상단(nav↔`.vhead` 사이) 「오늘의 투자 명언」 스트립 신설(`quote.js` 자가 마운트).** SimpleorNothing 지시(스크린샷 위치 · 증시 반영 랜덤 명언). `signals.json`(CNN F&G·VIX·나스닥 DD) 합산 스코어로 공포/중립/과열 레짐 판정 → 레짐별 내장 풀(각 8개 · 버핏·템플턴·멍거·린치·그레이엄·막스·월가 격언)에서 랜덤 1개, 스트립 클릭 시 같은 레짐 안 교체(직전 반복 배제). 우측 칩 = 레짐 라벨(공포=청 `--st-accel`·과열=적 `--st-hot`=등락색 규약·중립 무채) + F&G·VIX·나스닥 라이브 수치. 로더 = `changelog.js` `loadQuote()`(raer·lead·risk·trade 패턴) — **index.html·worker.js 무편집**. 레짐은 명언 「선곡」 전용으로 매크로 게이트(3중 AND)와 별개 렌즈 · narrative≠numbers(숫자·판단 파일 불변). signals 실패 시 중립 풀+「지표 수집 대기」 칩(§6-6). 신규 `:root` 토큰·전역 클래스 0(`<style id="quote-css">` `#mktQuote` 스코프) → TOKENS 무변·check-docs 통과·`node --check` 통과. §3 01 인벤토리 1행 · STYLE_GUIDE 동반.
 - 2026-07-26 12:40 · **#v-cal 모바일 판독성 픽스 — `.cal-row`를 ≤640px에서 스택 레이아웃으로.** SimpleorNothing 리포트(스크린샷 — `#calFull` 본문이 글자 단위 세로 줄바꿈). 원인 = 데스크톱 우선 3열 그리드(70px·12px·1fr)+작은 폰트(12.5px) → 모바일 확대·텍스트 리플로 시 본문 열이 최소폭으로 붕괴. 수정 = `@media(max-width:640px)`에서 날짜칩+분류점 1행·`.cal-body`는 `grid-column:1/-1` full-width 2행, 칩 좌정렬(D-N 인라인·`br` 숨김), 본문 폰트 상향(.ti 15.5·.mt 14), `word-break:keep-all`+`overflow-wrap:anywhere`(한글 어절 단위 줄바꿈). index.html CSS만·신규 토큰·클래스 0 → check-docs 통과. `patches/*.b64`(md5 왕복). 미반영이던 calFull docsync 동반 반영. (STYLE_GUIDE 동반)

@@ -1,4 +1,4 @@
-**최종 갱신: 2026-07-26 14:35 (KST)**
+**최종 갱신: 2026-07-26 20:05 (KST)**
 
 # STYLE_GUIDE — 알파맵 디자인 시스템
 
@@ -262,6 +262,7 @@ pantone.css :root       ← 현행 팔레트 (팬튼 A안, index.html 하단 <li
 
 ## 갱신 이력
 
+- 2026-07-26 20:05 · **#v-cal 모바일(≤640px) 칩 행 2차 픽스 — grid·flex 폭 계산 제거, 블록 플로.** D-N 하이픈 꺾임·분류점 날짜 겹침(스크린샷) 해소. `.cal-row` block(`:not(.cal-past)` 폴드 보존) · 칩 inline · D-N `white-space:nowrap` · `.cat-dot` inline-block · 본문 full-width. 한 행 = 「날짜 D-N ●」+본문 2행 구조. 신규 토큰·클래스 0 → TOKENS 무변·check-docs 통과. SimpleorNothing 리포트. (OPS §9 동반)
 - 2026-07-26 14:35 · **01 뷰 최상단 「오늘의 투자 명언」 스트립(`#mktQuote` · `quote.js` 자가 마운트).** §6-1에 위치·면(3px)·타이포(15px/12px 하한)·레짐 칩 색 규약(등락색 준용 — 공포 청·과열 적·중립 무채) 명문화. 신규 `:root` 토큰·전역 클래스 0 → TOKENS 무변·check-docs 통과. (OPS §3·§9 동반)
 - 2026-07-26 12:40 · **#v-cal 모바일(≤640px) `.cal-row` 스택 레이아웃.** 3열 그리드 유지하되 `.cal-body`를 `grid-column:1/-1`로 내려 full-width, 날짜칩 좌정렬+D-N 인라인(`br` 숨김), 본문 폰트 상향(.ti 15.5px·.mt 14px·line-height 1.6), `word-break:keep-all`·`overflow-wrap:anywhere`. 데스크톱 무변·신규 토큰·클래스 0 → TOKENS 무변·check-docs 통과. SimpleorNothing 리포트(모바일 글자 세로 줄바꿈) 해소. (OPS §9 동반)
 - 2026-07-26 11:30 · **#v-cal에 동적 「다가오는 이벤트」 구역(`#calFull`·`renderCalFull()`) 신설 — 01 8칸(`CAL_NOW_MAX`) 밖 먼 일정 표시.** 소스는 renderCalNow와 동일(`CAL_NOW`+실적무브+`CAL_OVR.added`)이되 8칸 컷 없이 월별 렌더. `#v-cal` 기존 클래스 재사용 → 신규 토큰·클래스 0·check-docs 통과·jsdom 9검사. SimpleorNothing 리포트(9월 일정 미표시) 해소. (OPS §3·§9 동반)
