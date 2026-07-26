@@ -62,8 +62,12 @@
     grid.id = MOUNT_ID;
     grid.innerHTML = '<div class="mkt-ph" style="grid-column:1/-1">로딩…</div>';
     // 「관련 기사」 헤더 앞에 삽입 — 뉴스(서술)보다 위, 지표(수치) 블록 다음
+    // 앵커와 h2 사이에 insight.js 스트립(#insStripMarket 등 div)이 끼면 직전 형제가 H2가 아니다
+    // → 가장 가까운 선행 H2까지 역행해 그 앞에 삽입(못 찾으면 앵커 앞 폴백).
+    // 구 판은 이때 anchor 직전에 h2를 꽂아 news-dedup.js가 「관련 기사」 h2로 오인·리네임(토픽 레이더 중복 표시).
     var prevH = anchor.previousElementSibling;
-    var ref = (prevH && prevH.tagName === 'H2') ? prevH : anchor;
+    while (prevH && prevH.tagName !== 'H2') prevH = prevH.previousElementSibling;
+    var ref = prevH || anchor;
     ref.parentNode.insertBefore(h, ref);
     ref.parentNode.insertBefore(grid, ref);
 

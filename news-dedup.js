@@ -92,8 +92,13 @@
     var host=document.getElementById('mktMacroNews');if(!host)return;
     if(busy)return;busy=true;if(OBS)OBS.disconnect();
     try{
-      var h=host.previousElementSibling;   /* h2 「관련 기사」→「토픽 레이더」 — insight.js가 host 앞에 #insStripMarket을 끼우므로 h2.msec 만날 때까지 역행 */
-      while(h&&!(h.classList&&h.classList.contains('msec')))h=h.previousElementSibling;
+      /* h2 「관련 기사」→「토픽 레이더」 — 역행하되 .msec라고 다 우리 것이 아니다(lead.js h2 오인 리네임=중복 원인)
+         → data-radar 기마킹 or 「관련 기사/토픽 레이더」 텍스트 시작 h2만 대상. */
+      var h=host.previousElementSibling,hit=null;
+      while(h){if(h.classList&&h.classList.contains('msec')){var tx=String(h.textContent||'').trim();
+        if(h.getAttribute('data-radar')||/^(관련 기사|토픽 레이더)/.test(tx)){hit=h;break;}}
+        h=h.previousElementSibling;}
+      h=hit;
       if(h&&!h.getAttribute('data-radar')){
         h.setAttribute('data-radar','1');
         h.innerHTML='토픽 레이더 <span class="mnote">매크로 관점 · 토픽별</span>';}

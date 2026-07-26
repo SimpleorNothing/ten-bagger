@@ -184,7 +184,8 @@
       var anchor = document.getElementById('mktMacroNews');
       if (!anchor) return false;
       var prevH = anchor.previousElementSibling;
-      ref = (prevH && prevH.tagName === 'H2') ? prevH : anchor;
+      while (prevH && prevH.tagName !== 'H2') prevH = prevH.previousElementSibling;   // 스트립 div 건너뛰기(lead.js 동일 픽스)
+      ref = prevH || anchor;
     }
     css();
     var h = document.createElement('h2');
