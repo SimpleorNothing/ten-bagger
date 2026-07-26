@@ -1,4 +1,4 @@
-**최종 갱신: 2026-07-26 05:45 (KST)**
+**최종 갱신: 2026-07-26 12:40 (KST)**
 
 # STYLE_GUIDE — 알파맵 디자인 시스템
 
@@ -261,6 +261,8 @@ pantone.css :root       ← 현행 팔레트 (팬튼 A안, index.html 하단 <li
 
 ## 갱신 이력
 
+- 2026-07-26 12:40 · **#v-cal 모바일(≤640px) `.cal-row` 스택 레이아웃.** 3열 그리드 유지하되 `.cal-body`를 `grid-column:1/-1`로 내려 full-width, 날짜칩 좌정렬+D-N 인라인(`br` 숨김), 본문 폰트 상향(.ti 15.5px·.mt 14px·line-height 1.6), `word-break:keep-all`·`overflow-wrap:anywhere`. 데스크톱 무변·신규 토큰·클래스 0 → TOKENS 무변·check-docs 통과. SimpleorNothing 리포트(모바일 글자 세로 줄바꿈) 해소. (OPS §9 동반)
+- 2026-07-26 11:30 · **#v-cal에 동적 「다가오는 이벤트」 구역(`#calFull`·`renderCalFull()`) 신설 — 01 8칸(`CAL_NOW_MAX`) 밖 먼 일정 표시.** 소스는 renderCalNow와 동일(`CAL_NOW`+실적무브+`CAL_OVR.added`)이되 8칸 컷 없이 월별 렌더. `#v-cal` 기존 클래스 재사용 → 신규 토큰·클래스 0·check-docs 통과·jsdom 9검사. SimpleorNothing 리포트(9월 일정 미표시) 해소. (OPS §3·§9 동반)
 - 2026-07-26 05:45 · **01 「다가오는 일정」 운영자 오버레이 UI — 롱프레스 삭제 칩·「＋ 이벤트 추가」 점선 타일·입력 모달.** 전부 `#v-market` 스코프 CSS — 삭제 칩은 데이터 인코딩(`--cat-*`)·단계색과 분리된 중립 크롬, 모달은 기존 토큰만 사용. **신규 `:root` 토큰·전역 클래스 0** → TOKENS 무변·check-docs 통과. 카드에 `user-select:none`(롱프레스 오선택 방지). jsdom 스모크 10검사 통과. SimpleorNothing 지시. (OPS §3·§9 동반)
 - 2026-07-26 · **01 지표 7번째 카드 「미국 가솔린」 추가.** §6 레퍼런스 복제 — `.mkt-card`+`card()`/`chart()`/`lens()` 재사용(`loadGas`/`lensGas`), 렌즈 2줄(l1=인플레·WTI 하류 / l2=$/gal·기간% → 판정), WTI 카드 바로 다음 배치. 표기 소수 2자리($/gal). **신규 `:root` 토큰·CSS 0** → TOKENS 무변·check-docs 통과. 등락색·기간버튼(RG) 규약 유지. 데이터=worker `/api/gasoline`(RB=F, `handleWti` 재사용). (OPS §3·§9 동반)
 - 2026-07-25 14:20 · **01 「보유 종목」 스파크라인 삭제 → 「리스크 보드」(3축) 신설(`risk.js` 자가 마운트).** SimpleorNothing 지시. §6 레퍼런스 승계 — `h2.msec`+`.mnote` · `.mkt-grid`/`.mkt-card` 복제 · **렌즈 2줄**(§6-4) · 기사 행은 **`.arow` 재사용** · 빈 상태 문구(§6-6). 상태 배지 `.rk-st` = 부표 20px(§3), 색은 판정 기능색만(`--st-hot` 점등 · `--st-mature` 연기 · `--st-dawn` 반전 = `wn/nt/ok` 어휘 동일). 게이지 값 = 등락색 규약(§4) + `tabular-nums`. 면 `#riskLens` radius 3px 직접 지정. 그리드만 `minmax(300px,1fr)` 스코프 오버라이드(600px 이하 1열). §2 하한 준수(12px 미만 0). **신규 `:root` 토큰·전역 CSS 클래스 0** — `risk.js`가 `<style id="risk-css">` 주입·`#riskBoard`/`#riskLens` 스코프(brief.js 패턴), index.html·pantone.css·worker.js 무편집 → TOKENS 무변·check-docs 통과·jsdom 스모크 통과. narrative≠numbers. (OPS §3·§9 동반)

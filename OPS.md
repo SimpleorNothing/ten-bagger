@@ -1,4 +1,4 @@
-**최종 갱신: 2026-07-26 12:15 (KST)**
+**최종 갱신: 2026-07-26 12:40 (KST)**
 
 # OPS — 알파맵 운영 가이드
 
@@ -138,7 +138,7 @@
 
 | 대상 | 무엇을 교차 확인 | 반영 방향 |
 |---|---|---|
-| **01 다가오는 일정** | 예정 거시·실적 이벤트(FOMC·CPI/PCE·금통위·메가이벤트·실적)가 **경과**했는지 | 경과분은 `renderCalNow()`가 오늘(KST) 기준 자동 소거 · 이벤트 큐레이션·다음 회차 추가는 `calendar.json` `events` 수기 편집. 예: US CPI 발표 → 01 매크로 축에 반영. narrative≠numbers |
+| **01 다가오는 일정** | 예정 거시·실적 이벤트(FOMC·CPI/PCE·금통위·메가이벤트·실적)가 **경과**했는지 | 경과분은 `renderCalNow()`가 오늘(KST) 기준 자동 소거 · 이벤트 큐레이션·다음 회차 추가는 `calendar.json` `events` 수기 편집. 예: US CPI 발표 → 01 매크로 축에 반영. narrative≠numbers. **표시 범위 = 근접 8칸(`CAL_NOW_MAX=8`·D-N 오름차순, 고정 D-N 아님) — 8칸 밖(예: 9월+) 먼 일정은 「전체 캘린더 →」(#v-cal `#calFull`·`renderCalFull()`)에서 8칸 제한 없이 월별 전부 표시**(2026-07-26). |
 | **04 시장과 실적 전망** | 01 데이터·병목 뉴스(지수·메모리 가격·capex·L3~L8 병목)가 **반도체 사이클(E군집)·주도주 사분면·γ·stage**에 함의가 있는지 | 메모리 가격 롤오버·병목 조임/완화 → 04 `cycle`·`gamma` stage 렌즈 점검. **숫자 변경은 §1 트리거 통과 시만**(가격 상승 자체는 플래그) |
 | **02 인사이트 찾기** | 01 종목·매크로 뉴스의 **확정 사건(m≥1)**이 채택 관점·`signal_log`로 이어지는지 | 확정 사건 → 02 인사이트 아래 `signal_log.json` EOF append(§6-5). 관점은 「반영 대기」 유지, 숫자는 §1 트리거 |
 
@@ -353,7 +353,9 @@
 
 ## 9. 갱신 이력
 
+- 2026-07-26 12:40 · **#v-cal 모바일 판독성 픽스 — `.cal-row`를 ≤640px에서 스택 레이아웃으로.** SimpleorNothing 리포트(스크린샷 — `#calFull` 본문이 글자 단위 세로 줄바꿈). 원인 = 데스크톱 우선 3열 그리드(70px·12px·1fr)+작은 폰트(12.5px) → 모바일 확대·텍스트 리플로 시 본문 열이 최소폭으로 붕괴. 수정 = `@media(max-width:640px)`에서 날짜칩+분류점 1행·`.cal-body`는 `grid-column:1/-1` full-width 2행, 칩 좌정렬(D-N 인라인·`br` 숨김), 본문 폰트 상향(.ti 15.5·.mt 14), `word-break:keep-all`+`overflow-wrap:anywhere`(한글 어절 단위 줄바꿈). index.html CSS만·신규 토큰·클래스 0 → check-docs 통과. `patches/*.b64`(md5 왕복). 미반영이던 calFull docsync 동반 반영. (STYLE_GUIDE 동반)
 - 2026-07-26 12:15 · **01 「토픽 레이더」 제목 중복 표시 수정(레이스 픽스 3파일).** SimpleorNothing 리포트(스크린샷 — h2 2개). 원인 = 자가 마운트 레이스: insight.js가 `#insStripMarket`(div)을 `#mktMacroNews` 앞에 끼우면 lead.js 「직전 형제=H2」 앵커 판정이 깨져 「월간 선행지표」 h2가 host 직전에 꽂히고, news-dedup.js 리네임이 「역행 첫 .msec」를 잡아 그 h2를 「토픽 레이더」로 오인 리네임(관련 기사 h2는 기리네임 → 화면 2개 + 선행지표 제목 소실). 수정 ①lead.js 선행 H2까지 역행 삽입 ②risk.js 폴백 동일 ③news-dedup.js 리네임 대상 한정(data-radar or 「관련 기사/토픽 레이더」 시작). jsdom 시뮬레이션 구판 재현·신판 단일·선행지표 보존·순서 검증 · node --check 3파일 · check-docs 통과(토큰 무변). 런타임 상태라 배포 후 새로고침으로 해소(데이터·index.html 무변·신규 토큰 0). narrative≠numbers.
+- 2026-07-26 11:30 · **#v-cal에 동적 「다가오는 이벤트」 구역(`#calFull`·`renderCalFull()`) 신설 — 01 「다가오는 일정」 8칸 밖 먼 일정(9월+) 표시.** 진단: ①01 카드=근접 8칸(`CAL_NOW_MAX`·`.slice(0,8)`)이라 고정 D-N 아님 ②「전체 캘린더」는 정적 타임라인이라 `calendar.json`·`CAL_OVR` 미소비 → 8칸 밖은 어디에도 미표시. 수정: `#v-cal` 상단 `#calFull`+`renderCalFull()`(renderCalNow와 동일 소스, 8칸 컷 없이 월별). renderCalNow 말미 연쇄+`.cal-jump` 재호출. index.html만 앵커 치환·신규 토큰 0·check-docs·jsdom 9검사. narrative≠numbers. (STYLE_GUIDE §9 동반)
 - 2026-07-26 05:45 · **01 「다가오는 일정」 운영자 오버레이 — 카드 롱프레스 삭제 + 「＋ 이벤트 추가」 모달(AI 필드 추출).** SimpleorNothing 지시(①롱프레스 삭제 ②추가 버튼→이벤트 입력 ③생성 시 내용 파악해 추가). worker 신설 3종: `/api/calevents` GET/POST(R2 `calevents.json` `{added,removed}` · `calevClamp` 검증 — d 형식·lbl 필수·cat 화이트리스트·길이 캡·512KB 컷) · `/api/calevent-parse`(opus-4-8 · max_tokens 400 · JSON only). 프런트: `CAL_OVR` 병합(`calEvKey`=d|lbl) · pointer 이벤트 롱프레스(이동 10px·업 취소, contextmenu 억제) · `#calEvModal`(파싱→검토→저장 · 낙관적 렌더 후 저장 실패 alert). `calendar.json`·크론 프루닝 무편집 — 오버레이는 R2 별도 보관이라 프루닝과 충돌 없음(지난 이벤트는 렌더 필터가 자동 제거). `node --check`(worker·인라인 11블록) · check-docs 통과(토큰 무변) · jsdom 스모크 10검사 통과. 반영 = `patches/*.b64` PR(md5 왕복). narrative≠numbers — 표시 큐레이션일 뿐 숫자 파일 불변. (STYLE_GUIDE §6-1·§9 동반)
 - 2026-07-26 · **01 지표 7번째 카드 「미국 가솔린」 추가 (WTI 다음).** SimpleorNothing 지시. worker `/api/gasoline` = 기존 `handleWti` 를 `sym/stooqSym` 파라미터화해 재사용(RB=F RBOB 가솔린 선물 $/gal · Yahoo 우선·Stooq `rb.f` 폴백·출력 스키마 `points` 동일). 프런트는 §6 레퍼런스 복제 — `loadGas`/`lensGas` = `loadWti` 미러(소수 2자리 $/gal), 렌즈 2줄(l1=인플레·WTI 하류·CPI 에너지 / l2=기간% → 판정), `redrawCharts`·`render` 배선. 신규 토큰·CSS 0. narrative≠numbers — 숫자 파일 불변. (§3 인벤토리 1행 동반)
 - 2026-07-25 14:20 · **01 「보유 종목」 스파크라인 삭제 → 「리스크 보드」(3축) 신설(`risk.js` 자가 마운트 + `risk.json`).** SimpleorNothing 지시. 3축 = ①사모 크레딧의 역습 ②채권 자경단의 귀환 ③수출 바통 터치 — 축마다 상태 배지(점등/연기/완화·반전)·렌즈 2줄·게이지 4행·**점등(해제) 조건**·레이어 리드스루. **보드 위 인사이트 2줄** = l1 상태 집계 런타임 자동 파생 + l2 `risk.json.insight`. **뉴스 자동 반영** = `news.json`(크론 06:12·18:12)을 축별 `keys`로 매칭(라틴은 단어 경계 — 부분 일치면 `Ares`가 `shares`를 잡는다)·`xkeys`로 동형이의 배제(③ 「수출통제」)·최근 45일 축당 3건. 0건이면 대기 사유 표기(현재 ①=0건 = 급성 사모 크레딧 사건 미유입이라는 관측 결과 자체). **index.html·worker.js 무편집** — `changelog.js`에 `loadRisk()` 1개(raer·lead 패턴), 보유 섹션 제거도 `risk.js`가 런타임 수행. 신규 `:root` 토큰 0 → check-docs 통과(토큰 24종)·`node --check`·jsdom 스모크 통과. **narrative≠numbers** — 숫자·판단 파일 전부 불변. §3 01 인벤토리 2행 · STYLE_GUIDE 동반.
