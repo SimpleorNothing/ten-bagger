@@ -30,14 +30,13 @@ const ROW = {
 // 레이어 집계 정의 (OPS §7 · 6/13 역산 검증) — [layer, label, [ROW 키…], [detail name…](members)]
 const LAYERS = [
   ['L2','연산칩 (마벨·KODEX 미국AI반도체TOP3+)',              ['marvell','dcTop3'],                                  ['마벨','KODEX 미국AI반도체TOP3+']],
-  ['L3','메모리 (마이크론·삼성전자·HBM ETF·삼성SK채권혼합)',   ['micron','samsung','irpHBM','dcHBM','irpSSK','dcSSK'], ['마이크론','삼성전자','글로벌HBM반도체','삼성·SK 채권혼합']],
+  ['L3','메모리 (마이크론·삼성전자·HBM ETF·삼성SK채권혼합·지수혼합)', ['micron','samsung','irpHBM','dcHBM','irpSSK','dcSSK','irpKospi','irpBond','dcBond'], ['마이크론','삼성전자','글로벌HBM반도체','삼성·SK 채권혼합','코스피50','코스피200 채권혼합']],  // 7/27 재분류: 지수·채권 방어 서브슬리브 편입(주식레그 삼전·하이닉스>50%)
   ['L4','소부장 (KODEX AI반도체핵심장비)',                    ['dcEquip'],                                           ['KODEX AI반도체핵심장비']],
   ['L6','연결 (루멘텀·KODEX 미국AI광통신네트워크)',            ['lumentum','dcOptic'],                                ['루멘텀','KODEX 미국AI광통신네트워크']],
   ['L7','전력·냉각 in-rack (버티브)',                         ['vertiv'],                                            ['버티브']],
   ['L8','그리드·송전·발전 (KODEX·SOL 전력ETF + 블룸)',        ['bloom','dcPower','dcSolPower'],                      ['블룸에너지','KODEX AI전력핵심설비','SOL 미국AI전력인프라']],
-  ['기타','테슬라',                                          ['tesla'],                                             ['테슬라']],
-  ['기타','지수·채권혼합 (코스피50·채권혼합)',                ['irpKospi','irpBond','dcBond'],                       ['코스피50','코스피200 채권혼합']],
   ['현금','현금',                                            ['pCash','dcCash'],                                    ['현금']],
+  ['기타','테슬라',                                          ['tesla'],                                             ['테슬라']],  // 기타=맨 아래 고정(7/27)
 ];
 
 // 종목 단위 분해 (index.html HOLD_DETAIL 머지 키 = name, 정확히 일치시킬 것)
@@ -52,6 +51,8 @@ const DETAIL = [
   ['글로벌HBM반도체','442580','L3',['irpHBM','dcHBM'],{priceKey:'k_hbm',ccy:'KRW',mkt:'KOSPI',qk:['dcHBM'],irp:[['irpHBM','dcHBM']]}],
   ['삼성전자','005930','L3',['samsung'],           {priceKey:'sec',ccy:'KRW',mkt:'KOSPI',qk:['samsung']}],
   ['삼성·SK 채권혼합','0162Z0','L3',['irpSSK','dcSSK'],{priceKey:'k_ssk',ccy:'KRW',mkt:'KOSPI',qk:['dcSSK'],irp:[['irpSSK','dcSSK']]}],
+  ['코스피50','122090','L3',['irpKospi'],        {priceKey:'k_kospi50',ccy:'KRW',mkt:'KOSPI',pxRow:'kospi50px',irpEval:'irpKospi'}],
+  ['코스피200 채권혼합','183700','L3',['irpBond','dcBond'],{priceKey:'k_kbbond',ccy:'KRW',mkt:'KOSPI',qk:['dcBond'],irp:[['irpBond','dcBond']]}],
   ['KODEX AI반도체핵심장비','471990','L4',['dcEquip'],{priceKey:'kodexeq',ccy:'KRW',mkt:'KOSPI',qk:['dcEquip']}],
   ['루멘텀','LITE','L6',['lumentum'],              {priceKey:'lite',ccy:'USD',mkt:'NASDAQ',qk:['lumentum']}],
   ['KODEX 미국AI광통신네트워크','0173Y0','L6',['dcOptic'],{priceKey:'optetf',ccy:'KRW',mkt:'KOSPI',qk:['dcOptic']}],
@@ -59,10 +60,8 @@ const DETAIL = [
   ['KODEX AI전력핵심설비','487240','L8',['dcPower'],{priceKey:'k_power',ccy:'KRW',mkt:'KOSPI',qk:['dcPower']}],
   ['SOL 미국AI전력인프라','486450','L8',['dcSolPower'],{priceKey:'k_solpower',ccy:'KRW',mkt:'KOSPI',qk:['dcSolPower']}],
   ['블룸에너지','BE','L8',['bloom'],               {priceKey:'be',ccy:'USD',mkt:'NYSE',qk:['bloom']}],
-  ['테슬라','TSLA','기타',['tesla'],               {priceKey:'tsla',ccy:'USD',mkt:'NASDAQ',qk:['tesla']}],
-  ['코스피50','122090','기타',['irpKospi'],        {priceKey:'k_kospi50',ccy:'KRW',mkt:'KOSPI',pxRow:'kospi50px',irpEval:'irpKospi'}],
-  ['코스피200 채권혼합','183700','기타',['irpBond','dcBond'],{priceKey:'k_kbbond',ccy:'KRW',mkt:'KOSPI',qk:['dcBond'],irp:[['irpBond','dcBond']]}],
   ['현금','—','현금',['pCash','dcCash'],            {}],
+  ['테슬라','TSLA','기타',['tesla'],               {priceKey:'tsla',ccy:'USD',mkt:'NASDAQ',qk:['tesla']}],
 ];
 
 const num = v => {
