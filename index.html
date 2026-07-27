@@ -2825,15 +2825,14 @@ function watchChips(lid){const ws=WATCH.filter(w=>w.layer===lid);if(!ws.length)r
 /* ===== HOLDINGS (6/6 동기 · 자산현황_260606, 테마버킷→레이어 · 실잔고 일치) ===== */
 let HOLDINGS=[
  {layer:'L2',label:'연산칩 (마벨·KODEX 미국AI반도체TOP3+)',amt:108,w:11.1},
- {layer:'L3',label:'메모리 (마이크론·삼성전자·HBM ETF)',amt:376,w:38.8},
+ {layer:'L3',label:'메모리 (마이크론·삼성전자·HBM ETF·삼성SK채권혼합·지수혼합)',amt:421,w:43.4}, /* 7/27 재분류: 지수·채권 방어 서브슬리브(코스피50·코스피200채권혼합) L3 편입 — 주식레그 삼전·하이닉스>50% */
  {layer:'L4',label:'소부장 (KODEX AI반도체핵심장비)',amt:21,w:2.2},
  {layer:'L6',label:'연결 (루멘텀·KODEX 미국AI광통신네트워크)',amt:117,w:12.1},
  /* 전력 ETF는 DC펜스 우세 레이어로 단일 귀속(차트 점=단일 instrument, 분할 불가). KODEX·SOL 구성 ~82~83% 그리드측 → L8. in-rack(L7)은 버티브 단독. D배열 종목 w 합과 일치. */
  {layer:'L7',label:'전력·냉각 in-rack (버티브)',amt:36,w:3.8},
  {layer:'L8',label:'그리드·송전·발전 (KODEX·SOL 전력ETF + 블룸)',amt:131,w:13.5},
- {layer:'기타',label:'테슬라',amt:54,w:5.6},
- {layer:'기타',label:'지수·채권혼합 (코스피50·채권혼합)',amt:45,w:4.6},
  {layer:'현금',label:'현금',amt:80,w:8.3},
+ {layer:'기타',label:'테슬라',amt:54,w:5.6}, /* 기타=맨 아래 고정(7/27) */
 ];
 /* 원본 총자산(M) = 968,195,026원(260606). holdings.json.total로 갱신. */
 let HOLD_TOTAL=968;
@@ -2851,6 +2850,8 @@ let HOLD_DETAIL=[
  {layer:'L3', name:'글로벌HBM반도체',          ticker:'ETF',    kind:'ETF',  w:15.71,tlo:10, thi:12, dir:'trim', note:'국내 HBM 바스켓 +66%·과열 해소 — 1순위 트림 통로'},
  {layer:'L3', name:'삼성전자',                 ticker:'005930', kind:'종목', w:3.60, tlo:3,  thi:5,  dir:'hold', note:'성숙이나 상대 저평가·HBM4 회복 미반영(비대칭 상방) — 유지/충격 시 매수'},
  {layer:'L3', name:'삼성·SK 채권혼합',         ticker:'ETF',    kind:'ETF',  w:8.73, tlo:8,  thi:10, dir:'hold', note:'메모리 방어자산(채권혼합) — 변동성 대비 유지·보강'},
+ {layer:'L3', name:'코스피50',                 ticker:'ETF',    kind:'ETF',  w:0.27, tlo:0.5,thi:1.5,dir:'add',  note:'지수 방어 — 주식레그 삼전·하이닉스>50% → L3 방어 서브슬리브 재분류(7/27), 소폭 보강'},
+ {layer:'L3', name:'코스피200 채권혼합',       ticker:'ETF',    kind:'ETF',  w:4.37, tlo:3,  thi:4,  dir:'hold', note:'방어자산(주식3:국채7) — 주식레그=코스피200(메모리 지배) → L3 재분류(7/27), 유지'},
  {layer:'L3', name:'◷ 램버스 (미보유 후보)',       ticker:'RMBS',   kind:'종목', w:0,    tlo:0,  thi:1,  dir:'add',  note:'미보유 — L3 인터페이스IP 프로브: $140 눌림 + 7/27 Q2 확인 AND, 점등 전 정찰 상한 ~1%'},
  {layer:'L4', name:'KODEX AI반도체핵심장비',   ticker:'471990', kind:'ETF',  w:2.15, tlo:7,  thi:9,  dir:'add',  note:'다음 병목(패키징)·YTD−58% 소외 = 1y 상방 최대 — 백엔드 비중 검증 후 증액'},
  {layer:'L4', name:'◷ 테크윙 (미보유 후보)',       ticker:'089030', kind:'종목', w:0,    tlo:0,  thi:1.5,dir:'add',  note:'미보유 — 초입 8/10·HBM 다이검사 독점·γ open. MU 6/24 게이트 후(FOMC 6/17 종료·매크로 0/3 동결) / 대안: ASMPT 0522.HK'},
@@ -2862,23 +2863,21 @@ let HOLD_DETAIL=[
  {layer:'L8', name:'SOL 미국AI전력인프라',     ticker:'ETF',    kind:'ETF',  w:4.78, tlo:2,  thi:4,  dir:'trim', note:'grid 재분류 과체중 — 신규 미반영 grid명만 선별, 추격금지'},
  {layer:'L8', name:'블룸에너지',               ticker:'BE',     kind:'종목', w:2.35, tlo:1,  thi:3,  dir:'trim', note:'과열·+1,200%/내부자매도, 1y 상방 0 — 추격금지·첫 눌림 대기'},
  {layer:'L8', name:'◷ CEG 가동원전 (미보유 후보)',  ticker:'CEG',    kind:'종목', w:0,    tlo:0,  thi:2,  dir:'add',  note:'미보유 — grid 발전 빈칸: 52주 저점권 관찰 + 매크로 게이트 AND / OKLO는 과열 강등(진입가 아님)'},
- {layer:'기타',name:'테슬라',                  ticker:'TSLA',   kind:'종목', w:5.59, tlo:4,  thi:6,  dir:'hold', note:'정치베타(8레이어 밖)·1y 상방은 있으나 별도 트랙 — 4~6% 유지'},
- {layer:'기타',name:'코스피50',               ticker:'ETF',    kind:'ETF',  w:0.27, tlo:0.5,thi:1.5,dir:'add',  note:'지수 방어 — 소폭 보강'},
- {layer:'기타',name:'코스피200 채권혼합',      ticker:'ETF',    kind:'ETF',  w:4.37, tlo:3,  thi:4,  dir:'hold', note:'방어자산(채권혼합) — 유지'},
  {layer:'현금',name:'현금',                    ticker:'—',      kind:'현금', w:8.30, tlo:9,  thi:12, dir:'hold', note:'⚑ 밴드 하단 이탈(8.3%<9) — 반등 트림 1차 용도는 현금 9%+ 복원'},
+ {layer:'기타',name:'테슬라',                  ticker:'TSLA',   kind:'종목', w:5.59, tlo:4,  thi:6,  dir:'hold', note:'정치베타(8레이어 밖)·1y 상방은 있으나 별도 트랙 — 4~6% 유지 · 기타=맨 아래 고정(7/27)'},
 ];
 /* ===== TARGETS — 적정 비중 밴드(프레임 도출 · 2026-06-21 시황 재점검: 메모리 타이트·L4 패키징 binding 다음 병목·전력 빌드아웃 지속 → 구조 불변, 밴드 유지) =====
    lo~hi = 밴드, dir = 회전방향(trim/add/hold), gate = AND 선결조건.
    강등규칙: 'add/trim'은 가격이 아니라 단계·γ·게이트로 정당화. 매매권유 아님. */
-let TARGETS_ASOF='2026-06-21';  /* 적정밴드 판단 기준일 — 매주 holdings.json 동기 시 시황 전망 반영해 수동 갱신 */
+let TARGETS_ASOF='2026-07-27';  /* 적정밴드 판단 기준일 — 매주 holdings.json 동기 시 시황 전망 반영해 수동 갱신 · 7/27=구조 리베이스만(지수·채권 슬리브 기타→L3 이동, 밴드 합 불변·시황 판단 6/21 유지) */
 let TARGETS=[
  {layer:'L2',lo:8, hi:9,  dir:'hold', gate:'ASIC 런웨이(m3·y1) 유지 시'},
- {layer:'L3',lo:30,hi:32, dir:'trim', gate:'6/24 해소: γ open 확정(추정>가격) → 트림 보류, γ 닫힐 때(가격이 추정 추월) 재개'},
+ {layer:'L3',lo:34,hi:37, dir:'trim', gate:'6/24 해소: γ open 확정(추정>가격) → 트림 보류, γ 닫힐 때(가격이 추정 추월) 재개 · 7/27 밴드 리베이스: 지수·채권 방어 슬리브(~5%p, 舊기타) 편입분 — 시황 재판단 아님'},
  {layer:'L4',lo:7, hi:9,  dir:'add',  gate:'구성 검증 통과(6/4·백엔드+테스트+기판 ≈60~75%, 시그널 로그) — 잔여 AND: S5 베이스 재형성 + 매크로 게이트 + 증액 D-1 PDF 최종확인 / 유의: 한미반도체 ~26~29% 집중·FC-BGA 과열노드 포함'},
  {layer:'L6',lo:9, hi:11, dir:'trim', gate:'LITE 트림 앰버(내부자매도·베어풋) — 광 구조 노출은 유지'},
  {layer:'L7',lo:7, hi:9,  dir:'add',  gate:'재분류 후 in-rack 실질 얇음(VRT 단독 ~3.9%) — 추가는 800V HVDC(SiC/GaN) 초입에 한정 / VRT·액체냉각 성숙 추격금지 / 한국 grid ETF는 L7 아님'},
  {layer:'L8',lo:8, hi:10, dir:'trim', gate:'KODEX·SOL grid분 재분류로 실질 과체중(~14.2%) — 한국 변압기·송전·발전 추격금지·BE 추격금지 / 신규 미반영 grid명(예: CEG 52주 저점권)만 선별'},
- {layer:'기타',lo:8,hi:11,dir:'hold', gate:'테슬라(정치베타·8레이어 밖) 4~6% + 지수·채권 방어 4~5%'},
+ {layer:'기타',lo:4,hi:6,dir:'hold', gate:'테슬라(정치베타·8레이어 밖) 단독 4~6% — 지수·채권 방어는 L3 재분류(7/27)'},
  {layer:'현금',lo:9, hi:12,dir:'hold', gate:'매크로 신호 부재 구간 — 충격 실탄 유지'},
 ];
 const TMAP=Object.fromEntries(TARGETS.map(t=>[t.layer,t]));
