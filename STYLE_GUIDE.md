@@ -1,4 +1,4 @@
-**최종 갱신: 2026-07-27 13:20 (KST)**
+**최종 갱신: 2026-07-27 14:10 (KST)**
 
 # STYLE_GUIDE — 알파맵 디자인 시스템
 
@@ -262,6 +262,7 @@ pantone.css :root       ← 현행 팔레트 (팬튼 A안, index.html 하단 <li
 
 ## 갱신 이력
 
+- 2026-07-27 14:10 · **02 aisd ③ 라인 값 라벨 규칙.** 스트레치 SVG(preserveAspectRatio:none) 내부 <text> 금지(글리프 왜곡) — 값 라벨은 컨테이너 기준 HTML 절대배치 span(left=cx/vbW%, top=cy/vbH%, translate(-50%,-130%))로. 폰트 mono 10px·시리즈 색 동일. 현재 매출 라인만 적용(밀집 시리즈는 트랙 행으로 충분). (OPS §9 동반)
 - 2026-07-27 13:20 · **02 aisd ③ 영업이익 라인 + 높이 1.5×.** 라인 3종 팔레트 확정: 매출=`--st-dawn`·FCF=`--st-hot`·영업이익=`--st-mature`(기존 전역 토큰만, 신규 0). 특정 차트만 키울 땐 공용 `.ds-bars` CSS 대신 인라인 height(255px) — `preserveAspectRatio:none` SVG는 좌표 재계산 없이 스트레치. 교차 서사(CAPEX>영업이익 역전)는 렌즈 ds-wn + 트랙 rtv로 이중 표기. (OPS §3·§9 동반)
 - 2026-07-27 12:20 · **02 aisd ③ 차트 축 통일.** 이중 축(매출 독립) 폐지 — 한 차트의 막대·라인 전 시리즈는 단일 $축 원칙(운영자 지시). 스케일 1px=$14B(상한 ~$2.55T), 막대 height%=V/25.48로 라인과 픽셀 정합 · 교차 이벤트(2024 FCF≈CAPEX)는 막대 상단 접점으로 표현 · 축 표기는 ds-rtl·ds-fn에 명기. 토큰·클래스 무변. (OPS §3·§9 동반)
 - 2026-07-27 · **02 aisd.js — ③ CAPEX 막대 차트에 매출·FCF 라인 오버레이(SVG 절대배치 · `ds-bars` `position:relative` 인라인).** 라인 규약 = 막대 실적·추정 규약의 라인 판: **실선=실적 · 점선(5 4)=추정** · 점 채움=실적/`--panel2`+색 테두리=추정. 색은 기능색만 재사용 — 매출 `--st-dawn`(ok) · FCF `--st-hot`(wn) · FCF ▼판정=등락색 하락 청(`--st-accel`). 축 2원화는 07-24 「3개 독립 축」 선례 계승 — 매출=독립 축·FCF=CAPEX 동일 $축(교차 시각화), 축 구분은 `ds-fn`·`ds-rtl`에 명기. 값 표기는 SVG 텍스트 금지(§2 12px 하한·`preserveAspectRatio:none` 왜곡) → `ds-rt` 값 트랙 2줄(범례 ━ 스와치=`ds-rtl` 안 인라인 span). 신규 `:root` 토큰·CSS 클래스 0(SVG 전부 인라인·기존 `ds-*` 재사용) → TOKENS 무변·check-docs 통과·node --check 통과·jsdom 스모크. (OPS §3·§9 동반)
