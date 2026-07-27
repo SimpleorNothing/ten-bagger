@@ -1,4 +1,4 @@
-**최종 갱신: 2026-07-27 19:30 (KST)**
+**최종 갱신: 2026-07-27 21:00 (KST)**
 
 # OPS — 알파맵 운영 가이드
 
@@ -355,6 +355,10 @@
 ---
 
 - 2026-07-27 19:30 · **02 aisd ③ 컴퓨팅 4사 합산 차트 인터랙티브 재구현.** 스트레치 SVG 제거 → CSS 픽셀+DPR Canvas, ResizeObserver, 호버·탭 툴팁, CAPEX/매출/FCF/영업이익 토글. `worker.js` aisd 주입 URL 캐시 버전 갱신. 데이터·단일 $축·narrative≠numbers 불변. STYLE_GUIDE §7 체크리스트·§9 동반.
+- 2026-07-27 20:50 · **02 aisd ③ FCF·영업이익 수치·이익률 추가.** 온차트 및 툴팁에 FCF·영업이익 `$B (매출 대비 %)` 표시. 이익률은 같은 연도 4사 합산 매출로 계산·정수 반올림, 데이터·판정 불변. STYLE_GUIDE 동반.
+
+- 2026-07-27 21:00 · **02 aisd ③ 시리즈 토글 순서 변경.** `매출 → CAPEX → 영업이익 → FCF`; 렌더·계산·판정 불변. STYLE_GUIDE 동반.
+
 ## 9. 갱신 이력
 - 2026-07-27 19:20 · **06 브리핑 매일성 개편(SimpleorNothing 지시 — 매일 갱신되는 브리핑답게).** 최근 1~2일 중심·직전 회차 반복 금지(`prevBrief`)·'새 소식 없음' 규약·지표에 F&G 수치와 유가·가솔린(`wti`·`gasoline` 티커 신설)·토픽 레이더 신규 기사(`macroNews`). worker `briefSituation`+프롬프트 3종, `scripts/fetch-prices.mjs` 후보 2종. `node --check` 2파일 통과 · UI·토큰 무변 · narrative≠numbers. 오늘치 캐시는 「다시 만들기」·「대담 다시 굽기」 필요. §3 06 ↳매일성 행 동기.
 - 2026-07-27 19:11 · **02 aisd ③ — 매출·CAPEX YoY% 라벨(운영자 지시).** 매출 온차트 5포인트(24~28E)·CAPEX 막대 값 5개(24~28E)에 전년비 증가율 병기(소수점 반올림 — 매출 전 구간 +14% · CAPEX +53/+100/+52/+43/+20% · 2023=기저 제외). 매출 YoY=신규 절대배치 span 라인 추가(순수 append)·CAPEX=ds-bv 내 윗줄 — 인라인(`--dim` 9/10px)만, 신규 클래스·토큰 0. node --check·jsdom 스모크·check-docs 통과 · patches/*.b64 3분할. 1차분(yoy-*)은 #505 OPS 타임스탬프 선변경으로 stale → yoy2-*로 현행 main 재베이스 재푸시(stale base 규칙 실사례). narrative 층 — 숫자 파일 불변.
