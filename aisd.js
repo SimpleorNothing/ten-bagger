@@ -396,7 +396,7 @@ var HTML=`<div style="position:relative">
   <div class="ds-l2">2025 ~$460B(실적) → 2026E ~$700B → 2027E <span class="ds-wn">$1T 돌파 전망</span> → 2028E ~$1.2T · 우상향 지속 = 고점 미점등, 추정 리비전 확인 필요 — 매출은 완만(+13~15%/y) · <span class="ds-wn">FCF는 26E ~0 붕괴</span> = 자체 현금 → 외부 조달 전환 국면 · <span class="ds-wn">25년 CAPEX($460B)가 영업이익(~$440B) 첫 추월</span></div>
 </div>
 <div class="ds-card">
-  <div class="ds-bars" style="position:relative;height:255px">
+  <div class="ds-bars" style="position:relative;height:510px">
     <div class="ds-bc"><span class="ds-bv">$150B</span><div class="ds-bar" style="height:5.9%"></div></div>
     <div class="ds-bc"><span class="ds-bv">$230B</span><div class="ds-bar" style="height:9%"></div></div>
     <div class="ds-bc"><span class="ds-bv">$460B</span><div class="ds-bar" style="height:18.1%"></div></div>
