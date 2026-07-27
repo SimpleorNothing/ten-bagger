@@ -1,4 +1,4 @@
-**최종 갱신: 2026-07-27 16:25 (KST)**
+**최종 갱신: 2026-07-27 18:49 (KST)**
 
 # OPS — 알파맵 운영 가이드
 
@@ -93,8 +93,8 @@
 | **다가오는 일정** (거시·실적 게이트 D-N 카드+범례 · 2026-07-17 06서 흡수) | 혼합 | 데일리 프루닝·asOf / 큐레이션 수시 | `calendar.json` `events`(수기+`derive-calendar.mjs` 프루닝) + `earnings.json` moves(`CAL_EARN_MOVES`). `renderCalNow()`가 오늘 기준 경과 제거·D-N·임박 `CAL_NOW_MAX`(8) 렌더. **운영자 오버레이(2026-07-26)**: 카드 **롱프레스(마우스·터치 600ms) → 삭제**, 그리드 끝 **「＋ 이벤트 추가」** 모달 — 텍스트 붙여넣기 → `/api/calevent-parse`(Claude, 오늘 KST 기준 상대날짜 환산·cat 6분류·렌즈 meta 초안)로 필드 자동 추출(뽑기≠반영·사람이 저장) → `/api/calevents` R2 `calevents.json` `{added,removed:["d|lbl"키]}` 전 기기 공유·`renderCalNow()` 병합(added 추가·removed 필터 — earnings moves 카드도 키 일치 시 숨김). `calendar.json`(리포 SoT)·숫자 파일 불변 — 표시 큐레이션(narrative≠numbers). `#calNow`·`--cat-*` `#v-market` 스코프. 크론 `update-calendar.yml`(운영자 수동) |
 | 업데이트 이력(변경 로그) | 수동(인라인) | 사이트 변경 시 | `changelog.js` 인라인 `MKT_CHANGELOG`(`{d,t}` 최신순·자가 마운트=insight.js 패턴). `mountHead()`가 **01 시장 모니터링(`#v-market`) + 전문가 원탁(`#v-council`) 헤더(`.vhead`) 우상단**에 각각 `.mkt-upd` 배지를 마운트 → 클릭 시 `.cyc-pop` 모달(`.cyc-upd`/`.cyc-pop` 재사용 · 신규 토큰 0). **사용자 향 변경만** 기록 · 신규 항목은 배열 맨 위 |
 | **오늘의 투자 명언** (뷰 최상단 스트립 · `quote.js` 자가 마운트 · `.vhead` 위) | 자동(런타임) | 페이지 로딩 시 · 스트립 클릭 시 교체 | `quote.js` 내장 명언 풀(공포/중립/과열 레짐별 8개) + `signals.json`(CNN F&G·VIX·나스닥 DD 합산 스코어)으로 레짐 판정 → 레짐 풀에서 랜덤 1개. 로더=`changelog.js` `loadQuote()`(raer·lead 패턴, index.html·worker 무편집). **레짐은 명언 「선곡」 전용** — 매크로 게이트(3중 AND) 판정과 별개 렌즈, narrative≠numbers·숫자 파일 불변. signals 실패 시 중립 풀 + 「지표 수집 대기」 칩(STYLE_GUIDE §6-6) |
-| 코스피·S&P·나스닥 지수 | 자동 | 06:37·18:37 KST (1일 2회 · ⏳저녁 §8-11) | `charts.json` (`fetch-prices.mjs`, `^KS11·^GSPC·^IXIC` Yahoo 5Y). **meta 거래일을 시계열 끝에 강제 반영 + 이전 창과 union 병합** → `prices.json`과 갈라지지 않는다. 괴리>1%는 `prices.json.warn` |
-| 미 10년물 금리 | 자동 | 06:37·18:37 KST + 폴백 런타임 | **1순위 `charts.json` `us10y`**(`fetch-prices.mjs` `^TNX` Yahoo 5Y · 지수 카드와 동일 t/c → 기간버튼 1M~5Y 실동작 · `^TNX` 10× 스케일은 `>20→÷10`로 % 정규화). **폴백** worker `/api/us10y` → `history[].markets.ten_year`(외부 피드 ~2개월). ※구버전은 폴백만 써서 6M+ 기간 무반응 버그(2026-07-16 수리, PR #345) |
+| 코스피·S&P·나스닥 지수 | 자동 | 06:05·15:40 KST 예약 (1일 2회 · 실측지연 ~1~1.5h §8 — 저녁분 15:40 예약은 운영자 yml 적용 대기) | `charts.json` (`fetch-prices.mjs`, `^KS11·^GSPC·^IXIC` Yahoo 5Y). **meta 거래일을 시계열 끝에 강제 반영 + 이전 창과 union 병합** → `prices.json`과 갈라지지 않는다. 괴리>1%는 `prices.json.warn` |
+| 미 10년물 금리 | 자동 | 06:05·15:40 KST 예약(시세 크론 편승 §6-1) + 폴백 런타임 | **1순위 `charts.json` `us10y`**(`fetch-prices.mjs` `^TNX` Yahoo 5Y · 지수 카드와 동일 t/c → 기간버튼 1M~5Y 실동작 · `^TNX` 10× 스케일은 `>20→÷10`로 % 정규화). **폴백** worker `/api/us10y` → `history[].markets.ten_year`(외부 피드 ~2개월). ※구버전은 폴백만 써서 6M+ 기간 무반응 버그(2026-07-16 수리, PR #345) |
 | WTI 유가 | 자동 | 런타임 | worker `/api/wti` → **`points`** 배열 (Yahoo). `series` 로 읽으면 0건 |
 | 미국 가솔린 (RBOB $/gal) | 자동 | 런타임 | worker `/api/gasoline` = `handleWti("RB=F","rb.f")` 재사용 → **`points`** 배열 (Yahoo · Stooq 폴백). 카드 표기 소수 2자리 |
 | **DXI 메모리 현물** (신규 · 지표 6번째 카드) | 수동/주간 | **매주 금요일 장마감 후**(스케줄 태스크) | `dxi.json` `series[]`(DDR4 16Gb 3200 메인스트림 현물 $). DXI 지수는 DRAMeXchange 포털 게이트라 무료 피드 없음 → TrendForce 공개 현물가로 주간 1점 append. `loadDxi()`·`lensDxi()`=01 `card()`/`lens()` 복제(신규 토큰 0·`dod:false`로 전일대비 억제). narrative≠numbers — MU γ-닫힘 ③ 입력 참고용 |
@@ -103,7 +103,7 @@
 | **리스크 보드 (3축 · `risk.js` 자가 마운트 · 지표 다음)** | 혼합 | 상태·게이지=수기(조건 충족 시) / 관련 기사=뉴스 크론 06:12·18:12 편승 | `risk.json`(축 정의·상태·게이지·점등 조건·`insight`) + `news.json`(런타임 키워드 매칭). 3축 = ①사모 크레딧의 역습(자본·강물3) ②채권 자경단의 귀활(매크로·장기금리) ③수출 바통 터치(한국·실물). 카드마다 상태 배지(점등 `wn`/연기 `nt`/완화·반전 `ok`) · 렌즈 2줄 · 게이지 4~5행(① 5행 — 「하이퍼스케일러 FCF/조달」 2026-07-27 추가) · **점등(해제) 조건** · 레이어 리드스루 · 「최근 반영 기사」. **보드 위 인사이트 2줄** = l1 상태 집계 런타임 자동 파생 + l2 `risk.json.insight`(해석 한 줄). **뉴스 자동 반영** = 축별 `keys`(라틴은 단어 경계·한글은 부분 일치) − `xkeys`(동형이의 배제, 예 「수출통제」) 로 최근 45일·축당 3건. narrative≠numbers — 표시 전용, 상태 전환은 `trigger` 충족 시 `risk.json` 수기 갱신으로만 |
 | **사이클 판별 보드 (AI capex 4지표 · `gates.js` 자가 마운트 · 리스크 보드 다음)** | 혼합 | 상태·게이지=수기(분기 실적·대형 공시 시) / 관련 기사=뉴스 크론 06:12·18:12 편승 | `gates.json`(지표·상태·게이지·점등/해제 조건·`insight`) + `news.json`(키워드 매칭 · risk.js 패턴 복제). 4지표 = ①수주잔고 vs capex ②상각기간 재조정 ③조달 가속·환원 축소 ④모델 레이어 조달. 상태 = 점등 `wn`/황색 `nt`/미점등 `ok` — 「의도된 FCF 마이너스」 변질 신호의 상시 관측. 마운트 = `#riskBoard` 뒤(6초 대기) → 폴백 `#mktMacroNews` 앞. narrative≠numbers — 표시 전용, 상태 전환은 `trigger` 충족 시 `gates.json` 수기 갱신으로만 |
 | **카드 렌즈 요약 2줄** (그래프마다 프레임→판정) | 자동(런타임 파생) | gamma·signals 일별 / holdings 주간에 편승 | `gamma.json`(γ·stage·flagged) + `signals.json`(**`window.macroEval` 단일소스 재사용**) + `holdings.json`(layer·평단) + `charts.json` |
-| 종목 뉴스 (종목 블록형 + 기사별 **일자 + 두 점**[명사형 요약 `a` / `→` 의미·주가영향 `w`] + 우측 주가 차트) | 자동 | **뉴스·digest 06:12·18:12 (1일 2회)** / 차트 06:37·18:37 | `news_digest.json`(claude-sonnet-4-6) + `news.json`(**물질성 m≥1만**) + `charts.json` |
+| 종목 뉴스 (종목 블록형 + 기사별 **일자 + 두 점**[명사형 요약 `a` / `→` 의미·주가영향 `w`] + 우측 주가 차트) | 자동 | **뉴스·digest 06:12·18:12 (1일 2회)** / 차트 = 시세 크론 편승(§6-1) | `news_digest.json`(claude-sonnet-4-6) + `news.json`(**물질성 m≥1만**) + `charts.json` |
 | ↳ 표시 규칙 | — | — | **최근 3개월(92일) 창 · 종목당 최신 5건.** 초과분은 「더 보기」 → `archive/{TK}.json` **온디맨드 로드**(첫 로딩 페이로드 상수 유지) |
 | ↳ **`NEW` 배지(신선도 큐)** | 자동(런타임 파생) | 매 렌더 | 최근 3일(72h·`isNewDt`)+미열람 기사에 `.arow .anew` 부표(디자인=STYLE_GUIDE §6-5). **3초 호버 or 클릭 시 제거**→localStorage `am_news_seen_v1`(키=link) 영속·재렌더 재출현 없음. `rowHTML()` 경로(종목+「더 보기」). narrative≠numbers |
 | 관련 기사 (매크로 · 토픽 블록형 + **기사별 일자 + 두 점**[명사형 요약 `a` / `→` 레이어·게이트 함의 `w`] — 종목 뉴스와 동일 형식) | 자동 | **06:12·18:12 KST** | `news_digest.json` `macro`(블록 상단 축 요약 `s`) + `news.json` `MACRO`. **LLM 물질성 채점(m)은 여전히 미적용**(축 자체가 관측 대상 · 하드룰만) 이나, **기사별 두 점 요약 `a·w`는 `summarizeMacro()`가 생성**(신규만 증분 · 과거치 재요약 없음). `w`는 개별 주가가 아니라 8레이어·매크로 게이트·상류 수요 관점의 함의. 렌더는 `.arow`(종목 뉴스 컴포넌트 재사용) · `a` 없으면 제목 폴백. **이 섹션 상단(자동 뉴스 위)에 03 채택 매크로 관점 스트립(`insStripMarket`)이 함께 렌더된다**(2026-07-18 상단→여기 이동 · `insight.js mount()` 앵커 `#mktMacroNews` 앞 · 큐레이션 관점=narrative, 뉴스와 별 컴포넌트) |
@@ -234,7 +234,8 @@
 | 주기 | 자동 | 수동(운영자/Claude) |
 |---|---|---|
 | 일별 (06:12·18:12) | 뉴스 수집·스크리닝·요약·digest | signal_log 인테이크(narrative) |
-| 일별 (06:37·18:37) | 시세·차트·신호·알파 업데이트 | — |
+| 일별 (06:05·15:40 예약) | 시세·차트·γ·E군집 업데이트 (`update-prices.yml`) | — |
+| 일별 (06:47) | 매크로 신호 업데이트 (`update-signals.yml`) | — |
 | 세션마다 | — | **관점 트리아지(§0-5)** — 지지↑ 관점 `until`·`review` 대조 → 발동/만료/유지 |
 | 주간 (금요일) | — | **DXI 현물가 갱신**(`dxi.json` · 스케줄 태스크) · holdings 동기화 · reviews.json 주간 리뷰 append |
 | 실적 시즌 | — | earnings.json 갱신 · γ·stage 재채점 |
@@ -257,10 +258,9 @@
 
 | 워크플로 | 트리거 | 주요 출력 |
 |---|---|---|
-| `fetch-prices.yml` | cron 06:37·18:37 | `prices.json` · `charts.json` |
-| `update-signals.yml` | cron 06:37·18:37 | `signals.json` |
-| `fetch-news.yml` | cron 06:12·18:12 | `news.json` · `news_digest.json` · `news_archive.json` |
-| `update-prices.yml` | manual / schedule | E-군집 파생(`derive-cycle-e.mjs`) |
+| `update-prices.yml` | cron 06:05·15:40 KST 예약 (저녁분 15:40은 운영자 적용 대기 §8 · 실측지연 ~1~1.5h) | `prices.json` · `charts.json` · `gamma.json` · `cycle.json`(E군집) · `holdings.json` |
+| `update-signals.yml` | cron 06:47 KST (1일 1회 · 시세와 push 충돌 분산) | `signals.json` |
+| `update-news.yml` | cron 06:12·18:12 세션(각 +30분·+1h 백업 다중 트리거 + 6h 가드) | `news.json` · `news_digest.json` · `news_archive.json` |
 | `sync-holdings.yml` | `repository_dispatch` (Drive Apps Script) | `holdings.json` |
 | `apply-patch.yml` | `repository_dispatch` | `index.html` 패치 적용 |
 | `deploy.yml` | push to main (paths 필터) | Cloudflare Workers 배포 |
@@ -341,9 +341,9 @@
 
 ## 8. 알려진 이슈 · 미완료 항목
 
-- **E-군집 자동화** (`update-prices.yml` manual edit): GitHub App lacks workflows write scope (403) → 운영자 수동 dispatch 필요
+- ~~E-군집 자동화~~ **해소(확인 2026-07-27)**: `update-prices.yml`에 `derive-cycle-e.mjs` 스텝 포함·크론 편승 — 수동 dispatch 불요
 - **`update-calendar.yml` 미등록(수동)**: `derive-calendar.mjs`(01 다가오는 일정 프루닝·asOf) 크론 미등록 — App workflow write 부재(403). 런타임 `renderCalNow()`가 오늘 기준 재계산하므로 표시는 신선(파일 `asOf`만 수동 refresh까지 스테일 가능). 신규 이벤트는 `calendar.json` 수기.
-- **⏳ 저녁 fetch-prices 지연**: cron 18:37 KST가 실제로 19:xx~20:xx에 돌고 있음 — 원인 미확인(Actions 큐 지연 추정). 모니터링 중.
+- **⏳ 저녁 시세 크론 예약 15:40 변경 — 운영자 yml 적용 대기**: Actions 큐 실측지연(~1~1.5h) 보정을 위해 예약을 당기는 방식으로 운영 중(현행 라이브 `52 7`=16:52 KST 예약→~18:30 완료). 2026-07-27 지시로 저녁 예약을 `40 6`(15:40 KST·한국 장마감 15:30 직후)로 변경 → 완료 ~16:40~17:10 예상. `.github/workflows/` 403 → **운영자 수동 교체 필요**(적용 전까지 라이브는 16:52 예약). 지연 자체는 계속 모니터링.
 - **관점 라이프사이클 LLM 자동 제안 미구현(부분 완화)**: 03 「🕔 라이프사이클」 편집은 **모달 + 필드별 「보기 칩」 선택식**으로, 클라 템플릿(게이트 어휘·8레이어·관점 티커·thesis-break 패턴)이 `hyp`·`trig`·`until` 후보와 `review` 날짜 프리셋을 즉시 제시한다(수동 4연타 부담 해소·오프라인·기존 채택분 전부). 다만 이는 **템플릿**이라 관점 고유 맥락은 못 맞춘다 — `/api/insight`(worker) 추출 시 `hyp`·`until`을 LLM으로 관점별 맞춤 자동 채우는 건 여전히 후속 PR(③). 신규 채택은 `review`=+14d 자동 유지.
 - **DXI 자동 피드 없음(2026-07-17)**: DXI 지수는 포털 게이트라 무료 피드 없음 → 매주 금요일 스케줄이 TrendForce 현물가로 `dxi.json` append.
 - **브리핑 팟캐스트 오디오판(A안) 대기(2026-07-19)**: MP3를 슬랙에 직접 첨부하려면 ①슬랙 봇 **`files:write`** 스코프 추가 후 재설치 ②리포 시크릿 **`SITE_PASSWORD`** ③리포 시크릿 **`GEMINI_API_KEY`** ④`.github/workflows/` 배치 — **전부 운영자 수동**(App workflows write 403). 제안본은 `scripts/proposed-workflows/daily-brief-podcast-audio.md` 체크리스트. 그 전까지는 링크형(B안)만 가동.
@@ -354,6 +354,7 @@
 ---
 
 ## 9. 갱신 이력
+- 2026-07-27 18:49 · **저녁 시세 크론 예약 16:52→15:40 변경 지시 반영 + §3·§4·§6-1 크론 표기 스테일 정정.** 실측 라이브 yml 대조 — 시세=`update-prices.yml` cron `5 21`(06:05)·`52 7`(16:52 예약, 15:40으로 변경 대기)이며 gamma·E군집·holdings까지 한 크론(구 `fetch-prices.yml` 표기·구 06:37·18:37 삭제) · 신호=06:47 1일 1회 · 뉴스=`update-news.yml` 다중 트리거+6h 가드. §8 E-군집 수동 dispatch 이슈 해소 처리 · 저녁 지연 이슈를 「15:40 예약 변경 운영자 적용 대기」로 갱신. SimpleorNothing 지시.
 - 2026-07-27 16:25 · **06 「오늘 브리핑 듣기」 대담을 01 시장 모니터링 정리 회차로 개편(worker `BRIEF_PART[1·2]`·`briefSituation` 입력 확장).** SimpleorNothing 지시(듣기 = 01 내용 정리 · 개별종목은 주요한 것만 간략히). 전반부 = 결론(게이트 몇/3) → 다가오는 일정 → 지표(지수·美10Y·DXI) → 시장 맥박 / 후반부 = 리스크 보드(3축) → 사이클 판별 보드(4지표) → 관련 기사(매크로 축) → 종목 뉴스(주요 보유종목 2~3건·종목당 한 문장 + 움직임 큰 1~2종목) → 스틸맨. 보유종목 마감 전 종목 낭독·리밸런싱 가이드는 듣기에서 제외 — 텍스트 회차(p0)·분량(5분·18~22발언)·모델·파트 분할·TTS 경로는 불변. 입력 5종 추가(`risk`·`gates`·`dxi`·`news`·`news_digest` → `riskBoard`·`cycleBoard`·`dxi`·`macroTopics`·`stockNews` — 상태·판정·요약만 추려 토큰 절약, 게이지 상세 제외). 낭독 치환에 DXI 추가. `node --check` 통과 · index.html·brief.js·CSS·워크플로 무편집(신규 토큰 0 → check-docs 무관). narrative≠numbers — 대본은 라이브 값을 읽어 말할 뿐 숫자·판단 파일 불변. **오늘치 캐시는 06 「대담 다시 굽기」로 재생성 필요.** §3 06 듣기 행·외부 채널 행 동기.
 - 2026-07-27 15:45 · **02 aisd ③ — 차트 높이 2×(운영자 지시).** ds-bars ③ 인라인 height 255→510px(직전의 2배). viewBox 스트레치 구조라 좌표·%라벨 재계산 0, 타 차트 무영향. §3 상태값(510px) 동기화. 코드 1속성·문서 외 변경 없음.
 - 2026-07-27 15:35 · **리스크 보드 ①(사모 크레딧의 역습)에 「하이퍼스케일러 FCF/조달」 게이지 5행·점등 조건 ④·뉴스 keys 3종 추가(`risk.json`).** SimpleorNothing 지시(14:45 signal_log 「조달 전환」 엔트리의 상시 감시 승격). 게이지 = 26E FCF ~$0(25년 CAPEX $460B>영업익 첫 추월·외부 조달 전환·d=down 값방향) · 점등 조건 ④ = AI 회사채·SPV 발행 스프레드 급확대 or 조달발 capex 가이던스 하향 · keys += FCF·잉여현금흐름·SPV(라틴 단어경계 매칭) · read에 「스프레드=수요 리비전 선행 지표」 접속. state는 nt(연기) 유지 — 조건 미충족. risk.js 무편집(gauge 제네릭 `.map()` 렌더 확인) · 신규 토큰 0 → check-docs 무관. narrative≠numbers — 표시·감시선일 뿐 gamma·holdings·earnings·judgment 불변, 상태 전환은 trigger 실충족 시 수기.
