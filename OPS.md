@@ -1,4 +1,4 @@
-**최종 갱신: 2026-07-27 14:10 (KST)**
+**최종 갱신: 2026-07-27 14:45 (KST)**
 
 # OPS — 알파맵 운영 가이드
 
@@ -214,7 +214,7 @@
 
 | 정보명 | 자동/수동 | 주기 | 소스 |
 |---|---|---|---|
-| 자유 메모 | 수동 | 필요 시 | `reviews.json` (`entries` 배열 · 주간 리뷰 포함) |
+| 자유 메모 (순간 아이디어·캡처) | 수동(운영자 입력) | 필요 시 | worker `/api/memo`(**R2** · 비밀번호 게이트 뒤) + localStorage 오프라인 캐시(`alphamap_notes_v1`). 노트 스키마 `{id,t,title,body,tags,imgs,imgw,imgmeta,pinned}` — 07 뷰 composer에서 작성·디바운스 PUT. **세션(Claude)은 게이트 밖·네트워크 제한이라 직접 적재 불가 — 운영자 붙여넣기 경로만.** ※ 구 기재 `reviews.json`(주간 점검 기록)은 07 메모 소스가 아니라 비렌더 뷰 `#v-port`의 `#reviewLog` 잔존분(2026-07-27 정정) |
 
 ### 외부 채널 — 슬랙 데일리 브리핑 (6탭 밖 · 사이트 미노출)
 
@@ -353,6 +353,7 @@
 ---
 
 ## 9. 갱신 이력
+- 2026-07-27 14:45 · **§3 07 메모 소스 기재 정정(`reviews.json` → worker `/api/memo` R2) + signal_log 「조달 전환」 엔트리 append.** SimpleorNothing 지시(04 로드맵 ③ 해석의 조달 전환 관전 포인트 적재). 07 메모 적재 시도 중 라이브 index.html 대조로 스테일 발견 — 07 메모 실소스 = `/api/memo`(R2·게이트 뒤·노트 스키마 `{id,t,title,body,tags,…}`)이고 `reviews.json`은 비렌더 `#v-port` `#reviewLog`용 주간 점검 기록. 세션은 게이트 밖이라 메모 직접 적재 불가 → 운영자 붙여넣기 경로 명기. signal_log 엔트리 = 25년 CAPEX>영업이익 첫 추월·26E FCF ~0 → 외부 조달 전환(크레딧 스프레드=수요 리비전 선행 지표 승격, 리스크 보드 ①·주간 브리핑 ⑩ 접속) + 리비전 트랙 관측(먼 연도 상향 가속=γ open 유지). narrative≠numbers — gamma·holdings·earnings·judgment 불변. 코드·UI 무편집(신규 토큰 0 → check-docs 무관).
 - 2026-07-27 14:10 · **02 aisd ③ — 매출 값 라벨 온차트(운영자 지시).** 매출 라인 6포인트 상단에 수치 라벨($1.25T~$2.4T) 표시. SVG text는 preserveAspectRatio:none 스트레치로 왜곡 → ds-bv와 동일한 HTML 절대배치 span(left/top %, translate(-50%,-130%), mono 10px, st-dawn) 채택. 신규 클래스·토큰 0.
 - 2026-07-27 13:20 · **02 aisd ③ — 영업이익 라인 추가 + 차트 높이 1.5×(운영자 지시).** 4사 합산 영업이익(st-mature) 오버레이: ~$270B(23)→~$370B→~$440B(25 실적: MSFT 캘린더 ~$142B·GOOGL ~$141B·META ~$85B·AMZN ~$75B)→26E ~$500B→27E ~$560B(컨센 방향성). 동일 $축 y=163→142. 핵심 관측: **25년 CAPEX($460B)가 영업이익 첫 추월** — FCF ~0 붕괴의 근원 시각화(렌즈·트랙 rtv 명기). ds-bars ③만 인라인 height 170→255px(viewBox 스트레치, 타 차트 무영향). 트랙 ③행·fn 범례·§3 동기화. 신규 토큰 0(st-mature 기존).
 - 2026-07-27 12:20 · **02 aisd ③ — 차트 축 통일(운영자 지시).** 매출 독립 축 폐지 → 막대·매출·FCF 전부 동일 $축(1px=$14B · 상한 ~$2.55T). 막대 height 5.9~47.1%로 재계산(비율 정직성 우선 — CAPEX 시각 압축 수용) · 매출 y 93→11 · FCF y 167→181(2024 교차=막대 상단 접점 유지). ds-rtl 2줄·ds-fn·§3 인벤토리 축 표기 동기화. 신규 토큰·클래스 0 · check-docs·node --check·jsdom 통과.
