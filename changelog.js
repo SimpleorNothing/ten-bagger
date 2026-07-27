@@ -125,6 +125,13 @@
     var s=document.createElement('script');s.id='riskJs';s.src='/risk.js';s.defer=true;
     (document.body||document.documentElement).appendChild(s);
   }
+  // 01 시장 모니터링 「사이클 판별 보드」 로더(gates.js 자가 마운트).
+  // AI capex 4지표(수주잔고·상각·조달 규율·모델 레이어) — 리스크 보드 다음에 주입.
+  function loadGates(){
+    if(document.getElementById('gatesJs'))return;
+    var s=document.createElement('script');s.id='gatesJs';s.src='/gates.js';s.defer=true;
+    (document.body||document.documentElement).appendChild(s);
+  }
   // 01 시장 모니터링 「한국 수출 (반도체 중심)」 카드 로더(trade.js 자가 마운트).
   function loadTrade(){
     if(document.getElementById('tradeJs'))return;
@@ -144,6 +151,7 @@
     loadRaer();                                     // 추정 리비전 트래커 기대수익 컬럼
     loadLead();                                     // 01 월간 선행지표(FRED) 카드
     loadRisk();                                     // 01 리스크 3축 보드
+    loadGates();                                        // 01 사이클 판별 보드(AI capex 4지표)
     loadTrade();                                    // 01 한국 수출(반도체 중심) 카드
     loadQuote();                                    // 01 상단 투자 명언 스트립
   }
