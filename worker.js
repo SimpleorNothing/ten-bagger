@@ -2034,7 +2034,7 @@ export default {
           .on("body", { element(el) {
             el.append('<script src="/hover-chart.js" defer></scr' + 'ipt>', { html: true });
             el.append('<script src="/flags.js" defer></scr' + 'ipt>', { html: true });
-            el.append('<script src="/aisd.js" defer></scr' + 'ipt>', { html: true });
+            el.append('<script src="/aisd.js?v=20260727-capex-interactive" defer></scr' + 'ipt>', { html: true });
             el.append('<script src="/council-ask.js" defer></scr' + 'ipt>', { html: true });
             el.append('<script src="/council-roster.js" defer></scr' + 'ipt>', { html: true });
             el.append('<script src="/brief.js" defer></scr' + 'ipt>', { html: true });
