@@ -1296,7 +1296,7 @@ function briefSeries(series, key) {
 
 // 라이브 상황 요약 — LLM 입력. 토큰을 아끼려고 판단에 쓰이는 값만 추린다.
 async function briefSituation(env, request) {
-  const [sig, gam, hol, cal, log, jud, pul, chr, ear, idx] = await Promise.all([
+  const [sig, gam, hol, cal, log, jud, pul, chr, ear, rk, gt, dx, nw, dg, idx] = await Promise.all([
     briefAsset(env, request, "/signals.json"),
     briefAsset(env, request, "/gamma.json"),
     briefAsset(env, request, "/holdings.json"),
@@ -1306,6 +1306,11 @@ async function briefSituation(env, request) {
     briefAsset(env, request, "/pulse.json"),
     briefAsset(env, request, "/charts.json"),
     briefAsset(env, request, "/earnings.json"),
+    briefAsset(env, request, "/risk.json"),
+    briefAsset(env, request, "/gates.json"),
+    briefAsset(env, request, "/dxi.json"),
+    briefAsset(env, request, "/news.json"),
+    briefAsset(env, request, "/news_digest.json"),
     briefText(env, request, "/index.html"),
   ]);
 
@@ -1385,10 +1390,47 @@ async function briefSituation(env, request) {
     .sort((a, b) => (a.d < b.d ? -1 : 1))
     .slice(0, 8);
 
+  // ⑥ 01 시장 모니터링 보드 요약 — 듣기(팟캐스트)가 01 화면을 귀로 훑도록 상태·판정만 추린다(게이지 상세 제외).
+  const board = (j) => (j && Array.isArray(j.items))
+    ? j.items.map((it) => ({ no: it.no || "", name: it.name || "", state: it.stateLabel || it.state || "",
+        verdict: String(it.verdict || "").slice(0, 180) }))
+    : [];
+  const riskBoard = rk ? { insight: String(rk.insight || "").slice(0, 240), items: board(rk) } : null;
+  const cycleBoard = gt ? { insight: String(gt.insight || "").slice(0, 240), items: board(gt) } : null;
+
+  // ⑦ DXI 메모리 현물(주간) — L3 렌즈 · MU γ-닫힘 트리거 ③ 참고 관측치.
+  const dser = (dx && Array.isArray(dx.series)) ? dx.series : [];
+  const dlast = dser[dser.length - 1], dprev = dser[dser.length - 2];
+  const dxi = (dlast && dlast.v != null) ? {
+    d: dlast.t || "", usd: dlast.v,
+    wowPct: (dprev && dprev.v) ? Math.round(((dlast.v / dprev.v) - 1) * 1000) / 10 : null,
+  } : null;
+
+  // ⑧ 01 관련 기사(매크로 축 요약) + 종목 뉴스 — 보유 비중 상위 · 종목당 1건 · 주요한 것만 간략히.
+  const TN = {}; ((nw && nw.macroTopics) || []).forEach((t) => { if (t && t.id) TN[t.id] = t.name || t.id; });
+  const macroTopics = ((dg && dg.macro) || []).slice(0, 4)
+    .map((m) => ({ name: TN[m.id] || m.id || "", s: String(m.s || "").slice(0, 180) }));
+
+  const wOf = {}; ((hol && hol.detail) || []).forEach((x) => { if (x.ticker) wOf[x.ticker] = x.w || 0; });
+  const newsCut = Date.now() - 10 * 86400000;
+  const seenTk = {};
+  const stockNews = ((nw && nw.items) || [])
+    .filter((it) => it.ticker && wOf[it.ticker] && (it.m || 0) >= 1 && it.published && Date.parse(it.published) >= newsCut)
+    .sort((a, b) => (wOf[b.ticker] - wOf[a.ticker]) || (a.published < b.published ? 1 : -1))
+    .filter((it) => (seenTk[it.ticker] ? false : (seenTk[it.ticker] = 1)))
+    .slice(0, 6)
+    .map((it) => ({ tk: it.ticker, nm: it.name || it.ticker, d: String(it.published || "").slice(5, 10),
+        a: String(it.a || it.title || "").slice(0, 150), w: String(it.w || "").slice(0, 130) }));
+
   return {
     asOf: today,
     macroGate: macro,
     marketPulse: pulse,
+    riskBoard: riskBoard,
+    cycleBoard: cycleBoard,
+    dxi: dxi,
+    macroTopics: macroTopics,
+    stockNews: stockNews,
     indices: indices,
     us10yPct: us10y ? { d: us10y.d, level: us10y.close } : null,
     gammaStage: gamma,
@@ -1414,9 +1456,9 @@ const BRIEF_SYS_BASE =
   "숫자는 입력된 라이브 값만 쓴다 — 없는 수치를 지어내지 마라. 모르면 '그 값은 오늘 데이터에 없습니다'라고 말한다. " +
   "한국어. 종결어는 '~하겠습니다/~할게요/~입니다'. '및' 을 쓰지 않는다. " +
   "**분량은 5분 — 양 파트 합쳐 발언 18~22개로 압축한다.** 인사말·맞장구·앞말 되풀이 같은 군더더기 발언을 빼고 " +
-  "발언당 정보 밀도를 높인다(내용을 빼는 게 아니라 말수를 줄인다 — **맥박·게이트·지수·보유 마감·뉴스·리밸런싱·볼 것·스틸맨**은 전부 담는다). " +
+  "발언당 정보 밀도를 높인다(내용을 빼는 게 아니라 말수를 줄인다 — **일정·지표·맥박·리스크 보드·사이클 보드·매크로 기사·주요 종목 뉴스·스틸맨**은 전부 담는다). " +
   "`say` 는 **음성 낭독용 평문**이라 기호를 말로 푼다(γ→'감마', → '로', % → '퍼센트', L3 → '레이어 3', VIX → '빅스', " +
-  "S&P500 → '에스앤피 오백', F&G → '공포탐욕지수', %p → '퍼센트포인트'). " +
+  "S&P500 → '에스앤피 오백', F&G → '공포탐욕지수', %p → '퍼센트포인트', DXI → '메모리 현물 지수'). " +
   "반드시 아래 JSON만 출력한다(코드펜스·설명 금지).\n" +
   'JSON: {"title":"오늘 브리핑 헤드라인 한 줄","badges":[["라벨","값"]],"script":[{"s":"host|ana","say":"발언 평문"}]}';
 
@@ -1462,19 +1504,22 @@ const BRIEF_TEXT_SYS =
   '"watch":["오늘 볼 것 3~5개"],"actions":["조건부 액션 2~4개"],"steelman":"반론 한 단락"}';
 
 const BRIEF_PART = {
-  1: "이번엔 **전반부**만 쓴다(약 2분 30초·발언 9~11개). 텍스트 회차와 **같은 순서**를 따른다 — " +
-     "오프닝 인사와 오늘 한 줄 결론 → **①시장 맥박**(입력 `marketPulse` 의 축을 방향과 함께, 위험이 몇 개인지 먼저 말하고 " +
-     "그중 가장 무거운 2~3축만 골라 렌즈와 귀결을 짚는다. 축을 지어내지 마라) → **②매크로 게이트 3중 AND**(나스닥 드로다운·빅스·공포탐욕 " +
-     "현재값과 점등 여부, 그래서 지금 무엇이 금지·허용인가) → **③한·미 종합지수**(입력 `indices` 의 종가·전일대비. " +
-     "마감일이 오늘과 다르면 휴장·시차를 반드시 말한다). badges 는 4~5개(나스닥 드로다운·빅스·공포탐욕·게이트 점등·맥박 위험 축 수). " +
-     "마지막 발언은 '보유 종목 마감부터는 후반부에서' 식으로 넘기는 진행자의 한마디로 끝낸다.",
+  1: "이번엔 **전반부**만 쓴다(약 2분 30초·발언 9~11개). 이 대담은 **01 시장 모니터링 화면을 귀로 훑는 회차**다 — " +
+     "보유종목 마감 전 종목 브리핑·리밸런싱 가이드는 하지 않는다. 흐름: 오프닝 인사와 오늘 한 줄 결론(매크로 게이트 점등 몇/3 을 한 문장에 녹인다) → " +
+     "**①다가오는 일정**(입력 `upcoming`·`upcomingEarnings` 를 합쳐 임박한 순 3~5개 — 'D-몇' 과 왜 중요한지 한 줄씩) → " +
+     "**②지표**(입력 `indices` 의 한·미 지수 종가·전일대비 — 마감일이 오늘과 다르면 휴장·시차를 반드시 말한다. `us10yPct` 는 수준값 퍼센트로만, " +
+     "`dxi` 가 있으면 메모리 현물가와 주간 방향을 레이어 3 렌즈로 한 문장) → " +
+     "**③시장 맥박**(입력 `marketPulse` — 위험이 몇 축인지 먼저 말하고 가장 무거운 2~3축만 렌즈와 귀결을 짚는다. 축을 지어내지 마라). " +
+     "badges 는 4~5개(게이트 점등·임박 이벤트 D-n·코스피/나스닥 전일대비·맥박 위험 축 수). " +
+     "마지막 발언은 '리스크 보드와 사이클 판정은 후반부에서' 식으로 넘기는 진행자의 한마디로 끝낸다.",
   2: "이번엔 **후반부**만 쓴다(약 2분 30초·발언 9~11개). 전반부 대본이 입력으로 주어지니 **같은 말을 반복하지 마라**. " +
-     "흐름: **④주요 보유종목 마감**(입력 `holdingCloses` 에서 움직임이 큰 4~6개만·전일대비와 5거래일을 함께, 감마와 단계 판정을 붙이고 " +
-     "닫힘 트리거 점등 여부를 명시한다. 전 종목 나열 금지) → **⑤주요 보유종목 뉴스**(입력 `recentSignals` 기반 3~4건, " +
-     "각각 어느 레이어로 읽히는지와 **뉴스는 숫자 파일을 바꾸지 않는다**는 점) → **⑥리밸런싱 가이드**(오늘 실행이 가능한지를 " +
-     "먼저 못박고, 밴드 갭이 큰 순이 아니라 **언더웨이트 우선**으로 조건부 액션을 읽는다. 게이트가 잠겨 있으면 가정형임을 분명히 하고 " +
-     "매매 지시처럼 말하지 마라) → **⑦오늘과 내일 지켜볼 것**(입력 `upcoming`·`upcomingEarnings` 에서 임박한 순으로 3~5개) → " +
-     "마지막에 반드시 **스틸맨 반론**(오늘 결론이 틀렸다면 무엇 때문인가) → 클로징. badges 는 빈 배열로 둔다.",
+     "01 시장 모니터링의 판정 보드·뉴스를 이어 정리한다 — 흐름: **④리스크 보드**(입력 `riskBoard` 3축 — 점등/연기/완화가 각각 몇인지 먼저, " +
+     "상태가 무거운 축부터 이름·상태·판정 한 줄씩. `insight` 가 있으면 종합 한 문장) → " +
+     "**⑤사이클 판별 보드**(입력 `cycleBoard` AI capex 4지표 — 점등·황색 개수를 먼저 말하고 황색·점등 지표만 이름과 판정을 짚는다) → " +
+     "**⑥관련 기사**(입력 `macroTopics` 축 요약 2~3개 — 어느 레이어·게이트로 읽히는지 리드스루) → " +
+     "**⑦종목 뉴스**(입력 `stockNews` 에서 **주요 보유종목만 2~3건, 종목당 한 문장으로 간략히** — 개별 종목을 길게 다루지 않는다. " +
+     "필요하면 `holdingCloses` 에서 움직임이 특히 큰 1~2종목만 전일대비 한 문장 덧붙인다. **뉴스는 숫자 파일을 바꾸지 않는다**는 점을 명시) → " +
+     "마지막에 반드시 **스틸맨 반론**(오늘 판 읽기가 틀렸다면 무엇 때문인가) → 클로징. badges 는 빈 배열로 둔다.",
 };
 
 // 저장된 브리핑 회차 목록 — 06 「지난 브리핑」. 뉴스레터처럼 **회차 번호 + 제목**으로 낸다.
