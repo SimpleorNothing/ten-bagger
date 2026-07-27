@@ -1334,8 +1334,10 @@ async function briefSituation(env, request) {
   const events = (cal && Array.isArray(cal.events))
     ? cal.events.filter((e) => e.d >= today).slice(0, 8).map((e) => ({ d: e.d, lbl: e.lbl, meta: e.meta })) : [];
 
+  // 매일 나가는 브리핑 — 신호 로그도 최근 1~2일 신규만 싣는다(없으면 빈 배열 → '새 소식 없음' 처리).
+  const cut2d = kstDate(Date.now() - 2 * 86400000);
   const recent = (log && Array.isArray(log.log))
-    ? log.log.slice(-6).map((e) => ({
+    ? log.log.filter((e) => (e.date || "") >= cut2d).slice(-6).map((e) => ({
         date: e.date,
         source: String(e.source || "").slice(0, 320),
         tags: (Array.isArray(e.items) ? e.items : []).slice(0, 3)
@@ -1406,13 +1408,45 @@ async function briefSituation(env, request) {
     wowPct: (dprev && dprev.v) ? Math.round(((dlast.v / dprev.v) - 1) * 1000) / 10 : null,
   } : null;
 
+  // ⑦-1 지표 확장 — 유가(WTI)·미국 가솔린(RBOB 선물). fetch-prices 가 채우기 전이면 null(빈 칸 규율).
+  const oilS = briefSeries(SER, "wti");
+  const gasS = briefSeries(SER, "gasoline");
+  const oilWti = oilS ? { d: oilS.d, usd: oilS.close, d1Pct: oilS.d1Pct } : null;
+  const gasolineRb = gasS ? { d: gasS.d, usd: gasS.close, d1Pct: gasS.d1Pct } : null;
+
+  // ⑦-2 토픽 레이더 신규 기사 — news.json items(ticker=MACRO · 발굴축+병목축)에서 최근 1~2일 발행분만.
+  const mCut = Date.now() - 2 * 86400000;
+  const seenMac = {};
+  const macroNews = ((nw && nw.items) || [])
+    .filter((it) => it.ticker === "MACRO" && it.published && Date.parse(it.published) >= mCut)
+    .sort((a, b) => (a.published < b.published ? 1 : -1))
+    .filter((it) => { const k = (it.name || "") + "|" + (it.a || it.title || ""); return seenMac[k] ? false : (seenMac[k] = 1); })
+    .slice(0, 5)
+    .map((it) => ({ ax: it.name || "", d: String(it.published || "").slice(5, 10),
+        a: String(it.a || it.title || "").slice(0, 140), w: String(it.w || "").slice(0, 120) }));
+
+  // ⑦-3 직전 브리핑 요지 — 매일성의 반복 방지 소스. 어제~3일 전 p0 캐시에서 최대 2회분(헤드라인 + 언급 제목만).
+  const prevBrief = [];
+  if (env && env.MEMO_BUCKET) {
+    for (let i = 1; i <= 3 && prevBrief.length < 2; i++) {
+      try {
+        const o = await env.MEMO_BUCKET.get(BRIEF_KEY(kstDate(Date.now() - i * 86400000), 0));
+        if (!o) continue;
+        const v = await o.json();
+        prevBrief.push({ d: v.asOf || "", headline: String(v.headline || "").slice(0, 120),
+          said: [].concat((v.news || []).map((n) => n.t || ""), v.watch || [], v.actions || [])
+            .filter(Boolean).slice(0, 14).map((s) => String(s).slice(0, 80)) });
+      } catch { /* 캐시 없으면 건너뜀 */ }
+    }
+  }
+
   // ⑧ 01 관련 기사(매크로 축 요약) + 종목 뉴스 — 보유 비중 상위 · 종목당 1건 · 주요한 것만 간략히.
   const TN = {}; ((nw && nw.macroTopics) || []).forEach((t) => { if (t && t.id) TN[t.id] = t.name || t.id; });
   const macroTopics = ((dg && dg.macro) || []).slice(0, 4)
     .map((m) => ({ name: TN[m.id] || m.id || "", s: String(m.s || "").slice(0, 180) }));
 
   const wOf = {}; ((hol && hol.detail) || []).forEach((x) => { if (x.ticker) wOf[x.ticker] = x.w || 0; });
-  const newsCut = Date.now() - 10 * 86400000;
+  const newsCut = Date.now() - 2 * 86400000; // 매일 브리핑 — 최근 1~2일 발생분만
   const seenTk = {};
   const stockNews = ((nw && nw.items) || [])
     .filter((it) => it.ticker && wOf[it.ticker] && (it.m || 0) >= 1 && it.published && Date.parse(it.published) >= newsCut)
@@ -1431,6 +1465,10 @@ async function briefSituation(env, request) {
     dxi: dxi,
     macroTopics: macroTopics,
     stockNews: stockNews,
+    macroNews: macroNews,
+    oilWti: oilWti,
+    gasolineRb: gasolineRb,
+    prevBrief: prevBrief,
     indices: indices,
     us10yPct: us10y ? { d: us10y.d, level: us10y.close } : null,
     gammaStage: gamma,
@@ -1457,6 +1495,9 @@ const BRIEF_SYS_BASE =
   "한국어. 종결어는 '~하겠습니다/~할게요/~입니다'. '및' 을 쓰지 않는다. " +
   "**분량은 5분 — 양 파트 합쳐 발언 18~22개로 압축한다.** 인사말·맞장구·앞말 되풀이 같은 군더더기 발언을 빼고 " +
   "발언당 정보 밀도를 높인다(내용을 빼는 게 아니라 말수를 줄인다 — **일정·지표·맥박·리스크 보드·사이클 보드·매크로 기사·주요 종목 뉴스·스틸맨**은 전부 담는다). " +
+  "**매일성(절대)**: 이 브리핑은 매일 나간다 — ⓐ최근 1~2일 발생분 중심으로 말하고 오래된 항목은 뺀다 " +
+  "ⓑ입력 `prevBrief`(직전 회차 요지)에 이미 나온 내용은 반복하지 않는다(값이 바뀌었으면 변화분만 짚는다) " +
+  "ⓒ어느 섹션이든 신규가 없으면 '새로 들어온 소식은 없습니다' 한 문장으로 짧게 넘어간다(억지로 채우지 않는다). " +
   "`say` 는 **음성 낭독용 평문**이라 기호를 말로 푼다(γ→'감마', → '로', % → '퍼센트', L3 → '레이어 3', VIX → '빅스', " +
   "S&P500 → '에스앤피 오백', F&G → '공포탐욕지수', %p → '퍼센트포인트', DXI → '메모리 현물 지수'). " +
   "반드시 아래 JSON만 출력한다(코드펜스·설명 금지).\n" +
@@ -1477,11 +1518,12 @@ const BRIEF_TEXT_SYS =
   "`gate` 는 매크로 게이트 3축(나스닥 드로다운·VIX·CNN 공포탐욕)을 각각 한 칸씩, `s` 는 '충족' 또는 '미충족'으로만 쓴다. " +
   "`gateVerdict` 는 '몇/3 · 그래서 지금 무엇이 금지·허용인가' 한 줄. " +
   "`indices` 는 입력 `indices` 를 옮기되 `note` 에 마감일이 오늘과 다르면 휴장·시차를 밝힌다(예: '한국 마지막 거래일'). " +
-  "美 10년물(`us10yPct`)은 지수가 아니므로 표에 넣지 말고 `bullets` 나 맥박 문장에서 **수준값(%)** 으로만 언급한다. " +
+  "美 10년물(`us10yPct`)은 지수가 아니므로 표에 넣지 말고 `bullets` 나 맥박 문장에서 **수준값(%)** 으로만 언급한다. 공포탐욕지수 수치, `oilWti`(WTI 달러/배럴)·`gasolineRb`(가솔린 선물 달러/갤런)도 있으면 `bullets` 에서 수준값으로 짚는다. " +
   "`holdSummary` 는 보유 전체 현황 2~3문장(어느 통화·레이어가 눌렸나·방어했나). " +
   "`holdings` 는 비중 상위 중 **움직임이 유의미한 6~9개만** 고른다(전 종목 나열 금지). `chg` 는 전일대비, `chg5` 는 5거래일. " +
   "`layers` 는 보유 레이어를 비중 큰 순으로, `state` 는 '오버'·'언더'·'적정' 중 하나. 밴드는 입력 `layerBands` 의 lo~hi 를 쓰고 없으면 빈 문자열. " +
-  "`news` 는 입력 `recentSignals` 기반 3~6건, `note` 에 어느 레이어로 읽히는지와 **narrative 라 숫자 파일은 불변**임을 명시한다. " +
+  "`news` 는 입력 `recentSignals`·`macroNews` 의 **최근 1~2일 신규만** 3~6건, `note` 에 어느 레이어로 읽히는지와 **narrative 라 숫자 파일은 불변**임을 명시한다 " +
+  "— 신규가 없으면 빈 배열로 두고 `bullets` 에 '새로 들어온 소식은 없습니다' 한 줄을 넣는다. 입력 `prevBrief` 에 이미 나온 내용은 반복하지 않는다(변화분만). " +
   "`upcoming` 은 `upcoming`·`upcomingEarnings` 를 합쳐 날짜순 4~7건, `dn` 은 오늘 기준 'D-n'. " +
   "`rebalance` 는 **오늘 실제로 실행 가능한가**를 먼저 판정(`verdict`)하고, `rows` 에 우선순위별로 " +
   "`act`(무엇을) · `size`(밴드 갭 %p 또는 금액) · `cond`(선결 AND 조건)를 쓴다. 게이트가 잠겨 있으면 " +
@@ -1508,6 +1550,7 @@ const BRIEF_PART = {
      "보유종목 마감 전 종목 브리핑·리밸런싱 가이드는 하지 않는다. 흐름: 오프닝 인사와 오늘 한 줄 결론(매크로 게이트 점등 몇/3 을 한 문장에 녹인다) → " +
      "**①다가오는 일정**(입력 `upcoming`·`upcomingEarnings` 를 합쳐 임박한 순 3~5개 — 'D-몇' 과 왜 중요한지 한 줄씩) → " +
      "**②지표**(입력 `indices` 의 한·미 지수 종가·전일대비 — 마감일이 오늘과 다르면 휴장·시차를 반드시 말한다. `us10yPct` 는 수준값 퍼센트로만, " +
+     "`macroGate` 의 빅스·공포탐욕지수는 **수치로** 짚고, `oilWti`(서부텍사스유 달러/배럴)·`gasolineRb`(미국 가솔린 선물 달러/갤런)는 있으면 수준값과 방향 한 문장 — 없으면 건너뛴다. " +
      "`dxi` 가 있으면 메모리 현물가와 주간 방향을 레이어 3 렌즈로 한 문장) → " +
      "**③시장 맥박**(입력 `marketPulse` — 위험이 몇 축인지 먼저 말하고 가장 무거운 2~3축만 렌즈와 귀결을 짚는다. 축을 지어내지 마라). " +
      "badges 는 4~5개(게이트 점등·임박 이벤트 D-n·코스피/나스닥 전일대비·맥박 위험 축 수). " +
@@ -1516,7 +1559,7 @@ const BRIEF_PART = {
      "01 시장 모니터링의 판정 보드·뉴스를 이어 정리한다 — 흐름: **④리스크 보드**(입력 `riskBoard` 3축 — 점등/연기/완화가 각각 몇인지 먼저, " +
      "상태가 무거운 축부터 이름·상태·판정 한 줄씩. `insight` 가 있으면 종합 한 문장) → " +
      "**⑤사이클 판별 보드**(입력 `cycleBoard` AI capex 4지표 — 점등·황색 개수를 먼저 말하고 황색·점등 지표만 이름과 판정을 짚는다) → " +
-     "**⑥관련 기사**(입력 `macroTopics` 축 요약 2~3개 — 어느 레이어·게이트로 읽히는지 리드스루) → " +
+     "**⑥토픽 레이더**(입력 `macroNews` 최근 1~2일 신규 기사 2~3건 — 축 이름과 함의 리드스루. 신규가 없으면 '토픽 레이더에 새 기사는 없습니다' 한 문장 뒤 `macroTopics` 축 요약 하나만 짧게) → " +
      "**⑦종목 뉴스**(입력 `stockNews` 에서 **주요 보유종목만 2~3건, 종목당 한 문장으로 간략히** — 개별 종목을 길게 다루지 않는다. " +
      "필요하면 `holdingCloses` 에서 움직임이 특히 큰 1~2종목만 전일대비 한 문장 덧붙인다. **뉴스는 숫자 파일을 바꾸지 않는다**는 점을 명시) → " +
      "마지막에 반드시 **스틸맨 반론**(오늘 판 읽기가 틀렸다면 무엇 때문인가) → 클로징. badges 는 빈 배열로 둔다.",
