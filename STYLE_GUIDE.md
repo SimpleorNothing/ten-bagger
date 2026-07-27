@@ -1,4 +1,4 @@
-**최종 갱신: 2026-07-27 14:10 (KST)**
+**최종 갱신: 2026-07-27 19:30 (KST)**
 
 # STYLE_GUIDE — 알파맵 디자인 시스템
 
@@ -261,6 +261,8 @@ pantone.css :root       ← 현행 팔레트 (팬튼 A안, index.html 하단 <li
 ---
 
 ## 갱신 이력
+
+- 2026-07-27 19:30 · **02 aisd ③ CAPEX·매출·FCF·영업이익 반응형 인터랙티브 차트.** `preserveAspectRatio="none"` SVG와 HTML 좌표 라벨을 실제 CSS 픽셀·devicePixelRatio 기준 Canvas 렌더로 교체 — 원형 마커 무왜곡, ResizeObserver 리사이즈, 포인터 호버·탭 툴팁, 4개 시리즈 토글. 단일 $축·실적 실선/추정 점선·기존 기능색·3px 면·12px 메타 하한 유지. worker.js의 aisd 주입 URL에 캐시 버전 추가, 신규 `:root` 토큰 0. (OPS §9 동반)`n
 
 - 2026-07-27 14:10 · **02 aisd ③ 라인 값 라벨 규칙.** 스트레치 SVG(preserveAspectRatio:none) 내부 <text> 금지(글리프 왜곡) — 값 라벨은 컨테이너 기준 HTML 절대배치 span(left=cx/vbW%, top=cy/vbH%, translate(-50%,-130%))로. 폰트 mono 10px·시리즈 색 동일. 현재 매출 라인만 적용(밀집 시리즈는 트랙 행으로 충분). (OPS §9 동반)
 - 2026-07-27 12:55 · **01 「사이클 판별 보드」(`gates.js` 자가 마운트 · `#gatesBoard` · 리스크 보드 다음).** §6 레퍼런스·리스크 보드 결 복제(`mkt-grid`/`mkt-card`·렌즈 2줄 §6-4·빈 상태 §6-6). 상태 배지 `.gt-st`(wn=`--st-hot`/nt=`--st-mature`/ok=`--st-dawn` · radius 20px §3) · 등락색 §4 · 본문 14px/메타 12px §2. **신규 `:root` 토큰·전역 클래스 0**(`gates-css` `#gatesBoard` 스코프 · `rk-*`→`gt-*`) → TOKENS 무변·check-docs 통과. index.html 무편집(`changelog.js` 로더 1개·신규 2파일만). narrative≠numbers. (OPS §3·§9 동반)
