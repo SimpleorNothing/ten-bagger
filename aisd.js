@@ -207,7 +207,7 @@ var CSS=`#dsAisd{margin:2px 0 38px}
 var HTML=`<div style="position:relative">
   <div class="ds-kick">AI Value Chain · Demand · Supply</div>
   <h2 class="ds-title">AI <em>수요·공급</em> — 밸류체인으로 보는 상류·병목</h2>
-  <div class="ds-upd">update : 2026.07.20 · 컨센서스 방향성 추정 · 수동 갱신(분기 캡처) · 리비전 트랙은 캡처 축적 전 예시</div>
+  <div class="ds-upd">update : 2026.07.27 · 컨센서스 방향성 추정 · 수동 갱신(분기 캡처) · 리비전 트랙은 캡처 축적 전 예시</div>
 </div>
 
 <div class="ds-sec">판정 <span class="ds-note">이 블록이 답하는 질문 · 결론 먼저</span></div>
@@ -390,21 +390,24 @@ var HTML=`<div style="position:relative">
   <div class="ds-fn">매출·계획은 공개 관측 기반 방향성(비상장 다수 · 확정치 아님) — narrative 층</div>
 </div>
 
-<div class="ds-sec">③ 컴퓨팅 판매자 — CAPEX · 주요 업체 투자계획 <span class="ds-note">4사 합산 · $B · 2027E &gt;$1T · 2028E 컨센서스 희박 · 업체 클릭 = 연도별 상세</span></div>
+<div class="ds-sec">③ 컴퓨팅 판매자 — CAPEX · 매출 · FCF · 주요 업체 투자계획 <span class="ds-note">4사 합산 · $B · 2027E &gt;$1T · 매출·FCF 라인 오버레이 · 업체 클릭 = 연도별 상세</span></div>
 <div class="ds-lens">
   <div class="ds-l1"><b>상류 · 수요 선행</b> 하이퍼스케일러 capex = 8레이어 전체 수요의 최상류 신호</div>
-  <div class="ds-l2">2025 ~$460B(실적) → 2026E ~$700B → 2027E <span class="ds-wn">$1T 돌파 전망</span> → 2028E ~$1.2T · 우상향 지속 = 고점 미점등, 추정 리비전 확인 필요</div>
+  <div class="ds-l2">2025 ~$460B(실적) → 2026E ~$700B → 2027E <span class="ds-wn">$1T 돌파 전망</span> → 2028E ~$1.2T · 우상향 지속 = 고점 미점등, 추정 리비전 확인 필요 — 매출은 완만(+13~15%/y) · <span class="ds-wn">FCF는 26E ~0 붕괴</span> = 자체 현금 → 외부 조달 전환 국면</div>
 </div>
 <div class="ds-card">
-  <div class="ds-bars">
+  <div class="ds-bars" style="position:relative">
     <div class="ds-bc"><span class="ds-bv">$150B</span><div class="ds-bar" style="height:12%"></div></div>
     <div class="ds-bc"><span class="ds-bv">$230B</span><div class="ds-bar" style="height:18%"></div></div>
     <div class="ds-bc"><span class="ds-bv">$460B</span><div class="ds-bar" style="height:36%"></div></div>
     <div class="ds-bc"><span class="ds-bv">~$700B</span><div class="ds-bar est" style="height:55%"></div></div>
     <div class="ds-bc"><span class="ds-bv">&gt;$1,000B</span><div class="ds-bar est" style="height:78%"></div></div>
     <div class="ds-bc"><span class="ds-bv">~$1,200B</span><div class="ds-bar est" style="height:94%;border-style:dashed"></div></div>
+    <svg viewBox="0 0 600 182" preserveAspectRatio="none" aria-hidden="true" style="position:absolute;left:0;top:0;width:100%;height:100%;overflow:visible;pointer-events:none"><polyline points="50,106 150,96 250,84" fill="none" stroke="var(--st-dawn)" stroke-width="2" stroke-opacity=".9" vector-effect="non-scaling-stroke"/><polyline points="250,84 350,72 450,54 550,36" fill="none" stroke="var(--st-dawn)" stroke-width="2" stroke-opacity=".9" stroke-dasharray="5 4" vector-effect="non-scaling-stroke"/><polyline points="50,154 150,151 250,159" fill="none" stroke="var(--st-hot)" stroke-width="2" stroke-opacity=".9" vector-effect="non-scaling-stroke"/><polyline points="250,159 350,179 450,181" fill="none" stroke="var(--st-hot)" stroke-width="2" stroke-opacity=".9" stroke-dasharray="5 4" vector-effect="non-scaling-stroke"/><circle cx="50" cy="106" r="3.5" fill="var(--st-dawn)"/><circle cx="150" cy="96" r="3.5" fill="var(--st-dawn)"/><circle cx="250" cy="84" r="3.5" fill="var(--st-dawn)"/><circle cx="350" cy="72" r="3.5" fill="var(--panel2)" stroke="var(--st-dawn)" stroke-width="1.5"/><circle cx="450" cy="54" r="3.5" fill="var(--panel2)" stroke="var(--st-dawn)" stroke-width="1.5"/><circle cx="550" cy="36" r="3.5" fill="var(--panel2)" stroke="var(--st-dawn)" stroke-width="1.5"/><circle cx="50" cy="154" r="3.5" fill="var(--st-hot)"/><circle cx="150" cy="151" r="3.5" fill="var(--st-hot)"/><circle cx="250" cy="159" r="3.5" fill="var(--st-hot)"/><circle cx="350" cy="179" r="3.5" fill="var(--panel2)" stroke="var(--st-hot)" stroke-width="1.5"/><circle cx="450" cy="181" r="3.5" fill="var(--panel2)" stroke="var(--st-hot)" stroke-width="1.5"/></svg>
   </div>
   <div class="ds-bx"><span>2023</span><span>2024</span><span>2025</span><span class="est">2026E</span><span class="est">2027E</span><span class="est">2028E</span></div>
+  <div class="ds-rt"><span class="ds-rtl"><span style="color:var(--st-dawn)">&#9473;</span> &#9312; 매출 트랙<br>4사 합산 · 독립 축</span><span class="ds-rts"><i>2023</i>$1.25T</span><span class="ds-rta">→</span><span class="ds-rts"><i>2024</i>$1.42T</span><span class="ds-rta">→</span><span class="ds-rts"><i>2025</i>~$1.62T</span><span class="ds-rta">→</span><span class="ds-rts"><i>26E</i>~$1.85T</span><span class="ds-rta">→</span><span class="ds-rts"><i>27E</i>~$2.1T</span><span class="ds-rta">→</span><span class="ds-rts"><i>28E</i>~$2.4T</span><span class="ds-rtv up">CAPEX/매출 12%(23)→38%E(26) 급등</span></div>
+  <div class="ds-rt"><span class="ds-rtl"><span style="color:var(--st-hot)">&#9473;</span> &#9313; FCF 트랙<br>4사 합산 · CAPEX 동일 축</span><span class="ds-rts"><i>2023</i>~$210B</span><span class="ds-rta">→</span><span class="ds-rts"><i>2024</i>~$230B</span><span class="ds-rta">→</span><span class="ds-rts"><i>2025</i>~$170B</span><span class="ds-rta">→</span><span class="ds-rts"><i>26E</i>~$0 근접</span><span class="ds-rta">→</span><span class="ds-rts"><i>27E</i>컨센 분산</span><span class="ds-rtv" style="color:var(--st-accel)">▼ 2024 교차 후 capex가 현금창출 추월</span></div>
   <div class="ds-rt"><span class="ds-rtl">2026E 리비전 트랙<br>4사 합산 · 캡처별</span>
     <span class="ds-rts"><i>25.10</i>$610B</span><span class="ds-rta">→</span>
     <span class="ds-rts"><i>26.01</i>$630B <span class="ds-rev up">▲20</span></span><span class="ds-rta">→</span>
@@ -420,7 +423,7 @@ var HTML=`<div style="position:relative">
     <span class="ds-rts"><i>26.04</i>$1,050B</span><span class="ds-rta">→</span>
     <span class="ds-rts"><i>26.07</i>~$1,200B <span class="ds-rev up">▲150</span></span>
     <span class="ds-rtv up">▲ 상향 · 캡처 2회 = 신뢰 낮음</span></div>
-  <div class="ds-fn">채워진 막대=실적 · 테두리=추정(E) · 점선=컨센서스 희박 · 리비전 트랙은 캡처 축적 전 예시 — 연동 시 분기 스냅샷 비교로 자동 파생</div>
+  <div class="ds-fn">채워진 막대=실적 · 테두리=추정(E) · 점선=컨센서스 희박 · 라인 <span style="color:var(--st-dawn)">&#9473; 매출(독립 축)</span>·<span style="color:var(--st-hot)">&#9473; FCF(CAPEX 동일 $축)</span> — 실선=실적·점선=추정, 26E FCF ~0은 MS·BofA·Epoch 컨센(AMZN 마이너스·GOOGL ~$8B) · 리비전 트랙은 캡처 축적 전 예시 — 연동 시 분기 스냅샷 비교로 자동 파생</div>
 </div>
 
 <div class="ds-lens" style="margin-top:14px">
