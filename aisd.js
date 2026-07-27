@@ -398,35 +398,24 @@ var HTML=`<div style="position:relative">
   <div class="ds-fn">매출·계획은 공개 관측 기반 방향성(비상장 다수 · 확정치 아님) — narrative 층</div>
 </div>
 
-<div class="ds-sec">③ 컴퓨팅 판매자 — CAPEX · 매출 · FCF · 영업이익 · 주요 업체 투자계획 <span class="ds-note">4사 합산 · $B · 2027E &gt;$1T · 매출·FCF·영업이익 라인 오버레이 · 업체 클릭 = 연도별 상세</span></div>
+<div class="ds-sec">③ 컴퓨팅 판매자 — CAPEX · 매출 · FCF · 영업이익 · 주요 업체 투자계획 <span class="ds-note">4사 합산 · $B · 2027E ~$801B · 매출·FCF·영업이익 라인 오버레이 · 업체 클릭 = 연도별 상세</span></div>
 <div class="ds-lens">
   <div class="ds-l1"><b>상류 · 수요 선행</b> 하이퍼스케일러 capex = 8레이어 전체 수요의 최상류 신호</div>
-  <div class="ds-l2">2025 ~$460B(실적) → 2026E ~$700B → 2027E <span class="ds-wn">$1T 돌파 전망</span> → 2028E ~$1.2T · 우상향 지속 = 고점 미점등, 추정 리비전 확인 필요 — 매출은 완만(+13~15%/y) · <span class="ds-wn">FCF는 26E ~0 붕괴</span> = 자체 현금 → 외부 조달 전환 국면 · <span class="ds-wn">25년 CAPEX($460B)가 영업이익(~$440B) 첫 추월</span></div>
+  <div class="ds-l2">2025 ~$358B(실적) → 2026E ~$725B → 2027E ~$801B → 2028E ~$950B · 우상향 지속이나 증가율은 27E 둔화 — 매출은 2024 +14% → 2025 +15% → 26E +19% → 27E +17% → 28E +13% · <span class="ds-wn">FCF는 26E ~$64B로 급감</span> = 자체 현금 → 외부 조달 전환 국면 · 영업이익은 25년 ~$421B로 CAPEX를 상회하나 26E CAPEX가 재역전</div>
 </div>
 <div class="ds-card">
   <div class="ds-capex-toggles" role="group" aria-label="차트 시리즈 표시">
     <button type="button" data-series="revenue" aria-pressed="true">매출</button><button type="button" data-series="capex" aria-pressed="true">CAPEX</button><button type="button" data-series="op" aria-pressed="true">영업이익</button><button type="button" data-series="fcf" aria-pressed="true">FCF</button>
   </div>
   <div class="ds-capex-chart"><canvas tabindex="0" role="img" aria-label="2023년부터 2028년까지 컴퓨팅 판매자 4사의 CAPEX, 매출, FCF, 영업이익 차트"></canvas><div class="ds-capex-tip" role="status" aria-live="polite"></div></div>
-  <div class="ds-rt"><span class="ds-rtl"><span style="color:var(--st-dawn)">&#9473;</span> &#9312; 매출 트랙<br>4사 합산 · 동일 $축</span><span class="ds-rts"><i>2023</i>$1.25T</span><span class="ds-rta">→</span><span class="ds-rts"><i>2024</i>$1.42T</span><span class="ds-rta">→</span><span class="ds-rts"><i>2025</i>~$1.62T</span><span class="ds-rta">→</span><span class="ds-rts"><i>26E</i>~$1.85T</span><span class="ds-rta">→</span><span class="ds-rts"><i>27E</i>~$2.1T</span><span class="ds-rta">→</span><span class="ds-rts"><i>28E</i>~$2.4T</span><span class="ds-rtv up">CAPEX/매출 12%(23)→38%E(26) 급등</span></div>
-  <div class="ds-rt"><span class="ds-rtl"><span style="color:var(--st-hot)">&#9473;</span> &#9313; FCF 트랙<br>4사 합산 · 동일 $축</span><span class="ds-rts"><i>2023</i>~$210B</span><span class="ds-rta">→</span><span class="ds-rts"><i>2024</i>~$230B</span><span class="ds-rta">→</span><span class="ds-rts"><i>2025</i>~$170B</span><span class="ds-rta">→</span><span class="ds-rts"><i>26E</i>~$0 근접</span><span class="ds-rta">→</span><span class="ds-rts"><i>27E</i>컨센 분산</span><span class="ds-rtv" style="color:var(--st-accel)">▼ 2024 교차 후 capex가 현금창출 추월</span></div>
-  <div class="ds-rt"><span class="ds-rtl"><span style="color:var(--st-mature)">&#9473;</span> &#9314; 영업이익 트랙<br>4사 합산 · 동일 $축</span><span class="ds-rts"><i>2023</i>~$270B</span><span class="ds-rta">→</span><span class="ds-rts"><i>2024</i>~$370B</span><span class="ds-rta">→</span><span class="ds-rts"><i>2025</i>~$440B</span><span class="ds-rta">→</span><span class="ds-rts"><i>26E</i>~$500B</span><span class="ds-rta">→</span><span class="ds-rts"><i>27E</i>~$560B</span><span class="ds-rtv" style="color:var(--st-accel)">▲ 증익 지속 · 25년 CAPEX>영업이익 첫 역전</span></div>
-  <div class="ds-rt"><span class="ds-rtl">2026E 리비전 트랙<br>4사 합산 · 캡처별</span>
-    <span class="ds-rts"><i>25.10</i>$610B</span><span class="ds-rta">→</span>
-    <span class="ds-rts"><i>26.01</i>$630B <span class="ds-rev up">▲20</span></span><span class="ds-rta">→</span>
-    <span class="ds-rts"><i>26.04</i>$690B <span class="ds-rev up">▲60</span></span><span class="ds-rta">→</span>
-    <span class="ds-rts"><i>26.07</i>~$700B <span class="ds-rev up">▲10</span></span>
-    <span class="ds-rtv up">▲ 상향 지속 = 수요 가속</span></div>
-  <div class="ds-rt"><span class="ds-rtl">2027E 리비전 트랙<br>4사 합산 · 캡처별</span>
-    <span class="ds-rts"><i>26.01</i>$820B</span><span class="ds-rta">→</span>
-    <span class="ds-rts"><i>26.04</i>$950B <span class="ds-rev up">▲130</span></span><span class="ds-rta">→</span>
-    <span class="ds-rts"><i>26.07</i>&gt;$1,000B <span class="ds-rev up">▲50</span></span>
-    <span class="ds-rtv up">▲ 상향 지속 · 폭은 둔화 관찰</span></div>
-  <div class="ds-rt"><span class="ds-rtl">2028E 리비전 트랙<br>4사 합산 · 캡처별</span>
-    <span class="ds-rts"><i>26.04</i>$1,050B</span><span class="ds-rta">→</span>
-    <span class="ds-rts"><i>26.07</i>~$1,200B <span class="ds-rev up">▲150</span></span>
-    <span class="ds-rtv up">▲ 상향 · 캡처 2회 = 신뢰 낮음</span></div>
-  <div class="ds-fn">채워진 막대=실적 · 테두리=추정(E) · 점선=컨센서스 희박 · 라인 <span style="color:var(--st-dawn)">&#9473; 매출</span>·<span style="color:var(--st-hot)">&#9473; FCF</span>·<span style="color:var(--st-mature)">&#9473; 영업이익</span> — <b>막대·라인 전부 동일 $축</b>(상한 ~$2.55T) · 실선=실적·점선=추정, 26E FCF ~0은 MS·BofA·Epoch 컨센(AMZN 마이너스·GOOGL ~$8B) · 영업이익 25는 실적 합산(MSFT 캘린더 ~$142B·GOOGL ~$141B·META ~$85B·AMZN ~$75B)·26E~27E는 컨센 방향성 · 리비전 트랙은 캡처 축적 전 예시 — 연동 시 분기 스냅샷 비교로 자동 파생</div>
+  <div class="ds-rt"><span class="ds-rtl"><span style="color:var(--st-dawn)">&#9473;</span> &#9312; 매출 트랙<br>4사 합산 · 동일 $축</span><span class="ds-rts"><i>2023</i>$1.229T</span><span class="ds-rta">→</span><span class="ds-rts"><i>2024</i>$1.398T (+14%)</span><span class="ds-rta">→</span><span class="ds-rts"><i>2025</i>$1.602T (+15%)</span><span class="ds-rta">→</span><span class="ds-rts"><i>26E</i>~$1.904T (+19%)</span><span class="ds-rta">→</span><span class="ds-rts"><i>27E</i>~$2.224T (+17%)</span><span class="ds-rta">→</span><span class="ds-rts"><i>28E</i>~$2.511T (+13%)</span><span class="ds-rtv up">CAPEX/매출 11%(23)→38%E(26)</span></div>
+  <div class="ds-rt"><span class="ds-rtl"><span style="color:var(--st-hot)">&#9473;</span> &#9313; FCF 트랙<br>4사 합산 · 동일 $축</span><span class="ds-rts"><i>2023</i>~$210B</span><span class="ds-rta">→</span><span class="ds-rts"><i>2024</i>~$237B</span><span class="ds-rta">→</span><span class="ds-rts"><i>2025</i>~$200B</span><span class="ds-rta">→</span><span class="ds-rts"><i>26E</i>~$64B</span><span class="ds-rta">→</span><span class="ds-rts"><i>27E</i>~$25B</span><span class="ds-rta">→</span><span class="ds-rts"><i>28E</i>~$50B</span><span class="ds-rtv" style="color:var(--st-accel)">▼ CAPEX 급증으로 26E 현금창출 급감</span></div>
+  <div class="ds-rt"><span class="ds-rtl"><span style="color:var(--st-mature)">&#9473;</span> &#9314; 영업이익 트랙<br>4사 합산 · 동일 $축</span><span class="ds-rts"><i>2023</i>~$256B</span><span class="ds-rta">→</span><span class="ds-rts"><i>2024</i>~$360B</span><span class="ds-rta">→</span><span class="ds-rts"><i>2025</i>~$421B</span><span class="ds-rta">→</span><span class="ds-rts"><i>26E</i>~$520B</span><span class="ds-rta">→</span><span class="ds-rts"><i>27E</i>~$523B</span><span class="ds-rta">→</span><span class="ds-rts"><i>28E</i>~$613B</span><span class="ds-rtv" style="color:var(--st-accel)">▲ 증익 지속 · 26E CAPEX가 영업이익 재추월</span></div>  <div class="ds-rt"><span class="ds-rtl">CAPEX 최신 스냅샷<br>4사 합산 · 2026-07-27</span>
+    <span class="ds-rts"><i>2025A</i>~$358B</span><span class="ds-rta">→</span>
+    <span class="ds-rts"><i>2026E</i>~$725B <span class="ds-rev up">▲103%</span></span><span class="ds-rta">→</span>
+    <span class="ds-rts"><i>2027E</i>~$801B <span class="ds-rev up">▲10%</span></span><span class="ds-rta">→</span>
+    <span class="ds-rts"><i>2028E</i>~$950B <span class="ds-rev up">▲19%</span></span>
+    <span class="ds-rtv up">26E 급증 · 27E 증가율 둔화</span></div>  <div class="ds-fn">채워진 막대=실적 · 테두리=추정(E) · 점선=전망 · 라인 <span style="color:var(--st-dawn)">&#9473; 매출</span>·<span style="color:var(--st-hot)">&#9473; FCF</span>·<span style="color:var(--st-mature)">&#9473; 영업이익</span> — <b>막대·라인 전부 동일 $축</b>(상한 ~$2.65T) · 2023~25 실적은 회사 공시/Yahoo Finance 연간치 합산(MSFT는 6월 결산 FY) · 26E 매출·영업이익·FCF는 S&amp;P Global 컨센서스 합산 · 27E 매출은 차년도 컨센서스 · 28E 및 27~28E CAPEX·FCF·영업이익은 공개 애널리스트 범위의 중앙 시나리오로 신뢰도 낮음 · FCF는 각사 공시 정의 기준으로 공급자별 화면과 차이 가능 · asOf 2026-07-27</div>
 </div>
 
 <div class="ds-lens" style="margin-top:14px">
@@ -478,35 +467,35 @@ var HTML=`<div style="position:relative">
   <table class="ds-mtx">
     <thead><tr><th>업체</th><th>2024</th><th>2025</th><th class="est">2026E</th><th class="est">2027E</th><th class="est">2028E</th><th class="nt">방향</th></tr></thead>
     <tbody>
-      <tr class="exp" tabindex="0"><td class="ds-co">Amazon<small>AWS</small></td><td>83</td><td>~118</td><td class="dim">~200 <span class="ds-rev up">▲25</span></td><td class="dim">↑ <span class="ds-rev up">▲</span></td><td class="dim">↑</td><td class="nt">최대 규모 · Trainium 자체칩 병행</td></tr>
+      <tr class="exp" tabindex="0"><td class="ds-co">Amazon<small>AWS</small></td><td>83</td><td>131.8</td><td class="dim">~200 <span class="ds-rev up">▲25</span></td><td class="dim">↑ <span class="ds-rev up">▲</span></td><td class="dim">↑</td><td class="nt">최대 규모 · Trainium 자체칩 병행</td></tr>
       <tr class="dtl"><td colspan="7"><div class="ds-yrp">
         <div class="ds-yc"><div class="ds-yy">2024</div><div class="ds-yv">$83B</div><div class="ds-yt">생성형 수요 대응 — DC·네트워크 확장, Trainium2 도입 개시</div></div>
-        <div class="ds-yc"><div class="ds-yy">2025</div><div class="ds-yv">~$118B</div><div class="ds-yt">Trainium2 램프 · 자체 DC 가속 · Anthropic 수요 연동</div></div>
+        <div class="ds-yc"><div class="ds-yy">2025</div><div class="ds-yv">$131.8B</div><div class="ds-yt">Trainium2 램프 · 자체 DC 가속 · Anthropic 수요 연동</div></div>
         <div class="ds-yc"><div class="ds-yy est">2026E</div><div class="ds-yv">~$200B</div><div class="ds-yt">「수요가 캐파 초과」 — Trainium3 · 전력 확보 경쟁</div></div>
         <div class="ds-yc"><div class="ds-yy est">2027E</div><div class="ds-yv">↑ 지속</div><div class="ds-yt">AWS AI 매출 성장 연동 증액 시사 · 구체 가이던스 미제시</div></div>
         <div class="ds-yc"><div class="ds-yy est">2028E</div><div class="ds-yv">컨센 희박</div><div class="ds-yt">AWS 매출·전력 확보 속도 연동 — 애널 소수 추정만 존재</div></div>
       </div></td></tr>
-      <tr class="exp" tabindex="0"><td class="ds-co">Google<small>Alphabet</small></td><td>53</td><td>~85</td><td class="dim">~185 <span class="ds-rev up">▲40</span></td><td class="dim">↑ <span class="ds-rev up">▲</span></td><td class="dim">↑</td><td class="nt">TPU·데이터센터 공격적 상향</td></tr>
+      <tr class="exp" tabindex="0"><td class="ds-co">Google<small>Alphabet</small></td><td>52.5</td><td>91.4</td><td class="dim">~200 <span class="ds-rev up">▲40</span></td><td class="dim">↑ <span class="ds-rev up">▲</span></td><td class="dim">↑</td><td class="nt">TPU·데이터센터 공격적 상향</td></tr>
       <tr class="dtl"><td colspan="7"><div class="ds-yrp">
-        <div class="ds-yc"><div class="ds-yy">2024</div><div class="ds-yv">$53B</div><div class="ds-yt">TPU v5·DC 증설 — Gemini 학습 인프라</div></div>
-        <div class="ds-yc"><div class="ds-yy">2025</div><div class="ds-yv">~$85B</div><div class="ds-yt">가이던스 반복 상향 · TPU 확대 · 클라우드 수요</div></div>
-        <div class="ds-yc"><div class="ds-yy est">2026E</div><div class="ds-yv">~$185B</div><div class="ds-yt">대폭 상향 — TPU 차세대 · Gemini 추론 트래픽 폭증 대응</div></div>
+        <div class="ds-yc"><div class="ds-yy">2024</div><div class="ds-yv">$52.5B</div><div class="ds-yt">TPU v5·DC 증설 — Gemini 학습 인프라</div></div>
+        <div class="ds-yc"><div class="ds-yy">2025</div><div class="ds-yv">$91.4B</div><div class="ds-yt">가이던스 반복 상향 · TPU 확대 · 클라우드 수요</div></div>
+        <div class="ds-yc"><div class="ds-yy est">2026E</div><div class="ds-yv">~$200B</div><div class="ds-yt">대폭 상향 — TPU 차세대 · Gemini 추론 트래픽 폭증 대응</div></div>
         <div class="ds-yc"><div class="ds-yy est">2027E</div><div class="ds-yv">↑ 지속</div><div class="ds-yt">자체칩(TPU) 비중 확대 = NVIDIA 의존 일부 완화 변수</div></div>
         <div class="ds-yc"><div class="ds-yy est">2028E</div><div class="ds-yv">컨센 희박</div><div class="ds-yt">TPU 세대 교체 주기 지속 전제 — 추론 트래픽이 규모 결정</div></div>
       </div></td></tr>
-      <tr class="exp" tabindex="0"><td class="ds-co">Meta</td><td>39</td><td>~72</td><td class="dim">~125 <span class="ds-rev up">▲10</span></td><td class="dim">↑ <span class="ds-rev fl">→</span></td><td class="dim">↑</td><td class="nt">추론·자체 클러스터 집중</td></tr>
+      <tr class="exp" tabindex="0"><td class="ds-co">Meta</td><td>39.2</td><td>72.2</td><td class="dim">$125~145 <span class="ds-rev up">▲10</span></td><td class="dim">↑ <span class="ds-rev fl">→</span></td><td class="dim">↑</td><td class="nt">추론·자체 클러스터 집중</td></tr>
       <tr class="dtl"><td colspan="7"><div class="ds-yrp">
-        <div class="ds-yc"><div class="ds-yy">2024</div><div class="ds-yv">$39B</div><div class="ds-yt">Llama 학습 · 추천 시스템 GPU 확충</div></div>
-        <div class="ds-yc"><div class="ds-yy">2025</div><div class="ds-yv">~$72B</div><div class="ds-yt">추론 캐파 집중 · 자체 DC 건설 가속</div></div>
-        <div class="ds-yc"><div class="ds-yy est">2026E</div><div class="ds-yv">~$125B</div><div class="ds-yt">기가와트급 클러스터(Hyperion·Prometheus) 착공·램프</div></div>
+        <div class="ds-yc"><div class="ds-yy">2024</div><div class="ds-yv">$39.2B</div><div class="ds-yt">Llama 학습 · 추천 시스템 GPU 확충</div></div>
+        <div class="ds-yc"><div class="ds-yy">2025</div><div class="ds-yv">$72.2B</div><div class="ds-yt">추론 캐파 집중 · 자체 DC 건설 가속</div></div>
+        <div class="ds-yc"><div class="ds-yy est">2026E</div><div class="ds-yv">$125~145B</div><div class="ds-yt">기가와트급 클러스터(Hyperion·Prometheus) 착공·램프</div></div>
         <div class="ds-yc"><div class="ds-yy est">2027E</div><div class="ds-yv">↑ 지속</div><div class="ds-yt">수년간 기가와트 단위 증설 로드맵 공언 — 전력이 제약</div></div>
         <div class="ds-yc"><div class="ds-yy est">2028E</div><div class="ds-yv">↑ 로드맵</div><div class="ds-yt">Hyperion 5GW급 완공 목표 구간 — 전력·부지 확보가 상한</div></div>
       </div></td></tr>
-      <tr class="exp" tabindex="0"><td class="ds-co">Microsoft<small>Azure/OpenAI</small></td><td>44</td><td>~80</td><td class="dim">~120 <span class="ds-rev up">▲5</span></td><td class="dim">↑ <span class="ds-rev fl">→</span></td><td class="dim">~</td><td class="nt">OpenAI 연동 · 임대+자가 혼합</td></tr>
+      <tr class="exp" tabindex="0"><td class="ds-co">Microsoft<small>Azure/OpenAI</small></td><td>44.5</td><td>64.6</td><td class="dim">~190(CY) <span class="ds-rev up">▲5</span></td><td class="dim">↑ <span class="ds-rev fl">→</span></td><td class="dim">~</td><td class="nt">OpenAI 연동 · 임대+자가 혼합</td></tr>
       <tr class="dtl"><td colspan="7"><div class="ds-yrp">
-        <div class="ds-yc"><div class="ds-yy">2024</div><div class="ds-yv">$44B</div><div class="ds-yt">Azure AI 인프라 — OpenAI 학습·서빙 수요</div></div>
-        <div class="ds-yc"><div class="ds-yy">2025</div><div class="ds-yv">~$80B</div><div class="ds-yt">FY 기준 $80B+ 공언 · 자가 DC + 임대(리스) 병행</div></div>
-        <div class="ds-yc"><div class="ds-yy est">2026E</div><div class="ds-yv">~$120B</div><div class="ds-yt">증가율은 둔화·절대액 확대 — 전력 계약(원전 포함) 선점</div></div>
+        <div class="ds-yc"><div class="ds-yy">2024</div><div class="ds-yv">$44.5B</div><div class="ds-yt">Azure AI 인프라 — OpenAI 학습·서빙 수요</div></div>
+        <div class="ds-yc"><div class="ds-yy">2025</div><div class="ds-yv">$64.6B</div><div class="ds-yt">FY 기준 $80B+ 공언 · 자가 DC + 임대(리스) 병행</div></div>
+        <div class="ds-yc"><div class="ds-yy est">2026E</div><div class="ds-yv">~$190B(CY)</div><div class="ds-yt">증가율은 둔화·절대액 확대 — 전력 계약(원전 포함) 선점</div></div>
         <div class="ds-yc"><div class="ds-yy est">2027E</div><div class="ds-yv">↑ 지속</div><div class="ds-yt">OpenAI 자체 DC(Stargate) 분산 = MS 단독 부담 완화 변수</div></div>
         <div class="ds-yc"><div class="ds-yy est">2028E</div><div class="ds-yv">~ 재조정</div><div class="ds-yt">Stargate 분산 후 자가/임대 비중 재조정 — 4사 중 증가율 최저 가능</div></div>
       </div></td></tr>
@@ -712,17 +701,21 @@ var HTML=`<div style="position:relative">
 function mountCapexChart(root){
  var box=root.querySelector('.ds-capex-chart'),canvas=box&&box.querySelector('canvas'),tip=box&&box.querySelector('.ds-capex-tip');if(!canvas)return;
  var ctx=canvas.getContext('2d'),years=['2023','2024','2025','2026E','2027E','2028E'],visible={capex:true,revenue:true,fcf:true,op:true},hit=[],active=-1;
- var data={capex:{label:'CAPEX',values:[150,230,460,700,1000,1200],display:['$150B','$230B','$460B','~$700B','>$1,000B','~$1,200B'],yoy:[null,53,100,52,43,20],color:'--dawn',bar:true},revenue:{label:'매출',values:[1250,1420,1620,1850,2100,2400],display:['$1.25T','$1.42T','~$1.62T','~$1.85T','~$2.1T','~$2.4T'],yoy:[null,14,14,14,14,14],color:'--st-dawn'},fcf:{label:'FCF',values:[210,230,170,0,null,null],display:['~$210B','~$230B','~$170B','~$0',null,null],color:'--st-hot'},op:{label:'영업이익',values:[270,370,440,500,560,null],display:['~$270B','~$370B','~$440B','~$500B','~$560B',null],color:'--st-mature'}};
+ var data={capex:{label:'CAPEX',values:[136,214,358,725,801,950],display:['~$136B','~$214B','~$358B','~$725B','~$801B','~$950B'],yoy:[null,57,67,103,10,19],color:'--dawn',bar:true},revenue:{label:'매출',values:[1229,1398,1602,1904,2224,2511],display:['$1.229T','$1.398T','$1.602T','~$1.904T','~$2.224T','~$2.511T'],yoy:[null,14,15,19,17,13],color:'--st-dawn'},fcf:{label:'FCF',values:[210,237,200,64,25,50],display:['~$210B','~$237B','~$200B','~$64B','~$25B','~$50B'],color:'--st-hot'},op:{label:'영업이익',values:[256,360,421,520,523,613],display:['~$256B','~$360B','~$421B','~$520B','~$523B','~$613B'],color:'--st-mature'}};
  function col(name){return getComputedStyle(root).getPropertyValue(name).trim()||'#496176'}
  function fmt(v){return v>=1000?'$'+(v/1000).toFixed(v%1000?2:1).replace(/0$/,'')+'T':'$'+v.toLocaleString()+'B'}
+ function label(text,xx,yy,color,bold){
+  ctx.font=(bold?'700 ':'600 ')+'12px '+getComputedStyle(root).getPropertyValue('--mono');var tw=ctx.measureText(text).width,padx=5,pady=3,bx=xx-tw/2-padx,by=yy-7-pady;
+  ctx.fillStyle=col('--panel');ctx.globalAlpha=.94;ctx.fillRect(bx,by,tw+padx*2,14+pady*2);ctx.globalAlpha=1;ctx.fillStyle=color;ctx.textAlign='center';ctx.fillText(text,xx,yy)
+ }
  function draw(){
   var r=box.getBoundingClientRect(),dpr=Math.min(window.devicePixelRatio||1,2),w=Math.max(280,Math.round(r.width)),h=Math.max(260,Math.round(r.height));canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,w,h);hit=[];
-  var pad={l:48,r:16,t:24,b:42},pw=w-pad.l-pad.r,ph=h-pad.t-pad.b,max=2550,x=function(i){return pad.l+pw*(i+.5)/years.length},y=function(v){return pad.t+ph*(1-v/max)};
+  var pad={l:48,r:16,t:24,b:42},pw=w-pad.l-pad.r,ph=h-pad.t-pad.b,max=2650,x=function(i){return pad.l+pw*(i+.5)/years.length},y=function(v){return pad.t+ph*(1-v/max)};
   ctx.font='12px '+getComputedStyle(root).getPropertyValue('--mono');ctx.textBaseline='middle';ctx.strokeStyle=col('--line');ctx.fillStyle=col('--faint');ctx.lineWidth=1;
   [0,500,1000,1500,2000,2500].forEach(function(v){var yy=y(v);ctx.beginPath();ctx.moveTo(pad.l,yy+.5);ctx.lineTo(w-pad.r,yy+.5);ctx.stroke();ctx.textAlign='right';ctx.fillText(v?fmt(v):'$0',pad.l-7,yy)});
   ctx.textAlign='center';years.forEach(function(v,i){ctx.fillText(v,x(i),h-16)});
-  if(visible.capex){var d=data.capex,bw=Math.min(54,pw/years.length*.55);d.values.forEach(function(v,i){var xx=x(i)-bw/2,yy=y(v);ctx.fillStyle=i<3?col(d.color):col('--panel2');ctx.strokeStyle=col(d.color);ctx.lineWidth=1.5;ctx.fillRect(xx,yy,bw,y(0)-yy);if(i>=3){ctx.setLineDash(i===5?[5,4]:[]);ctx.strokeRect(xx+.75,yy+.75,bw-1.5,y(0)-yy-1);ctx.setLineDash([])}hit.push({i:i,x:x(i),y:yy,key:'capex'});ctx.fillStyle=col('--txt');ctx.font='700 12px '+getComputedStyle(root).getPropertyValue('--mono');ctx.fillText(d.display[i],x(i),Math.max(18,yy-10));if(d.yoy[i]!=null){ctx.fillStyle=col('--dim');ctx.font='12px '+getComputedStyle(root).getPropertyValue('--mono');ctx.fillText('+'+d.yoy[i]+'%',x(i),Math.max(8,yy-27))}})}
-  ['revenue','fcf','op'].forEach(function(key){if(!visible[key])return;var d=data[key];ctx.strokeStyle=col(d.color);ctx.fillStyle=col(d.color);ctx.lineWidth=2;for(var seg=0;seg<2;seg++){ctx.setLineDash(seg?[5,4]:[]);ctx.beginPath();var began=false;d.values.forEach(function(v,i){if(v==null||(seg===0&&i>2)||(seg===1&&i<2))return;var xx=x(i),yy=y(v);began?ctx.lineTo(xx,yy):ctx.moveTo(xx,yy);began=true});ctx.stroke()}ctx.setLineDash([]);d.values.forEach(function(v,i){if(v==null)return;var xx=x(i),yy=y(v);ctx.beginPath();ctx.arc(xx,yy,4,0,Math.PI*2);ctx.fillStyle=i<3?col(d.color):col('--panel2');ctx.fill();ctx.strokeStyle=col(d.color);ctx.lineWidth=1.5;ctx.stroke();hit.push({i:i,x:xx,y:yy,key:key});ctx.textAlign='center';ctx.font='12px '+getComputedStyle(root).getPropertyValue('--mono');if(key==='revenue'){ctx.fillStyle=col(d.color);ctx.fillText(d.display[i],xx,Math.max(18,yy-11));if(d.yoy[i]!=null){ctx.fillStyle=col('--dim');ctx.fillText('+'+d.yoy[i]+'%',xx,Math.max(8,yy-27))}}else{var margin=Math.round(v/data.revenue.values[i]*100),ly=key==='op'?yy-14:(v===0?yy-14:yy+14);ctx.fillStyle=col(d.color);ctx.fillText(d.display[i]+' ('+margin+'%)',xx,ly)}})});
+  if(visible.capex){var d=data.capex,bw=Math.min(54,pw/years.length*.55);d.values.forEach(function(v,i){var xx=x(i)-bw/2,yy=y(v);ctx.fillStyle=i<3?col(d.color):col('--panel2');ctx.strokeStyle=col(d.color);ctx.lineWidth=1.5;ctx.fillRect(xx,yy,bw,y(0)-yy);if(i>=3){ctx.setLineDash(i===5?[5,4]:[]);ctx.strokeRect(xx+.75,yy+.75,bw-1.5,y(0)-yy-1);ctx.setLineDash([])}hit.push({i:i,x:x(i),y:yy,key:'capex'});label(d.display[i],x(i),Math.max(22,yy-12),col('--txt'),true);if(d.yoy[i]!=null)label('+'+d.yoy[i]+'%',x(i),Math.max(12,yy-32),col('--dim'),false)})}
+  ['revenue','fcf','op'].forEach(function(key){if(!visible[key])return;var d=data[key];ctx.strokeStyle=col(d.color);ctx.fillStyle=col(d.color);ctx.lineWidth=2;for(var seg=0;seg<2;seg++){ctx.setLineDash(seg?[5,4]:[]);ctx.beginPath();var began=false;d.values.forEach(function(v,i){if(v==null||(seg===0&&i>2)||(seg===1&&i<2))return;var xx=x(i),yy=y(v);began?ctx.lineTo(xx,yy):ctx.moveTo(xx,yy);began=true});ctx.stroke()}ctx.setLineDash([]);d.values.forEach(function(v,i){if(v==null)return;var xx=x(i),yy=y(v);ctx.beginPath();ctx.arc(xx,yy,4,0,Math.PI*2);ctx.fillStyle=i<3?col(d.color):col('--panel2');ctx.fill();ctx.strokeStyle=col(d.color);ctx.lineWidth=1.5;ctx.stroke();hit.push({i:i,x:xx,y:yy,key:key});if(key==='revenue'){label(d.display[i],xx,Math.max(22,yy-12),col(d.color),true);if(d.yoy[i]!=null)label('+'+d.yoy[i]+'%',xx,Math.max(12,yy-32),col('--dim'),false)}else{var margin=Math.round(v/data.revenue.values[i]*100),ly=key==='op'?yy-38:Math.min(h-pad.b-12,yy+22);label(d.display[i]+' ('+margin+'%)',xx,ly,col(d.color),true)}})});
   if(active>=0){ctx.fillStyle='rgba(73,97,118,.07)';ctx.fillRect(x(active)-pw/years.length/2,pad.t,pw/years.length,ph)}
  }
  function show(e){var r=canvas.getBoundingClientRect(),px=e.clientX-r.left,idx=Math.max(0,Math.min(5,Math.round((px-48)/(r.width-64)*6-.5)));active=idx;var lines=['<b>'+years[idx]+'</b>'];Object.keys(data).forEach(function(k){var v=data[k].values[idx];if(visible[k]&&v!=null){var suffix=(k==='fcf'||k==='op')?' ('+Math.round(v/data.revenue.values[idx]*100)+'%)':'';lines.push(data[k].label+' · '+fmt(v)+suffix)}});tip.innerHTML=lines.join('<br>');tip.style.display='block';tip.style.left=Math.min(r.width-170,Math.max(4,px+12))+'px';tip.style.top='8px';draw()}
