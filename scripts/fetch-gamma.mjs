@@ -21,6 +21,7 @@ import fs from 'node:fs';
 const GAMMA = 'gamma.json';
 const CHARTS = 'charts.json';
 const HIST_KEEP = 120;   // targetHist·priceHist 보존 포인트 수(구 6 → 120)
+const ONLY_TICKER = String(process.env.GAMMA_ONLY || '').trim().toUpperCase();
 const UA = { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36' };
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -195,6 +196,7 @@ async function main() {
 
   let ok = 0, fl = 0, lk = 0, rv = 0;
   for (const [tk, e] of Object.entries(g.gamma)) {
+    if (ONLY_TICKER && tk.toUpperCase() !== ONLY_TICKER) continue;
     if (e.lock) { lk++; console.log(`LOCK  ${tk} (수동고정 ${e.g})`); continue; }
     try {
       const { price, target, res, fd } = await yahooSummary(gammaSymbol(tk, e.mkt || 'US'));
