@@ -208,7 +208,12 @@ window.INSIGHT=(function(){
    .then(function(r){if(!r.ok)setMsg('클라우드 저장 실패(로컬에는 보관됨)');})
    .catch(function(){setMsg('클라우드 저장 실패(로컬에는 보관됨)');});
  }
- function persist(){cacheSet();clearTimeout(putTimer);putTimer=setTimeout(push,200);renderAll();}
+function persist(){cacheSet();clearTimeout(putTimer);putTimer=setTimeout(push,200);renderAll();}
+ function deleteClaim(rid,cid){
+  recs.forEach(function(r){if(r.id===rid)r.claims=(r.claims||[]).filter(function(c){return c.id!==cid;});});
+  recs=recs.filter(function(r){return (r.claims||[]).length;});
+  persist();
+ }
  function load(){
   recs=cacheGet();renderAll();
   fetch(STORE,{cache:'no-store'}).then(function(r){return r.ok?r.json():null;})
@@ -593,21 +598,26 @@ window.INSIGHT=(function(){
  }
 
  /* --- 반영(다른 메뉴 스트립) — 채택분만, 숫자는 '대기'로만 --- */
- function strip(id,list,head,note){
+ function strip(id,list,head,note,canDelete){
   var e=$(id);if(!e)return;
   if(!list.length){e.innerHTML='';return;}
   e.innerHTML='<div class="sh">'+head+'</div>'+list.map(function(o){
    var pend=NUM[o.c.route]&&!o.c.applied;
-   return '<div class="ins-si'+(pend?' pend':'')+'">'+gradeBadge(o.c.grade||0,o.c.reinf)+' '+esc(o.c.text)+
+   var del=canDelete?'<button type="button" class="ins-strip-del" data-strip-rid="'+esc(o.r.id)+'" data-strip-cid="'+esc(o.c.id)+'" aria-label="이 일정 관점 삭제">삭제</button>':'';
+   return '<div class="ins-si'+(pend?' pend':'')+'">'+del+gradeBadge(o.c.grade||0,o.c.reinf)+' '+esc(o.c.text)+
     '<span class="m">'+(o.c.layer?esc(o.c.layer)+' · ':'')+esc(RT[o.c.route]||o.c.route)+
     (pend?' · 숫자 반영 대기':'')+'</span>'+claimSrc(o.r,true)+'</div>';}).join('')+
    (note?'<div class="ins-noise">'+note+'</div>':'');
+  Array.prototype.forEach.call(e.querySelectorAll('[data-strip-cid]'),function(b){b.onclick=function(){
+   if(!window.confirm('이 일정 관점을 삭제할까요?'))return;
+   deleteClaim(b.getAttribute('data-strip-rid'),b.getAttribute('data-strip-cid'));
+  };});
  }
  function renderStrips(){
   var f=flat();
   strip('insStripMarket',f.filter(function(o){return o.c.route==='macro';}).sort(byScore).slice(0,4),'관점과 정보 — 채택한 매크로 관점');
   /* insStripSig 폐지 — 앵커였던 #v-siglog 가 사라졌고, 시그널 로그는 03의 관점 아래로 들어왔다. */
-  strip('insStripCal',f.filter(function(o){return o.c.route==='calendar';}).sort(byScore).slice(0,4),'관점과 정보 — 채택한 일정 관점');
+  strip('insStripCal',f.filter(function(o){return o.c.route==='calendar';}).sort(byScore).slice(0,4),'관점과 정보 — 채택한 일정 관점','',true);
   strip('insStripThread',f.filter(function(o){return /^L[1-8]$/.test(o.c.layer||'')&&o.c.route!=='none';}).sort(byScore).slice(0,4),'관점과 정보 — 채택한 레이어 관점');
   strip('insStripDec',f.filter(function(o){return !!NUM[o.c.route]&&!o.c.applied;}).sort(byScore).slice(0,5),'관점과 정보 — 숫자 반영 대기',
    '실적·판단·단계·비중 파일은 자동으로 바뀌지 않습니다. 검증 후 반영하고 02 인사이트 찾기에서 <b>반영 완료</b>로 표시하세요.');
@@ -806,7 +816,7 @@ window.INSIGHT=(function(){
  }
  function mount(){
   if(!document.getElementById('insight-css')){
-   var l=document.createElement('link');l.id='insight-css';l.rel='stylesheet';l.href='/insight.css';document.head.appendChild(l);
+   var l=document.createElement('link');l.id='insight-css';l.rel='stylesheet';l.href='/insight.css?v=20260728-cal-delete';document.head.appendChild(l);
   }
   var nav=document.getElementById('nav');
   if(nav&&!nav.querySelector('.tab[data-v="insight"]')){

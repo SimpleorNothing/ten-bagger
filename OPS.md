@@ -1,4 +1,4 @@
-**최종 갱신: 2026-07-28 18:08 (KST)**
+**최종 갱신: 2026-07-28 18:15 (KST)**
 
 # OPS — 알파맵 운영 가이드
 
@@ -152,7 +152,7 @@
 | 관점 추출 (인테이크) | 수동(운영자 입력) | 인테이크 시 | 「관점 뽑기」 → `/api/insight`(worker→Claude). 본문(스크립트/기사) 있으면 그대로, URL만 있으면 web_search로 시도. 8레이어·단계 프레임으로 claims 후보 정렬(뽑기≠반영 · 채택은 사람이 체크). 캡처 이미지=클라 OCR(Tesseract)·PDF/TXT/파일=클라 추출로 textarea 채움. **PDF는 `getDocument`에 `cMapUrl`(cdnjs `/pdf.js/{PDFJS_VER}/cmaps/`)+`cMapPacked` 지정 → 한글 CID 폰트(Adobe-Korea1·ToUnicode 없음) 정상 디코드**(2026-07-20). 없으면 CID 한글이 빈 텍스트로 나와 실글자 0 판정→불필요한 OCR 폴백→백지 렌더 쓰레기. OCR 폴백은 진짜 스캔본·ToUnicode 파손 PDF(예: CXMT Batang→U+2014)만 `realLetters` 컷으로 걸러 발동 |
 | ↳ **유튜브 링크 스크립트 추출**(2026-07-18 신설) | 자동(입력 보조) | 인테이크 시 | URL 칸에 **유튜브 링크만** 넣고 본문이 비면 클라(`ytExtract`)가 먼저 `/api/yt-view`(**`mode:'insight'`** · Gemini 영상 인식)로 영상을 **상세 전사**→`insText` textarea 채움(원문 raw 저장)→그 스크립트로 `/api/insight` 관점 추출로 이어감. **03 전문가 원탁과 동일 엔드포인트**(03=발화자 관점 압축 요약 / 02=`mode:'insight'` 상세 전사 분기·`maxOutputTokens` 상향). 실패·`GEMINI_API_KEY` 부재(503)면 **URL web_search로 폴백**(구 동작). narrative≠numbers — 스크립트는 인테이크 입력일 뿐 숫자 파일 불변. 신규 CSS·토큰 0(index.html 무패치·insight.js/worker.js만) |
 | **표시 레벨(뎁스) 접기**(2026-07-18 신설) | 런타임(표시 전용) | 상시 · 기본 L1 | 「채택한 관점」 목록을 3단계 아웃라인으로: **L1 자료**(소스 카드만·접힌 관점·시그널 건수 힌트) · **L2 관점**(+claims, 시그널은 건수 힌트) · **L3 시그널**(+관련 시그널 로그·미연결 시그널 펼침). 상단 `.ins-lv` 버튼군(기본 L1). `insight.js` `renderLevel()`·`lvl` 상태·`renderList` 뎁스 분기·`claimLine(…,showSig)`·`sigSection(c,open)`·`renderSigRest` lvl 게이트. **힌트 클릭 = 그 자리 펼침(전체 lvl 독립)** — L1 자료 힌트(`.ins-lvhint`) 클릭→그 자료 관점을 `.ins-recwrap`로 펼침, 관점 시그널 힌트(`.ins-sighint`) 클릭→로그를 `.ins-sigwrap`로 펼침(자료→관점→시그널 중첩 드릴·CTA 펼치기↔접기·`data-rec`/`data-sig`, 2026-07-18~19). **검색·라우트 필터·등급 보드와 직교**(무엇을 펼칠지만 · 데이터 무변). narrative≠numbers — 표시 방식일 뿐 숫자·판단 파일 불변. 신규 CSS만(`:root` 토큰 0 · index.html 무패치) |
-| 인사이트 자가 마운트 | 자동(런타임) | 페이지 로딩 시 | `insight.js`의 `mount()` 함수가 `#v-insight` 탭(**01 시장 모니터링 뒤·03 전문가 원탁 앞에 주입** · 정적 nav 무편집 런타임 재구성 · 2026-07-18) + 헤더 배지 + `signal_log` 섹션을 런타임에 주입. **채택 관점 반영 스트립(`insStripMarket`/`insStripCal`→01 · `insStripDec`→**04** · 2026-07-18 05→04 이동, 로드맵 `#dsAisd` 아래·강물 탐색 `.vhead` 위)도 `mount()`가 각 뷰에 앵커링**(`insStripThread`는 2026-07-18 #424 「02 박스1 삭제」로 앵커 제거 — `strip()`은 `#insStripThread` 부재 시 no-op) — 매크로 관점 스트립은 01 「관련 기사」 섹션(`#mktMacroNews` 앞)에 붙는다(2026-07-18 상단→이동, §01 관련 기사 행) |
+| 인사이트 자가 마운트 | 자동(런타임) | 페이지 로딩 시 | `insight.js`의 `mount()` 함수가 `#v-insight` 탭(**01 시장 모니터링 뒤·03 전문가 원탁 앞에 주입** · 정적 nav 무편집 런타임 재구성 · 2026-07-18) + 헤더 배지 + `signal_log` 섹션을 런타임에 주입. **채택 관점 반영 스트립(`insStripMarket`/`insStripCal`→01 · `insStripDec`→**04** · 2026-07-18 05→04 이동, 로드맵 `#dsAisd` 아래·강물 탐색 `.vhead` 위)도 `mount()`가 각 뷰에 앵커링**(`insStripThread`는 2026-07-18 #424 「02 박스1 삭제」로 앵커 제거 — `strip()`은 `#insStripThread` 부재 시 no-op) — 매크로 관점 스트립은 01 「관련 기사」 섹션(`#mktMacroNews` 앞)에 붙는다(2026-07-18 상단→이동, §01 관련 기사 행). **`insStripCal` 일정 관점은 항목별 `삭제` 버튼 제공(2026-07-28): 해당 claim만 제거·다른 관점 보존, 마지막 claim 삭제 시 빈 자료 정리, `persist()`가 localStorage+R2에 동시 저장** |
 
 > **관점은 채택으로 끝나지 않는다.** `review`(점검일)가 강제 부여돼 도래 시 「점검 필요」로 재부상하고, §0-5 트리아지에서 발동/만료/유지로 처리된다. narrative는 여전히 숫자 파일을 못 바꾼다 — **발동 = 05 리밸런싱 후보로 올릴 뿐**이고, 숫자 변경은 §1 트리거(실적 비트·가이던스 상향·확정 수주) 별도.
 
@@ -367,6 +367,8 @@
 - 2026-07-27 23:40 · **02 aisd ③ 4사 재무 숫자·성장률 재산정.** 오류가 있던 입력표를 그대로 사용하지 않고 2023~25 공시 실적, 26E 컨센서스/가이던스, 27~28E 저신뢰 전망으로 층위를 분리. 매출 성장률 24A +14%·25A +15%·26E +19%·27E +17%·28E +13%; CAPEX·FCF·영업이익·회사별 상세·설명·출처 동기화. narrative≠numbers 규율에 따라 과거 signal_log 캡처는 불변. STYLE_GUIDE 동반.
 
 ## 9. 갱신 이력
+
+- 2026-07-28 18:15 · **01 「채택한 일정 관점」 수동 삭제 지원.** `strip()`에 일정 전용 `canDelete` 옵션과 `data-strip-rid/cid` 버튼을 추가. 확인 후 `deleteClaim()`이 해당 claim만 제거해 같은 자료의 매크로·레이어 등 다른 관점을 보존하고, claims 0 자료만 함께 제거. 기존 `persist()` 경로로 localStorage 즉시 갱신+R2 PUT 예약. `insight.js?v=20260728-cal-delete`·CSS 링크 버전 동기화. STYLE_GUIDE §6-1 동반.
 
 - 2026-07-28 18:08 · **01 토픽 레이더 모바일 드래그 비활성.** `mobileBoard()`(≤700px)에서 pointerdown 좌표 이동을 차단하고 일반 click으로 펼침·접힘만 실행. 모바일 CSS는 `touch-action:auto`로 스크롤을 복구하고 드래그 핸들 `↕`를 숨김. 데스크톱 자유 배치·좌표 영속·키보드 토글은 유지. STYLE_GUIDE §6-5 동기.
 
