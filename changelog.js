@@ -7,6 +7,7 @@
    신규 변경 항목은 아래 MKT_CHANGELOG 맨 위에 {d:'YYYY-MM-DD',t:'주요내용'} 로 추가한다(최신순). */
 (function(){
   var MKT_CHANGELOG=[
+    {d:'2026-07-28',t:'01 지표 한곳에 VIX·공포탐욕·드로다운·환율·반도체 수출 통합 + 미국 NFP 그래프·데스크톱 카드 순서 드래그 추가'},
     {d:'2026-07-26',t:'01 맨 위에 「오늘의 투자 명언」 — 그날 증시 체온(공포·중립·과열)을 반영해 랜덤 표시, 누르면 다른 명언'},
     {d:'2026-07-17',t:'전문가 원탁 화면 헤더에도 업데이트 배지 추가 — 우상단에서 클릭하면 사이트 변경 이력을 한눈에'},
     {d:'2026-07-16',t:'04 전문가 원탁 신설 — 반도체·매크로·상대가치 전문가 5인 + 「알파맵」좌장(라이브 데이터)으로 현 상황을 교차 토론하고 이력을 남기는 화면'},
@@ -132,7 +133,7 @@
     var s=document.createElement('script');s.id='gatesJs';s.src='/gates.js';s.defer=true;
     (document.body||document.documentElement).appendChild(s);
   }
-  // 01 시장 모니터링 「한국 수출 (반도체 중심)」 카드 로더(trade.js 자가 마운트).
+  // 01 시장 모니터링 통합 지표 「반도체 수출」 카드 로더(trade.js 자가 마운트).
   function loadTrade(){
     if(document.getElementById('tradeJs'))return;
     var s=document.createElement('script');s.id='tradeJs';s.src='/trade.js';s.defer=true;
@@ -152,7 +153,7 @@
     loadLead();                                     // 01 월간 선행지표(FRED) 카드
     loadRisk();                                     // 01 리스크 3축 보드
     loadGates();                                        // 01 사이클 판별 보드(AI capex 4지표)
-    loadTrade();                                    // 01 한국 수출(반도체 중심) 카드
+    loadTrade();                                    // 01 통합 지표 반도체 수출 카드
     loadQuote();                                    // 01 상단 투자 명언 스트립
   }
   document.addEventListener('keydown',function(e){if(e.key==='Escape')hide();});
