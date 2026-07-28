@@ -239,6 +239,11 @@ function axisOf(s) {
   for (const [id, re] of AXIS_RULES) if (re.test(t)) return id;
   return 'x_' + (t || 'macro');
 }
+function articleAxis(it, fallback) {
+  const text = [it && it.title, it && it.a, it && it.w, it && it.name].join(' ');
+  if (/cxmt|창신메모리|창신반도체/i.test(text)) return 'china';
+  return fallback || axisOf(it && (it.name || it.id));
+}
 function stabilizeTopics(topics, prevTopics) {
   const prevByAx = new Map();
   for (const p of (prevTopics || [])) {
@@ -493,6 +498,7 @@ async function main() {
   }
   const all = [...byLink.values()]
     .sort((a, b) => new Date(b.published || 0) - new Date(a.published || 0));
+  for (const it of all) if (it.ticker === 'MACRO') it.ax = articleAxis(it, it.ax || axisOf(it.name || it.id));
 
   preScreen(all);
   const newArts = await summarizeArticles(all);
