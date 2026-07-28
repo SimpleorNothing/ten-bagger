@@ -714,6 +714,15 @@ table.tk th.c{text-align:center}
 #mktMacroNews{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;align-items:start}
 #mktMacroNews .stk-blk{margin:0}
 #mktMacroNews .mkt-ph{grid-column:1/-1}
+#mktMacroNews .stk-hd{align-items:center;cursor:grab;user-select:none}
+#mktMacroNews .stk-hd:active{cursor:grabbing}
+#mktMacroNews .stk-hd::before{content:'↕';flex:0 0 auto;font:700 12px var(--mono);color:var(--faint)}
+#mktMacroNews .stk-hd::after{content:'＋';margin-left:auto;flex:0 0 auto;font:700 16px/1 var(--mono);color:var(--dawn)}
+#mktMacroNews .stk-hd[aria-expanded="true"]::after{content:'−'}
+#mktMacroNews .stk-hd:focus-visible{outline:2px solid var(--st-accel);outline-offset:-3px}
+#mktMacroNews .stk-blk.is-collapsed>:not(.stk-hd){display:none}
+#mktMacroNews .stk-blk.is-dragging{opacity:.46}
+#mktMacroNews .stk-blk.is-drop-before{box-shadow:inset 0 3px 0 var(--dawn)}
 @media(max-width:700px){#mktMacroNews{grid-template-columns:1fr}}
 /* 시장 맥박 = 동인 브리핑(pulse.json) + 심리·수급·환율 게이지. 동인은 축마다 방향(위험/기회/중립) + 렌즈 2줄 + 근거. 새 면 컴포넌트 없이 .stk-blk/.mkt-lens/.nlist 재사용 · 방향 배지(.pdir)만 부표(pill 20px). */
 #mktPulse{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;align-items:start;margin-bottom:6px}
@@ -3762,11 +3771,16 @@ window.MARKET=(function(){
    Object.keys(byA).filter(function(k){return order.indexOf(k)<0;})
     .sort(function(a,b){return new Date((byA[b][0]||{}).published||0)-new Date((byA[a][0]||{}).published||0);})
     .forEach(function(k){order.push(k);});
+   // 사용자가 옮긴 축 순서는 브라우저에 보존하되, 새 축은 라이브 기본 순서 뒤에 붙인다.
+   var TOPIC_ORDER_KEY='am_topic_radar_order_v1',savedOrder=[];
+   try{savedOrder=JSON.parse(localStorage.getItem(TOPIC_ORDER_KEY)||'[]');if(!Array.isArray(savedOrder))savedOrder=[];}catch(e){savedOrder=[];}
+   order=savedOrder.filter(function(k){return order.indexOf(k)>=0;})
+    .concat(order.filter(function(k){return savedOrder.indexOf(k)<0;}));
    var html='';
    order.forEach(function(k){
     var lst=byA[k].slice(0,MX);
     var title=NM[k]||(lst[0]&&lst[0].name)||k;
-    html+='<div class="stk-blk"><div class="stk-hd"><span class="nm">'+esc(title)+'</span></div>';
+    html+='<div class="stk-blk is-collapsed" data-topic-key="'+esc(k)+'"><div class="stk-hd" role="button" tabindex="0" draggable="true" aria-expanded="false" aria-label="'+esc(title)+' 펼치기"><span class="nm">'+esc(title)+'</span></div>';
     html+=sums[k]?'<div class="stk-sum">'+esc(sums[k])+'</div>'
             :'<div class="stk-sum ph">요약 대기 — 다음 다이제스트(06:12·18:12)에서 생성</div>';
     lst.forEach(function(it){
@@ -3778,7 +3792,20 @@ window.MARKET=(function(){
       +(im?'<span class="aimp"><span class="aar">→</span><span>'+esc(im)+'</span></span>':'')
       +'</span></a>';});
     html+='</div>';});
-   host.innerHTML=html;}
+   host.innerHTML=html;
+   var dragged=null,didDrag=false;
+   function saveTopicOrder(){try{localStorage.setItem(TOPIC_ORDER_KEY,JSON.stringify(Array.prototype.map.call(host.querySelectorAll('.stk-blk[data-topic-key]'),function(c){return c.getAttribute('data-topic-key');})));}catch(e){}}
+   function toggleTopic(card,hd){var open=card.classList.contains('is-collapsed');card.classList.toggle('is-collapsed',!open);hd.setAttribute('aria-expanded',String(open));hd.setAttribute('aria-label',(hd.querySelector('.nm').textContent||'토픽')+(open?' 접기':' 펼치기'));}
+   Array.prototype.forEach.call(host.querySelectorAll('.stk-blk[data-topic-key]'),function(card){
+    var hd=card.querySelector('.stk-hd');
+    hd.addEventListener('click',function(){if(didDrag){didDrag=false;return;}toggleTopic(card,hd);});
+    hd.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();toggleTopic(card,hd);}});
+    hd.addEventListener('dragstart',function(e){dragged=card;didDrag=true;card.classList.add('is-dragging');e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',card.getAttribute('data-topic-key'));});
+    hd.addEventListener('dragend',function(){card.classList.remove('is-dragging');Array.prototype.forEach.call(host.querySelectorAll('.is-drop-before'),function(x){x.classList.remove('is-drop-before');});dragged=null;setTimeout(function(){didDrag=false;},0);});
+    card.addEventListener('dragover',function(e){if(!dragged||dragged===card)return;e.preventDefault();e.dataTransfer.dropEffect='move';card.classList.add('is-drop-before');});
+    card.addEventListener('dragleave',function(e){if(!card.contains(e.relatedTarget))card.classList.remove('is-drop-before');});
+    card.addEventListener('drop',function(e){if(!dragged||dragged===card)return;e.preventDefault();card.classList.remove('is-drop-before');var r=card.getBoundingClientRect();var sameRow=Math.abs(e.clientY-(r.top+r.height/2))<r.height/3;var after=sameRow?e.clientX>r.left+r.width/2:e.clientY>r.top+r.height/2;host.insertBefore(dragged,after?card.nextSibling:card);saveTopicOrder();});
+   });}
   catch(e){host.innerHTML='<div class="mkt-ph">수집 대기</div>';}
  }
  // NEW 배지 — 최근 3일(72h 롤링) 기사 표시 · 3초 호버 or 클릭 시 제거(localStorage 영속)
