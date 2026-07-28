@@ -267,6 +267,8 @@ pantone.css :root       ← 현행 팔레트 (팬튼 A안, index.html 하단 <li
 
 ## 갱신 이력
 
+- 2026-07-28 · **02 인사이트 「사이트 반영」 — 관점이 표시 전용 보드와 겹치면 「🔗 반영하기」.** SimpleorNothing 지시(구글 2Q26 RPO → 사이클 판별 보드 ①수주잔고 자동 감지). 관점 추출·저장목록 행에서 `gates.json`·`risk.json`의 `keys`/`xkeys`로 매칭 → 버튼 `.ins-apply`(`--dawn` 테두리·처리분 `.done`=`--line2`/`--dim`). 모달은 **라이프사이클 모달(`.ins-lc-ov`/`.ins-lc-sheet`/`.ins-lc-hd`/`.ins-lc-ti`/`.ins-lc-x`/`.ins-lc-bd`/`.ins-lc-ft`/`.ins-lc-note`) 전면 재사용** + 신규 `.ins-ap-card`/`.ins-ap-h`/`.ins-ap-f`(mono 11px 파일명)/`.ins-ap-v`/`.ins-ap-g`/`.ins-ap-note`/`.ins-ap-ta`(대상 카드·현재 게이지·「반영 지시」 복사 textarea). **신규 `:root` 토큰 0**(`--dawn`/`--dim`/`--line`/`--line2`/`--faint`/`--mono`/`--panel2`/`--txt` 재사용) → TOKENS 무변·`check-docs` 통과(토큰 24종·폰트 v1.3.9)·`node --check` 통과·매처 스모크(구글 RPO→①수주잔고 매칭·수출통제 `xkeys` 배제·수치 없는 관점 무매칭·양보드 교차). 면 radius 3px·본문 13~15px·라벨 mono 11~12px(§2 하한·§3 면 결). **자동 write 없음** — 반영은 수기 PR(OPS §6). narrative≠numbers. (OPS §3·§9 동반)
+
 - 2026-07-28 23:12 · **01 리스크·사이클 카드 롱프레스 삭제.** 카드 빈 영역 600ms 정지→우상단 삭제, 4px 이동 취소, 다른 카드·상세 버튼 동작 시 해제. 보드별 숨김 id를 localStorage에 영속하고 원본 JSON은 보존. 토픽 카드 조작 규약·12px/radius 3px 경고 버튼 재사용, 신규 토큰 0. SimpleorNothing 지시. (OPS §3·§9)
 
 - 2026-07-28 22:46 · **01 리스크·사이클 판별 카드 상시 본문 절반 축약.** 제목·상태·렌즈·게이지만 상시 표시하고 조건·리드스루·기사·근거는 하단 호버/포커스/탭 오버레이로 이동. 최대 68vh 내부 스크롤·단일 카드 탭 전개·ARIA expanded 적용. 신규 토큰 0. SimpleorNothing 지시. (OPS §3·§9)

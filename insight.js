@@ -139,6 +139,108 @@ window.INSIGHT=(function(){
   var f=ov.querySelector('[data-k="hyp"]');if(f)f.focus();
  }
 
+ /* --- 사이트 반영 매칭(2026-07-28) — 관점이 사이트 내 '표시 전용 보드'(사이클 판별 gates.json · 리스크 risk.json)와
+    키워드로 겹치면 「반영하기」로 표면화한다. 자동 write 없음(정적 서빙·git=SoT·narrative≠numbers) —
+    대상 카드·현재 게이지·Claude 실행용 반영 지시를 제시하고, 반영은 사람이 확인 후 수기 갱신(§6 규율 그대로).
+    코퍼스 = 두 보드의 items[](name·keys·xkeys·gauge·verdict). 확장 시 SITE_SRC 에 파일만 추가. */
+ var SITE_SRC=[{file:'gates.json',board:'사이클 판별 보드'},{file:'risk.json',board:'리스크 보드'}];
+ var SITE={loaded:false,idx:[]};
+ function siteHas(hay,k){
+  k=String(k||'').toLowerCase().trim();if(!k)return false;
+  if(/[a-z0-9]/.test(k)&&!/[가-힣]/.test(k)){                 /* 라틴·숫자 키 = 단어 경계(부분어 오매칭 방지) */
+   var re=new RegExp('(^|[^a-z0-9])'+k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'([^a-z0-9]|$)');
+   return re.test(hay);
+  }
+  return hay.indexOf(k)>=0;                                    /* 한글 = 부분 일치(risk.js 관행) */
+ }
+ function siteLoad(){
+  var done=0;
+  SITE_SRC.forEach(function(s){
+   fetch('./'+s.file,{cache:'no-store'}).then(function(r){return r.ok?r.json():null;}).then(function(d){
+    var arr=(d&&(d.items||d.axes))||[];
+    arr.forEach(function(it){
+     if(!it||!Array.isArray(it.keys)||!it.keys.length)return;
+     SITE.idx.push({file:s.file,board:s.board,name:it.name||it.id||'',no:it.no||'',
+      keys:it.keys,xkeys:Array.isArray(it.xkeys)?it.xkeys:[],gauge:Array.isArray(it.gauge)?it.gauge:[],verdict:it.verdict||''});
+    });
+   }).catch(function(){}).then(function(){if(++done>=SITE_SRC.length){SITE.loaded=true;if(cur)renderResult();renderList();}});
+  });
+ }
+ function siteMatch(c){
+  if(!SITE.idx.length||!c)return [];
+  if(!/\d/.test(String(c.text||''))&&c.type!=='numbers')return [];   /* 수치 없는 관점은 보드 반영 대상 아님 */
+  var hay=((c.text||'')+' '+(c.why||'')+' '+((c.tickers||[]).join(' '))).toLowerCase();
+  return SITE.idx.filter(function(t){
+   if(t.xkeys.some(function(x){return siteHas(hay,x);}))return false;   /* 동형이의 배제(예 「수출통제」) */
+   return t.keys.some(function(k){return siteHas(hay,k);});
+  });
+ }
+ function applyBtn(c){
+  var m=siteMatch(c);if(!m.length)return '';
+  var lb=m[0].name+(m.length>1?' 외 '+(m.length-1):'');
+  return '<button type="button" class="ins-btn ins-apply'+(c.siteDone?' done':'')+'" data-apply="'+c.id+'">'+
+   (c.siteDone?'✓ 반영 처리됨':'🔗 반영하기 · '+esc(lb))+'</button>';
+ }
+ function applyBar(c){var b=applyBtn(c);return b?'<div class="ins-lcbar">'+b+'</div>':'';}
+ function apFind(id){
+  if(cur){var f=(cur.claims||[]).filter(function(x){return x.id===id;});if(f[0])return {c:f[0],src:cur.src,saved:false};}
+  var o=flat().filter(function(x){return x.c.id===id;})[0];
+  if(o){var rec=recs.filter(function(r){return (r.claims||[]).some(function(x){return x.id===id;});})[0];return {c:o.c,src:rec&&rec.src,saved:true};}
+  return null;
+ }
+ function apOrder(c,src,m){
+  var L=['[사이트 반영 지시]'];
+  m.forEach(function(t){
+   L.push('· 대상: '+t.file+' — '+t.board+' '+(t.no?t.no+' ':'')+t.name);
+   (t.gauge||[]).slice(0,4).forEach(function(g){L.push('   현재 '+g.k+': '+g.v+(g.n?' ('+g.n+')':''));});
+  });
+  L.push('· 새 관점: '+(c.text||''));
+  if(c.why)L.push('· 근거: '+c.why);
+  var sm=[src&&src.title,src&&src.publisher,src&&src.date].filter(Boolean).join(' · ');
+  if(sm)L.push('· 출처: '+sm+(src&&src.url?' ('+src.url+')':''));
+  L.push('→ 확정 실적·공시면 대상 파일 gauge/verdict/srcs/asOf 수기 갱신 PR. narrative면 signal_log만. (narrative≠numbers)');
+  return L.join('\n');
+ }
+ function applyModal(id){
+  var o=apFind(id);if(!o)return;var c=o.c;var m=siteMatch(c);
+  if(!m.length){setMsg('겹치는 사이트 내용이 없습니다.');return;}
+  lcClose();
+  var order=apOrder(c,o.src,m);
+  var cards=m.map(function(t){
+   var gh=(t.gauge||[]).slice(0,4).map(function(g){return '<div class="ins-ap-g"><b>'+esc(g.k)+'</b> '+esc(g.v)+(g.n?' <span>'+esc(g.n)+'</span>':'')+'</div>';}).join('');
+   return '<div class="ins-ap-card"><div class="ins-ap-h">'+esc(t.board)+' · '+(t.no?esc(t.no)+' ':'')+esc(t.name)+' <span class="ins-ap-f">'+esc(t.file)+'</span></div>'+
+    (t.verdict?'<div class="ins-ap-v">현재 판정 — '+esc(t.verdict)+'</div>':'')+gh+'</div>';
+  }).join('');
+  var ov=document.createElement('div');ov.className='ins-lc-ov';ov.id='insLcOv';
+  ov.innerHTML='<div class="ins-lc-sheet" role="dialog" aria-modal="true" aria-label="사이트 반영">'+
+   '<div class="ins-lc-hd"><div class="ins-lc-ti">🔗 사이트 반영 — 관점이 기존 보드와 겹칩니다</div>'+
+    '<button type="button" class="ins-lc-x" data-x aria-label="닫기">✕</button></div>'+
+   '<div class="ins-lc-claim">'+esc(c.text||'')+'</div>'+
+   '<div class="ins-lc-bd">'+cards+
+    '<div class="ins-ap-note">자동 변경 없음 — 아래 「반영 지시」를 복사해 확정 실적·공시 검증 후 수기 갱신(PR)한다. narrative는 signal_log에만.</div>'+
+    '<textarea class="ins-lc-in ins-ap-ta" readonly rows="7">'+esc(order)+'</textarea></div>'+
+   '<div class="ins-lc-ft"><button type="button" class="ins-btn primary" data-copy>📋 반영 지시 복사</button>'+
+    '<button type="button" class="ins-btn" data-done>'+(c.siteDone?'처리 해제':'처리함 표시')+'</button>'+
+    '<button type="button" class="ins-btn" data-x>닫기</button>'+
+    '<span class="ins-lc-note">복사 → Claude 전달 = 검증 후 반영 PR</span></div>'+
+   '</div>';
+  document.body.appendChild(ov);
+  ov.addEventListener('click',function(e){if(e.target===ov)lcClose();});
+  Array.prototype.forEach.call(ov.querySelectorAll('[data-x]'),function(b){b.onclick=lcClose;});
+  var cp=ov.querySelector('[data-copy]');
+  if(cp)cp.onclick=function(){
+   var ta=ov.querySelector('.ins-ap-ta');
+   function ok(){cp.textContent='✓ 복사됨';setTimeout(function(){cp.textContent='📋 반영 지시 복사';},1400);}
+   try{
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(order).then(ok,function(){if(ta){ta.select();document.execCommand('copy');}ok();});}
+    else if(ta){ta.select();document.execCommand('copy');ok();}
+   }catch(x){if(ta)ta.select();}
+  };
+  var dn=ov.querySelector('[data-done]');
+  if(dn)dn.onclick=function(){c.siteDone=!c.siteDone;if(o.saved)persist();else renderResult();lcClose();};
+  document.addEventListener('keydown',lcKey);
+ }
+
  /* --- 등급(승격) — 관점·정보의 확신도. 기본 점수(N·I·C) + 유사 관점 보강 횟수로 산정.
     같은 얘기가 다른 자료에서 반복 채택될수록(보강) 등급이 오른다. narrative≠numbers 규율과 무관 — 표시 전용. */
  var GRD=['관찰','후보','지지','확립','확신'];   /* g0..g4 */
@@ -317,7 +419,7 @@ function persist(){cacheSet();clearTimeout(putTimer);putTimer=setTimeout(push,20
     (c.clamped?'<span class="ins-tag">내러티브 → 로그로 강등</span>':'')+
     '<span class="ins-tag">N'+c.novelty+'·I'+c.impact+'·C'+c.confidence+' ('+score(c)+'/6)</span>'+
     '<span class="ins-tag gpv g'+pv.g+'">'+(pv.n?'기존 '+pv.n+'건 보강 → '+GRD[pv.g]:'신규 · '+GRD[pv.g])+'</span>'+
-   '</div></div></div>';
+   '</div>'+applyBar(c)+'</div></div>';
  }
  function renderResult(){
   var box=$('insResult');if(!box)return;
@@ -341,13 +443,14 @@ function persist(){cacheSet();clearTimeout(putTimer);putTimer=setTimeout(push,20
     var n=$('insPickN');if(n)n.textContent=cur.claims.filter(function(x){return x.pick;}).length;
    };});
   var sv=$('insSave');if(sv)sv.onclick=save;
+  Array.prototype.forEach.call(box.querySelectorAll('[data-apply]'),function(b){b.onclick=function(){applyModal(b.getAttribute('data-apply'));};});
   var dc=$('insDiscard');if(dc)dc.onclick=function(){cur=null;renderResult();setMsg('버렸습니다.');};
  }
  function save(){
   if(!cur)return;
   var picked=cur.claims.filter(function(c){return c.pick;}).map(function(c){
    return {id:c.id,text:c.text||'',layer:c.layer||'',tickers:c.tickers,type:c.type,novelty:c.novelty,impact:c.impact,
-           confidence:c.confidence,route:c.route,why:c.why||'',verify:c.verify||'',applied:false,hyp:c.hyp||'',trig:c.trig||'',until:c.until||'',review:c.review||lcPlus14()};});
+           confidence:c.confidence,route:c.route,why:c.why||'',verify:c.verify||'',applied:false,hyp:c.hyp||'',trig:c.trig||'',until:c.until||'',review:c.review||lcPlus14(),siteDone:c.siteDone||false};});
   if(!picked.length){setMsg('채택한 관점이 없습니다 — 하나 이상 체크하세요.');return;}
   recs.unshift({id:cur.id,t:cur.t,src:cur.src,summary:cur.summary,steelman:cur.steelman,raw:cur.raw||'',rawcut:cur.rawcut||0,claims:picked});
   cur=null;renderResult();persist();
@@ -472,6 +575,7 @@ function persist(){cacheSet();clearTimeout(putTimer);putTimer=setTimeout(push,20
    lcLine(c)+
    (showBtn?'<div class="ins-lcbar">'+
      (NUM[c.route]?'<button class="ins-btn" data-ap="'+c.id+'">'+(c.applied?'대기로 되돌리기':'반영 완료 표시')+'</button>':'')+
+     applyBtn(c)+
      '<button class="ins-btn" data-lc="'+c.id+'">🕔 라이프사이클</button>'+
     '</div>':'')+
    sigSection(c,showSig)+
@@ -530,6 +634,8 @@ function persist(){cacheSet();clearTimeout(putTimer);putTimer=setTimeout(push,20
     persist();};});
   Array.prototype.forEach.call(L.querySelectorAll('[data-lc]'),function(b){
    b.onclick=function(){editLC(b.getAttribute('data-lc'));};});
+  Array.prototype.forEach.call(L.querySelectorAll('[data-apply]'),function(b){
+   b.onclick=function(){applyModal(b.getAttribute('data-apply'));};});
   Array.prototype.forEach.call(L.querySelectorAll('[data-sig]'),function(b){
    var tg=function(){
     var id=b.getAttribute('data-sig'), w=document.getElementById('sigw-'+id);if(!w)return;
@@ -871,7 +977,7 @@ function persist(){cacheSet();clearTimeout(putTimer);putTimer=setTimeout(push,20
   /* insStripThread(02 채택한 레이어 관점 스트립) 앵커 제거 — 02 박스1(#instantAnswer+관점 스트립) 삭제 지시(2026-07-18 SimpleorNothing). 관점 원본은 03 관점과 정보에 유지. strip()은 #insStripThread 부재 시 if(!e)return no-op. */
  }
 
- function init(){mount();if(!document.getElementById('insList'))return;bind();load();sigLoad();}
+ function init(){mount();if(!document.getElementById('insList'))return;bind();load();sigLoad();siteLoad();}
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
  return {render:renderAll, all:function(){return recs;}, adopted:function(){return flat();}};
 })();
