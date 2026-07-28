@@ -3560,6 +3560,15 @@ window.MARKET=(function(){
   if(dates&&dates.length){ax='<div class="mkt-axis"><span class="ax-dt">'+esc(fmtDay(dates[0]))+'</span><span class="ax-dt ax-e">'+esc(fmtDay(dates[dates.length-1]))+'</span></div>';}
   return '<div class="mkt-chart">'+spark(vals,ref)+sv+ev+'</div>'+ax;
  }
+ function barChart(vals,dates,fmtV){
+  if(!vals||vals.length<2)return '';
+  var f=(typeof fmtV==='function')?fmtV:fmtNum,w=140,h=54,g=4,n=vals.length,bw=(w-g*(n-1))/n;
+  var mn=Math.min(0,Math.min.apply(null,vals)),mx=Math.max(0,Math.max.apply(null,vals)),rg=(mx-mn)||1;
+  var y=function(v){return h-((v-mn)/rg)*h;},zy=y(0),bars='';
+  vals.forEach(function(v,i){var yy=y(v),top=Math.min(yy,zy),bh=Math.max(1,Math.abs(zy-yy)),x=i*(bw+g),c=v>=0?'var(--st-hot)':'var(--st-accel)';bars+='<rect x="'+x.toFixed(1)+'" y="'+top.toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+bh.toFixed(1)+'" rx="1" fill="'+c+'"><title>'+esc(fmtDay(dates&&dates[i]))+' '+esc(f(v))+'</title></rect>';});
+  var ax=dates&&dates.length?'<div class="mkt-axis"><span class="ax-dt">'+esc(fmtDay(dates[0]))+'</span><span class="ax-dt ax-e">'+esc(fmtDay(dates[dates.length-1]))+'</span></div>':'';
+  return '<div class="mkt-chart"><svg class="spark nfp-bars" viewBox="0 0 '+w+' '+h+'" preserveAspectRatio="none" role="img" aria-label="최근 6개월 비농업고용 증감 막대그래프"><line x1="0" y1="'+zy.toFixed(1)+'" x2="'+w+'" y2="'+zy.toFixed(1)+'" stroke="var(--dim)" stroke-width="1" stroke-dasharray="3 2" opacity=".75"/>'+bars+'</svg></div>'+ax;
+ }
  function card(name,val,p,vals,ref,lns,opts){
   var up=p>=0,cls=up?'up':'dn',sign=up?'+':'';
   var o=opts||{},dod=(o.dod===false)?null:pctDoD(vals),dodHTML='';
@@ -3749,7 +3758,7 @@ window.MARKET=(function(){
    var verdict=last<0?'<span class="wn">고용 감소 — 경기 둔화 신호</span>':delta>=0?'<span class="ok">고용 증가폭 확대</span>':'<span class="nt">고용 증가폭 둔화</span>';
    el.innerHTML='<div class="mkt-nm">미국 비농업고용(NFP)</div><div class="mkt-val">'+fmtK(last)+
     ' <span class="mkt-chg '+(delta>=0?'up':'dn')+'">전월비 '+fmtK(delta)+'</span></div>'+lens('<b>노동</b>비농업고용 증감 · Fed 이중책무',
-    esc(dts[dts.length-1])+' '+fmtK(last)+' · 이전 '+fmtK(prev)+' → '+verdict)+chart(vals,0,dts,fmtK)+'<div class="mkt-span">'+RG.ko+'</div>';
+    esc(dts[dts.length-1])+' '+fmtK(last)+' · 이전 '+fmtK(prev)+' → '+verdict)+(RG.k==='6M'?barChart(vals,dts,fmtK):chart(vals,0,dts,fmtK))+'<div class="mkt-span">'+RG.ko+'</div>';
   }catch(e){el.innerHTML=wait;}
  }
 
@@ -4119,11 +4128,6 @@ var HIDDEN_KEY='am_topic_radar_hidden_v1',hiddenTopics=[];
     var fj=f<=25?'<span class="ok">역발상 매수 관심대</span>':f>=75?'<span class="wn">과열 — 되돌림 경계</span>':'<span class="nt">방향 미확정</span>';
     cards+=gauge('fear-greed','CNN 공포·탐욕',f+'<span class="vlab">'+fl+'</span>',
      lens('<b>심리</b>공포탐욕지수 0~100 · 역발상 렌즈','F&amp;G '+f+' ('+fl+') → '+fj),fgGauge(f));}
-   if(s.nasdaqDrawdownPct!=null){var dd=s.nasdaqDrawdownPct,g=dd<=-20?3:dd<=-13?2:dd<=-8?1:0;
-    var gv=g>=1?'<span class="ok">깊이 게이트 G'+g+' 점등</span>':'<span class="nt">G0 — 조정 미진입</span>';
-    cards+=gauge('nasdaq-dd','나스닥 드로다운','<span class="'+(dd<0?'dn':'up')+'">'+dd.toFixed(1)+'%</span>',
-     lens('<b>수급</b>고점 대비 낙폭 · 40주선 추세 · 매수 깊이축',
-      dd.toFixed(1)+'% · 40주선 '+(s.wma40SlopeUp?'상승':'하락')+' 이격 '+(s.wma40GapPct!=null?fmtP(s.wma40GapPct,1)+'%':'--')+' → '+gv));}
    var fp=gaugePoints(((hist.usdkrw||{}).points)||[],fx.points||[]),fw=gaugeWindow(fp),last=fp.length?fp[fp.length-1][1]:null;
    if(last!=null&&isFinite(last)){var prev=fp.length>1?fp[fp.length-2][1]:null,chg=(prev?((last/prev-1)*100):null);
     var wv=last>=1400?'<span class="wn">원약세 심화 — 외인 이탈·위험회피</span>':last<=1300?'<span class="ok">원강세 — 위험선호</span>':'<span class="nt">중립대</span>';
