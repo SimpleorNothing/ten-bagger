@@ -1122,14 +1122,14 @@ async function handleWti(sym = "CL=F", stooqSym = "cl.f") {
 }
 
 // 원/달러 환율(USD/KRW) 일별 시계열 프록시 — 01 시장 맥박 환율 게이지용.
-// 출력 = {source, points:[["YYYY-MM-DD", close]]} (WTI 와 동일 스키마 → 프런트 재사용). 최근 ~1년.
+// 출력 = {source, points:[["YYYY-MM-DD", close]]} (WTI 와 동일 스키마 → 프런트 재사용). 최근 3년.
 async function handleFx() {
   const okJson = (obj) => new Response(JSON.stringify(obj), {
     status: 200,
     headers: { "content-type": "application/json; charset=utf-8", "cache-control": "public, max-age=1800" },
   });
   const now = Math.floor(Date.now() / 1000);
-  const P1 = now - 400 * 86400; // 최근 ~400일
+  const P1 = now - 1105 * 86400; // 최근 3년 + 윤년 여유
 
   // 1) Yahoo Finance v8 chart — KRW=X (USD→KRW)
   for (const host of ["query1.finance.yahoo.com", "query2.finance.yahoo.com"]) {
@@ -1164,7 +1164,7 @@ async function handleFx() {
         const c = lines[i].split(",");
         if (c.length >= 5 && c[4] && !isNaN(+c[4])) out.push([c[0], Math.round(+c[4] * 100) / 100]);
       }
-      if (out.length) return okJson({ source: "stooq", points: out.slice(-400) });
+      if (out.length) return okJson({ source: "stooq", points: out.filter((x) => Date.parse(x[0]) >= (Date.now() - 1105 * 86400000)) });
     }
   } catch (_) { /* 폴백 실패 */ }
 
