@@ -1,5 +1,5 @@
 {
-  "asOf": "2026-07-28T10:16:27.919Z",
+  "asOf": "2026-07-28T12:02:37.086Z",
   "source": "auto(price-vs-target+revisions)+judgment",
   "note": "γ 단일 소스. index.html D배열 g·judgment.json g는 이 파일이 대체(인라인 g는 폴백). stage도 이 파일이 단일소스(인라인 폴백). stage는 판단값이라 cron은 g만 자동, stage는 수동. 룰: pct=(target-price)/price. pct>=+10% → open / pct<=-5% AND trend in(flat,falling) → spent / 그 외(모호밴드·trend rising·unknown) → flagged+직전값 hold. lock=true는 운영자 수동 고정(auto 미적용). US는 Yahoo quoteSummary 자동, KR(005930·000660)·EU(BESI)는 커버리지 갭으로 수기 보정 가능. checkedAt이 N일 초과면 스테일.",
   "rules": {
@@ -4083,6 +4083,176 @@
         "gate": {
           "d30": null,
           "d90": null
+        }
+      }
+    },
+    "TSLA": {
+      "g": "open",
+      "stage": "가속",
+      "mkt": "US",
+      "lock": false,
+      "why": null,
+      "price": 309.22,
+      "target": 401.07,
+      "pct": 29.7,
+      "targetHist": [
+        {
+          "d": "2026-07-28",
+          "t": 401.07
+        }
+      ],
+      "priceHist": [
+        {
+          "d": "2026-07-28",
+          "p": 309.22
+        }
+      ],
+      "trend": "unknown",
+      "checkedAt": "2026-07-28",
+      "flagged": false,
+      "rev": {
+        "at": "2026-07-28",
+        "tp": {
+          "now": 401.07,
+          "hi": 600,
+          "lo": 125,
+          "c7": null,
+          "c30": null,
+          "c90": null
+        },
+        "px": {
+          "c7": -16.3,
+          "c30": -18.6,
+          "c90": -17.8
+        },
+        "eps": {
+          "fy1": {
+            "end": "2027-12-31",
+            "now": 2.22,
+            "d7": 2.55,
+            "d30": 2.52,
+            "d60": 2.53,
+            "d90": 2.53,
+            "c7": -12.9,
+            "c30": -11.8,
+            "c90": -12.3,
+            "up7": 4,
+            "dn7": null,
+            "up30": 5,
+            "dn30": 3,
+            "revEst": 120456741310
+          },
+          "fy0": {
+            "end": "2026-12-31",
+            "now": 1.8,
+            "d7": 2.13,
+            "d30": 2.05,
+            "d60": 2.04,
+            "d90": 2.09,
+            "c7": -15.8,
+            "c30": -12.2,
+            "c90": -13.8,
+            "up7": 6,
+            "dn7": null,
+            "up30": 9,
+            "dn30": 0,
+            "revEst": 105846019990
+          },
+          "q1": {
+            "end": "2026-12-31",
+            "now": 0.5,
+            "d7": 0.62,
+            "d30": 0.63,
+            "d60": 0.63,
+            "d90": 0.65,
+            "c7": -20.4,
+            "c30": -21.2,
+            "c90": -23.2,
+            "up7": 3,
+            "dn7": null,
+            "up30": 4,
+            "dn30": 1,
+            "revEst": 28364506000
+          }
+        },
+        "rating": {
+          "mean": 2.35,
+          "n": 40,
+          "hist": [
+            {
+              "m": "0m",
+              "sb": 6,
+              "b": 17,
+              "h": 17,
+              "u": 4,
+              "s": 2
+            },
+            {
+              "m": "-1m",
+              "sb": 5,
+              "b": 18,
+              "h": 18,
+              "u": 4,
+              "s": 2
+            },
+            {
+              "m": "-2m",
+              "sb": 5,
+              "b": 18,
+              "h": 17,
+              "u": 4,
+              "s": 3
+            },
+            {
+              "m": "-3m",
+              "sb": 5,
+              "b": 18,
+              "h": 17,
+              "u": 4,
+              "s": 3
+            }
+          ]
+        },
+        "actions": [
+          {
+            "d": "2026-07-24",
+            "firm": "Piper Sandler",
+            "to": "Overweight",
+            "from": "Overweight",
+            "act": "main"
+          },
+          {
+            "d": "2026-07-23",
+            "firm": "Needham",
+            "to": "Hold",
+            "from": "Hold",
+            "act": "reit"
+          },
+          {
+            "d": "2026-07-23",
+            "firm": "Cantor Fitzgerald",
+            "to": "Overweight",
+            "from": "Overweight",
+            "act": "main"
+          },
+          {
+            "d": "2026-07-23",
+            "firm": "Roth Capital",
+            "to": "Buy",
+            "from": "Buy",
+            "act": "main"
+          },
+          {
+            "d": "2026-07-23",
+            "firm": "RBC Capital",
+            "to": "Outperform",
+            "from": "Outperform",
+            "act": "reit"
+          }
+        ],
+        "gate": {
+          "d30": -6.8,
+          "d90": -5.5
         }
       }
     }

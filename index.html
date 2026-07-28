@@ -6092,7 +6092,7 @@ function renderInstantAnswer(){
   var J=function(u){return fetch(u,{cache:'no-store'}).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;});};
   // gamma 티커 → 표시명
   var NM={MRVL:'마벨','005930':'삼성전자',MU:'마이크론',LITE:'루멘텀',VRT:'버티브',BE:'블룸에너지',
-          AMD:'AMD',RMBS:'램버스',CEG:'컨스텔레이션',QCOM:'퀄컴',APH:'앰페놀',BESI:'BESI','000660':'SK하이닉스'};
+          AMD:'AMD',RMBS:'램버스',CEG:'컨스텔레이션',QCOM:'퀄컴',APH:'앰페놀',BESI:'BESI','000660':'SK하이닉스',TSLA:'테슬라'};
   function series(CH,k){ if(!k||!CH||!CH.series||!CH.series[k])return null; var s=CH.series[k]; return Array.isArray(s.c)?s.c.filter(function(x){return typeof x==='number'&&x>0;}):null; }
   function trend(c){ if(!c||c.length<22)return {dir:'—',r20:null,r63:null}; var last=c[c.length-1]; var r20=last/c[c.length-21]-1; var r63=c.length>=64?last/c[c.length-64]-1:null; var dir=r20>0.02?'상승':(r20<-0.02?'하락':'횡보'); return {dir:dir,r20:r20,r63:r63}; }
   function sp(x){return (x>=0?'+':'')+Math.round(x*100)+'%';}
