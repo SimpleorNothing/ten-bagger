@@ -3387,7 +3387,7 @@ function renderCalFull(){
   .sort((a,b)=>a._n-b._n);
  if(!rows.length){box.innerHTML='<div class="mt" style="padding:10px 6px;color:var(--faint)">예정 이벤트 없음</div>';return;}
  const MON=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
- let out='',curMo='';
+ let out='',curMo='',prevD='';
  rows.forEach(e=>{
   const dt=new Date(e.d+'T00:00:00Z');const mo=dt.getUTCFullYear()+'-'+dt.getUTCMonth();
   if(mo!==curMo){curMo=mo;out+=`<div class="cal-month">${dt.getUTCFullYear()} ${MON[dt.getUTCMonth()]}</div>`;}
@@ -3395,7 +3395,9 @@ function renderCalFull(){
   const tk=e.tk?` <span class="tk">${calEsc(e.tk)}</span>`:'';
   const wh=(e.when&&e.when!==e.d)?` <span class="tk">${calEsc(e.when)}</span>`:'';
   const ov=e._ov?` <span class="tag-est">수기 추가</span>`:'';
-  out+=`<div class="cal-row"${e._ov?' data-ov="1"':''}><div class="date-chip">${md}<br><span style="color:var(--dawn);font-weight:800">${calDNText(e._n)}</span></div>`+
+  const showDate=e.d!==prevD;prevD=e.d;
+  const dateChip=showDate?`<div class="date-chip">${md}<br><span style="color:var(--dawn);font-weight:800">${calDNText(e._n)}</span></div>`:'<div class="date-chip" aria-hidden="true"></div>';
+  out+=`<div class="cal-row"${e._ov?' data-ov="1"':''}>${dateChip}`+
    `<div class="cat-dot" style="background:var(--cat-${e.cat})"></div>`+
    `<div class="cal-body"><div class="ti">${calEsc(e.lbl)}${tk}${wh}${ov}</div>`+
    (e.meta?`<div class="mt">${calEsc(e.meta)}</div>`:'')+`</div></div>`;
