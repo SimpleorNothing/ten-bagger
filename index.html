@@ -640,6 +640,7 @@ table.tk th.c{text-align:center}
 .mkt-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(224px,1fr));gap:12px}
 .mkt-card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:15px 16px;transition:.15s;min-height:128px;display:flex;flex-direction:column}
 .mkt-card:hover{border-color:var(--line2);box-shadow:0 4px 14px rgba(22,36,45,.06)}
+@media(min-width:701px){#mktIndicators .mkt-card{cursor:grab}#mktIndicators .mkt-card.is-ind-dragging{opacity:.52;cursor:grabbing}#mktIndicators .mkt-card.is-ind-over{outline:2px solid var(--st-accel);outline-offset:2px}}
 .mkt-nm{font-size:15px;font-weight:700;color:var(--txt);margin-bottom:6px}
 .mkt-val{font:700 17px var(--mono);color:var(--txt);margin-bottom:8px}
 .mkt-chg{font-size:14px;font-weight:600}
@@ -1800,9 +1801,9 @@ window.CYCLE=(function(){
   <div class="cal-now" id="calNow"><div class="mkt-ph" style="grid-column:1/-1">임박 이벤트 계산 대기 (calendar.json)</div></div>
   <h2 class="msec">시장 맥박 <span class="mnote">지금 무엇이 시장을 움직이나 · 동인 4~6회/일 · 게이지 실시간</span></h2>
   <div id="mktPulse"><div class="mkt-ph">동인 합성 대기 (pulse.json)</div></div>
-  <div class="mkt-grid" id="mktGauge"><div class="mkt-ph" style="grid-column:1/-1">게이지 로딩…</div></div>
-  <h2 class="msec">지표 <span class="mrng" role="group" aria-label="기간 선택"><button type="button" class="rbtn" data-r="1M">1M</button><button type="button" class="rbtn" data-r="6M">6M</button><button type="button" class="rbtn" data-r="1Y">1Y</button><button type="button" class="rbtn" data-r="3Y">3Y</button><button type="button" class="rbtn" data-r="5Y">5Y</button></span></h2>
-  <div class="mkt-grid">
+  <h2 class="msec">지표 <span class="mnote">카드를 드래그해 그리드 순서 변경</span> <span class="mrng" role="group" aria-label="기간 선택"><button type="button" class="rbtn" data-r="1M">1M</button><button type="button" class="rbtn" data-r="6M">6M</button><button type="button" class="rbtn" data-r="1Y">1Y</button><button type="button" class="rbtn" data-r="3Y">3Y</button><button type="button" class="rbtn" data-r="5Y">5Y</button></span></h2>
+  <div class="mkt-grid" id="mktIndicators">
+    <div id="mktGauge" style="display:contents"><div class="mkt-ph" style="grid-column:1/-1">게이지 로딩…</div></div>
     <div class="mkt-card" id="mkt_ks11"><div class="mkt-nm">코스피</div><div class="mkt-ph">지수 수집 대기</div></div>
     <div class="mkt-card" id="mkt_gspc"><div class="mkt-nm">S&amp;P 500</div><div class="mkt-ph">지수 수집 대기</div></div>
     <div class="mkt-card" id="mkt_ixic"><div class="mkt-nm">나스닥</div><div class="mkt-ph">지수 수집 대기</div></div>
@@ -1810,6 +1811,7 @@ window.CYCLE=(function(){
     <div class="mkt-card" id="mkt_wti"><div class="mkt-nm">WTI 유가</div><div class="mkt-ph">로딩…</div></div>
     <div class="mkt-card" id="mkt_gas"><div class="mkt-nm">미국 가솔린</div><div class="mkt-ph">로딩…</div></div>
     <div class="mkt-card" id="mkt_dxi"><div class="mkt-nm">DXI 메모리 현물</div><div class="mkt-ph">현물 수집 대기</div></div>
+    <div class="mkt-card" id="mkt_nfp" data-indicator-key="nfp"><div class="mkt-nm">미국 비농업고용(NFP)</div><div class="mkt-ph">FRED 고용 수집 대기</div></div>
   </div>
   <h2 class="msec">보유 종목 <span class="mrng" role="group" aria-label="기간 선택"><button type="button" class="rbtn" data-r="1M">1M</button><button type="button" class="rbtn" data-r="6M">6M</button><button type="button" class="rbtn" data-r="1Y">1Y</button><button type="button" class="rbtn" data-r="3Y">3Y</button><button type="button" class="rbtn" data-r="5Y">5Y</button></span></h2>
   <div class="mkt-grid" id="mktHoldings"><div class="mkt-ph" style="grid-column:1/-1">로딩…</div></div>
@@ -3727,6 +3729,45 @@ window.MARKET=(function(){
    if(v2.length>=2)el.innerHTML=card('미 10년물',v2[v2.length-1].toFixed(2)+'%',pct(v2),v2,null,lensUs10y(v2),{dates:t2,fmtV:function(v){return fmtNum(v)+'%';}});}
   catch(e){}
  }
+ async function loadNfp(){
+  var el=document.getElementById('mkt_nfp');if(!el)return;
+  var wait='<div class="mkt-nm">미국 비농업고용(NFP)</div><div class="mkt-ph">FRED 고용 수집 대기</div>';
+  try{
+   var r=await fetch('/api/fred?ids=PAYEMS&from=2020-01-01',{cache:'no-store'}),j=await r.json();
+   var raw=(j.PAYEMS||((j.series||{}).PAYEMS)||[]).filter(function(x){return Array.isArray(x)&&x[0]&&x[1]!=null&&isFinite(x[1]);});
+   var changes=[];for(var i=1;i<raw.length;i++)changes.push([raw[i][0],(+raw[i][1])-(+raw[i-1][1])]);
+   var NW={'1M':2,'6M':7,'1Y':13,'3Y':37,'5Y':61},view=changes.slice(-(NW[RG.k]||7));
+   if(view.length<2){el.innerHTML=wait;return;}
+   var vals=view.map(function(x){return x[1];}),dts=view.map(function(x){return x[0];});
+   var last=vals[vals.length-1],prev=vals[vals.length-2],delta=last-prev;
+   var fmtK=function(x){return (x>=0?'+':'')+Math.round(x).toLocaleString()+'K';};
+   var verdict=last<0?'<span class="wn">고용 감소 — 경기 둔화 신호</span>':delta>=0?'<span class="ok">고용 증가폭 확대</span>':'<span class="nt">고용 증가폭 둔화</span>';
+   el.innerHTML='<div class="mkt-nm">미국 비농업고용(NFP)</div><div class="mkt-val">'+fmtK(last)+
+    ' <span class="mkt-chg '+(delta>=0?'up':'dn')+'">전월비 '+fmtK(delta)+'</span></div>'+lens('<b>노동</b>비농업고용 증감 · Fed 이중책무',
+    esc(dts[dts.length-1])+' '+fmtK(last)+' · 이전 '+fmtK(prev)+' → '+verdict)+chart(vals,0,dts,fmtK)+'<div class="mkt-span">'+RG.ko+'</div>';
+  }catch(e){el.innerHTML=wait;}
+ }
+
+ var IND_ORDER_KEY='am_market_indicator_order_v1',indDragKey='',indDragWired=false;
+ function indicatorCards(){return Array.prototype.slice.call(document.querySelectorAll('#mktIndicators > .mkt-card, #mktGauge > .mkt-card'));}
+ function indicatorKey(card){return card&&card.getAttribute('data-indicator-key')||card&&card.id||'';}
+ function savedIndicatorOrder(){try{var a=JSON.parse(localStorage.getItem(IND_ORDER_KEY)||'[]');return Array.isArray(a)?a:[];}catch(e){return [];}}
+ function applyIndicatorOrder(){
+  var cards=indicatorCards(),order=savedIndicatorOrder(),seen={};
+  order=order.filter(function(k){if(!k||seen[k])return false;seen[k]=1;return true;});
+  cards.forEach(function(c){var k=indicatorKey(c);if(k&&!seen[k]){seen[k]=1;order.push(k);}});
+  cards.forEach(function(c){var i=order.indexOf(indicatorKey(c));c.style.order=String(i<0?order.length:i);c.draggable=window.matchMedia('(min-width:701px)').matches;});
+ }
+ function wireIndicatorDrag(){
+  var grid=document.getElementById('mktIndicators');if(!grid)return;applyIndicatorOrder();
+  if(indDragWired)return;indDragWired=true;
+  grid.addEventListener('dragstart',function(e){var c=e.target.closest&&e.target.closest('.mkt-card');if(!c||!window.matchMedia('(min-width:701px)').matches)return;indDragKey=indicatorKey(c);c.classList.add('is-ind-dragging');if(e.dataTransfer){e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',indDragKey);}});
+  grid.addEventListener('dragover',function(e){var c=e.target.closest&&e.target.closest('.mkt-card');if(!c||!indDragKey)return;e.preventDefault();grid.querySelectorAll('.is-ind-over').forEach(function(x){x.classList.remove('is-ind-over');});c.classList.add('is-ind-over');});
+  grid.addEventListener('drop',function(e){var target=e.target.closest&&e.target.closest('.mkt-card');if(!target||!indDragKey)return;e.preventDefault();var tk=indicatorKey(target),order=indicatorCards().sort(function(a,b){return (+a.style.order||0)-(+b.style.order||0);}).map(indicatorKey);var from=order.indexOf(indDragKey),to=order.indexOf(tk);if(from>=0&&to>=0&&from!==to){order.splice(from,1);order.splice(to,0,indDragKey);localStorage.setItem(IND_ORDER_KEY,JSON.stringify(order));applyIndicatorOrder();}});
+  grid.addEventListener('dragend',function(){indDragKey='';grid.querySelectorAll('.is-ind-dragging,.is-ind-over').forEach(function(x){x.classList.remove('is-ind-dragging','is-ind-over');});});
+  new MutationObserver(applyIndicatorOrder).observe(grid,{childList:true,subtree:true});
+  window.matchMedia('(min-width:701px)').addEventListener('change',applyIndicatorOrder);
+ }
  async function loadMacroNews(){
   var host=document.getElementById('mktMacroNews');if(!host)return;
   try{
@@ -4006,7 +4047,7 @@ var HIDDEN_KEY='am_topic_radar_hidden_v1',hiddenTopics=[];
   for(var i=0;i<bs.length;i++){bs[i].classList.toggle('on',bs[i].getAttribute('data-r')===RG.k);}
  }
  // 차트 계열만 다시 그린다(뉴스 블록은 기간과 무관 → 재요청 안 함)
- function redrawCharts(){loadWti();loadGas();loadDxi();loadUs10y();loadIndices();loadHoldings();}
+ function redrawCharts(){loadWti();loadGas();loadDxi();loadUs10y();loadIndices();loadNfp();loadHoldings();}
  function setRange(k){
   var r=null;for(var i=0;i<RANGES.length;i++)if(RANGES[i].k===k)r=RANGES[i];
   if(!r||r.k===RG.k)return;
@@ -4049,7 +4090,7 @@ var HIDDEN_KEY='am_topic_radar_hidden_v1',hiddenTopics=[];
   catch(e){host.innerHTML='<div class="mkt-ph">동인 합성 대기 (pulse.json)</div>';}
  }
  // ===== 심리·수급·환율 게이지 (런타임 — 페이지 열 때마다 최신) =====
- function gauge(nm,val,lns,extra){return '<div class="mkt-card"><div class="mkt-nm">'+esc(nm)+'</div><div class="mkt-val">'+val+'</div>'+(lns||'')+(extra||'')+'</div>';}
+ function gauge(key,nm,val,lns,extra){return '<div class="mkt-card" data-indicator-key="'+esc(key)+'"><div class="mkt-nm">'+esc(nm)+'</div><div class="mkt-val">'+val+'</div>'+(lns||'')+(extra||'')+'</div>';}
  function fgGauge(f){var v=Math.max(0,Math.min(100,+f||0)),cx=105,cy=104,R=80,W=13,D=Math.PI/180,pt=function(x,r){var t=(180*(1-x/100))*D;return[cx+r*Math.cos(t),cy-r*Math.sin(t)]},A=function(a,b,k,o,w){var p=pt(a,R),q=pt(b,R);return '<path d="M'+p[0].toFixed(1)+' '+p[1].toFixed(1)+' A'+R+' '+R+' 0 0 1 '+q[0].toFixed(1)+' '+q[1].toFixed(1)+'" fill="none" style="stroke:var('+k+');stroke-width:'+w+';opacity:'+o+'"/>'},Z=[[0,25,'--st-dawn',1],[25,45,'--st-dawn',.4],[45,55,'--st-mature',.5],[55,75,'--st-hot',.4],[75,100,'--st-hot',1]],a=-1,i,s='';for(i=0;i<5;i++){if(v>=Z[i][0]&&v<Z[i][1]){a=i;break}}if(v>=100)a=4;if(a<0)a=0;for(i=0;i<5;i++){var on=i===a;s+=A(Z[i][0],Z[i][1],Z[i][2],on?1:Z[i][3],on?W+3:W)}var t=(180*(1-v/100))*D,c=Math.cos(t),n=Math.sin(t),tp=pt(v,R-4),P=function(p){return p[0].toFixed(1)+' '+p[1].toFixed(1)},nd='<polygon points="'+P(tp)+' '+P([cx+5.5*n,cy+5.5*c])+' '+P([cx-13*c,cy+13*n])+' '+P([cx-5.5*n,cy-5.5*c])+'" style="fill:var(--txt)"/><circle cx="'+cx+'" cy="'+cy+'" r="6.5" style="fill:var(--txt)"/><circle cx="'+cx+'" cy="'+cy+'" r="3" style="fill:var(--panel)"/>',z=pt(0,R+13),h=pt(100,R+13),L='<text x="'+z[0].toFixed(1)+'" y="'+(z[1]+4).toFixed(1)+'" text-anchor="middle" style="font:12px var(--mono);fill:var(--faint)">0</text><text x="'+h[0].toFixed(1)+'" y="'+(h[1]+4).toFixed(1)+'" text-anchor="middle" style="font:12px var(--mono);fill:var(--faint)">100</text><text x="30" y="123" text-anchor="middle" style="font:600 12px var(--serif);fill:var(--st-dawn)">공포</text><text x="180" y="123" text-anchor="middle" style="font:600 12px var(--serif);fill:var(--st-hot)">탐욕</text>';return '<div class="mkt-chart" style="padding-top:6px"><svg viewBox="0 0 210 130" style="width:100%;height:auto;display:block" role="img" aria-label="공포탐욕 게이지 '+v+'">'+s+nd+L+'</svg></div>'}
  async function loadGauges(){
   var host=document.getElementById('mktGauge');if(!host)return;
@@ -4061,27 +4102,27 @@ var HIDDEN_KEY='am_topic_radar_hidden_v1',hiddenTopics=[];
    var s=rs[0]||{},fx=rs[1]||{},cards='';
    if(s.vix!=null){var bw=(s.vix3m!=null&&s.vix>s.vix3m);
     var vv=s.vix>=25?'<span class="wn">고변동 — 위험회피</span>':s.vix>=18?'<span class="nt">경계대</span>':'<span class="ok">저변동 — 안도</span>';
-    cards+=gauge('VIX 변동성',s.vix.toFixed(1),
+    cards+=gauge('vix','VIX 변동성',s.vix.toFixed(1),
      lens('<b>심리</b>공포·변동성 · VIX3M 대비 기간구조',
       'VIX '+s.vix.toFixed(1)+' vs 3M '+(s.vix3m!=null?s.vix3m.toFixed(1):'--')+(bw?' · <span class="wn">백워데이션(급성)</span>':' · 콘탱고(정상)')+' → '+vv));}
    if(s.fearGreed!=null){var f=s.fearGreed;var fl=f<=25?'극도의 공포':f<=45?'공포':f<=55?'중립':f<=75?'탐욕':'극도의 탐욕';
     var fj=f<=25?'<span class="ok">역발상 매수 관심대</span>':f>=75?'<span class="wn">과열 — 되돌림 경계</span>':'<span class="nt">방향 미확정</span>';
-    cards+=gauge('CNN 공포·탐욕',f+'<span class="vlab">'+fl+'</span>',
+    cards+=gauge('fear-greed','CNN 공포·탐욕',f+'<span class="vlab">'+fl+'</span>',
      lens('<b>심리</b>공포탐욕지수 0~100 · 역발상 렌즈','F&amp;G '+f+' ('+fl+') → '+fj),fgGauge(f));}
    if(s.nasdaqDrawdownPct!=null){var dd=s.nasdaqDrawdownPct,g=dd<=-20?3:dd<=-13?2:dd<=-8?1:0;
     var gv=g>=1?'<span class="ok">깊이 게이트 G'+g+' 점등</span>':'<span class="nt">G0 — 조정 미진입</span>';
-    cards+=gauge('나스닥 드로다운','<span class="'+(dd<0?'dn':'up')+'">'+dd.toFixed(1)+'%</span>',
+    cards+=gauge('nasdaq-dd','나스닥 드로다운','<span class="'+(dd<0?'dn':'up')+'">'+dd.toFixed(1)+'%</span>',
      lens('<b>수급</b>고점 대비 낙폭 · 40주선 추세 · 매수 깊이축',
       dd.toFixed(1)+'% · 40주선 '+(s.wma40SlopeUp?'상승':'하락')+' 이격 '+(s.wma40GapPct!=null?fmtP(s.wma40GapPct,1)+'%':'--')+' → '+gv));}
    var fp=(fx.points||[]),last=fp.length?fp[fp.length-1][1]:null;
    if(last!=null&&isFinite(last)){var prev=fp.length>1?fp[fp.length-2][1]:null,chg=(prev?((last/prev-1)*100):null);
     var wv=last>=1400?'<span class="wn">원약세 심화 — 외인 이탈·위험회피</span>':last<=1300?'<span class="ok">원강세 — 위험선호</span>':'<span class="nt">중립대</span>';
-    cards+=gauge('원/달러 환율','₩'+Math.round(last).toLocaleString()+(chg!=null&&isFinite(chg)?' <span class="mkt-dod '+(chg>=0?'up':'dn')+'">'+(chg>=0?'+':'')+chg.toFixed(1)+'%</span>':''),
+    cards+=gauge('usdkrw','원/달러 환율','₩'+Math.round(last).toLocaleString()+(chg!=null&&isFinite(chg)?' <span class="mkt-dod '+(chg>=0?'up':'dn')+'">'+(chg>=0?'+':'')+chg.toFixed(1)+'%</span>':''),
      lens('<b>환율</b>달러/원 · 외국인 수급·위험선호 대리','₩'+Math.round(last).toLocaleString()+' → '+wv));}
    host.innerHTML=cards||'<div class="mkt-ph" style="grid-column:1/-1">게이지 데이터 대기</div>';}
   catch(e){host.innerHTML='<div class="mkt-ph" style="grid-column:1/-1">게이지 대기</div>';}
  }
- async function render(){wireRange();loadPulse();loadGauges();await loadCtx();loadWti();loadGas();loadDxi();loadUs10y();loadIndices();loadHoldings();loadMacroNews();loadStockNews();}
+ async function render(){wireRange();wireIndicatorDrag();loadPulse();loadGauges();await loadCtx();loadWti();loadGas();loadDxi();loadUs10y();loadIndices();loadNfp();loadHoldings();loadMacroNews();loadStockNews();}
  return {render:render,setRange:setRange};
 })();
 
