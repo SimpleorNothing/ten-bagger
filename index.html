@@ -3754,14 +3754,14 @@ window.MARKET=(function(){
     return 'x_'+(t||'macro');}
    // 병목축은 원칙적으로 발굴축과 분리하되, CAPEX만 같은 토픽으로 합친다.
    // 기존 bn_capex 데이터와 한글 캐펙스/캐팩스 표기도 모두 대표키 capex로 환원한다.
-   function isCxmt(it){return /cxmt|창신메모리|창신반도체/i.test([it&&it.title,it&&it.a,it&&it.w,it&&it.s,it&&it.name].join(' '));}
+   function isChinaAi(it){return /cxmt|창신메모리|창신반도체|kimi(?:[- ]?k3)?|키미\s*k3|moonshot|문샷|deepseek|딥시크|중국.{0,12}(?:ai|인공지능|ai모델)|china.{0,12}(?:ai|model)/i.test([it&&it.title,it&&it.a,it&&it.w,it&&it.s,it&&it.name].join(' '));}
    function axIt(it){var a=String(it.ax||''),id=String(it.id||'');
-    if(isCxmt(it))return 'china';                         // CXMT 내용은 관세 검색축 유입이어도 중국 AI 부상축 우선
+    if(isChinaAi(it))return 'china';                         // CXMT 내용은 관세 검색축 유입이어도 중국 AI 부상축 우선
     if(a==='bn_capex'||id==='bneck_capex')return 'capex'; // 상류 CAPEX 고정축 ↔ 발굴축 병합
     if(a.indexOf('bn_')===0)return a;                     // 나머지 병목축은 독립 유지
     if(id.indexOf('bneck_')===0)return 'bn_'+id.slice(6); // 구 병목 데이터(ax 이전)
     return axOf(it.name||it.id);}                         // 발굴축은 이름 정규화
-   var MX=5,byA={},byId={},seen={};
+   var MX=5,CHINA_MX=12,byA={},byId={},seen={};
    items.forEach(function(it){var k=axIt(it);
     if(it.id&&!byId[it.id])byId[it.id]=k;
     var u=k+'|'+(it.link||it.title||'');if(seen[u])return;seen[u]=1;   // 축 병합 시 같은 기사 중복 제거
@@ -3769,7 +3769,7 @@ window.MARKET=(function(){
    Object.keys(byA).forEach(function(k){byA[k].sort(function(a,b){return new Date(b.published||0)-new Date(a.published||0);});});
    // 다이제스트 요약: 신규는 축 키, 구버전은 토픽id로 들어온다 → 둘 다 축으로 환원
    var sums={};(((dg||{}).macro)||[]).forEach(function(m){if(!m||!m.id)return;
-    var k=isCxmt(m)?'china':(byId[m.id]||axOf(m.id));if(!sums[k])sums[k]=m.s;});
+    var k=isChinaAi(m)?'china':(byId[m.id]||axOf(m.id));if(!sums[k])sums[k]=m.s;});
    var NM={},order=[];   // 이번 실행 채택 축 먼저 → 식은 축은 최신순
    (((nw||{}).macroTopics)||[]).forEach(function(t){var k=axOf(t.name||t.id);
     if(!NM[k])NM[k]=t.name;
@@ -3780,11 +3780,13 @@ window.MARKET=(function(){
 
 var HIDDEN_KEY='am_topic_radar_hidden_v1',hiddenTopics=[];
    try{hiddenTopics=JSON.parse(localStorage.getItem(HIDDEN_KEY)||'[]');if(!Array.isArray(hiddenTopics))hiddenTopics=[];}catch(e){hiddenTopics=[];}
+   var REVIVE_CHINA_KEY='am_topic_radar_revive_china_v1';
+   try{if(!localStorage.getItem(REVIVE_CHINA_KEY)){hiddenTopics=hiddenTopics.filter(function(k){return k!=='china';});localStorage.setItem(HIDDEN_KEY,JSON.stringify(hiddenTopics));localStorage.setItem(REVIVE_CHINA_KEY,'1');}}catch(e){}
    order=order.filter(function(k){return hiddenTopics.indexOf(k)<0;});
    var html='';
    order.forEach(function(k){
-    var lst=byA[k].slice(0,MX);
-    var title=NM[k]||(lst[0]&&lst[0].name)||k;
+    var lst=byA[k].slice(0,k==='china'?CHINA_MX:MX);
+    var title=NM[k]||(lst[0]&&lst[0].name)||k;if(k==='china'){var chinaNamed=lst.find(function(it){return /중국 AI 부상/.test(it.name||'');});title=chinaNamed?chinaNamed.name:'중국 AI 부상·반도체 수출통제';}
     html+='<div class="stk-blk is-collapsed" data-topic-key="'+esc(k)+'"><div class="stk-hd" role="button" tabindex="0" aria-expanded="false" aria-label="'+esc(title)+' 펼치기"><span class="nm">'+esc(title)+'</span><button type="button" class="stk-topic-del" aria-label="'+esc(title)+' 토픽 삭제">삭제</button></div>';
     html+=sums[k]?'<div class="stk-sum">'+esc(sums[k])+'</div>'
             :'<div class="stk-sum ph">요약 대기 — 다음 다이제스트(06:12·18:12)에서 생성</div>';

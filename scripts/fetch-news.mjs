@@ -241,7 +241,7 @@ function axisOf(s) {
 }
 function articleAxis(it, fallback) {
   const text = [it && it.title, it && it.a, it && it.w, it && it.name].join(' ');
-  if (/cxmt|창신메모리|창신반도체/i.test(text)) return 'china';
+  if (/cxmt|창신메모리|창신반도체|kimi(?:[- ]?k3)?|키미\s*k3|moonshot|문샷|deepseek|딥시크|중국.{0,12}(?:ai|인공지능|ai모델)|china.{0,12}(?:ai|model)/i.test(text)) return 'china';
   return fallback || axisOf(it && (it.name || it.id));
 }
 function stabilizeTopics(topics, prevTopics) {
@@ -549,7 +549,7 @@ async function main() {
       if (!material(it)) return false;
       const k = it.ticker === 'MACRO' ? (it.ax || axisOf(it.name || it.id)) : (it.ticker || '?');
       const n = (perTk.get(k) || 0) + 1;
-      if (n > SITE_PER_TICKER) return false;
+      if (n > (k === 'china' ? 12 : SITE_PER_TICKER)) return false;
       perTk.set(k, n);
       return true;
     })
