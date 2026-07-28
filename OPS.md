@@ -1,4 +1,4 @@
-**최종 갱신: 2026-07-29 08:05 (KST)**
+**최종 갱신: 2026-07-29 09:20 (KST)**
 
 # OPS — 알파맵 운영 가이드
 
@@ -370,6 +370,7 @@
 
 ## 9. 갱신 이력
 
+- 2026-07-29 09:20 · **알파벳 26Q2 실적(7/22 AMC) `signal_log` 보강 — 2각도만 추가(중복 회피).** 07-23 엔트리(capex $180~190B→$195~205B 상향·클라우드 +82%·Gemini 3.5 Pro 지연)와 `gates.json`(#530 — 백로그 $514B·capex $195–205B)이 이미 핵심 수치·04 로드맵 ③ 반영을 처리 → 여기선 그 엔트리에 없던 **①TPU 시스템 외부 DC 납품 매출 최초 인식(L2 외판 개시) ②스틸맨·가격시계 경고(FCF −$5.9B·영업마진 미스·시간외 −5% → 리비전 하향 방아쇠는 실적 아닌 조달·마진)** 2항목만 EOF append. **narrative≠numbers — 미보유 상류 종목이므로 gamma·holdings·judgment·earnings 전부 불변, aisd.js(이미 2026E ~$725B·Google 행 ~200 반영)도 무편집**(과거 캡처 기준 패치의 ~$715B/~$185B 수치는 현행 main보다 스테일이라 미반영). `signal_log.json` 유효 JSON 유지(`node -e` 파싱 통과) · UI·토큰 무편집.
 - 2026-07-29 08:05 · **02 관점 등급 옆 후속 상태 표시.** 등급(관찰→확신)과 실행 생명주기를 분리해 각 관점·다른 메뉴 스트립에 `승격 대기`/`발동 대기`/`발동`/`유지`/`만료` 배지를 표시한다. 기존 데이터는 g0~g1=`승격 대기`, g2↑=`발동 대기`로 무이전 파생하고, 「🕔 라이프사이클」 모달의 상태 칩 선택을 `lcState`로 R2/localStorage에 저장한다. 확신은 자동 실행이 아니며 발동은 05 리밸런싱 후보라는 §0-5 규율 유지. 신규 `:root` 토큰 0 · narrative≠numbers.
 - 2026-07-29 · **02 인사이트 「사이트 반영」을 완전 자동 직접 커밋으로 전환(1/2).** SimpleorNothing 지시("사이트에서 바로 반영되게 해줘" → "완전 자동 — 검증·PR 없이 바로 커밋" 선택) — narrative≠numbers 수기 검증 원칙에 대한 명시적 예외로 승인. **worker.js**: `handleSiteApply` 신설(`POST /api/site-apply`) — GitHub Contents API로 대상 항목을 읽고 Claude(claude-opus-4-8)에 패치 계산만 맡긴 뒤(`{changed,gauge,verdict,srcs_add,reason}`), **구조 가드레일**(gauge 길이·순서·`k` 완전 동일해야 반영·스키마 신설 금지·`changed:false`면 무변경) 통과 시에만 `default_branch`(라이브 해소)에 직접 PUT 커밋(PR 없음). `GITHUB_TOKEN`·`ANTHROPIC_API_KEY` 기설정 확인.
 - 2026-07-29 · **(2/2) insight.js/css.** `applyModal`에 「🚀 지금 반영」 버튼 추가 — 매칭 항목마다 `/api/site-apply` 호출, 카드별 결과(✅반영됨/—변경없음/❌실패) 즉시 표시, 성공 시 `siteDone` 자동 세팅. 「📋 반영 지시 복사」는 수동 폴백 유지. `.ins-ap-st` 상태줄(신규 토큰 0). §3 행 갱신. narrative≠numbers는 이 버튼 하나에 한해 예외 — 다른 숫자 파일 경로는 기존 규율(§1·§6) 그대로.
