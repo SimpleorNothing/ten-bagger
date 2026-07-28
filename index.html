@@ -3733,8 +3733,13 @@ window.MARKET=(function(){
   var el=document.getElementById('mkt_nfp');if(!el)return;
   var wait='<div class="mkt-nm">미국 비농업고용(NFP)</div><div class="mkt-ph">FRED 고용 수집 대기</div>';
   try{
-   var r=await fetch('/api/fred?ids=PAYEMS&from=2020-01-01',{cache:'no-store'}),j=await r.json();
-   var raw=(j.PAYEMS||((j.series||{}).PAYEMS)||[]).filter(function(x){return Array.isArray(x)&&x[0]&&x[1]!=null&&isFinite(x[1]);});
+   var rs=await Promise.all([
+    fetch('/api/fred?ids=PAYEMS&from=2023-06-01',{cache:'no-store'}).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;}),
+    fetch('nfp.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;})
+   ]),j=rs[0]||{},bk=rs[1]||{};
+   var live=(j.PAYEMS||((j.series||{}).PAYEMS)||[]),merged={};
+   (bk.levels||[]).concat(live).forEach(function(x){if(Array.isArray(x)&&x[0]&&x[1]!=null&&isFinite(x[1]))merged[x[0]]=[x[0],+x[1]];});
+   var raw=Object.keys(merged).sort().map(function(d){return merged[d];});
    var changes=[];for(var i=1;i<raw.length;i++)changes.push([raw[i][0],(+raw[i][1])-(+raw[i-1][1])]);
    var NW={'1M':2,'6M':7,'1Y':13,'3Y':37,'5Y':61},view=changes.slice(-(NW[RG.k]||7));
    if(view.length<2){el.innerHTML=wait;return;}
