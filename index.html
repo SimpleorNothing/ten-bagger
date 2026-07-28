@@ -3754,7 +3754,9 @@ window.MARKET=(function(){
     return 'x_'+(t||'macro');}
    // 병목축은 원칙적으로 발굴축과 분리하되, CAPEX만 같은 토픽으로 합친다.
    // 기존 bn_capex 데이터와 한글 캐펙스/캐팩스 표기도 모두 대표키 capex로 환원한다.
+   function isCxmt(it){return /cxmt|창신메모리|창신반도체/i.test([it&&it.title,it&&it.a,it&&it.w,it&&it.s,it&&it.name].join(' '));}
    function axIt(it){var a=String(it.ax||''),id=String(it.id||'');
+    if(isCxmt(it))return 'china';                         // CXMT 내용은 관세 검색축 유입이어도 중국 AI 부상축 우선
     if(a==='bn_capex'||id==='bneck_capex')return 'capex'; // 상류 CAPEX 고정축 ↔ 발굴축 병합
     if(a.indexOf('bn_')===0)return a;                     // 나머지 병목축은 독립 유지
     if(id.indexOf('bneck_')===0)return 'bn_'+id.slice(6); // 구 병목 데이터(ax 이전)
@@ -3767,7 +3769,7 @@ window.MARKET=(function(){
    Object.keys(byA).forEach(function(k){byA[k].sort(function(a,b){return new Date(b.published||0)-new Date(a.published||0);});});
    // 다이제스트 요약: 신규는 축 키, 구버전은 토픽id로 들어온다 → 둘 다 축으로 환원
    var sums={};(((dg||{}).macro)||[]).forEach(function(m){if(!m||!m.id)return;
-    var k=byId[m.id]||axOf(m.id);if(!sums[k])sums[k]=m.s;});
+    var k=isCxmt(m)?'china':(byId[m.id]||axOf(m.id));if(!sums[k])sums[k]=m.s;});
    var NM={},order=[];   // 이번 실행 채택 축 먼저 → 식은 축은 최신순
    (((nw||{}).macroTopics)||[]).forEach(function(t){var k=axOf(t.name||t.id);
     if(!NM[k])NM[k]=t.name;
