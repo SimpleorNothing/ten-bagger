@@ -267,6 +267,8 @@ pantone.css :root       ← 현행 팔레트 (팬튼 A안, index.html 하단 <li
 
 ## 갱신 이력
 
+- 2026-07-29 · **02 인사이트 「사이트 반영」 모달에 「🚀 지금 반영」(완전 자동 직접 커밋) 추가.** SimpleorNothing 지시(narrative≠numbers 수기 검증 원칙에 대한 명시적 예외 승인). `applyModal`의 카드마다 상태줄 `.ins-ap-st`(신규·mono 12px·`--dim`)를 붙이고, 기존 「📋 반영 지시 복사」 버튼 앞에 primary 버튼 「🚀 지금 반영」을 추가(기존 `.ins-btn primary` 재사용) — 클릭 시 `/api/site-apply`(worker 신설, Claude가 패치 계산 후 GitHub에 직접 PUT)를 카드마다 호출하고 결과를 그 자리 상태줄에 표시(✅반영됨/—변경없음/❌실패). **신규 `:root` 토큰 0**(`.ins-ap-st`는 `--dim`/`--mono` 재사용) → TOKENS 무변·`check-docs` 통과·`node --check` 통과. 복사 버튼은 수동 폴백으로 유지. (OPS §3·§9 동반)
+
 - 2026-07-28 · **02 인사이트 「사이트 반영」 — 관점이 표시 전용 보드와 겹치면 「🔗 반영하기」.** SimpleorNothing 지시(구글 2Q26 RPO → 사이클 판별 보드 ①수주잔고 자동 감지). 관점 추출·저장목록 행에서 `gates.json`·`risk.json`의 `keys`/`xkeys`로 매칭 → 버튼 `.ins-apply`(`--dawn` 테두리·처리분 `.done`=`--line2`/`--dim`). 모달은 **라이프사이클 모달(`.ins-lc-ov`/`.ins-lc-sheet`/`.ins-lc-hd`/`.ins-lc-ti`/`.ins-lc-x`/`.ins-lc-bd`/`.ins-lc-ft`/`.ins-lc-note`) 전면 재사용** + 신규 `.ins-ap-card`/`.ins-ap-h`/`.ins-ap-f`(mono 11px 파일명)/`.ins-ap-v`/`.ins-ap-g`/`.ins-ap-note`/`.ins-ap-ta`(대상 카드·현재 게이지·「반영 지시」 복사 textarea). **신규 `:root` 토큰 0**(`--dawn`/`--dim`/`--line`/`--line2`/`--faint`/`--mono`/`--panel2`/`--txt` 재사용) → TOKENS 무변·`check-docs` 통과(토큰 24종·폰트 v1.3.9)·`node --check` 통과·매처 스모크(구글 RPO→①수주잔고 매칭·수출통제 `xkeys` 배제·수치 없는 관점 무매칭·양보드 교차). 면 radius 3px·본문 13~15px·라벨 mono 11~12px(§2 하한·§3 면 결). **자동 write 없음** — 반영은 수기 PR(OPS §6). narrative≠numbers. (OPS §3·§9 동반)
 
 - 2026-07-28 23:12 · **01 리스크·사이클 카드 롱프레스 삭제.** 카드 빈 영역 600ms 정지→우상단 삭제, 4px 이동 취소, 다른 카드·상세 버튼 동작 시 해제. 보드별 숨김 id를 localStorage에 영속하고 원본 JSON은 보존. 토픽 카드 조작 규약·12px/radius 3px 경고 버튼 재사용, 신규 토큰 0. SimpleorNothing 지시. (OPS §3·§9)

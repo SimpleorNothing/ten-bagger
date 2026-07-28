@@ -206,10 +206,11 @@ window.INSIGHT=(function(){
   if(!m.length){setMsg('겹치는 사이트 내용이 없습니다.');return;}
   lcClose();
   var order=apOrder(c,o.src,m);
-  var cards=m.map(function(t){
+  var cards=m.map(function(t,i){
    var gh=(t.gauge||[]).slice(0,4).map(function(g){return '<div class="ins-ap-g"><b>'+esc(g.k)+'</b> '+esc(g.v)+(g.n?' <span>'+esc(g.n)+'</span>':'')+'</div>';}).join('');
    return '<div class="ins-ap-card"><div class="ins-ap-h">'+esc(t.board)+' · '+(t.no?esc(t.no)+' ':'')+esc(t.name)+' <span class="ins-ap-f">'+esc(t.file)+'</span></div>'+
-    (t.verdict?'<div class="ins-ap-v">현재 판정 — '+esc(t.verdict)+'</div>':'')+gh+'</div>';
+    (t.verdict?'<div class="ins-ap-v">현재 판정 — '+esc(t.verdict)+'</div>':'')+gh+
+    '<div class="ins-ap-st" data-st="'+i+'"></div></div>';
   }).join('');
   var ov=document.createElement('div');ov.className='ins-lc-ov';ov.id='insLcOv';
   ov.innerHTML='<div class="ins-lc-sheet" role="dialog" aria-modal="true" aria-label="사이트 반영">'+
@@ -217,12 +218,13 @@ window.INSIGHT=(function(){
     '<button type="button" class="ins-lc-x" data-x aria-label="닫기">✕</button></div>'+
    '<div class="ins-lc-claim">'+esc(c.text||'')+'</div>'+
    '<div class="ins-lc-bd">'+cards+
-    '<div class="ins-ap-note">자동 변경 없음 — 아래 「반영 지시」를 복사해 확정 실적·공시 검증 후 수기 갱신(PR)한다. narrative는 signal_log에만.</div>'+
-    '<textarea class="ins-lc-in ins-ap-ta" readonly rows="7">'+esc(order)+'</textarea></div>'+
-   '<div class="ins-lc-ft"><button type="button" class="ins-btn primary" data-copy>📋 반영 지시 복사</button>'+
+    '<div class="ins-ap-note">「지금 반영」은 Claude가 위 항목의 gauge/verdict/asOf 값을 계산해 PR 없이 바로 커밋한다(완전 자동 · SimpleorNothing 지시). 근거가 불충분하면 자동으로 변경하지 않는다.</div>'+
+    '<textarea class="ins-lc-in ins-ap-ta" readonly rows="5">'+esc(order)+'</textarea></div>'+
+   '<div class="ins-lc-ft"><button type="button" class="ins-btn primary" data-apply-now>🚀 지금 반영</button>'+
+    '<button type="button" class="ins-btn" data-copy>📋 반영 지시 복사</button>'+
     '<button type="button" class="ins-btn" data-done>'+(c.siteDone?'처리 해제':'처리함 표시')+'</button>'+
     '<button type="button" class="ins-btn" data-x>닫기</button>'+
-    '<span class="ins-lc-note">복사 → Claude 전달 = 검증 후 반영 PR</span></div>'+
+    '<span class="ins-lc-note">지금 반영 = 커밋 직행 · 반영 지시 복사 = Claude에 수동 전달</span></div>'+
    '</div>';
   document.body.appendChild(ov);
   ov.addEventListener('click',function(e){if(e.target===ov)lcClose();});
@@ -238,6 +240,31 @@ window.INSIGHT=(function(){
   };
   var dn=ov.querySelector('[data-done]');
   if(dn)dn.onclick=function(){c.siteDone=!c.siteDone;if(o.saved)persist();else renderResult();lcClose();};
+  var an=ov.querySelector('[data-apply-now]');
+  if(an)an.onclick=function(){
+   an.disabled=true;an.textContent='반영 중…';
+   var anyChanged=false,done=0;
+   m.forEach(function(t,i){
+    var stEl=ov.querySelector('[data-st="'+i+'"]');
+    if(stEl)stEl.textContent='⏳ 확인 중…';
+    fetch('/api/site-apply',{method:'POST',headers:{'content-type':'application/json'},
+     body:JSON.stringify({file:t.file,itemNo:t.no,itemName:t.name,text:c.text||'',why:c.why||'',src:o.src||{}})})
+     .then(function(r){return r.json().then(function(j){return {ok:r.ok,j:j};});})
+     .then(function(res){
+      if(!stEl)return;
+      if(!res.ok||res.j.error){stEl.textContent='❌ 실패 — '+esc(String(res.j.error||'오류'));return;}
+      if(res.j.changed){anyChanged=true;stEl.textContent='✅ 반영됨'+(res.j.reason?' — '+esc(res.j.reason):'');}
+      else{stEl.textContent='— 변경 없음'+(res.j.reason?' · '+esc(res.j.reason):'');}
+     })
+     .catch(function(){if(stEl)stEl.textContent='❌ 실패 — 네트워크 오류';})
+     .then(function(){
+      if(++done>=m.length){
+       an.textContent=anyChanged?'✓ 반영 완료':'완료(변경 없음)';
+       if(anyChanged){c.siteDone=true;if(o.saved)persist();else renderResult();}
+      }
+     });
+   });
+  };
   document.addEventListener('keydown',lcKey);
  }
 

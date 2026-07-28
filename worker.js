@@ -1023,6 +1023,140 @@ async function handleInsight(request, env) {
   return memoJson({ content: [{ type: "text", text: r.text }], stop_reason: r.stop_reason }, 200);
 }
 
+// 02 인사이트 「사이트 반영」 — 표시 전용 보드(gates.json/risk.json) 직접 갱신.
+// SimpleorNothing 지시(2026-07-29): PR·수동 승인 없이 클릭 즉시 반영하는 완전 자동 예외.
+// narrative≠numbers 의 '확정 검증 후 수기 갱신' 원칙에 대한 명시적 카ㅂ아웃 —
+// 대신 Claude가 계산한 패치를 구조적으로 제한한다(게이지 배열 길이·k 순서·id 불변, 스키마 신설 금지).
+// 근거 불충분/이미 반영/모호하면 changed:false 로 아무것도 쓰지 않는다.
+async function handleSiteApply(request, env) {
+  if (!env.GITHUB_TOKEN) return memoJson({ error: "GITHUB_TOKEN not configured" }, 503);
+  if (!env.ANTHROPIC_API_KEY) return memoJson({ error: "ANTHROPIC_API_KEY not configured" }, 503);
+
+  let body;
+  try { body = await request.json(); }
+  catch { return memoJson({ error: "invalid json" }, 400); }
+
+  const file = String((body && body.file) || "");
+  if (file !== "gates.json" && file !== "risk.json") {
+    return memoJson({ error: "invalid file — gates.json|risk.json only" }, 400);
+  }
+  const itemNo   = String((body && body.itemNo) || "");
+  const itemName = String((body && body.itemName) || "");
+  const claimText = String((body && body.text) || "").slice(0, 2000);
+  const why = String((body && body.why) || "").slice(0, 2000);
+  const src = (body && body.src) || {};
+  if (!claimText.trim()) return memoJson({ error: "text required" }, 400);
+  if (!itemNo && !itemName) return memoJson({ error: "itemNo or itemName required" }, 400);
+
+  const OWNER = "SimpleorNothing", REPO = "ten-bagger";
+  const gh = {
+    Authorization: `Bearer ${env.GITHUB_TOKEN}`,
+    "User-Agent": "alphamap-worker",
+    Accept: "application/vnd.github+json",
+  };
+
+  // 브랜치는 하드코딩하지 않는다 — 라이브 해소(자기치유), 실패 시 main 폴백.
+  let BRANCH = "main";
+  try {
+    const rmeta = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}`, { headers: gh });
+    if (rmeta.ok) { const rj = await rmeta.json(); if (rj && rj.default_branch) BRANCH = rj.default_branch; }
+  } catch {}
+
+  const API = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${file}`;
+  const cur = await fetch(`${API}?ref=${encodeURIComponent(BRANCH)}`, { headers: gh });
+  if (!cur.ok) return memoJson({ error: "github get failed", status: cur.status }, 502);
+  const curJson = await cur.json();
+  const sha = curJson.sha;
+
+  let raw;
+  try { raw = decodeURIComponent(escape(atob(String(curJson.content || "").replace(/\n/g, "")))); }
+  catch { return memoJson({ error: "decode failed" }, 500); }
+  let doc;
+  try { doc = JSON.parse(raw); }
+  catch { return memoJson({ error: "current file invalid json" }, 500); }
+
+  const items = doc.items || doc.axes || [];
+  const item = items.find((it) =>
+    (itemNo && (it.no === itemNo || it.id === itemNo)) || (itemName && it.name === itemName));
+  if (!item) return memoJson({ error: "item not found" }, 404);
+
+  const prompt = [
+    "너는 '알파맵' 사이클 판별/리스크 보드의 표시값을 갱신하는 데이터 담당자다.",
+    "아래 '현재 항목'과 '새 관점'을 비교해 갱신이 필요한 필드만 정확히 계산하라.",
+    "",
+    "[절대 규율]",
+    "1. narrative≠numbers — 확정 실적·공시·계약 등 '숫자'만 반영한다. 추측·전망·소문·아직 확정 안 된 내용이면 changed=false.",
+    "2. gauge 배열은 원본과 같은 길이·같은 순서·같은 k(라벨)를 유지한다. v(값)·d(up/down/flat)·n(부연설명)만 바꿀 수 있다.",
+    "3. 스키마를 새로 만들지 마라 — 기존 필드만 채운다. 근거 없는 필드는 건드리지 마라.",
+    "4. 근거가 불충분하거나 이미 반영된 값과 사실상 같으면 changed=false를 반환하라(추측으로 채우지 마라).",
+    "",
+    "[출력] 마크다운 없이 JSON 객체 하나만:",
+    '{"changed":true,"gauge":[{"k":"...","v":"...","d":"up|down|flat","n":"..."}],"verdict":"...","srcs_add":"...","reason":"한 줄 요약"}',
+    "changed=false면 reason만 채우고 나머지는 생략 가능.",
+    "",
+    "[현재 항목]",
+    JSON.stringify(item, null, 2),
+    "",
+    "[새 관점]",
+    claimText,
+    why ? ("근거: " + why) : "",
+    (src && (src.title || src.publisher)) ? ("출처: " + [src.title, src.publisher, src.date].filter(Boolean).join(" · ")) : "",
+  ].filter(Boolean).join("\n");
+
+  const r = await anthropicText(env, prompt, false, 1200);
+  if (r.error) return memoJson({ error: r.error, detail: r.detail }, 502);
+
+  let patch;
+  try {
+    const m = String(r.text || "").match(/\{[\s\S]*\}/);
+    patch = JSON.parse(m ? m[0] : r.text);
+  } catch {
+    return memoJson({ error: "claude response not json", raw: String(r.text || "").slice(0, 300) }, 502);
+  }
+
+  if (!patch || patch.changed !== true) {
+    return memoJson({ ok: true, changed: false, reason: (patch && patch.reason) || "변경 근거 불충분" }, 200);
+  }
+
+  // 구조 검증 — 게이지 배열 길이·순서·라벨(k) 불변만 허용. 어긋나면 반영 거부.
+  if (Array.isArray(patch.gauge)) {
+    const baseGauge = Array.isArray(item.gauge) ? item.gauge : [];
+    const okShape = patch.gauge.length === baseGauge.length &&
+      patch.gauge.every((g, i) => g && typeof g.k === "string" && g.k === baseGauge[i].k && typeof g.v === "string");
+    if (!okShape) return memoJson({ error: "gauge shape mismatch — 반영 거부(구조 보호)" }, 422);
+    item.gauge = patch.gauge.map((g, i) => ({ ...baseGauge[i], ...g }));
+  }
+  if (typeof patch.verdict === "string" && patch.verdict.trim()) item.verdict = patch.verdict.trim();
+  if (typeof patch.srcs_add === "string" && patch.srcs_add.trim()) {
+    item.srcs = Array.isArray(item.srcs) ? item.srcs : [];
+    item.srcs.push({ label: patch.srcs_add.trim() });
+  }
+  const today = new Date().toISOString().slice(0, 10);
+  item.upd = today;
+  doc.asOf = today;
+
+  const content = btoa(unescape(encodeURIComponent(JSON.stringify(doc, null, 2) + "\n")));
+  const put = await fetch(API, {
+    method: "PUT",
+    headers: { ...gh, "content-type": "application/json" },
+    body: JSON.stringify({
+      message: `site-apply: ${file} ${item.no || item.id || item.name} 자동 반영 — ${String(patch.reason || "").slice(0, 80)}`,
+      branch: BRANCH,
+      content,
+      sha,
+    }),
+  });
+  if (!put.ok) {
+    const t = await put.text();
+    return memoJson({ error: "github put failed", status: put.status, detail: t.slice(0, 300) }, 502);
+  }
+
+  return memoJson({
+    ok: true, changed: true, reason: patch.reason || "",
+    item: { no: item.no, id: item.id, name: item.name, gauge: item.gauge, verdict: item.verdict },
+  }, 200);
+}
+
 // US10Y 데이터 프록시 — 데이터 생성은 us10y 리포의 GitHub Actions(daily-update.yml)가
 // 매일 data.json 을 기본 브랜치에 커밋한다. Railway(구 us10y.simpleornothing.com)는
 // 배달 전용이었고 트라이얼 만료로 폐기 → GitHub 을 직접 SoT 로 사용.
@@ -1959,6 +2093,10 @@ export default {
       // 03 관점과 정보 — 관점 추출(Claude) · 인사이트 저장(R2) — 인증된 디바이스만 도달
       if (request.method === "POST" && url.pathname === "/api/insight") {
         return handleInsight(request, env);
+      }
+      // 02 인사이트 「사이트 반영」 — 완전 자동 직접 커밋(PR 없음). SimpleorNothing 지시(2026-07-29).
+      if (request.method === "POST" && url.pathname === "/api/site-apply") {
+        return handleSiteApply(request, env);
       }
       // 07 자문단 — 유튜브 관점 추출(Gemini) · 원탁 토론(Claude) — 인증된 디바이스만 도달
       if (request.method === "POST" && url.pathname === "/api/yt-view") {
