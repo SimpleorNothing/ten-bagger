@@ -40,7 +40,7 @@
     s.textContent = [
       '#gatesLens{background:var(--panel);border:1px solid var(--line);border-radius:3px;padding:11px 14px;margin:0 0 12px}',
       '#gatesBoard{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}',
-      '#gatesBoard .mkt-card{padding:15px 16px 13px}',
+      '#gatesBoard .mkt-card{padding:15px 16px 13px;position:relative}',
       '#gatesBoard .gt-hd{display:flex;align-items:baseline;gap:7px;flex-wrap:wrap;margin-bottom:6px}',
       '#gatesBoard .gt-no{font:700 13px var(--mono);color:var(--faint);flex:0 0 auto}',
       '#gatesBoard .gt-st{flex:0 0 auto;font:700 12px var(--mono);letter-spacing:.04em;border-radius:20px;padding:1px 8px;color:var(--onacc)}',
@@ -63,6 +63,11 @@
       '#gatesBoard .gt-nw .arow:hover{background:var(--panel2)}',
       '#gatesBoard .gt-nw .asum{font-size:14px;font-weight:500}',
       '#gatesBoard .gt-src{margin-top:9px;font:12px var(--mono);color:var(--faint);line-height:1.5}',
+      '#gatesBoard .gt-morebox{margin-top:auto;padding-top:9px}',
+      '#gatesBoard .gt-more{width:100%;border:0;border-top:1px dashed var(--line2);background:transparent;padding:8px 0 0;text-align:left;font:700 12px var(--mono);color:var(--faint);cursor:help}',
+      '#gatesBoard .gt-more:focus-visible{outline:2px solid var(--st-accel);outline-offset:3px}',
+      '#gatesBoard .gt-detail{display:none;position:absolute;z-index:12;left:12px;right:12px;bottom:42px;max-height:min(68vh,460px);overflow:auto;background:var(--panel);border:1px solid var(--line2);border-radius:3px;padding:11px 12px;box-shadow:0 10px 28px rgba(22,36,45,.16)}',
+      '#gatesBoard .gt-morebox:hover .gt-detail,#gatesBoard .gt-morebox:focus-within .gt-detail,#gatesBoard .mkt-card.show-detail .gt-detail{display:block}',
       '@media(max-width:600px){#gatesBoard{grid-template-columns:1fr}}'
     ].join('');
     document.head.appendChild(s);
@@ -125,6 +130,9 @@
         (x.n ? '<div class="gt-gn">' + esc(x.n) + '</div>' : '');
     }).join('');
     var src = (it.srcs || []).map(function (s) { return esc(s.label); }).join(' · ');
+    var detail = (it.trigger ? '<div class="gt-tr">' + esc(it.trigger) + '</div>' : '') +
+      (it.read ? '<div class="gt-rd">' + esc(it.read) + '</div>' : '') + newsHTML(news) +
+      (src ? '<div class="gt-src">근거 · ' + src + '</div>' : '');
     return '<div class="mkt-card">' +
       '<div class="gt-hd"><span class="gt-no">' + esc(it.no || '') + '</span>' +
       '<span class="mkt-nm" style="margin:0">' + esc(it.name) + '</span>' +
@@ -132,11 +140,19 @@
       '<div class="mkt-lens"><div class="l1"><b>' + esc(it.tag || '') + '</b> ' + esc(it.frame || '') + '</div>' +
       '<div class="l2"><span class="' + st + '">판정</span> ' + esc(it.verdict || '') + '</div></div>' +
       (g ? '<div class="gt-g">' + g + '</div>' : '') +
-      (it.trigger ? '<div class="gt-tr">' + esc(it.trigger) + '</div>' : '') +
-      (it.read ? '<div class="gt-rd">' + esc(it.read) + '</div>' : '') +
-      newsHTML(news) +
-      (src ? '<div class="gt-src">근거 · ' + src + '</div>' : '') +
+      '<div class="gt-morebox"><button type="button" class="gt-more" aria-expanded="false">조건·근거 보기 ↑</button>' +
+      '<div class="gt-detail" role="region">' + detail + '</div></div>' +
       '</div>';
+  }
+
+  function wireDetails(host) {
+    host.addEventListener('click', function (e) {
+      var b = e.target.closest && e.target.closest('.gt-more');
+      if (!b) return;
+      var card = b.closest('.mkt-card'), open = !card.classList.contains('show-detail');
+      host.querySelectorAll('.mkt-card.show-detail').forEach(function (x) { x.classList.remove('show-detail'); var q=x.querySelector('.gt-more');if(q)q.setAttribute('aria-expanded','false'); });
+      card.classList.toggle('show-detail', open);b.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
   }
 
   /* 보드에서 뽑은 인사이트 2줄 — l1은 상태 집계 자동 파생, l2는 gates.json 해석 한 줄. */
@@ -165,6 +181,7 @@
     if (lens) lens.innerHTML = lensHTML(gates);
     var items = (news && news.items) || [];
     host.innerHTML = gates.items.map(function (it) { return card(it, matchNews(items, it.keys, it.xkeys)); }).join('');
+    wireDetails(host);
   }
 
   /* 앵커 — 1순위: 리스크 보드(#riskBoard) 바로 뒤(다음 형제 앞).
@@ -190,7 +207,7 @@
     css();
     var h = document.createElement('h2');
     h.className = 'msec';
-    h.innerHTML = '사이클 판별 보드 <span class="mnote">AI capex 4지표 · \u2018의도된 FCF 마이너스\u2019가 변질되는 신호 · 관련 기사 자동 반영</span>';
+    h.innerHTML = '사이클 판별 보드 <span class="mnote">AI capex 4지표 · 핵심만 표시 · 카드 하단 호버/탭으로 조건·근거</span>';
     var lens = document.createElement('div');
     lens.id = 'gatesLens';
     var grid = document.createElement('div');
