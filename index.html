@@ -557,7 +557,9 @@ table.tk th.c{text-align:center}
 #v-market .cal-legend .dot{width:9px;height:9px;border-radius:50%;display:inline-block}
 #v-cal .cal-month{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--txt);margin:20px 0 6px;padding-bottom:5px;border-bottom:1px solid var(--line2);display:flex;align-items:baseline;gap:8px}
 #v-cal .cal-month .mo-sub{font-weight:500;color:var(--faint);font-size:12px}
-#v-cal .cal-row{display:grid;grid-template-columns:78px 14px 1fr;align-items:start;gap:11px;padding:9px 6px;border-bottom:1px solid var(--line)}
+#v-cal #calFull{display:block;width:100%;min-width:0}
+#v-cal .cal-row{display:grid;grid-template-columns:78px 14px minmax(0,1fr);width:100%;min-width:0;align-items:start;gap:11px;padding:9px 6px;border-bottom:1px solid var(--line)}
+#v-cal .cal-body{min-width:0;width:100%;word-break:keep-all;overflow-wrap:break-word}
 #v-cal .cal-row:hover{background:var(--panel2)}
 #v-cal .cal-row.key{background:linear-gradient(90deg,rgba(22,36,45,.035),transparent)}
 #v-cal .cal-row.fomc-check{position:relative;cursor:help}
@@ -613,7 +615,7 @@ table.tk th.c{text-align:center}
 #v-cal .cal-past{display:none}
 #v-cal.cal-open .cal-row.cal-past{display:grid}
 #v-cal.cal-open .cal-month.cal-past{display:flex}
-@media(max-width:760px){#v-market .cal-now{grid-template-columns:1fr 1fr}#v-cal .watch-grid{grid-template-columns:1fr}#v-cal .cal-row{grid-template-columns:70px 12px 1fr;gap:9px}}
+@media(max-width:760px){#v-market .cal-now{grid-template-columns:1fr 1fr}#v-cal .watch-grid{grid-template-columns:1fr}#v-cal .cal-row{grid-template-columns:70px 12px minmax(0,1fr);gap:9px}}
 @media(max-width:640px){#v-cal .cal-row:not(.cal-past),#v-cal.cal-open .cal-row.cal-past{display:block;padding:11px 4px}#v-cal .date-chip{display:inline;font-size:13.5px}#v-cal .date-chip br{display:none}#v-cal .date-chip span{white-space:nowrap;margin-left:7px}#v-cal .cat-dot{display:inline-block;vertical-align:middle;margin:0 0 0 8px}#v-cal .cal-body{display:block;margin-top:3px;word-break:keep-all;overflow-wrap:anywhere}#v-cal .cal-body .ti{font-size:15.5px;line-height:1.45}#v-cal .cal-body .mt{font-size:14px;line-height:1.6;margin-top:3px}}
 
 /* ===== MARKET (01 market) ===== */
@@ -1251,7 +1253,7 @@ header::after{
   <div class="cal-row key"><div class="date-chip">07.07</div><div class="cat-dot" style="background:var(--cat-event)"></div><div class="cal-body"><div class="ti">SPCX 나스닥100 편입 효력 <span class="tk">MU·MRVL·TSLA</span> <span class="mbadge" style="background:#e8590c22;color:#e8590c">강제매수/매도</span> <span class="mbadge" style="background:#7048e822;color:#7048e8">6/26 확정</span></div><div class="mt"><b>Nasdaq 6/26 공식 확정</b> — 7/6 종가 후 패시브 강제매수 개시, 7/7 장전 정식 편입(weight &lt;1%). 나스닥100 ~$4.3B + Russell 리웨이트 ~$3B 유입 추정 → 기존 구성종목(<b>MU·MRVL·TSLA</b>) 강제매도 클라이맥스. low-float 3x 배수로 종목당 압력 일부 완화. MSCI(6/29)·Russell(6/26 종가) 선행 중첩. <b>mechanical 단발·되돌림 빈번 — TSLA 재진입 게이트 A('SPCX 편입 완료')와 직결.</b></div></div></div>
   <div class="cal-row"><div class="date-chip">07.22</div><div class="cat-dot" style="background:var(--cat-earn)"></div><div class="cal-body"><div class="ti">테슬라 <span class="tk">TSLA</span> <span class="tag-est">추정</span></div><div class="mt">정치/거버넌스 베타 · 매크로 룰북 적용 제외(별도 관리).</div></div></div>
   <div class="cal-row key"><div class="date-chip">~07.22</div><div class="cat-dot" style="background:var(--cat-event)"></div><div class="cal-body"><div class="ti">알파벳 <span class="tk">GOOGL · AMC</span> <span class="mbadge" style="background:#e8590c22;color:#e8590c">capex 게이트</span> <span class="tag-est">추정</span></div><div class="mt">클라우드 capex·AI 수익화. 강물① 자금 게이트 = L2~L8 전 스택 수요의 상류 S1 소스($175~185B capex 가이던스 유지 여부).</div></div></div>
-  <div class="cal-row key"><div class="date-chip">07.29~30</div><div class="cat-dot" style="background:var(--cat-event)"></div><div class="cal-body"><div class="ti">MS·메타·아마존 <span class="tk">MSFT·META·AMZN · AMC</span> <span class="mbadge" style="background:#e8590c22;color:#e8590c">capex 클러스터</span> <span class="tag-est">추정</span></div><div class="mt">Azure·Meta·AWS capex 가이던스가 한 주에 집중. 상향=AI 인프라 추세강화, 컷=L2~L8 전층 역풍. 내 보유보다 <b>선행·우선</b>하는 수요 신호(상대가치 회전 판단의 입력).</div></div></div>
+  <div class="cal-row key"><div class="date-chip">07.30~31</div><div class="cat-dot" style="background:var(--cat-earn)"></div><div class="cal-body"><div class="ti">메타·아마존·애플 실적 <span class="tk">META·AMZN·AAPL · AMC</span> <span class="mbadge" style="background:#e8590c22;color:#e8590c">확정</span></div><div class="mt">KST 기준 META 7/30 05:30 · AMZN·AAPL 7/31 06:00. Meta·AWS capex 가이던스와 Apple 온디바이스·서비스 수요가 집중 — L1~L8 수요 및 상대가치 회전의 선행 입력.</div></div></div>
   <div class="cal-row"><div class="date-chip">07.27</div><div class="cat-dot" style="background:var(--cat-earn)"></div><div class="cal-body"><div class="ti">램버스 <span class="tk">RMBS · Q2</span> <span class="tag-est">추정</span></div><div class="mt">제품매출/가이던스 게이트. 2분기 연속 QoQ 감소 시 kill 트리거.</div></div></div>
   <div class="cal-row key"><div class="date-chip">07.23</div><div class="cat-dot" style="background:var(--cat-macro)"></div><div class="cal-body"><div class="ti">ECB 통화정책회의 <span class="mbadge" style="background:#1c7ed622;color:#1c7ed6">금리결정</span></div><div class="mt">21:15 KST(14:15 CET) 발표. 현 예금금리 2.25%. <b>6/11 첫 인상(2023년 이후) 후 관망</b> — 7/23 컨센 = 동결 ~76%. 연내 +25bp(→2.50%) 1회 추가 선반영(매파 바이어스).</div></div></div>
   <div class="cal-row key"><div class="date-chip">07.30</div><div class="cat-dot" style="background:var(--cat-macro)"></div><div class="cal-body"><div class="ti">FOMC <span class="mbadge" style="background:#1c7ed622;color:#1c7ed6">금리결정</span></div><div class="mt"><b>회의 7/28~29(美) · 결정 7/30 03:00 KST.</b> 현 3.50~3.75%. <b>FedWatch 7/29 동결 89.3%</b>(인상 8.3% &gt; 인하 2.3% — 위쪽 비대칭). 인플레·견조한 노동으로 인하 경로 소멸, <b>12/9 +25bp 1회 인상이 모달 경로</b>(인상 59.4%). 점도표 없는 회의.</div></div></div>
@@ -1351,7 +1353,7 @@ header::after{
 
   <div class="foot">
     <b>표기:</b> 굵은 행(key)=확정·고임팩트 게이트. 점선 태그=IR/기관 미확정 추정(경과 시 갱신). 카테고리 색은 사이트 stage hue set 재사용.<br>
-    <b>출처:</b> Federal Reserve(FOMC) · ECB(통화정책회의) · Bank of Japan(BOJ 금정위) · BLS/BEA(CPI·PCE) · 한국은행(금통위) · CNBC/Reuters/WaPo(SpaceX·이란) · Congress.gov/House of Commons Library(이란) · NVIDIA IR(NVDA 8/26 확정·Computex)·Apple Newsroom(WWDC 6/8)·Broadcom IR(AVGO 6/3 AMC)·Nasdaq(SPCX 7/7 편입 6/26 확정)·M7 실적 추정 · earnings.json. 기준일 2026-06-28.
+    <b>출처:</b> Federal Reserve(FOMC) · ECB(통화정책회의) · Bank of Japan(BOJ 금정위) · BLS/BEA(CPI·PCE) · 한국은행(금통위) · CNBC/Reuters/WaPo(SpaceX·이란) · Congress.gov/House of Commons Library(이란) · NVIDIA IR(NVDA 8/26 확정·Computex)·Meta IR(META 7/29 PT)·Amazon IR(AMZN 7/30 PT)·Apple IR(AAPL FY26 Q3 7/30 PT)·Broadcom IR(AVGO 6/3 AMC)·Nasdaq(SPCX 7/7 편입 6/26 확정)·earnings.json. 기준일 2026-06-28.
   </div>
 </section>
 
