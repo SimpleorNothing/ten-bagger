@@ -710,20 +710,19 @@ table.tk th.c{text-align:center}
 .stk-chart{flex:0 0 36%;border-left:1px solid var(--line);border-top:1px solid var(--line);padding:10px 10px 6px;display:flex;flex-direction:column;justify-content:flex-start;background:var(--panel)}
 .stk-cv{width:100%;height:190px;flex:0 0 190px;display:block;cursor:crosshair}
 @media(max-width:700px){.stk-body{flex-direction:column}.stk-chart{border-left:0;flex-basis:auto}.stk-cv{height:150px;flex-basis:150px}}
-/* 관련 기사(매크로 토픽) = 2열 그리드. 블록마다 기사 수가 달라도 상단 정렬(빈 오른쪽 공백 제거) */
-#mktMacroNews{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;align-items:start}
-#mktMacroNews .stk-blk{margin:0}
-#mktMacroNews .mkt-ph{grid-column:1/-1}
-#mktMacroNews .stk-hd{align-items:center;cursor:grab;user-select:none}
+/* 토픽 레이더 = 상대 좌표 보드 + 절대 위치 카드. 초기값만 2열, 이후 포인터로 자유 배치. */
+#mktMacroNews{position:relative;display:block;min-height:56px}
+#mktMacroNews .stk-blk{position:absolute;margin:0;width:calc(50% - 6px);touch-action:none}
+#mktMacroNews .mkt-ph{position:static;width:auto}
+#mktMacroNews .stk-hd{align-items:center;cursor:grab;user-select:none;touch-action:none}
 #mktMacroNews .stk-hd:active{cursor:grabbing}
 #mktMacroNews .stk-hd::before{content:'↕';flex:0 0 auto;font:700 12px var(--mono);color:var(--faint)}
 #mktMacroNews .stk-hd::after{content:'＋';margin-left:auto;flex:0 0 auto;font:700 16px/1 var(--mono);color:var(--dawn)}
 #mktMacroNews .stk-hd[aria-expanded="true"]::after{content:'−'}
 #mktMacroNews .stk-hd:focus-visible{outline:2px solid var(--st-accel);outline-offset:-3px}
 #mktMacroNews .stk-blk.is-collapsed>:not(.stk-hd){display:none}
-#mktMacroNews .stk-blk.is-dragging{opacity:.46}
-#mktMacroNews .stk-blk.is-drop-before{box-shadow:inset 0 3px 0 var(--dawn)}
-@media(max-width:700px){#mktMacroNews{grid-template-columns:1fr}}
+#mktMacroNews .stk-blk.is-dragging{opacity:.78;box-shadow:0 10px 28px rgba(22,36,45,.18)}
+@media(max-width:700px){#mktMacroNews .stk-blk{width:100%}}
 /* 시장 맥박 = 동인 브리핑(pulse.json) + 심리·수급·환율 게이지. 동인은 축마다 방향(위험/기회/중립) + 렌즈 2줄 + 근거. 새 면 컴포넌트 없이 .stk-blk/.mkt-lens/.nlist 재사용 · 방향 배지(.pdir)만 부표(pill 20px). */
 #mktPulse{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;align-items:start;margin-bottom:6px}
 #mktPulse .stk-blk{margin:0}
@@ -3771,16 +3770,12 @@ window.MARKET=(function(){
    Object.keys(byA).filter(function(k){return order.indexOf(k)<0;})
     .sort(function(a,b){return new Date((byA[b][0]||{}).published||0)-new Date((byA[a][0]||{}).published||0);})
     .forEach(function(k){order.push(k);});
-   // 사용자가 옮긴 축 순서는 브라우저에 보존하되, 새 축은 라이브 기본 순서 뒤에 붙인다.
-   var TOPIC_ORDER_KEY='am_topic_radar_order_v1',savedOrder=[];
-   try{savedOrder=JSON.parse(localStorage.getItem(TOPIC_ORDER_KEY)||'[]');if(!Array.isArray(savedOrder))savedOrder=[];}catch(e){savedOrder=[];}
-   order=savedOrder.filter(function(k){return order.indexOf(k)>=0;})
-    .concat(order.filter(function(k){return savedOrder.indexOf(k)<0;}));
+
    var html='';
    order.forEach(function(k){
     var lst=byA[k].slice(0,MX);
     var title=NM[k]||(lst[0]&&lst[0].name)||k;
-    html+='<div class="stk-blk is-collapsed" data-topic-key="'+esc(k)+'"><div class="stk-hd" role="button" tabindex="0" draggable="true" aria-expanded="false" aria-label="'+esc(title)+' 펼치기"><span class="nm">'+esc(title)+'</span></div>';
+    html+='<div class="stk-blk is-collapsed" data-topic-key="'+esc(k)+'"><div class="stk-hd" role="button" tabindex="0" aria-expanded="false" aria-label="'+esc(title)+' 펼치기"><span class="nm">'+esc(title)+'</span></div>';
     html+=sums[k]?'<div class="stk-sum">'+esc(sums[k])+'</div>'
             :'<div class="stk-sum ph">요약 대기 — 다음 다이제스트(06:12·18:12)에서 생성</div>';
     lst.forEach(function(it){
@@ -3793,19 +3788,29 @@ window.MARKET=(function(){
       +'</span></a>';});
     html+='</div>';});
    host.innerHTML=html;
-   var dragged=null,didDrag=false;
-   function saveTopicOrder(){try{localStorage.setItem(TOPIC_ORDER_KEY,JSON.stringify(Array.prototype.map.call(host.querySelectorAll('.stk-blk[data-topic-key]'),function(c){return c.getAttribute('data-topic-key');})));}catch(e){}}
-   function toggleTopic(card,hd){var open=card.classList.contains('is-collapsed');card.classList.toggle('is-collapsed',!open);hd.setAttribute('aria-expanded',String(open));hd.setAttribute('aria-label',(hd.querySelector('.nm').textContent||'토픽')+(open?' 접기':' 펼치기'));}
-   Array.prototype.forEach.call(host.querySelectorAll('.stk-blk[data-topic-key]'),function(card){
-    var hd=card.querySelector('.stk-hd');
-    hd.addEventListener('click',function(){if(didDrag){didDrag=false;return;}toggleTopic(card,hd);});
+   // 그리드 순서가 아니라 카드별 좌표를 저장하는 자유 배치 보드.
+   var POS_KEY='am_topic_radar_positions_v1',posState={};
+   try{posState=JSON.parse(localStorage.getItem(POS_KEY)||'{}');if(!posState||Array.isArray(posState))posState={};}catch(e){posState={};}
+   var cards=Array.prototype.slice.call(host.querySelectorAll('.stk-blk[data-topic-key]')),gap=12,topZ=1,resizeTimer=null;
+   function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+   function boardWidth(){return Math.max(1,host.clientWidth);}
+   function cardWidth(){var w=boardWidth();return w<=700?w:Math.max(260,(w-gap)/2);}
+   function defaultPos(i){var w=boardWidth(),cw=cardWidth(),cols=w<=700?1:2;return{x:(i%cols)*(cw+gap),y:Math.floor(i/cols)*(50+gap),bw:w};}
+   function setPos(card,x,y){card.style.left=Math.round(x)+'px';card.style.top=Math.round(y)+'px';card.setAttribute('data-x',String(x));card.setAttribute('data-y',String(y));}
+   function updateBoard(){var bottom=56;cards.forEach(function(c){bottom=Math.max(bottom,(+c.getAttribute('data-y')||0)+c.offsetHeight+gap);});host.style.height=Math.ceil(bottom)+'px';}
+   function placeAll(){var w=boardWidth(),cw=cardWidth();cards.forEach(function(card,i){card.style.width=cw+'px';var k=card.getAttribute('data-topic-key'),p=posState[k]||defaultPos(i),scale=p.bw?Math.max(0,w-cw)/Math.max(1,p.bw-(p.cw||cw)):1;var x=w<=700?0:clamp((+p.x||0)*scale,0,Math.max(0,w-cw)),y=Math.max(0,+p.y||0);setPos(card,x,y);});updateBoard();}
+   function savePositions(){var w=boardWidth(),cw=cardWidth(),out={};cards.forEach(function(card){out[card.getAttribute('data-topic-key')]={x:+card.getAttribute('data-x')||0,y:+card.getAttribute('data-y')||0,bw:w,cw:cw};});posState=out;try{localStorage.setItem(POS_KEY,JSON.stringify(out));}catch(e){}}
+   function toggleTopic(card,hd){var open=card.classList.contains('is-collapsed');card.classList.toggle('is-collapsed',!open);hd.setAttribute('aria-expanded',String(open));hd.setAttribute('aria-label',(hd.querySelector('.nm').textContent||'토픽')+(open?' 접기':' 펼치기'));card.style.zIndex=String(++topZ);updateBoard();}
+   cards.forEach(function(card){
+    var hd=card.querySelector('.stk-hd'),drag=null;
     hd.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();toggleTopic(card,hd);}});
-    hd.addEventListener('dragstart',function(e){dragged=card;didDrag=true;card.classList.add('is-dragging');e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',card.getAttribute('data-topic-key'));});
-    hd.addEventListener('dragend',function(){card.classList.remove('is-dragging');Array.prototype.forEach.call(host.querySelectorAll('.is-drop-before'),function(x){x.classList.remove('is-drop-before');});dragged=null;setTimeout(function(){didDrag=false;},0);});
-    card.addEventListener('dragover',function(e){if(!dragged||dragged===card)return;e.preventDefault();e.dataTransfer.dropEffect='move';card.classList.add('is-drop-before');});
-    card.addEventListener('dragleave',function(e){if(!card.contains(e.relatedTarget))card.classList.remove('is-drop-before');});
-    card.addEventListener('drop',function(e){if(!dragged||dragged===card)return;e.preventDefault();card.classList.remove('is-drop-before');var r=card.getBoundingClientRect();var sameRow=Math.abs(e.clientY-(r.top+r.height/2))<r.height/3;var after=sameRow?e.clientX>r.left+r.width/2:e.clientY>r.top+r.height/2;host.insertBefore(dragged,after?card.nextSibling:card);saveTopicOrder();});
-   });}
+    hd.addEventListener('pointerdown',function(e){if(e.button!==0)return;drag={id:e.pointerId,sx:e.clientX,sy:e.clientY,ox:+card.getAttribute('data-x')||0,oy:+card.getAttribute('data-y')||0,moved:false};card.style.zIndex=String(++topZ);hd.setPointerCapture(e.pointerId);e.preventDefault();});
+    hd.addEventListener('pointermove',function(e){if(!drag||drag.id!==e.pointerId)return;var dx=e.clientX-drag.sx,dy=e.clientY-drag.sy;if(!drag.moved&&Math.hypot(dx,dy)<4)return;drag.moved=true;card.classList.add('is-dragging');var x=clamp(drag.ox+dx,0,Math.max(0,boardWidth()-card.offsetWidth)),y=Math.max(0,drag.oy+dy);setPos(card,x,y);updateBoard();});
+    function finish(e){if(!drag||drag.id!==e.pointerId)return;var moved=drag.moved;drag=null;card.classList.remove('is-dragging');if(hd.hasPointerCapture(e.pointerId))hd.releasePointerCapture(e.pointerId);if(moved)savePositions();else toggleTopic(card,hd);}
+    hd.addEventListener('pointerup',finish);hd.addEventListener('pointercancel',function(e){if(!drag||drag.id!==e.pointerId)return;drag=null;card.classList.remove('is-dragging');placeAll();});
+   });
+   placeAll();
+   window.addEventListener('resize',function(){clearTimeout(resizeTimer);resizeTimer=setTimeout(placeAll,120);});}
   catch(e){host.innerHTML='<div class="mkt-ph">수집 대기</div>';}
  }
  // NEW 배지 — 최근 3일(72h 롤링) 기사 표시 · 3초 호버 or 클릭 시 제거(localStorage 영속)
