@@ -1,4 +1,4 @@
-**최종 갱신: 2026-07-28 23:53 (KST)**
+**최종 갱신: 2026-07-29 08:05 (KST)**
 
 # OPS — 알파맵 운영 가이드
 
@@ -149,7 +149,7 @@
 
 | 정보명 | 자동/수동 | 주기 | 소스 |
 |---|---|---|---|
-| 관점 카드 (Insight) | 수동 | 판단·논제 시계 변화 시 | R2 `/api/insights`(+localStorage 캐시). **하나의 채택 claim = 하나의 관점**. 필드: 출처(`src`)·`route`·N·I·C·`grade`(관찰→확신 자동 승격)·`applied`(숫자 route 반영 여부) + **라이프사이클 `hyp`(전제)·`trig`(발동조건)·`until`(폐기 트리거)·`review`(점검일, 신규 채택 시 +14d 기본)**. `review` 도래 시 02 「점검 필요」로 재부상 → §0-5 트리아지. **편집기 = 카드 「🕔 라이프사이클」 → 모달 + 필드별 「보기 칩」 선택식**(클라 템플릿이 게이트·레이어·티커 기반 후보·날짜 프리셋 제시 · 칩 클릭=채우기·직접 수정 가능). |
+| 관점 카드 (Insight) | 수동 | 판단·논제 시계 변화 시 | R2 `/api/insights`(+localStorage 캐시). **하나의 채택 claim = 하나의 관점**. 필드: 출처(`src`)·`route`·N·I·C·`grade`(관찰→확신 자동 승격)·`applied`(숫자 route 반영 여부) + **라이프사이클 `lcState`(발동 대기·발동·유지·만료)·`hyp`(전제)·`trig`(발동조건)·`until`(폐기 트리거)·`review`(점검일, 신규 채택 시 +14d 기본)**. 등급 옆에 후속 상태를 별도 배지로 표시하며, 기존 데이터는 관찰·후보=`승격 대기`, 지지↑=`발동 대기`로 무이전 파생한다. 상태는 「🕔 라이프사이클」 모달에서 선택·저장한다. `review` 도래 시 02 「점검 필요」로 재부상 → §0-5 트리아지. **편집기 = 카드 「🕔 라이프사이클」 → 모달 + 필드별 「보기 칩」 선택식**(클라 템플릿이 게이트·레이어·티커 기반 후보·날짜 프리셋 제시 · 칩 클릭=채우기·직접 수정 가능). |
 | 관점 추출 (인테이크) | 수동(운영자 입력) | 인테이크 시 | 「관점 뽑기」 → `/api/insight`(worker→Claude). 본문(스크립트/기사) 있으면 그대로, URL만 있으면 web_search로 시도. 8레이어·단계 프레임으로 claims 후보 정렬(뽑기≠반영 · 채택은 사람이 체크). 캡처 이미지=클라 OCR(Tesseract)·PDF/TXT/파일=클라 추출로 textarea 채움. **PDF는 `getDocument`에 `cMapUrl`(cdnjs `/pdf.js/{PDFJS_VER}/cmaps/`)+`cMapPacked` 지정 → 한글 CID 폰트(Adobe-Korea1·ToUnicode 없음) 정상 디코드**(2026-07-20). 없으면 CID 한글이 빈 텍스트로 나와 실글자 0 판정→불필요한 OCR 폴백→백지 렌더 쓰레기. OCR 폴백은 진짜 스캔본·ToUnicode 파손 PDF(예: CXMT Batang→U+2014)만 `realLetters` 컷으로 걸러 발동 |
 | ↳ **유튜브 링크 스크립트 추출**(2026-07-18 신설) | 자동(입력 보조) | 인테이크 시 | URL 칸에 **유튜브 링크만** 넣고 본문이 비면 클라(`ytExtract`)가 먼저 `/api/yt-view`(**`mode:'insight'`** · Gemini 영상 인식)로 영상을 **상세 전사**→`insText` textarea 채움(원문 raw 저장)→그 스크립트로 `/api/insight` 관점 추출로 이어감. **03 전문가 원탁과 동일 엔드포인트**(03=발화자 관점 압축 요약 / 02=`mode:'insight'` 상세 전사 분기·`maxOutputTokens` 상향). 실패·`GEMINI_API_KEY` 부재(503)면 **URL web_search로 폴백**(구 동작). narrative≠numbers — 스크립트는 인테이크 입력일 뿐 숫자 파일 불변. 신규 CSS·토큰 0(index.html 무패치·insight.js/worker.js만) |
 | **표시 레벨(뎁스) 접기**(2026-07-18 신설) | 런타임(표시 전용) | 상시 · 기본 L1 | 「채택한 관점」 목록을 3단계 아웃라인으로: **L1 자료**(소스 카드만·접힌 관점·시그널 건수 힌트) · **L2 관점**(+claims, 시그널은 건수 힌트) · **L3 시그널**(+관련 시그널 로그·미연결 시그널 펼침). 상단 `.ins-lv` 버튼군(기본 L1). `insight.js` `renderLevel()`·`lvl` 상태·`renderList` 뎁스 분기·`claimLine(…,showSig)`·`sigSection(c,open)`·`renderSigRest` lvl 게이트. **힌트 클릭 = 그 자리 펼침(전체 lvl 독립)** — L1 자료 힌트(`.ins-lvhint`) 클릭→그 자료 관점을 `.ins-recwrap`로 펼침, 관점 시그널 힌트(`.ins-sighint`) 클릭→로그를 `.ins-sigwrap`로 펼침(자료→관점→시그널 중첩 드릴·CTA 펼치기↔접기·`data-rec`/`data-sig`, 2026-07-18~19). **검색·라우트 필터·등급 보드와 직교**(무엇을 펼칠지만 · 데이터 무변). narrative≠numbers — 표시 방식일 뿐 숫자·판단 파일 불변. 신규 CSS만(`:root` 토큰 0 · index.html 무패치) |
@@ -370,6 +370,7 @@
 
 ## 9. 갱신 이력
 
+- 2026-07-29 08:05 · **02 관점 등급 옆 후속 상태 표시.** 등급(관찰→확신)과 실행 생명주기를 분리해 각 관점·다른 메뉴 스트립에 `승격 대기`/`발동 대기`/`발동`/`유지`/`만료` 배지를 표시한다. 기존 데이터는 g0~g1=`승격 대기`, g2↑=`발동 대기`로 무이전 파생하고, 「🕔 라이프사이클」 모달의 상태 칩 선택을 `lcState`로 R2/localStorage에 저장한다. 확신은 자동 실행이 아니며 발동은 05 리밸런싱 후보라는 §0-5 규율 유지. 신규 `:root` 토큰 0 · narrative≠numbers.
 - 2026-07-29 · **02 인사이트 「사이트 반영」을 완전 자동 직접 커밋으로 전환(1/2).** SimpleorNothing 지시("사이트에서 바로 반영되게 해줘" → "완전 자동 — 검증·PR 없이 바로 커밋" 선택) — narrative≠numbers 수기 검증 원칙에 대한 명시적 예외로 승인. **worker.js**: `handleSiteApply` 신설(`POST /api/site-apply`) — GitHub Contents API로 대상 항목을 읽고 Claude(claude-opus-4-8)에 패치 계산만 맡긴 뒤(`{changed,gauge,verdict,srcs_add,reason}`), **구조 가드레일**(gauge 길이·순서·`k` 완전 동일해야 반영·스키마 신설 금지·`changed:false`면 무변경) 통과 시에만 `default_branch`(라이브 해소)에 직접 PUT 커밋(PR 없음). `GITHUB_TOKEN`·`ANTHROPIC_API_KEY` 기설정 확인.
 - 2026-07-29 · **(2/2) insight.js/css.** `applyModal`에 「🚀 지금 반영」 버튼 추가 — 매칭 항목마다 `/api/site-apply` 호출, 카드별 결과(✅반영됨/—변경없음/❌실패) 즉시 표시, 성공 시 `siteDone` 자동 세팅. 「📋 반영 지시 복사」는 수동 폴백 유지. `.ins-ap-st` 상태줄(신규 토큰 0). §3 행 갱신. narrative≠numbers는 이 버튼 하나에 한해 예외 — 다른 숫자 파일 경로는 기존 규율(§1·§6) 그대로.
 

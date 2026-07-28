@@ -34,6 +34,15 @@ window.INSIGHT=(function(){
  function lcToday(){return lcISO(new Date());}
  function lcPlus14(){var d=new Date();d.setDate(d.getDate()+14);return lcISO(d);}
  function lcDue(c){return !!c.review&&c.review<=lcToday();}
+ var LCST={wait:'발동 대기',active:'발동',keep:'유지',expired:'만료'};
+ function lcState(c,g){
+  var s=c&&LCST[c.lcState]?c.lcState:'';
+  return s||((g||0)>=2?'wait':'dormant');
+ }
+ function lcStateBadge(c,g){
+  var s=lcState(c,g),label=s==='dormant'?'승격 대기':LCST[s];
+  return '<span class="ins-lcs '+s+'">'+label+'</span>';
+ }
  function lcLine(c){
   var b=[];
   if(c.hyp)b.push('전제: '+esc(c.hyp));
@@ -91,6 +100,13 @@ window.INSIGHT=(function(){
   return '<div class="ins-lc-f"><label class="ins-lc-lb">'+ic+' '+t+' <span>— '+esc(d)+'</span></label>'+
    '<div class="ins-lc-chips">'+chips+'</div>'+field+'</div>';
  }
+ function lcStateHTML(c){
+  var cur=lcState(c,c.grade||0);
+  return '<div class="ins-lc-f"><label class="ins-lc-lb">↪ 후속 상태 <span>— 등급과 별개로 발동·유지·만료를 기록</span></label>'+
+   '<div class="ins-lc-chips">'+Object.keys(LCST).map(function(k){
+    return '<button type="button" class="ins-lc-chip'+(cur===k?' on':'')+'" data-state="'+k+'">'+LCST[k]+'</button>';
+   }).join('')+'</div></div>';
+ }
  function lcKey(e){if(e.key==='Escape')lcClose();}
  function lcClose(){var o=document.getElementById('insLcOv');if(o&&o.parentNode)o.parentNode.removeChild(o);document.removeEventListener('keydown',lcKey);}
  function editLC(id){
@@ -98,7 +114,8 @@ window.INSIGHT=(function(){
   lcClose();
   var opt=lcOpts(c);
   var meta=[c.layer?(LAYN[c.layer]?c.layer+' '+LAYN[c.layer]:c.layer):'',RT[c.route]||c.route,(c.tickers||[]).join('·')].filter(Boolean).join(' · ');
-  var body=lcFieldHTML('hyp','🎯','전제','이게 참이어야 관점이 성립',lcChips('hyp',opt.hyp,c.hyp),c.hyp,false,'예: 이 우위가 대체기술로 무너지지 않는다')+
+  var body=lcStateHTML(c)+
+   lcFieldHTML('hyp','🎯','전제','이게 참이어야 관점이 성립',lcChips('hyp',opt.hyp,c.hyp),c.hyp,false,'예: 이 우위가 대체기술로 무너지지 않는다')+
    lcFieldHTML('trig','⚡','발동조건','어느 게이트·신호가 켜지면 액션인가',lcChips('trig',opt.trig,c.trig),c.trig,false,'예: 매크로 게이트 3중 AND 해제')+
    lcFieldHTML('until','🗑','폐기 트리거','이 조건이 소멸하면 관점 폐기',lcChips('until',opt.until,c.until),c.until,false,'예: 목표가 리비전 소진 + 주가가 평균목표가 추월')+
    lcFieldHTML('review','🕔','점검일','YYYY-MM-DD · 빈칸=오늘+14일',lcDateChips(c.review),c.review,true,'YYYY-MM-DD');
@@ -123,6 +140,11 @@ window.INSIGHT=(function(){
     Array.prototype.forEach.call(ov.querySelectorAll('[data-fill="'+k+'"]'),function(x){x.classList.remove('on');});
     if(v)b.classList.add('on');
    };});
+  Array.prototype.forEach.call(ov.querySelectorAll('[data-state]'),function(b){
+   b.onclick=function(){
+    Array.prototype.forEach.call(ov.querySelectorAll('[data-state]'),function(x){x.classList.remove('on');});
+    b.classList.add('on');
+   };});
   Array.prototype.forEach.call(ov.querySelectorAll('[data-k]'),function(inp){
    inp.addEventListener('input',function(){
     var k=inp.getAttribute('data-k');
@@ -132,6 +154,8 @@ window.INSIGHT=(function(){
   var sv=ov.querySelector('[data-save]');
   if(sv)sv.onclick=function(){
    function val(k){var e=ov.querySelector('[data-k="'+k+'"]');return e?e.value.trim():'';}
+   var st=ov.querySelector('[data-state].on');
+   if(st)c.lcState=st.getAttribute('data-state');else delete c.lcState;
    c.hyp=val('hyp');c.trig=val('trig');c.until=val('until');c.review=val('review')||lcPlus14();
    lcClose();persist();
   };
@@ -594,7 +618,7 @@ function persist(){cacheSet();clearTimeout(putTimer);putTimer=setTimeout(push,20
  /* --- 저장 목록 --- */
  function claimLine(r,c,showBtn,showSig){
   var pend=NUM[c.route]&&!c.applied;
-  return '<div class="ins-si'+(pend?' pend':'')+(lcDue(c)?' due':'')+'">'+gradeBadge(c.grade||0,c.reinf)+' '+esc(c.text)+
+  return '<div class="ins-si'+(pend?' pend':'')+(lcDue(c)?' due':'')+'">'+gradeBadge(c.grade||0,c.reinf)+lcStateBadge(c,c.grade||0)+' '+esc(c.text)+
    '<span class="m">'+(c.layer?esc(c.layer)+' · ':'')+esc(RT[c.route]||c.route)+' · N'+c.novelty+'I'+c.impact+'C'+c.confidence+
    (c.reinf?' · 유사 '+c.reinf+'건 보강':'')+
    (NUM[c.route]?(c.applied?' · 반영 완료':' · 반영 대기(자동 변경 없음)'):'')+'</span>'+
@@ -737,7 +761,7 @@ function persist(){cacheSet();clearTimeout(putTimer);putTimer=setTimeout(push,20
   e.innerHTML='<div class="sh">'+head+'</div>'+list.map(function(o){
    var pend=NUM[o.c.route]&&!o.c.applied;
    var del=canDelete?'<button type="button" class="ins-strip-del" data-strip-rid="'+esc(o.r.id)+'" data-strip-cid="'+esc(o.c.id)+'" aria-label="이 일정 관점 삭제">삭제</button>':'';
-   return '<div class="ins-si'+(pend?' pend':'')+'">'+del+gradeBadge(o.c.grade||0,o.c.reinf)+' '+esc(o.c.text)+
+   return '<div class="ins-si'+(pend?' pend':'')+'">'+del+gradeBadge(o.c.grade||0,o.c.reinf)+lcStateBadge(o.c,o.c.grade||0)+' '+esc(o.c.text)+
     '<span class="m">'+(o.c.layer?esc(o.c.layer)+' · ':'')+esc(RT[o.c.route]||o.c.route)+
     (pend?' · 숫자 반영 대기':'')+'</span>'+claimSrc(o.r,true)+'</div>';}).join('')+
    (note?'<div class="ins-noise">'+note+'</div>':'');
