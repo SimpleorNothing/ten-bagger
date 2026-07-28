@@ -90,7 +90,7 @@ export const BOTTLENECK_TOPICS = [
   { id: 'bneck_l4_pkg', ticker: 'MACRO', name: 'L4 · 패키징 캐파', q: 'CoWoS capacity hybrid bonding advanced packaging', mkt: 'US', ax: 'bn_l4_pkg' },
   { id: 'bneck_l6_opt', ticker: 'MACRO', name: 'L6 · 옵티컬 리드타임', q: '1.6T optical transceiver CPO lead time', mkt: 'US', ax: 'bn_l6_opt' },
   { id: 'bneck_l8_pwr', ticker: 'MACRO', name: 'L7·L8 · 전력 병목', q: 'transformer lead time grid interconnection queue data center power', mkt: 'US', ax: 'bn_l8_pwr' },
-  { id: 'bneck_capex', ticker: 'MACRO', name: '상류 · 하이퍼스케일러 capex', q: 'hyperscaler capex guidance data center spending', mkt: 'US', ax: 'bn_capex' },
+  { id: 'bneck_capex', ticker: 'MACRO', name: '상류 · 하이퍼스케일러 capex', q: 'hyperscaler capex guidance data center spending', mkt: 'US', ax: 'capex' },
   { id: 'bneck_silicon', ticker: 'MACRO', name: '상류 · 빅테크 자체 실리콘', q: 'Google TPU Amazon Trainium Microsoft Maia Meta MTIA custom silicon', mkt: 'US', ax: 'bn_silicon' },
   { id: 'bneck_asic', ticker: 'MACRO', name: 'L2 · 커스텀 실리콘·전력효율', q: 'custom AI accelerator ASIC inference performance per watt roadmap', mkt: 'US', ax: 'bn_asic' },
 ];

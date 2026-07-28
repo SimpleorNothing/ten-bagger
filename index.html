@@ -3738,7 +3738,7 @@ window.MARKET=(function(){
    // id·name 을 그대로 키로 쓰면 같은 토픽이 여러 블록으로 쪼개진다 → 축 키로 병합한다.
    // 표시 이름은 하드코딩하지 않는다(라이브 macroTopics → 없으면 최신 기사의 it.name).
    var AXR=[['china',/중국|china/],
-    ['capex',/capex|하이퍼스케일러|hyperscaler|빅테크투자|ai투자/],
+    ['capex',/capex|캐[펙팩]스|케[펙팩]스|자본지출|하이퍼스케일러|hyperscaler|빅테크투자|ai투자|ai지출/],
     ['chip',/반도체|수출통제|공급망|hbm|semiconductor|chip|exportcontrol|supplychain/],
     ['power',/전력|원전|그리드|송전|냉각|power|grid|nuclear|smr|electric/],
     ['energy',/중동|이란|호르무즈|유가|원유|석유|oil|opec|에너지|energy|지정학|geopolit|전쟁|war|이스라엘|israel/],
@@ -3748,12 +3748,13 @@ window.MARKET=(function(){
    function axOf(s){var t=String(s||'').toLowerCase().replace(/[^0-9a-z가-힣]/g,'');
     for(var i=0;i<AXR.length;i++)if(AXR[i][1].test(t))return AXR[i][0];
     return 'x_'+(t||'macro');}
-   // 병목축은 발굴 매크로축과 절대 병합되지 않는다(상시 관측이 존재 이유) → 서버가 실어보낸 ax 우선,
-   // 구 데이터(ax 이전)는 bneck_ id 로 같은 키를 파생해 전환기에도 블록이 쪼개지지 않게 한다.
+   // 병목축은 원칙적으로 발굴축과 분리하되, CAPEX만 같은 토픽으로 합친다.
+   // 기존 bn_capex 데이터와 한글 캐펙스/캐팩스 표기도 모두 대표키 capex로 환원한다.
    function axIt(it){var a=String(it.ax||''),id=String(it.id||'');
-    if(a.indexOf('bn_')===0)return a;                      // 병목축만 서버 ax 신뢰
-    if(id.indexOf('bneck_')===0)return 'bn_'+id.slice(6);  // 구 병목 데이터(ax 이전)
-    return axOf(it.name||it.id);}                          // 발굴축은 종전대로 이름 병합(구 ax 는 스테일)
+    if(a==='bn_capex'||id==='bneck_capex')return 'capex'; // 상류 CAPEX 고정축 ↔ 발굴축 병합
+    if(a.indexOf('bn_')===0)return a;                     // 나머지 병목축은 독립 유지
+    if(id.indexOf('bneck_')===0)return 'bn_'+id.slice(6); // 구 병목 데이터(ax 이전)
+    return axOf(it.name||it.id);}                         // 발굴축은 이름 정규화
    var MX=5,byA={},byId={},seen={};
    items.forEach(function(it){var k=axIt(it);
     if(it.id&&!byId[it.id])byId[it.id]=k;

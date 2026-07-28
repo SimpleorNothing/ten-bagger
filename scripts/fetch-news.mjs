@@ -226,7 +226,7 @@ function slugId(s, i) {
 // ※ 축 키는 '병합용 식별자'일 뿐 표시명이 아니다(표시명은 라이브 name 그대로 — 하드코딩 금지).
 const AXIS_RULES = [
   ['china', /중국|china/],           // 중국 경제·수요 (먼저 매칭해야 공급망·chip 규칙보다 우선됨)
-  ['capex', /capex|하이퍼스케일러|hyperscaler|빅테크투자|ai투자/],
+  ['capex', /capex|캐[펙팩]스|케[펙팩]스|자본지출|하이퍼스케일러|hyperscaler|빅테크투자|ai투자|ai지출/],
   ['chip', /반도체|수출통제|공급망|hbm|semiconductor|chip|exportcontrol|supplychain/],
   ['power', /전력|원전|그리드|송전|냉각|power|grid|nuclear|smr|electric/],
   ['energy', /중동|이란|호르무즈|유가|원유|석유|oil|opec|에너지|energy|지정학|geopolit|전쟁|war|이스라엘|israel/],
