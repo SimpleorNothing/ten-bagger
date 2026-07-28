@@ -17,6 +17,9 @@
   var MOUNT_ID = 'riskBoard';
   var NEWS_DAYS = 45;   // 최근 반영 기사 창(일)
   var NEWS_MAX = 3;     // 축당 표시 건수
+  var HIDDEN_KEY = 'am_risk_board_hidden_v1', hiddenCards = [];
+  try { hiddenCards = JSON.parse(localStorage.getItem(HIDDEN_KEY) || '[]'); if (!Array.isArray(hiddenCards)) hiddenCards = []; } catch (e) { hiddenCards = []; }
+  function saveHidden() { try { localStorage.setItem(HIDDEN_KEY, JSON.stringify(hiddenCards)); } catch (e) {} }
 
   function esc(s) {
     return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
@@ -65,6 +68,8 @@
       '#riskBoard .rk-more:focus-visible{outline:2px solid var(--st-accel);outline-offset:3px}',
       '#riskBoard .rk-detail{display:none;position:absolute;z-index:12;left:12px;right:12px;bottom:42px;max-height:min(68vh,460px);overflow:auto;background:var(--panel);border:1px solid var(--line2);border-radius:3px;padding:11px 12px;box-shadow:0 10px 28px rgba(22,36,45,.16)}',
       '#riskBoard .rk-morebox:hover .rk-detail,#riskBoard .rk-morebox:focus-within .rk-detail,#riskBoard .mkt-card.show-detail .rk-detail{display:block}',
+      '#riskBoard .rk-del{display:none;position:absolute;z-index:14;top:8px;right:8px;border:1px solid var(--st-hot);border-radius:3px;background:var(--panel);color:var(--st-hot);padding:4px 9px;font:700 12px var(--mono);cursor:pointer}',
+      '#riskBoard .mkt-card.show-delete .rk-del{display:block}',
       '@media(max-width:600px){#riskBoard{grid-template-columns:1fr}}'
     ].join('');
     document.head.appendChild(s);
@@ -130,7 +135,8 @@
     var detail = (it.trigger ? '<div class="rk-tr">' + esc(it.trigger) + '</div>' : '') +
       (it.read ? '<div class="rk-rd">' + esc(it.read) + '</div>' : '') + newsHTML(news) +
       (src ? '<div class="rk-src">근거 · ' + src + '</div>' : '');
-    return '<div class="mkt-card">' +
+    return '<div class="mkt-card" data-board-key="' + esc(it.id || it.no || it.name) + '">' +
+      '<button type="button" class="rk-del" aria-label="' + esc(it.name || '리스크') + ' 카드 삭제">삭제</button>' +
       '<div class="rk-hd"><span class="rk-no">' + esc(it.no || '') + '</span>' +
       '<span class="mkt-nm" style="margin:0">' + esc(it.name) + '</span>' +
       '<span class="rk-st ' + st + '">' + esc(it.stateLabel || '') + '</span></div>' +
@@ -142,10 +148,27 @@
       '</div>';
   }
 
+  function wireDeletes(host) {
+    var cards = Array.prototype.slice.call(host.querySelectorAll('.mkt-card[data-board-key]'));
+    function hideDeletes() { cards.forEach(function (c) { c.classList.remove('show-delete'); }); }
+    cards.forEach(function (card) {
+      var hold=null,press=null,longPress=false,del=card.querySelector('.rk-del');
+      function clearHold(){if(hold){clearTimeout(hold);hold=null;}}
+      card.addEventListener('pointerdown',function(e){if(e.button!==0||e.target.closest('a,button,.rk-detail'))return;hideDeletes();longPress=false;press={id:e.pointerId,x:e.clientX,y:e.clientY};clearHold();hold=setTimeout(function(){hold=null;longPress=true;card.classList.add('show-delete');},600);});
+      card.addEventListener('pointermove',function(e){if(press&&press.id===e.pointerId&&Math.hypot(e.clientX-press.x,e.clientY-press.y)>=4)clearHold();});
+      card.addEventListener('pointerup',function(){clearHold();press=null;if(longPress)longPress=false;});
+      card.addEventListener('pointercancel',function(){clearHold();press=null;longPress=false;});
+      del.addEventListener('pointerdown',function(e){e.stopPropagation();});
+      del.addEventListener('click',function(e){e.stopPropagation();var key=card.getAttribute('data-board-key'),name=(card.querySelector('.mkt-nm')||{}).textContent||'리스크 카드';if(!window.confirm('이 카드를 삭제할까요?\n'+name))return;if(hiddenCards.indexOf(key)<0)hiddenCards.push(key);saveHidden();card.remove();cards=cards.filter(function(c){return c!==card;});if(!cards.length)host.innerHTML='<div class="mkt-ph" style="grid-column:1/-1">모든 리스크 카드가 숨김 처리되었습니다</div>';});
+    });
+    return hideDeletes;
+  }
+
   function wireDetails(host) {
     host.addEventListener('click', function (e) {
       var b = e.target.closest && e.target.closest('.rk-more');
       if (!b) return;
+      host.querySelectorAll('.mkt-card.show-delete').forEach(function (x) { x.classList.remove('show-delete'); });
       var card = b.closest('.mkt-card'), open = !card.classList.contains('show-detail');
       host.querySelectorAll('.mkt-card.show-detail').forEach(function (x) { x.classList.remove('show-detail'); var q=x.querySelector('.rk-more');if(q)q.setAttribute('aria-expanded','false'); });
       card.classList.toggle('show-detail', open);b.setAttribute('aria-expanded', open ? 'true' : 'false');
@@ -175,8 +198,10 @@
     var lens = document.getElementById('riskLens');
     if (lens) lens.innerHTML = lensHTML(risk);
     var items = (news && news.items) || [];
-    host.innerHTML = risk.items.map(function (it) { return card(it, matchNews(items, it.keys, it.xkeys)); }).join('');
+    var visible = risk.items.filter(function (it) { return hiddenCards.indexOf(String(it.id || it.no || it.name)) < 0; });
+    host.innerHTML = visible.length ? visible.map(function (it) { return card(it, matchNews(items, it.keys, it.xkeys)); }).join('') : '<div class="mkt-ph" style="grid-column:1/-1">모든 리스크 카드가 숨김 처리되었습니다</div>';
     wireDetails(host);
+    wireDeletes(host);
   }
 
   /* 「보유 종목」 스파크라인 섹션 제거(h2 + #mktHoldings) — SimpleorNothing 지시 2026-07-25 */
