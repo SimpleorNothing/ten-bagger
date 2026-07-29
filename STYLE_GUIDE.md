@@ -1,4 +1,4 @@
-**최종 갱신: 2026-07-29 10:40 (KST)**
+**최종 갱신: 2026-07-29 18:54 (KST)**
 
 # STYLE_GUIDE — 알파맵 디자인 시스템
 
@@ -267,6 +267,7 @@ pantone.css :root       ← 현행 팔레트 (팬튼 A안, index.html 하단 <li
 
 ## 갱신 이력
 
+- 2026-07-29 18:54 · **03 전문가 원탁 「분석 자료」 업로드 UI(`council-material.js` 자가 마운트).** 「토론 주제」 위에 `#clMaterial`을 삽입하고 기존 `.msec`/`.mnote`/`.cl-drop`/`.cl-blk`/`.cl-chip`/`.cl-note`/`.cl-btn`만 재사용한다. 드롭존은 클릭·드래그와 Enter/Space를 지원하고, 파일별 형식·이름·추출 글자수·오류·삭제를 목록으로 표시한다. 리포트에는 기존 `.cl-note`·`.cl-chip`으로 사용 자료를 표시하며 전문가 발언·기존 `.cl-*` 음성 플레이어는 무변경. PDF.js·JSZip·Mammoth는 해당 형식 업로드 시에만 지연 로드한다. **신규 `:root` 토큰·CSS 클래스·index.html 편집 0** — 면 radius 3px·본문 14px·메타 12px 규약 유지. TOKENS 무변·`node --check` 통과·jsdom 업로드→`material` 요청 스모크 8/8. narrative≠numbers. (OPS §3·§9 동반)
 - 2026-07-29 10:40 · **03 전문가 원탁 음성 토론 HiFi 전환(Google AI Studio Gemini TTS).** `council-audio.js`는 새 플레이어를 만들지 않고 기존 `.cl-play`/`.cl-psheet`/`.cl-pmsg`/`.cl-pbub`/`.cl-pcall`/`.cl-ptype` 구조와 `window.COUNCIL.playReport`를 재사용한다. 원탁 버튼은 캡처 단계에서 가로채 DOM의 발언 순서를 복원하고, 서버가 반환한 단일 WAV의 발언 시작 시각에 맞춰 기존 말풍선 강조 상태를 동기화한다. 1인 심층 자문도 같은 HiFi 경로를 사용하며 실패 시 기존 브라우저 TTS로 폴백한다. **신규 `:root` 토큰·CSS 클래스·index.html 편집 0** — worker의 `<script defer>` 자가 마운트만 추가. 면 radius 3px·부표 20px·본문 14px·메타 12px 규약 유지. TOKENS 무변·`check-docs` 통과·`node --check` 통과·jsdom 스모크 23/23. narrative≠numbers. (OPS §3·§9 동반)
 - 2026-07-29 08:05 · **02 관점 후속 상태 배지.** 등급 배지(`.ins-gr`) 바로 뒤에 별도 pill `.ins-lcs`를 배치해 `승격 대기`·`발동 대기`·`발동`·`유지`·`만료`를 표시한다. 상태색은 기존 기능 토큰만 재사용(wait=`--st-mature`, active=`--st-hot`, keep=`--st-dawn`, dormant/expired=`--faint`)하고 만료는 취소선으로 구분한다. 라이프사이클 모달은 기존 `.ins-lc-chip`을 재사용해 상태를 선택한다. **신규 `:root` 토큰 0**, 메타 12px·pill radius 20px 규약 준수. (OPS §3·§9 동반)
 - 2026-07-29 · **02 인사이트 「사이트 반영」 모달에 「🚀 지금 반영」(완전 자동 직접 커밋) 추가.** SimpleorNothing 지시(narrative≠numbers 수기 검증 원칙에 대한 명시적 예외 승인). `applyModal`의 카드마다 상태줄 `.ins-ap-st`(신규·mono 12px·`--dim`)를 붙이고, 기존 「📋 반영 지시 복사」 버튼 앞에 primary 버튼 「🚀 지금 반영」을 추가(기존 `.ins-btn primary` 재사용) — 클릭 시 `/api/site-apply`(worker 신설, Claude가 패치 계산 후 GitHub에 직접 PUT)를 카드마다 호출하고 결과를 그 자리 상태줄에 표시(✅반영됨/—변경없음/❌실패). **신규 `:root` 토큰 0**(`.ins-ap-st`는 `--dim`/`--mono` 재사용) → TOKENS 무변·`check-docs` 통과·`node --check` 통과. 복사 버튼은 수동 폴백으로 유지. (OPS §3·§9 동반)
