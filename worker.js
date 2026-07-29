@@ -929,7 +929,7 @@ async function handleInsightsPut(request, env) {
 
 // Anthropic Messages 프록시(공용) — SSE 를 서버측에서 재조립해 텍스트만 반환.
 // (handleEstimate 와 동일한 이유로 스트리밍: Opus + web_search 는 비스트리밍 시 100s 한도에 걸린다.)
-async function anthropicText(env, prompt, useSearch, maxTokens) {
+async function anthropicText(env, prompt, useSearch, maxTokens, maxUses) {
   const payload = {
     model: "claude-opus-4-8",
     max_tokens: maxTokens || 4000,
@@ -937,7 +937,8 @@ async function anthropicText(env, prompt, useSearch, maxTokens) {
     messages: [{ role: "user", content: prompt }],
   };
   // 검색 턴마다 전체 컨텍스트가 재전송된다(입력 2차식 증가) → 상한 고정.
-  if (useSearch) payload.tools = [{ type: "web_search_20260209", name: "web_search", max_uses: 3 }];
+  // maxUses 는 선택 오버라이드(기본 3) — 다중 대상 조사(예: earnings-capture) 호출만 넉넉히 쓴다.
+  if (useSearch) payload.tools = [{ type: "web_search_20260209", name: "web_search", max_uses: maxUses || 3 }];
 
   let upstream;
   try {
@@ -1173,6 +1174,191 @@ async function handleSiteApply(request, env) {
   return memoJson({
     ok: true, changed: true, reason: patch.reason || "",
     item: { no: item.no, id: item.id, name: item.name, gauge: item.gauge, verdict: item.verdict },
+  }, 200);
+}
+
+// ===== 04 signal_log — 실적/매크로 자동 캡처(narrative만) · /api/earnings-capture =====
+// GitHub Actions 크론(scripts/earnings-capture.mjs)이 호출한다. site-apply(2026-07-29)와 같은
+// "완전 자동 직접 커밋" 예외를 잇되, 훨씬 좁게 잠근다:
+// ①대상 파일이 코드에 signal_log.json 으로 고정(요청 바디로 절대 못 바꾼다)
+// ②append-only — 기존 로그를 절대 재직렬화하지 않고 EOF 앵커(`    }\n  ]\n}\n`)에 서지컬 삽입만
+// ③출력 스키마(date·at·source·srcs[]·items[].tag/layer/col/html)를 코드로 검증 — 어긋나면 422 거부
+// ④병합 후 JSON.parse 재검증 — 실패하면 커밋 자체를 하지 않는다
+// ⑤같은 날짜에 같은 티커 조합이 이미 있으면 changed:false(중복 방지)
+// narrative≠numbers — 이 엔드포인트는 gamma·holdings·earnings·judgment 어느 파일도 손대지 않는다
+// (코드 경로 자체에 그 파일들에 대한 쓰기가 없다 — 프롬프트 신뢰가 아니라 구조로 차단).
+const SIGNAL_LOG_LAYERS = new Set(["L1", "L2", "L3", "L4", "L5", "L6", "L7", "L8"]);
+
+function ecValidateEntry(entry) {
+  if (!entry || typeof entry !== "object") return "entry not object";
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(entry.date || "")) return "date invalid";
+  if (typeof entry.at !== "string" || !entry.at) return "at invalid";
+  if (typeof entry.source !== "string" || !entry.source.trim()) return "source invalid";
+  if (!Array.isArray(entry.srcs) || !entry.srcs.length) return "srcs invalid";
+  for (const s of entry.srcs) {
+    if (!s || typeof s.label !== "string" || !s.label.trim()) return "srcs[].label invalid";
+    if (s.url != null && typeof s.url !== "string") return "srcs[].url invalid";
+  }
+  if (!Array.isArray(entry.items) || !entry.items.length || entry.items.length > 8) return "items invalid";
+  for (const it of entry.items) {
+    if (!it || typeof it.tag !== "string" || !it.tag.trim()) return "items[].tag invalid";
+    if (it.layer !== null && !SIGNAL_LOG_LAYERS.has(it.layer)) return "items[].layer invalid";
+    if (typeof it.col !== "string" || !/^#[0-9a-fA-F]{6}$/.test(it.col)) return "items[].col invalid";
+    if (typeof it.html !== "string" || it.html.trim().length < 20) return "items[].html invalid";
+  }
+  return null;
+}
+
+// entry 객체 → 파일에 들어갈 4스페이스 들여쓰기 텍스트(수기 append 규약과 동일 포맷 — log[] 배열 원소 위치).
+function ecIndentEntry(entry) {
+  const j = JSON.stringify(entry, null, 2);
+  return j.split("\n").map((l) => (l.trim() ? "    " + l : l)).join("\n");
+}
+
+async function handleEarningsCapture(request, env) {
+  const json = (obj, status) => new Response(JSON.stringify(obj),
+    { status, headers: { "content-type": "application/json" } });
+  if (!env.GITHUB_TOKEN) return json({ error: "GITHUB_TOKEN not configured" }, 503);
+  if (!env.ANTHROPIC_API_KEY) return json({ error: "ANTHROPIC_API_KEY not configured" }, 503);
+
+  let body;
+  try { body = await request.json(); }
+  catch { return json({ error: "invalid json" }, 400); }
+
+  const targets = Array.isArray(body && body.targets) ? body.targets.slice(0, 6) : [];
+  const clean = targets
+    .map((t) => ({
+      ticker: String((t && t.ticker) || "").trim().toUpperCase().slice(0, 12),
+      name: String((t && t.name) || "").trim().slice(0, 40),
+    }))
+    .filter((t) => t.ticker);
+  if (!clean.length) return json({ error: "targets[] required (ticker)" }, 400);
+  const context = String((body && body.context) || "").slice(0, 500).trim();
+
+  const OWNER = "SimpleorNothing", REPO = "ten-bagger", FILE = "signal_log.json"; // 하드코딩 — 요청 바디로 못 바꾼다
+  const gh = {
+    Authorization: `Bearer ${env.GITHUB_TOKEN}`,
+    "User-Agent": "alphamap-worker",
+    Accept: "application/vnd.github+json",
+  };
+
+  let BRANCH = "main";
+  try {
+    const rmeta = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}`, { headers: gh });
+    if (rmeta.ok) { const rj = await rmeta.json(); if (rj && rj.default_branch) BRANCH = rj.default_branch; }
+  } catch {}
+
+  const API = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${FILE}`;
+  const cur = await fetch(`${API}?ref=${encodeURIComponent(BRANCH)}`, { headers: gh });
+  if (!cur.ok) return json({ error: "github get failed", status: cur.status }, 502);
+  const curJson = await cur.json();
+  const sha = curJson.sha;
+
+  let raw;
+  try { raw = decodeURIComponent(escape(atob(String(curJson.content || "").replace(/\n/g, "")))); }
+  catch { return json({ error: "decode failed" }, 500); }
+
+  let doc;
+  try { doc = JSON.parse(raw); }
+  catch { return json({ error: "current file invalid json" }, 500); }
+  if (!doc || !Array.isArray(doc.log)) return json({ error: "signal_log.json shape unexpected" }, 500);
+
+  // 중복 방지 — 대상 날짜(기본 오늘 KST)에 대상 티커 전부가 이미 최근 로그에 있으면 스킵.
+  const todayKst = new Date(Date.now() + 9 * 3600000).toISOString().slice(0, 10);
+  const targetDate = /^\d{4}-\d{2}-\d{2}$/.test(body.dateHint || "") ? body.dateHint : todayKst;
+  const recent = doc.log.slice(-8);
+  const already = recent.some((e) => {
+    if (e.date !== targetDate) return false;
+    const s = String(e.source || "");
+    return clean.every((t) => s.includes(t.ticker));
+  });
+  if (already) return json({ ok: true, changed: false, reason: "이미 해당 날짜 로그에 대상 티커 전부 반영됨(중복 방지)" }, 200);
+
+  // 보유 여부는 코드가 holdings.json 을 직접 대조해 결정 — LLM 추측에 맡기지 않는다.
+  const heldTickers = new Set();
+  try {
+    const holRes = await env.ASSETS.fetch(new Request(new URL("/holdings.json", request.url).toString()));
+    if (holRes.ok) {
+      const hol = await holRes.json();
+      (hol.detail || []).forEach((d) => { if (d.ticker) heldTickers.add(String(d.ticker).toUpperCase()); });
+    }
+  } catch {}
+
+  const targetLines = clean.map((t) =>
+    `- ${t.ticker}${t.name ? "(" + t.name + ")" : ""} — ${heldTickers.has(t.ticker) ? "알파맵 보유 종목" : "비보유(상류 신호 관측용)"}`
+  ).join("\n");
+
+  const prompt = [
+    "너는 '알파맵' AI 인프라 투자 관측소의 signal_log 작성자다. web_search 로 아래 대상의 가장 최근 실적(또는 지정된 이벤트)을 조사해",
+    "signal_log.json 배치 엔트리 하나를 만든다. 실제로 서비스에 append 되는 엔트리이므로 반드시 하우스 스타일을 지켜라.",
+    "",
+    "[조사 대상]",
+    context ? ("맥락: " + context) : "",
+    targetLines,
+    "",
+    "[절대 규율 — narrative≠numbers]",
+    "1. 이 엔트리는 signal_log 뿐이다. gamma·holdings·earnings·judgment 파일 변경은 제안조차 하지 마라.",
+    "2. 대상이 '비보유'면 해당 item html 끝에 '비보유·gamma·holdings·earnings·judgment 불변' 취지 문구를 반드시 넣어라.",
+    "3. 대상이 '보유'면 실적이 earnings.json 갱신 임계를 넘는지 단정하지 말고 '숫자 파일 갱신은 별도 확인 필요'라고만 남겨라.",
+    "4. 가격 상승/하락 그 자체는 단계 강등·판단 근거가 아니다 — 언급 시 '가격시계(narrative)' 로 명시.",
+    "5. 확정된 수치만 써라(추정·루머 금지). 검색으로 확인 못 한 항목은 언급하지 마라.",
+    "6. 저작권 — 기사 문장을 그대로 베끼지 말고 반드시 너의 표현으로 바꿔 써라(직접 인용 금지).",
+    "",
+    "[하우스 스타일]",
+    "- 한국어, 결론 먼저, 문장 짧게. 핵심 수치는 <b></b>로 감싼다. '및' 쓰지 마라.",
+    "- layer 태깅: L1 모델/SW · L2 컴퓨트 · L3 메모리 · L4 패키징/장비 · L5 서버 · L6 옵티컬 · L7 전력/냉각 · L8 발전/그리드. 순수 매크로·가격시계 이벤트는 layer=null.",
+    "- col(HEX): 수요·공급 확인(긍정)=#2f9e44 또는 #0ca678 · 가격시계·리스크(부정)=#e03131 · 주의·플래그=#e67700 또는 #e8590c · 관찰·게이트=#1c7ed6 또는 #1971c2 · 중립·보류=#868e96 · 두 시계 분리=#7048e8.",
+    "- 하이퍼스케일러 capex 상향·클라우드 가속처럼 상류 수요를 확인하는 내용은 L2·긍정색. 실적 미스·시간외 급락처럼 가격시계 이벤트는 layer=null·부정색으로 분리하라(두 시계 분리).",
+    "",
+    "[출력] JSON 객체 하나만(코드펜스·설명 금지). 스키마:",
+    '{"date":"YYYY-MM-DD(발표일, 불명확하면 오늘)","at":"","source":"이 배치를 설명하는 한 줄(무엇+narrative≠numbers 명시)","srcs":[{"label":"매체 — 핵심 한 줄(MM-DD)","url":"실제 확인한 기사 URL"}],"items":[{"tag":"짧은 태그","layer":"L2 또는 null","col":"#hex","html":"<b>핵심</b> 상세 내용..."}]}',
+    "items 는 대상당 1~2개(총 최대 " + Math.min(8, clean.length * 2) + "개). srcs 는 실제로 검색해서 읽은 기사 3~6개, url 은 정확한 실제 링크만(지어내지 마라).",
+  ].filter(Boolean).join("\n");
+
+  const r = await anthropicText(env, prompt, true, 4500, Math.min(12, clean.length * 5));
+  if (r.error) return json({ error: r.error, detail: r.detail }, 502);
+
+  let entry;
+  try {
+    const m = String(r.text || "").match(/\{[\s\S]*\}/);
+    entry = JSON.parse(m ? m[0] : r.text);
+  } catch {
+    return json({ error: "claude response not json", raw: String(r.text || "").slice(0, 300) }, 502);
+  }
+  if (!entry.at) entry.at = new Date(Date.now() + 9 * 3600000).toISOString().slice(0, 16) + "+09:00";
+  if (!entry.date) entry.date = targetDate;
+
+  const bad = ecValidateEntry(entry);
+  if (bad) return json({ error: "entry schema invalid — 반영 거부(구조 보호): " + bad, entry }, 422);
+
+  const anchor = "    }\n  ]\n}\n";
+  if (!raw.endsWith(anchor)) return json({ error: "EOF anchor mismatch — 반영 거부(구조 보호)" }, 500);
+  const newRaw = raw.slice(0, -anchor.length) + "    },\n" + ecIndentEntry(entry) + "\n  ]\n}\n";
+
+  try { JSON.parse(newRaw); }
+  catch { return json({ error: "merged file invalid json — 반영 거부(커밋 안 함)" }, 500); }
+
+  const content = btoa(unescape(encodeURIComponent(newRaw)));
+  const put = await fetch(API, {
+    method: "PUT",
+    headers: { ...gh, "content-type": "application/json" },
+    body: JSON.stringify({
+      message: `signal_log: 자동 캡처 — ${clean.map((t) => t.ticker).join("·")} (${entry.date})`,
+      branch: BRANCH,
+      content,
+      sha,
+    }),
+  });
+  if (!put.ok) {
+    const t = await put.text();
+    return json({ error: "github put failed", status: put.status, detail: t.slice(0, 300) }, 502);
+  }
+  const putJson = await put.json();
+
+  return json({
+    ok: true, changed: true,
+    entry: { date: entry.date, source: entry.source, tags: entry.items.map((it) => it.tag) },
+    commitSha: (putJson.commit && putJson.commit.sha) || null,
   }, 200);
 }
 
@@ -2247,6 +2433,10 @@ export default {
       // 02 인사이트 「사이트 반영」 — 완전 자동 직접 커밋(PR 없음). SimpleorNothing 지시(2026-07-29).
       if (request.method === "POST" && url.pathname === "/api/site-apply") {
         return handleSiteApply(request, env);
+      }
+      // 04 signal_log — 실적/매크로 자동 캡처(완전 자동 직접 커밋 · 구조 가드레일). GH Actions 크론 전용.
+      if (request.method === "POST" && url.pathname === "/api/earnings-capture") {
+        return handleEarningsCapture(request, env);
       }
       // 07 자문단 — 유튜브 관점 추출(Gemini) · 원탁 토론(Claude) — 인증된 디바이스만 도달
       if (request.method === "POST" && url.pathname === "/api/yt-view") {
