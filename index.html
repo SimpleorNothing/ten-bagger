@@ -3525,7 +3525,7 @@ window.MARKET=(function(){
  // 기간 선택(지표·보유 종목 공통) — 거래일 근사: 1M≈21 · 6M≈126 · 1Y≈252 · 3Y≈756 · 5Y≈1260.
  // charts.json 은 fetch-prices.mjs 가 ~5년 일봉(range=5y)으로 채운다 → 3Y·5Y 버튼까지 실데이터. 확보분이 창보다 짧은 시리즈만 자동 클램프.
  var RANGES=[{k:'1M',days:21,ko:'1개월'},{k:'6M',days:126,ko:'6개월'},{k:'1Y',days:252,ko:'1년'},{k:'3Y',days:756,ko:'3년'},{k:'5Y',days:1260,ko:'5년'}];
- var RG=RANGES[2];   // 기본 1년
+ var RG=RANGES[1];   // 01 시장 모니터링 기본 6개월
  function slice6(a){return a.slice(-RG.days);}
  function pct(v){return (!v||v.length<2)?0:(v[v.length-1]/v[0]-1)*100;}
  function pctDoD(v){return (!v||v.length<2)?null:(v[v.length-1]/v[v.length-2]-1)*100;}
@@ -3996,7 +3996,7 @@ var HIDDEN_KEY='am_topic_radar_hidden_v1',hiddenTopics=[];
  function iSC(CH,AVG){document.querySelectorAll('canvas.stk-cv').forEach(function(cv){if(cv._i)return;cv._i=1;
   var s=CH[cv.getAttribute('data-ck')];if(!s||!s.c){cv.parentElement.style.display='none';return;}
   var av=(AVG||{})[cv.getAttribute('data-ck')];if(!(av!=null&&isFinite(av)))av=null;   // 보유 종목만 평단선
-  var st={sp:Math.min(252,s.c.length),hv:-1};
+  var st={sp:Math.min(126,s.c.length),hv:-1};
   function fdD(x){if(x==null)return null;var n=Number(x);var d=isFinite(n)?new Date(n*(n<1e6?86400000:n<1e12?1000:1)):new Date(x);return isNaN(d)?null:d;}
   // yr=true면 연도까지(YY-MM-DD) — 창이 여러 해에 걸치면 시작·끝이 몇 해 차인지 드러나야 함. false면 종전대로 MM-DD.
   function fd(x,yr){var d=fdD(x);if(!d){var s=String(x==null?'':x);return yr?s.slice(0,10):s.slice(5,10);}var p=function(n){return String(n).padStart(2,'0');};var md=p(d.getUTCMonth()+1)+'-'+p(d.getUTCDate());return yr?(String(d.getUTCFullYear()).slice(2)+'-'+md):md;}
