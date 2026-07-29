@@ -1,5 +1,5 @@
 {
-  "asOf": "2026-07-29T11:32:35.465Z",
+  "asOf": "2026-07-29T22:09:29.214Z",
   "source": "Google News RSS · 종목축 + 시그널축 + 병목축 (기사별 한 줄 요약 + 물질성 스크리닝)",
   "note": "사이트 종목 카드의 \"일자 + 요약\" 행 소스. 최근 95일 창 · 종목당 최신 5건(첫 로딩 페이로드 상한) · **물질성 스크리닝 통과분만**(items[].m>=1 — 2=논제/펀더멘털, 1=리비전·수급 실사건, 0=사후 등락 서술·홍보·추측·콘텐츠팜으로 제외). 탈락 기사는 삭제가 아니라 news_archive.json 에 전건 보존. 나머지 3개월치는 archive/{티커}.json 을 '더 보기'로 온디맨드 로드. 신호/소음 판단과 SIGNAL_LOG 반영은 사람/Claude의 몫 — 채점·차트에는 쓰이지 않는다.",
   "count": 253,
@@ -88,37 +88,248 @@
     }
   ],
   "archive": "news_archive.json",
-  "archiveCount": 2388,
+  "archiveCount": 2443,
   "shardDir": "archive",
   "winCounts": {
     "353200": 46,
-    "VICR": 34,
-    "VRT": 34,
-    "0522": 25,
-    "CEG": 31,
+    "LITE": 18,
+    "SNDK": 19,
+    "VRT": 38,
+    "OKLO": 17,
+    "RMBS": 41,
+    "COHR": 21,
+    "MRVL": 16,
+    "APH": 7,
+    "AMD": 45,
+    "VICR": 37,
+    "0522": 26,
+    "CEG": 32,
     "009150": 46,
-    "SNDK": 17,
-    "BE": 27,
-    "AMD": 42,
+    "SMCI": 32,
+    "BE": 29,
     "TER": 5,
-    "MRVL": 14,
     "TSLA": 24,
-    "RMBS": 40,
-    "ALAB": 23,
-    "COHR": 18,
+    "ALAB": 24,
     "QCOM": 29,
-    "OKLO": 15,
-    "APH": 6,
-    "005930": 51,
-    "BESI": 35,
+    "089030": 32,
+    "005930": 53,
+    "BESI": 36,
     "PLTR": 27,
-    "SMCI": 28,
-    "089030": 31,
     "MU": 9,
-    "CBRS": 32,
-    "LITE": 16
+    "CBRS": 33
   },
   "items": [
+    {
+      "id": "macro_fomc_금리결정_대기_1",
+      "ticker": "MACRO",
+      "name": "FOMC 금리결정 대기",
+      "ax": "rates",
+      "title": "Federal Reserve holds interest rates steady, but 3 officials vote for hike - CBS News",
+      "link": "https://news.google.com/rss/articles/CBMiiAFBVV95cUxPMmFhYi1fZEdkNzZpWnpMWmVnMGVrNlRXTnJJdTM4RWZDdHQtbGR3RW5ndmlNU3hTY252SGp1R0hCc1Y0S2pBMWlSN0xtQ1I4NWU1QnllLVh6LW5RcW9jd3BLZ21lSGpCUVpwNmxzMkFuU0JvSExzV0FZTGF6N0FGeDUxTVhjRE5s?oc=5",
+      "published": "2026-07-29T21:45:52.000Z",
+      "source": "CBS News",
+      "st": 3
+    },
+    {
+      "id": "macro_fomc_금리결정_대기_1",
+      "ticker": "MACRO",
+      "name": "FOMC 금리결정 대기",
+      "ax": "rates",
+      "title": "‘The Fed’s on the case,’ Chair Warsh says as rate pause holds - RealEstateNews.com",
+      "link": "https://news.google.com/rss/articles/CBMioAFBVV95cUxQUjRZalphdG9IN083VXF0cnBRNTYtMzFKVUIyTXV1VkVlNVVpTTl5ZnhiWVNjVFpLaHdHbVY2VTdIOEhKZnJOemUydENyc09DRzQ1RldfdEYtWmpBX2sxYlFhcmtXaUIyQzVjU1NuQUh1enJFN1NGT0lkdklhaHk1T0ZGNjVHb0xZdkRxNzFtUkdDQ1FyczZ5Qk80UVJHOWtS?oc=5",
+      "published": "2026-07-29T20:32:14.000Z",
+      "source": "RealEstateNews.com",
+      "st": 3
+    },
+    {
+      "id": "lite",
+      "ticker": "LITE",
+      "name": "Lumentum",
+      "title": "AXT, Inc. (NASDAQ: AXTI) secures Lumentum deal with two $43.5M deposits - Stock Titan",
+      "link": "https://news.google.com/rss/articles/CBMinAFBVV95cUxOR3huVlQtTTh1Z2t2dTN3aHpWWUVSOW1UWVBTNjlZUGc3TkVvQkdaeGVRcUFLNlJnb2RCbjhQdnV0OWVtSWViXzFIY1Y1V0EzbjFkYmUtSTBnSFRHbWdnT0RKSHV3TGtwSmgxbHg2WkJJUENNTThpOXdhMmIyOXU0RzU0N3ZMSnk1NkNZTXM0aWFHTjdPa2hFSDlxMVo?oc=5",
+      "published": "2026-07-29T20:18:32.000Z",
+      "source": "Stock Titan",
+      "st": 1,
+      "m": 1,
+      "mv": 3
+    },
+    {
+      "id": "bneck_capex",
+      "ticker": "MACRO",
+      "name": "상류 · 하이퍼스케일러 capex",
+      "ax": "capex",
+      "title": "ETFs in the Crosshairs Ahead of Microsoft & Meta Earnings - ETF Database",
+      "link": "https://news.google.com/rss/articles/CBMijAFBVV95cUxOYVlCU1N5U0JnVlNIV1hxeXdIRnFRNDdiTlotUDg1bVdYd1BFdm9ZeXByOUkzSnlaN3drdmkxUlFsNWgyTGJja0FfNlo0V1IzOG4wTk9GMk9RUlhwNS1CM1hGQ29Ob1JOdUk5R3k5dlFULUhlSWM0dk5wNVU2bTlJNWJLS2JXSHRHUTNrMw?oc=5",
+      "published": "2026-07-29T19:07:09.000Z",
+      "source": "ETF Database",
+      "st": 3
+    },
+    {
+      "id": "sndk",
+      "ticker": "SNDK",
+      "name": "SanDisk",
+      "title": "Sandisk Sinks 54% in July. The S&P 500’s Biggest Loser Is Still Up 2,000%. - Barron's",
+      "link": "https://news.google.com/rss/articles/CBMif0FVX3lxTE5zcHZKei1zeUlSNHNob19CSTlWN0YwZ3RDYUotVFNQU0VLcGRLcklnQVZkWGR1NFp0VGxUYkhobkM1M3FCZ0VGeEp2a05YZGk3Ujl6MW9TQnlMLWlVYXR6cndYZHdwNzUzbV9udWloTGlIOElFLTVQZmRHUkVlZlk?oc=5",
+      "published": "2026-07-29T18:28:00.000Z",
+      "source": "Barron's",
+      "st": 3,
+      "m": 1,
+      "mv": 3
+    },
+    {
+      "id": "macro_fomc_금리결정_대기_1",
+      "ticker": "MACRO",
+      "name": "FOMC 금리결정 대기",
+      "ax": "rates",
+      "title": "Divided Fed holds interest rates steady, but three members voted to hike - CNBC",
+      "link": "https://news.google.com/rss/articles/CBMickFVX3lxTE9vaDVNbGxDRS1HN2NjNmFxYmNuVXpHZGUzY0J5QVVhdmpiV09hM2NmbFpLLUFpYmROUGNKYjJQRnRsWW0yU3pMWHV2WDk0RUt1bWw2S013V0o1T1ZsSWl4cFp3WkNPT1BTbzdPODd3STJnd9IBd0FVX3lxTE11UXlCYnJZWmo4dEtTNkNkOTVpUzZqeHdvYlNuMjIyaTFILWF3X3RQUmtRakN5Sm1WbjZrRU5MdVlpS3AtMDNiUUdpdFJUeTlucFZQRXBuSG5OVWI0Ry1YT1RzMkZ4a0pfVk44U0JsRUF3TF9MNFlN?oc=5",
+      "published": "2026-07-29T18:00:17.000Z",
+      "source": "CNBC",
+      "st": 3
+    },
+    {
+      "id": "vrt",
+      "ticker": "VRT",
+      "name": "Vertiv",
+      "title": "Vertiv (VRT) Stock Slides After Revenue Miss Despite Earnings Beat And Higher Outlook - simplywall.st",
+      "link": "https://news.google.com/rss/articles/CBMi1AFBVV95cUxNeDhVb3J3NEV5VkpMbWlyS2VrOFR2RmpyOFd2UjJFTzBBR29ac3dZbXNURHFvcGU4VEFiY2ZZZG00UUxSbkZFRmZTTGJlYTZucF90clFJYmZidW15Z0k3OHV1NTNNVHBhTlFKd3pQRkRMZE05Z0JfVUNycm52T3ZKS3JTWDlJT1BqNUNmX0V5NVJ6eVE1aDNOXy1UMU9KdTE1Qk1fQ3BRaXhMZmxwWUx1djlnclFfaktJenNaQkZLSEY5UmFuaFhiLS1KQ3RGYV92a25KedIB2gFBVV95cUxNYUZsSGFhMFBCOHFnSG1XaDJ4clU1Z0w4eXVEYVkxTzdRczczcVRpeXdSNk9KcEt0Nm1VZmlnSU84WlBQRmwxLVBQUVFxajZqRXZaYVR4LWxhR3NkU1ZPUlJQa3dMemhHVVFhdW5MdDhyNzR2Y2VFZm5FRXVSMjlCSEJnZ2NpZjZZTHFDWkhfRmt1U0ZYMjJ4a0RnRFJTbi1oeklmSXhRX3hDZU5jQkcxNDhMUHQ4dzdyQnhyYm5TNC1HcEEwOU1IdFoxYXNPenZDY2ZiREFmYkk3dw?oc=5",
+      "published": "2026-07-29T17:16:54.000Z",
+      "source": "simplywall.st",
+      "st": 9,
+      "m": 1,
+      "mv": 3
+    },
+    {
+      "id": "oklo",
+      "ticker": "OKLO",
+      "name": "SMR plays (Oklo 등)",
+      "title": "Oklo Is Down Over 75% From Its High. It's Still Not the Best Nuclear Stock to Buy. - The Globe and Mail",
+      "link": "https://news.google.com/rss/articles/CBMi9gFBVV95cUxQM2dLUXV6dkE3N0xhXzlaUFhwLU93SlNHZ3lQanNRU3NfQjN2cGJHcnc4djVFcy1ZbHhtTjJ5RzVPZ1JJdEJ2cFFfcHVmMEJqY2VNbnNiQ01tSldIeUdOSDVUR1J6ZUF6Q0pmUEdfVlMwenM5bmkzQUJMN1RrRGhUTEw3QXZ1NFZTUUp2VFN0TTN2RjdQbVJCVjdTWjZfT2FudmM4RnYxeU5ON01DOFFNYlZaa2lXZ2tuQ3lxS2ZjZUc5RnFXNGdfM1ZHOFVhdnZyRHE1cFNqQmFmbWlTZmJuS2xzWDVxLW1wSnh1X3JkZDZBNTdDaHc?oc=5",
+      "published": "2026-07-29T17:05:00.000Z",
+      "source": "The Globe and Mail",
+      "st": 3,
+      "m": 1,
+      "mv": 3
+    },
+    {
+      "id": "bneck_capex",
+      "ticker": "MACRO",
+      "name": "상류 · 하이퍼스케일러 capex",
+      "ax": "capex",
+      "title": "Fast Money Host Warns Hyperscaler CapEx Binge Is ‘Issuing Near Junk’ as Data Center Buildout Shows Cracks - Yahoo Finance",
+      "link": "https://news.google.com/rss/articles/CBMinwFBVV95cUxNandJcUhod0JzdzBrdFVkc1BYV0NISlk3b3lZMXBWalMxU3RoR1JIM0tEcDR4WVNZRmFHbnR6NnpVQUx4N0hoNWdzclU1VGV6V2E5WVo2a2FpNDVtZkllR2J4SDFBRUREMjIzSUEzQ3l1ZzZzVEdhb191VEVEVF9Ua2RscHQ5U1l0NmFIdXhIX3M0eVl4R2Zlc1RfdWQ4X1E?oc=5",
+      "published": "2026-07-29T17:02:07.000Z",
+      "source": "Yahoo Finance",
+      "st": 3
+    },
+    {
+      "id": "rmbs",
+      "ticker": "RMBS",
+      "name": "Rambus",
+      "title": "Rambus: Not Broken, Just Not Cheap Enough Yet (NASDAQ:RMBS) - Seeking Alpha",
+      "link": "https://news.google.com/rss/articles/CBMijAFBVV95cUxNenhVbWc4R1EyRm10VXRiYnZpSC1ncXdpRUVNY1YxLW81T3E2NVFXSkY4NWEzRzU0b281OVZPNVdRQnNQTFF5QnFjc3RzQ2ZSdEJ1Q3NySlFNV1R6LW4zdHVaR29hR1dfaWRlZTV1bDEweDJxRHFFcWZkTXdKN19zVExiN3F4Xy1rU3UtOA?oc=5",
+      "published": "2026-07-29T15:24:57.000Z",
+      "source": "Seeking Alpha",
+      "st": 3,
+      "m": 1,
+      "mv": 3
+    },
+    {
+      "id": "cohr",
+      "ticker": "COHR",
+      "name": "Coherent",
+      "title": "Corning (GLW) Crashed 20% Despite 32% Optical Growth. Should Coherent (COHR) Investors Worry? - Yahoo Finance",
+      "link": "https://news.google.com/rss/articles/CBMimwFBVV95cUxPZXYxUzBoQmFfOUttTXA3SWRNV1VmdE8zLUFUa0thYWhKVzRPSVNBZTJhenk3Y0NDX1hVekJxbF8yZFpMeGdaUXdiWFg1eXlsUFhSZnB4ZHl3TlBmemFJbkJlZ0xvenY1Snd1QzJjMzFzeFRobkVHQmhWbWdOM3FDdldJNnpMcDBjMXE4dXo1aDFubl8xbTZESnhtRQ?oc=5",
+      "published": "2026-07-29T15:11:27.000Z",
+      "source": "Yahoo Finance",
+      "st": 3,
+      "m": 1,
+      "mv": 3
+    },
+    {
+      "id": "cohr",
+      "ticker": "COHR",
+      "name": "Coherent",
+      "title": "Corning (GLW) Crashed 20% Despite 32% Optical Growth. Should Coherent (COHR) Investors Worry? - Yahoo! Finance Canada",
+      "link": "https://news.google.com/rss/articles/CBMihgFBVV95cUxQTzdNb213UV9hRGNqdk9xbGJRdklDZG9MNnZyTHlrNXRiU19hbVNVMmxkTGF5WkFWR05iZjVva2k1bEFIOG9CR1FnOFRaRF9EMFNvcUlCT2wzd1g0QksyMWFTYXFMd3k1MUJic210LXFYajl4T1pYcHdGbWxiSXo1eDVWQVN3UQ?oc=5",
+      "published": "2026-07-29T15:11:27.000Z",
+      "source": "Yahoo! Finance Canada",
+      "st": 3,
+      "m": 1,
+      "mv": 3
+    },
+    {
+      "id": "mrvl",
+      "ticker": "MRVL",
+      "name": "Marvell",
+      "title": "Here is What to Know Beyond Why Marvell Technology, Inc. (MRVL) is a Trending Stock - Yahoo Finance Singapore",
+      "link": "https://news.google.com/rss/articles/CBMiiwFBVV95cUxOYU9DV0pnWmtPZ09rZTZXS05aNXd2UTJTWE5iaHdENEJWcHVTMGNFVGt3UGIzaGZfX2pjNnEwR0xXSmJNLVUtOWxTdVpaWVpLaVhmT3dSTExoSW5neFZ1SnRlOERoQ3UwYU5NbUN2MXJMMGtnc3A3azlsRTJEM2Z1dnJPcVNRa25ycUQ0?oc=5",
+      "published": "2026-07-29T13:00:08.000Z",
+      "source": "Yahoo Finance Singapore",
+      "st": 3,
+      "m": 1,
+      "mv": 3
+    },
+    {
+      "id": "aph",
+      "ticker": "APH",
+      "name": "암페놀",
+      "title": "Amphenol: Q2 Earnings Snapshot - kare11.com",
+      "link": "https://news.google.com/rss/articles/CBMiyAFBVV95cUxNcjZ0Q2Z1SlNObDZNeVRLbG1PSzdxSkZiUE9ub2xwbXFjTFRIcFJyWGFZbGdMT0hTZmRUMDg2TUc3S21QaHJpbnFtdnBNc05aWHlVQTRzd0NSN3poa1JiTXFCeV9RSmJ1R2lZbk1VWUJnWnJiZUV3cFdVaDlTVVFFdG5qaHZxbllxUS1ZaUtTNGRBTkVPeG5CY3ozTjFGMGRtRG9SNWlydWRqbXlxajJmekozNTVueE5TTVM3UnN6YkZjZnA0dFE1Ng?oc=5",
+      "published": "2026-07-29T12:09:00.000Z",
+      "source": "kare11.com",
+      "st": 3,
+      "m": 1,
+      "mv": 3
+    },
+    {
+      "id": "amd",
+      "ticker": "AMD",
+      "name": "AMD",
+      "title": "AMD secures up to 2.5 GW of Core Scientific data centre capacity - Cloud Computing News",
+      "link": "https://news.google.com/rss/articles/CBMihAFBVV95cUxPLXJGYldXZW50SVdVZWJub29Mc1puRk9PMl9zdVI5ZFVvTVRibXRVWnFkWDlEOUZQVlpkN09zOFEwUnlENFVNUGJwMGE4N1RRc3pmR0dkWWQ3bVg1cFcwaFhqTURWcWxEOU92ck5saEJpdzBVRWJHeGRZdmRmSU4yWkl5S0s?oc=5",
+      "published": "2026-07-29T12:03:39.000Z",
+      "source": "Cloud Computing News",
+      "st": 3,
+      "m": 1,
+      "mv": 3
+    },
+    {
+      "id": "vrt",
+      "ticker": "VRT",
+      "name": "Vertiv",
+      "title": "Vertiv Holdings plunges on revenue miss, supply chain timing (VRT:NYSE) - Seeking Alpha",
+      "link": "https://news.google.com/rss/articles/CBMingFBVV95cUxNakM4M2JyYmJuSF80ZU54U1pjdjdDRHZjQXFfdzZ4MzhzbjFVVEdMRnVUZVJ6eGFhbGs3UklsbUtQR3NaN1FwdkM1OGhUazBtQTNTNzliUXVycUZVMGgxTHJrelByUmt0TExSbFdQUWR4NnFsQkFVRnB2azU1WmJ0UnBpOU55aUJZelpsd0V6QU52eG80UTRrR2dGbk9nUQ?oc=5",
+      "published": "2026-07-29T11:51:42.000Z",
+      "source": "Seeking Alpha",
+      "st": 3,
+      "m": 1,
+      "mv": 3
+    },
+    {
+      "id": "vrt",
+      "ticker": "VRT",
+      "name": "Vertiv",
+      "title": "Stocks making the biggest moves premarket: Biogen, Vertiv, GE HealthCare, Generac & more - CNBC",
+      "link": "https://news.google.com/rss/articles/CBMingFBVV95cUxPZWFxVEFoTjRaclNkSnAybk5OVmliRi1HZDRtTmpUelM0a3gxNGRqZ3ZkNmhldnMtX3dnRmxWenNpRHlnUmxoSHMtajVQNGdINzBQX3h4U1JFVFFjQU92YTV1UkktMHRBTVdBbUYwM0R5aTk0c2owanpoRXM3MkRRdFBNRTlFV2o2aTVHc2QtanR4eGtxeDVEUC1GdjZlUQ?oc=5",
+      "published": "2026-07-29T11:36:03.000Z",
+      "source": "CNBC",
+      "st": 3,
+      "m": 1,
+      "mv": 3
+    },
+    {
+      "id": "sndk",
+      "ticker": "SNDK",
+      "name": "SanDisk",
+      "title": "S&P 500: Analysts Predict Sandisk And Micron Still Good For Huge Gains - Investor's Business Daily",
+      "link": "https://news.google.com/rss/articles/CBMiuAFBVV95cUxNc0VQajI3UGtiYkhKbEY4cF8xRXV5djdTbzVaRDhVY1JhUG9xVmdMRURwc1J4UHY1MnNZQUNDYlV1ZGtpY05jbjdBa3lKdFRrZ2Z3WHpqeS1Cd0ZFcmd5VWlmclo1RUcwZjlOSlVWX09SazRiUm5QY2xETGhna0RQZFpsR1J0ekF2OW5DeEJVWVdkSlRILVZveXJoVWZRWTMyaFRkMklNSllmTmw5NVMwQWVrR1ZUUTB3?oc=5",
+      "published": "2026-07-29T11:33:00.000Z",
+      "source": "Investor's Business Daily",
+      "st": 3,
+      "m": 1,
+      "mv": 3
+    },
     {
       "id": "macro_fomc_금리결정_대기_1",
       "ticker": "MACRO",
@@ -129,6 +340,18 @@
       "published": "2026-07-29T10:53:04.000Z",
       "source": "Reuters",
       "st": 1
+    },
+    {
+      "id": "amd",
+      "ticker": "AMD",
+      "name": "AMD",
+      "title": "Prediction: AMD Stock Could Double by 2028. Here's Why - Yahoo Finance",
+      "link": "https://news.google.com/rss/articles/CBMinwFBVV95cUxNUUpnN3F3VzVjb3NWcmttUEVRVm5LTlJhOVJFZDF6eTNJWFdmTWZPbXVlaVhyMTNDVG05Yi1DNG9wM0lzODM5cDBUQ18tOWp3dG9KTDZGMG5pc1BGVjM2aXBITzI0bW5Pa3U0WEoyYjl2eXRfcjJnaVhNcjlZRWZNQVVjMFQ1em92MXljRDI5LU1tNFJCaHFxTGZqVlN0WDQ?oc=5",
+      "published": "2026-07-29T10:48:00.000Z",
+      "source": "Yahoo Finance",
+      "st": 3,
+      "m": 1,
+      "mv": 3
     },
     {
       "id": "bneck_l8_pwr",
@@ -142,11 +365,47 @@
       "st": 3
     },
     {
+      "id": "vrt",
+      "ticker": "VRT",
+      "name": "Vertiv",
+      "title": "Vertiv shares sink as Q2 revenue miss offsets upgraded guidance - Yahoo Finance",
+      "link": "https://news.google.com/rss/articles/CBMimgFBVV95cUxNTHE4MXR1T0ZaaFFXQWl6UzM3MDFIUjdNSUh0M0cwTldZVC11Tjg3YlJuZ3dmbUYtT19TYzZlWTBqLTdSYk1fQWFfVU1YaGFLX25hWkRfS2FJM0d3eUtkU05xNk4zcTV5WVpYZm9WeWhnT2hPRzdBc1ZVWGN1WmllcHZOUndoNG1SMzB2U29HRnRia3dCRnFKbUNR?oc=5",
+      "published": "2026-07-29T10:38:46.000Z",
+      "source": "Yahoo Finance",
+      "st": 3,
+      "m": 1,
+      "mv": 3
+    },
+    {
+      "id": "mrvl",
+      "ticker": "MRVL",
+      "name": "Marvell",
+      "title": "Marvell to Invest $250 Million in India, Expanding Bangalore Facility to Drive Next-generation AI Technology Development - Marvell Technology",
+      "link": "https://news.google.com/rss/articles/CBMilAJBVV95cUxQUG43eENDc0wybkFOdVkwTVVfbE45cVoyS3c3SHV0aDhuQ2tDVjg0MTJva0Z5NEdBWkV4Y3B6Z2ZMSVVrZ0dOM0JLWVo1dlVxRW5uSjRtblhEcWo0ZDR5NWN4Ny1KajZiNWdodzcwLS0wb0VsUkY5YkladGc2dGxGYmZMWXF6U05QOHhjd1Nhc3pPQnc1NnJ2YjJQUk1jdV92bU9tMGpiR1JBTU1mZVJuQVFvRE9OQjVhbV83VEtvMjFPU2N5Q0JYbm9NQkk4QVdMX2pHa2dKdEJsRzFIYWpYRWZySmZGeHN6aGVoWGg2ak5PdXVqNnpXSU11Nkg4d09aaTdEcmJkOFdBQkpUdnAtR3lUd18?oc=5",
+      "published": "2026-07-29T10:34:57.000Z",
+      "source": "Marvell Technology",
+      "st": 3,
+      "m": 1,
+      "mv": 3
+    },
+    {
       "id": "vicr",
       "ticker": "VICR",
       "name": "Vicor",
       "title": "Vicor (VICR) Stock Looks Fairly Valued On Cash Flow While Earnings Suggest Value - simplywall.st",
       "link": "https://news.google.com/rss/articles/CBMiyAFBVV95cUxOUjI4aWtGbFF2QU9reFdOUk5ZVDY3Y0FTSHhESlJDUkVzNTB6UlJ6MUgtS3lhdnNJcnBNd25sMXh3SEJqUmdaTEVlT2wzNFRIRXdGYVh5Szh0N3JKUFhxU1FUaHoySTlUeXoyWDJ3eFduMEdoQnp0WGN5Zl9oQUZvVXU0a196MF8yYnUzb2VIV1g3N1Y1Y3A1clBtUHVVV3c1bHpta3dMX3E2aGNqUm5PVGphaHVmXy1uQ3FiNk5oaWZ0VzdGV2wtMNIBzgFBVV95cUxOd2NUQzM3cUJXRzk0b3M2YlZJbnlDaEUzSVFBX0FudHdIdEVYTnotcWhPNWt3UWJNNXV3ZVo0NG90ekRUUWdvWFFJMlZMWi1Ed3FTZmVmWkdiaEV5cHM2UVpvV0s5UGJucDkyT05Hby1NMVdWVjFxckZmUWRaVXAwdFUxb2F2dWM4Q25Va2ZDeEJvSlkwZFJXXzVyamRCQjVQeTJ1UUtsNWRRMkRLR0ozYVpjTU4zYzN5ZEJIZ2gyc1NpWWhJMnJZUHpNOWFSQQ?oc=5",
+      "published": "2026-07-29T10:26:58.000Z",
+      "source": "simplywall.st",
+      "st": 9,
+      "m": 1,
+      "mv": 3
+    },
+    {
+      "id": "vicr",
+      "ticker": "VICR",
+      "name": "Vicor",
+      "title": "Vicor (VICR) Stock Looks Fairly Valued On Cash Flow While Earnings Suggest Value - simplywall.st",
+      "link": "https://news.google.com/rss/articles/CBMizgFBVV95cUxOd2NUQzM3cUJXRzk0b3M2YlZJbnlDaEUzSVFBX0FudHdIdEVYTnotcWhPNWt3UWJNNXV3ZVo0NG90ekRUUWdvWFFJMlZMWi1Ed3FTZmVmWkdiaEV5cHM2UVpvV0s5UGJucDkyT05Hby1NMVdWVjFxckZmUWRaVXAwdFUxb2F2dWM4Q25Va2ZDeEJvSlkwZFJXXzVyamRCQjVQeTJ1UUtsNWRRMkRLR0ozYVpjTU4zYzN5ZEJIZ2gyc1NpWWhJMnJZUHpNOWFSQdIBzgFBVV95cUxOd2NUQzM3cUJXRzk0b3M2YlZJbnlDaEUzSVFBX0FudHdIdEVYTnotcWhPNWt3UWJNNXV3ZVo0NG90ekRUUWdvWFFJMlZMWi1Ed3FTZmVmWkdiaEV5cHM2UVpvV0s5UGJucDkyT05Hby1NMVdWVjFxckZmUWRaVXAwdFUxb2F2dWM4Q25Va2ZDeEJvSlkwZFJXXzVyamRCQjVQeTJ1UUtsNWRRMkRLR0ozYVpjTU4zYzN5ZEJIZ2gyc1NpWWhJMnJZUHpNOWFSQQ?oc=5",
       "published": "2026-07-29T10:26:58.000Z",
       "source": "simplywall.st",
       "st": 9,
@@ -162,30 +421,6 @@
       "published": "2026-07-29T10:13:00.000Z",
       "source": "Barron's",
       "st": 3,
-      "m": 1,
-      "mv": 3
-    },
-    {
-      "id": "vrt",
-      "ticker": "VRT",
-      "name": "Vertiv",
-      "title": "Vertiv shares sink as Q2 revenue miss offsets upgraded guidance - Investing.com",
-      "link": "https://news.google.com/rss/articles/CBMisAFBVV95cUxQS1BEZ3o2NnhSMm1KMHFFZW56cTZTYUxYT0FqVEJfSDZzRGw5V1h0bW50bzhpOVJkOW5GLWhKeTVSUmQteTBaWExWUDFFeno2Ukx2cXlDM2o0dmtSSnF0d3B4WUtVQVFyZjF4amdPVjRyOWp2ZXdxbnVxTGhQM21Sc1ppSndoUk81c0kzSW90eXpqdDN6dE1UVWp5V2o3b0ZiMUFGdEhzYS1KMDdFLTNRbw?oc=5",
-      "published": "2026-07-29T10:12:54.000Z",
-      "source": "Investing.com",
-      "st": 3,
-      "m": 1,
-      "mv": 3
-    },
-    {
-      "id": "vrt",
-      "ticker": "VRT",
-      "name": "Vertiv",
-      "title": "Vertiv Reports Strong Second Quarter 2026 with Diluted EPS Growth of 53% (Adjusted Diluted EPS Growth of +60%); Raises Full Year 2026 Guidance Across All Key Metrics - PR Newswire",
-      "link": "https://news.google.com/rss/articles/CBMiuwJBVV95cUxNMzU3Sk5uRTdHMFc2N21CVDNwbjdfYlJNVFRTN2Z2Ym5yWHBMME84SV8wN3J6MGRxak5ENFlINGtxdldoLTBnVGxQZHVwbklDZHkyOFQtUHpEUmVraFNLN0owUmNTSi1ScFNWbmhSRmhvNTF1YTlvcnBOUXQ0WmdnODk1VzhlZnA5c3l2N3FxWThtVV81ZS1NR0VYRzEzY2dhdTVqcVhJUUU5R1pkMlJZeGFYOVNEQUZQR3JQTGhaWUtyS0VOTmNMcDBOcjAtbFZtSkpaeW50Rjd1Y2g5Q3hPY1VEUTlHLVNuMFpGVjdwOG5DcWhqb29SV2doU01ENkZnT2lqSGV3NFM0T1ZyRG5IeHgybmJ6blctX3duYU1FUVVwUEgydk8tTkFOV0FTekJiVWE2aElKLVJRbms?oc=5",
-      "published": "2026-07-29T09:55:00.000Z",
-      "source": "PR Newswire",
-      "st": 1,
       "m": 1,
       "mv": 3
     },
@@ -238,6 +473,30 @@
       "mv": 3
     },
     {
+      "id": "amd",
+      "ticker": "AMD",
+      "name": "AMD",
+      "title": "Core Scientific Doubles AI Capacity to 1.1 GW in $14B AMD Deal - datacenterknowledge.com",
+      "link": "https://news.google.com/rss/articles/CBMipgFBVV95cUxQRzhNNWQxNldRdXlBaXd2Nm9WMTdGcF92M2FwUnNULVEzVC1QQmtQMmdqTzZxbHVwYUVGcTRCOTVlTWo4Njd4aDFEanN0RjVmXzY5eUIxNXRkeDRDd3lsQnBNMlU0c1Ffc3pzTWlwQVhKQldWRU91S2Y0WE54WkxzWTlzWi1FRnJQVGhhWm05aVd0ekthNTQ5dXQ1dWluVUYxZGZQOUhR?oc=5",
+      "published": "2026-07-29T07:32:10.000Z",
+      "source": "datacenterknowledge.com",
+      "st": 2,
+      "m": 1,
+      "mv": 3
+    },
+    {
+      "id": "asmpt",
+      "ticker": "0522",
+      "name": "ASMPT",
+      "title": "ASMPT Limited Reports Earnings Results for the Second Quarter and Six Months Ended June 30, 2026 - marketscreener.com",
+      "link": "https://news.google.com/rss/articles/CBMi4gFBVV95cUxNZVFMc3F2Z00xY1hRcGpXaGpvYVB0SFdCakZRSlRhZ3Y1QlBvWk14VlhLLVZ2SGJNSmpwRV9veE5oSFowQ1lJRzFpNHBXOVlUR2tTMjFnS0lxMzNVX3ZfbVVDN3FuMjdEa0VtaklHVFNqT2Rlblo1QXNMSkRQTDRiRTNuV2lwcUZGY1NiTTl0OHY3SFhHa2xZSUNKNkRrdm9pbnZ2UGtrNVpmR0xSRE9ra0FLc1JpLU9xWTRCNkJTVFhJMGVTVXoxUGpfeVNqN2lVUnNnNkI3TnlfOXhsYWdnLWpB?oc=5",
+      "published": "2026-07-29T07:08:37.000Z",
+      "source": "marketscreener.com",
+      "st": 3,
+      "m": 1,
+      "mv": 3
+    },
+    {
       "id": "sem",
       "ticker": "009150",
       "name": "삼성전기",
@@ -250,14 +509,14 @@
       "mv": 3
     },
     {
-      "id": "asmpt",
-      "ticker": "0522",
-      "name": "ASMPT",
-      "title": "ASMPT: Strong H1 2026 growth driven by AI and photonics, with robust Q3 outlook and stable margins - TradingView",
-      "link": "https://news.google.com/rss/articles/CBMikAJBVV95cUxQbEE3RDN5WmFRb3JJUkFLUW9HSGFHaUJvNEs5aVZ3VXk0MEJBRUR0NTVZOFpLamFhQTV1TWVVLUlsWU9WamF2SFZ1VE01aHFtM3JjUm5rUklIbFdwZUJwWjZBNHdyeEphaDUzeXJENUpWNHlPOGhlcXJITGt5a2lfMEVoZEVvaU44YzBvY2ZNMnRjcUdLWm12RkhDR2s2OWlqVElTUXFJcnhfT0tiY0dUTFpfYkxsUVQtLW5LT19QX0JoVUdKN0VzVGlXR05hM2RwZ1k5NmZsZ1RhaU5WQTdPS3FkNU54UGwzZWp5Rmt0NGZkZ2JwTkpEVE5STkwtT1pKb3FPMk1SUEtGbnFCZWdJQQ?oc=5",
-      "published": "2026-07-29T04:27:00.000Z",
-      "source": "TradingView",
-      "st": 3,
+      "id": "smci",
+      "ticker": "SMCI",
+      "name": "Supermicro",
+      "title": "GRRR Stock Slides Premarket Despite A $2B AI Deal With Supermicro — Here's Why - Stocktwits",
+      "link": "https://news.google.com/rss/articles/CBMivgFBVV95cUxNZ1BTMU05cW9QemR4N2U2Vmk0VEtFWDhQZjVIR3hKU0w1UHdNSVRzeWlNVTBqa3dEWXZfT0JyT1ZxVFMtOUlWdEs4Y0N3azVZcG9WLXNsTlNzMWNmcWlwaTJEd0paLUQ5cUJBTUpVeDlUc3phUTIxOFYydjNFcENwVGY3cE51VkJzR1h6cjZqM1ZDc3BKMFZoc3RJOGJPV1dGTm9zUVZwTWFWM3RTRk5mcWl5RUJNbXE1YjlnQzlR?oc=5",
+      "published": "2026-07-29T04:45:50.000Z",
+      "source": "Stocktwits",
+      "st": 9,
       "m": 1,
       "mv": 3
     },
@@ -265,10 +524,10 @@
       "id": "asmpt",
       "ticker": "0522",
       "name": "ASMPT",
-      "title": "ASMPT Limited 2026 Q2 - Results - Earnings Call Presentation (OTCMKTS:ASMVY) 2026-07-28 - Seeking Alpha",
-      "link": "https://news.google.com/rss/articles/CBMingFBVV95cUxOTUlrZmJsYzZSNnlEdU01amVpanZlM1VHM1VCR1V3RlZsVTBsOWI4Q2s0amQ4blI2X0lVekFfdmNwdmxOenBpbEZmbEhEc09BNFdGTWZTWEE0eHd3NGg0YWVIbXY2bGg2WDFYLWIyUWRwYlBnSWNiUW40UkRLQmpRVF9qeFBOTkQ5bzhyMlRMeTFfaEZBLXdhbmhCRFR0UQ?oc=5",
-      "published": "2026-07-29T03:31:08.000Z",
-      "source": "Seeking Alpha",
+      "title": "ASMPT: Strong H1 2026 growth driven by AI and photonics, with robust Q3 outlook and stable margins - TradingView",
+      "link": "https://news.google.com/rss/articles/CBMikAJBVV95cUxQbEE3RDN5WmFRb3JJUkFLUW9HSGFHaUJvNEs5aVZ3VXk0MEJBRUR0NTVZOFpLamFhQTV1TWVVLUlsWU9WamF2SFZ1VE01aHFtM3JjUm5rUklIbFdwZUJwWjZBNHdyeEphaDUzeXJENUpWNHlPOGhlcXJITGt5a2lfMEVoZEVvaU44YzBvY2ZNMnRjcUdLWm12RkhDR2s2OWlqVElTUXFJcnhfT0tiY0dUTFpfYkxsUVQtLW5LT19QX0JoVUdKN0VzVGlXR05hM2RwZ1k5NmZsZ1RhaU5WQTdPS3FkNU54UGwzZWp5Rmt0NGZkZ2JwTkpEVE5STkwtT1pKb3FPMk1SUEtGbnFCZWdJQQ?oc=5",
+      "published": "2026-07-29T04:27:00.000Z",
+      "source": "TradingView",
       "st": 3,
       "m": 1,
       "mv": 3
@@ -339,6 +598,18 @@
       "published": "2026-07-28T22:10:45.000Z",
       "source": "qz.com",
       "st": 3,
+      "m": 1,
+      "mv": 3
+    },
+    {
+      "id": "be",
+      "ticker": "BE",
+      "name": "Bloom Energy",
+      "title": "Bloom Energy Boosts Outlook as Profit, Sales Climb - WSJ",
+      "link": "https://news.google.com/rss/articles/CBMinAFBVV95cUxNNlZpSElfeG5wWTFKcTg2ZV9kZTZ1b2NPOHJRM3U4dU01T0hidUxwRFJTRFBxUEpDaXRTRWxDYlVudE8xTmlJNm9EeHg0end2cnFOX3NubFVEUUp2Vm9zbzNvci1QWW1VMGZJSklaT0RqNWNKWWRqRlFnWnVVb3pYd2NNUFc0Q3ljOXJHY3plSlRkenZ1cmQ4TFNyeG4?oc=5",
+      "published": "2026-07-28T21:55:00.000Z",
+      "source": "WSJ",
+      "st": 1,
       "m": 1,
       "mv": 3
     },
@@ -427,18 +698,6 @@
       "mv": 3
     },
     {
-      "id": "amd",
-      "ticker": "AMD",
-      "name": "AMD",
-      "title": "Core Scientific Stock Falls. AMD Deal Can’t Outweigh Wider-Than-Expected Loss. - Barron's",
-      "link": "https://news.google.com/rss/articles/CBMiigFBVV95cUxNSThqTU8zbmNBSnktYkt2VXc2NllDMjRFQUJoelB2bThNZy1nMzBzZE9BT3ZfNGZ2aFJQQnFmbWd1NmpENWE3aE5qelNVQ2hxak9CRzNFZkhaU1RqbFFNWjNibWZFMUx2VTROdUJkWkpfUXU1aFhXYmViVV82by0zaDBFU3lNcFJBMUE?oc=5",
-      "published": "2026-07-28T18:47:00.000Z",
-      "source": "Barron's",
-      "st": 3,
-      "m": 1,
-      "mv": 3
-    },
-    {
       "id": "macro_fomc_금리결정_대기_1",
       "ticker": "MACRO",
       "name": "FOMC 금리결정 대기",
@@ -447,17 +706,6 @@
       "link": "https://news.google.com/rss/articles/CBMiqwFBVV95cUxNdDh6Y01yVFVKS0RueW9RcFluSzBvVzVXNlMtRnhIamlJNTJ4amJISTctLUFTeWhCQ2FGVFlCNVc3QjQxREJwYl9heTVZa1B4dEc5X0I3dmwwdHltM2U0VllwejFodTU4ckVfOXJVdXFqY1ZIeWhhajJsZFVsUERkOE9MNU5mQ1BZLWRaWHM4SndsNzdBa0o2b3BFZ0cyZDAxRXBRUXU5cGdLSDQ?oc=5",
       "published": "2026-07-28T18:17:07.000Z",
       "source": "Business Insider",
-      "st": 3
-    },
-    {
-      "id": "macro_fomc_금리결정_대기_1",
-      "ticker": "MACRO",
-      "name": "FOMC 금리결정 대기",
-      "ax": "rates",
-      "title": "Prediction Markets for Fed Decision in July - Federal News Network",
-      "link": "https://news.google.com/rss/articles/CBMimwFBVV95cUxPbUxXOXcwRGFfV2UwX2dJd2xyNWdJdm1yTnk4dk9ybEljLUx3WnRnRl8td0FKSGoweDBPd2VmLUctNVZIS1ZEZi1lbWZ1UkwtaUo4WFA2WnZUYUtSa1hibWlLNTdtY2dWVGRiM19KVU5iZEJEWU1DTmIyMDJPVk9KWl9xTmwwWTVOOTFqb3NUYlFCX1NCVERfOEU0NA?oc=5",
-      "published": "2026-07-28T17:22:35.000Z",
-      "source": "Federal News Network",
       "st": 3
     },
     {
@@ -497,18 +745,6 @@
       "mv": 3
     },
     {
-      "id": "vrt",
-      "ticker": "VRT",
-      "name": "Vertiv",
-      "title": "Earnings To Watch: Vertiv (VRT) Reports Q2 Results Tomorrow - Yahoo Finance",
-      "link": "https://news.google.com/rss/articles/CBMinwFBVV95cUxPLVltbDhVT2I0NFFsbXpUaURIRnFmVjZVd2FLZUZQS3NqUTlfTUxxTXVBZzgwYzFMYllxbm1yU1J1RmwzYkI2SGdaU0dJYXE3WWRmSmlmalgxQnJ1OWFBcnVaVzAzVlBDTnY1MDV6WG54YTZ6R2M0OGQtTmY3QnpvZkFtMHlyN0lJZndYRzRabnl0OW83ODZ3bzRWREY2bnM?oc=5",
-      "published": "2026-07-28T15:57:02.000Z",
-      "source": "Yahoo Finance",
-      "st": 3,
-      "m": 1,
-      "mv": 3
-    },
-    {
       "id": "cohr",
       "ticker": "COHR",
       "name": "Coherent",
@@ -516,18 +752,6 @@
       "link": "https://news.google.com/rss/articles/CBMi9wFBVV95cUxPVjJsWmZ1WnhsdE5fQ0dUVVg5TzgzNFJ0ck9PRnV1NFRZcTJ4Sm1vMXBhS3ZPejNZdndzbWZFTE5FSVZCODE5SGVGQWRxa19XYTdQZXhnNGdvMngzZjJWbXlBN3BsRXZmZWdmQ21KbEhuV2xlaWN0RXpXamdRbmEtNUVTMHFFM1BPOW9xWTlBRVR4a0J2cUhHaFVUMEUzbzQ3ZV9wbWNHWW00SWtfNXAwTGZqRUdZNEw1WHoyUlFKVnlIdVhkQm9sQVJSVjM1cV9xZ0QxN3FrQm5Cc1p4eHloT1ktU3FLMVNzYWgtWHRudFdnSGQ5eUFr?oc=5",
       "published": "2026-07-28T15:53:59.000Z",
       "source": "Data Center Frontier",
-      "st": 3,
-      "m": 1,
-      "mv": 3
-    },
-    {
-      "id": "amd",
-      "ticker": "AMD",
-      "name": "AMD",
-      "title": "AMD shares may move 7.8% on upcoming earnings release - Investing.com",
-      "link": "https://news.google.com/rss/articles/CBMiswFBVV95cUxNR2hscnpDaHZmQVhmalNGTU9LX3BlMWFlMHBKRHdLYXlBV2NpYjR3enExZ1g5S1lNdXdQNF9qNnZlZWJ4N3FteTRCbXYxX3BVLUFsRW5HckNDRzhqcURVX0dqNHhTNzBaTGlvYWdVaElDdlZOY1dDcmIyaldlalRxRElQZUExS0xvR0NJMVI3NU5ZLXBodUNnU2V0UTcxRXc0TE4tZ0RRR0t3ZW5BQU5sUlJqVQ?oc=5",
-      "published": "2026-07-28T15:25:04.000Z",
-      "source": "Investing.com",
       "st": 3,
       "m": 1,
       "mv": 3
@@ -604,18 +828,6 @@
       "mv": 3
     },
     {
-      "id": "cohr",
-      "ticker": "COHR",
-      "name": "Coherent",
-      "title": "When fiber becomes a sensor: why AI is the missing ingredient in next-generation network protection - Nokia",
-      "link": "https://news.google.com/rss/articles/CBMixAFBVV95cUxOdU5GbU4wUkxCR1ZkOFNMb25mcnVnZGdiX25WSVJydUpEdF91MmZJanlFN01ZR2M2YWtiV0dUTWtmTDhFcWVJaHl2cEdGMDNfMG9BZWxseWpIT2lhMDM3R05BX3pCZko5UHNoQVktRnFmZlFsRTdyMEQxOXVObmIzcE1sRXFqT1BMVldUVFlkLU41cHV2VmZLWFhNZDVWUENGNGgxcm5sMTBfV3pCVzcyS1otRlpCcTJEd0JBZDB0RW12UE01?oc=5",
-      "published": "2026-07-28T14:07:04.000Z",
-      "source": "Nokia",
-      "st": 3,
-      "m": 1,
-      "mv": 3
-    },
-    {
       "id": "rmbs",
       "ticker": "RMBS",
       "name": "Rambus",
@@ -628,14 +840,14 @@
       "mv": 3
     },
     {
-      "id": "amd",
-      "ticker": "AMD",
-      "name": "AMD",
-      "title": "Core Scientific and AMD Announce Infrastructure Partnership - Core Scientific",
-      "link": "https://news.google.com/rss/articles/CBMizwFBVV95cUxPTEstWlVPenBxdWx3WkxBUVI0N3BXbDZSWGtkZ3IwcjFianBmWERSWGJOUXRrblpXZG5NVnF1QXozLVZrRzY3MTFKVW9tXzMyX3o0OHB1cERDQXRhSzQ0RnRKN3NoaENMbGhxbXc4akNKVmtiREFWSnBkSVBXczZTejJrblRkelNsZW9fVl9PMTRuVDY4UXV1Ui1vV1kxSVl4eF9tZjN6enF0QjllSnI0TkMzakZfaXFiS2wyMVU0LTN1dUhMVXpmTFdmcDRldDg?oc=5",
-      "published": "2026-07-28T12:54:23.000Z",
-      "source": "Core Scientific",
-      "st": 3,
+      "id": "be",
+      "ticker": "BE",
+      "name": "Bloom Energy",
+      "title": "Bloom Energy Stock Tests 200-Day Moving Average: Can Thursday Earnings Spark a Rebound to $181? - Benzinga",
+      "link": "https://news.google.com/rss/articles/CBMi6AFBVV95cUxOTmQyYi1nQTg0dndNZmZyY3hzMGt4WTJ6a24tN29mY2swN2dMRzhVZllfTjZsZFFWTlFzM0pOWjkzMnlQdU5YZEhQS0hzYUloVGdJU2RqVnh4NWhuUVJ2Y3NoZFpEMjRwZUdfX1NLNjFWeXZiaTJscC1SSFpfR25PbDJaMm5veWM5QUxETmpwWEQ0a0JJTF9jNnNmT2FsdHdJUk9JMHdjQ1pQMlltYTJvclhQM3hXZzZzckRPSVc4LVpwMF9TVjZZZ0ZxSTVBbHhVOXhLejJwaDlidlh4VlVvT3lEX0J5Y29l?oc=5",
+      "published": "2026-07-28T13:32:50.000Z",
+      "source": "Benzinga",
+      "st": 9,
       "m": 1,
       "mv": 3
     },
@@ -648,6 +860,30 @@
       "published": "2026-07-28T12:51:08.000Z",
       "source": "The Globe and Mail",
       "st": 3,
+      "m": 1,
+      "mv": 3
+    },
+    {
+      "id": "smci",
+      "ticker": "SMCI",
+      "name": "Supermicro",
+      "title": "Nvidia Gets Drawn Into Supermicro Chip Smuggling Scandal. Should Investors Be Worried? - Yahoo Finance",
+      "link": "https://news.google.com/rss/articles/CBMinwFBVV95cUxQQlhpTkFpaXA5VVJ3V2NCNHVZRHB6eWJvSTM2aXhCMm1EcVlRQnVzQU1TU0M4TXo5Z1BBVGVCNXF6c0ZydWdSVGtwZzJBMExKZ0U0ZWNPQnRIaVg2Rnljbnh3bnEyWVoyWjJnREJiNW9hOXZtTEtwb3BFRXQzNEVucDU5V1B0WFBPSzVQQVR1NEVoQy1TTllGcUMyWDVZc1E?oc=5",
+      "published": "2026-07-28T12:44:52.000Z",
+      "source": "Yahoo Finance",
+      "st": 3,
+      "m": 1,
+      "mv": 3
+    },
+    {
+      "id": "smci",
+      "ticker": "SMCI",
+      "name": "Supermicro",
+      "title": "Nvidia Gets Drawn Into Supermicro Chip Smuggling Scandal. Should Investors Be Worried? - 24/7 Wall St.",
+      "link": "https://news.google.com/rss/articles/CBMixwFBVV95cUxPQ1VBNTJQUl9aTjUzRGJMR2pjckR0WFJEejJ1VnhNMFlrUlVDbGp3VGtia1poU2lwVVJJVzBUVS1wU1Etak5MTmdlelZLMVRrd2pTemN3U3F5SW4weGw0S0JKMUZKaWNUbVhfanN5NlZTc3JDbXZ2aURLcUlidElWd0QxWEdWSHNXM3NPZHlfS09pckR6d3c5RDFyam8wQnNLemE3LTJ1M2NaZl9XMWNMb0VmSVFCU0lfR1I1RWN3NXp5ZjlmaUVV?oc=5",
+      "published": "2026-07-28T12:44:52.000Z",
+      "source": "24/7 Wall St.",
+      "st": 9,
       "m": 1,
       "mv": 3
     },
@@ -710,17 +946,6 @@
       "mv": 3
     },
     {
-      "id": "macro_fomc_금리결정_대기_1",
-      "ticker": "MACRO",
-      "name": "FOMC 금리결정 대기",
-      "ax": "rates",
-      "title": "What would a rate hike signal about the new Fed chief's MO? - Axios",
-      "link": "https://news.google.com/rss/articles/CBMibkFVX3lxTE5peUZ0QVc0N2xYNlZ6SkJJVTE1R1ZjN202LXgyS2E2SUVLZm1VOGlhZkluZG1FeVdmTUdnU2QtRVdHWjAzUVhUWFZDV0pMWkxtSkZ0VnVfN1NCUVVNOHVYNlM1bHZHQmJrcV9TOWxn?oc=5",
-      "published": "2026-07-28T11:33:05.000Z",
-      "source": "Axios",
-      "st": 3
-    },
-    {
       "id": "bneck_capex",
       "ticker": "MACRO",
       "name": "상류 · 하이퍼스케일러 capex",
@@ -780,6 +1005,18 @@
       "mv": 3
     },
     {
+      "id": "twng",
+      "ticker": "089030",
+      "name": "테크윙",
+      "title": "테크윙 투자분석 2026. 07. 28 - judal.co.kr",
+      "link": "https://news.google.com/rss/articles/CBMic0FVX3lxTE1Xd19uNUZ5VEVJUmhOS3liYjRpSlVaNTg1RXB2S2pwR0F3dWhOUDJjaUNBaVZMc21oa3ZNamZwNmtRWVdweTkteUk2NHZPUVJDbmRlSTMxUXJtS3lLd0FHLUdzMXVGZEtXVnQ1WlF0RXdPWDQ?oc=5",
+      "published": "2026-07-28T07:40:09.000Z",
+      "source": "judal.co.kr",
+      "st": 3,
+      "m": 1,
+      "mv": 3
+    },
+    {
       "id": "sem",
       "ticker": "009150",
       "name": "삼성전기",
@@ -815,18 +1052,6 @@
       "mv": 3
     },
     {
-      "id": "cohr",
-      "ticker": "COHR",
-      "name": "Coherent",
-      "title": "Scientists create an “electron lighthouse” with laser light - ScienceDaily",
-      "link": "https://news.google.com/rss/articles/CBMibkFVX3lxTE1QNks2dElDUEU2WGl1MDlnaEdqQ3lER0wzOWVZd1pPMlBIVkVlNTBPWFg0bXNLc0FqaUtJSUF1VzlVLUpDMzZucGpMSEN6b1BoVloxaU9YT1lRVEhSRWFLTmptSzFVSVB6eXFwTUZR?oc=5",
-      "published": "2026-07-28T05:04:52.000Z",
-      "source": "ScienceDaily",
-      "st": 3,
-      "m": 1,
-      "mv": 3
-    },
-    {
       "id": "sndk",
       "ticker": "SNDK",
       "name": "SanDisk",
@@ -834,18 +1059,6 @@
       "link": "https://news.google.com/rss/articles/CBMikgFBVV95cUxPd2hkZ2xERVI1VkJoeF9aeXk5LVBUdmF2YU4tU1ROVDVUVzZyU3JDdDRrV1k5Z0lDVkQ3MEtFVkN0Q3UxOVlMRVlReExIR21VakRURkZWaHFjRUxuWUFfZ1d3UjQ1Nm1pVldXclVuOGVJZk1Pem8zdk8ycnJQRUJfNl9pUlUtam15WHEzZ01LQVVBQQ?oc=5",
       "published": "2026-07-28T04:30:35.000Z",
       "source": "Yahoo Finance",
-      "st": 3,
-      "m": 1,
-      "mv": 3
-    },
-    {
-      "id": "vrt",
-      "ticker": "VRT",
-      "name": "Vertiv",
-      "title": "Earnings To Watch: Vertiv (VRT) Reports Q2 Results Tomorrow - StockStory",
-      "link": "https://news.google.com/rss/articles/CBMitAFBVV95cUxPamdpa2FsMXVTYUJyaHNGQXZsY1FuR05OckZXOXZjVkprWUxQZ05UdmY1WGRUNEVUVnhVcW1LX3hJck9CcW9LOGtDcmp3Y3hTR3pQdFpYNUxiM2xMVGVGVngtYmxNcVNXVHg2SXhfVjlENkU0U2NzbFFOcHI5ZXVYRGp2bGhKaXZmdXhuXzJDT0NwN1lOZjA1NnRFNi1fMHE3MDVTOUZNUXNpNDlDT3hMV2tiQ3g?oc=5",
-      "published": "2026-07-28T03:59:43.000Z",
-      "source": "StockStory",
       "st": 3,
       "m": 1,
       "mv": 3
@@ -863,18 +1076,6 @@
       "mv": 3
     },
     {
-      "id": "rmbs",
-      "ticker": "RMBS",
-      "name": "Rambus",
-      "title": "Rambus Inc. 2026 Q2 - Results - Earnings Call Presentation (NASDAQ:RMBS) 2026-07-27 - Seeking Alpha",
-      "link": "https://news.google.com/rss/articles/CBMimgFBVV95cUxNeXV1cGdmN2VFZDdkdmdILWxDWFM0YVREZmt4SU1iNFNkOWRTa1ExRFpObzZmaWJEeVhzZEtETVVpNHNnQk1wQl9xX0xoUFd6TGpUUjQ1ZzZ1anVKSjRVbDR1T3ZRdFNrXzRKbDdxek5TUnotY2xsekxVa1RuS0ZPVk1xN21JemJPanBqbzlONTcwcmxDOTEyU0ZR?oc=5",
-      "published": "2026-07-28T03:31:29.000Z",
-      "source": "Seeking Alpha",
-      "st": 3,
-      "m": 1,
-      "mv": 3
-    },
-    {
       "id": "sec",
       "ticker": "005930",
       "name": "삼성전자",
@@ -883,18 +1084,6 @@
       "published": "2026-07-28T02:21:08.000Z",
       "source": "시사저널e",
       "st": 3,
-      "m": 1,
-      "mv": 3
-    },
-    {
-      "id": "mrvl",
-      "ticker": "MRVL",
-      "name": "Marvell",
-      "title": "Marvell (MRVL1) Q3 2025 Earnings Report - Results, Call & Slides - TipRanks",
-      "link": "https://news.google.com/rss/articles/CBMickFVX3lxTE9QazI2Mkdxb3R0RFhmQ205azRCdnRvZlhLUmtzejJhT0stdktzVzdMOE1JY0UyeWdMN0NLeUZiN2ZuQTEzaFNycjlvTWFfcTd6QXY2Um5MUC1IN1RaZnlhZjZVUjhDU0VVMGxId2liTTladw?oc=5",
-      "published": "2026-07-28T02:06:53.000Z",
-      "source": "TipRanks",
-      "st": 9,
       "m": 1,
       "mv": 3
     },
@@ -1017,17 +1206,6 @@
       "mv": 3
     },
     {
-      "id": "macro_fomc_금리결정_대기_1",
-      "ticker": "MACRO",
-      "name": "FOMC 금리결정 대기",
-      "ax": "rates",
-      "title": "Prediction Market Traders Brace for Surprise Fed Rate Hike - Decrypt",
-      "link": "https://news.google.com/rss/articles/CBMilAFBVV95cUxNeGxCd3pRbzlLaEk3bFVOODdvNjA1bDdkZFhfbV9HLWQ0LUdiRHV5Q1dpWHJCaWlGR0lWREN5YXo1X0MycFN4ZmUwTWdhTVFaOV9JaWw0dGJub1owVGh2QzVZZmhlSEpFbWx6QmhMVGQ2d09NYURfd3JyVU1scUZLZlhEVVNmZ3RWTTFBaFJOMHMtOW5M0gGUAUFVX3lxTE14bEJ3elFvOUtoSTdsVU44N282MDVsN2RkWF9tX0ctZDQtR2JEdXlDV2lYckJpaUZHSVZEQ3lhejVfQzJwU3hmZTBNZ2FNUVo5X0lpbDR0Ym5vWjBUaHZDNVlmaGVISkVtbHpCaExUZDZ3T01hRF93cnJVTWxxRktmWERVU2ZndFZNMUFoUk4wcy05bkw?oc=5",
-      "published": "2026-07-27T20:43:16.000Z",
-      "source": "Decrypt",
-      "st": 3
-    },
-    {
       "id": "sndk",
       "ticker": "SNDK",
       "name": "SanDisk",
@@ -1048,18 +1226,6 @@
       "published": "2026-07-27T20:12:00.000Z",
       "source": "Stock Titan",
       "st": 1,
-      "m": 1,
-      "mv": 3
-    },
-    {
-      "id": "mrvl",
-      "ticker": "MRVL",
-      "name": "Marvell",
-      "title": "Marvell Technology Inc Stock (MRVL) Moved Down by 3.81% on Jul 27: Key Drivers Unveiled - TradingKey",
-      "link": "https://news.google.com/rss/articles/CBMiiwFBVV95cUxPekRiUnh3Q2w5RlNMZUxOM3Rya0NWZlZqUUxlUFlWVF9lQ2w3VGs4VFhaT1pHRTJyVGNLR1B4NkdGMEdjR1RoQjI1MTVCLUtNWW1nZWE5RmUwZUFpcXZjOWdTWDZiVnFRN3JsSjlIeFJBMWJCRFJsQkJCOEVxOE1sWlNfRDFYNmIzTFFN?oc=5",
-      "published": "2026-07-27T18:15:40.000Z",
-      "source": "TradingKey",
-      "st": 3,
       "m": 1,
       "mv": 3
     },
@@ -1086,30 +1252,6 @@
       "st": 3
     },
     {
-      "id": "sndk",
-      "ticker": "SNDK",
-      "name": "SanDisk",
-      "title": "SanDisk’s $42 Billion Backlog Is Real — So Is the Valuation Question Now Hitting Every Memory Stock - Yahoo Finance",
-      "link": "https://news.google.com/rss/articles/CBMinAFBVV95cUxNS3hVOUJKLWNQeV9fSTItSG5XMGVrQTQ3T09nek5ENHFKbi15VEdIN1Z5bzhqcnVyMDRQcmJaMHRoZzltVkVLU0g3MzdpRW96c1JOX0VxX3FQNkhJNllKWFhXSG14cmhuakdNdFZidWQ4RHhhWlNXRndMd0VOLWNhMlAzWGZqcVEyRUdwTnRhanlFa0VpamNDUVVJS1E?oc=5",
-      "published": "2026-07-27T15:42:53.000Z",
-      "source": "Yahoo Finance",
-      "st": 3,
-      "m": 1,
-      "mv": 3
-    },
-    {
-      "id": "sndk",
-      "ticker": "SNDK",
-      "name": "SanDisk",
-      "title": "Sandisk Slides as Memory-Sector Weakness and Pre-Earnings Caution Weigh on Shares - Quiver Quantitative",
-      "link": "https://news.google.com/rss/articles/CBMitAFBVV95cUxObnRXVTQ3UFE0b2FZN18ycFlSYkdSUERwVjlWMmRzcThaSS1wTkNUSUthUnVlT1VvMW14UW1HRTJqVGpZZjBsYlpRdEpieTN1NHdxeTJNSVN1dE5ySHJ6QTFLWk9obUxSVUoyZlpuUGpWWmNLMXRhalk4QVgwbTQ1bFhQcHMyQ2VYZFN6OHZKRTd0M1VmcEREeGFxTUIxYlhCc2xnQWJ0bzluTnpud3N6NmlaSnI?oc=5",
-      "published": "2026-07-27T14:53:00.000Z",
-      "source": "Quiver Quantitative",
-      "st": 9,
-      "m": 1,
-      "mv": 3
-    },
-    {
       "id": "smci",
       "ticker": "SMCI",
       "name": "Supermicro",
@@ -1117,6 +1259,18 @@
       "link": "https://news.google.com/rss/articles/CBMikgFBVV95cUxPeTlyY1dRYmdwQ0UySW1qUHVCNHlkbjdwNklUNThWNDROMWQ3eVlTSUZjdnUtWk5JcWpYOTVGdHNPS2gybzBYOFpQNDJLcHZJZHNHWks5Y3lnOURscXR3V25SSHRCQmswaXBzaFhLMEg4T1lpTkdCYTllcWlFaG5lcWxnTXNXeHVDUG0tTEIxSEgzZw?oc=5",
       "published": "2026-07-27T14:31:49.000Z",
       "source": "Seeking Alpha",
+      "st": 3,
+      "m": 1,
+      "mv": 3
+    },
+    {
+      "id": "ceg",
+      "ticker": "CEG",
+      "name": "Constellation",
+      "title": "Brokers Suggest Investing in Constellation Energy Corporation (CEG): Read This Before Placing a Bet - Yahoo Finance",
+      "link": "https://news.google.com/rss/articles/CBMisAFBVV95cUxPWFpYbW5zZTQ2cUFQMVk1amxuTk02SnFpZTRmNEQ4YVhnMHFVZDRvTUd6Q1dJRzZraVRnRmQzRlFjSjNhLWxvbkhLaTNvSWdtVkU2VGdRVDgwRV8xUjU1X0NKbDFuTFY4QnRzRmNFX3daVGt6dnMzQ1YwcU56WXFkQ2I0U2tObTZiWHVzcW1TU1otbl95OTFrd2hsQWsxTjlfRGVjLXRKU3lCcVZMTnctUg?oc=5",
+      "published": "2026-07-27T13:30:04.000Z",
+      "source": "Yahoo Finance",
       "st": 3,
       "m": 1,
       "mv": 3
@@ -1134,6 +1288,18 @@
       "mv": 3
     },
     {
+      "id": "vicr",
+      "ticker": "VICR",
+      "name": "Vicor",
+      "title": "This Tiny AI Supplier Could Be More Important Than the Chipmakers - Yahoo Finance",
+      "link": "https://news.google.com/rss/articles/CBMilgFBVV95cUxOa1JINWRxbUgtOG1nY09fdGxVb1JPNTNPajlKUTJiTjdsYTZQNGNoeXU4UG5pRjhSX3JMdmxNTEVwM3JlYmlpb1V5Y0lqeUhRUTBtdGFDQTdtcXlqYlpvTlFSS3ZhSTZBaFhSdERLSmdqTjJKcTIwNVdVLTY0TWhfeC1temxqSTJlMTBzLTdYY3dOSFRVZmc?oc=5",
+      "published": "2026-07-27T12:45:00.000Z",
+      "source": "Yahoo Finance",
+      "st": 3,
+      "m": 1,
+      "mv": 3
+    },
+    {
       "id": "bneck_l8_pwr",
       "ticker": "MACRO",
       "name": "L7·L8 · 전력 병목",
@@ -1143,6 +1309,18 @@
       "published": "2026-07-27T11:13:34.000Z",
       "source": "StartupHub.ai",
       "st": 3
+    },
+    {
+      "id": "oklo",
+      "ticker": "OKLO",
+      "name": "SMR plays (Oklo 등)",
+      "title": "Oklo Cleared by US Department of Energy to Start Groves Reactor - energynews.pro",
+      "link": "https://news.google.com/rss/articles/CBMikwFBVV95cUxOTmpEWXZibUc0TDhvZTJJNi1ZUERNOHBHNC1yd1pXUEk2OE9IZFF5c0hCUnpmMDBxMWxCb0F1cndCRGs2SXUyUXlrWG5XbGxSYlE1TlVnS1B5MGtxTFdfMmhLdi1jVEV1QmJESkNSS2JocHNGVU9vUEVqaUp5c1FLSkkyTEx4aFRsV0U0OE9ONjRWQU0?oc=5",
+      "published": "2026-07-27T10:56:20.000Z",
+      "source": "energynews.pro",
+      "st": 3,
+      "m": 1,
+      "mv": 3
     },
     {
       "id": "mu",
@@ -1176,6 +1354,18 @@
       "link": "https://news.google.com/rss/articles/CBMingFBVV95cUxQLXNWel85VC1HaGdYTWZ4TGthZDY1dzF4cGJvNEZ1U014ZHhLNGktSjFCUl8xQlNWdzZkbDJfbmZoWE05WU52Z21pSTBBSEs2TUZNNUpnc2FiQmp5TGttOVJvRkpicUFaa1pmRWNuV1ExTi1YWGZZd01pbmhwRi1XSTcxN08xX0JFN2pwMjhxLXViQXVCTUdxTU80d1huQQ?oc=5",
       "published": "2026-07-27T09:14:21.000Z",
       "source": "Yahoo Finance",
+      "st": 3,
+      "m": 1,
+      "mv": 3
+    },
+    {
+      "id": "smci",
+      "ticker": "SMCI",
+      "name": "Supermicro",
+      "title": "Supermicro adds H15 servers with AMD EPYC 9006 CPUs - Engineering.com",
+      "link": "https://news.google.com/rss/articles/CBMihwFBVV95cUxPVzluYVNERThMT1BfU2ZTaTc2X25TTWc5cnAzUmsxR09teV9fcVkyMUFrYlFmbHBxMm8yMVh1STFNRWdTTWNjYVdPSzdUdWpYb2xXZGM5ZzNOdWRnYnpZN0ZnakVyZC1FOVhURjBpa1pSMnFUbkc1Sm12c1dUNDBzM0dXQjBlXzg?oc=5",
+      "published": "2026-07-27T08:55:31.000Z",
+      "source": "Engineering.com",
       "st": 3,
       "m": 1,
       "mv": 3
@@ -1245,17 +1435,6 @@
       "link": "https://news.google.com/rss/articles/CBMicEFVX3lxTFBkZkVtRXJjX3ZOa2dZYjZzbXVPTlZUUVJZd25fVGZfdmJ2UkxmSkQ5Tzl2VWpEWXZIMk5VaWxmVmhfNnRBN0kwdkdIRk5ESXVUYUpxYVJkTDVyU3JTcDhTbnlJXzNGWUFNX0NaTzJtTlE?oc=5",
       "published": "2026-07-27T06:55:25.000Z",
       "source": "블록체인투데이",
-      "st": 3
-    },
-    {
-      "id": "bneck_capex",
-      "ticker": "MACRO",
-      "name": "상류 · 하이퍼스케일러 capex",
-      "ax": "capex",
-      "title": "Hyperscaler AI Capex Tops $500 Billion Even as Burry Shorts the Chip Trade - Gotrade",
-      "link": "https://news.google.com/rss/articles/CBMilAFBVV95cUxPcFIzNUxlX3hsWm51ZUZFLTN6UnhkM0dDN0FDZmNfWENUNkdJQVJuMUU3NS1fQlV3T3hmYmpQVDh4ODZtTXdkQlUwNk93a2NiclVIZ0ZFamRaMW9CdFhUN0tEVm8xaUJuRjdZQkROR0NaMGR3Vl9oSUlybks0ZkZOZjNxS2V1cW5laHdjeTNKZGxfUzFn?oc=5",
-      "published": "2026-07-27T06:38:00.000Z",
-      "source": "Gotrade",
       "st": 3
     },
     {
@@ -1352,19 +1531,6 @@
       "st": 3
     },
     {
-      "id": "macro_빅테크_ai_capex_실적_1",
-      "ticker": "MACRO",
-      "name": "빅테크 AI Capex 실적",
-      "ax": "capex",
-      "title": "Big Tech earnings slam into a market in revolt over AI spending - Fortune",
-      "link": "https://news.google.com/rss/articles/CBMipgFBVV95cUxNT3RZajdfZVBqRTR4TFVYZlh1bUMwUEZtRnRORzlQVk9jcnJMVTdqRl9aN19YS0JNZjl1SWVFUFJSUlBQel9HeTVLeV8wSDRvS1NpR3dyXzZfckVIUWtKeUFkZnZpTE45OTc5T3poNVpMQ2JWeDVtTnFtMWQ1c0k5YlFvNTNpX0NnS3VLMG5lTnRvQ25TYmw0WjVZTWd6RnRxbi1GNWZ3?oc=5",
-      "published": "2026-07-26T18:30:00.000Z",
-      "source": "Fortune",
-      "st": 3,
-      "a": "빅테크 실적 시즌에 AI 지출 규모에 반발한 시장 매도세 충돌, AI Capex 정당성 논란 격화",
-      "w": "상류 하이퍼스케일러 Capex 사이클 지속 여부가 L2~L5 가속기·패키징 수요의 핵심 게이트로 작동 중."
-    },
-    {
       "id": "bneck_l3_dram",
       "ticker": "MACRO",
       "name": "L3 · DRAM/HBM 가격·공급",
@@ -1383,30 +1549,6 @@
       "link": "https://news.google.com/rss/articles/CBMiUEFVX3lxTFB0dm1zb3JScFdPTFhDLVRjSm93MXAtdm01VDUtcHpjbHhST2t5YUZfNDhDbnV2MXBkTkZ4VnE2MlA3bENQUEVNWDBuRWJvQ1RS?oc=5",
       "published": "2026-07-26T14:32:26.000Z",
       "source": "문화일보",
-      "st": 3,
-      "m": 1,
-      "mv": 3
-    },
-    {
-      "id": "be",
-      "ticker": "BE",
-      "name": "Bloom Energy",
-      "title": "Bloom Energy's Next Earnings Report on July 28 Could Send the Stock Soaring. Here's Why. - The Motley Fool",
-      "link": "https://news.google.com/rss/articles/CBMixgFBVV95cUxNU0NtSzdpdVRhaWVmbDhYSWhYcGhvakZVZEtVMUF2ZlVmOWs4cFd5NHdkQ3EzbVlObmktd01RSE15cnp1Y281cnkwYWN3cWE2NzJhZmFpYllndEJSOEdabDFESzRQRk1FbkFKbXhPY3BLdGQxN01vbG95emhmRFQ3NnpZdUZRTGRlcWJrSktkVjV5SWNzQUxLX09YLXpHb2FTd1p1TThVLUtpNjlNSWJ6MmJPSVJSbVhRUU40cGp2U0Ztc3ZnLXc?oc=5",
-      "published": "2026-07-26T14:25:00.000Z",
-      "source": "The Motley Fool",
-      "st": 9,
-      "m": 1,
-      "mv": 3
-    },
-    {
-      "id": "be",
-      "ticker": "BE",
-      "name": "Bloom Energy",
-      "title": "Bloom Energy's Next Earnings Report on July 28 Could Send the Stock Soaring. Here's Why. - The Globe and Mail",
-      "link": "https://news.google.com/rss/articles/CBMi-AFBVV95cUxQYWZLVU1NeDRnRWRNbG5EQ2JyQlNyRV9INHVnQTRDenJWZ29KOGQ0bzZTM0pOa0Zxc1Jjc2tfZzJuM0gxNG9yeXExUTExT2lkOFY4N1g3Q2hLVVFHSnNTY25kaXlCSEswNFBDdVhDbV9yeHVKT0ZwcDM2eVY0MkdzVUIxV2FXS0xaOWt2ajdwTlBnLWtPeEJyczdGOVNLUGlhdWxPTVQ0SUFoS2xIaHFyNXJvSEMyWnZkczB6aWwwMHVFbEpnNDFiMHJJZzczdFRPeGNLQXNUQUJDeHpIeHFMQU12OW1CXzhJazZKanFNRXFFdG9XV0dseA?oc=5",
-      "published": "2026-07-26T14:00:08.000Z",
-      "source": "The Globe and Mail",
       "st": 3,
       "m": 1,
       "mv": 3
@@ -1502,20 +1644,6 @@
       "st": 3,
       "a": "SK하이닉스 주가 3주간 40% 급락에도 현물 D램 가격은 고점 유지",
       "w": "L3 메모리 현물가격 강세는 HBM·DDR5 공급 타이트 지속을 시사하며, 하이퍼스케일러 capex 수요가 물량 소화를 뒷받침하는 구조 확인."
-    },
-    {
-      "id": "smci",
-      "ticker": "SMCI",
-      "name": "Supermicro",
-      "title": "Supermicro H15 Servers Pair 6th Gen EPYC With MI350P GPU Systems and the Helios Rack - StorageReview.com",
-      "link": "https://news.google.com/rss/articles/CBMiuwFBVV95cUxPckNNa0tRQy1QampJZDdpa0Y3dW1FNURPLTRTLUM4TUZ4M2Y0dzVCVzVqNmg3V0VxamllQzlEUms0Wk9iN01jXzM1NVhGRkRqLWlPNFlCc1U3MG40MzhjLTVZcHM4U2dBa09HcGZmTnRFa0FwWmpobnV5M1ltOW10RkYtbTNhRWNPd1RBODM3bmpoR1pPdWQ5VDN1R1dkQUdaMWlFb3l2cFpmdTlRcGZNV2poMVNHLUFuTzVJ0gHAAUFVX3lxTFBKdkc4QV9ZMFhBdkRoTTVBNUVqdXY1ZTlyaF9BZTByWEVYcHlhWUtWY2tBYU5lR0xMM25qa0tOUUxxaEFzemp0VWJNQ2xBWXk1M2dMT3ZDMF9wcWY3YWtjMXZIVFUydTgzVmY4RVpjMDhYYXQzT3kzR0dYM3F5bElIZXZvVUEtZHpSRi1tTlBaOFRMcHhGeW0xUWZaay1GRE9vS0ZTUFJVNkZCbUV6T2NhbGNzaXpVZ2dUTDJGbm9oYQ?oc=5",
-      "published": "2026-07-25T18:09:08.000Z",
-      "source": "StorageReview.com",
-      "st": 3,
-      "m": 2,
-      "a": "Supermicro, 6세대 EPYC CPU와 AMD MI350P GPU를 탑재한 H15 서버 및 Helios 랙 시스템 공개",
-      "w": "신규 AI 서버 라인업 공개는 제품 포트폴리오 확장 신호로 긍정적이나, 실제 수주·출하 확정 전까지는 수요 견인 여부 확인이 필요.",
-      "mv": 3
     },
     {
       "id": "bneck_capex",
@@ -1798,20 +1926,6 @@
       "w": "지정학·무역 이중 충격은 하이퍼스케일러의 해외 데이터센터 입지 및 공급망(L5~L8) 의사결정 불확실성을 높여 capex 집행 시계 단축 리스크 내포."
     },
     {
-      "id": "oklo",
-      "ticker": "OKLO",
-      "name": "SMR plays (Oklo 등)",
-      "title": "Oklo Stock Soars as Microsoft and Nvidia Join $200M AI and Nuclear Deal Backed by Trump's Administration - CarbonCredits.com",
-      "link": "https://news.google.com/rss/articles/CBMiyAFBVV95cUxNVVNJY0RmNEtvcUtfekVxc1N4NXA3bzE5a3dpOWRVd2NUV3pCaEQxb1o1bDdrOW5tS21fNzNFTHlEQzBCWHhHUnR5Q05FVE1maVA0bVkzVDJOQmhpT1YwUHpqR0ZMcXlHWmFyYi1hbFlybEhQMXVaeHJ2QnhidHBBOExkSUhfeDc1c0M3NmIzbFVHS2tVd2Vuc041V2tOLVVmUm5WOGo5Q3FRalhEdFcteTRuZHFMSzIyd241dU5iTmRvMXlQV3MwTA?oc=5",
-      "published": "2026-07-24T16:18:31.000Z",
-      "source": "CarbonCredits.com",
-      "st": 3,
-      "m": 2,
-      "a": "마이크로소프트·엔비디아, 오클로 참여 2억 달러 AI·핵에너지 딜 체결",
-      "w": "대형 빅테크와의 구체적 투자 계약 확인으로 Oklo 수요 기반 확충이라는 강한 펀더멘털 호재 관측.",
-      "mv": 3
-    },
-    {
       "id": "macro_중동_충돌_유가_급등_0",
       "ticker": "MACRO",
       "name": "중동 충돌·유가 급등",
@@ -1839,6 +1953,18 @@
       "mv": 3
     },
     {
+      "id": "cbrs",
+      "ticker": "CBRS",
+      "name": "Cerebras",
+      "title": "Can AMD Partnership Strengthen Cerebras' AI Infrastructure Leadership? - Yahoo Finance",
+      "link": "https://news.google.com/rss/articles/CBMipAFBVV95cUxPT042VG14ejhTT0w4ZHRtaEVqRU5WSVNGZUZ0TGJieHlKb0JPSkxrclNTYVhMMjlodlg2cF85bl9HSUZvNExnLWhLMS1ORFE5MWZuOGdieUowWml3d1BGYWthcU5UYWNQemtQMUNfaUpxRDA1M3R4b0lkMnVGS01paHkzNWItWXExR2tkNUx6b1V1Uk9pVVpTZnd0UkxKU1NEajFvaA?oc=5",
+      "published": "2026-07-24T15:04:00.000Z",
+      "source": "Yahoo Finance",
+      "st": 3,
+      "m": 1,
+      "mv": 3
+    },
+    {
       "id": "vicr",
       "ticker": "VICR",
       "name": "Vicor",
@@ -1848,20 +1974,6 @@
       "source": "simplywall.st",
       "st": 9,
       "m": 1,
-      "mv": 3
-    },
-    {
-      "id": "oklo",
-      "ticker": "OKLO",
-      "name": "SMR plays (Oklo 등)",
-      "title": "Oklo cleared to start up test reactor - World Nuclear News",
-      "link": "https://news.google.com/rss/articles/CBMiiAFBVV95cUxNQk10c1hMT2l6SzJVeklCajBGVzNVQkFncTNJOWVqazdNQ2lMRm5WNGRxSWpUMG9ZYll0MWx0OVRCODFsTVkyc05nbU5CLWlwR3FYQUZSXzBIYnAwZkdicmh1UHhCRHRjQ1lObS1MS1Q4Z1ZpTWZsWXVDTF9PVzEtRlV5eGt4ejls?oc=5",
-      "published": "2026-07-24T14:34:19.000Z",
-      "source": "World Nuclear News",
-      "st": 3,
-      "m": 2,
-      "a": "오클로, 테스트 원자로 가동 승인 획득",
-      "w": "규제 당국의 가동 허가라는 구체적 마일스톤 확인으로 사업화 일정 앞당김이라는 펀더멘털 호재.",
       "mv": 3
     },
     {
@@ -1876,20 +1988,6 @@
       "st": 3,
       "a": "트럼프 행정부, 80개국 이상에 약 10% 신규 관세 일괄 부과 발표",
       "w": "매크로 게이트(VIX 상승·리스크오프) 압력 강화 및 L4~L6 하드웨어 공급망 원가 상승 경로 재활성화"
-    },
-    {
-      "id": "ceg",
-      "ticker": "CEG",
-      "name": "Constellation",
-      "title": "These 9 Illinois communities say they’re interested in new nuclear facilities - NPR Illinois",
-      "link": "https://news.google.com/rss/articles/CBMiwgFBVV95cUxNMW1Lb1ppYnBzWl9PYkViYjFPMVNTbHJHVnNLaXpxTU1IMFdLVzBCdmoxM3dTS0g1d0Fvb1pxbXdWc2xqQUNPQTdXZ3o1aTJneVFXakY1ZWk2Ymlab1NKdktWWk15VFJERmZpX0V0TDBzaXBzQ2JBVE1PX0dlXzlBTS1MZFlVUFVJdkFZQjlHcTJRdjFIYmNDTWNEYng1M0FLWkdnN3gteEd4clBpc1ZrVXZfdGhGYUtYemFuZGVWU3lTUQ?oc=5",
-      "published": "2026-07-24T13:23:00.000Z",
-      "source": "NPR Illinois",
-      "st": 3,
-      "m": 1,
-      "a": "일리노이 9개 지역사회, 신규 핵시설 유치 의향 표명",
-      "w": "CEG 직접 수주 확정이 아닌 지자체 관심 표명 단계로, 간접 수혜 기대감에 그치는 관측.",
-      "mv": 3
     },
     {
       "id": "pltr",
@@ -1917,20 +2015,6 @@
       "st": 3,
       "a": "트럼프 신규 관세의 대상국·세율·법적 근거 등 구조 해설",
       "w": "매크로 게이트(드로다운·VIX) 변동성 지속 가능성, L4~L5 반도체·서버 장비 수입 원가 구조 재평가 필요"
-    },
-    {
-      "id": "smci",
-      "ticker": "SMCI",
-      "name": "Supermicro",
-      "title": "How Supermicro is partnering with AMD to scale frontier AI - capacityglobal.com",
-      "link": "https://news.google.com/rss/articles/CBMidEFVX3lxTE8zMEFDRkdWWmJpTkFPdlRaNmhrb0RwVGIzNm5GekpEc0hFU3RYeUg3ZzU0S1hqbW5SbXUtaVNCSjhJSlMtWUV3VzE5bVpPT3BFdFJuZ21MWEF5elNXZWdENmk4NnNyVTVXTE9jMUtpdDBfRXAt?oc=5",
-      "published": "2026-07-24T10:12:24.000Z",
-      "source": "capacityglobal.com",
-      "st": 3,
-      "m": 1,
-      "a": "슈퍼마이크로, AMD와 협력해 프론티어 AI 스케일 확장 파트너십 추진",
-      "w": "구체적 계약 규모 미확인이나 양사 협력 사실 공개로 SMCI 수주 파이프라인 확충 기대감 관측.",
-      "mv": 3
     },
     {
       "id": "macro_트럼프_관세_재부과_2",
@@ -2052,6 +2136,18 @@
       "w": "공급망 게이트에서 강제노동 제재가 반도체·광물 소재 조달 다변화를 강제하며, L7·L8 데이터센터 건설 자재 및 L4 패키징 소재 원가 상승 압력으로 전이될 수 있음."
     },
     {
+      "id": "alab",
+      "ticker": "ALAB",
+      "name": "Astera Labs",
+      "title": "Astera Labs, Inc. (ALAB) Stock Moves -1.19%: What You Should Know - Yahoo Finance",
+      "link": "https://news.google.com/rss/articles/CBMilgFBVV95cUxOaW9rM2RQNk9mV3NGNmh1eWIwbDduVzRvbm1rSzRfNTVVQnYxYnNjMkxWZ19Ca1pETGNqZDV6ZWNqaXh1dUp1UHdOVkpSWlpwS3pVc1ZPMjhFRGNTdnduVW50MG1Tc0M3WVJTYWxUM2ZqNGF4OVp2c0Q3Uk1lV2V6OER2dTRBOUhrdmRnN1ZDUExDdE5SOUE?oc=5",
+      "published": "2026-07-23T22:15:01.000Z",
+      "source": "Yahoo Finance",
+      "st": 3,
+      "m": 1,
+      "mv": 3
+    },
+    {
       "id": "cbrs",
       "ticker": "CBRS",
       "name": "Cerebras",
@@ -2090,20 +2186,6 @@
       "m": 1,
       "a": "미시건주 Stevens 캠페인, Palantir 관련 컨설턴트와 관계 단절",
       "w": "정치적 논란으로 인한 단기 센티먼트 부담이나 실적·수주와 직접 연관 없어 펀더멘털 영향은 제한적.",
-      "mv": 3
-    },
-    {
-      "id": "smci",
-      "ticker": "SMCI",
-      "name": "Supermicro",
-      "title": "Supermicro Introduces New Server Portfolio with 6th Gen AMD EPYC™ 9006 Series CPUs, Delivering 1.7x Generational Performance Improvements - PR Newswire",
-      "link": "https://news.google.com/rss/articles/CBMimwJBVV95cUxOZTdhQ2dlWVRFQXRCS1RDUDJGY3FVenZQNFJSTWU3Y3d3N3dBM1k1Z0tudmVQcXBFSm9yNk9qQURVXzRmSjd4Z3NWYk5WV09BYWp5cDNSWENtamRWM29ab2ZNc2IwSVdVSmxCRlZNc0VWSkdnWUk3Q004bW5qWnBYb2pDVXBRQ212ZnBTejRVbTU0ek1GeGRxSkZnSHAwQmhPOUoxZTNPNFdkVXhmY0FwLXlGRzViTUM3M29RZGQtOVZ0Zml4dHNQN3hNUjVXcm1MX0pRTXY1MDRvZFdSSURPcnRINlRfcWlyTkp0V3R4Zk5ZUDBER053cThyOUFzdlJDb3pTVHpPRE5aUDc4WlNTZ3FUd0JEYlhNclhV?oc=5",
-      "published": "2026-07-23T18:35:00.000Z",
-      "source": "PR Newswire",
-      "st": 1,
-      "m": 2,
-      "a": "Supermicro, 6세대 AMD EPYC 9006 탑재 신규 서버 포트폴리오 공개 — 전세대 대비 1.7배 성능 향상 표방",
-      "w": "신제품 출시는 SMCI 수주 파이프라인 확대 가능성을 시사하는 펀더멘털 호재 관측이나, 실제 수주·출하 확정 전까지는 제한적.",
       "mv": 3
     },
     {
@@ -2196,17 +2278,15 @@
       "w": "L2 커스텀 실리콘 레이어의 성장은 L3 범용 GPU 수요 집중도를 분산시켜 하이퍼스케일러 capex 내 벤더 믹스를 장기 재편하는 구조 변수"
     },
     {
-      "id": "vicr",
-      "ticker": "VICR",
-      "name": "Vicor",
-      "title": "Westpac Banking Corp Invests $1.26 Million in Vicor Corporation $VICR - MarketBeat",
-      "link": "https://news.google.com/rss/articles/CBMixgFBVV95cUxPUXpMYVRqdk9kX2VEcEU4MTZZYkpvNHhJOE13RUo2QmU1ZGotUWwyNm5Zek1KcWdDSnN1V3dLYVZ0MzNEWG80VTktYUVFSmhqMk5YNWlXNlFjUHhDX2toZkkzSGJUMWRDTnF4Y01fRTR2aURjS2EzdmhoT2ZnSk9GMjZZTTViZXBfR0tDajBCUHNTQTlvbVloQ29WMG5Gc19DeWhqTWx1eWFmSnhhM21SSmxnc2hYRS1XdzZlR3VRTVVheGRWN0E?oc=5",
-      "published": "2026-07-23T11:03:52.000Z",
-      "source": "MarketBeat",
-      "st": 9,
+      "id": "lite",
+      "ticker": "LITE",
+      "name": "Lumentum",
+      "title": "Lumentum Holdings' Quarterly Earnings Preview: What You Need to Know - Yahoo Finance",
+      "link": "https://news.google.com/rss/articles/CBMirgFBVV95cUxQTm5zbE0tbXljN3ctbzhDS0Jia0Zfb1AzOUI3ZWdoQnZXZlpyMVdibVkxWVJ3TlpuOHk4SUlEYTd1Vmd2NXdKZ1VvSUxhYTg3NDhfUjFsbWZwMXV0T1FDTHdYYVVOeDdhZXpycWstUkNSV01kaTI4ZGNGV3dXQVdaQnBrUnptRFBBcHBrQkp4UXNjLXRJYjhDaFRpLXpEQk9JcFYxRkRuWjhEV1hpdUE?oc=5",
+      "published": "2026-07-23T09:35:06.000Z",
+      "source": "Yahoo Finance",
+      "st": 3,
       "m": 1,
-      "a": "Westpac Banking, Vicor 주식 126만 달러 규모 신규 매입 공시",
-      "w": "기관 대량보유 공시로 수급 측면의 소규모 긍정 시그널이나, 규모가 제한적이어서 주가 영향은 미미한 수준에 그침.",
       "mv": 3
     },
     {
@@ -2298,30 +2378,6 @@
       "mv": 3
     },
     {
-      "id": "twng",
-      "ticker": "089030",
-      "name": "테크윙",
-      "title": "구글 투자 확대 기대에 삼전닉스 강세…소부장주도 동반 상승[특징주] - v.daum.net",
-      "link": "https://news.google.com/rss/articles/CBMiS0FVX3lxTE81WGU3MUNuZWU4bDVPNmc3U2lQbHp5Z1JHUzNyWVZZUkJOQ19WdWx4aGl0clNzVlJKbnRzSDJ0eHlLVF9hLVVTZ2FEWQ?oc=5",
-      "published": "2026-07-23T00:54:02.000Z",
-      "source": "v.daum.net",
-      "st": 3,
-      "m": 1,
-      "mv": 3
-    },
-    {
-      "id": "alab",
-      "ticker": "ALAB",
-      "name": "Astera Labs",
-      "title": "Astera Labs (ALAB) grants 1,451 RSUs to finance VP - Stock Titan",
-      "link": "https://news.google.com/rss/articles/CBMirgFBVV95cUxQaHBaZWlxS19xeXhtZ2wtNU9SMkFoaUo2N2JRcGRMLWhuVVRfRVduekphSEVOVEVWRDM4WnZ1NXpOOUNKMHMwWFhHMEN4QnRTZlBPME9HS0lmYUs0RVRNOHZIUndTTUtFVzJWR0lBdUxkaVhoUnRObG1WMW5ET2pfM3pQOUlmWEVVUUlGdzR4OUNjM2Q0WHRzMG1QNXMzcjc2WDg5bnRQcm5pRU1QTHc?oc=5",
-      "published": "2026-07-22T23:55:24.000Z",
-      "source": "Stock Titan",
-      "st": 1,
-      "m": 1,
-      "mv": 3
-    },
-    {
       "id": "lite",
       "ticker": "LITE",
       "name": "Lumentum",
@@ -2362,20 +2418,6 @@
       "mv": 3
     },
     {
-      "id": "vicr",
-      "ticker": "VICR",
-      "name": "Vicor",
-      "title": "Vicor Q2 Earnings Beat Estimates, Revenues Increase Y/Y, Shares Rise - Yahoo Finance",
-      "link": "https://news.google.com/rss/articles/CBMingFBVV95cUxOUElZYjBid2RlclhudmZDa0pDU0R0OXhnQ19UaXpoaURUOUtXQjBfcnUtRXJ4Q2g1NG5nR0w2bG4wQ1pGN1VZQkZrZ0RIWmdadjN0c29TZTFyUGo3YjFCMzR0c2toOGNfN2pCOXlWTTBaY2JELTVqdHlFWjROTGVNWDRzZzBuQmF3bk1kYVlGdHNXQkhZenl5VTNxdU5nQQ?oc=5",
-      "published": "2026-07-22T17:21:00.000Z",
-      "source": "Yahoo Finance",
-      "st": 3,
-      "m": 2,
-      "a": "Vicor Q2 실적 컨센서스 상회 및 전년 대비 매출 증가 확인",
-      "w": "실적 어닝 비트는 단기 펀더멘털 호재로 작용하며 가이던스 확인 시 모멘텀 지속 가능성 있다는 관측.",
-      "mv": 3
-    },
-    {
       "id": "cbrs",
       "ticker": "CBRS",
       "name": "Cerebras",
@@ -2404,20 +2446,6 @@
       "mv": 3
     },
     {
-      "id": "cbrs",
-      "ticker": "CBRS",
-      "name": "Cerebras",
-      "title": "Cerebras Systems Stock Rises on CrowdStrike AI Cybersecurity Chip Deal - Barron's",
-      "link": "https://news.google.com/rss/articles/CBMihAFBVV95cUxQX01mZWd1U3VVNS1zVGdWRkd4R0xhTXQzUG05WXFKeUJvWDNoMXJCcG9rNmdDcE9nYm5GWThoRnpPU0gxNmU5eDNZdTdoRG54bl8ybFJZcUtQZnpmdXAyb0ZQdzhHcXJkeXo2WktrTF9qb1RmQXpKVmotNkJVcjdoTEFDZ2Y?oc=5",
-      "published": "2026-07-22T15:40:00.000Z",
-      "source": "Barron's",
-      "st": 3,
-      "m": 2,
-      "a": "Cerebras, CrowdStrike와 AI 사이버보안 칩 공급 계약 체결",
-      "w": "엔터프라이즈 AI 보안 분야 신규 고객 확보로 Cerebras 매출 다변화 펀더멘털 호재.",
-      "mv": 3
-    },
-    {
       "id": "macro_ai캐팩스_수익성_의구심_1",
       "ticker": "MACRO",
       "name": "AI캐팩스 수익성 의구심",
@@ -2429,20 +2457,6 @@
       "st": 3,
       "a": "하이퍼스케일러 실적이 S&P500 향방을 좌우하는 구조적 집중 리스크 부각",
       "w": "상류 하이퍼스케일러 capex·수익성이 지수 전반의 드로다운 게이트와 동기화된 상황에서, AI 인프라 스택 전 레이어의 변동성이 광범위한 시장 리스크로 전이될 수 있음."
-    },
-    {
-      "id": "smci",
-      "ticker": "SMCI",
-      "name": "Supermicro",
-      "title": "Supermicro Surges as Gross Margin Outlook Rises Amid $60B Backlog - StockInvest.us",
-      "link": "https://news.google.com/rss/articles/CBMimgFBVV95cUxPeXFZT0dZMGtlN2I4cXJwN2l4ZFZPLWRhazRLcGRBTXBRWXQ2aUt2TUtFY3pGUWRUcmtqbG1fVmlrVk9YVG9pTkdDVVhTMEF0VnZGanRac0w5MnhsSVZ6bEhMY0ZUc1JraEpqbExtb0dmMEluU0Q0T2JTVjhaV1VDVWNrdWdaSHBUcmZhei1NblhqYnpLb3BsaUlB?oc=5",
-      "published": "2026-07-22T12:29:21.000Z",
-      "source": "StockInvest.us",
-      "st": 3,
-      "m": 2,
-      "a": "Supermicro, 600억 달러 수주잔고 확보 및 총마진 가이던스 상향 보도",
-      "w": "대규모 수주잔고와 마진 가이던스 개선은 매출 가시성 및 수익성 동시 개선을 시사하는 강한 펀더멘털 호재.",
-      "mv": 3
     },
     {
       "id": "bneck_asic",
@@ -2573,34 +2587,6 @@
       "st": 1,
       "a": "JP모간 분석, 레버리지 ETF가 코스피 급락을 증폭시켰고 청산은 75% 완료 단계",
       "w": "레버리지 ETF 증폭 효과는 AI 인프라 공급망 상류(HBM·파운드리) 주가 변동성을 실물 수요와 무관하게 과장한 매크로 게이트 노이즈임을 시사"
-    },
-    {
-      "id": "lite",
-      "ticker": "LITE",
-      "name": "Lumentum",
-      "title": "Lumentum’s stock just got a lot more interesting — and Barclays has turned bullish - MarketWatch",
-      "link": "https://news.google.com/rss/articles/CBMivwFBVV95cUxOT3paMFQ1TUhXblkyXzE1VzZqUjE3NU96MVhQLVBkWjZ0QVJNdXprSFZHNlBCaGVjUk96VUc3Ym1HRThZTlF6SG9lV3loVENkTkJXd185S3p1VEdIR3ljS1dxcXR3LUNjUXM0aFZoNndHc3E4LW5iZTljRjR1a1otU29XakZ1dUF1MWNFOWJOenFudkctc281c2FEVXhKSDJBREJ3T3VUNU51TXhhcVZBWkVyS2wxdWhuSThQVFNMdw?oc=5",
-      "published": "2026-07-20T21:05:00.000Z",
-      "source": "MarketWatch",
-      "st": 3,
-      "m": 1,
-      "a": "Barclays, Lumentum 투자의견 상향 및 매수 기회 제시",
-      "w": "Barclays의 강세 전환은 단기 수급·센티먼트에 긍정적 자극이나, 펀더멘털 변화 없이 애널리스트 의견 변경에 그쳐 가격 시계 노이즈로 분류됨.",
-      "mv": 3
-    },
-    {
-      "id": "lite",
-      "ticker": "LITE",
-      "name": "Lumentum",
-      "title": "Lumentum Stock: Barclays Upgrades AI Name, Sees Buying Opportunity - Barron's",
-      "link": "https://news.google.com/rss/articles/CBMihgFBVV95cUxOMzA5Tjh5dVltX2lBRWFBcUNUQVVjdXpNNlJuUEk2eXA1ZUdEeGlXMDF5b2tMTXBFUVV1dzB6SlRLaXk5VmozRnNuM1FNTHpRaWhNeHBfczZaXzh1YUxYWHVyamFoWWpRU3BmZnkxd2Z4UmRwSjM2NFVOcHRmV3ZWSnFZVkRkZw?oc=5",
-      "published": "2026-07-20T20:17:00.000Z",
-      "source": "Barron's",
-      "st": 3,
-      "m": 1,
-      "a": "Barclays, Lumentum AI 종목으로 투자의견 상향 및 매수 기회 판단",
-      "w": "복수 매체가 같은 Barclays 업그레이드를 보도한 것으로, n=1과 동일 이벤트 반복 보도에 그침.",
-      "mv": 3
     },
     {
       "id": "bneck_l8_pwr",
@@ -3162,20 +3148,6 @@
       "st": 3,
       "a": "노벨 수상자·AI 리더들, AI 경제 충격 대비 창이 빠르게 닫히고 있다는 경고 발신",
       "w": "기술·경제 양쪽 권위자들의 동시 경고는 AI 인프라 투자 사이클에 대한 사회적·정책적 역풍 게이트 강도를 높이는 요인으로 관측."
-    },
-    {
-      "id": "aph",
-      "ticker": "APH",
-      "name": "암페놀",
-      "title": "Amphenol (APH) Upgraded to Buy: Here's What You Should Know - Yahoo Finance",
-      "link": "https://news.google.com/rss/articles/CBMinAFBVV95cUxOSUd2RTVWMy11enN2WGZGRHFkbTM2Sm00dGlIWjFOeTQycEp6VkF0alZ5Y0ZOZWh3V0pjaHV1eUNCYjZTVDEtVFFOdHhqUFJoWlN1eXNWUkNlX2F4U3NFOTB4ako4aXpoeDkyUmhYbWp5WHkzczQwVzd1d1pIOG9zellCNWk4Uy1oQXd5bUxzRHRVSzVYbjlCVEVVakc?oc=5",
-      "published": "2026-07-13T16:00:04.000Z",
-      "source": "Yahoo Finance",
-      "st": 3,
-      "m": 1,
-      "a": "Amphenol, 애널리스트로부터 Buy 등급으로 투자의견 상향",
-      "w": "투자의견 상향은 단기 수급·센티먼트 개선 재료이며 목표가 상향 수반 시 가격 시계 긍정 영향 예상.",
-      "mv": 3
     },
     {
       "id": "bneck_l6_opt",
