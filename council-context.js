@@ -1,0 +1,240 @@
+/* council-context.js — 03 전문가 원탁 「알파맵 전체 컨텍스트」 자동 주입
+ * 매 토론 시작 시 자산현황·01 시장 모니터링·02 채택 인사이트·04 시장/실적 전망을
+ * 최신 데이터에서 압축해 /api/council 의 siteContext 로 보낸다.
+ * index.html 무편집 · 기존 fetch 계약 유지 · 신규 :root 토큰 0 · narrative≠numbers. */
+(function () {
+  'use strict';
+
+  if (window.__councilContextMounted) return;
+  window.__councilContextMounted = true;
+
+  var innerFetch = window.fetch.bind(window);
+  var cache = null;
+  var cachedAt = 0;
+  var CACHE_MS = 60000;
+
+  function $(id) { return document.getElementById(id); }
+  function cut(s, n) {
+    s = String(s == null ? '' : s).replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+    return s.length > n ? s.slice(0, n - 1) + '…' : s;
+  }
+  function num(v) { return v == null || v === '' || isNaN(+v) ? null : +v; }
+  function today() {
+    var d = new Date();
+    return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2);
+  }
+  function compactSource(x) {
+    if (!x || typeof x !== 'object') return null;
+    return { asOf: x.asOf || x.checkedAt || '', source: cut(x.source || '', 180) };
+  }
+  async function getJSON(url) {
+    try {
+      var r = await innerFetch(url, { credentials: 'same-origin', cache: 'no-store' });
+      return r.ok ? await r.json() : null;
+    } catch (_) {
+      return null;
+    }
+  }
+  function assetSection(H, P) {
+    if (!H) return null;
+    var quotes = P && P.quotes ? P.quotes : {};
+    var avg = H.avg || {};
+    var positions = (Array.isArray(H.detail) ? H.detail : []).slice(0, 30).map(function (x) {
+      var q = quotes[x.priceKey] || {};
+      return {
+        name: x.name || x.ticker || '',
+        ticker: x.ticker || '',
+        layer: x.layer || '',
+        amount: num(x.amt),
+        weightPct: num(x.w),
+        qty: num(x.qty),
+        currentPrice: num(q.price),
+        currency: q.currency || x.ccy || '',
+        avgPrice: num(avg[x.priceKey])
+      };
+    });
+    return {
+      asOf: H.asOf || '',
+      qtyAsOf: H.qtyAsOf || '',
+      total: num(H.total),
+      totalNote: cut(H.note || '', 700),
+      fx: H.fx || null,
+      layers: (Array.isArray(H.holdings) ? H.holdings : []).slice(0, 16).map(function (x) {
+        return { layer: x.layer || '', label: cut(x.label || '', 180), amount: num(x.amt), weightPct: num(x.w) };
+      }),
+      positions: positions
+    };
+  }
+  function marketSection(S, C, G, L, Cal, H) {
+    var held = {};
+    (H && Array.isArray(H.detail) ? H.detail : []).forEach(function (x) {
+      if (x.ticker) held[String(x.ticker).toUpperCase()] = 1;
+    });
+    var gg = G && G.gamma ? G.gamma : {};
+    var gamma = Object.keys(gg).filter(function (k) { return held[String(k).toUpperCase()]; }).slice(0, 30).map(function (k) {
+      var x = gg[k] || {};
+      return {
+        ticker: k, state: x.g || '', stage: x.stage || '', lock: !!x.lock,
+        price: num(x.price), target: num(x.target), upsidePct: num(x.pct), trend: x.trend || '',
+        checkedAt: x.checkedAt || '', revision: x.rev ? {
+          eps7dPct: x.rev.eps && x.rev.eps.fy1 ? num(x.rev.eps.fy1.c7) : null,
+          eps30dPct: x.rev.eps && x.rev.eps.fy1 ? num(x.rev.eps.fy1.c30) : null
+        } : null
+      };
+    });
+    var log = L && Array.isArray(L.log) ? L.log.slice(-8).reverse().map(function (e) {
+      return {
+        date: e.date || '', source: cut(e.source || '', 220),
+        items: (Array.isArray(e.items) ? e.items : []).slice(0, 5).map(function (x) {
+          return { tag: x.tag || '', layer: x.layer || '', text: cut(x.html || '', 420) };
+        })
+      };
+    }) : [];
+    var td = today();
+    var events = Cal && Array.isArray(Cal.events) ? Cal.events.filter(function (x) {
+      return !x.d || x.d >= td;
+    }).slice(0, 12).map(function (x) {
+      return { date: x.d || '', category: x.cat || '', label: x.lbl || '', ticker: x.tk || '', detail: cut(x.meta || '', 300), when: x.when || '' };
+    }) : [];
+    return {
+      signals: S ? {
+        asOf: S.asOf || '', vix: num(S.vix), vixHigh: num(S.vixHigh), fearGreed: num(S.fearGreed),
+        nasdaqDrawdownPct: num(S.nasdaqDrawdownPct), spDailyPct: num(S.spDailyPct),
+        wma40SlopeUp: S.wma40SlopeUp, wma40GapPct: num(S.wma40GapPct),
+        sidecarKR: !!S.sidecarKR, circuitKR: !!S.circuitKR
+      } : null,
+      semiconductorCycle: C && Array.isArray(C.clusters) ? C.clusters.map(function (x) {
+        return { id: x.id || '', name: x.name || '', state: x.lamp || '', now: cut(x.now || '', 420), trigger: cut(x.on || '', 320), updated: x.updated || '' };
+      }) : [],
+      heldGamma: gamma,
+      latestSignals: log,
+      upcomingEvents: events
+    };
+  }
+  function insightSection(records) {
+    if (!Array.isArray(records)) return [];
+    var out = [];
+    records.forEach(function (r) {
+      (Array.isArray(r.claims) ? r.claims : []).forEach(function (c) {
+        out.push({
+          savedAt: r.t || '', source: cut((r.src && (r.src.title || r.src.publisher || r.src.url)) || '', 220),
+          text: cut(c.text || '', 520), layer: c.layer || '', tickers: Array.isArray(c.tickers) ? c.tickers.slice(0, 6) : [],
+          type: c.type || '', route: c.route || '', novelty: num(c.novelty), impact: num(c.impact), confidence: num(c.confidence),
+          why: cut(c.why || '', 360), verify: cut(c.verify || '', 260),
+          lifecycle: { state: c.lcState || '', premise: cut(c.hyp || '', 260), trigger: cut(c.trig || '', 260), discard: cut(c.until || '', 260), review: c.review || '' }
+        });
+      });
+    });
+    out.sort(function (a, b) {
+      var sa = (a.impact || 0) + (a.confidence || 0) + (a.novelty || 0);
+      var sb = (b.impact || 0) + (b.confidence || 0) + (b.novelty || 0);
+      return sb - sa || String(b.savedAt).localeCompare(String(a.savedAt));
+    });
+    return out.slice(0, 20);
+  }
+  function boardItems(d) {
+    return d && Array.isArray(d.items) ? d.items.map(function (x) {
+      return {
+        id: x.id || '', name: x.name || '', state: x.stateLabel || x.state || '',
+        verdict: cut(x.verdict || '', 600), trigger: cut(x.trigger || '', 420), updated: x.upd || '',
+        gauges: (Array.isArray(x.gauge) ? x.gauge : []).slice(0, 6).map(function (g) {
+          return { name: g.k || '', value: g.v == null ? '' : String(g.v), direction: g.d || '', note: cut(g.n || '', 260) };
+        })
+      };
+    }) : [];
+  }
+  function outlookSection(Gates, Risk, Earnings, Judgment, H) {
+    var td = today();
+    var moves = Earnings && Earnings.moves ? Object.keys(Earnings.moves).map(function (k) {
+      var x = Earnings.moves[k] || {};
+      return { ticker: k, date: x.date || '', expectedMovePct: num(x.pct), basis: x.basis || '', source: cut(x.src || '', 220) };
+    }).filter(function (x) { return !x.date || x.date >= td; }).sort(function (a, b) {
+      return String(a.date).localeCompare(String(b.date));
+    }).slice(0, 20) : [];
+    var held = {};
+    (H && Array.isArray(H.detail) ? H.detail : []).forEach(function (x) {
+      if (x.ticker) held[String(x.ticker).toUpperCase()] = 1;
+    });
+    var ov = Judgment && Judgment.overrides ? Judgment.overrides : {};
+    var judgments = Object.keys(ov).filter(function (k) {
+      return held[String(k).toUpperCase()] || k === '한국 ETF';
+    }).map(function (k) {
+      var x = ov[k] || {};
+      return { ticker: k, horizonAlpha: x.aN || [], gamma: x.g || '', why: cut(x.why || '', 800) };
+    });
+    return {
+      capexGates: { asOf: Gates && Gates.asOf || '', summary: cut(Gates && Gates.insight || '', 800), items: boardItems(Gates) },
+      riskBoard: { asOf: Risk && Risk.asOf || '', summary: cut(Risk && Risk.insight || '', 800), items: boardItems(Risk) },
+      earnings: { asOf: Earnings && Earnings.asOf || '', upcoming: moves },
+      heldJudgments: { asOf: Judgment && Judgment.asOf || '', items: judgments }
+    };
+  }
+  async function buildContext() {
+    if (cache && Date.now() - cachedAt < CACHE_MS) return cache;
+    var urls = [
+      '/holdings.json', '/prices.json', '/signals.json', '/cycle.json', '/gamma.json', '/signal_log.json',
+      '/api/insights', '/gates.json', '/risk.json', '/earnings.json', '/judgment.json', '/calendar.json'
+    ];
+    var vals = await Promise.all(urls.map(getJSON));
+    var H = vals[0], P = vals[1], S = vals[2], C = vals[3], G = vals[4], L = vals[5];
+    var Ins = vals[6], Gates = vals[7], Risk = vals[8], Earnings = vals[9], Judgment = vals[10], Cal = vals[11];
+    cache = {
+      generatedAt: new Date().toISOString(),
+      rule: '알파맵 사이트의 최신 내부 컨텍스트. 자산·01·02·04를 토론의 기본 전제로 사용하되 숫자와 narrative를 구분한다.',
+      sources: {
+        assets: compactSource(H), market: compactSource(S), cycle: compactSource(C),
+        insights: { asOf: new Date().toISOString(), source: 'R2 /api/insights · 운영자가 채택한 관점' },
+        gates: compactSource(Gates), risk: compactSource(Risk), earnings: compactSource(Earnings), judgment: compactSource(Judgment)
+      },
+      assets: assetSection(H, P),
+      marketMonitoring01: marketSection(S, C, G, L, Cal, H),
+      adoptedInsights02: insightSection(Ins),
+      marketAndEarnings04: outlookSection(Gates, Risk, Earnings, Judgment, H)
+    };
+    cachedAt = Date.now();
+    return cache;
+  }
+  function setStatus(text, bad) {
+    var el = $('clAutoCtxStatus');
+    if (!el) return;
+    el.textContent = text;
+    el.style.color = bad ? 'var(--st-hot,#b4472f)' : 'var(--dim)';
+  }
+  function mountNote() {
+    var ta = $('clCtx');
+    if (!ta || $('clAutoCtxStatus')) return false;
+    var p = document.createElement('p');
+    p.id = 'clAutoCtxStatus';
+    p.className = 'cl-note';
+    p.style.margin = '6px 0 12px';
+    p.textContent = '기본 참조: 나의 자산현황 · 01 시장 모니터링 · 02 채택 인사이트 · 04 시장/실적 전망 · 토론 시작 시 최신 갱신';
+    ta.insertAdjacentElement('afterend', p);
+    return true;
+  }
+
+  window.fetch = function (input, init) {
+    var url = typeof input === 'string' ? input : ((input && input.url) || '');
+    if (url === '/api/council' && init && String(init.method || 'GET').toUpperCase() === 'POST') {
+      return (async function () {
+        setStatus('알파맵 최신 컨텍스트를 모으는 중…');
+        try {
+          var ctx = await buildContext();
+          var body = JSON.parse(init.body || '{}');
+          body.siteContext = ctx;
+          init = Object.assign({}, init, { body: JSON.stringify(body) });
+          setStatus('기본 참조 완료: 자산 · 01 시장 · 02 인사이트 · 04 시장/실적 전망');
+        } catch (e) {
+          setStatus('일부 알파맵 컨텍스트를 읽지 못해 현 상황 입력으로 토론합니다.', true);
+        }
+        return innerFetch(input, init);
+      })();
+    }
+    return innerFetch(input, init);
+  };
+
+  if (!mountNote()) {
+    var tries = 0, timer = setInterval(function () {
+      if (mountNote() || ++tries > 80) clearInterval(timer);
+    }, 100);
+  }
+})();
