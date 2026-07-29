@@ -1,4 +1,4 @@
-**최종 갱신: 2026-07-29 18:54 (KST)**
+**최종 갱신: 2026-07-29 19:21 (KST)**
 
 # STYLE_GUIDE — 알파맵 디자인 시스템
 
@@ -267,6 +267,7 @@ pantone.css :root       ← 현행 팔레트 (팬튼 A안, index.html 하단 <li
 
 ## 갱신 이력
 
+- 2026-07-29 19:21 · **03 전문가 원탁 알파맵 기본 컨텍스트 상태 안내(`council-context.js` 자가 마운트).** 「현 상황」 입력(`#clCtx`) 아래에 `#clAutoCtxStatus`를 삽입해 자산·01 시장·02 인사이트·04 시장/실적 전망을 토론 시작 시 최신 갱신한다는 사실과 수집 진행/완료/부분 실패를 표시한다. 기존 `.cl-note`만 재사용하고 실패색도 기존 `--st-hot`·`--dim` 토큰을 사용한다. **신규 `:root` 토큰·CSS 클래스·index.html 편집 0** — 본문·메타 크기와 면 규약 무변. TOKENS 무변·`node --check` 통과·jsdom 컨텍스트 결합/상태 안내 스모크 10/10. narrative≠numbers. (OPS §3·§9 동반)
 - 2026-07-29 18:54 · **03 전문가 원탁 「분석 자료」 업로드 UI(`council-material.js` 자가 마운트).** 「토론 주제」 위에 `#clMaterial`을 삽입하고 기존 `.msec`/`.mnote`/`.cl-drop`/`.cl-blk`/`.cl-chip`/`.cl-note`/`.cl-btn`만 재사용한다. 드롭존은 클릭·드래그와 Enter/Space를 지원하고, 파일별 형식·이름·추출 글자수·오류·삭제를 목록으로 표시한다. 리포트에는 기존 `.cl-note`·`.cl-chip`으로 사용 자료를 표시하며 전문가 발언·기존 `.cl-*` 음성 플레이어는 무변경. PDF.js·JSZip·Mammoth는 해당 형식 업로드 시에만 지연 로드한다. **신규 `:root` 토큰·CSS 클래스·index.html 편집 0** — 면 radius 3px·본문 14px·메타 12px 규약 유지. TOKENS 무변·`node --check` 통과·jsdom 업로드→`material` 요청 스모크 8/8. narrative≠numbers. (OPS §3·§9 동반)
 - 2026-07-29 10:40 · **03 전문가 원탁 음성 토론 HiFi 전환(Google AI Studio Gemini TTS).** `council-audio.js`는 새 플레이어를 만들지 않고 기존 `.cl-play`/`.cl-psheet`/`.cl-pmsg`/`.cl-pbub`/`.cl-pcall`/`.cl-ptype` 구조와 `window.COUNCIL.playReport`를 재사용한다. 원탁 버튼은 캡처 단계에서 가로채 DOM의 발언 순서를 복원하고, 서버가 반환한 단일 WAV의 발언 시작 시각에 맞춰 기존 말풍선 강조 상태를 동기화한다. 1인 심층 자문도 같은 HiFi 경로를 사용하며 실패 시 기존 브라우저 TTS로 폴백한다. **신규 `:root` 토큰·CSS 클래스·index.html 편집 0** — worker의 `<script defer>` 자가 마운트만 추가. 면 radius 3px·부표 20px·본문 14px·메타 12px 규약 유지. TOKENS 무변·`check-docs` 통과·`node --check` 통과·jsdom 스모크 23/23. narrative≠numbers. (OPS §3·§9 동반)
 - 2026-07-29 08:05 · **02 관점 후속 상태 배지.** 등급 배지(`.ins-gr`) 바로 뒤에 별도 pill `.ins-lcs`를 배치해 `승격 대기`·`발동 대기`·`발동`·`유지`·`만료`를 표시한다. 상태색은 기존 기능 토큰만 재사용(wait=`--st-mature`, active=`--st-hot`, keep=`--st-dawn`, dormant/expired=`--faint`)하고 만료는 취소선으로 구분한다. 라이프사이클 모달은 기존 `.ins-lc-chip`을 재사용해 상태를 선택한다. **신규 `:root` 토큰 0**, 메타 12px·pill radius 20px 규약 준수. (OPS §3·§9 동반)
