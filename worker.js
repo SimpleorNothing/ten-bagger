@@ -2026,6 +2026,137 @@ async function handleBriefAudio(request, env) {
   return new Response(wav, { headers: audHeaders });
 }
 
+// ===== 03 전문가 원탁 — 고품질 오디오(Gemini 발언별 단일화자 TTS) · /api/council-audio =====
+// 06 모닝 브리핑의 handleBriefAudio 와 같은 방식이되, 원탁은 화자가 6인+좌장이라 멀티스피커(2인 상한)로
+// 한 번에 못 굽는다 → 발언마다 그 화자 음성으로 단일화자 TTS 를 굽고(로컬 build.py 하이브리드 파이프라인과
+// 동일 원리) 성량 정규화·무음 이음으로 이어붙여 WAV 로 서빙한다. 결과 WAV 는 R2 에 '내용 해시' 키로
+// 캐시(같은 대본 = 즉시 재생). 발언별 시작 시각(ms 누적)은 customMetadata·응답 헤더(X-Council-Starts)로
+// 실어 클라이언트가 말풍선을 정확히 하이라이트한다. 실패는 항상 비-200 JSON → 클라(council-audio.js)가
+// 브라우저 TTS 로 자동 폴백(무해). 키 접두 `cnclaud_` — 다른 캐시 정규식과 무충돌.
+const COUNCIL_TTS_ALLOW = ["Kore", "Puck", "Charon", "Aoede", "Iapetus", "Fenrir", "Orus", "Zephyr", "Leda", "Umbriel"];
+const COUNCIL_TTS_STYLE =
+  "다음 한국어 문장을 뉴스 토론에서 자기 의견을 또렷하게 말하듯 자연스럽게 읽어 주세요. " +
+  "처음부터 끝까지 같은 성량·같은 속도를 유지하고, 인사말이나 마무리 멘트를 새로 지어내지 마세요.";
+const COUNCIL_AUD_KEY = (h) => `cnclaud_${h}.wav`;
+
+async function sha256Hex(s) {
+  const b = new TextEncoder().encode(s);
+  const d = await crypto.subtle.digest("SHA-256", b);
+  return [...new Uint8Array(d)].map((x) => x.toString(16).padStart(2, "0")).join("");
+}
+
+// 제한 동시성 실행기 — Gemini 레이트리밋(429) 회피용. 결과는 입력 순서 보존.
+async function mapPool(items, limit, fn) {
+  const out = new Array(items.length);
+  let i = 0;
+  async function worker() { while (i < items.length) { const idx = i++; out[idx] = await fn(items[idx], idx); } }
+  const n = Math.max(1, Math.min(limit, items.length));
+  await Promise.all(Array.from({ length: n }, worker));
+  return out;
+}
+
+// 발언 1건 → 단일화자 Gemini TTS → {pcm, rate}. 429/5xx 는 한 번 재시도, 항구적 오류는 즉시 throw.
+async function bakeCouncilTurn(env, ttsModel, text, voice) {
+  const body = {
+    contents: [{ parts: [{ text: COUNCIL_TTS_STYLE + "\n\n" + text }] }],
+    generationConfig: {
+      responseModalities: ["AUDIO"],
+      speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: voice } } },
+    },
+  };
+  let lastErr = "";
+  for (let attempt = 0; attempt < 2; attempt++) {
+    let up = null, g = null;
+    try {
+      up = await fetch("https://generativelanguage.googleapis.com/v1beta/models/" + ttsModel + ":generateContent",
+        { method: "POST", headers: { "content-type": "application/json", "x-goog-api-key": env.GEMINI_API_KEY }, body: JSON.stringify(body) });
+      g = await up.json().catch(() => null);
+    } catch (e) { lastErr = String(e && e.message ? e.message : e); up = null; g = null; }
+    if (up && up.ok && g) {
+      const gParts = (g.candidates && g.candidates[0] && g.candidates[0].content && g.candidates[0].content.parts) || [];
+      const inl = gParts.map((p) => p.inlineData || p.inline_data).find((x) => x && x.data);
+      if (inl && inl.data) {
+        const rateM = /rate=(\d+)/.exec(inl.mimeType || inl.mime_type || "");
+        const bin = atob(inl.data);
+        const pcm = new Uint8Array(bin.length);
+        for (let k = 0; k < bin.length; k++) pcm[k] = bin.charCodeAt(k);
+        return { pcm, rate: rateM ? Number(rateM[1]) : 24000 };
+      }
+      lastErr = "오디오 없음";
+    } else if (up && up.status && up.status !== 429 && up.status < 500) {
+      lastErr = (g && g.error && g.error.message) ? g.error.message : ("gemini tts " + up.status);
+      break; // 항구적 오류는 재시도하지 않음
+    } else {
+      lastErr = (g && g.error && g.error.message) ? g.error.message : ("gemini tts " + (up ? up.status : "fetch"));
+    }
+    await new Promise((r) => setTimeout(r, 500 * (attempt + 1)));
+  }
+  throw new Error("gemini tts failed: " + lastErr.slice(0, 160));
+}
+
+async function handleCouncilAudio(request, env) {
+  const json = (obj, status) => new Response(JSON.stringify(obj),
+    { status, headers: { "content-type": "application/json", "cache-control": "no-store" } });
+  if (!env.GEMINI_API_KEY) return json({ error: "GEMINI_API_KEY not configured" }, 503);
+  if (!env.MEMO_BUCKET) return json({ error: "MEMO_BUCKET not configured" }, 503);
+
+  let body;
+  try { body = await request.json(); } catch { return json({ error: "invalid json" }, 400); }
+  const rawTurns = (body && Array.isArray(body.turns)) ? body.turns : [];
+  const turns = rawTurns.slice(0, 40).map((t) => ({
+    say: String((t && t.say) || "").slice(0, 1200).trim(),
+    voice: COUNCIL_TTS_ALLOW.indexOf(String((t && t.voice) || "")) >= 0 ? String(t.voice) : "Kore",
+  })).filter((t) => t.say);
+  if (!turns.length) return json({ error: "turns required" }, 400);
+
+  const url = new URL(request.url);
+  const regen = url.searchParams.get("regen") === "1";
+  const audHeaders = (starts) => ({ "content-type": "audio/wav", "cache-control": "no-store", "x-council-starts": starts || "" });
+
+  // 내용 주소화 캐시 — 같은 대본(발언·음성 동일)은 한 번만 굽는다.
+  const hash = await sha256Hex(JSON.stringify(turns.map((t) => [t.say, t.voice])));
+  if (!regen) {
+    try {
+      const c = await env.MEMO_BUCKET.get(COUNCIL_AUD_KEY(hash));
+      if (c) return new Response(c.body, { headers: audHeaders((c.customMetadata && c.customMetadata.starts) || "") });
+    } catch { /* 캐시 조회 실패는 무시하고 생성 */ }
+  }
+
+  const ttsModel = env.GEMINI_TTS_MODEL || "gemini-3.1-flash-tts-preview";
+  let baked;
+  try {
+    baked = await mapPool(turns, 3, (t) => bakeCouncilTurn(env, ttsModel, t.say, t.voice));
+  } catch (e) {
+    return json({ error: String(e && e.message ? e.message : e) }, 502);
+  }
+  const rate = baked[0].rate || 24000;
+
+  // 발언 간 성량 정규화(가장 큰 발언에 맞춤) — 화자가 바뀌어도 성량 편차 최소화(brief-audio 헬퍼 재사용).
+  const rmss = baked.map((b) => pcmRms(b.pcm));
+  const target = Math.max.apply(null, rmss.filter((r) => r > 0).concat([0]));
+  if (target > 0) baked.forEach((b, i) => { if (rmss[i] > 0) pcmGain(b.pcm, target / rmss[i]); });
+
+  // 발언별 시작 시각(ms 누적, 이음매 무음 BRIEF_TTS_GAP_MS 포함) — 클라 말풍선 하이라이트 동기용.
+  const starts = [];
+  let acc = 0;
+  baked.forEach((b, i) => {
+    if (i) acc += BRIEF_TTS_GAP_MS;
+    starts.push(Math.round(acc));
+    acc += Math.round((b.pcm.length / 2) / rate * 1000);
+  });
+  const startsCsv = starts.join(",");
+
+  const wav = wavFromPcm(pcmJoin(baked.map((b) => b.pcm), rate), rate);
+  try {
+    await env.MEMO_BUCKET.put(COUNCIL_AUD_KEY(hash), wav, {
+      httpMetadata: { contentType: "audio/wav" },
+      customMetadata: { starts: startsCsv },
+    });
+  } catch { /* 캐시 저장 실패는 응답에 영향 없음 */ }
+
+  return new Response(wav, { headers: audHeaders(startsCsv) });
+}
+
 export default {
   async fetch(request, env) {
     const password = env.SITE_PASSWORD;
@@ -2136,6 +2267,10 @@ export default {
       if (request.method === "GET" && url.pathname === "/api/brief-audio") {
         return handleBriefAudio(request, env);
       }
+      // 03 전문가 원탁 — 고품질 오디오(Gemini 발언별 단일화자 TTS · 발언 이어붙여 WAV)
+      if (request.method === "POST" && url.pathname === "/api/council-audio") {
+        return handleCouncilAudio(request, env);
+      }
       if (url.pathname === "/api/council-roster") {
         if (request.method === "GET") return handleCouncilRosterGet(env);
         if (request.method === "POST") return handleCouncilRosterPost(request, env);
@@ -2174,6 +2309,7 @@ export default {
             el.append('<script src="/flags.js" defer></scr' + 'ipt>', { html: true });
             el.append('<script src="/aisd.js?v=20260728-capex-label-layout" defer></scr' + 'ipt>', { html: true });
             el.append('<script src="/council-ask.js" defer></scr' + 'ipt>', { html: true });
+            el.append('<script src="/council-audio.js" defer></scr' + 'ipt>', { html: true });
             el.append('<script src="/council-roster.js" defer></scr' + 'ipt>', { html: true });
             el.append('<script src="/brief.js" defer></scr' + 'ipt>', { html: true });
           } })
