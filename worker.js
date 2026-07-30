@@ -1000,6 +1000,11 @@ async function handleInsight(request, env) {
   let text = String((body && body.text) || "");
   if (text.length > 120000) text = text.slice(0, 120000);
   if (!text.trim() && !url.trim()) return memoJson({ error: "text or url required" }, 400);
+  let siteContext = "";
+  try {
+    siteContext = JSON.stringify((body && body.siteContext) || null);
+    if (siteContext.length > 60000) siteContext = siteContext.slice(0, 60000);
+  } catch {}
 
   const useSearch = !text.trim() && !!url.trim();
 
@@ -1017,6 +1022,9 @@ async function handleInsight(request, env) {
     "3. 가격 상승 그 자체는 단계 강등 근거가 아니다. 강등은 '가격 상승률 vs FY+1/+2 EPS 추정 리비전 속도' 비교로만.",
     "4. 이미 아는 컨센서스·홍보성 문구·중복 헤드라인은 noise 로 버려라. 애널리스트의 목표가 상향 그 자체는 근거(추정 변경)가 없으면 noise.",
     "5. 너는 후보 정렬까지만 한다. 최종 반영은 사람이 승인한다. 단정하지 말고 검증 항목(verify)을 남겨라.",
+    "6. [알파맵 내부 컨텍스트]에서 입력 자료와 직접 관련된 기존 주제·게이지·판정이 있으면 반드시 대조해 관점을 확장하라. 예: 실적 자료의 RPO는 01 시장 모니터링 '사이클 판별 보드' 수주잔고 vs capex와 연결한다.",
+    "   관련성이 낮으면 억지로 연결하지 마라. 입력 자료가 더 최신인 1차 자료면 입력 자료를 우선하고, 내부 값과 다르면 오류로 단정하지 말고 양쪽 기준일과 변화 방향을 명시하라.",
+    "   내부 컨텍스트를 사용한 claim에는 siteRefs를 1~4개 붙여 menu·source·item·asOf·evidence를 채워라. evidence는 실제 내부 수치·판정과 이 관점의 연결 이유를 짧게 쓴다. 내부 컨텍스트에 없는 내용을 만들지 마라.",
     "",
     "[점수] 각 0~2 · novelty(기존 컨센 대비 새로움) · impact(레이어 상대가치를 바꾸는 정도) · confidence(출처·검증가능성)",
     "[route] 'signal_log' | 'earnings' | 'judgment' | 'stage' | 'holdings' | 'macro' | 'calendar' | 'none'",
@@ -1025,11 +1033,12 @@ async function handleInsight(request, env) {
     "  - none: 소음",
     "",
     "[출력] 아래 JSON 객체 하나만. 마크다운 펜스·서문·후기 금지. 한국어. 결론 먼저, 문장은 짧게.",
-    '{"src":{"kind":"","publisher":"","title":"","url":"","date":""},"summary":"3줄 이내 핵심 요약","claims":[{"text":"핵심 한 줄","layer":"L3","tickers":["MU"],"type":"numbers|narrative","novelty":0,"impact":0,"confidence":0,"route":"signal_log","why":"어느 층 수요/공급을 바꾸는지 + 상대가치 함의","verify":"확인해야 할 것"}],"noise":["버린 것 한 줄씩"],"steelman":"이 자료의 논지에 대한 가장 강한 반론 1~2문장"}',
+    '{"src":{"kind":"","publisher":"","title":"","url":"","date":""},"summary":"3줄 이내 핵심 요약","claims":[{"text":"핵심 한 줄","layer":"L3","tickers":["MU"],"type":"numbers|narrative","novelty":0,"impact":0,"confidence":0,"route":"signal_log","why":"어느 층 수요/공급을 바꾸는지 + 상대가치 함의","verify":"확인해야 할 것","siteRefs":[{"menu":"01 시장 모니터링","source":"gates.json","item":"① 수주잔고 vs capex","asOf":"YYYY-MM-DD","evidence":"기존 게이지·판정과 새 자료의 연결"}]}],"noise":["버린 것 한 줄씩"],"steelman":"이 자료의 논지에 대한 가장 강한 반론 1~2문장"}',
     "claims 는 최대 8개. 유의미한 게 없으면 claims 는 빈 배열로 두고 noise 에 이유를 적어라.",
     "",
     "[자료] 종류·출처·제목·날짜는 주어지지 않는다. 본문(또는 URL)에서 직접 판별해 src 에 채워라(불명확하면 빈 문자열).",
     "  src.kind 는 '증권사 리포트' | '기사' | '유튜브' | '공시' | '기타' 중 하나로 분류하라. src.title 은 자료의 실제 제목, src.publisher 는 발행처·매체·채널명.",
+    siteContext ? ("[알파맵 내부 컨텍스트]\n" + siteContext) : "[알파맵 내부 컨텍스트] 불러오지 못함 — 입력 자료만 분석",
     url ? ("URL: " + url) : "",
     useSearch
       ? "본문이 제공되지 않았다. web_search 로 위 URL 의 내용(또는 그 영상·기사에 대한 신뢰 가능한 요약·보도)을 찾아 근거로 삼아라. 찾지 못하면 claims 를 비우고 noise 에 '본문 확보 실패'라고 적어라."
