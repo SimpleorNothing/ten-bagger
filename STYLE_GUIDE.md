@@ -1,4 +1,4 @@
-**최종 갱신: 2026-07-30 14:55 (KST)**
+**최종 갱신: 2026-07-30 15:27 (KST)**
 
 # STYLE_GUIDE — 알파맵 디자인 시스템
 
@@ -267,6 +267,7 @@ pantone.css :root       ← 현행 팔레트 (팬튼 A안, index.html 하단 <li
 
 ## 갱신 이력
 
+- 2026-07-30 15:27 · **02 저장 원문 글자수 제한 해제.** 새 저장분은 입력 원문 전체를 보존하며, 원문 페이지의 20,000자 상한 안내를 제거했다. 제한 해제 전에 잘린 과거 자료에만 기존 저장분 안내와 재저장 방법을 표시한다. 신규 DOM·CSS 클래스·`:root` 토큰·레이아웃 변경 0 — 저장 동작과 상태 문구만 변경. 분석 입력 120,000자 컷은 별도 규율로 유지한다. (OPS §3·§9 동반)
 - 2026-07-30 14:40 · **02 인사이트 찾기 주요 문서 첨부 인식 정상화.** 인테이크 드롭존 카피를 「PDF·Word·PowerPoint·Excel·HWPX·TXT·이미지」로 확장하고 숨김 file input의 `accept`를 DOCX·PPTX·XLSX/XLS/XLSM/XLSB·RTF·HTML/XML·ODT/ODS/ODP·HWPX·EML·TSV/YAML/자막까지 맞췄다. 형식별 전용 추출로 바이너리 노출을 차단하고, 이미지형 PPTX는 기존 Tesseract 진행 상태줄(`.ins-msg`)로 슬라이드 OCR 진행을 표시한다. 파일당 25MB·분석 입력 120,000자 컷과 구형/암호화 문서 안내도 같은 기존 상태줄로 전달한다. **신규 DOM 컴포넌트·CSS 클래스·`:root` 토큰 0** — 기존 `.ins-drop`·`.ins-msg`·`.ins-ta`·14px 폼 하한·radius 규약 불변. 실제 DOCX/PPTX·XLSX·HWPX·HTML·RTF 스모크와 `node --check`·`check-docs` 통과. narrative≠numbers. (OPS §3·§9 동반)
 - 2026-07-30 14:47 · **04 AI 수요·공급 로드맵 ③ Meta 행 수치·설명 갱신.** 기존 `ds-mtx`·`ds-rev`·`ds-yrp` 구조와 상향 기능색을 그대로 사용해 2026E 범위·리비전, 2027E 상향 방향, BlackRock·El Paso 1GW 벤처와 Hyperion 5GW 공원 목표를 반영했다. **신규 `:root` 토큰·CSS 클래스·레이아웃 변경 0** — TOKENS·본문/메타 크기·면 규약 불변. (OPS §3·§9 동반)
 - 2026-07-29 23:35 · **화면별 주가그래프 기본 기간 분리.** 01 시장 모니터링의 공통 `RG`와 종목 뉴스 미니차트 초기 창은 6M(126거래일)으로 복원하고, 04 시장과 실적 전망 Value Chain 종목 칩은 별도 `hover-chart.js`의 1Y 일봉을 유지. 01 기간 버튼·Ctrl+휠·04 호버 차트 컴포넌트·토큰은 불변. (OPS §3·§9 동반)

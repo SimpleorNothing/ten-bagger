@@ -868,7 +868,7 @@ function insightRawPage(rec) {
   const meta = [s.publisher, s.kind, s.date].filter(Boolean).join(" · ");
   const body = String((rec && rec.raw) || "");
   const cutNote = rec && rec.rawcut
-    ? `<p class="note">원문 ${Number(rec.rawcut).toLocaleString()}자 중 앞 ${body.length.toLocaleString()}자만 저장됨(상한 20,000자).</p>`
+    ? `<p class="note">제한 해제 전 저장분: 원문 ${Number(rec.rawcut).toLocaleString()}자 중 앞 ${body.length.toLocaleString()}자만 남아 있습니다. 전체 원문은 자료를 다시 분석해 저장하면 보존됩니다.</p>`
     : "";
   const link = s.url ? `<a href="${hesc(s.url)}" target="_blank" rel="noopener">원문 링크 ↗</a>` : "";
   return `<!doctype html><html lang="ko"><head><meta charset="utf-8">
@@ -920,7 +920,6 @@ async function handleInsightsPut(request, env) {
   try { arr = JSON.parse(raw); }
   catch { return memoJson({ error: "invalid json" }, 400); }
   if (!Array.isArray(arr)) return memoJson({ error: "expected array" }, 400);
-  if (raw.length > 16 * 1024 * 1024) return memoJson({ error: "too large", bytes: raw.length }, 413);
   await env.MEMO_BUCKET.put(INSIGHTS_KEY, JSON.stringify(arr), {
     httpMetadata: { contentType: "application/json" },
   });

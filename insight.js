@@ -7,7 +7,6 @@ window.INSIGHT=(function(){
  var GEN='/api/insight', STORE='/api/insights', CK='ins_cache_v1';
  var recs=[], cur=null, busy=false, q='', filt='', putTimer=null;
  var lvl=1;   /* 03 표시 레벨(뎁스) — L1 자료(소스 카드만) · L2 관점(+claims) · L3 시그널(+signal_log). 기본 L1(SimpleorNothing 지시 2026-07-18). */
- var MAXRAW=20000;   /* 원문 저장 상한(자) — R2 배열·localStorage 캐시 비대 방지. 초과분은 rawcut에 전체 길이 기록 */
  function $(id){return document.getElementById(id);}
  function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
  function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
@@ -443,8 +442,8 @@ function persist(){cacheSet();clearTimeout(putTimer);putTimer=setTimeout(push,20
     cur={id:uid(),t:Date.now(),
      src:{kind:ps.kind||'',publisher:ps.publisher||'',title:ps.title||'',url:url||ps.url||'',date:ps.date||''},
      summary:pj.summary||'', steelman:pj.steelman||'', noise:Array.isArray(pj.noise)?pj.noise:[],
-     raw:rawFull.length>MAXRAW?rawFull.slice(0,MAXRAW):rawFull,   /* 원문 저장(상한 캡) */
-     rawcut:rawFull.length>MAXRAW?rawFull.length:0,               /* 잘렸으면 전체 길이 */
+     raw:rawFull,                                                 /* 입력 원문 전체 저장 — 앱 글자수 제한 없음 */
+     rawcut:0,                                                    /* 구 저장분 호환 필드(신규 저장은 절단하지 않음) */
      claims:(Array.isArray(pj.claims)?pj.claims:[]).slice(0,8).map(function(c){c=clampClaim(c);c.id=uid();c.pick=recommend(c);return c;})};
     renderResult();
     stopProg();
