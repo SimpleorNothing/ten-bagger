@@ -786,7 +786,199 @@ function persist(){cacheSet();clearTimeout(putTimer);putTimer=setTimeout(push,20
  }
  function renderAll(){recomputeGrades();SIGCTX=sigCtx();renderLevel();renderGradeBoard();renderList();renderSigRest();renderStrips();stamp();}
 
- /* --- 파일(PDF·TXT) → 텍스트 --- */
+ /* --- 파일 → 텍스트
+    브라우저가 ZIP 기반 Office 파일(DOCX·PPTX)을 file.text() 로 읽으면 PK·word/document.xml
+    같은 바이너리가 textarea 에 노출된다. 확장자별 전용 추출기만 허용하고 미지원 형식은
+    즉시 안내한다. 긴 문서는 /api/insight 입력 상한과 같은 120,000자로 정직하게 컷한다. */
+ var FILE_MAX_BYTES=25*1024*1024;
+ var FILE_TEXT_MAX=120000;
+ var PLAIN_EXT={txt:1,md:1,csv:1,tsv:1,json:1,srt:1,vtt:1,log:1,yaml:1,yml:1,ini:1};
+ var EXCEL_EXT={xlsx:1,xls:1,xlsm:1,xlsb:1,ods:1};
+ var SUPPORTED_EXT={pdf:1,docx:1,pptx:1,rtf:1,html:1,htm:1,xml:1,odt:1,odp:1,hwpx:1,eml:1};
+ Object.keys(PLAIN_EXT).forEach(function(k){SUPPORTED_EXT[k]=1;});
+ Object.keys(EXCEL_EXT).forEach(function(k){SUPPORTED_EXT[k]=1;});
+ function fileExt(f){var n=String((f&&f.name)||'').toLowerCase(),m=n.match(/\.([^.]+)$/);return m?m[1]:'';}
+ function cleanText(s){
+  return String(s||'').replace(/\r\n?/g,'\n').replace(/\u0000/g,'')
+   .replace(/[ \t]+\n/g,'\n').replace(/\n{4,}/g,'\n\n\n').trim();
+ }
+ function capFileText(s){
+  s=cleanText(s);
+  if(s.length<=FILE_TEXT_MAX)return {text:s,total:s.length,cut:false};
+  var note='\n\n…(전체 '+s.length.toLocaleString()+'자 중 앞 '+FILE_TEXT_MAX.toLocaleString()+'자만 관점 분석에 사용)';
+  return {text:s.slice(0,Math.max(0,FILE_TEXT_MAX-note.length))+note,total:s.length,cut:true};
+ }
+ function loadGlobal(key,url,label){
+  if(window[key])return Promise.resolve(window[key]);
+  var pk='__ins_'+key;
+  if(window[pk])return window[pk];
+  window[pk]=new Promise(function(res,rej){
+   var s=document.createElement('script');s.src=url;
+   s.onload=function(){if(window[key])res(window[key]);else{window[pk]=null;rej(new Error(label+' 초기화 실패'));}};
+   s.onerror=function(){window[pk]=null;rej(new Error(label+' 로드 실패'));};
+   document.head.appendChild(s);
+  });
+  return window[pk];
+ }
+ function jszip(){return loadGlobal('JSZip','https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js','JSZip');}
+ function sheetjs(){return loadGlobal('XLSX','https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js','SheetJS');}
+ async function openZip(file){
+  var Z=await jszip();
+  try{return await Z.loadAsync(await file.arrayBuffer());}
+  catch(e){throw new Error('압축 구조를 열 수 없습니다. 암호화·손상 여부를 확인하세요');}
+ }
+ function xmlDoc(raw){
+  var d=new DOMParser().parseFromString(raw,'application/xml');
+  if(d.getElementsByTagName('parsererror').length)throw new Error('문서 XML 파싱 실패');
+  return d;
+ }
+ function localEls(root,name){
+  var all=root.getElementsByTagName('*'),out=[];
+  for(var i=0;i<all.length;i++)if((all[i].localName||all[i].nodeName.split(':').pop())===name)out.push(all[i]);
+  return out;
+ }
+ function inlineXmlText(node){
+  var out=[];
+  function walk(n){
+   if(n.nodeType!==1)return;
+   var k=n.localName||n.nodeName.split(':').pop();
+   if(k==='t'){out.push(n.textContent||'');return;}
+   if(k==='tab'){out.push('\t');return;}
+   if(k==='br'||k==='cr'){out.push('\n');return;}
+   for(var c=n.firstChild;c;c=c.nextSibling)walk(c);
+  }
+  walk(node);
+  return cleanText(out.join(''));
+ }
+ function xmlParagraphText(raw,names){
+  var d=xmlDoc(raw),out=[],seen=[];
+  (names||['p']).forEach(function(n){localEls(d,n).forEach(function(e){seen.push(e);});});
+  seen.sort(function(a,b){
+   if(a===b)return 0;
+   var p=a.compareDocumentPosition(b);
+   return p&Node.DOCUMENT_POSITION_FOLLOWING?-1:1;
+  });
+  seen.forEach(function(p){var t=inlineXmlText(p);if(t)out.push(t);});
+  return cleanText(out.join('\n'));
+ }
+ async function zipEntryText(zip,path){
+  var e=zip.file(path);return e?await e.async('string'):'';
+ }
+ function xmlUnescape(s){
+  return String(s||'').replace(/&#x([0-9a-f]+);/gi,function(_,n){return String.fromCodePoint(parseInt(n,16));})
+   .replace(/&#(\d+);/g,function(_,n){return String.fromCodePoint(+n);})
+   .replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&apos;/g,"'").replace(/&amp;/g,'&');
+ }
+ /* 대형 10-K DOCX 는 document.xml 하나가 10MB를 넘는다. DOM 전체를 만들면 모바일·저사양 PC에서
+    수십 초 멈출 수 있어, OOXML의 텍스트 run/문단 경계만 단일 패스로 읽는다. */
+ function ooxmlFastText(raw,prefix){
+  var p=prefix.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),out=[];
+  var re=new RegExp('<'+p+':t\\b[^>]*>([\\s\\S]*?)<\\/'+p+':t>|<'+p+':tab\\b[^>]*\\/?>|<'+p+':(?:br|cr)\\b[^>]*\\/?>|<\\/'+p+':p>|<\\/'+p+':tr>','g');
+  raw.replace(re,function(m,t){
+   if(t!==undefined)out.push(xmlUnescape(t));
+   else if(/^<[^>]+:tab\b/i.test(m))out.push('\t');
+   else if(/^<[^>]+:(?:br|cr)\b/i.test(m))out.push('\n');
+   else out.push('\n');
+   return m;
+  });
+  return cleanText(out.join(''));
+ }
+ async function docxText(file){
+  var z=await openZip(file),main=await zipEntryText(z,'word/document.xml');
+  if(!main)throw new Error('DOCX 본문(word/document.xml)이 없습니다');
+  var out=[ooxmlFastText(main,'w')];
+  for(var i=0;i<2;i++){
+   var path=i===0?'word/footnotes.xml':'word/endnotes.xml';
+   var raw=await zipEntryText(z,path);
+   if(raw){var t=ooxmlFastText(raw,'w');if(t)out.push((i===0?'[각주]':'[미주]')+'\n'+t);}
+  }
+  return cleanText(out.join('\n\n'));
+ }
+ async function pptxText(file){
+  var z=await openZip(file),slides=Object.keys(z.files).map(function(path){
+   var m=path.match(/^ppt\/slides\/slide(\d+)\.xml$/);return m?{path:path,n:+m[1]}:null;
+  }).filter(Boolean).sort(function(a,b){return a.n-b.n;}),out=[];
+  if(!slides.length)throw new Error('PPTX 슬라이드 XML이 없습니다');
+  for(var i=0;i<slides.length;i++){
+   var raw=await zipEntryText(z,slides[i].path),t=xmlParagraphText(raw,['p']);
+   var relPath='ppt/slides/_rels/slide'+slides[i].n+'.xml.rels';
+   var rel=await zipEntryText(z,relPath);
+   /* 증권사·IR 자료는 슬라이드 전체를 이미지 한 장으로 붙인 경우가 많다.
+      네이티브 글자가 거의 없으면 관계 파일의 media 이미지를 OCR 해 실제 내용을 복원한다. */
+   if(realLetters(t)<12&&rel){
+    var media=[],re=/Target="(?:\.\.\/)?media\/([^"]+)"/gi,mr;
+    while((mr=re.exec(rel)))if(media.indexOf(mr[1])<0)media.push(mr[1]);
+    var ocr=[];
+    for(var j=0;j<media.length;j++){
+     var ent=z.file('ppt/media/'+media[j]);if(!ent)continue;
+     setMsg('PowerPoint 이미지 슬라이드 OCR 중 — '+(i+1)+'/'+slides.length);
+     var bytes=await ent.async('uint8array');
+     var ex=(media[j].match(/\.([^.]+)$/)||[])[1]||'png';
+     var mime=/jpe?g/i.test(ex)?'image/jpeg':/webp/i.test(ex)?'image/webp':/gif/i.test(ex)?'image/gif':'image/png';
+     var ot=await ocrImage(new Blob([bytes],{type:mime}));
+     if(ot)ocr.push(ot);
+    }
+    if(ocr.length)t=cleanText(ocr.join('\n'));
+   }
+   out.push('[슬라이드 '+(i+1)+']'+(t?'\n'+t:''));
+   var m=rel.match(/Target="(?:\.\.\/)?notesSlides\/(notesSlide\d+\.xml)"/i);
+   if(m){
+    var note=await zipEntryText(z,'ppt/notesSlides/'+m[1]);
+    var nt=note?xmlParagraphText(note,['p']):'';
+    if(nt&&nt!==t)out.push('[발표자 노트]\n'+nt);
+   }
+  }
+  return cleanText(out.join('\n\n'));
+ }
+ async function excelText(file){
+  var X=await sheetjs(),wb;
+  try{wb=X.read(await file.arrayBuffer(),{type:'array',cellDates:true,cellText:true});}
+  catch(e){throw new Error('스프레드시트 파싱 실패: '+(e&&e.message?e.message:e));}
+  var out=[];
+  (wb.SheetNames||[]).forEach(function(name){
+   var csv=X.utils.sheet_to_csv(wb.Sheets[name],{blankrows:false});
+   if(csv.trim())out.push('[시트: '+name+']\n'+csv);
+  });
+  if(!out.length)throw new Error('읽을 수 있는 셀 데이터가 없습니다');
+  return cleanText(out.join('\n\n'));
+ }
+ async function openDocumentText(file,kind){
+  var z=await openZip(file);
+  if(kind==='hwpx'){
+   var secs=Object.keys(z.files).map(function(path){
+    var m=path.match(/^Contents\/section(\d+)\.xml$/i);return m?{path:path,n:+m[1]}:null;
+   }).filter(Boolean).sort(function(a,b){return a.n-b.n;}),out=[];
+   if(!secs.length)throw new Error('HWPX 본문 섹션이 없습니다');
+   for(var i=0;i<secs.length;i++){
+    var raw=await zipEntryText(z,secs[i].path),t=xmlParagraphText(raw,['p']);
+    if(t)out.push('[구역 '+(i+1)+']\n'+t);
+   }
+   return cleanText(out.join('\n\n'));
+  }
+  var content=await zipEntryText(z,'content.xml');
+  if(!content)throw new Error(kind.toUpperCase()+' 본문(content.xml)이 없습니다');
+  return xmlParagraphText(content,['h','p']);
+ }
+ function rtfText(raw){
+  var s=String(raw||'');
+  s=s.replace(/\\u(-?\d+)\??/g,function(_,n){n=+n;if(n<0)n+=65536;return String.fromCharCode(n);});
+  s=s.replace(/\\'[0-9a-fA-F]{2}/g,function(m){return String.fromCharCode(parseInt(m.slice(2),16));});
+  s=s.replace(/\\par[d]?\b/g,'\n').replace(/\\tab\b/g,'\t')
+   .replace(/\\[a-zA-Z]+-?\d* ?/g,'').replace(/[{}]/g,'');
+  return cleanText(s);
+ }
+ function markupText(raw,type){
+  var d=new DOMParser().parseFromString(raw,type==='html'?'text/html':'application/xml');
+  if(type!=='html'&&d.getElementsByTagName('parsererror').length)throw new Error('XML 파싱 실패');
+  if(type==='html')Array.prototype.forEach.call(d.querySelectorAll('script,style,noscript'),function(e){e.remove();});
+  return cleanText((d.body||d.documentElement).textContent||'');
+ }
+ function emlText(raw){
+  var s=String(raw||''),p=s.search(/\r?\n\r?\n/);
+  if(p>=0)s=s.slice(p).replace(/^\s+/,'');
+  if(/<html[\s>]/i.test(s))return markupText(s,'html');
+  return cleanText(s.replace(/^--[-\w]+.*$/gm,''));
+ }
  /* pdf.js 버전·CDN 경로를 한 곳으로 묶는다 — 로더 스크립트·워커·cMap 이 같은 릴리스를 쓰도록.
     cMap = 한글 CID 폰트(Adobe-Korea1 등, ToUnicode 없음)를 유니코드로 디코드하는 번들 테이블.
     이게 없으면 pdf.js 가 CID 한글을 통째로 못 읽어 빈 텍스트를 준다 → 실글자 0 판정 →
@@ -881,20 +1073,37 @@ function persist(){cacheSet();clearTimeout(putTimer);putTimer=setTimeout(push,20
   return (r&&r.data&&r.data.text?r.data.text:'').replace(/[ \t]+\n/g,'\n').trim();
  }
  function isImg(f){return /^image\//.test(f.type||'')||/\.(png|jpe?g|gif|bmp|webp)$/i.test(f.name||'');}
+ async function extractFileText(f){
+  var x=fileExt(f),raw;
+  if(isImg(f))return {kind:'이미지 OCR',text:await ocrImage(f)};
+  if(x==='pdf'||f.type==='application/pdf')return {kind:'PDF',text:await pdfText(f)};
+  if(x==='docx')return {kind:'Word',text:await docxText(f)};
+  if(x==='pptx')return {kind:'PowerPoint',text:await pptxText(f)};
+  if(EXCEL_EXT[x])return {kind:'스프레드시트',text:await excelText(f)};
+  if(x==='odt'||x==='odp'||x==='hwpx')return {kind:x.toUpperCase(),text:await openDocumentText(f,x)};
+  if(x==='rtf'){raw=await f.text();return {kind:'RTF',text:rtfText(raw)};}
+  if(x==='html'||x==='htm'){raw=await f.text();return {kind:'HTML',text:markupText(raw,'html')};}
+  if(x==='xml'){raw=await f.text();return {kind:'XML',text:markupText(raw,'xml')};}
+  if(x==='eml'){raw=await f.text();return {kind:'이메일',text:emlText(raw)};}
+  if(PLAIN_EXT[x])return {kind:'텍스트',text:await f.text()};
+  if(x==='doc'||x==='ppt'||x==='hwp')throw new Error('구형 .'+x.toUpperCase()+' 형식은 직접 해제할 수 없습니다. '+(x==='hwp'?'HWPX':'최신 Office 형식')+' 또는 PDF로 저장해 주세요');
+  throw new Error('지원하지 않는 파일 형식입니다: '+(x?'.'+x:'확장자 없음'));
+ }
 
  async function addFiles(files){
   for(var i=0;i<files.length;i++){
    var f=files[i];
-   var img=isImg(f),name=f.name||(img?'붙여넣은 이미지':'파일');
-   setMsg((img?'이미지 글자 인식 준비 — ':'읽는 중 — ')+name);
+   var img=isImg(f),name=f.name||(img?'붙여넣은 이미지':'파일'),x=fileExt(f);
+   if(!img&&!SUPPORTED_EXT[x]&&x!=='doc'&&x!=='ppt'&&x!=='hwp'){setMsg(name+' — 지원하지 않는 파일 형식입니다');continue;}
+   if(f.size>FILE_MAX_BYTES){setMsg(name+' — 파일이 25MB를 초과해 읽지 않았습니다');continue;}
+   setMsg((img?'이미지 글자 인식 준비 — ':'문서 구조 읽는 중 — ')+name);
    try{
-    var t=img?await ocrImage(f)
-            :(/\.pdf$/i.test(f.name)||f.type==='application/pdf')?await pdfText(f):await f.text();
-    t=(t||'').trim();
+    var got=await extractFileText(f),cap=capFileText(got.text),t=cap.text;
+    if(!t||realLetters(t)<2)throw new Error('추출된 본문이 없습니다. 스캔·암호화 여부를 확인하세요');
     var ta=$('insText');
     ta.value=(ta.value?ta.value+'\n\n':'')+'--- '+name+' ---\n'+t;
-    setMsg(name+' — '+t.length.toLocaleString()+'자 '+(img?'인식':'추출')+' · 종류·출처·제목은 내용에서 판별합니다');
-   }catch(e){setMsg(name+(img?' 글자 인식 실패: ':' 추출 실패: ')+(e&&e.message?e.message:e));}
+    setMsg(name+' — '+cap.total.toLocaleString()+'자 '+got.kind+' '+(img?'인식':'추출')+(cap.cut?' · 분석 입력은 앞 120,000자로 제한':'')+' · 종류·출처·제목은 내용에서 판별합니다');
+   }catch(e){setMsg(name+(img?' 글자 인식 실패: ':' 문서 추출 실패: ')+(e&&e.message?e.message:e));}
   }
  }
 
@@ -941,8 +1150,8 @@ function persist(){cacheSet();clearTimeout(putTimer);putTimer=setTimeout(push,20
    '<div class="ins-card">'+
     '<div class="ins-row"><input class="ins-in" id="insUrl" placeholder="URL (선택)"></div>'+
     '<textarea class="ins-ta" id="insText" style="margin-top:8px" placeholder="본문·스크립트를 붙여넣으세요"></textarea>'+
-    '<input type="file" id="insFile" accept=".pdf,.txt,.md,.csv,.json,.png,.jpg,.jpeg,.gif,.bmp,.webp,image/*" multiple hidden>'+
-    '<div class="ins-drop" id="insDrop" role="button" tabindex="0">PDF·TXT·이미지 파일 끌어놓기 또는 클릭</div>'+
+    '<input type="file" id="insFile" accept=".pdf,.docx,.pptx,.xlsx,.xls,.xlsm,.xlsb,.csv,.tsv,.txt,.md,.json,.yaml,.yml,.log,.ini,.html,.htm,.xml,.rtf,.odt,.ods,.odp,.hwpx,.srt,.vtt,.eml,.png,.jpg,.jpeg,.gif,.bmp,.webp,image/*" multiple hidden>'+
+    '<div class="ins-drop" id="insDrop" role="button" tabindex="0">PDF·Word·PowerPoint·Excel·HWPX·TXT·이미지 파일 끌어놓기 또는 클릭</div>'+
     '<div class="ins-bar">'+
      '<button class="ins-btn primary" id="insRun">관점 뽑기</button>'+
      '<button class="ins-btn" id="insClear">비우기</button>'+
@@ -1030,5 +1239,6 @@ function persist(){cacheSet();clearTimeout(putTimer);putTimer=setTimeout(push,20
 
  function init(){mount();if(!document.getElementById('insList'))return;bind();load();sigLoad();siteLoad();}
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
- return {render:renderAll, all:function(){return recs;}, adopted:function(){return flat();}};
+ return {render:renderAll, all:function(){return recs;}, adopted:function(){return flat();},
+  docs:{extract:extractFileText,cap:capFileText,supported:function(f){var x=fileExt(f);return isImg(f)||!!SUPPORTED_EXT[x];}}};
 })();
