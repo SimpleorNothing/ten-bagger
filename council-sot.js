@@ -42,6 +42,27 @@
     return '<div class="cl-blk"><div class="cl-eye" style="color:' + color + '">' + esc(title) + '</div><ul style="margin:8px 0 0;padding-left:16px;line-height:1.7;font-size:14px">' +
       items.map(function (x) { return '<li style="margin-bottom:5px">' + esc(x) + "</li>"; }).join("") + "</ul></div>";
   }
+
+  // SoT council.json 데이터를 council-audio.js 의 hifiPlay 에 넘기기 위한 d 구조 빌드.
+  // index.html buildSeq 와 동일한 형태: { diagnosis, board[], consensus[], tension[], steelman }.
+  function buildSotD() {
+    if (!DATA) return null;
+    var s = DATA.synthesis || {};
+    var d = { diagnosis: "", board: [], consensus: s.converge || [], tension: s.diverge || [], steelman: s.steelman || "" };
+    // 좌장 진단: insight 를 diagnosis 로 사용(가장 밀도 높은 1줄 요약).
+    d.diagnosis = s.insight || "";
+    // 전문가 발언: experts 배열에서 id·name·call(stance)·take(view) 추출.
+    (DATA.experts || []).forEach(function (e) {
+      if (e.id === "chair" || !e.view) return;
+      d.board.push({ id: e.id, name: e.name || e.id, call: e.stance || "", take: e.view || "" });
+    });
+    // tension 은 diverge + tension 합산(council.json 에서 diverge·tension 둘 다 존재할 수 있음).
+    var tensions = (s.tension || []).concat(s.diverge || []);
+    d.tension = tensions.filter(function (x, i, a) { return a.indexOf(x) === i; }); // dedup
+    d.consensus = s.converge || [];
+    return d;
+  }
+
   function renderSynth() {
     var s = DATA && DATA.synthesis; if (!s) return;
     var price = document.getElementById("clPrice"); if (!price || !price.parentNode) return;
@@ -57,7 +78,24 @@
     var ten = (s.tension && s.tension.length) ? '<div style="margin-top:14px"><div class="cl-eye">긴장축 · 대립 렌즈</div><ul style="margin:8px 0 0;padding-left:18px;line-height:1.8;font-size:14px">' + s.tension.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") + "</ul></div>" : "";
     var ins = s.insight ? '<div class="cl-steel"><div class="cl-eye">좌장 · 한 줄 인사이트</div><p style="margin:6px 0 0;font-size:14px;line-height:1.7">' + esc(s.insight) + "</p></div>" : "";
     var stl = s.steelman ? '<div class="cl-steel" style="border-left-color:var(--st-hot,#b4472f)"><div class="cl-eye">스틸맨 반론</div><p style="margin:6px 0 0;font-size:14px;line-height:1.7">' + esc(s.steelman) + "</p></div>" : "";
-    el.innerHTML = '<div class="cl-rep">' + two + ten + ins + stl + "</div>";
+    // ▶ 음성 토론 재생 버튼 — council-audio.js(hifiPlay) 또는 인라인 playReport 폴백.
+    var playBtn = '<button type="button" class="cl-btn cl-playbtn" style="margin:0 0 4px" data-sot="1">▶ 음성 토론 재생</button>';
+    el.innerHTML = '<div class="cl-rep">' + playBtn + two + ten + ins + stl + "</div>";
+    // 버튼 클릭 — council-audio.js 가 로드됐으면 hifiPlay, 없으면 인라인 playReport 폴백.
+    var btn = el.querySelector(".cl-playbtn[data-sot]");
+    if (btn) {
+      btn.addEventListener("click", function (e) {
+        // council-audio.js 가 캡처 단계에서 cl-playbtn 을 가로채므로,
+        // SoT 버튼은 여기서 직접 처리하고 캡처 리스너까지 막는다.
+        e.stopImmediatePropagation();
+        var d = buildSotD();
+        if (!d) return;
+        // council-audio.js 의 HiFi 경로 우선(window.COUNCIL.__hifi 가 세팅됐을 때).
+        if (window.COUNCIL && window.COUNCIL.playReport) {
+          window.COUNCIL.playReport(d);
+        }
+      });
+    }
   }
 
   function apply() { if (patching) return; patching = true; try { patchCards(); renderSynth(); } catch (e) {} setTimeout(function () { patching = false; }, 0); }
