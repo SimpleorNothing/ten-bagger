@@ -215,7 +215,7 @@ var CSS=`#dsAisd{margin:2px 0 38px}
 var HTML=`<div style="position:relative">
   <div class="ds-kick">AI Value Chain · Demand · Supply</div>
   <h2 class="ds-title">AI <em>수요·공급</em> — 밸류체인으로 보는 상류·병목</h2>
-  <div class="ds-upd">update : 2026.07.27 · 컨센서스 방향성 추정 · 수동 갱신(분기 캡처) · 리비전 트랙은 캡처 축적 전 예시</div>
+  <div class="ds-upd">update : 2026.07.30 · 컨센서스 방향성 추정 · 수동 갱신(분기 캡처) · 리비전 트랙은 캡처 축적 전 예시</div>
 </div>
 
 <div class="ds-sec">판정 <span class="ds-note">이 블록이 답하는 질문 · 결론 먼저</span></div>
@@ -483,13 +483,13 @@ var HTML=`<div style="position:relative">
         <div class="ds-yc"><div class="ds-yy est">2027E</div><div class="ds-yv">↑ 지속</div><div class="ds-yt">자체칩(TPU) 비중 확대 = NVIDIA 의존 일부 완화 변수</div></div>
         <div class="ds-yc"><div class="ds-yy est">2028E</div><div class="ds-yv">컨센 희박</div><div class="ds-yt">TPU 세대 교체 주기 지속 전제 — 추론 트래픽이 규모 결정</div></div>
       </div></td></tr>
-      <tr class="exp" tabindex="0"><td class="ds-co">Meta</td><td>39.2</td><td>72.2</td><td class="dim">$125~145 <span class="ds-rev up">▲10</span></td><td class="dim">↑ <span class="ds-rev fl">→</span></td><td class="dim">↑</td><td class="nt">추론·자체 클러스터 집중</td></tr>
+      <tr class="exp" tabindex="0"><td class="ds-co">Meta</td><td>39.2</td><td>72.2</td><td class="dim">$130~145 <span class="ds-rev up">▲15</span></td><td class="dim">↑ <span class="ds-rev up">↑</span></td><td class="dim">↑</td><td class="nt">추론·자체 클러스터 집중</td></tr>
       <tr class="dtl"><td colspan="7"><div class="ds-yrp">
         <div class="ds-yc"><div class="ds-yy">2024</div><div class="ds-yv">$39.2B</div><div class="ds-yt">Llama 학습 · 추천 시스템 GPU 확충</div></div>
         <div class="ds-yc"><div class="ds-yy">2025</div><div class="ds-yv">$72.2B</div><div class="ds-yt">추론 캐파 집중 · 자체 DC 건설 가속</div></div>
-        <div class="ds-yc"><div class="ds-yy est">2026E</div><div class="ds-yv">$125~145B</div><div class="ds-yt">기가와트급 클러스터(Hyperion·Prometheus) 착공·램프</div></div>
+        <div class="ds-yc"><div class="ds-yy est">2026E</div><div class="ds-yv">$130~145B</div><div class="ds-yt">기가와트급 클러스터(Hyperion·Prometheus) 착공·램프 · BlackRock·El Paso 1GW 벤처</div></div>
         <div class="ds-yc"><div class="ds-yy est">2027E</div><div class="ds-yv">↑ 지속</div><div class="ds-yt">수년간 기가와트 단위 증설 로드맵 공언 — 전력이 제약</div></div>
-        <div class="ds-yc"><div class="ds-yy est">2028E</div><div class="ds-yv">↑ 로드맵</div><div class="ds-yt">Hyperion 5GW급 완공 목표 구간 — 전력·부지 확보가 상한</div></div>
+        <div class="ds-yc"><div class="ds-yy est">2028E</div><div class="ds-yv">↑ 로드맵</div><div class="ds-yt">Hyperion 5GW 공원 목표 — 완공 구간의 전력·부지 확보가 상한</div></div>
       </div></td></tr>
       <tr class="exp" tabindex="0"><td class="ds-co">Microsoft<small>Azure/OpenAI</small></td><td>44.5</td><td>64.6</td><td class="dim">~190(CY) <span class="ds-rev up">▲5</span></td><td class="dim">↑ <span class="ds-rev fl">→</span></td><td class="dim">~</td><td class="nt">OpenAI 연동 · 임대+자가 혼합</td></tr>
       <tr class="dtl"><td colspan="7"><div class="ds-yrp">
