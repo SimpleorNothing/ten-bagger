@@ -423,7 +423,7 @@ var HTML=`<div style="position:relative">
   <div class="ds-l2">CAPEX는 <b>명목 달러 선행</b> · 아래 3종은 <span class="ds-ok">가속기(L2 실현)</span> · <span class="ds-nt">메모리(L3)</span> · <span class="ds-wn">전력(L8)</span> 을 각각 <b>동행 검증</b> — 셋이 함께 꺾여야 수요 피크 확증(하나만으론 플래그)</div>
 </div>
 <div class="ds-card">
-  <div class="ds-l1" style="margin-bottom:7px"><b>① 가속기 L2</b> NVDA 데이터센터 매출 · $B <span class="ds-note">명목$ 시계 · NVDA 회계연도(FY26=2025.2~2026.1) 캘린더 근사</span></div>
+  <div class="ds-l1" style="margin-bottom:7px"><b>① 가속기 L2</b> NVDA 데이터센터 매출 · $B <span class="ds-note">명목$ 시계 · NVDA 회계연도(2025.2~2026.1) 캘린더 근사</span></div>
   <div class="ds-bars" style="height:118px">
     <div class="ds-bc"><span class="ds-bv">$47B</span><div class="ds-bar" style="height:13%"></div></div>
     <div class="ds-bc"><span class="ds-bv">$115B</span><div class="ds-bar" style="height:32%"></div></div>
@@ -456,7 +456,7 @@ var HTML=`<div style="position:relative">
   </div>
   <div class="ds-bx"><span>2023</span><span>2024</span><span>2025</span><span class="est">2026E</span><span class="est">2027E</span><span class="est">2028E</span></div>
 
-  <div class="ds-fn">채운 막대=실적 · 테두리=추정(E)·보간 · <b>—</b>=데이터 공백 · 3종 = CAPEX 달러의 실물 검증축(명목$/물량+가격/커밋 실물 3시계) · 소스: NVDA 실적(FY26 DC $193.7B·FY→캘린더 근사·FY27~28 컨센 추정) · HBM TrendForce/BofA(26E $54.6B·28E $100B, 23~24 초기시장) · IEA Energy&AI(24 415TWh·30 945TWh, 25~28 궤적 보간) · 셋이 동시 꺾여야 수요 피크, 트리거 승격은 MU γ 3트리거·매크로 게이트 AND에만</div>
+  <div class="ds-fn">채운 막대=실적 · 테두리=추정(E)·보간 · <b>—</b>=데이터 공백 · 3종 = CAPEX 달러의 실물 검증축(명목$/물량+가격/커밋 실물 3시계) · 소스: NVDA 실적(2025.2~2026.1 DC $193.7B·회계연도→캘린더 근사·2026.2~2028.1 컨센 추정) · HBM TrendForce/BofA(26E $54.6B·28E $100B, 23~24 초기시장) · IEA Energy&AI(24 415TWh·30 945TWh, 25~28 궤적 보간) · 셋이 동시 꺾여야 수요 피크, 트리거 승격은 MU γ 3트리거·매크로 게이트 AND에만</div>
 </div>
 
 <div class="ds-lens" style="margin-top:14px">
