@@ -9,6 +9,7 @@
  * 통합: ① window.COUNCIL.playReport 를 감싸 1인 심층 자문(council-ask.js) 음성도 HiFi 로 승격
  *       ② 원탁 리포트의 「▶ 음성 토론 재생」(.cl-playbtn)은 인라인 클로저에 바인딩돼 있어
  *          캡처 단계 클릭 인터셉트 + 리포트 DOM 파싱으로 d 를 복원해 가로챈다.
+ *       ③ 관점 지형(clSynth)의 cl-playbtn[data-sot=1]은 council-sot.js 가 직접 처리 — 인터셉트 제외.
  * 규율: 신규 :root 토큰·CSS 0 (기존 .cl-* 전면 재사용) · narrative≠numbers(관점 텍스트일 뿐 숫자 파일 불변). */
 (function () {
   if (window.__councilAudio) return;
@@ -197,9 +198,13 @@
   }
 
   // 원탁 리포트의 「▶ 음성 토론 재생」(.cl-playbtn)은 인라인 클로저에 바인딩 → 캡처 단계에서 가로챈다.
+  // data-sot="1" 버튼: council-sot.js 가 buildSotD() → playReport(d) 를 직접 호출하므로
+  //   캡처 인터셉트 없이 council-sot.js 의 버블 단계 핸들러로 넘긴다.
   function onCapture(e) {
     var pb = e.target.closest && e.target.closest('.cl-playbtn'); if (!pb) return;
     if (!pb.closest('#v-council')) return;
+    // SoT 버튼은 council-sot.js 가 직접 처리 — 인터셉트하지 않는다.
+    if (pb.getAttribute('data-sot') === '1') return;
     var rep = pb.closest('.cl-rep'); if (!rep) return;
     var d = readReportDOM(rep);
     if (!d || !buildSeq(d).length) return; // 파싱 실패 → 인라인 브라우저 TTS 그대로 실행
