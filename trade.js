@@ -43,11 +43,13 @@
       '<div class="mkt-chg ' + cls(s.semiYoy) + '">' + pct(s.semiYoy, 1) +
       '<span style="font:600 12px var(--mono);margin-left:8px;color:var(--faint)">전월 ' +
       (mom == null ? '—' : '<span style="color:var(--' + (mom >= 0 ? 'st-hot' : 'st-accel') + ')">' + pct(mom, 1) + '</span>') + '</span></div>' +
-      spark(series.map(function (r) { return r.semi; }), s.semiYoy != null && s.semiYoy >= 0) +
       lensRow('<b>L3 메모리</b> 수요 선행 ' + judge,
         '반도체 ' + num(s.semi) + '억달러 · 전년비 ' + pct(s.semiYoy, 1) +
         (share != null ? ' · 수출 내 ' + share.toFixed(0) + '%' : '') + ' · MU·삼성·하이닉스 실적 선행') +
-      '<div style="margin-top:auto;font:600 11px var(--mono);color:var(--faint)">' + esc(s.ym || '') + ' · MOTIE 수출입 동향</div>';
+      '<div class="mkt-chart">' +
+      spark(series.map(function (r) { return r.semi; }), s.semiYoy != null && s.semiYoy >= 0) +
+      '</div>' +
+      '<div class="mkt-span">' + esc(s.ym || '') + ' · MOTIE 수출입 동향</div>';
   }
 
   function render(td, host) {
