@@ -1050,11 +1050,10 @@ async function handleInsight(request, env) {
   return memoJson({ content: [{ type: "text", text: r.text }], stop_reason: r.stop_reason }, 200);
 }
 
-// 02 인사이트 「사이트 반영」 — 표시 전용 보드(gates.json/risk.json) 직접 갱신.
+// 02 인사이트 「사이트 반영」 — 보드(gates/risk)·시장 맥락(signal_log)·일정(calendar) 직접 갱신.
 // SimpleorNothing 지시(2026-07-29): PR·수동 승인 없이 클릭 즉시 반영하는 완전 자동 예외.
-// narrative≠numbers 의 '확정 검증 후 수기 갱신' 원칙에 대한 명시적 카ㅂ아웃 —
-// 대신 Claude가 계산한 패치를 구조적으로 제한한다(게이지 배열 길이·k 순서·id 불변, 스키마 신설 금지).
-// 근거 불충분/이미 반영/모호하면 changed:false 로 아무것도 쓰지 않는다.
+// narrative≠numbers 의 '확정 검증 후 수기 갱신' 원칙에 대한 명시적 예외 —
+// 숫자 보드는 Claude 패치를 구조적으로 제한하고, narrative는 signal_log/calendar의 기존 스키마 안에서만 갱신한다.
 async function handleSiteApply(request, env) {
   if (!env.GITHUB_TOKEN) return memoJson({ error: "GITHUB_TOKEN not configured" }, 503);
   if (!env.ANTHROPIC_API_KEY) return memoJson({ error: "ANTHROPIC_API_KEY not configured" }, 503);
@@ -1064,16 +1063,21 @@ async function handleSiteApply(request, env) {
   catch { return memoJson({ error: "invalid json" }, 400); }
 
   const file = String((body && body.file) || "");
-  if (file !== "gates.json" && file !== "risk.json") {
-    return memoJson({ error: "invalid file — gates.json|risk.json only" }, 400);
+  if (!["gates.json", "risk.json", "signal_log.json", "calendar.json"].includes(file)) {
+    return memoJson({ error: "invalid file — gates.json|risk.json|signal_log.json|calendar.json only" }, 400);
   }
   const itemNo   = String((body && body.itemNo) || "");
   const itemName = String((body && body.itemName) || "");
   const claimText = String((body && body.text) || "").slice(0, 2000);
   const why = String((body && body.why) || "").slice(0, 2000);
   const src = (body && body.src) || {};
+  const route = String((body && body.route) || "signal_log");
+  const claimType = String((body && body.type) || "narrative");
+  const layer = String((body && body.layer) || "").slice(0, 20);
   if (!claimText.trim()) return memoJson({ error: "text required" }, 400);
-  if (!itemNo && !itemName) return memoJson({ error: "itemNo or itemName required" }, 400);
+  if (file !== "signal_log.json" && !itemNo && !itemName) {
+    return memoJson({ error: "itemNo or itemName required" }, 400);
+  }
 
   const OWNER = "SimpleorNothing", REPO = "ten-bagger";
   const gh = {
@@ -1102,6 +1106,73 @@ async function handleSiteApply(request, env) {
   try { doc = JSON.parse(raw); }
   catch { return memoJson({ error: "current file invalid json" }, 500); }
 
+  const kstNow = () => {
+    const shifted = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().replace("Z", "+09:00");
+    return { at: shifted, date: shifted.slice(0, 10) };
+  };
+  const norm = (s) => String(s || "").replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim().toLowerCase();
+  const htmlEsc = (s) => String(s || "").replace(/[&<>"]/g, (c) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;",
+  })[c]);
+  const commitDoc = async (message) => {
+    const content = btoa(unescape(encodeURIComponent(JSON.stringify(doc, null, 2) + "\n")));
+    const put = await fetch(API, {
+      method: "PUT",
+      headers: { ...gh, "content-type": "application/json" },
+      body: JSON.stringify({ message, branch: BRANCH, content, sha }),
+    });
+    if (!put.ok) {
+      const t = await put.text();
+      return { error: "github put failed", status: put.status, detail: t.slice(0, 300) };
+    }
+    return null;
+  };
+
+  // 01 시장 모니터링 「시장 맥락」 — 채택 관점을 기존 signal_log 스키마로 append.
+  if (file === "signal_log.json") {
+    doc.log = Array.isArray(doc.log) ? doc.log : [];
+    const needle = norm(claimText);
+    const duplicate = doc.log.some((e) => (e.items || []).some((it) => {
+      const old = norm(it && it.html);
+      return needle && (old.includes(needle) || needle.includes(old));
+    }));
+    if (duplicate) return memoJson({ ok: true, changed: false, reason: "시장 맥락에 이미 반영된 관점" }, 200);
+
+    const now = kstNow();
+    const srcLabel = [src.title, src.publisher, src.date].filter(Boolean).join(" · ") || "02 인사이트 찾기 채택 관점";
+    const tag = route === "macro" ? "매크로·인사이트 반영" : (layer ? `${layer}·인사이트 반영` : "인사이트 반영");
+    const html = `<b>${htmlEsc(claimText)}</b>${why ? ` ${htmlEsc(why)}` : ""} <b>narrative≠numbers — 숫자 파일 불변.</b>`;
+    doc.log.push({
+      date: /^\d{4}-\d{2}-\d{2}$/.test(String(src.date || "")) ? src.date : now.date,
+      at: now.at,
+      source: `${srcLabel} — 02 인사이트 「사이트 반영」`,
+      srcs: [{ label: srcLabel, ...(src.url ? { url: String(src.url).slice(0, 1000) } : {}) }],
+      items: [{ tag, layer: layer || null, col: route === "macro" ? "#e03131" : "#868e96", html }],
+    });
+    doc.asOf = now.date;
+    const err = await commitDoc(`site-apply: signal_log 시장 맥락 추가 — ${claimText.slice(0, 60)}`);
+    if (err) return memoJson(err, 502);
+    return memoJson({ ok: true, changed: true, reason: "01 시장 모니터링의 시장 맥락에 추가" }, 200);
+  }
+
+  // 01 시장 모니터링 「다가오는 일정」 — 같은 이벤트의 D-day 카드 설명을 결과/새 관점으로 갱신.
+  if (file === "calendar.json") {
+    const events = Array.isArray(doc.events) ? doc.events : [];
+    const event = events.find((it) =>
+      (itemNo && `${it.d || ""}|${it.lbl || ""}` === itemNo) || (itemName && it.lbl === itemName));
+    if (!event) return memoJson({ error: "calendar event not found" }, 404);
+    if (norm(event.meta).includes(norm(claimText))) {
+      return memoJson({ ok: true, changed: false, reason: "일정 설명에 이미 반영된 관점" }, 200);
+    }
+    const incoming = [claimText, why].filter(Boolean).join(" · ").replace(/\s+/g, " ").trim();
+    event.meta = [event.meta, `결과 업데이트: ${incoming}`].filter(Boolean).join(" · ").slice(0, 900);
+    const now = kstNow();
+    doc.asOf = now.at;
+    const err = await commitDoc(`site-apply: calendar ${event.lbl} 일정 맥락 갱신`);
+    if (err) return memoJson(err, 502);
+    return memoJson({ ok: true, changed: true, reason: "01 다가오는 일정의 해당 이벤트 설명 갱신" }, 200);
+  }
+
   const items = doc.items || doc.axes || [];
   const item = items.find((it) =>
     (itemNo && (it.no === itemNo || it.id === itemNo)) || (itemName && it.name === itemName));
@@ -1112,7 +1183,8 @@ async function handleSiteApply(request, env) {
     "아래 '현재 항목'과 '새 관점'을 비교해 갱신이 필요한 필드만 정확히 계산하라.",
     "",
     "[절대 규율]",
-    "1. narrative≠numbers — 확정 실적·공시·계약 등 '숫자'만 반영한다. 추측·전망·소문·아직 확정 안 된 내용이면 changed=false.",
+    "1. gauge 숫자는 확정 실적·공시·계약·정책결정만 반영한다. 추측·전망·소문이면 changed=false.",
+    "   FOMC·중앙은행 결정처럼 확정된 매크로 결과는 narrative여도 verdict/srcs 갱신 가능하나, 숫자 gauge는 근거가 있을 때만 바꾼다.",
     "2. gauge 배열은 원본과 같은 길이·같은 순서·같은 k(라벨)를 유지한다. v(값)·d(up/down/flat)·n(부연설명)만 바꿀 수 있다.",
     "3. 스키마를 새로 만들지 마라 — 기존 필드만 채운다. 근거 없는 필드는 건드리지 마라.",
     "4. 근거가 불충분하거나 이미 반영된 값과 사실상 같으면 changed=false를 반환하라(추측으로 채우지 마라).",
@@ -1126,6 +1198,7 @@ async function handleSiteApply(request, env) {
     "",
     "[새 관점]",
     claimText,
+    `분류: route=${route} · type=${claimType}`,
     why ? ("근거: " + why) : "",
     (src && (src.title || src.publisher)) ? ("출처: " + [src.title, src.publisher, src.date].filter(Boolean).join(" · ")) : "",
   ].filter(Boolean).join("\n");
@@ -1162,21 +1235,9 @@ async function handleSiteApply(request, env) {
   item.upd = today;
   doc.asOf = today;
 
-  const content = btoa(unescape(encodeURIComponent(JSON.stringify(doc, null, 2) + "\n")));
-  const put = await fetch(API, {
-    method: "PUT",
-    headers: { ...gh, "content-type": "application/json" },
-    body: JSON.stringify({
-      message: `site-apply: ${file} ${item.no || item.id || item.name} 자동 반영 — ${String(patch.reason || "").slice(0, 80)}`,
-      branch: BRANCH,
-      content,
-      sha,
-    }),
-  });
-  if (!put.ok) {
-    const t = await put.text();
-    return memoJson({ error: "github put failed", status: put.status, detail: t.slice(0, 300) }, 502);
-  }
+  const commitErr = await commitDoc(
+    `site-apply: ${file} ${item.no || item.id || item.name} 자동 반영 — ${String(patch.reason || "").slice(0, 80)}`);
+  if (commitErr) return memoJson(commitErr, 502);
 
   return memoJson({
     ok: true, changed: true, reason: patch.reason || "",
