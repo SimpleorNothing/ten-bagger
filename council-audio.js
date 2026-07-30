@@ -17,6 +17,7 @@
   var _orig = null, _avn = 0;
   var host = null, audio = null, curURL = null;
   var seqRef = [], startsRef = [], els = [], revealIx = 0, activeIx = -1;
+  var prepTimer = null, prepStartedAt = 0, prepStage = 0, prepLabel = '';
 
   // 좌장(알파맵)=Kore 고정 · 나머지는 착석 순서로 서로 다른 프리셋 배정(로컬 build.py 화자 팔레트 계승).
   var VOICE_POOL = ['Puck', 'Charon', 'Aoede', 'Iapetus', 'Fenrir', 'Orus', 'Zephyr', 'Leda', 'Umbriel'];
@@ -127,7 +128,63 @@
   }
   function resetChat() { if (host) host.querySelector('.cl-pchat').innerHTML = ''; els = []; revealIx = 0; activeIx = -1; }
   function setStat(t) { var s = host && host.querySelector('.cl-pstat'); if (s) s.textContent = t || ''; }
-  function setToggle(t) { var b = host && host.querySelector('[data-a=toggle]'); if (b) b.textContent = t; }
+  function setToggle(t, disabled) {
+    var b = host && host.querySelector('[data-a=toggle]');
+    if (b) { b.textContent = t; b.disabled = !!disabled; }
+  }
+
+  function ensurePrepStyle() {
+    if (document.getElementById('clHiPrepStyle')) return;
+    var s = document.createElement('style'); s.id = 'clHiPrepStyle';
+    s.textContent = [
+      '#clPlayHi .cl-prep{width:min(430px,calc(100% - 32px));margin:clamp(42px,12vh,120px) auto 24px;padding:20px;border:1px solid var(--line2,#d9d6ce);border-radius:14px;background:var(--paper,#fff);box-shadow:0 8px 28px rgba(28,35,43,.07)}',
+      '#clPlayHi .cl-preptop{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:13px}',
+      '#clPlayHi .cl-preptitle{font-size:14px;font-weight:700;color:var(--ink,#252525)}',
+      '#clPlayHi .cl-preptime{font-size:13px;font-variant-numeric:tabular-nums;color:var(--muted,#777);white-space:nowrap}',
+      '#clPlayHi .cl-prepbar{height:4px;overflow:hidden;border-radius:999px;background:var(--line,#e9e6df);margin-bottom:17px}',
+      '#clPlayHi .cl-prepbar>i{display:block;width:36%;height:100%;border-radius:inherit;background:var(--accent,#416987);animation:clHiPrepMove 1.35s ease-in-out infinite}',
+      '#clPlayHi .cl-prepsteps{display:grid;gap:10px;margin:0;padding:0;list-style:none}',
+      '#clPlayHi .cl-prepstep{display:grid;grid-template-columns:25px 1fr auto;align-items:center;gap:10px;color:var(--muted,#777);font-size:13px}',
+      '#clPlayHi .cl-prepnum{display:grid;place-items:center;width:25px;height:25px;border-radius:50%;border:1px solid var(--line2,#d9d6ce);font-size:11px;font-weight:700;background:var(--paper2,#f5f3ee)}',
+      '#clPlayHi .cl-prepstep.done{color:var(--ink2,#555)}',
+      '#clPlayHi .cl-prepstep.done .cl-prepnum{color:#fff;border-color:var(--st-dawn,#2f7d63);background:var(--st-dawn,#2f7d63)}',
+      '#clPlayHi .cl-prepstep.active{color:var(--ink,#252525);font-weight:700}',
+      '#clPlayHi .cl-prepstep.active .cl-prepnum{color:#fff;border-color:var(--accent,#416987);background:var(--accent,#416987);box-shadow:0 0 0 4px color-mix(in srgb,var(--accent,#416987) 14%,transparent)}',
+      '#clPlayHi .cl-prepstate{font-size:11px;font-weight:600;color:var(--muted,#777)}',
+      '#clPlayHi .cl-prepstep.active .cl-prepstate{color:var(--accent,#416987)}',
+      '#clPlayHi [data-a=toggle]:disabled{opacity:.62;cursor:wait}',
+      '@keyframes clHiPrepMove{0%{transform:translateX(-110%)}50%{transform:translateX(185%)}100%{transform:translateX(390%)}}',
+      '@media(prefers-reduced-motion:reduce){#clPlayHi .cl-prepbar>i{animation-duration:3s}}'
+    ].join('');
+    document.head.appendChild(s);
+  }
+  function prepSeconds() { return prepStartedAt ? Math.max(0, Math.floor((Date.now() - prepStartedAt) / 1000)) : 0; }
+  function prepStepHTML(n, title) {
+    var state = n < prepStage ? 'done' : (n === prepStage ? 'active' : 'wait');
+    var word = n < prepStage ? '완료' : (n === prepStage ? '진행 중' : '대기');
+    return '<li class="cl-prepstep ' + state + '"><span class="cl-prepnum">' + n + '</span><span>' + title + '</span><span class="cl-prepstate">' + word + '</span></li>';
+  }
+  function renderPrep() {
+    if (!host) return;
+    var chat = host.querySelector('.cl-pchat'); if (!chat) return;
+    var sec = prepSeconds(), box = chat.querySelector('.cl-prep');
+    var html = '<div class="cl-preptop"><span class="cl-preptitle">' + esc(prepLabel || '음성 토론을 준비하고 있습니다') + '</span><span class="cl-preptime">' + sec + '초 경과</span></div>' +
+      '<div class="cl-prepbar" aria-hidden="true"><i></i></div><ol class="cl-prepsteps">' +
+      prepStepHTML(1, '토론 대본 구성') + prepStepHTML(2, '고품질 AI 음성 생성') + prepStepHTML(3, '재생 준비') + '</ol>';
+    if (!box) { chat.innerHTML = '<div class="cl-prep" role="status" aria-live="polite">' + html + '</div>'; }
+    else { box.innerHTML = html; }
+    var statLabel = prepStage === 2 ? 'AI 음성 생성 중' : (prepStage === 3 ? '재생 준비 중' : '대본 구성 중');
+    setStat(prepStage + '/3 ' + statLabel + ' · ' + sec + '초');
+  }
+  function startPrep() {
+    stopPrep(true); prepStartedAt = Date.now(); prepStage = 2; prepLabel = '고품질 AI 음성을 생성하고 있습니다';
+    renderPrep(); prepTimer = setInterval(renderPrep, 1000);
+  }
+  function setPrep(stage, label) { prepStage = stage; prepLabel = label || prepLabel; renderPrep(); }
+  function stopPrep(remove) {
+    if (prepTimer) { clearInterval(prepTimer); prepTimer = null; }
+    if (remove && host) { var p = host.querySelector('.cl-prep'); if (p) p.remove(); }
+  }
 
   function onTick() {
     if (!audio || startsRef.length !== seqRef.length) return;
@@ -143,13 +200,14 @@
   }
 
   function buildHost() {
+    ensurePrepStyle();
     host = document.createElement('div');
     host.id = 'clPlayHi'; host.className = 'cl-play'; host.hidden = true;
     host.innerHTML = '<div class="cl-psheet"><div class="cl-phead"><span class="cl-ptitle">원탁 음성 토론</span><span class="cl-chip" style="margin-left:6px">고품질 AI 음성</span><button type="button" class="cl-btn" data-a="mute" title="음성 켜기/끄기">🔊</button><button type="button" class="cl-btn" data-a="close">닫기</button></div><div class="cl-pchat"></div><div class="cl-pfoot"><button type="button" class="cl-btnp" data-a="toggle">⏸ 일시정지</button><span class="cl-pstat"></span></div></div>';
     (document.getElementById('v-council') || document.body).appendChild(host);
     host.addEventListener('click', function (e) {
       var t = e.target.closest('[data-a]'); if (!t) return; var a = t.getAttribute('data-a');
-      if (a === 'close') { try { if (audio) audio.pause(); } catch (_e) {} host.hidden = true; }
+      if (a === 'close') { stopPrep(true); try { if (audio) audio.pause(); } catch (_e) {} host.hidden = true; }
       else if (a === 'mute') { if (audio) { audio.muted = !audio.muted; t.textContent = audio.muted ? '🔇' : '🔊'; } }
       else if (a === 'toggle') {
         if (!audio) return;
@@ -171,11 +229,11 @@
     if (!host) buildHost();
     resetChat();
     host.querySelector('.cl-ptitle').textContent = '원탁 음성 토론' + (d && d.diagnosis ? ' — ' + String(d.diagnosis).slice(0, 32) + '…' : '');
-    setToggle('⏸ 일시정지'); setStat('고품질 AI 음성 준비 중…'); host.hidden = false;
-    seqRef = seq; startsRef = [];
+    setToggle('준비 중', true); host.hidden = false;
+    seqRef = seq; startsRef = []; startPrep();
 
     fetch('/api/council-audio', { method: 'POST', headers: { 'content-type': 'application/json' }, credentials: 'same-origin', body: JSON.stringify({ turns: turns }) })
-      .then(function (r) { if (!r.ok) throw new Error('audio ' + r.status); var st = r.headers.get('x-council-starts'); return r.blob().then(function (b) { return { b: b, starts: st }; }); })
+      .then(function (r) { if (!r.ok) throw new Error('audio ' + r.status); setPrep(3, '음성 파일을 재생 준비하고 있습니다'); var st = r.headers.get('x-council-starts'); return r.blob().then(function (b) { return { b: b, starts: st }; }); })
       .then(function (o) {
         if (curURL) { try { URL.revokeObjectURL(curURL); } catch (_e) {} }
         curURL = URL.createObjectURL(o.b);
@@ -189,12 +247,13 @@
           startsRef = lens.map(function (L) { var s = acc; acc += L / tot * totMs; return Math.round(s); });
         });
         audio.addEventListener('timeupdate', onTick);
+        audio.addEventListener('playing', function () { stopPrep(true); setToggle('⏸ 일시정지'); setStat('재생 중'); onTick(); }, { once: true });
         audio.addEventListener('ended', function () { setToggle('▶ 다시'); setStat('토론 종료 · 다시 눌러 재생'); if (activeIx >= 0 && els[activeIx]) { var bb = els[activeIx].querySelector('.cl-pbub'); if (bb) bb.classList.remove('on'); } });
-        setStat('');
+        setToggle('⏸ 일시정지');
         var p = audio.play();
-        if (p && p.catch) p.catch(function () { setToggle('▶ 재생'); setStat('▶ 를 눌러 재생하세요'); });
+        if (p && p.catch) p.catch(function () { setPrep(3, '재생 버튼을 눌러 시작하세요'); stopPrep(false); setToggle('▶ 재생'); setStat('재생 준비 완료'); });
       })
-      .catch(function () { host.hidden = true; if (_orig) { try { _orig(d); } catch (_e) {} } });
+      .catch(function () { stopPrep(true); host.hidden = true; if (_orig) { try { _orig(d); } catch (_e) {} } });
   }
 
   // 원탁 리포트의 「▶ 음성 토론 재생」(.cl-playbtn)은 인라인 클로저에 바인딩 → 캡처 단계에서 가로챈다.
