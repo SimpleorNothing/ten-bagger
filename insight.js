@@ -166,11 +166,15 @@ window.INSIGHT=(function(){
   var f=ov.querySelector('[data-k="hyp"]');if(f)f.focus();
  }
 
- /* --- 사이트 반영 매칭(2026-07-28) — 관점이 사이트 내 '표시 전용 보드'(사이클 판별 gates.json · 리스크 risk.json)와
-    키워드로 겹치면 「반영하기」로 표면화한다. 자동 write 없음(정적 서빙·git=SoT·narrative≠numbers) —
-    대상 카드·현재 게이지·Claude 실행용 반영 지시를 제시하고, 반영은 사람이 확인 후 수기 갱신(§6 규율 그대로).
-    코퍼스 = 두 보드의 items[](name·keys·xkeys·gauge·verdict). 확장 시 SITE_SRC 에 파일만 추가. */
- var SITE_SRC=[{file:'gates.json',board:'사이클 판별 보드'},{file:'risk.json',board:'리스크 보드'}];
+ /* --- 사이트 반영 매칭(2026-07-28, 07-31 확장) — 관점이 기존 보드·시장 맥락·일정과 겹치면
+    「반영하기」로 표면화한다. 숫자 보드는 keys/xkeys로, 시장 맥락은 route로, 일정은 이벤트명으로 연결한다.
+    macro/calendar narrative는 판정·맥락 갱신 대상이므로 '수치 없음' 필터의 예외다. */
+ var SITE_SRC=[
+  {file:'gates.json',board:'사이클 판별 보드',kind:'board'},
+  {file:'risk.json',board:'리스크 보드',kind:'board'},
+  {file:'signal_log.json',board:'시장 맥락',kind:'log'},
+  {file:'calendar.json',board:'다가오는 일정',kind:'calendar'}
+ ];
  var SITE={loaded:false,idx:[]};
  function siteHas(hay,k){
   k=String(k||'').toLowerCase().trim();if(!k)return false;
@@ -184,10 +188,26 @@ window.INSIGHT=(function(){
   var done=0;
   SITE_SRC.forEach(function(s){
    fetch('./'+s.file,{cache:'no-store'}).then(function(r){return r.ok?r.json():null;}).then(function(d){
-    var arr=(d&&(d.items||d.axes))||[];
+    if(!d)return;
+    if(s.kind==='log'){
+     SITE.idx.push({file:s.file,board:s.board,kind:'log',name:'시장 맥락 로그',no:'signal-log',
+      keys:[],xkeys:[],gauge:[],verdict:'채택 관점을 01 시장 모니터링의 누적 판단 컨텍스트에 추가'});
+     return;
+    }
+    if(s.kind==='calendar'){
+     (d.events||[]).forEach(function(it){
+      if(!it||!it.lbl)return;
+      var words=String(it.lbl).split(/[\s·/(),]+/).filter(function(x){return x.length>1;});
+      SITE.idx.push({file:s.file,board:s.board,kind:'calendar',name:it.lbl,no:(it.d||'')+'|'+it.lbl,
+       keys:[it.lbl,it.tk||''].concat(words).filter(Boolean),xkeys:[],gauge:[],
+       verdict:it.meta||'',date:it.d||'',when:it.when||''});
+     });
+     return;
+    }
+    var arr=(d.items||d.axes)||[];
     arr.forEach(function(it){
      if(!it||!Array.isArray(it.keys)||!it.keys.length)return;
-     SITE.idx.push({file:s.file,board:s.board,name:it.name||it.id||'',no:it.no||'',
+     SITE.idx.push({file:s.file,board:s.board,kind:'board',name:it.name||it.id||'',no:it.no||'',
       keys:it.keys,xkeys:Array.isArray(it.xkeys)?it.xkeys:[],gauge:Array.isArray(it.gauge)?it.gauge:[],verdict:it.verdict||''});
     });
    }).catch(function(){}).then(function(){if(++done>=SITE_SRC.length){SITE.loaded=true;if(cur)renderResult();renderList();}});
@@ -195,9 +215,14 @@ window.INSIGHT=(function(){
  }
  function siteMatch(c){
   if(!SITE.idx.length||!c)return [];
-  if(!/\d/.test(String(c.text||''))&&c.type!=='numbers')return [];   /* 수치 없는 관점은 보드 반영 대상 아님 */
   var hay=((c.text||'')+' '+(c.why||'')+' '+((c.tickers||[]).join(' '))).toLowerCase();
   return SITE.idx.filter(function(t){
+   if(t.kind==='log')return c.route==='macro'||c.route==='calendar'||c.route==='signal_log';
+   if(t.kind==='calendar'){
+    if(c.route!=='macro'&&c.route!=='calendar')return false;
+    return t.keys.some(function(k){return siteHas(hay,k);});
+   }
+   if(!/\d/.test(String(c.text||''))&&c.type!=='numbers'&&c.route!=='macro'&&c.route!=='calendar')return false;
    if(t.xkeys.some(function(x){return siteHas(hay,x);}))return false;   /* 동형이의 배제(예 「수출통제」) */
    return t.keys.some(function(k){return siteHas(hay,k);});
   });
@@ -245,7 +270,7 @@ window.INSIGHT=(function(){
     '<button type="button" class="ins-lc-x" data-x aria-label="닫기">✕</button></div>'+
    '<div class="ins-lc-claim">'+esc(c.text||'')+'</div>'+
    '<div class="ins-lc-bd">'+cards+
-    '<div class="ins-ap-note">「지금 반영」은 Claude가 위 항목의 gauge/verdict/asOf 값을 계산해 PR 없이 바로 커밋한다(완전 자동 · SimpleorNothing 지시). 근거가 불충분하면 자동으로 변경하지 않는다.</div>'+
+    '<div class="ins-ap-note">「지금 반영」은 보드의 gauge/verdict 또는 01 시장 맥락·일정 설명을 기존 스키마 안에서 계산해 PR 없이 바로 커밋한다. 근거가 불충분하거나 이미 반영됐으면 변경하지 않는다.</div>'+
     '<textarea class="ins-lc-in ins-ap-ta" readonly rows="5">'+esc(order)+'</textarea></div>'+
    '<div class="ins-lc-ft"><button type="button" class="ins-btn primary" data-apply-now>🚀 지금 반영</button>'+
     '<button type="button" class="ins-btn" data-copy>📋 반영 지시 복사</button>'+
@@ -275,7 +300,8 @@ window.INSIGHT=(function(){
     var stEl=ov.querySelector('[data-st="'+i+'"]');
     if(stEl)stEl.textContent='⏳ 확인 중…';
     fetch('/api/site-apply',{method:'POST',headers:{'content-type':'application/json'},
-     body:JSON.stringify({file:t.file,itemNo:t.no,itemName:t.name,text:c.text||'',why:c.why||'',src:o.src||{}})})
+     body:JSON.stringify({file:t.file,itemNo:t.no,itemName:t.name,text:c.text||'',why:c.why||'',src:o.src||{},
+      route:c.route||'signal_log',type:c.type||'narrative',layer:c.layer||'',tickers:c.tickers||[]})})
      .then(function(r){return r.json().then(function(j){return {ok:r.ok,j:j};});})
      .then(function(res){
       if(!stEl)return;
