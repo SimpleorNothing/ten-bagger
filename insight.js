@@ -22,6 +22,10 @@ window.INSIGHT=(function(){
   if(c.type!=='numbers'&&NUM[c.route]){c.route='signal_log';c.clamped=1;}   /* narrative ≠ numbers */
   ['novelty','impact','confidence'].forEach(function(k){var v=Math.round(+c[k]);c[k]=isFinite(v)?Math.max(0,Math.min(2,v)):0;});
   c.tickers=Array.isArray(c.tickers)?c.tickers.slice(0,4):[];
+  c.siteRefs=Array.isArray(c.siteRefs)?c.siteRefs.slice(0,4).map(function(r){
+   r=r||{};return {menu:String(r.menu||'').slice(0,40),source:String(r.source||'').slice(0,80),
+    item:String(r.item||'').slice(0,120),asOf:String(r.asOf||'').slice(0,30),evidence:String(r.evidence||'').slice(0,420)};
+  }).filter(function(r){return r.menu&&r.evidence;}):[];
   return c;
  }
  function score(c){return (c.novelty||0)+(c.impact||0)+(c.confidence||0);}
@@ -376,6 +380,87 @@ function persist(){cacheSet();clearTimeout(putTimer);putTimer=setTimeout(push,20
 
  /* --- 추출 --- */
  function isYt(u){return /youtu\.?be/.test(String(u||''));}
+ /* 관점 생성 전 사이트 내부 SoT를 압축해 함께 보낸다.
+    기존 SITE 매칭은 추출 '후' 반영 대상 탐지이고, 이 컨텍스트는 추출 '전' 관련 관점 발굴용이다.
+    원문 우선 · 관련 없으면 미사용 · 숫자 충돌 시 기준일 병기를 서버 프롬프트가 강제한다. */
+ var ICTX={at:0,data:null}, ICTX_MS=60000;
+ function icCut(s,n){s=String(s==null?'':s).replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim();return s.length>n?s.slice(0,n-1)+'…':s;}
+ function icGet(u){return fetch(u,{cache:'no-store'}).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;});}
+ function icGauges(a){return (Array.isArray(a)?a:[]).slice(0,6).map(function(g){
+  return {name:icCut(g&&g.k,80),value:icCut(g&&g.v,60),note:icCut(g&&g.n,240)};
+ });}
+ function icBoard(d,menu,source){
+  return (d&&Array.isArray(d.items)?d.items:[]).map(function(x){return {
+   menu:menu,source:source,asOf:x.upd||d.asOf||'',item:(x.no||'')+' '+(x.name||x.id||''),
+   state:x.stateLabel||x.state||'',verdict:icCut(x.verdict||'',520),gauges:icGauges(x.gauge),
+   trigger:icCut(x.trigger||'',300),keys:(x.keys||[]).slice(0,20)
+  };});
+ }
+ function icTickerMap(d,text,field){
+  var src=d&&d[field]&&typeof d[field]==='object'?d[field]:{}, up=String(text||'').toUpperCase();
+  return Object.keys(src).filter(function(k){
+   var t=String(k).toUpperCase();return t.length>1&&new RegExp('(^|[^A-Z0-9])'+t.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'([^A-Z0-9]|$)').test(up);
+  }).slice(0,12).map(function(k){var x=src[k]||{};return {ticker:k,data:x};});
+ }
+ function icHoldings(d,text){
+  var up=String(text||'').toUpperCase();
+  return (d&&Array.isArray(d.detail)?d.detail:[]).filter(function(x){
+   return [x.ticker,x.name].filter(Boolean).some(function(k){return up.indexOf(String(k).toUpperCase())>=0;});
+  }).slice(0,12).map(function(x){return {ticker:x.ticker||'',name:x.name||'',layer:x.layer||'',weightPct:x.w,amount:x.amt,asOf:d.asOf||''};});
+ }
+ function icAdopted(a,text){
+  var up=String(text||'').toUpperCase(),out=[];
+  (Array.isArray(a)?a:[]).forEach(function(r){(r.claims||[]).forEach(function(c){
+   if((c.tickers||[]).some(function(t){return up.indexOf(String(t).toUpperCase())>=0;})){
+    out.push({source:icCut(r.src&&(r.src.title||r.src.publisher||r.src.url),160),text:icCut(c.text,420),
+     layer:c.layer||'',tickers:(c.tickers||[]).slice(0,6),why:icCut(c.why,260),savedAt:r.t||''});
+   }
+  });});return out.slice(0,12);
+ }
+ function icCompact(vals,text){
+  var S=vals[0],C=vals[1],G=vals[2],L=vals[3],Cal=vals[4],Gates=vals[5],Risk=vals[6],Earn=vals[7],Judge=vals[8],
+   Council=vals[9],Hold=vals[10],Adopted=vals[11];
+  var td=new Date().toISOString().slice(0,10), log=[];
+  (L&&Array.isArray(L.log)?L.log.slice(-10).reverse():[]).forEach(function(e){
+   (e.items||[]).slice(0,5).forEach(function(x){log.push({menu:'01 시장 모니터링',source:'signal_log.json',asOf:e.date||e.at||'',
+    item:x.tag||x.layer||'시그널',evidence:icCut(x.html||'',420)});});
+  });
+  return {
+   rule:'입력 자료와 직접 관련된 내부 항목만 사용. 원문이 최신 1차 자료면 원문 우선. 숫자 충돌은 기준일 차이 명시.',
+   marketMonitoring01:{
+    signals:S?{source:'signals.json',asOf:S.asOf||'',vix:S.vix,fearGreed:S.fearGreed,nasdaqDrawdownPct:S.nasdaqDrawdownPct,
+     wma40SlopeUp:S.wma40SlopeUp,wma40GapPct:S.wma40GapPct,sidecarKR:!!S.sidecarKR,circuitKR:!!S.circuitKR}:null,
+    semiconductorCycle:(C&&Array.isArray(C.clusters)?C.clusters:[]).map(function(x){return {source:'cycle.json',asOf:x.updated||C.asOf||'',
+     item:(x.id||'')+' '+(x.name||''),state:x.lamp||'',evidence:icCut(x.now||'',420),trigger:icCut(x.on||'',260)};}),
+    capexCycleBoard:icBoard(Gates,'01 시장 모니터링','gates.json'),
+    riskBoard:icBoard(Risk,'01 시장 모니터링','risk.json'),
+    relatedSignals:log.slice(0,40),
+    upcomingEvents:(Cal&&Array.isArray(Cal.events)?Cal.events:[]).filter(function(x){return !x.d||x.d>=td;}).slice(0,16).map(function(x){
+     return {source:'calendar.json',asOf:Cal.asOf||'',item:(x.d||'')+' '+(x.lbl||''),ticker:x.tk||'',evidence:icCut(x.meta||'',260)};})
+   },
+   adoptedInsights02:icAdopted(Adopted,text),
+   expertRoundtable03:{
+    source:'council.json',asOf:Council&&Council.asOf||'',
+    synthesis:Council&&Council.synthesis?{insight:icCut(Council.synthesis.insight,520),steelman:icCut(Council.synthesis.steelman,420)}:null,
+    experts:(Council&&Array.isArray(Council.experts)?Council.experts:[]).filter(function(x){return x.id!=='chair';}).map(function(x){
+     return {name:x.name||'',field:x.field||'',stance:x.stance||'',view:icCut(x.view,520)};
+    })
+   },
+   marketAndEarnings04:{
+    matchedGamma:icTickerMap(G,text,'gamma'),
+    matchedEarnings:icTickerMap(Earn,text,'moves'),
+    matchedJudgments:icTickerMap(Judge,text,'overrides')
+   },
+   rebalancing05:{source:'holdings.json',matchedHoldings:icHoldings(Hold,text)}
+  };
+ }
+ function buildInsightContext(text){
+  function compact(raw){return icCompact(raw,text);}
+  if(ICTX.data&&Date.now()-ICTX.at<ICTX_MS)return Promise.resolve(compact(ICTX.data));
+  var urls=['./signals.json','./cycle.json','./gamma.json','./signal_log.json','./calendar.json',
+   './gates.json','./risk.json','./earnings.json','./judgment.json','./council.json','./holdings.json','/api/insights'];
+  return Promise.all(urls.map(icGet)).then(function(v){ICTX={at:Date.now(),data:v};return compact(v);});
+ }
  /* 유튜브 URL만 있고 본문이 비면 → 먼저 /api/yt-view(Gemini 영상 인식, mode:insight)로 스크립트를 뽑아
     textarea 를 채운 뒤 그 스크립트로 관점 추출을 이어간다(04 전문가 원탁과 동일 경로).
     /api/insight 의 URL-웹검색은 유튜브 영상을 실제로 보지 못하므로, 실패 시에만 그 경로로 폴백한다. */
@@ -418,7 +503,7 @@ function persist(){cacheSet();clearTimeout(putTimer);putTimer=setTimeout(push,20
   // 서버(/api/insight)는 단일 비스트리밍 호출이라 실제 서버 내부 진척은 알 수 없다.
   // 사용자에게 "멈춘 게 아니다"를 알리려 클라 단계(전송→분석→정리) + 경과초 카운터를 돌린다.
   var isUrl=!text;
-  var STG=isUrl?['URL 전송','웹검색·관점 분석','결과 정리']:['자료 전송','관점 분석','결과 정리'];
+  var STG=['사이트 관련 내용 검색',isUrl?'웹검색·내부 근거 분석':'자료·내부 근거 분석','결과 정리'];
   var t0=Date.now(), stage=0, progTimer=null, toAnalyze=null;
   function tick(){
    var s=Math.floor((Date.now()-t0)/1000);
@@ -428,7 +513,10 @@ function persist(){cacheSet();clearTimeout(putTimer);putTimer=setTimeout(push,20
   function stopProg(){if(progTimer){clearInterval(progTimer);progTimer=null;}if(toAnalyze){clearTimeout(toAnalyze);toAnalyze=null;}}
   progTimer=setInterval(tick,1000); setStage(0);
   toAnalyze=setTimeout(function(){if(stage<1)setStage(1);},900); // 전송은 짧다 → 곧 분석 단계로
-  fetch(GEN,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({url:url, text:text})})
+  buildInsightContext(text).catch(function(){return null;}).then(function(siteContext){
+   setStage(1);
+   return fetch(GEN,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({url:url,text:text,siteContext:siteContext})});
+  })
    .then(function(r){return r.json().then(function(j){return {ok:r.ok,st:r.status,j:j};});})
    .then(function(o){
     setStage(2); // 응답 수신 → 결과 정리
@@ -447,19 +535,27 @@ function persist(){cacheSet();clearTimeout(putTimer);putTimer=setTimeout(push,20
      claims:(Array.isArray(pj.claims)?pj.claims:[]).slice(0,8).map(function(c){c=clampClaim(c);c.id=uid();c.pick=recommend(c);return c;})};
     renderResult();
     stopProg();
-    setMsg('추출 완료 — 체크한 관점만 저장·반영됩니다.');
+    var refN=cur.claims.reduce(function(n,c){return n+(c.siteRefs||[]).length;},0);
+    setMsg('추출 완료'+(refN?' — 사이트 연관 근거 '+refN+'건 포함':'')+' · 체크한 관점만 저장·반영됩니다.');
    })
    .catch(function(e){stopProg();setMsg('실패: '+(e&&e.message?e.message:e));})
    .then(function(){stopProg();busy=false;$('insRun').disabled=false;});
  }
 
  /* --- 결과(선별 화면) --- */
+ function siteRefsLine(c){
+  var a=Array.isArray(c.siteRefs)?c.siteRefs:[];if(!a.length)return '';
+  return '<div class="ins-vf">사이트 연관 — '+a.map(function(r){
+   return '<b>'+esc(r.menu)+'</b> · '+esc(r.item||r.source)+(r.asOf?' ('+esc(r.asOf)+')':'')+' : '+esc(r.evidence);
+  }).join('<br>')+'</div>';
+ }
  function claimRow(c){
   var pv=previewGrade(c);
   return '<div class="ins-claim'+(c.pick?'':' rej')+'" data-row="'+c.id+'">'+
    '<input type="checkbox" class="ck" data-cid="'+c.id+'"'+(c.pick?' checked':'')+'>'+
    '<div><div class="ins-txt">'+esc(c.text||'')+'</div>'+
    (c.why?'<div class="ins-why">'+esc(c.why)+'</div>':'')+
+   siteRefsLine(c)+
    (c.verify?'<div class="ins-vf">확인 필요 — '+esc(c.verify)+'</div>':'')+
    '<div class="ins-tags">'+
     (c.layer?'<span class="ins-tag">'+esc(c.layer)+'</span>':'')+
@@ -500,7 +596,7 @@ function persist(){cacheSet();clearTimeout(putTimer);putTimer=setTimeout(push,20
   if(!cur)return;
   var picked=cur.claims.filter(function(c){return c.pick;}).map(function(c){
    return {id:c.id,text:c.text||'',layer:c.layer||'',tickers:c.tickers,type:c.type,novelty:c.novelty,impact:c.impact,
-           confidence:c.confidence,route:c.route,why:c.why||'',verify:c.verify||'',applied:false,hyp:c.hyp||'',trig:c.trig||'',until:c.until||'',review:c.review||lcPlus14(),siteDone:c.siteDone||false};});
+           confidence:c.confidence,route:c.route,why:c.why||'',verify:c.verify||'',siteRefs:c.siteRefs||[],applied:false,hyp:c.hyp||'',trig:c.trig||'',until:c.until||'',review:c.review||lcPlus14(),siteDone:c.siteDone||false};});
   if(!picked.length){setMsg('채택한 관점이 없습니다 — 하나 이상 체크하세요.');return;}
   recs.unshift({id:cur.id,t:cur.t,src:cur.src,summary:cur.summary,steelman:cur.steelman,raw:cur.raw||'',rawcut:cur.rawcut||0,claims:picked});
   cur=null;renderResult();persist();
@@ -622,6 +718,7 @@ function persist(){cacheSet();clearTimeout(putTimer);putTimer=setTimeout(push,20
    (c.reinf?' · 유사 '+c.reinf+'건 보강':'')+
    (NUM[c.route]?(c.applied?' · 반영 완료':' · 반영 대기(자동 변경 없음)'):'')+'</span>'+
    claimSrc(r,false)+
+   siteRefsLine(c)+
    lcLine(c)+
    (showBtn?'<div class="ins-lcbar">'+
      (NUM[c.route]?'<button class="ins-btn" data-ap="'+c.id+'">'+(c.applied?'대기로 되돌리기':'반영 완료 표시')+'</button>':'')+
@@ -1138,6 +1235,7 @@ function persist(){cacheSet();clearTimeout(putTimer);putTimer=setTimeout(push,20
  /* vsub 설명 문단 = 뷰 맨 아래로(SimpleorNothing 지시 2026-07-20) · placeholder 예시·힌트 제거(동일 지시) */
  var GUIDE_HTML='<p class="vsub" style="border-top:1px solid var(--line);margin-top:24px;padding-top:16px">'+
   '증권사 리포트·기사·유튜브(링크 또는 스크립트)를 넣으면 8레이어·단계 프레임으로 관점과 정보를 구조화해 뽑는다. '+
+  '관점을 만들기 전에 <b>01 시장 모니터링·02 채택 관점·03 전문가 원탁·04 시장/실적 전망·05 리밸런싱</b>의 관련 내용을 함께 대조하고, 사용한 근거는 <b>사이트 연관</b>으로 표시한다. '+
   '<b>뽑는 것과 반영하는 것은 분리한다</b> — 체크해 채택한 관점만 다른 메뉴에 뜬다. 숫자 파일(실적·판단·단계·비중)은 자동으로 바뀌지 않는다(narrative ≠ numbers). '+
   '채택 관점은 <b>등급</b>(관찰→후보→지지→확립→확신)을 갖고, 다른 자료에서 유사한 내용이 보강될수록 자동 승격된다. '+
   '<b>시그널 로그</b>는 관련 관점 밑에 붙어 그 관점의 누적 컨텍스트가 된다 — 티커가 겹치면 종목 기준, 없으면 레이어 기준으로 매칭된다. '+
