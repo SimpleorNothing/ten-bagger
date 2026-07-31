@@ -1290,16 +1290,89 @@ async function handleSiteApply(request, env) {
   const htmlEsc = (s) => String(s || "").replace(/[&<>"]/g, (c) => ({
     "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;",
   })[c]);
+  // main 보호 규칙을 우회하지 않는다. 요청별 브랜치 → PR → 즉시 병합,
+  // 필수 검사가 남아 있으면 GitHub auto-merge에 맡긴다.
   const commitDoc = async (message) => {
+    const suffix = Date.now().toString(36) + "-" + crypto.randomUUID().slice(0, 8);
+    const safeFile = file.replace(/\.json$/i, "").replace(/[^a-z0-9-]/gi, "-").toLowerCase();
+    const workBranch = `site-apply/${safeFile}-${suffix}`;
+    const apiBase = `https://api.github.com/repos/${OWNER}/${REPO}`;
+    const jsonHeaders = { ...gh, "content-type": "application/json" };
+
+    const baseRef = await fetch(`${apiBase}/git/ref/heads/${encodeURIComponent(BRANCH)}`, { headers: gh });
+    if (!baseRef.ok) {
+      const t = await baseRef.text();
+      return { error: "github base ref failed", status: baseRef.status, detail: t.slice(0, 300) };
+    }
+    const baseJson = await baseRef.json();
+    const baseSha = baseJson && baseJson.object && baseJson.object.sha;
+    if (!baseSha) return { error: "github base sha missing" };
+
+    const made = await fetch(`${apiBase}/git/refs`, {
+      method: "POST",
+      headers: jsonHeaders,
+      body: JSON.stringify({ ref: `refs/heads/${workBranch}`, sha: baseSha }),
+    });
+    if (!made.ok) {
+      const t = await made.text();
+      return { error: "github branch create failed", status: made.status, detail: t.slice(0, 300) };
+    }
+
     const content = btoa(unescape(encodeURIComponent(JSON.stringify(doc, null, 2) + "\n")));
     const put = await fetch(API, {
       method: "PUT",
-      headers: { ...gh, "content-type": "application/json" },
-      body: JSON.stringify({ message, branch: BRANCH, content, sha }),
+      headers: jsonHeaders,
+      body: JSON.stringify({ message, branch: workBranch, content, sha }),
     });
     if (!put.ok) {
       const t = await put.text();
-      return { error: "github put failed", status: put.status, detail: t.slice(0, 300) };
+      return { error: "github branch put failed", status: put.status, detail: t.slice(0, 300) };
+    }
+
+    const opened = await fetch(`${apiBase}/pulls`, {
+      method: "POST",
+      headers: jsonHeaders,
+      body: JSON.stringify({
+        title: message,
+        head: workBranch,
+        base: BRANCH,
+        body: "02 인사이트 찾기 사이트 반영 버튼이 생성한 자동 PR입니다. main 보호 규칙과 필수 검사를 준수합니다.",
+        maintainer_can_modify: true,
+      }),
+    });
+    if (!opened.ok) {
+      const t = await opened.text();
+      return { error: "github pr create failed", status: opened.status, detail: t.slice(0, 300) };
+    }
+    const pr = await opened.json();
+
+    const merged = await fetch(`${apiBase}/pulls/${pr.number}/merge`, {
+      method: "PUT",
+      headers: jsonHeaders,
+      body: JSON.stringify({
+        merge_method: "squash",
+        commit_title: message,
+        sha: pr.head && pr.head.sha,
+      }),
+    });
+    if (merged.ok) return null;
+
+    const auto = await fetch("https://api.github.com/graphql", {
+      method: "POST",
+      headers: jsonHeaders,
+      body: JSON.stringify({
+        query: "mutation($id:ID!){enablePullRequestAutoMerge(input:{pullRequestId:$id,mergeMethod:SQUASH}){pullRequest{number autoMergeRequest{enabledAt}}}}",
+        variables: { id: pr.node_id },
+      }),
+    });
+    const autoJson = await auto.json().catch(() => ({}));
+    if (!auto.ok || (autoJson.errors && autoJson.errors.length)) {
+      return {
+        error: "github auto merge failed",
+        status: auto.status,
+        detail: JSON.stringify(autoJson.errors || autoJson).slice(0, 300),
+        pr: pr.html_url,
+      };
     }
     return null;
   };
