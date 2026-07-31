@@ -927,10 +927,10 @@ async function handleInsightsPut(request, env) {
 }
 
 // Anthropic Messages 프록시(공용) — SSE 를 서버측에서 재조립해 텍스트만 반환.
-// (handleEstimate 와 동일한 이유로 스트리밍: Opus + web_search 는 비스트리밍 시 100s 한도에 걸린다.)
+// (handleEstimate 와 동일한 이유로 스트리밍: Sonnet + web_search 는 비스트리밍 시 100s 한도에 걸린다.)
 async function anthropicText(env, prompt, useSearch, maxTokens) {
   const payload = {
-    model: "claude-opus-4-8",
+    model: "claude-sonnet-5",
     max_tokens: maxTokens || 4000,
     stream: true,
     messages: [{ role: "user", content: prompt }],
