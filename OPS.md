@@ -1,4 +1,4 @@
-**최종 갱신: 2026-07-30 15:27 (KST)**
+**최종 갱신: 2026-07-31 09:59 (KST)**
 
 # OPS — 알파맵 운영 가이드
 
@@ -312,18 +312,18 @@
 
 ### 6-6. LLM 호출 비용 규율 (2026-07-20 신설)
 
-**원칙 — 결정론 우선 · 판단만 Opus · 검색은 상한.**
+**원칙 — 결정론 우선 · 복잡 판단은 Opus · 고출력 생성은 Sonnet · 단순 추출은 Haiku · 검색은 상한.**
 
 | # | 규율 | 내용 |
 |---|---|---|
 | ① | 결정론 우선 | 시세·변동성·수익률·게이트 임계는 **무료 피드 직산**(Yahoo 일봉·네이버·CNN F&G). LLM 은 심볼 해석 실패 등 **폴백 경로에서만** |
-| ② | 모델 계층 | **판단·생성**(브리핑 p0·p1·p2, 원탁 토론, 1인 심층 자문, 베어 케이스, 인사이트 추출) = `claude-opus-4-8` · **추출·요약·수치 회수**(관점 요약 2종, σ·μ 폴백) = `claude-sonnet-5` |
+| ② | 모델 계층 | **복잡 판단·토론**(원탁 토론, 1인 심층 자문, 베어 케이스) = `claude-opus-4-8` · **고출력 생성·검색형 추론·요약·수치 회수**(브리핑 p0·p1·p2, 인사이트 추출·사이트 반영 패치, 관점 요약 2종, σ·μ 폴백) = `claude-sonnet-5` · **정형 필드 추출**(캘린더 이벤트 파서) = `claude-haiku-4-5-20251001` |
 | ③ | 검색 상한 | `web_search` 툴에는 **반드시 `max_uses: 3`**. 검색 턴마다 전체 컨텍스트가 재전송돼 입력이 2차식으로 증가한다 |
 | ④ | 출력 상한 | `max_tokens` 는 실제 필요분까지만 — 출력 토큰이 생성비의 대부분이다 |
 
 **실측 근거(2026-07-19 콘솔).** `da-market-insight` 3.72M 토큰 = $1.11(실효 **$0.30/M** · Sonnet+캐시 히트) vs `stock price` 0.25M 토큰 = $2.23(실효 **$8.93/M** · Opus+무제한 검색 7회). **30배 차이의 원인은 토큰량이 아니라 모델·검색 정책이었다.**
 
-**적용 지점(worker.js).** `handleEstimate` = `localVolDrift()` 결정론 경로 우선(비용 0·검색 0회) → 실패 시에만 Sonnet+`max_uses:3` 폴백 · `anthropicText()` 검색 상한 · 관점 요약 2종(`handleCouncilIntake`·`handleCouncilSummary`) Sonnet.
+**적용 지점(worker.js).** `handleEstimate` = `localVolDrift()` 결정론 경로 우선(비용 0·검색 0회) → 실패 시에만 Sonnet+`max_uses:3` 폴백 · `anthropicText()` = Sonnet+검색 3회 상한(인사이트 추출·사이트 반영 패치) · 브리핑 p0·p1·p2 = Sonnet · 관점 요약 2종(`handleCouncilIntake`·`handleCouncilSummary`) = Sonnet · 캘린더 이벤트 파서 = Haiku.
 
 **미적용(후속).** `cache_control` 프롬프트 캐싱 — 워커 시스템 프롬프트가 짧아 최소 캐시 단위(1024토큰) 미달. `BRIEF_SYS_BASE` 계열이 커지면 재검토.
 
@@ -372,6 +372,7 @@
 
 ## 9. 갱신 이력
 
+- 2026-07-31 09:59 · **Anthropic API 모델 비용 최적화 3건 완료.** 캘린더 이벤트 추출(`/api/calevent-parse`)은 `claude-haiku-4-5-20251001`, 데일리 브리핑 대본(`/api/brief` p0·p1·p2)은 `claude-sonnet-5` 반영 상태를 재검증하고, 남아 있던 공용 인사이트 프록시 `anthropicText()`를 `claude-opus-4-8`→`claude-sonnet-5`로 변경했다. `web_search_20260209`와 `max_uses:3`, 스트리밍, 출력 상한·응답 스키마는 유지해 추론·호환성 조건은 불변. 영향 범위는 `/api/insight`와 같은 프록시를 재사용하는 `/api/site-apply`의 패치 계산이며 원탁·1인 자문·베어 케이스 Opus 경로는 불변. `worker.js` 문법 검사·모델 호출부 정적 검증 통과. UI·CSS·숫자 파일·`:root` 토큰 불변.
 - 2026-07-30 15:27 · **02 인사이트 저장 원문 글자수 제한 해제.** `insight.js`의 `MAXRAW=20000` 절단을 제거해 인테이크에 입력된 원문 전체를 `raw`로 저장하고, `/api/insights`의 애플리케이션 단위 16MiB 거부도 제거했다. 분석 입력 120,000자 컷은 Claude 분석 비용·컨텍스트 보호용으로 그대로 유지되며 저장 원문에는 적용하지 않는다. 제한 해제 전에 이미 잘린 자료는 `/api/insights/raw`에서 과거 저장분임을 명시하고 재분석·저장 시 전체 원문이 보존됨을 안내한다. 신규 데이터 스키마·CSS·토큰·숫자 파일 불변. (STYLE_GUIDE 이력 동반)
 - 2026-07-31 · **02 인사이트 「사이트 반영」 교차메뉴 확장·FOMC 미반영 수정.** 원인: 프런트 `SITE_SRC`와 서버 화이트리스트가 `gates.json`·`risk.json`에만 묶이고, 수치 없는 narrative가 `siteMatch()` 초입에서 차단돼 FOMC 관점이 01 시장 맥락·D-day에 도달하지 못했다. 수정: `signal_log.json`·`calendar.json`을 반영 코퍼스에 추가하고 `macro`/`calendar` narrative를 관련 보드 판정·맥락 갱신 예외로 허용. 「지금 반영」은 보드 verdict, 시장 맥락 append(중복 차단), 동일 일정 `meta` 결과 업데이트(중복 차단)를 대상별 직접 커밋한다. 숫자 gauge는 확정 근거와 기존 구조 가드가 있을 때만 변경하고 gamma·holdings·earnings·judgment는 불변. FOMC 매칭·시장 맥락 append/중복·일정 갱신 스모크 10/10, `node --check`·`check-docs`·`git diff --check` 통과. (STYLE_GUIDE 동반)
 - 2026-07-30 14:40 · **02 인사이트 찾기 주요 문서 형식 전용 추출기.** DOCX·PPTX를 일반 `file.text()`로 읽어 `PK`·`word/document.xml` 압축 바이너리가 textarea에 노출되던 원인을 제거했다. `insight.js`가 확장자를 먼저 검증하고 PDF·이미지·DOCX·PPTX·스프레드시트·RTF·HTML/XML·OpenDocument·HWPX·텍스트/자막/EML을 형식별로 읽는다. DOCX 대형 10-K는 10MB+ XML DOM 구축 대신 OOXML run/문단 단일패스로 추출하고, 네이티브 글자가 없는 이미지형 PPTX는 media 관계를 따라 슬라이드별 OCR한다. 파일 선택 accept·드롭 안내를 주요 형식으로 확장하되 파일당 25MB·분석 입력 120,000자 컷을 명시하며, 구형 DOC/PPT/HWP·암호화/손상 파일은 변환 안내로 차단한다. 실제 `MSFT_FY26Q4_10K.docx` 393,165자 본문과 이미지형 `OutlookFY27Q1.pptx` 6장 OCR 경로, XLSX·HWPX·HTML·RTF 픽스처 스모크 통과. `node --check`·`check-docs` 통과, index.html·CSS·worker·숫자 파일·`:root` 토큰 불변. narrative≠numbers. (STYLE_GUIDE 갱신 이력 동반)
