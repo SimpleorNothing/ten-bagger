@@ -1354,6 +1354,33 @@ async function handleSiteApply(request, env) {
     (itemNo && (it.no === itemNo || it.id === itemNo)) || (itemName && it.name === itemName));
   if (!item) return memoJson({ error: "item not found" }, 404);
 
+  function mergeGaugeUpdates(baseGauge, rawUpdates) {
+    const original = Array.isArray(baseGauge) ? baseGauge : [];
+    const next = original.map((g) => ({ ...g }));
+    const byKey = new Map(original.map((g, i) => [String(g && g.k || ""), i]));
+    const seen = new Set();
+    const applied = [];
+    const rejected = [];
+
+    for (const update of Array.isArray(rawUpdates) ? rawUpdates : []) {
+      const key = String(update && update.k || "");
+      if (!key || !byKey.has(key) || seen.has(key) || typeof update.v !== "string") {
+        rejected.push(key || "(라벨 없음)");
+        continue;
+      }
+      seen.add(key);
+      const i = byKey.get(key);
+      const merged = { ...original[i], v: update.v };
+      if (["up", "down", "flat"].includes(update.d)) merged.d = update.d;
+      if (typeof update.n === "string") merged.n = update.n;
+      if (JSON.stringify(merged) !== JSON.stringify(original[i])) {
+        next[i] = merged;
+        applied.push(key);
+      }
+    }
+    return { gauge: next, applied, rejected };
+  }
+
   const prompt = [
     "너는 '알파맵' 사이클 판별/리스크 보드의 표시값을 갱신하는 데이터 담당자다.",
     "아래 '현재 항목'과 '새 관점'을 비교해 갱신이 필요한 필드만 정확히 계산하라.",
@@ -1361,14 +1388,15 @@ async function handleSiteApply(request, env) {
     "[절대 규율]",
     "1. gauge 숫자는 확정 실적·공시·계약·정책결정만 반영한다. 추측·전망·소문이면 changed=false.",
     "   FOMC·중앙은행 결정처럼 확정된 매크로 결과는 narrative여도 verdict/srcs 갱신 가능하나, 숫자 gauge는 근거가 있을 때만 바꾼다.",
-    "2. gauge 배열은 원본과 같은 길이·같은 순서·같은 k(라벨)를 유지한다. v(값)·d(up/down/flat)·n(부연설명)만 바꿀 수 있다.",
+    "2. gauge 전체 배열을 반환하지 마라. 바꿀 게이지만 gauge_updates에 넣고, k는 아래 사용 가능한 라벨을 한 글자도 바꾸지 말고 그대로 복사한다. v(값)·d(up/down/flat)·n(부연설명)만 바꿀 수 있다.",
     "3. 스키마를 새로 만들지 마라 — 기존 필드만 채운다. 근거 없는 필드는 건드리지 마라.",
     "4. 근거가 불충분하거나 이미 반영된 값과 사실상 같으면 changed=false를 반환하라(추측으로 채우지 마라).",
     "5. 기업 FY/FQ 표기는 저장하지 않는다. 분기는 실제 종료일 기준 달력분기 nQyy로 쓴다(MSFT FY26 Q4→2Q26 등). 회계연도 전체 수치는 실제 포함 기간으로 쓴다(MSFT FY27→2026.7~2027.6).",
     "",
     "[출력] 마크다운 없이 JSON 객체 하나만:",
-    '{"changed":true,"gauge":[{"k":"...","v":"...","d":"up|down|flat","n":"..."}],"verdict":"...","srcs_add":"...","reason":"한 줄 요약"}',
-    "changed=false면 reason만 채우고 나머지는 생략 가능.",
+    '{"changed":true,"gauge_updates":[{"k":"현재 항목의 정확한 라벨","v":"...","d":"up|down|flat","n":"..."}],"verdict":"...","srcs_add":"...","reason":"한 줄 요약"}',
+    "changed=false면 reason만 채우고 나머지는 생략 가능. 게이지 변경이 없으면 gauge_updates도 생략한다.",
+    "사용 가능한 gauge k: " + (Array.isArray(item.gauge) ? item.gauge.map((g) => JSON.stringify(g.k)).join(", ") : "(없음)"),
     "",
     "[현재 항목]",
     JSON.stringify(item, null, 2),
@@ -1421,18 +1449,35 @@ async function handleSiteApply(request, env) {
     return memoJson({ ok: true, changed: false, reason: (patch && patch.reason) || "변경 근거 불충분" }, 200);
   }
 
-  // 구조 검증 — 게이지 배열 길이·순서·라벨(k) 불변만 허용. 어긋나면 반영 거부.
-  if (Array.isArray(patch.gauge)) {
-    const baseGauge = Array.isArray(item.gauge) ? item.gauge : [];
-    const okShape = patch.gauge.length === baseGauge.length &&
-      patch.gauge.every((g, i) => g && typeof g.k === "string" && g.k === baseGauge[i].k && typeof g.v === "string");
-    if (!okShape) return memoJson({ error: "gauge shape mismatch — 반영 거부(구조 보호)" }, 422);
-    item.gauge = patch.gauge.map((g, i) => ({ ...baseGauge[i], ...g }));
+  // Worker가 원본 배열·순서·라벨을 보존하고, AI가 지정한 기존 라벨의 값만 병합한다.
+  // 구형 전체 gauge 응답도 같은 키 기반 경로로 흡수해 배포 중 호환성을 유지한다.
+  const gaugeInput = Array.isArray(patch.gauge_updates) ? patch.gauge_updates : patch.gauge;
+  const gaugeMerge = mergeGaugeUpdates(item.gauge, gaugeInput);
+  let effectiveChange = false;
+  if (gaugeMerge.applied.length) {
+    item.gauge = gaugeMerge.gauge;
+    effectiveChange = true;
   }
-  if (typeof patch.verdict === "string" && patch.verdict.trim()) item.verdict = patch.verdict.trim();
+
+  if (typeof patch.verdict === "string" && patch.verdict.trim() && patch.verdict.trim() !== item.verdict) {
+    item.verdict = patch.verdict.trim();
+    effectiveChange = true;
+  }
   if (typeof patch.srcs_add === "string" && patch.srcs_add.trim()) {
     item.srcs = Array.isArray(item.srcs) ? item.srcs : [];
-    item.srcs.push({ label: patch.srcs_add.trim() });
+    const label = patch.srcs_add.trim();
+    if (!item.srcs.some((s) => s && s.label === label)) {
+      item.srcs.push({ label });
+      effectiveChange = true;
+    }
+  }
+  if (!effectiveChange) {
+    return memoJson({
+      ok: true,
+      changed: false,
+      reason: patch.reason || "기존 구조에 적용할 새 값이 없음",
+      ...(gaugeMerge.rejected.length ? { ignored_gauge_labels: gaugeMerge.rejected } : {}),
+    }, 200);
   }
   const today = new Date().toISOString().slice(0, 10);
   item.upd = today;
@@ -1445,6 +1490,7 @@ async function handleSiteApply(request, env) {
   return memoJson({
     ok: true, changed: true, reason: patch.reason || "",
     item: { no: item.no, id: item.id, name: item.name, gauge: item.gauge, verdict: item.verdict },
+    ...(gaugeMerge.rejected.length ? { ignored_gauge_labels: gaugeMerge.rejected } : {}),
   }, 200);
 }
 
