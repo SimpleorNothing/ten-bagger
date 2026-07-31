@@ -825,7 +825,7 @@ async function handleCaleventParse(request, env) {
     up = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: { "content-type": "application/json", "x-api-key": env.ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01" },
-      body: JSON.stringify({ model: "claude-opus-4-8", max_tokens: 400, system: sys,
+      body: JSON.stringify({ model: "claude-haiku-4-5-20251001", max_tokens: 400, system: sys,
         messages: [{ role: "user", content: text }] }),
     });
   } catch (e) {
@@ -1061,7 +1061,7 @@ function normalizeFiscalText(value, fallback) {
   // Fiscal Q3 2026 · FQ3'26
   s = s.replace(/\bFiscal\s+Q([1-4])\s+(20\d{2}|\d{2})\b/gi,
     function(m,fq,fy,at){ return cv(m,fy,fq,at); });
-  s = s.replace(/\bFQ([1-4])['’ ]?(\d{2})\b/gi,
+  s = s.replace(/\bFQ([1-4])['' ]?(\d{2})\b/gi,
     function(m,fq,fy,at){ return cv(m,fy,fq,at); });
   const qword = {first:1,second:2,third:3,fourth:4};
   s = s.replace(/\bFY\s*(20\d{2}|\d{2})\s+(first|second|third|fourth)\s+quarter\b/gi,
@@ -1998,7 +1998,8 @@ async function handleBrief(request, env) {
       headers: { "content-type": "application/json", "x-api-key": env.ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01" },
       body: JSON.stringify({
         // 텍스트 회차(part 0)는 섹션이 9개라 4000 으로는 잘린다. 대담(1·2)은 100s 한도 여유를 위해 그대로 둔다.
-        model: "claude-opus-4-8", max_tokens: part === 0 ? 6500 : 4000, system: sys,
+        // 비용 최적화: 브리핑 대본은 claude-sonnet-5로 충분 (2026-07-31)
+        model: "claude-sonnet-5", max_tokens: part === 0 ? 6500 : 4000, system: sys,
         messages: [{ role: "user", content: JSON.stringify(payload) }],
       }),
     });
