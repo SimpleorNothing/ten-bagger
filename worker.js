@@ -952,16 +952,19 @@ async function handleInsightsPut(request, env) {
 }
 
 // Anthropic Messages 프록시(공용) — SSE 를 서버측에서 재조립해 텍스트만 반환.
-// (handleEstimate 와 동일한 이유로 스트리밍: Opus + web_search 는 비스트리밍 시 100s 한도에 걸린다.)
-async function anthropicText(env, prompt, useSearch, maxTokens) {
+// (handleEstimate 와 동일한 이유로 스트리밍: Sonnet + web_search 는 비스트리밍 시 100s 한도에 걸린다.)
+async function anthropicText(env, prompt, useSearch, maxTokens, options) {
   const payload = {
-    model: "claude-opus-4-8",
+    model: "claude-sonnet-5",
     max_tokens: maxTokens || 4000,
     stream: true,
     messages: [{ role: "user", content: prompt }],
   };
   // 검색 턴마다 전체 컨텍스트가 재전송된다(입력 2차식 증가) → 상한 고정.
   if (useSearch) payload.tools = [{ type: "web_search_20260209", name: "web_search", max_uses: 3 }];
+  // Sonnet 5는 adaptive thinking이 기본 켜짐. JSON 본문이 비는 실패에 한해
+  // 복구 호출에서만 thinking을 끈다(첫 호출의 추론·web_search 품질은 유지).
+  if (options && options.disableThinking) payload.thinking = { type: "disabled" };
 
   let upstream;
   try {
@@ -1012,6 +1015,116 @@ async function anthropicText(env, prompt, useSearch, maxTokens) {
   return { text: text, stop_reason: stopReason };
 }
 
+// 기업 회계분기(FY/FQ) → 달력분기(CY) 정규화.
+// 출력 표기는 nQyy 하나로 통일한다. 원문 raw는 보존하고 Claude JSON 결과에만 적용한다.
+// rule[q-1] = [calendar quarter, calendar year delta vs fiscal year].
+const FISCAL_CY_RULES = {
+  MSFT: [[3,-1],[4,-1],[1,0],[2,0]], ORCL: [[3,-1],[4,-1],[1,0],[2,0]],
+  NVDA: [[2,-1],[3,-1],[4,-1],[1,0]], MRVL: [[2,-1],[3,-1],[4,-1],[1,0]],
+  CRM:  [[2,-1],[3,-1],[4,-1],[1,0]], DELL: [[2,-1],[3,-1],[4,-1],[1,0]],
+  AAPL: [[4,-1],[1,0],[2,0],[3,0]], MU:   [[4,-1],[1,0],[2,0],[3,0]],
+  COST: [[4,-1],[1,0],[2,0],[3,0]],
+  AVGO: [[1,0],[2,0],[3,0],[4,0]], HPE:  [[1,0],[2,0],[3,0],[4,0]],
+  META: [[1,0],[2,0],[3,0],[4,0]], AMZN: [[1,0],[2,0],[3,0],[4,0]],
+  GOOGL:[[1,0],[2,0],[3,0],[4,0]], AMD:  [[1,0],[2,0],[3,0],[4,0]],
+  INTC: [[1,0],[2,0],[3,0],[4,0]], APH:  [[1,0],[2,0],[3,0],[4,0]],
+};
+// 회계연도 전체는 단일 CY로 오인하지 않도록 실제 포함 월 범위로 쓴다.
+// [시작월, 시작연도 delta, 종료월, 종료연도 delta].
+const FISCAL_YEAR_SPANS = {
+  MSFT:[7,-1,6,0], ORCL:[6,-1,5,0],
+  NVDA:[2,-1,1,0], MRVL:[2,-1,1,0], CRM:[2,-1,1,0], DELL:[2,-1,1,0],
+  AAPL:[10,-1,9,0], MU:[9,-1,8,0], COST:[9,-1,8,0],
+  AVGO:[11,-1,10,0], HPE:[11,-1,10,0],
+  AMSC:[4,0,3,1],
+  META:[1,0,12,0], AMZN:[1,0,12,0], GOOGL:[1,0,12,0], AMD:[1,0,12,0],
+  INTC:[1,0,12,0], APH:[1,0,12,0],
+};
+const FISCAL_ALIASES = [
+  ["MSFT",/MSFT|Microsoft|마이크로소프트/i], ["NVDA",/NVDA|NVIDIA|엔비디아/i],
+  ["AAPL",/AAPL|Apple|애플/i], ["AVGO",/AVGO|Broadcom|브로드컴/i],
+  ["MU",/(^|[^A-Z])MU([^A-Z]|$)|Micron|마이크론/i], ["MRVL",/MRVL|Marvell|마벨/i],
+  ["ORCL",/ORCL|Oracle|오라클/i], ["CRM",/(^|[^A-Z])CRM([^A-Z]|$)|Salesforce|세일즈포스/i],
+  ["DELL",/DELL|델 테크놀로지/i], ["HPE",/(^|[^A-Z])HPE([^A-Z]|$)|Hewlett Packard/i],
+  ["COST",/COST|Costco|코스트코/i], ["META",/META|Meta|메타/i],
+  ["AMZN",/AMZN|Amazon|AWS|아마존/i], ["GOOGL",/GOOGL|GOOG|Alphabet|Google|알파벳|구글/i],
+  ["AMD",/(^|[^A-Z])AMD([^A-Z]|$)/i], ["INTC",/INTC|Intel|인텔/i], ["APH",/(^|[^A-Z])APH([^A-Z]|$)|Amphenol/i],
+  ["AMSC",/AMSC|American Superconductor/i],
+];
+function fiscalTicker(text, at, fallback) {
+  const s = String(text || ""), near = s.slice(Math.max(0, at - 120), Math.min(s.length, at + 120));
+  for (const [ticker, re] of FISCAL_ALIASES) if (re.test(near)) return ticker;
+  const fb = (fallback || []).map(x => String(x || "").toUpperCase()).find(x => FISCAL_CY_RULES[x]);
+  return fb || "";
+}
+function fiscalTickerAnywhere(text) {
+  const s = String(text || "");
+  for (const [ticker, re] of FISCAL_ALIASES) if (re.test(s)) return ticker;
+  return "";
+}
+function fiscalQuarterCY(ticker, fy, fq) {
+  const rule = FISCAL_CY_RULES[ticker] && FISCAL_CY_RULES[ticker][fq - 1];
+  if (!rule) return "";
+  const year = (fy < 100 ? 2000 + fy : fy) + rule[1];
+  return `${rule[0]}Q${String(year).slice(-2)}`;
+}
+function fiscalYearCY(ticker, fy) {
+  const rule = FISCAL_YEAR_SPANS[ticker];
+  if (!rule) return "";
+  const year = fy < 100 ? 2000 + fy : fy;
+  if (rule[0] === 1 && rule[2] === 12 && rule[1] === rule[3]) return `CY${String(year + rule[1]).slice(-2)}`;
+  return `${year + rule[1]}.${rule[0]}~${year + rule[3]}.${rule[2]}`;
+}
+function normalizeFiscalText(value, fallback) {
+  let s = String(value == null ? "" : value);
+  function cv(full, fy, fq, at) {
+    const ticker = fiscalTicker(s, at, fallback), out = fiscalQuarterCY(ticker, +fy, +fq);
+    return out || full;
+  }
+  // FY26 Q4 · FY2026Q4 · Q4 FY26 · FQ3 FY26
+  s = s.replace(/\bFY\s*(20\d{2}|\d{2})\s*[- ]?\s*F?Q\s*([1-4])\b/gi,
+    function(m,fy,fq,at){ return cv(m,fy,fq,at); });
+  s = s.replace(/\bF?Q\s*([1-4])\s*[- ]?\s*FY\s*(20\d{2}|\d{2})\b/gi,
+    function(m,fq,fy,at){ return cv(m,fy,fq,at); });
+  // Fiscal Q3 2026 · FQ3'26
+  s = s.replace(/\bFiscal\s+Q([1-4])\s+(20\d{2}|\d{2})\b/gi,
+    function(m,fq,fy,at){ return cv(m,fy,fq,at); });
+  s = s.replace(/\bFQ([1-4])['' ]?(\d{2})\b/gi,
+    function(m,fq,fy,at){ return cv(m,fy,fq,at); });
+  const qword = {first:1,second:2,third:3,fourth:4};
+  s = s.replace(/\bFY\s*(20\d{2}|\d{2})\s+(first|second|third|fourth)\s+quarter\b/gi,
+    function(m,fy,w,at){ return cv(m,fy,qword[String(w).toLowerCase()],at); });
+  s = s.replace(/\b(first|second|third|fourth)\s+quarter\s+FY\s*(20\d{2}|\d{2})\b/gi,
+    function(m,w,fy,at){ return cv(m,fy,qword[String(w).toLowerCase()],at); });
+  s = s.replace(/\b(?:fiscal(?:\s+year)?\s*(20\d{2}|\d{2})\s+)?(first|second|third|fourth)\s+quarter(?:\s+(?:of\s+)?fiscal(?:\s+year)?\s*(20\d{2}|\d{2}))?\b/gi,
+    function(m,fy1,w,fy2,at){ const fy=fy1||fy2; return fy?cv(m,fy,qword[String(w).toLowerCase()],at):m; });
+  function cvYear(full, fy, at) {
+    const ticker = fiscalTicker(s, at, fallback), out = fiscalYearCY(ticker, +fy);
+    return out || full;
+  }
+  // 분기 변환 뒤 남은 회계연도 전체 표기만 실제 달력 기간으로 바꾼다.
+  s = s.replace(/\bFY\s*(20\d{2}|\d{2})\b/gi,
+    function(m,fy,at){ return cvYear(m,fy,at); });
+  s = s.replace(/\bFiscal\s+Year\s+(20\d{2}|\d{2})\b/gi,
+    function(m,fy,at){ return cvYear(m,fy,at); });
+  return s;
+}
+function normalizeFiscalValue(v, fallback) {
+  if (typeof v === "string") return normalizeFiscalText(v, fallback);
+  if (Array.isArray(v)) return v.map(x => normalizeFiscalValue(x, fallback));
+  if (!v || typeof v !== "object") return v;
+  const fb = Array.isArray(v.tickers) ? v.tickers : fallback;
+  Object.keys(v).forEach(k => { v[k] = normalizeFiscalValue(v[k], fb); });
+  return v;
+}
+function normalizeInsightFiscalJSON(raw) {
+  const s = String(raw || ""), a = s.indexOf("{"), b = s.lastIndexOf("}");
+  if (a < 0 || b < a) return s;
+  let obj;
+  try { obj = JSON.parse(s.slice(a, b + 1)); } catch { return s; }
+  return JSON.stringify(normalizeFiscalValue(obj, []));
+}
+
 // 관점 추출 — 리포트/기사/유튜브 본문(또는 URL)을 알파맵 프레임으로 구조화.
 // 규율은 프롬프트에 박아 넣는다: narrative≠numbers · 상대가치 · 가격상승≠강등 · 사람 승인 필수.
 async function handleInsight(request, env) {
@@ -1025,6 +1138,11 @@ async function handleInsight(request, env) {
   let text = String((body && body.text) || "");
   if (text.length > 120000) text = text.slice(0, 120000);
   if (!text.trim() && !url.trim()) return memoJson({ error: "text or url required" }, 400);
+  let siteContext = "";
+  try {
+    siteContext = JSON.stringify((body && body.siteContext) || null);
+    if (siteContext.length > 60000) siteContext = siteContext.slice(0, 60000);
+  } catch {}
 
   const useSearch = !text.trim() && !!url.trim();
 
@@ -1039,9 +1157,14 @@ async function handleInsight(request, env) {
     "1. narrative ≠ numbers: 발표·키노트·전망·M&A 논의 같은 내러티브는 type='narrative' 이며 route 는 최대 'signal_log' 까지만. 숫자 파일(earnings/judgment/stage/holdings) 변경을 제안하지 마라.",
     "   실적 비트/미스, 가이더스 상향/하향, 확정 수주·계약, 확정된 가격·수급 데이터만 type='numbers'.",
     "2. 상대가치가 핵심: '이 종목에 호재인가'가 아니라 '어느 레이어가 싸지고 어느 레이어가 비싸졌는가'를 바꾸는지로 평가하라.",
-    "3. 가격 상승 그 자체는 단계 강등 근거가 아니다. 강등은 '가격 상승률 vs FY+1/+2 EPS 추정 리비전 속도' 비교로만.",
+    "3. 가격 상승 그 자체는 단계 강등 근거가 아니다. 강등은 '가격 상승률 vs 향후 1년/2년 EPS 추정 리비전 속도' 비교로만.",
     "4. 이미 아는 컨센서스·홍보성 문구·중복 헤드라인은 noise 로 버려라. 애널리스트의 목표가 상향 그 자체는 근거(추정 변경)가 없으면 noise.",
     "5. 너는 후보 정렬까지만 한다. 최종 반영은 사람이 승인한다. 단정하지 말고 검증 항목(verify)을 남겨라.",
+    "6. [알파맵 내부 컨텍스트]에서 입력 자료와 직접 관련된 기존 주제·게이지·판정이 있으면 반드시 대조해 관점을 확장하라. 예: 실적 자료의 RPO는 01 시장 모니터링 '사이클 판별 보드' 수주잔고 vs capex와 연결한다.",
+    "   관련성이 낮으면 억지로 연결하지 마라. 입력 자료가 더 최신인 1차 자료면 입력 자료를 우선하고, 내부 값과 다르면 오류로 단정하지 말고 양쪽 기준일과 변화 방향을 명시하라.",
+    "   내부 컨텍스트를 사용한 claim에는 siteRefs를 1~4개 붙여 menu·source·item·asOf·evidence를 채워라. evidence는 실제 내부 수치·판정과 이 관점의 연결 이유를 짧게 쓴다. 내부 컨텍스트에 없는 내용을 만들지 마라.",
+    "7. 기업 회계연도 FY/FQ 표기를 결과에 그대로 쓰지 않는다. 분기는 실제 분기 종료일 기준 달력분기 nQyy로 변환한다. 예: MSFT FY26 Q4→2Q26, NVDA FY27 Q1→2Q26·Q2→3Q26, AAPL FY26 Q3→2Q26, AVGO FY26 Q2→2Q26, MU FY26 Q3→2Q26, MRVL FY27 Q1→2Q26, ORCL FY26 Q4→2Q26.",
+    "   src.title·summary·claims·why·verify·siteRefs·noise·steelman 어디에도 FY/FQ 표기를 남기지 마라. 회계연도 전체 수치는 실제 포함 기간으로 쓴다. 예: MSFT FY27→2026.7~2027.6, NVDA FY27→2026.2~2027.1, AAPL FY26→2025.10~2026.9. 달력연도 기업은 CY26처럼 쓴다.",
     "",
     "[점수] 각 0~2 · novelty(기존 컨센 대비 새로움) · impact(레이어 상대가치를 바꾸는 정도) · confidence(출처·검증가능성)",
     "[route] 'signal_log' | 'earnings' | 'judgment' | 'stage' | 'holdings' | 'macro' | 'calendar' | 'none'",
@@ -1050,27 +1173,58 @@ async function handleInsight(request, env) {
     "  - none: 소음",
     "",
     "[출력] 아래 JSON 객체 하나만. 마크다운 펜스·서문·후기 금지. 한국어. 결론 먼저, 문장은 짧게.",
-    '{"src":{"kind":"","publisher":"","title":"","url":"","date":""},"summary":"3줄 이내 핵심 요약","claims":[{"text":"핵심 한 줄","layer":"L3","tickers":["MU"],"type":"numbers|narrative","novelty":0,"impact":0,"confidence":0,"route":"signal_log","why":"어느 층 수요/공급을 바꾸는지 + 상대가치 함의","verify":"확인해야 할 것"}],"noise":["버린 것 한 줄씩"],"steelman":"이 자료의 논지에 대한 가장 강한 반론 1~2문장"}',
+    '{"src":{"kind":"","publisher":"","title":"","url":"","date":""},"summary":"3줄 이내 핵심 요약","claims":[{"text":"핵심 한 줄","layer":"L3","tickers":["MU"],"type":"numbers|narrative","novelty":0,"impact":0,"confidence":0,"route":"signal_log","why":"어느 층 수요/공급을 바꾸는지 + 상대가치 함의","verify":"확인해야 할 것","siteRefs":[{"menu":"01 시장 모니터링","source":"gates.json","item":"① 수주잔고 vs capex","asOf":"YYYY-MM-DD","evidence":"기존 게이지·판정과 새 자료의 연결"}]}],"noise":["버린 것 한 줄씩"],"steelman":"이 자료의 논지에 대한 가장 강한 반론 1~2문장"}',
     "claims 는 최대 8개. 유의미한 게 없으면 claims 는 빈 배열로 두고 noise 에 이유를 적어라.",
     "",
     "[자료] 종류·출처·제목·날짜는 주어지지 않는다. 본문(또는 URL)에서 직접 판별해 src 에 채워라(불명확하면 빈 문자열).",
     "  src.kind 는 '증권사 리포트' | '기사' | '유튜브' | '공시' | '기타' 중 하나로 분류하라. src.title 은 자료의 실제 제목, src.publisher 는 발행처·매체·채널명.",
+    siteContext ? ("[알파맵 내부 컨텍스트]\n" + siteContext) : "[알파맵 내부 컨텍스트] 불러오지 못함 — 입력 자료만 분석",
     url ? ("URL: " + url) : "",
     useSearch
       ? "본문이 제공되지 않았다. web_search 로 위 URL 의 내용(또는 그 영상·기사에 대한 신뢰 가능한 요약·보도)을 찾아 근거로 삼아라. 찾지 못하면 claims 를 비우고 noise 에 '본문 확보 실패'라고 적어라."
       : ("본문/스크립트:\n" + text),
   ].filter(Boolean).join("\n");
 
-  const r = await anthropicText(env, prompt, useSearch, 6000);
+  // Sonnet 5는 adaptive thinking이 기본 활성화돼 max_tokens 안에서 사고 토큰이
+  // 먼저 소진되면 HTTP 200 + 빈 최종 텍스트가 올 수 있다. 첫 호출은 추론을 유지하되
+  // 예산을 넉넉히 주고, JSON이 없을 때만 thinking-off로 1회 자동 복구한다.
+  function validInsightJSON(raw) {
+    const s = String(raw || ""), a = s.indexOf("{"), b = s.lastIndexOf("}");
+    if (a < 0 || b < a) return "";
+    const candidate = s.slice(a, b + 1);
+    try {
+      const parsed = JSON.parse(candidate);
+      return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? candidate : "";
+    } catch { return ""; }
+  }
+
+  let r = await anthropicText(env, prompt, useSearch, 12000);
   if (r.error) return memoJson(r, 502);
-  return memoJson({ content: [{ type: "text", text: r.text }], stop_reason: r.stop_reason }, 200);
+  let jsonText = validInsightJSON(r.text);
+  if (!jsonText) {
+    const firstStop = r.stop_reason || "empty";
+    r = await anthropicText(env, prompt, useSearch, 8000, { disableThinking: true });
+    if (r.error) return memoJson({ error: r.error, detail: r.detail, retry: "thinking-disabled", first_stop: firstStop }, 502);
+    jsonText = validInsightJSON(r.text);
+  }
+  if (!jsonText) {
+    return memoJson({
+      error: "AI가 최종 JSON을 생성하지 못했습니다 — 자동 재시도 후에도 빈 응답",
+      detail: "stop_reason=" + String(r.stop_reason || "unknown"),
+    }, 502);
+  }
+  return memoJson({
+    content: [{ type: "text", text: normalizeInsightFiscalJSON(jsonText) }],
+    stop_reason: r.stop_reason,
+  }, 200);
 }
 
-// 02 인사이트 「사이트 반영」 — 표시 전용 보드(gates.json/risk.json) 직접 갱신.
+// 02 인사이트 「사이트 반영」 — 보드(gates/risk)·시장 맥락(signal_log)·일정(calendar) 직접 갱신.
+// 허용 파일은 이 상수 하나가 SoT다. 프런트 SITE_SRC와 반드시 동일하게 유지한다.
+const SITE_APPLY_FILES = new Set(["gates.json", "risk.json", "signal_log.json", "calendar.json"]);
 // SimpleorNothing 지시(2026-07-29): PR·수동 승인 없이 클릭 즉시 반영하는 완전 자동 예외.
-// narrative≠numbers 의 '확정 검증 후 수기 갱신' 원칙에 대한 명시적 카ㅂ아웃 —
-// 대신 Claude가 계산한 패치를 구조적으로 제한한다(게이지 배열 길이·k 순서·id 불변, 스키마 신설 금지).
-// 근거 불충분/이미 반영/모호하면 changed:false 로 아무것도 쓰지 않는다.
+// narrative≠numbers 의 '확정 검증 후 수기 갱신' 원칙에 대한 명시적 예외 —
+// 숫자 보드는 Claude 패치를 구조적으로 제한하고, narrative는 signal_log/calendar의 기존 스키마 안에서만 갱신한다.
 async function handleSiteApply(request, env) {
   if (!env.GITHUB_TOKEN) return memoJson({ error: "GITHUB_TOKEN not configured" }, 503);
   if (!env.ANTHROPIC_API_KEY) return memoJson({ error: "ANTHROPIC_API_KEY not configured" }, 503);
@@ -1080,16 +1234,26 @@ async function handleSiteApply(request, env) {
   catch { return memoJson({ error: "invalid json" }, 400); }
 
   const file = String((body && body.file) || "");
-  if (file !== "gates.json" && file !== "risk.json") {
-    return memoJson({ error: "invalid file — gates.json|risk.json only" }, 400);
+  if (!SITE_APPLY_FILES.has(file)) {
+    return memoJson({
+      error: "지원하지 않는 반영 대상 파일",
+      file,
+      supported: Array.from(SITE_APPLY_FILES),
+      api_version: "site-apply-v2",
+    }, 400);
   }
   const itemNo   = String((body && body.itemNo) || "");
   const itemName = String((body && body.itemName) || "");
   const claimText = String((body && body.text) || "").slice(0, 2000);
   const why = String((body && body.why) || "").slice(0, 2000);
   const src = (body && body.src) || {};
+  const route = String((body && body.route) || "signal_log");
+  const claimType = String((body && body.type) || "narrative");
+  const layer = String((body && body.layer) || "").slice(0, 20);
   if (!claimText.trim()) return memoJson({ error: "text required" }, 400);
-  if (!itemNo && !itemName) return memoJson({ error: "itemNo or itemName required" }, 400);
+  if (file !== "signal_log.json" && !itemNo && !itemName) {
+    return memoJson({ error: "itemNo or itemName required" }, 400);
+  }
 
   const OWNER = "SimpleorNothing", REPO = "ten-bagger";
   const gh = {
@@ -1118,6 +1282,73 @@ async function handleSiteApply(request, env) {
   try { doc = JSON.parse(raw); }
   catch { return memoJson({ error: "current file invalid json" }, 500); }
 
+  const kstNow = () => {
+    const shifted = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().replace("Z", "+09:00");
+    return { at: shifted, date: shifted.slice(0, 10) };
+  };
+  const norm = (s) => String(s || "").replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim().toLowerCase();
+  const htmlEsc = (s) => String(s || "").replace(/[&<>"]/g, (c) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;",
+  })[c]);
+  const commitDoc = async (message) => {
+    const content = btoa(unescape(encodeURIComponent(JSON.stringify(doc, null, 2) + "\n")));
+    const put = await fetch(API, {
+      method: "PUT",
+      headers: { ...gh, "content-type": "application/json" },
+      body: JSON.stringify({ message, branch: BRANCH, content, sha }),
+    });
+    if (!put.ok) {
+      const t = await put.text();
+      return { error: "github put failed", status: put.status, detail: t.slice(0, 300) };
+    }
+    return null;
+  };
+
+  // 01 시장 모니터링 「시장 맥락」 — 채택 관점을 기존 signal_log 스키마로 append.
+  if (file === "signal_log.json") {
+    doc.log = Array.isArray(doc.log) ? doc.log : [];
+    const needle = norm(claimText);
+    const duplicate = doc.log.some((e) => (e.items || []).some((it) => {
+      const old = norm(it && it.html);
+      return needle && (old.includes(needle) || needle.includes(old));
+    }));
+    if (duplicate) return memoJson({ ok: true, changed: false, reason: "시장 맥락에 이미 반영된 관점" }, 200);
+
+    const now = kstNow();
+    const srcLabel = [src.title, src.publisher, src.date].filter(Boolean).join(" · ") || "02 인사이트 찾기 채택 관점";
+    const tag = route === "macro" ? "매크로·인사이트 반영" : (layer ? `${layer}·인사이트 반영` : "인사이트 반영");
+    const html = `<b>${htmlEsc(claimText)}</b>${why ? ` ${htmlEsc(why)}` : ""} <b>narrative≠numbers — 숫자 파일 불변.</b>`;
+    doc.log.push({
+      date: /^\d{4}-\d{2}-\d{2}$/.test(String(src.date || "")) ? src.date : now.date,
+      at: now.at,
+      source: `${srcLabel} — 02 인사이트 「사이트 반영」`,
+      srcs: [{ label: srcLabel, ...(src.url ? { url: String(src.url).slice(0, 1000) } : {}) }],
+      items: [{ tag, layer: layer || null, col: route === "macro" ? "#e03131" : "#868e96", html }],
+    });
+    doc.asOf = now.date;
+    const err = await commitDoc(`site-apply: signal_log 시장 맥락 추가 — ${claimText.slice(0, 60)}`);
+    if (err) return memoJson(err, 502);
+    return memoJson({ ok: true, changed: true, reason: "01 시장 모니터링의 시장 맥락에 추가" }, 200);
+  }
+
+  // 01 시장 모니터링 「다가오는 일정」 — 같은 이벤트의 D-day 카드 설명을 결과/새 관점으로 갱신.
+  if (file === "calendar.json") {
+    const events = Array.isArray(doc.events) ? doc.events : [];
+    const event = events.find((it) =>
+      (itemNo && `${it.d || ""}|${it.lbl || ""}` === itemNo) || (itemName && it.lbl === itemName));
+    if (!event) return memoJson({ error: "calendar event not found" }, 404);
+    if (norm(event.meta).includes(norm(claimText))) {
+      return memoJson({ ok: true, changed: false, reason: "일정 설명에 이미 반영된 관점" }, 200);
+    }
+    const incoming = [claimText, why].filter(Boolean).join(" · ").replace(/\s+/g, " ").trim();
+    event.meta = [event.meta, `결과 업데이트: ${incoming}`].filter(Boolean).join(" · ").slice(0, 900);
+    const now = kstNow();
+    doc.asOf = now.at;
+    const err = await commitDoc(`site-apply: calendar ${event.lbl} 일정 맥락 갱신`);
+    if (err) return memoJson(err, 502);
+    return memoJson({ ok: true, changed: true, reason: "01 다가오는 일정의 해당 이벤트 설명 갱신" }, 200);
+  }
+
   const items = doc.items || doc.axes || [];
   const item = items.find((it) =>
     (itemNo && (it.no === itemNo || it.id === itemNo)) || (itemName && it.name === itemName));
@@ -1128,10 +1359,12 @@ async function handleSiteApply(request, env) {
     "아래 '현재 항목'과 '새 관점'을 비교해 갱신이 필요한 필드만 정확히 계산하라.",
     "",
     "[절대 규율]",
-    "1. narrative≠numbers — 확정 실적·공시·계약 등 '숫자'만 반영한다. 추측·전망·소문·아직 확정 안 된 내용이면 changed=false.",
+    "1. gauge 숫자는 확정 실적·공시·계약·정책결정만 반영한다. 추측·전망·소문이면 changed=false.",
+    "   FOMC·중앙은행 결정처럼 확정된 매크로 결과는 narrative여도 verdict/srcs 갱신 가능하나, 숫자 gauge는 근거가 있을 때만 바꾼다.",
     "2. gauge 배열은 원본과 같은 길이·같은 순서·같은 k(라벨)를 유지한다. v(값)·d(up/down/flat)·n(부연설명)만 바꿀 수 있다.",
     "3. 스키마를 새로 만들지 마라 — 기존 필드만 채운다. 근거 없는 필드는 건드리지 마라.",
     "4. 근거가 불충분하거나 이미 반영된 값과 사실상 같으면 changed=false를 반환하라(추측으로 채우지 마라).",
+    "5. 기업 FY/FQ 표기는 저장하지 않는다. 분기는 실제 종료일 기준 달력분기 nQyy로 쓴다(MSFT FY26 Q4→2Q26 등). 회계연도 전체 수치는 실제 포함 기간으로 쓴다(MSFT FY27→2026.7~2027.6).",
     "",
     "[출력] 마크다운 없이 JSON 객체 하나만:",
     '{"changed":true,"gauge":[{"k":"...","v":"...","d":"up|down|flat","n":"..."}],"verdict":"...","srcs_add":"...","reason":"한 줄 요약"}',
@@ -1142,20 +1375,47 @@ async function handleSiteApply(request, env) {
     "",
     "[새 관점]",
     claimText,
+    `분류: route=${route} · type=${claimType}`,
     why ? ("근거: " + why) : "",
     (src && (src.title || src.publisher)) ? ("출처: " + [src.title, src.publisher, src.date].filter(Boolean).join(" · ")) : "",
   ].filter(Boolean).join("\n");
 
-  const r = await anthropicText(env, prompt, false, 1200);
-  if (r.error) return memoJson({ error: r.error, detail: r.detail }, 502);
-
-  let patch;
-  try {
-    const m = String(r.text || "").match(/\{[\s\S]*\}/);
-    patch = JSON.parse(m ? m[0] : r.text);
-  } catch {
-    return memoJson({ error: "claude response not json", raw: String(r.text || "").slice(0, 300) }, 502);
+  // Sonnet 5 adaptive thinking이 기본 활성화돼 작은 출력 예산에서는 사고 토큰만
+  // 소진하고 최종 JSON이 비는 경우가 있다. 첫 호출은 판단 품질을 위해 thinking을
+  // 유지하고, 유효 JSON이 없을 때만 thinking-off로 1회 자동 복구한다.
+  function parseSitePatch(raw) {
+    const m = String(raw || "").match(/\{[\s\S]*\}/);
+    if (!m) return null;
+    try {
+      const out = JSON.parse(m[0]);
+      return out && typeof out === "object" && !Array.isArray(out) ? out : null;
+    } catch { return null; }
   }
+
+  let r = await anthropicText(env, prompt, false, 4000);
+  if (r.error) return memoJson({ error: r.error, detail: r.detail }, 502);
+  let patch = parseSitePatch(r.text);
+  if (!patch) {
+    const firstStop = r.stop_reason || "empty";
+    r = await anthropicText(env, prompt, false, 2400, { disableThinking: true });
+    if (r.error) {
+      return memoJson({
+        error: r.error,
+        detail: r.detail,
+        retry: "thinking-disabled",
+        first_stop: firstStop,
+      }, 502);
+    }
+    patch = parseSitePatch(r.text);
+  }
+  if (!patch) {
+    return memoJson({
+      error: "AI가 사이트 반영 JSON을 생성하지 못했습니다 — 자동 재시도 후에도 실패",
+      detail: "stop_reason=" + String(r.stop_reason || "unknown"),
+    }, 502);
+  }
+  const applyTicker = fiscalTickerAnywhere([claimText, why, src.title, src.publisher, item.name, JSON.stringify(item.keys || [])].join(" "));
+  patch = normalizeFiscalValue(patch, applyTicker ? [applyTicker] : []);
 
   if (!patch || patch.changed !== true) {
     return memoJson({ ok: true, changed: false, reason: (patch && patch.reason) || "변경 근거 불충분" }, 200);
@@ -1178,21 +1438,9 @@ async function handleSiteApply(request, env) {
   item.upd = today;
   doc.asOf = today;
 
-  const content = btoa(unescape(encodeURIComponent(JSON.stringify(doc, null, 2) + "\n")));
-  const put = await fetch(API, {
-    method: "PUT",
-    headers: { ...gh, "content-type": "application/json" },
-    body: JSON.stringify({
-      message: `site-apply: ${file} ${item.no || item.id || item.name} 자동 반영 — ${String(patch.reason || "").slice(0, 80)}`,
-      branch: BRANCH,
-      content,
-      sha,
-    }),
-  });
-  if (!put.ok) {
-    const t = await put.text();
-    return memoJson({ error: "github put failed", status: put.status, detail: t.slice(0, 300) }, 502);
-  }
+  const commitErr = await commitDoc(
+    `site-apply: ${file} ${item.no || item.id || item.name} 자동 반영 — ${String(patch.reason || "").slice(0, 80)}`);
+  if (commitErr) return memoJson(commitErr, 502);
 
   return memoJson({
     ok: true, changed: true, reason: patch.reason || "",
