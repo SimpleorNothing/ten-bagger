@@ -3773,7 +3773,7 @@ window.MARKET=(function(){
    var verdict=last<0?'<span class="wn">고용 감소 — 경기 둔화 신호</span>':delta>=0?'<span class="ok">고용 증가폭 확대</span>':'<span class="nt">고용 증가폭 둔화</span>';
    el.innerHTML='<div class="mkt-nm">미국 비농업고용(NFP)</div><div class="mkt-val">'+fmtK(last)+
     ' <span class="mkt-chg '+(delta>=0?'up':'dn')+'">전월비 '+fmtK(delta)+'</span></div>'+lens('<b>노동</b>비농업고용 증감 · Fed 이중책무',
-    esc(dts[dts.length-1])+' '+fmtK(last)+' · 이전 '+fmtK(prev)+' → '+verdict)+(RG.k==='6M'?barChart(vals,dts,fmtK):chart(vals,0,dts,fmtK))+'<div class="mkt-span">'+RG.ko+'</div>';
+    esc(dts[dts.length-1])+' '+fmtK(last)+' · 이전 '+fmtK(prev)+' → '+verdict)+barChart(vals,dts,fmtK)+'<div class="mkt-span">'+RG.ko+'</div>';
   }catch(e){el.innerHTML=wait;}
  }
 
