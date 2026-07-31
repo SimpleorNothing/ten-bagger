@@ -632,11 +632,24 @@ async function handleCouncilLogPost(request, env) {
 }
 
 const COUNCIL_DISC_KEY = "council_discussions.json";
+function latestCouncilDiscussion(arr) {
+  if (!Array.isArray(arr)) return [];
+  const valid = arr.filter((x) => x && typeof x === "object");
+  if (!valid.length) return [];
+  valid.sort((a, b) => String(b.at || "").localeCompare(String(a.at || "")));
+  return [valid[0]];
+}
 async function handleCouncilDiscGet(env) {
   if (!env.MEMO_BUCKET) return memoJson({ error: "MEMO_BUCKET not configured" }, 503);
   const obj = await env.MEMO_BUCKET.get(COUNCIL_DISC_KEY);
   const v = obj ? await obj.text() : "";
-  return new Response(v && v.trim() ? v : "[]", { status: 200, headers: { "content-type": "application/json", "cache-control": "no-store" } });
+  let arr = [];
+  if (v && v.trim()) { try { arr = JSON.parse(v); } catch (_) { arr = []; } }
+  const latest = latestCouncilDiscussion(arr);
+  if (JSON.stringify(arr) !== JSON.stringify(latest)) {
+    await env.MEMO_BUCKET.put(COUNCIL_DISC_KEY, JSON.stringify(latest), { httpMetadata: { contentType: "application/json" } });
+  }
+  return new Response(JSON.stringify(latest), { status: 200, headers: { "content-type": "application/json", "cache-control": "no-store" } });
 }
 async function handleCouncilDiscDelete(request, env) {
   if (!env.MEMO_BUCKET) return memoJson({ error: "MEMO_BUCKET not configured" }, 503);
@@ -663,7 +676,7 @@ async function handleCouncilDiscPost(request, env) {
   let arr = [];
   if (obj) { try { arr = JSON.parse(await obj.text()); } catch (_) { arr = []; } }
   if (!Array.isArray(arr)) arr = [];
-  arr.push({
+  const discussion = {
     at: (typeof e.at === "string" && e.at) ? e.at : new Date().toISOString(),
     members: Array.isArray(e.members) ? e.members.slice(0, 12).map(String) : [],
     diagnosis: String(e.diagnosis || "").slice(0, 1000),
@@ -672,10 +685,11 @@ async function handleCouncilDiscPost(request, env) {
     tension: Array.isArray(e.tension) ? e.tension.slice(0, 20) : [],
     actions: Array.isArray(e.actions) ? e.actions.slice(0, 20) : [],
     steelman: String(e.steelman || "").slice(0, 2000),
-  });
-  if (arr.length > 500) arr = arr.slice(-500);
+  };
+  // 원탁 이력은 최신 생성 결과 한 건만 보관한다. 이전 누적분은 GET에서도 정리한다.
+  arr = [discussion];
   await env.MEMO_BUCKET.put(COUNCIL_DISC_KEY, JSON.stringify(arr), { httpMetadata: { contentType: "application/json" } });
-  return memoJson({ ok: true, count: arr.length }, 200);
+  return memoJson({ ok: true, count: 1 }, 200);
 }
 
 // ===== 원탁 로스터(패널 명단) — R2(MEMO_BUCKET) · 추가·삭제·편집 SoT =====
