@@ -6,7 +6,8 @@ on:
       - 'index.html'
       - 'scripts/fetch-prices.mjs'
   schedule:
-    - cron: '5 21 * * *'    # 06:05 KST 예약 → 실측지연 ~53분 → ~06:55 KST 완료 (미 장마감 후·여름/겨울 모두 안전)
+    - cron: '5 21 * * *'    # 06:05 KST 예약 → 미장 마감 데이터 반영
+    - cron: '35 21 * * *'   # 06:35 KST 재시도 → 예약 지연·야후 마감 캔들 지연 방어
     - cron: '52 7 * * *'    # 16:52 KST 예약 → 실측지연 ~98분 → ~18:30 KST 완료 (한국 장마감 15:30 이후)
   workflow_dispatch: {}      # allow manual run from the Actions tab
 
