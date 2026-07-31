@@ -200,7 +200,7 @@ async function localVolDrift(sym) {
 // 상단/하단 티커 장중 실시간 시세. Yahoo 공개 차트 피드만 사용하며 LLM 호출은 하지 않는다.
 async function handleTickerLive() {
   const symbols = {
-    ixic: "^IXIC", gspc: "^GSPC", ks11: "^KS11", ksdaq: "^KQ11", fx: "KRW=X", wti: "CL=F",
+    ixic: "^IXIC", gspc: "^GSPC", es: "ES=F", nq: "NQ=F", ks11: "^KS11", ksdaq: "^KQ11", fx: "KRW=X", wti: "CL=F",
     nikkei: "^N225", twii: "^TWII", shc: "^SSEC", hsi: "^HSI", stoxx50: "^STOXX50E", us10y: "^TNX",
   };
   const out = {};
