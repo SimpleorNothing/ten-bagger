@@ -33,7 +33,7 @@
                      └─ R2 (MEMO_BUCKET) — 메모 저장, 없으면 localStorage로 graceful degrade
 ```
 
-- **프론트:** `index.html` — 약 550KB 단일 파일 SPA. 6탭 런타임 렌더(`01 시장 모니터링` · `02 궁금한 것` · `03 관점과 정보 얻기` · `04 전문가 원탁` · `05 리밸런싱` · `06 메모`). 보조 모듈: `insight.js/css`, `council-sot.js`, `changelog.js`, `hover-chart.js`, `flags.js`, `hmz.js` 등.
+- **프론트:** `index.html` — 약 550KB 단일 파일 SPA. 6탭 런타임 렌더(`01 시장 모니터링` · `02 궁금한 것` · `03 관점과 정보 얻기` · `04 전문가 원탁` · `05 비중조절` · `06 메모`). 보조 모듈: `insight.js/css`, `council-sot.js`, `changelog.js`, `hover-chart.js`, `flags.js`, `hmz.js` 등.
 - **데이터(JSON):** 자동 2층(시세·매크로 신호·모멘텀 알파) + 판단 2층(γ·stage·실적 크기·판단 알파). **γ·stage 단일 소스 = `gamma.json`.** 층위·병합 순서는 `OPS.md` §2.
 - **백엔드:** `worker.js` (Cloudflare Workers) · 설정 `wrangler.jsonc`.
 - **배포 안 되는 것:** `.assetsignore`에 `*.md` → 마크다운 문서는 **리포 전용**(사이트 미배포).
