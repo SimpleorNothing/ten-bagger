@@ -34,6 +34,10 @@ html,body{height:100%}
 body{font-family:var(--sans);font-size:16px;background:var(--ink);color:var(--txt);-webkit-font-smoothing:antialiased;line-height:1.6}
 .wrap{max-width:1340px;margin:0 auto;padding:0 22px}
 header{position:sticky;top:0;z-index:50;backdrop-filter:blur(12px);background:linear-gradient(180deg,rgba(255,255,255,.92),rgba(255,255,255,.68));border-bottom:1px solid var(--line)}
+.am-ticker{position:sticky;top:0;z-index:49;height:36px;overflow:hidden;background:#fff;border-bottom:1px solid var(--line);box-shadow:0 2px 8px rgba(15,23,42,.05)}
+.am-ticker-track{display:flex;align-items:center;min-width:max-content;height:100%;animation:amTicker 42s linear infinite;will-change:transform}.am-ticker:hover .am-ticker-track{animation-play-state:paused}
+.am-ticker-item{display:inline-flex;align-items:baseline;gap:7px;padding:0 20px;border-right:1px solid #e8edf3;white-space:nowrap;font-family:var(--mono);font-size:12px;line-height:1}.am-ticker-name{font-weight:800;color:var(--txt)}.am-ticker-value{font-weight:700;color:#17202b}.am-ticker-change{font-weight:800}.am-ticker-change.up{color:#e3262e}.am-ticker-change.down{color:#1670c5}.am-ticker-change.flat{color:#6b7280}.am-ticker-asof{padding:0 18px;color:var(--faint);font:10px var(--mono);white-space:nowrap}
+@keyframes amTicker{from{transform:translateX(0)}to{transform:translateX(-50%)}}@media(max-width:700px){.am-ticker{height:32px}.am-ticker-item{padding:0 13px;font-size:11px}.am-ticker-track{animation-duration:32s}}@media(prefers-reduced-motion:reduce){.am-ticker-track{animation:none}}
 .bar{display:flex;align-items:center;gap:16px;padding:13px 0;flex-wrap:wrap}
 .brand{display:flex;align-items:baseline;gap:10px;white-space:nowrap;padding-left:16px}
 .mark{font-family:var(--serif);font-weight:800;font-size:30px;letter-spacing:-.02em;color:var(--txt)}
@@ -984,6 +988,9 @@ header::after{
  setTimeout(rdy,3000);
 })();
 </script>
+<script>
+(function(){var root=document.getElementById('amTickerTrack');if(!root)return;var defs=[['ixic','NASDAQ',2],['gspc','S&P 500',2],['ks11','KOSPI',2],['fx','USD/KRW',2],['wti','WTI',2],['nikkei','일본 종합',2],['twii','대만 종합',2],['shc','중국 종합',2],['hsi','홍콩 종합',2],['us10y','미 10년물',2]];function n(v){v=Number(v);return Number.isFinite(v)?v:null}function q(o,k){var a={ixic:['ixic','^ixic','nasdaq'],gspc:['gspc','^gspc','sp500'],ks11:['ks11','^ks11','kospi'],fx:['fx','usdkrw','usd/krw','krw'],nikkei:['nikkei','^n225','n225'],twii:['twii','^twii','taiwan'],shc:['shc','^ssec','ssec','shanghai'],hsi:['hsi','^hsi','hang seng'],us10y:['us10y','ten_year','10y','^tnx']}[k]||[k],x=o&& (o.quotes||o);for(var i=0;i<a.length;i++){var z=x&&x[a[i]];if(z==null)continue;if(typeof z==='number')return{v:z};if(typeof z==='object')return{v:n(z.price!=null?z.price:(z.close!=null?z.close:z.value)),c:n(z.changePct!=null?z.changePct:z.change)}}return null}function row(d,x){if(!x||x.v==null)return'';var c=x.c,cl=c>0?'up':c<0?'down':'flat';return'<span class="am-ticker-item"><span class="am-ticker-name">'+d[1]+'</span><span class="am-ticker-value">'+x.v.toLocaleString('ko-KR',{minimumFractionDigits:d[2],maximumFractionDigits:d[2]})+'</span><span class="am-ticker-change '+cl+'">'+(c==null?'—':(c>0?'▲ ':'▼ ')+Math.abs(c).toFixed(2)+'%')+'</span></span>'}Promise.all([fetch('prices.json?t='+Date.now()).then(function(r){return r.ok?r.json():null}).catch(function(){return null}),fetch('charts.json?t='+Date.now()).then(function(r){return r.ok?r.json():null}).catch(function(){return null}),fetch('/api/wti',{cache:'no-store'}).then(function(r){return r.ok?r.json():null}).catch(function(){return null})]).then(function(a){var p=a[0]||{},ch=a[1]||{},w=a[2]||{},pts=w.points||w.series||[],last=pts[pts.length-1],prev=pts[pts.length-2],wq=last?{v:n(Array.isArray(last)?last[1]:last.close||last.value),c:prev?(n(Array.isArray(last)?last[1]:last.close||last.value)/n(Array.isArray(prev)?prev[1]:prev.close||prev.value)-1)*100:null}:null;var html=defs.map(function(d){return row(d,d[0]==='wti'?wq:q(p,d[0])||q(ch.series,d[0]))}).join('');if(html)root.innerHTML=html+html+'<span class="am-ticker-asof">자동 갱신</span>';else root.innerHTML='<span class="am-ticker-asof">시장 지표를 불러오지 못했습니다</span>'})})();
+</script>
 </head>
 <body>
 <header><div class="wrap bar">
@@ -996,6 +1003,7 @@ header::after{
     <button class="tab" data-v="memo"><span class="n">05</span>메모</button>
   </nav>
 </div></header>
+<div class="am-ticker" id="amTicker" aria-label="주요 시장 지표" aria-live="polite"><div class="am-ticker-track" id="amTickerTrack"><span class="am-ticker-asof">주요 지표 불러오는 중</span></div></div>
 
 <main class="wrap">
 
@@ -1225,7 +1233,7 @@ header::after{
 
   <div class="cal-month">6월 <span class="mo-sub">— AVGO·SpaceX·CPI·FOMC·MU + 메가테크 키노트가 몰린 고밀도 구간</span></div>
   <div class="cal-row"><div class="date-chip">06.01~05</div><div class="cat-dot" style="background:var(--cat-event)"></div><div class="cal-body"><div class="ti">엔비디아 Computex·GTC Taipei 키노트 <span class="tk">NVDA</span> <span class="mbadge" style="background:#e8590c22;color:#e8590c">내러티브</span></div><div class="mt">6/1 젠슨 황 키노트(Vera Rubin VR200·RTX Spark·피지컬 AI), Computex 6/2~5. 강물①·⑤ 수요 확인 — <b>레이어 수요 확정이지 종목 채점 아님</b>(I/O 2026과 동일 처리·추격 경고).</div></div></div>
-  <div class="cal-row key"><div class="date-chip">06.03</div><div class="cat-dot" style="background:var(--cat-earn)"></div><div class="cal-body"><div class="ti">브로드컴 <span class="tk">AVGO · AMC</span> <span class="mbadge" style="background:#e8590c22;color:#e8590c">ASIC 리드스루</span></div><div class="mt">2Q26 컨센 매출 ~$22.1B · AI매출 가이드 $10.7B. <b>미보유 — MRVL 커스텀 ASIC 리드스루 게이트</b>(hist ±8%, 과거 5~9%). D-1 옵션 event-iv로 expected move 갱신 권장.</div></div></div>
+  <div class="cal-row key"><div class="date-chip">06.03</div><div class="cat-dot" style="background:var(--cat-earn)"></div><div class="cal-body"><div class="ti">브로드컴 <span class="tk">AVGO · AMC</span> <span class="mbadge" style="background:#e8590c22;color:#e8590c">ASIC 리드스루</span></div><div class="mt">Q2 FY26 컨센 매출 ~$22.1B · AI매출 가이드 $10.7B. <b>미보유 — MRVL 커스텀 ASIC 리드스루 게이트</b>(hist ±8%, 과거 5~9%). D-1 옵션 event-iv로 expected move 갱신 권장.</div></div></div>
   <div class="cal-row"><div class="date-chip">06.04~08</div><div class="cat-dot" style="background:var(--cat-event)"></div><div class="cal-body"><div class="ti">SpaceX 로드쇼 시작</div><div class="mt">가격밴드 $1.75T~$2T 확정 구간. 조달 $40~80B · 사상 최대 IPO.</div></div></div>
   <div class="cal-row key"><div class="date-chip">06.10</div><div class="cat-dot" style="background:var(--cat-infl)"></div><div class="cal-body"><div class="ti">美 CPI (5월분) <span class="mbadge" style="background:#7048e822;color:#7048e8">확정</span></div><div class="mt">21:30 KST(08:30 ET). 4월 헤드라인 +3.8% YoY로 재상승 — 유가·중동이 인플레 변수.</div></div></div>
   <div class="cal-row"><div class="date-chip">06.11</div><div class="cat-dot" style="background:var(--cat-macro)"></div><div class="cal-body"><div class="ti">ECB 통화정책회의 <span class="mbadge" style="background:#1c7ed622;color:#1c7ed6">금리결정</span></div><div class="mt">21:15 KST 발표·21:45 KST 기자회견(14:15/14:45 CET). 예치금리 경로 — 유로존 디스인플레 속도가 변수.</div></div></div>
@@ -1254,7 +1262,7 @@ header::after{
   </div></div>
   <div class="cal-row key"><div class="date-chip">06.17</div><div class="cat-dot" style="background:var(--cat-watch)"></div><div class="cal-body"><div class="ti">美-이란 이슬라마바드 MOU 서명·발효 <span class="mbadge" style="background:#5b647022;color:#5b6470">지정학·완화</span></div><div class="mt">14개항 정상 서명(트럼프·페제시키안) — 전 전선 휴전(레바논)·호르무즈 재개통·美 해상봉쇄 30일내 해제·원유수출 면제 즉시·$300B 재건. <b>최종딜 60일창·양측 이탈 가능 = 잠정.</b> 유가↓ 재료지만 6/17 FOMC 매파 확정으로 금리경로 미반영 → 매수 게이트 0/3 불변(로그 전용). 6/19 제네바 기술협상.</div></div></div>
   <div class="cal-row key"><div class="date-chip">06.22</div><div class="cat-dot" style="background:var(--cat-event)"></div><div class="cal-body"><div class="ti">S&amp;P500 편입 효력 <span class="tk">MRVL·FLEX</span> <span class="mbadge" style="background:#e8590c22;color:#e8590c">지수 편입</span></div><div class="mt">장전 효력. <b>관찰 로그(mechanical)</b> — 채점·단계 변경 아님. 편입 범프 미지속 → 보유 MRVL(L2/L6 과중) 트림 윈도로만 활용. AVGO ASIC 다운그레이드 트리거와 시계 분리, 매크로 게이트 0/3이라 신규 매수와 무관.</div></div></div>
-  <div class="cal-row key"><div class="date-chip">06.24</div><div class="cat-dot" style="background:var(--cat-earn)"></div><div class="cal-body"><div class="ti">마이크론 <span class="tk">MU · AMC</span> <span class="mbadge" style="background:#0ca67822;color:#0ca678">D+1 ✓ γ open·강등 기각</span></div><div class="mt"><b>블로아웃 비트앤레이즈</b> — Rev $41.46B(컨센 ~$35.8B)·EPS $25.11(~$20.2)·GM 84.9%, <b>3Q26 $50B·EPS $30~32</b> 컨센 상회. 성숙 강등 도전 <b>기각·γ open</b>(추정 상향&gt;가격=fwd 멀티플 압축). <b>L3 트림 게이트 '추정&gt;가격이면 보류' 발동</b> → 집중도(43.6%) 정리와 충돌, 보류/신중. 차기 9/22.</div></div></div>
+  <div class="cal-row key"><div class="date-chip">06.24</div><div class="cat-dot" style="background:var(--cat-earn)"></div><div class="cal-body"><div class="ti">마이크론 <span class="tk">MU · AMC</span> <span class="mbadge" style="background:#0ca67822;color:#0ca678">D+1 ✓ γ open·강등 기각</span></div><div class="mt"><b>블로아웃 비트앤레이즈</b> — Rev $41.46B(컨센 ~$35.8B)·EPS $25.11(~$20.2)·GM 84.9%, <b>FQ4 $50B·EPS $30~32</b> 컨센 상회. 성숙 강등 도전 <b>기각·γ open</b>(추정 상향&gt;가격=fwd 멀티플 압축). <b>L3 트림 게이트 '추정&gt;가격이면 보류' 발동</b> → 집중도(43.6%) 정리와 충돌, 보류/신중. 차기 9/22.</div></div></div>
   <div class="cal-row key"><div class="date-chip">06.29</div><div class="cat-dot" style="background:var(--cat-pol)"></div><div class="cal-body"><div class="ti">삼성 ~1000조원대 투자 계획 발표 <span class="tk">005930</span> <span class="mbadge" style="background:#b8860b22;color:#b8860b">★★ 국민보고회</span> <span class="tag-est">발표 예정</span></div><div class="mt">청와대 국민보고회. 동일 6/29 알파벳 다우지수 편입(GOOGL 미보유·관찰)·에어로바이런먼트(AVAV) 실적. <b>L3 메모리·L4 소부장·L8 전력 동시 리드스루</b> — 발표=내러티브 이벤트(SIGNAL_LOG 후보), <b>확정 금액·집행 일정 전까지 judgment/earnings 숫자 무변</b>. L4(471990) severely underweight(2% vs 7~9%) 맥락에서 소부장 capex 시그널은 회전 근거 입력.</div></div></div>
   <div class="cal-row"><div class="date-chip">06.30</div><div class="cat-dot" style="background:var(--cat-event)"></div><div class="cal-body"><div class="ti">SK 호남 반도체 클러스터 조성 계획 <span class="tk">000660</span> <span class="tag-est">발표 예정</span></div><div class="mt">동일 6/30 JOLTS 구인건수·CB 소비자기대지수(거시)·나이키·콘스텔레이션 실적. L4 후공정·소부장 수요 리드스루 — 발표=내러티브, 채점·숫자 무관.</div></div></div>
   <div class="cal-row key"><div class="date-chip">06.25</div><div class="cat-dot" style="background:var(--cat-infl)"></div><div class="cal-body"><div class="ti">美 PCE (5월분) <span class="mbadge" style="background:#e0313122;color:#e03131">결과·핫</span></div><div class="mt"><b>헤드라인 +4.1%·근원 +3.4% YoY</b>(2023.4 이후 최고·4개월 연속 가속). 이란전發 유가+관세 전가. 시장 9월 인상 프라이싱 유지 → higher-for-longer 강화. 매크로 게이트는 자동(나스닥 −4.7%·VIX 17.7·F&amp;G 27)이라 직접 점등 아님(드로다운 트립 확률↑) — 게이트 0/3 잠금=신규매수 금지 불변. SIGNAL_LOG 1건.</div></div></div>
@@ -1284,7 +1292,7 @@ header::after{
 
   <div class="cal-month">8월</div>
   <div class="cal-row"><div class="date-chip">08.07</div><div class="cat-dot" style="background:var(--cat-macro)"></div><div class="cal-body"><div class="ti">美 고용보고서 (실업률·NFP) · 7월분 <span class="mbadge" style="background:#1c7ed622;color:#1c7ed6">★ 노동 게이트</span> <span class="tag-est">첫째 금요일 21:30 KST</span></div><div class="mt">매월 첫째 금요일 정규 발표(8/1 토 → 8/7 금). 컨센은 발표 임박 확정. 9/16~17 FOMC 노동 축 입력 — 둔화 가속 시 매크로 게이트 완화 후보, 재가속 시 인하 차단 강화.</div></div></div>
-  <div class="cal-row key"><div class="date-chip">08.26</div><div class="cat-dot" style="background:var(--cat-event)"></div><div class="cal-body"><div class="ti">엔비디아 <span class="tk">NVDA · AMC</span> <span class="mbadge" style="background:#e8590c22;color:#e8590c">스택 정점·확정</span></div><div class="mt">3Q26(7월 분기) 확정 실적. 블랙웰·루빈 램프 + 데이터센터 네트워킹 γ 재확인 = 강물①·S1의 원천. 전 보유 레이어(L2·L3·L6·L7) 수요 가시성을 한 번에 갱신하는 분기 최대 게이트.</div></div></div>
+  <div class="cal-row key"><div class="date-chip">08.26</div><div class="cat-dot" style="background:var(--cat-event)"></div><div class="cal-body"><div class="ti">엔비디아 <span class="tk">NVDA · AMC</span> <span class="mbadge" style="background:#e8590c22;color:#e8590c">스택 정점·확정</span></div><div class="mt">FY27 Q2(7월 분기) 확정 실적. 블랙웰·루빈 램프 + 데이터센터 네트워킹 γ 재확인 = 강물①·S1의 원천. 전 보유 레이어(L2·L3·L6·L7) 수요 가시성을 한 번에 갱신하는 분기 최대 게이트.</div></div></div>
   <div class="cal-row"><div class="date-chip">~08.05</div><div class="cat-dot" style="background:var(--cat-earn)"></div><div class="cal-body"><div class="ti">블룸에너지 <span class="tk">BE</span> <span class="tag-est">추정</span></div><div class="mt">L8 발전 · 과열·추격금지·첫 눌림 대기.</div></div></div>
   <div class="cal-row"><div class="date-chip">08.27</div><div class="cat-dot" style="background:var(--cat-macro)"></div><div class="cal-body"><div class="ti">한국 금통위 (통화정책방향) <span class="tag-est">BOK 확정</span></div></div></div>
   <div class="cal-row"><div class="date-chip">~08.12</div><div class="cat-dot" style="background:var(--cat-earn)"></div><div class="cal-body"><div class="ti">루멘텀 <span class="tk">LITE</span> <span class="tag-est">추정</span></div><div class="mt">L6 광 · 트림 앰버(임원 내부자 매도).</div></div></div>
@@ -1330,9 +1338,9 @@ header::after{
       <p><b>트리거 ▸</b> DRAM/NAND 고정가 <b>데드크로스</b>(현물&lt;계약)·삼성/SK 범용 가이드 하향 코멘트 → MU 트림게이트 γ③ 점등 감시. narrative≠numbers — 롤오버 수치만 트리거.</p>
     </div>
     <div class="watch-card" data-h="중기" style="--c:#b8860b">
-      <h4>MU 3Q26 ~9/22 <span class="st" style="background:#b8860b">하드 γ 재채점</span></h4>
-      <p>6/24 블로아웃(Rev $41.46B·EPS $25.11·GM 84.9%·3Q26 $50B 가이드) 이후 <b>차기 확정 3트리거 재판정일</b>. 현 γ open·목표가 상향($1,410→$1,486)·현가 $975(-52% 하회).</p>
-      <p><b>트리거 ▸</b> <b>D-7 IR 확정 필수</b>. 질문지: 범용 D램 가격·中 공급 정상화 시점·4Q26 가이드 지평. 재채점 전까지 L3 트림 보류 유지.</p>
+      <h4>MU FQ4 ~9/22 <span class="st" style="background:#b8860b">하드 γ 재채점</span></h4>
+      <p>6/24 블로아웃(Rev $41.46B·EPS $25.11·GM 84.9%·FQ4 $50B 가이드) 이후 <b>차기 확정 3트리거 재판정일</b>. 현 γ open·목표가 상향($1,410→$1,486)·현가 $975(-52% 하회).</p>
+      <p><b>트리거 ▸</b> <b>D-7 IR 확정 필수</b>. 질문지: 범용 D램 가격·中 공급 정상화 시점·FQ1 가이드 지평. 재채점 전까지 L3 트림 보류 유지.</p>
       <div class="shelf"><div class="shelf-lab"><span>차기 실적</span><span>~9/22 (D-80)</span></div><div class="shelf-bar"><div class="shelf-fill" style="width:22%;background:#b8860b"></div></div></div>
     </div>
     <div class="watch-card" data-h="중기" style="--c:#b8860b">
@@ -1372,7 +1380,7 @@ header::after{
 
   <div class="foot">
     <b>표기:</b> 굵은 행(key)=확정·고임팩트 게이트. 점선 태그=IR/기관 미확정 추정(경과 시 갱신). 카테고리 색은 사이트 stage hue set 재사용.<br>
-    <b>출처:</b> Federal Reserve(FOMC) · ECB(통화정책회의) · Bank of Japan(BOJ 금정위) · BLS/BEA(CPI·PCE) · 한국은행(금통위) · CNBC/Reuters/WaPo(SpaceX·이란) · Congress.gov/House of Commons Library(이란) · NVIDIA IR(NVDA 8/26 확정·Computex)·Meta IR(META 7/29 PT)·Amazon IR(AMZN 7/30 PT)·Apple IR(AAPL 2Q26 7/30 PT)·Broadcom IR(AVGO 6/3 AMC)·Nasdaq(SPCX 7/7 편입 6/26 확정)·earnings.json. 기준일 2026-06-28.
+    <b>출처:</b> Federal Reserve(FOMC) · ECB(통화정책회의) · Bank of Japan(BOJ 금정위) · BLS/BEA(CPI·PCE) · 한국은행(금통위) · CNBC/Reuters/WaPo(SpaceX·이란) · Congress.gov/House of Commons Library(이란) · NVIDIA IR(NVDA 8/26 확정·Computex)·Meta IR(META 7/29 PT)·Amazon IR(AMZN 7/30 PT)·Apple IR(AAPL FY26 Q3 7/30 PT)·Broadcom IR(AVGO 6/3 AMC)·Nasdaq(SPCX 7/7 편입 6/26 확정)·earnings.json. 기준일 2026-06-28.
   </div>
 </section>
 
@@ -2657,7 +2665,7 @@ const RIVER_CHAINS={
   '엣지':[
    {n:'엣지 추론 실리콘',why:'피지컬 AI의 두뇌 = 온디바이스 저지연·저전력 칩',cos:[['QCOM','가속'],['온디바이스 NPU(범주)','가속']],stage:'가속',cand:'qcom'}],
   '액추':[
-   {n:'정밀 감속기·하모닉',why:'1대당 관절 다수 = 비선형 부품 수요(현재 전선). Harmonic Drive ~¥7,800·52주 ¥2,316~¥8,400(저점比 +237%)·P/E 457·평균목표가 −30% = 밸류 부담, 단 2026.4~2027.3 가이던스 +14%·수주 4년 최고·흑자 전환 = 펀더 동반(순수 내러티브 아닌 가속). Nabtesco·THK는 상승세 초입',cos:[['Harmonic Drive 6324·~¥7.8k·ATH권·P/E 457','가속'],['Nabtesco 6268·~¥5.5k','초입'],['THK 6481·~¥7.6k','초입']],stage:'초입'},
+   {n:'정밀 감속기·하모닉',why:'1대당 관절 다수 = 비선형 부품 수요(현재 전선). Harmonic Drive ~¥7,800·52주 ¥2,316~¥8,400(저점比 +237%)·P/E 457·평균목표가 −30% = 밸류 부담, 단 FY26 가이던스 +14%·수주 4년 최고·흑자 전환 = 펀더 동반(순수 내러티브 아닌 가속). Nabtesco·THK는 상승세 초입',cos:[['Harmonic Drive 6324·~¥7.8k·ATH권·P/E 457','가속'],['Nabtesco 6268·~¥5.5k','초입'],['THK 6481·~¥7.6k','초입']],stage:'초입'},
    {n:'모터·볼스크류·센서',why:'액추에이터 = 모터+감속기+센서 결합',cos:[['Nidec 6594','초입'],['Regal Rexnord RRX','초입']],stage:'초입'},
    {n:'한국 감속기',why:'국내 휴머노이드 부품 노출. K-휴머노이드(현대차 아틀라스 CES 2026 시연·로보티즈·ACE K휴머노이드 ETF) 테마로 급등 선반영 — 에스피지 5Y +871% 과열, 에스비비테크 양산 전 태동. 양산 EPS 부재로 순수 내러티브(추격 금지)',cos:[['에스피지 058610·5Y +871%','과열'],['에스비비테크 389500·양산 전','태동']],stage:'태동'}],
   '통합':[
@@ -2760,7 +2768,7 @@ function rvPx(label){if(!label)return null;
    예: 온사이트 발전(Bloom)은 '생산' 자산이므로 L8 단독 귀속. L7은 trigger 화살표로만 L8을 가리킨다. */
 const CASCADES=[
  {key:'cpu',driver:'호스트 CPU',layer:'L2',stage:'성숙',
-  trigger:'Agentic AI → 지속적 에이전트 워크로드 → 서버 CPU 코어수·수요 폭증. 인퍼런스 비중↑로 CPU:GPU 비율이 균형으로 회귀. ★ NVDA 2Q26(5/20): Vera 단독 CPU $20B 가시성·$200B TAM — 1차주가 CPU를 공식 매출축으로 인정.',
+  trigger:'Agentic AI → 지속적 에이전트 워크로드 → 서버 CPU 코어수·수요 폭증. 인퍼런스 비중↑로 CPU:GPU 비율이 균형으로 회귀. ★ NVDA Q1 FY27(5/20): Vera 단독 CPU $20B 가시성·$200B TAM — 1차주가 CPU를 공식 매출축으로 인정.',
   primary:{label:'1차주 (선반영 · 가이던스 포화)',ex:'Arm · AMD EPYC Venice(256코어) · Intel Clearwater Forest(288 E코어) · NVIDIA Vera(신규) · 하이퍼스케일러 커스텀'},
   nodes:[
    {n:'메모리 인터페이스칩',why:'12채널 DDR5 + MRDIMM 전환',mult:'RCD 1개 → MRCD 1 + MDB 10 (모듈당 칩 ×수배)',cos:[['Rambus','가속'],['Montage','가속'],['Renesas','성숙']],stage:'가속',cand:'rmbs'},
@@ -2770,7 +2778,7 @@ const CASCADES=[
    {n:'CXL 메모리 풀링',why:'메모리 용량·대역폭 확장',mult:'침투 초기(서버 1%)',cos:[['Astera','가속'],['Montage','가속']],stage:'가속',cand:'alab'},
   ]},
  {key:'gpu',driver:'AI 가속기(GPU/ASIC)',layer:'L2',stage:'성숙',
-  trigger:'학습·추론 가속기 출하 폭증 → 동반 부품 동시 병목. ★ NVDA 2Q26(5/20): Vera Rubin 풀사이클 공급 제약 — CFO "제약은 수요가 아니라 모든 시스템 부품의 양산 타임라인". 다음 병목=components 직접 확인. ★ NVDA, Groq LPU $20B 라이선스+acquihire(\'25.12)로 SRAM 추론 위협 내재화 → 훈련·추론·스토리지 풀스택 장악(FTC·상원 심사 오버행).',
+  trigger:'학습·추론 가속기 출하 폭증 → 동반 부품 동시 병목. ★ NVDA Q1 FY27(5/20): Vera Rubin 풀사이클 공급 제약 — CFO "제약은 수요가 아니라 모든 시스템 부품의 양산 타임라인". 다음 병목=components 직접 확인. ★ NVDA, Groq LPU $20B 라이선스+acquihire(\'25.12)로 SRAM 추론 위협 내재화 → 훈련·추론·스토리지 풀스택 장악(FTC·상원 심사 오버행).',
   primary:{label:'1차주 (선반영)',ex:'NVDA(Blackwell/Vera Rubin) · AVGO · AMD · 커스텀 ASIC(MRVL<span class="heldstar">★</span>)'},
   nodes:[
    {n:'HBM',why:'가속기당 HBM 스택 수·단수↑',mult:'HBM3E → HBM4 용량·단수↑',cos:[['SK하이닉스','성숙'],['삼성','성숙',1],['마이크론','성숙',1]],stage:'성숙',cand:'mu'},
@@ -2788,7 +2796,7 @@ const CASCADES=[
    {n:'메모리 테스트',why:'고단 HBM·MRDIMM 검사 난도↑ + 다이레벨(큐브프로버) 검사 표준화',mult:'번인·모듈·다이레벨 테스터↑',cos:[['테크윙','초입',],['ISC','가속'],['Teradyne','가속']],stage:'가속',cand:'twng'},
   ]},
  {key:'optical',driver:'광 연결(Optical)',layer:'L6',stage:'가속',
-  trigger:'AI 인터커넥트 요구가 pluggable 한계 초과 → CPO·scale-up 광 전환. ★ NVDA 2Q26(5/20): 데이터센터 네트워킹 $14.8B·+199% YoY(컴퓨트 +92%보다 빠름) — "networking이 컴퓨트보다 늦게 반영(γ)" 가설 강력 확인.',
+  trigger:'AI 인터커넥트 요구가 pluggable 한계 초과 → CPO·scale-up 광 전환. ★ NVDA Q1 FY27(5/20): 데이터센터 네트워킹 $14.8B·+199% YoY(컴퓨트 +92%보다 빠름) — "networking이 컴퓨트보다 늦게 반영(γ)" 가설 강력 확인.',
   primary:{label:'1차주',ex:'AVGO · MRVL<span class="heldstar">★</span> · Lumentum<span class="heldstar">★</span> · Coherent'},
   nodes:[
    {n:'EML / 외장 레이저(ELS)',why:'CPO는 외장 레이저 광원 필요',mult:'레이저 채널 수↑',cos:[['Coherent','가속'],['Lumentum','성숙',1]],stage:'가속',cand:'cohr'},
@@ -2802,7 +2810,7 @@ const CASCADES=[
   nodes:[
    {n:'변압기 · 송전 인터커넥트',why:'HV 변압기 리드타임 3~5년',mult:'grid 병목 = 다음 전선 · 통로 식별됨(대부분 가속~과열) · 미반영 잔량 잔존',cos:'GE Vernova·Quanta·Eaton (글로벌·SOL 內) / 효성·LS일렉 (한국·가속·KODEX)',stage:'초입',cand:null},
    {n:'액체냉각',why:'50kW+ 랙 표준화',mult:'D2C → immersion 단계',cos:[['Vertiv','성숙',1],['SMCI','가속']],stage:'가속',cand:'vrt'},
-   {n:'800V HVDC 변환(SiC/GaN)',why:'13.8kV→800V 솔리드스테이트 변압 · VPD 상류 변환단',mult:'NVIDIA 800V 전환 = AC/DC·DC/DC 단계 제거 · VPD보다 초입(실램프 Rubin Ultra/Kyber 2027+)',cos:'검증완료(26.6.1) 전 종목 52주 고점권 — NVTS 과열(1Y+994%·EPS음수·포물선) / IFX·STM 과열(신고가·단 EPS상향 동반) / ROHM 과열(가격>컨센목표 +73%·2025.4~2026.3 SiC감손 적자) / TI 분산 · 안-과열 공개 비히클 부재 → L4 CoWoS와 동일 cand:null',stage:'초입',cand:null},
+   {n:'800V HVDC 변환(SiC/GaN)',why:'13.8kV→800V 솔리드스테이트 변압 · VPD 상류 변환단',mult:'NVIDIA 800V 전환 = AC/DC·DC/DC 단계 제거 · VPD보다 초입(실램프 Rubin Ultra/Kyber 2027+)',cos:'검증완료(26.6.1) 전 종목 52주 고점권 — NVTS 과열(1Y+994%·EPS음수·포물선) / IFX·STM 과열(신고가·단 EPS상향 동반) / ROHM 과열(가격>컨센목표 +73%·FY25 SiC감손 적자) / TI 분산 · 안-과열 공개 비히클 부재 → L4 CoWoS와 동일 cand:null',stage:'초입',cand:null},
    {n:'전력 반도체(VPD)',why:'고전류 변환 효율 "라스트 인치"',mult:'전류밀도↑ · 합의 도달',cos:[['Vicor','과열'],['MPS','성숙']],stage:'성숙',cand:'vicr'},
   ]},
  {key:'grid',driver:'발전·그리드(L8)',layer:'L8',stage:'초입',
@@ -3024,7 +3032,7 @@ const C=[
  {id:'oklo',name:'SMR plays (Oklo 등)',ticker:'OKLO',mkt:'NYSE',layer:'L8',stage:'과열',mat:.9,conv:.45,
   sub:'소형모듈원전 → 온사이트 발전 → 2028+ 상용',compete:'SMR 초기·미상용',up:{l:'—',d:'—'},down:{l:'L7',d:'강'},
   capex:{bull:'데이터센터 SMR 발주',base:'시범 프로젝트',bear:'인허가 지연·미상용'},
-  thesis:'SMR 테마(데이터센터 PPA·2027~28 상용)는 유효하나 매출 0인데 저점比 ~36x($5.35→$193.84) 폭등 후 고점比 −65%($67) 조정 — CY28 매출 추정比 ~326x·컨센 목표가 하향·CEO 매도. 테마 성숙도(태동)와 가격 반영도(과열)가 분리된 케이스 → 초입/태동 라벨은 테마축 한정이고 가격축은 과열, 진입가 아님. 7/4 파일럿로·NRC 상업라이선스가 진짜 게이트.',kill:['인허가 지연','초기 프로젝트 좌초','자금조달 경색'],S:{s1:1,s2:0,s3:1,s4:0,s5:0}},
+  thesis:'SMR 테마(데이터센터 PPA·2027~28 상용)는 유효하나 매출 0인데 저점比 ~36x($5.35→$193.84) 폭등 후 고점比 −65%($67) 조정 — FY28 매출 추정比 ~326x·컨센 목표가 하향·CEO 매도. 테마 성숙도(태동)와 가격 반영도(과열)가 분리된 케이스 → 초입/태동 라벨은 테마축 한정이고 가격축은 과열, 진입가 아님. 7/4 파일럿로·NRC 상업라이선스가 진짜 게이트.',kill:['인허가 지연','초기 프로젝트 좌초','자금조달 경색'],S:{s1:1,s2:0,s3:1,s4:0,s5:0}},
  {id:'qcom',name:'Qualcomm',ticker:'QCOM',mkt:'NASDAQ',layer:'L2',stage:'성숙',mat:.56,conv:.6,
   sub:'모바일 AP → 자동차·엣지AI mix shift → 데이터센터 진입 타진',compete:'엣지·오토모티브 전환',up:{l:'L4',d:'중'},down:{l:'L5',d:'약'},
   capex:{bull:'엣지 추론·오토 mix shift',base:'모바일 안정+오토 성장',bear:'모바일 의존·DC 진입 실패'},
@@ -3525,7 +3533,7 @@ window.MARKET=(function(){
  // 기간 선택(지표·보유 종목 공통) — 거래일 근사: 1M≈21 · 6M≈126 · 1Y≈252 · 3Y≈756 · 5Y≈1260.
  // charts.json 은 fetch-prices.mjs 가 ~5년 일봉(range=5y)으로 채운다 → 3Y·5Y 버튼까지 실데이터. 확보분이 창보다 짧은 시리즈만 자동 클램프.
  var RANGES=[{k:'1M',days:21,ko:'1개월'},{k:'6M',days:126,ko:'6개월'},{k:'1Y',days:252,ko:'1년'},{k:'3Y',days:756,ko:'3년'},{k:'5Y',days:1260,ko:'5년'}];
- var RG=RANGES[1];   // 01 시장 모니터링 기본 6개월
+ var RG=RANGES[2];   // 기본 1년
  function slice6(a){return a.slice(-RG.days);}
  function pct(v){return (!v||v.length<2)?0:(v[v.length-1]/v[0]-1)*100;}
  function pctDoD(v){return (!v||v.length<2)?null:(v[v.length-1]/v[v.length-2]-1)*100;}
@@ -3996,7 +4004,7 @@ var HIDDEN_KEY='am_topic_radar_hidden_v1',hiddenTopics=[];
  function iSC(CH,AVG){document.querySelectorAll('canvas.stk-cv').forEach(function(cv){if(cv._i)return;cv._i=1;
   var s=CH[cv.getAttribute('data-ck')];if(!s||!s.c){cv.parentElement.style.display='none';return;}
   var av=(AVG||{})[cv.getAttribute('data-ck')];if(!(av!=null&&isFinite(av)))av=null;   // 보유 종목만 평단선
-  var st={sp:Math.min(126,s.c.length),hv:-1};
+  var st={sp:Math.min(252,s.c.length),hv:-1};
   function fdD(x){if(x==null)return null;var n=Number(x);var d=isFinite(n)?new Date(n*(n<1e6?86400000:n<1e12?1000:1)):new Date(x);return isNaN(d)?null:d;}
   // yr=true면 연도까지(YY-MM-DD) — 창이 여러 해에 걸치면 시작·끝이 몇 해 차인지 드러나야 함. false면 종전대로 MM-DD.
   function fd(x,yr){var d=fdD(x);if(!d){var s=String(x==null?'':x);return yr?s.slice(0,10):s.slice(5,10);}var p=function(n){return String(n).padStart(2,'0');};var md=p(d.getUTCMonth()+1)+'-'+p(d.getUTCDate());return yr?(String(d.getUTCFullYear()).slice(2)+'-'+md):md;}
@@ -4474,7 +4482,7 @@ let SIGNAL_LOG=[
    {tag:'테일리스크 등록',layer:'L4',col:'#7048e8',html:'<b>CoWoP</b> — NVDA가 인터포저를 PCB에 직접 올려 ABF를 우회하는 방식 테스트 중, 26년 말 Grace Rubin 150 검증 시 ABF 생태계 재편 가능. 삼성전기(ABF)·일부 본딩 노드 kill 신호로 등록.'},
   ]},
  {date:'2026-06-01', at:'2026-06-01T15:00+09:00', source:'L6 포지셔닝 — APH는 LITE 대체 아닌 L6 내부 분산·저베타 보완재 (비중·타이밍 판단)',
-  srcs:[{label:'Amphenol 1Q26: record orders +78%·B2B 1.24·IT datacom 41%·2Q 가이던스 상향 (TIKR·Yahoo Finance)'},{label:'Lumentum: NVIDIA $2B 전략투자·Q3 +90%·Q4 가이던스 상향 (StocksToTrade 2026-05)'},{label:'APH 베타1.39·NYSE/S&P500·NASDAQ100 미편입 (TradingView·Finbox)'}],
+  srcs:[{label:'Amphenol Q1 FY26: record orders +78%·B2B 1.24·IT datacom 41%·Q2 가이던스 상향 (TIKR·Yahoo Finance)'},{label:'Lumentum: NVIDIA $2B 전략투자·Q3 +90%·Q4 가이던스 상향 (StocksToTrade 2026-05)'},{label:'APH 베타1.39·NYSE/S&P500·NASDAQ100 미편입 (TradingView·Finbox)'}],
   items:[
    {tag:'L6 구조 진단',layer:'L6',col:'#b8860b',html:'<b>L6(연결) 109.5M = 총자산 11.3%가 100% 광 순수 베팅</b>(LITE 64.1M + KODEX 광통신 45.4M). copper scale-up·전력 인터커넥트·분산 노출 0 + LITE 베타>2.0 + 단일종목 집중 → L6가 매크로 충격에 가장 취약한 구성. 상대가치 결론: 신규자본 아니라 <b>내부 구성 회전</b>.'},
    {tag:'LITE 트림',layer:'L6',col:'#e03131',html:'<b>LITE = 성숙·γ 대부분 소진</b>(NVIDIA $2B·Q3 +90%로 펀더는 폭발이나 ~$975 포물선·가격이 낙관 추정 추월) → 강등규칙 충족. 베타>2.0(5분할군) → 트림 재원을 APH로 회전 = 애크먼 GOOGL→MSFT를 L6 바스켓 내부에 적용(유한자본·상대가치). judgment.json LITE wk −1 유지+회전 근거 보강.'},
@@ -4485,7 +4493,7 @@ let SIGNAL_LOG=[
   srcs:[{label:'barchart·Power Electronics News·CoinCentral·TrendForce(2026-05-27~31)'},{label:'ROHM 6963.T: Investing·Morningstar 시세 + 9-analyst 컨센서스(2026-05-28)'}],
   items:[
    {tag:'검증·과열',layer:'L7',col:'#e03131',html:'<b>800V HVDC 변환단 명명 5종목 전부 52주 고점권 = 안-과열 공개 비히클 부재.</b> NVTS 1년 +994%·EPS 음수·포물선(<b>S5=0</b>) → 강등규칙상 따라잡을 추정치 자체가 부재 = 순수 내러티브(추격경고). IFX·STM은 신고가권이나 반복 가격인상·구조적 수요이동으로 EPS 상향 동반 = 내러티브 아니나 차트 과열 플래그. <b>노드 자체는 기술 초입 유지(cand:null)</b> — L4 CoWoS와 동일 구조적 공백.'},
-   {tag:'ROHM 판정',layer:'L7',col:'#e03131',html:'<b>ROHM(6963.T) "펀더 훼손형 저점" 가설 기각.</b> 현재가 ¥5,078 = 52주 고점(¥5,288) −4%·저점比 +232% → <b>저점 아님</b>. 평균 목표가 ¥2,944를 <b>+73% 상회</b>(최고 목표가 ¥3,900도 상회)·2025.4~2026.3 순손실 ¥1,584억(SiC 감손·BEV 둔화·중국 경쟁). 펀더 훼손 + 주가만 신고가 = <b>미반영 γ 아님(가격이 추정을 추월)</b> → 5종목 중 가격-추정 괴리 최대 과열. 초입 아님.'},
+   {tag:'ROHM 판정',layer:'L7',col:'#e03131',html:'<b>ROHM(6963.T) "펀더 훼손형 저점" 가설 기각.</b> 현재가 ¥5,078 = 52주 고점(¥5,288) −4%·저점比 +232% → <b>저점 아님</b>. 평균 목표가 ¥2,944를 <b>+73% 상회</b>(최고 목표가 ¥3,900도 상회)·FY25 순손실 ¥1,584억(SiC 감손·BEV 둔화·중국 경쟁). 펀더 훼손 + 주가만 신고가 = <b>미반영 γ 아님(가격이 추정을 추월)</b> → 5종목 중 가격-추정 괴리 최대 과열. 초입 아님.'},
    {tag:'상대가치',layer:null,col:'#b8860b',html:'노드(기술)는 진짜 초입(실양산 램프 Rubin Ultra/Kyber 2027+)이나 <b>종목 진입점은 전무</b>. NVTS만 needle-moving pure-play지만 포물선·첫 눌림 전. 자본 규율 결론 유지: 다음 한 단위는 <b>L4 패키징·L8 grid</b> 또는 NVTS <b>첫 눌림/베이스 재형성</b> 후 — 현 고점권 추격 금지(기술 신호만으론 부족, AND 게이트 선결).'},
   ]},
  {date:'2026-05-31', at:'2026-05-31T20:00+09:00', source:'전력 반도체(VPD) 차트 위치 검증 — 단계 라벨 재평가 (theme-maturity lag 정리)',
@@ -4508,7 +4516,7 @@ let SIGNAL_LOG=[
    {tag:'과열 동기화',layer:'L4',col:'#e03131',html:'<b>FC-BGA 고사양 기판(삼성전기·대덕·Ibiden)</b> 노드를 <b>초입→과열</b>. 5/22 WATCH에서 삼성전기 과열·대덕 성숙으로 이미 강등됐으나 cascade 노드만 방치됐던 침묵 오류 정리. Ibiden 1Y +115%·5월 ATH·평균목표가 +36% 상회로 확인.'},
    {tag:'유지·관찰',layer:null,col:'#b8860b',html:'VPD(Vicor·MPS)·테스트번인소켓(ISC·리노·FormFactor)·CXL(Astera)은 <b>가속 유지</b>. 단 MPS·ISC·FORM은 ATH 부근·내부자매도 = <b>가속 후반</b> → 다음 분기 5신호 재점검 1순위. 리노공업만 상대 저평가(AI 직노출 약·모바일/의료 비중).'},
   ]},
- {date:'2026-05-20', at:'2026-05-20T22:00+09:00', source:'NVIDIA 2Q26 실적·컨콜',
+ {date:'2026-05-20', at:'2026-05-20T22:00+09:00', source:'NVIDIA Q1 FY27 실적·컨콜',
   srcs:[
    {label:'NVIDIA IR(8-K)', url:'https://www.sec.gov/Archives/edgar/data/0001045810/000104581026000051/q1fy27pr.htm'},
    {label:'컨콜 전사', url:'https://www.fool.com/earnings/call-transcripts/2026/05/20/nvidia-nvda-q1-2027-earnings-transcript/'}
@@ -4633,12 +4641,12 @@ let SIGNAL_LOG=[
   srcs:[
    {label:'TSLA·MBLY·LAZR·OUST·Harmonic 6324·Nabtesco·THK·Nidec 시세(Investing/Yahoo/Morningstar 2026-05-29~06-01)'},
    {label:'MBLY Q1: 매출 +27% YoY·EPS +50%·2026 가이던스 상향'},
-   {label:'Harmonic Drive 6324: 2026.4~2027.3 가이던스 +14%·수주 4년 최고·P/E 457·평균목표가 −30%'},
+   {label:'Harmonic Drive 6324: FY26 가이던스 +14%·수주 4년 최고·P/E 457·평균목표가 −30%'},
    {label:'K-휴머노이드: 현대차 아틀라스 CES 2026·로보티즈·ACE K휴머노이드 ETF'}
   ],
   items:[
    {tag:'FSD·상대가치',layer:null,col:'#0ca678',html:'<b>강물4 상장 종목 중 진짜 공포눌림 초입 = MBLY.</b> ~$10·52주 저점권($8.3~$22.5)·1Y −38%인데 Q1 매출 +27%·EPS +50%·2026 가이던스 상향 = <b>가격은 눌리고 추정은 올라가는 beat&raise</b>(미반영 γ 열림). 반면 TSLA ~$430·52주 고점권·로보택시(텍사스 무인 승인) = 추격 쪽. 같은 AV축에서 비싼 쪽(TSLA)↔눌린 쪽(MBLY) 분리 명확. 단 MBLY 본격 인플렉션은 28년+ 로보택시 — 관찰.'},
-   {tag:'액추·가속캡션',layer:null,col:'#b8860b',html:'<b>휴머노이드 액추에이터 = 현재 전선이나 상장 노출주는 선반영 진행.</b> Harmonic Drive(6324) ~¥7,800·저점比 +237%·52주 고점권·P/E 457·평균목표가 −30%로 밸류 극단이나, 2026.4~2027.3 가이던스 +14%·수주 4년 최고·흑자전환 = 순수 내러티브 아닌 <b>펀더 동반 가속</b>(과열 강등 보류, 단 추격가 아님). Nabtesco·THK·Nidec 상승세 초입 유지.'},
+   {tag:'액추·가속캡션',layer:null,col:'#b8860b',html:'<b>휴머노이드 액추에이터 = 현재 전선이나 상장 노출주는 선반영 진행.</b> Harmonic Drive(6324) ~¥7,800·저점比 +237%·52주 고점권·P/E 457·평균목표가 −30%로 밸류 극단이나, FY26 가이던스 +14%·수주 4년 최고·흑자전환 = 순수 내러티브 아닌 <b>펀더 동반 가속</b>(과열 강등 보류, 단 추격가 아님). Nabtesco·THK·Nidec 상승세 초입 유지.'},
    {tag:'라이다·리스크',layer:null,col:'#e03131',html:'<b>센서 노드는 진입 부적 — 재무 취약.</b> LAZR 시총 ~$0.14B로 사실상 붕괴(감자·적자), OUST ~$21·52주 $6.3~$41.7 고변동·흑자 28년+. 같은 센서 노출이면 펀더·밸류 우위인 MBLY가 합리. 센서 BOM 테제는 유효하나 깨끗한 비히클 부재(L4 CoWoS·강물3 사모신용과 같은 공백 구조).'},
    {tag:'한국·과열',layer:null,col:'#e03131',html:'<b>K-휴머노이드 테마 급등 선반영 — 추격 금지.</b> 현대차 아틀라스 CES 2026 시연·로보티즈·ACE K휴머노이드 ETF로 부품주 일제 급등. 에스피지 5Y +871% 과열·에스비비테크 양산 전 태동 = <b>양산 EPS 부재 + 주가만 폭등</b>으로 강등규칙상 따라잡을 추정치 부재(순수 내러티브). 5/31 LG이노텍·삼현 과열 판정과 동일 결.'},
    {tag:'결론·상대가치',layer:null,col:'#b8860b',html:'<b>강물4 결론 — 단계 대량 이동 없음(산업 FANUC·키엔스·ABB·ROK 성숙 / 통합 Optimus·Figure 태동 불변), 변화는 “성격”.</b> 추격 쪽=TSLA·Harmonic Drive·에스피지(고점·과열), 눌린 쪽=MBLY(저점 beat&raise). 자본 규율: 강물4에서 한 단위 진입한다면 추격 아닌 <b>MBLY 공포눌림</b>이 후보지만, 보유 0%·양산 전·매크로 게이트 미충족·인플렉션 28년+ → <b>채점/숫자 갱신만, 신규 매수 아님.</b>'}
@@ -5892,7 +5900,7 @@ Promise.all([getJSON('alpha.json'),getJSON('earnings.json'),getJSON('judgment.js
 /* renderInstantAnswer — 02 궁금한 것 즉답 요약(답-먼저). gamma/holdings/TARGETS/signal_log 런타임 파생 */
 function renderInstantAnswer(){
  var host=document.getElementById('instantAnswer'); if(!host) return;
- var IA_CFG={front:'L4 패키징 · L6 광 · L8 발전',frontNote:'컴퓨트·메모리(L1–L3)는 가격 반영(성숙) — 병목은 앞단으로 이동',next:'MU 3Q26 실적 — D-7 IR 확정',updated:'2026-07-11'};
+ var IA_CFG={front:'L4 패키징 · L6 광 · L8 발전',frontNote:'컴퓨트·메모리(L1–L3)는 가격 반영(성숙) — 병목은 앞단으로 이동',next:'MU FQ4 실적 — D-7 IR 확정',updated:'2026-07-11'};
  var G=window.GAMMA||{};
  var ORDER=['초입','가속','성숙','과열'];
  var cnt={'초입':0,'가속':0,'성숙':0,'과열':0,'태동':0},open=[],spent=[];
@@ -6139,9 +6147,9 @@ function renderInstantAnswer(){
      폐기 사유: σ는 코드에 박힌 상수(라이브 아님), μ는 최근 3개월 수익률의 연율 외삽.
        → 과거를 미래로 위장해 표시하고 있었음. QQQ 행은 라이브 입력이 0인 상수였음.
      교체: 예측을 그만두고 관측을 표시한다. §2-4 강등 룰이 요구하는 것은
-       "가격 상승률 vs 향후 1년 EPS 추정 리비전 속도"이며, 이는 예측이 아니라 측정이다.
+       "가격 상승률 vs FY+1 EPS 추정 리비전 속도"이며, 이는 예측이 아니라 측정이다.
 
-   ★ 강등 게이트 = 가격 변화율 − 향후 1년 EPS 리비전율 (동기간, fetch-gamma.mjs 산출)
+   ★ 강등 게이트 = 가격 변화율 − EPS(FY+1) 리비전율 (동기간, fetch-gamma.mjs 산출)
        gate > 0 → 가격이 추정을 추월 = 성숙 강등 후보
        gate < 0 → 추정이 앞섬       = γ open 유지
    관측치 · 투자권유 아님. 값은 라이브(gamma·charts·signals) 구동. */
@@ -6249,7 +6257,7 @@ function renderInstantAnswer(){
           +'<div class="pe-p">여력 '+(e.pct!=null?(e.pct>0?'+':'')+e.pct+'%':'—')+'</div></td>'
         +'<td class="c">'+sgn(tp.c7)+'<div class="pe-p">30d '+ (tp.c30==null?'<span style="color:var(--faint)">축적중</span>':sgn(tp.c30)) +'</div></td>'
         +'<td class="c"><b>'+(f1&&f1.now!=null?f1.now:'—')+'</b>'
-          +'<div class="pe-p">'+(f1&&f1.end?String(f1.end).slice(0,4):'향후 1년')+'</div></td>'
+          +'<div class="pe-p">'+(f1&&f1.end?String(f1.end).slice(0,4):'FY+1')+'</div></td>'
         +'<td class="c"><b>'+sgn(f1?f1.c30:null)+'</b><div class="pe-p">90d '+sgn(f1?f1.c90:null)+'</div></td>'
         +'<td class="c">'+bd+'<div class="pe-p">애널 30d</div></td>'
         +'<td class="c">'+sgn(px.c30)+'<div class="pe-p">90d '+sgn(px.c90)+'</div></td>'
@@ -6259,7 +6267,7 @@ function renderInstantAnswer(){
 
     var asOf=GM.asOf?String(GM.asOf).slice(0,10):'—';
     var verdict = rows.length
-      ? '향후 1년 EPS 30일 리비전 <b style="color:var(--st-dawn)">상향 '+upN+'</b> · <b style="color:var(--st-hot)">하향 '+dnN+'</b>. '
+      ? 'EPS(FY+1) 30일 리비전 <b style="color:var(--st-dawn)">상향 '+upN+'</b> · <b style="color:var(--st-hot)">하향 '+dnN+'</b>. '
         +'강등 게이트 점등(가격이 추정 추월) <b style="color:'+(hotN?'var(--st-hot)':'var(--st-dawn)')+'">'+hotN+'/'+rows.length+'</b>.'
       : '';
     var pendMsg = pend
@@ -6272,14 +6280,14 @@ function renderInstantAnswer(){
         +'<th>종목</th>'
         +'<th class="c">목표가<br><span style="font-weight:400;color:var(--faint)">TP 평균</span></th>'
         +'<th class="c">TP 리비전<br><span style="font-weight:400;color:var(--faint)">7d · 30d</span></th>'
-        +'<th class="c">EPS<br><span style="font-weight:400;color:var(--faint)">향후 1년</span></th>'
+        +'<th class="c">EPS<br><span style="font-weight:400;color:var(--faint)">FY+1</span></th>'
         +'<th class="c">EPS 리비전<br><span style="font-weight:400;color:var(--faint)">30d · 90d</span></th>'
         +'<th class="c">상향/하향<br><span style="font-weight:400;color:var(--faint)">애널 수</span></th>'
         +'<th class="c">주가<br><span style="font-weight:400;color:var(--faint)">30d · 90d</span></th>'
         +'<th class="c">★ 강등 게이트<br><span style="font-weight:400;color:var(--faint)">주가−EPS, 30d</span></th>'
       +'</tr></thead><tbody>'+(body||'<tr><td colspan="8" style="color:var(--faint);padding:14px">리비전 수집 대기</td></tr>')+'</tbody></table></div>'
       +pendMsg
-      +'<div class="mp-note"><b>강등 게이트(§2-4)</b> = 30일 주가 변화율 − 30일 향후 1년 EPS 리비전율. '
+      +'<div class="mp-note"><b>강등 게이트(§2-4)</b> = 30일 주가 변화율 − 30일 EPS(FY+1) 리비전율. '
         +'<b style="color:var(--st-hot)">양수 = 가격이 추정을 추월</b>(성숙 강등 후보) · '
         +'<b style="color:var(--st-dawn)">음수 = 추정이 앞섬</b>(γ open 유지). '
         +'EPS 리비전은 Yahoo epsTrend(7/30/60/90일 전 값)를 그대로 읽는다. '
