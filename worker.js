@@ -1073,15 +1073,14 @@ async function handleInsight(request, env) {
 // 근거 불충분/이미 반영/모호하면 changed:false 로 아무것도 쓰지 않는다.
 async function handleSiteApply(request, env) {
   if (!env.GITHUB_TOKEN) return memoJson({ error: "GITHUB_TOKEN not configured" }, 503);
-  if (!env.ANTHROPIC_API_KEY) return memoJson({ error: "ANTHROPIC_API_KEY not configured" }, 503);
 
   let body;
   try { body = await request.json(); }
   catch { return memoJson({ error: "invalid json" }, 400); }
 
   const file = String((body && body.file) || "");
-  if (file !== "gates.json" && file !== "risk.json") {
-    return memoJson({ error: "invalid file — gates.json|risk.json only" }, 400);
+  if (file !== "gates.json" && file !== "risk.json" && file !== "signal_log.json") {
+    return memoJson({ error: "invalid file — gates.json|risk.json|signal_log.json only" }, 400);
   }
   const itemNo   = String((body && body.itemNo) || "");
   const itemName = String((body && body.itemName) || "");
@@ -1117,6 +1116,57 @@ async function handleSiteApply(request, env) {
   let doc;
   try { doc = JSON.parse(raw); }
   catch { return memoJson({ error: "current file invalid json" }, 500); }
+
+  // 시장 맥락은 수치 보드가 아니라 누적 로그다. Claude 판정을 거치지 않고
+  // 채택 관점·출처를 안전하게 append해 narrative≠numbers 규율을 지킨다.
+  if (file === "signal_log.json") {
+    const escHtml = (s) => String(s).replace(/[&<>"']/g, (ch) => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" })[ch]);
+    const now = new Date();
+    const today = now.toISOString().slice(0, 10);
+    const sourceDate = /^\d{4}-\d{2}-\d{2}$/.test(String(src.date || "")) ? String(src.date) : today;
+    const route = String((body && body.route) || "signal_log");
+    const layer = /^L[1-8]$/.test(String((body && body.layer) || "")) ? String(body.layer) : null;
+    const tickers = Array.isArray(body && body.tickers) ? body.tickers.map(String).filter(Boolean).slice(0, 8) : [];
+    const tag = [layer, tickers.join("·"), "인사이트 반영"].filter(Boolean).join("·") || "시장 맥락·인사이트 반영";
+    const col = route === "macro" ? "#e8590c" : route === "calendar" ? "#1971c2" : "#868e96";
+    const claim = claimText.trim();
+    const duplicate = Array.isArray(doc.log) && doc.log.some((entry) =>
+      Array.isArray(entry.items) && entry.items.some((it) => String(it.html || "").includes(claim.slice(0, 80))));
+    if (duplicate) return memoJson({ ok: true, changed: false, reason: "동일 관점이 시장 맥락 로그에 이미 반영됨" }, 200);
+
+    const sourceBits = [src.title, src.publisher, src.date].filter(Boolean).join(" · ") || "02 인사이트 채택 관점";
+    const srcEntry = { label: sourceBits.slice(0, 300) };
+    if (/^https?:\/\//i.test(String(src.url || ""))) srcEntry.url = String(src.url);
+    const html = "<b>" + escHtml(claim) + "</b>" +
+      (why.trim() ? "<br>" + escHtml(why.trim()) : "") +
+      "<br><b>narrative≠numbers — 숫자·판단 파일 불변.</b>";
+    doc.log = Array.isArray(doc.log) ? doc.log : [];
+    doc.log.push({
+      date: sourceDate,
+      at: now.toISOString(),
+      source: sourceBits.slice(0, 500) + " — 02 인사이트 「사이트 반영」",
+      srcs: [srcEntry],
+      items: [{ tag, layer, col, html }],
+    });
+    doc.asOf = today;
+
+    const content = btoa(unescape(encodeURIComponent(JSON.stringify(doc, null, 2) + "\n")));
+    const put = await fetch(API, {
+      method: "PUT",
+      headers: { ...gh, "content-type": "application/json" },
+      body: JSON.stringify({
+        message: "site-apply: signal_log 시장 맥락 누적",
+        branch: BRANCH, content, sha,
+      }),
+    });
+    if (!put.ok) {
+      const t = await put.text();
+      return memoJson({ error: "github put failed", status: put.status, detail: t.slice(0, 300) }, 502);
+    }
+    return memoJson({ ok: true, changed: true, reason: "시장 맥락 로그에 누적 반영" }, 200);
+  }
+
+  if (!env.ANTHROPIC_API_KEY) return memoJson({ error: "ANTHROPIC_API_KEY not configured" }, 503);
 
   const items = doc.items || doc.axes || [];
   const item = items.find((it) =>
