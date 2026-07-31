@@ -98,6 +98,12 @@
 
   // ── CSS 주입 (첨부 UI 토큰 · 기존 .cl-* 무충돌 · csot- 네임스페이스)
   function injectCSS() {
+    if (document.getElementById("csotHistDeleteStyle")) return;
+    var style = document.createElement("style");
+    style.id = "csotHistDeleteStyle";
+    style.textContent = ".csot-hist-item{touch-action:pan-y;position:relative}.csot-hist-deletebtn{margin-left:6px;padding:4px 8px;border:1px solid #d8b6b0;background:transparent;color:#a4473b;border-radius:4px;cursor:pointer;font:inherit}.csot-hist-deletebtn:hover{background:#f8e9e6}";
+    document.head.appendChild(style);
+
     if (document.getElementById("csotStyle")) return;
     var s = document.createElement("style");
     s.id = "csotStyle";
@@ -200,11 +206,23 @@
       '<div class="csot-hist-topic">' + esc(topicText) + "</div>",
       '<div class="csot-hist-meta">' + tagHtml + "</div>",
       '<button type="button" class="csot-hist-playbtn" data-hist-idx="' + idx + '">▶ 음성 재생</button>',
+      '<button type="button" class="csot-hist-deletebtn" data-hist-idx="' + idx + '" aria-label="이 토론 삭제">삭제</button>',
       "</div>"
     ].join("");
   }
 
   // 이력 섹션 전체 렌더
+  function deleteHistoryEntry(idx) {
+    var arr = loadHistory();
+    if (idx < 0 || idx >= arr.length || !arr[idx]) return;
+    var topic = arr[idx].topic || arr[idx].diagnosis || "(주제 없음)";
+    if (!window.confirm("이 토론 이력을 삭제할까요?\\n\\n" + topic)) return;
+    arr.splice(idx, 1);
+    saveHistory(arr);
+    var histWrap = document.getElementById("csotHistSection");
+    if (histWrap) renderHistSection(histWrap);
+  }
+
   function renderHistSection(container) {
     var arr = loadHistory();
     if (!arr.length) {
@@ -215,7 +233,8 @@
     container.innerHTML = '<div class="csot-hist-wrap">' + items + "</div>";
     // 음성 재생 버튼 이벤트
     container.querySelectorAll(".csot-hist-playbtn").forEach(function (btn) {
-      btn.addEventListener("click", function () {
+      btn.addEventListener("click", function (e) {
+        e.stopPropagation();
         var idx = parseInt(btn.getAttribute("data-hist-idx"), 10);
         var arr2 = loadHistory();
         var entry = arr2[idx];
@@ -225,6 +244,35 @@
         if (window.COUNCIL && window.COUNCIL.playReport) {
           window.COUNCIL.playReport(d);
         }
+      });
+    });
+
+    container.querySelectorAll(".csot-hist-deletebtn").forEach(function (btn) {
+      btn.addEventListener("click", function (e) {
+        e.stopPropagation();
+        deleteHistoryEntry(parseInt(btn.getAttribute("data-hist-idx"), 10));
+      });
+    });
+
+    // 항목을 550ms 이상 길게 누르면 삭제 확인
+    container.querySelectorAll(".csot-hist-item").forEach(function (item) {
+      var timer = null, moved = false, startX = 0, startY = 0;
+      var clear = function () { if (timer) { clearTimeout(timer); timer = null; } };
+      item.addEventListener("pointerdown", function (e) {
+        if (e.target.closest("button")) return;
+        moved = false; startX = e.clientX; startY = e.clientY; clear();
+        timer = setTimeout(function () {
+          timer = null;
+          if (!moved) deleteHistoryEntry(parseInt(item.getAttribute("data-hist-idx"), 10));
+        }, 550);
+      });
+      item.addEventListener("pointermove", function (e) {
+        if (Math.abs(e.clientX - startX) > 10 || Math.abs(e.clientY - startY) > 10) {
+          moved = true; clear();
+        }
+      });
+      ["pointerup", "pointercancel", "pointerleave"].forEach(function (type) {
+        item.addEventListener(type, clear);
       });
     });
   }
