@@ -98,11 +98,12 @@
 
   // ── CSS 주입 (첨부 UI 토큰 · 기존 .cl-* 무충돌 · csot- 네임스페이스)
   function injectCSS() {
-    if (document.getElementById("csotHistDeleteStyle")) return;
-    var style = document.createElement("style");
-    style.id = "csotHistDeleteStyle";
-    style.textContent = ".csot-hist-item{touch-action:pan-y;position:relative}.csot-hist-deletebtn{margin-left:6px;padding:4px 8px;border:1px solid #d8b6b0;background:transparent;color:#a4473b;border-radius:4px;cursor:pointer;font:inherit}.csot-hist-deletebtn:hover{background:#f8e9e6}";
-    document.head.appendChild(style);
+    if (!document.getElementById("csotHistDeleteStyle")) {
+      var style = document.createElement("style");
+      style.id = "csotHistDeleteStyle";
+      style.textContent = ".csot-hist-item{touch-action:pan-y;position:relative}.csot-hist-deletebtn{display:inline-flex;align-items:center;margin:6px 0 0 6px;padding:3px 9px;border:1px solid #d8b6b0;border-radius:5px;background:#fff4f2;color:#a4473b;cursor:pointer;font:inherit;font-size:10px;font-weight:600;line-height:1.4}.csot-hist-deletebtn:hover{background:#f8e9e6}";
+      document.head.appendChild(style);
+    }
 
     if (document.getElementById("csotStyle")) return;
     var s = document.createElement("style");
