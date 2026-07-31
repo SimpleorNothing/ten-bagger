@@ -222,7 +222,7 @@ function revalueHoldings(h, quotes) {
 }
 
 async function main() {
-  const candidates = [...readCandidates(), { id: 'ks11', ticker: '^KS11', mkt: 'INDEX' }, { id: 'gspc', ticker: '^GSPC', mkt: 'INDEX' }, { id: 'ixic', ticker: '^IXIC', mkt: 'INDEX' }, { id: 'us10y', ticker: '^TNX', mkt: 'INDEX' }, { id: 'wti', ticker: 'CL=F', mkt: 'INDEX' }, { id: 'gasoline', ticker: 'RB=F', mkt: 'INDEX' }];
+  const candidates = [...readCandidates(), { id: 'ks11', ticker: '^KS11', mkt: 'INDEX' }, { id: 'ksdaq', ticker: '^KQ11', mkt: 'INDEX' }, { id: 'gspc', ticker: '^GSPC', mkt: 'INDEX' }, { id: 'ixic', ticker: '^IXIC', mkt: 'INDEX' }, { id: 'stoxx50', ticker: '^STOXX50E', mkt: 'INDEX' }, { id: 'us10y', ticker: '^TNX', mkt: 'INDEX' }, { id: 'wti', ticker: 'CL=F', mkt: 'INDEX' }, { id: 'gasoline', ticker: 'RB=F', mkt: 'INDEX' }];
   let holdings = null;
   try { holdings = JSON.parse(fs.readFileSync(HOLD, 'utf8')); } catch (e) { /* holdings optional */ }
   addHoldingsCandidates(candidates, holdings); // 보유 ETF 티커 합류(개별주는 seen 스킵)
