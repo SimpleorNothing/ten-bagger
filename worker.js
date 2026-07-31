@@ -1348,15 +1348,39 @@ async function handleSiteApply(request, env) {
     (src && (src.title || src.publisher)) ? ("출처: " + [src.title, src.publisher, src.date].filter(Boolean).join(" · ")) : "",
   ].filter(Boolean).join("\n");
 
-  const r = await anthropicText(env, prompt, false, 1200);
-  if (r.error) return memoJson({ error: r.error, detail: r.detail }, 502);
+  // Sonnet 5 adaptive thinking이 기본 활성화돼 작은 출력 예산에서는 사고 토큰만
+  // 소진하고 최종 JSON이 비는 경우가 있다. 첫 호출은 판단 품질을 위해 thinking을
+  // 유지하고, 유효 JSON이 없을 때만 thinking-off로 1회 자동 복구한다.
+  function parseSitePatch(raw) {
+    const m = String(raw || "").match(/\{[\s\S]*\}/);
+    if (!m) return null;
+    try {
+      const out = JSON.parse(m[0]);
+      return out && typeof out === "object" && !Array.isArray(out) ? out : null;
+    } catch { return null; }
+  }
 
-  let patch;
-  try {
-    const m = String(r.text || "").match(/\{[\s\S]*\}/);
-    patch = JSON.parse(m ? m[0] : r.text);
-  } catch {
-    return memoJson({ error: "claude response not json", raw: String(r.text || "").slice(0, 300) }, 502);
+  let r = await anthropicText(env, prompt, false, 4000);
+  if (r.error) return memoJson({ error: r.error, detail: r.detail }, 502);
+  let patch = parseSitePatch(r.text);
+  if (!patch) {
+    const firstStop = r.stop_reason || "empty";
+    r = await anthropicText(env, prompt, false, 2400, { disableThinking: true });
+    if (r.error) {
+      return memoJson({
+        error: r.error,
+        detail: r.detail,
+        retry: "thinking-disabled",
+        first_stop: firstStop,
+      }, 502);
+    }
+    patch = parseSitePatch(r.text);
+  }
+  if (!patch) {
+    return memoJson({
+      error: "AI가 사이트 반영 JSON을 생성하지 못했습니다 — 자동 재시도 후에도 실패",
+      detail: "stop_reason=" + String(r.stop_reason || "unknown"),
+    }, 502);
   }
   const applyTicker = fiscalTickerAnywhere([claimText, why, src.title, src.publisher, item.name, JSON.stringify(item.keys || [])].join(" "));
   patch = normalizeFiscalValue(patch, applyTicker ? [applyTicker] : []);
