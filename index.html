@@ -5926,7 +5926,7 @@ function renderInstantAnswer(){
  var muO=G['MU']&&G['MU'].g==='open';
  var trim=(muO?'<span style="background:#e5f6ef;color:var(--st-dawn);padding:2px 9px;border-radius:20px;font-size:12px;font-weight:600">MU open 유지</span> → L3 트림 보류':'<span style="background:#fdecec;color:var(--st-hot);padding:2px 9px;border-radius:20px;font-size:12px;font-weight:600">MU γ 재확인</span> → 트림게이트 점검')+(spent.length?' <span style="color:var(--faint)">· spent '+spent.join('·')+'</span>':'');
  var gr=(typeof window.MACRO_GRADE==='number')?window.MACRO_GRADE:null;
- var gate=gr==null?'매크로 게이트 → <b>03 리밸런싱</b>':(gr===0?'매크로 게이트 <b>G0 (잠김)</b> — 신규매수 금지':'매크로 게이트 <b>G'+gr+'</b> 점등');
+ var gate=gr==null?'매크로 게이트 → <b>05 비중조절</b>':(gr===0?'매크로 게이트 <b>G0 (잠김)</b> — 신규매수 금지':'매크로 게이트 <b>G'+gr+'</b> 점등');
  var sig='';
  if(typeof SIGNAL_LOG!=='undefined'&&SIGNAL_LOG&&SIGNAL_LOG.length){var last=SIGNAL_LOG.slice().sort(function(a,b){return (a.at||a.date||'')<(b.at||b.date||'')?1:-1;})[0];if(last){var it=(last.items&&last.items[0])||{};var raw=(it.html||last.source||'').replace(/<[^>]+>/g,'');if(raw.length>84)raw=raw.slice(0,82)+'…';sig=(last.date||'')+' · '+raw;}}
  function row(q,a){return '<div style="display:grid;grid-template-columns:118px 1fr;gap:12px;padding:11px 0;border-top:1px solid var(--line)"><div style="font-size:13px;color:var(--dim)">'+q+'</div><div style="font-size:14px;color:var(--txt);line-height:1.5">'+a+'</div></div>';}
