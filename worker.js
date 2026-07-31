@@ -638,6 +638,22 @@ async function handleCouncilDiscGet(env) {
   const v = obj ? await obj.text() : "";
   return new Response(v && v.trim() ? v : "[]", { status: 200, headers: { "content-type": "application/json", "cache-control": "no-store" } });
 }
+async function handleCouncilDiscDelete(request, env) {
+  if (!env.MEMO_BUCKET) return memoJson({ error: "MEMO_BUCKET not configured" }, 503);
+  let b;
+  try { b = await request.json(); } catch { return memoJson({ error: "invalid json" }, 400); }
+  const at = typeof b?.at === "string" ? b.at : "";
+  if (!at) return memoJson({ error: "at required" }, 400);
+  const obj = await env.MEMO_BUCKET.get(COUNCIL_DISC_KEY);
+  let arr = [];
+  if (obj) { try { arr = JSON.parse(await obj.text()); } catch (_) { arr = []; } }
+  if (!Array.isArray(arr)) arr = [];
+  const next = arr.filter((x) => x && x.at !== at);
+  if (next.length === arr.length) return memoJson({ error: "discussion not found" }, 404);
+  await env.MEMO_BUCKET.put(COUNCIL_DISC_KEY, JSON.stringify(next), { httpMetadata: { contentType: "application/json" } });
+  return memoJson({ ok: true, count: next.length }, 200);
+}
+
 async function handleCouncilDiscPost(request, env) {
   if (!env.MEMO_BUCKET) return memoJson({ error: "MEMO_BUCKET not configured" }, 503);
   let e;
@@ -2667,6 +2683,7 @@ export default {
       if (url.pathname === "/api/council-discussions") {
         if (request.method === "GET") return handleCouncilDiscGet(env);
         if (request.method === "POST") return handleCouncilDiscPost(request, env);
+        if (request.method === "DELETE") return handleCouncilDiscDelete(request, env);
         return memoJson({ error: "method not allowed" }, 405);
       }
       // 데일리 브리핑 팟캐스트(2인 대담 대본) — 파트 분할 생성·R2 날짜 캐시
