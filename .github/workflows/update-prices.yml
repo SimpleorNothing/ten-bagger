@@ -29,12 +29,48 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - name: Fetch latest prices
-        run: node scripts/fetch-prices.mjs
-      - name: Update gamma (γ)
-        run: node scripts/fetch-gamma.mjs
-      - name: Derive cycle E-cluster
-        run: node scripts/derive-cycle-e.mjs        
+      - name: Fetch and validate latest prices (retry ×3)
+        shell: bash
+        run: |
+          set -euo pipefail
+          ok=0
+          for attempt in 1 2 3; do
+            echo "price refresh attempt $attempt/3"
+            if node scripts/fetch-prices.mjs \
+              && node scripts/fetch-gamma.mjs \
+              && node scripts/derive-cycle-e.mjs \
+              && node - <<'NODE'
+          const fs = require('fs');
+          const p = JSON.parse(fs.readFileSync('prices.json', 'utf8'));
+          const c = JSON.parse(fs.readFileSync('charts.json', 'utf8'));
+          const now = new Date();
+          // 한국 장마감(16:52 KST) 실행은 미국 전일 종가가 정상이다.
+          // 미국 장 마감 후(20:00 UTC 이후)에는 당일 미국 종가가 반드시 있어야 한다.
+          if (now.getUTCHours() >= 20) {
+            const expected = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()) / 86400000;
+            const asOfDay = String(p.asOf || '').slice(0, 10);
+            for (const id of ['gspc', 'ixic', 'us10y']) {
+              if (!p.quotes?.[id] || !Number.isFinite(Number(p.quotes[id].price))) {
+                throw new Error('required quote missing: ' + id);
+              }
+              const s = c.series?.[id];
+              const last = s?.t?.[s.t.length - 1];
+              if (!(Number.isFinite(last) && last >= expected)) {
+                throw new Error('stale chart for ' + id + ': expected ' + expected + ', got ' + last);
+              }
+            }
+            if (asOfDay !== now.toISOString().slice(0, 10)) {
+              throw new Error('stale prices.asOf: expected ' + now.toISOString().slice(0, 10) + ', got ' + asOfDay);
+            }
+          }
+          console.log('price freshness validation passed');
+          NODE
+            then ok=1; break; fi
+            echo "attempt $attempt failed; waiting before retry"
+            sleep $((attempt * 15))
+          done
+          test "$ok" -eq 1
+ 
       - name: Commit & push if changed (rebase-safe)
         run: |
           FILES="prices.json charts.json gamma.json cycle.json holdings.json"
