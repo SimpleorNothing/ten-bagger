@@ -21,6 +21,23 @@ jobs:
             if [ -f "$f" ]; then python3 -c "import json;json.load(open('$f'))" \
               || { echo "::error::$f JSON 깨짐"; exit 1; }; fi
           done
+      - name: worker.js 회귀 가드
+        run: |
+          node --check worker.js
+          grep -Fq 'const SITE_APPLY_FILES = new Set(["gates.json", "risk.json", "signal_log.json", "calendar.json"]);' worker.js \
+            || { echo "::error::사이트 반영 대상 SoT 소실"; exit 1; }
+          grep -Fq 'if (file === "signal_log.json")' worker.js \
+            || { echo "::error::signal_log 반영 경로 소실"; exit 1; }
+          grep -Fq 'if (file === "calendar.json")' worker.js \
+            || { echo "::error::calendar 반영 경로 소실"; exit 1; }
+          grep -Fq 'function normalizeInsightFiscalJSON' worker.js \
+            || { echo "::error::인사이트 FY/FQ 정규화 소실"; exit 1; }
+          grep -Fq 'disableThinking: true' worker.js \
+            || { echo "::error::Claude JSON 재시도 경로 소실"; exit 1; }
+          if grep -Fq 'claude response not json' worker.js; then
+            echo "::error::구형 단발 JSON 파싱 경로 재유입"
+            exit 1
+          fi
   auto-merge:
     needs: validate
     runs-on: ubuntu-latest
