@@ -53,12 +53,13 @@ pantone.css :root       ← 현행 팔레트 (팬튼 A안, index.html 하단 <li
 | `--st-mature` | `#9a7b2f` | index | **기능색** 단계=성숙 |
 | `--st-hot` | `#b4472f` | index | **기능색** 단계=과열 |
 | `--glow` | `none` | index | 글로우 비활성 |
+| `--am-ticker-h` | `44px` | index | —(설명 미기입: DESC에 추가할 것) |
 | `--serif` | `'Pretendard Variable','Pretendard',system-ui,…` | index | 전 서체 (단일 패밀리) |
 | `--mono` | `var(--serif)` | index | 데이터·수치 (별도 고정폭 없음) |
 | `--sans` | `var(--serif)` | index | 본문 |
 
 웹폰트: Pretendard Variable **v1.3.9** (jsDelivr `orioncactus/pretendard`, dynamic-subset)
-<!-- TOKENS:FP {"font":"v1.3.9","eff":{"--ink":"#F0EFEB","--ink2":"#ECEAE3","--panel":"#ffffff","--panel2":"#E9E7E0","--line":"#dedbd3","--line2":"#cbc7bd","--txt":"#3d3935","--dim":"#746F69","--faint":"#989292","--dawn":"#496176","--accel":"#496176","--hot":"#496176","--nascent":"#496176","--mature":"#746F69","--onacc":"#ffffff","--st-nascent":"#6b5a9e","--st-dawn":"#2f7d63","--st-accel":"#2a6f97","--st-mature":"#9a7b2f","--st-hot":"#b4472f","--glow":"none","--serif":"'Pretendard Variable','Pretendard',system-ui,-apple-system,'Segoe UI',Roboto,'Apple SD Gothic Neo','Noto Sans KR',sans-serif","--mono":"var(--serif)","--sans":"var(--serif)"}} -->
+<!-- TOKENS:FP {"font":"v1.3.9","eff":{"--ink":"#F0EFEB","--ink2":"#ECEAE3","--panel":"#ffffff","--panel2":"#E9E7E0","--line":"#dedbd3","--line2":"#cbc7bd","--txt":"#3d3935","--dim":"#746F69","--faint":"#989292","--dawn":"#496176","--accel":"#496176","--hot":"#496176","--nascent":"#496176","--mature":"#746F69","--onacc":"#ffffff","--st-nascent":"#6b5a9e","--st-dawn":"#2f7d63","--st-accel":"#2a6f97","--st-mature":"#9a7b2f","--st-hot":"#b4472f","--glow":"none","--am-ticker-h":"44px","--serif":"'Pretendard Variable','Pretendard',system-ui,-apple-system,'Segoe UI',Roboto,'Apple SD Gothic Neo','Noto Sans KR',sans-serif","--mono":"var(--serif)","--sans":"var(--serif)"}} -->
 <!-- TOKENS:END -->
 
 **장식색 vs 기능색 — 절대 규칙**
@@ -207,7 +208,7 @@ pantone.css :root       ← 현행 팔레트 (팬튼 A안, index.html 하단 <li
 
 ### 6-3-1. 통합 지표 카드 재정렬
 
-「지표」는 VIX·CNN F&G·원/달러·한국 반도체 수출·미국 NFP를 포함한 단일 `.mkt-grid`다. 한국 반도체 수출도 공통 카드 순서인 `이름 → 값·변화 → 렌즈 2줄 → .mkt-chart → 출처`를 따르며, 판정 멘트는 그래프 위에 두고 그래프는 카드 하단에 정렬한다. VIX·원/달러의 3Y 선택은 `market_history.json`의 최근 3년 거래일 관측치를 실제 날짜로 자르고 스파크라인·시작/끝 날짜·툴팁을 표시한다. 실시간 값은 같은 날짜의 백필보다 우선한다. NFP의 6M 선택은 양수·음수를 0선 기준 막대로 표시하고, 그 외 기간은 선 그래프를 유지한다. NFP의 3Y 선택은 최근 36개 월별 증감 관측치를 모두 표시하며, 실시간 FRED 실패 시 동일 BLS 계열의 `nfp.json` 백필을 사용한다. 데스크톱(701px+)에서 카드 전체를 드래그하면 **자유 좌표가 아니라 고정 그리드 슬롯 순서**를 교환하며, 축별 `data-indicator-key`/id 순서를 `localStorage` `am_market_indicator_order_v1`에 저장한다. 드래그 중에는 반투명·윤곽선 피드백만 사용하고 신규 토큰을 만들지 않는다. 모바일(700px 이하)은 `draggable=false`로 두어 스크롤을 방해하지 않는다. 동적으로 들어오는 게이지·반도체 카드도 같은 순서 상태에 합류한다.
+「지표」는 VIX·CNN F&G·원/달러·한국 반도체 수출·미국 NFP를 포함한 단일 `.mkt-grid`다. 한국 반도체 수출도 공통 카드 순서인 `이름 → 값·변화 → 렌즈 2줄 → .mkt-chart → 출처`를 따르며, 판정 멘트는 그래프 위에 두고 그래프는 카드 하단에 정렬한다. VIX·원/달러의 3Y 선택은 `market_history.json`의 최근 3년 거래일 관측치를 실제 날짜로 자르고 스파크라인·시작/끝 날짜·툴팁을 표시한다. 실시간 값은 같은 날짜의 백필보다 우선한다. NFP는 모든 기간에서 월별 증감을 양수·음수 0선 기준 막대그래프로 표시한다. NFP의 3Y 선택은 최근 36개 월별 증감 관측치를 모두 표시하며, 실시간 FRED 실패 시 동일 BLS 계열의 `nfp.json` 백필을 사용한다. 데스크톱(701px+)에서 카드 전체를 드래그하면 **자유 좌표가 아니라 고정 그리드 슬롯 순서**를 교환하며, 축별 `data-indicator-key`/id 순서를 `localStorage` `am_market_indicator_order_v1`에 저장한다. 드래그 중에는 반투명·윤곽선 피드백만 사용하고 신규 토큰을 만들지 않는다. 모바일(700px 이하)은 `draggable=false`로 두어 스크롤을 방해하지 않는다. 동적으로 들어오는 게이지·반도체 카드도 같은 순서 상태에 합류한다.
 
 ### 6-4. **렌즈 2줄** — 알파맵의 정보 규약 (가장 중요)
 
@@ -266,6 +267,9 @@ pantone.css :root       ← 현행 팔레트 (팬튼 A안, index.html 하단 <li
 ---
 
 ## 갱신 이력
+
+- 2026-07-31 20:08 · **01 미국 NFP 전 기간 막대그래프.** 6M에서만 막대를 쓰던 기간 분기를 제거해 1M·6M·1Y·3Y·5Y 모두 월별 고용 증감을 0선 기준 막대로 표시한다. 기존 `.nfp-bars`·기능색·기간 축·툴팁을 재사용하며 신규 토큰·클래스 0. (OPS §3·§9 동반)
+- 2026-07-31 20:08 · **토큰 문서 드리프트 동기화.** `check-docs --fix`로 라이브 CSS에 이미 존재하던 `--am-ticker-h`(44px)를 TOKENS 목록에 반영했다. 런타임 CSS·화면 변경 없음.
 - 2026-07-31 19:37 · **AMZN 조달 관점 리스크 보드 반영(구조·시각 변경 없음).** `risk.json` ①의 기존 「하이퍼스케일러 FCF/조달」 게이지 설명·판정·출처만 갱신. 게이지 배열·라벨·CSS·토큰은 불변.
 - 2026-07-31 19:34 · **보드 게이지 부분 병합 안정화(시각 변경 없음).** AI가 변경 게이지만 `gauge_updates`로 반환하고 Worker가 기존 배열·순서·라벨을 보존해 병합하도록 수정. CSS·토큰·화면 구조는 불변.
 - 2026-07-31 19:22 · **사이트 반영 Worker 회귀 복구(시각 변경 없음).** PR #565의 오래된 `worker.js` 전체 덮어쓰기로 사라진 4파일 반영·Claude JSON 재시도·FY/FQ 정규화를 복원하고 PR 게이트에 앵커 검사를 추가. 티커 기능·CSS·토큰·화면 구조는 불변.
