@@ -2724,6 +2724,7 @@ export default {
             el.append('<script src="/aisd.js?v=20260728-capex-label-layout" defer></scr' + 'ipt>', { html: true });
             el.append('<script src="/council-context.js" defer></scr' + 'ipt>', { html: true });
             el.append('<script src="/council-material.js" defer></scr' + 'ipt>', { html: true });
+            el.append('<script src="/council-sot.js?v=20260731-hist-delete" defer></scr' + 'ipt>', { html: true });
             el.append('<script src="/council-ask.js" defer></scr' + 'ipt>', { html: true });
             el.append('<script src="/council-audio.js" defer></scr' + 'ipt>', { html: true });
             el.append('<script src="/council-roster.js" defer></scr' + 'ipt>', { html: true });
