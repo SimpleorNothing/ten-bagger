@@ -1,0 +1,34 @@
+name: Daily OPS audit
+
+on:
+  schedule:
+    - cron: '30 0 * * *' # 09:30 KST 매일
+  workflow_dispatch: {}
+  push:
+    paths:
+      - 'OPS.md'
+      - 'STYLE_GUIDE.md'
+      - 'scripts/audit-ops.mjs'
+      - 'prices.json'
+      - 'charts.json'
+      - 'signals.json'
+      - 'gamma.json'
+      - 'cycle.json'
+      - 'index.html'
+      - 'changelog.js'
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Run OPS compliance audit
+        run: node scripts/audit-ops.mjs
