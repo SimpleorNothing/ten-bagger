@@ -1,6 +1,10 @@
 name: Update stock prices
 
 on:
+  push:
+    paths:
+      - 'index.html'
+      - 'scripts/fetch-prices.mjs'
   schedule:
     - cron: '5 21 * * *'    # 06:05 KST 예약 → 실측지연 ~53분 → ~06:55 KST 완료 (미 장마감 후·여름/겨울 모두 안전)
     - cron: '52 7 * * *'    # 16:52 KST 예약 → 실측지연 ~98분 → ~18:30 KST 완료 (한국 장마감 15:30 이후)
