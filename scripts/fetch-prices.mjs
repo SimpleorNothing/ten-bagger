@@ -3,6 +3,7 @@
 // Source of truth for tickers/markets is the C array inside index.html.
 // Korean (KOSPI/KOSDAQ) -> Naver; US/Taiwan/Japan -> Yahoo. Failures are
 // non-fatal: last known price is preserved so the site never goes blank.
+// A post-close retry is scheduled in update-prices.yml so US close candles are refreshed even when the first run is delayed.
 //
 // changePct = YTD 수익률: (현재가 / 전년도 마지막 거래일 종가 − 1) × 100.
 // 전일 대비가 아니라 연초 대비(올해 누적). 필드명은 프런트(priceHTML) 호환을
