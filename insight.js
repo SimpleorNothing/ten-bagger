@@ -525,6 +525,14 @@ function persist(){cacheSet();clearTimeout(putTimer);putTimer=setTimeout(push,20
   if(!text&&isYt(url)){ytExtract(url);return;}    /* 유튜브 링크만 → 스크립트 먼저 뽑기 */
   doExtract(text,url);
  }
+ function parseInsightPayload(raw){
+  var s=String(raw||'').trim().replace(/^\`\`\`(?:json)?\s*/i,'').replace(/\s*\`\`\`$/,'').trim();
+  if(!s)throw new Error('AI 응답 본문이 비었습니다 — 자동 재시도 후에도 결과 없음');
+  try{return JSON.parse(s);}catch(e){}
+  var a=s.indexOf('{'),b=s.lastIndexOf('}');
+  if(a>=0&&b>a){try{return JSON.parse(s.slice(a,b+1));}catch(e){}}
+  throw new Error('AI 응답 JSON 형식 오류');
+ }
  function doExtract(text,url){
   // 서버(/api/insight)는 단일 비스트리밍 호출이라 실제 서버 내부 진척은 알 수 없다.
   // 사용자에게 "멈춘 게 아니다"를 알리려 클라 단계(전송→분석→정리) + 경과초 카운터를 돌린다.
@@ -548,9 +556,7 @@ function persist(){cacheSet();clearTimeout(putTimer);putTimer=setTimeout(push,20
     setStage(2); // 응답 수신 → 결과 정리
     if(!o.ok||o.j.error)throw new Error(o.j.error||('HTTP '+o.st));
     var raw=((o.j.content||[]).map(function(b){return b.text||'';}).join('')||'').trim();
-    var i=raw.indexOf('{'), n=raw.lastIndexOf('}');
-    if(i<0||n<0)throw new Error('응답 파싱 실패');
-    var pj=JSON.parse(raw.slice(i,n+1));
+    var pj=parseInsightPayload(raw);
     var ps=pj.src||{};
     var rawFull=text||'';   /* 뽑을 때 넣은 원문(스크립트/본문). URL만 준 경우 빈 문자열 */
     cur={id:uid(),t:Date.now(),

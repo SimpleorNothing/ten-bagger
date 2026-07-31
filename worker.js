@@ -928,7 +928,7 @@ async function handleInsightsPut(request, env) {
 
 // Anthropic Messages 프록시(공용) — SSE 를 서버측에서 재조립해 텍스트만 반환.
 // (handleEstimate 와 동일한 이유로 스트리밍: Sonnet + web_search 는 비스트리밍 시 100s 한도에 걸린다.)
-async function anthropicText(env, prompt, useSearch, maxTokens) {
+async function anthropicText(env, prompt, useSearch, maxTokens, options) {
   const payload = {
     model: "claude-sonnet-5",
     max_tokens: maxTokens || 4000,
@@ -937,6 +937,9 @@ async function anthropicText(env, prompt, useSearch, maxTokens) {
   };
   // 검색 턴마다 전체 컨텍스트가 재전송된다(입력 2차식 증가) → 상한 고정.
   if (useSearch) payload.tools = [{ type: "web_search_20260209", name: "web_search", max_uses: 3 }];
+  // Sonnet 5는 adaptive thinking이 기본 켜짐. JSON 본문이 비는 실패에 한해
+  // 복구 호출에서만 thinking을 끈다(첫 호출의 추론·web_search 품질은 유지).
+  if (options && options.disableThinking) payload.thinking = { type: "disabled" };
 
   let upstream;
   try {
@@ -1157,9 +1160,38 @@ async function handleInsight(request, env) {
       : ("본문/스크립트:\n" + text),
   ].filter(Boolean).join("\n");
 
-  const r = await anthropicText(env, prompt, useSearch, 6000);
+  // Sonnet 5는 adaptive thinking이 기본 활성화돼 max_tokens 안에서 사고 토큰이
+  // 먼저 소진되면 HTTP 200 + 빈 최종 텍스트가 올 수 있다. 첫 호출은 추론을 유지하되
+  // 예산을 넉넉히 주고, JSON이 없을 때만 thinking-off로 1회 자동 복구한다.
+  function validInsightJSON(raw) {
+    const s = String(raw || ""), a = s.indexOf("{"), b = s.lastIndexOf("}");
+    if (a < 0 || b < a) return "";
+    const candidate = s.slice(a, b + 1);
+    try {
+      const parsed = JSON.parse(candidate);
+      return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? candidate : "";
+    } catch { return ""; }
+  }
+
+  let r = await anthropicText(env, prompt, useSearch, 12000);
   if (r.error) return memoJson(r, 502);
-  return memoJson({ content: [{ type: "text", text: normalizeInsightFiscalJSON(r.text) }], stop_reason: r.stop_reason }, 200);
+  let jsonText = validInsightJSON(r.text);
+  if (!jsonText) {
+    const firstStop = r.stop_reason || "empty";
+    r = await anthropicText(env, prompt, useSearch, 8000, { disableThinking: true });
+    if (r.error) return memoJson({ error: r.error, detail: r.detail, retry: "thinking-disabled", first_stop: firstStop }, 502);
+    jsonText = validInsightJSON(r.text);
+  }
+  if (!jsonText) {
+    return memoJson({
+      error: "AI가 최종 JSON을 생성하지 못했습니다 — 자동 재시도 후에도 빈 응답",
+      detail: "stop_reason=" + String(r.stop_reason || "unknown"),
+    }, 502);
+  }
+  return memoJson({
+    content: [{ type: "text", text: normalizeInsightFiscalJSON(jsonText) }],
+    stop_reason: r.stop_reason,
+  }, 200);
 }
 
 // 02 인사이트 「사이트 반영」 — 보드(gates/risk)·시장 맥락(signal_log)·일정(calendar) 직접 갱신.
