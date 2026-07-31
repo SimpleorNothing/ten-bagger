@@ -1267,7 +1267,7 @@ function persist(){cacheSet();clearTimeout(putTimer);putTimer=setTimeout(push,20
  /* vsub 설명 문단 = 뷰 맨 아래로(SimpleorNothing 지시 2026-07-20) · placeholder 예시·힌트 제거(동일 지시) */
  var GUIDE_HTML='<p class="vsub" style="border-top:1px solid var(--line);margin-top:24px;padding-top:16px">'+
   '증권사 리포트·기사·유튜브(링크 또는 스크립트)를 넣으면 8레이어·단계 프레임으로 관점과 정보를 구조화해 뽑는다. '+
-  '관점을 만들기 전에 <b>01 시장 모니터링·02 채택 관점·03 전문가 원탁·04 시장/실적 전망·05 리밸런싱</b>의 관련 내용을 함께 대조하고, 사용한 근거는 <b>사이트 연관</b>으로 표시한다. '+
+  '관점을 만들기 전에 <b>01 시장 모니터링·02 채택 관점·03 전문가 원탁·04 시장/실적 전망·05 비중조절</b>의 관련 내용을 함께 대조하고, 사용한 근거는 <b>사이트 연관</b>으로 표시한다. '+
   '<b>뽑는 것과 반영하는 것은 분리한다</b> — 체크해 채택한 관점만 다른 메뉴에 뜬다. 숫자 파일(실적·판단·단계·비중)은 자동으로 바뀌지 않는다(narrative ≠ numbers). '+
   '채택 관점은 <b>등급</b>(관찰→후보→지지→확립→확신)을 갖고, 다른 자료에서 유사한 내용이 보강될수록 자동 승격된다. '+
   '<b>시그널 로그</b>는 관련 관점 밑에 붙어 그 관점의 누적 컨텍스트가 된다 — 티커가 겹치면 종목 기준, 없으면 레이어 기준으로 매칭된다. '+
@@ -1319,7 +1319,7 @@ function persist(){cacheSet();clearTimeout(putTimer);putTimer=setTimeout(push,20
    b.innerHTML='<span class="n"></span>인사이트 찾기';
    /* 상단 메뉴 재구성 — index.html 정적 nav 무편집(대용량 패치 최소화 = 자가 마운트 패턴)
       정적 nav : market · cycle · port · council · memo
-      목표     : 01 시장 모니터링 · 02 인사이트 찾기 · 03 전문가 원탁 · 04 시장과 실적 전망 · 05 리밸런싱 · 06 메모
+      목표     : 01 시장 모니터링 · 02 인사이트 찾기 · 03 전문가 원탁 · 04 시장과 실적 전망 · 05 비중조절 · 06 메모
       (SimpleorNothing 지시 2026-07-18 · data-v·뷰·데이터 소스는 불변, 라벨·순서만 재구성) */
    var market=nav.querySelector('.tab[data-v="market"]');
    var council=nav.querySelector('.tab[data-v="council"]');
@@ -1358,7 +1358,7 @@ function persist(){cacheSet();clearTimeout(putTimer);putTimer=setTimeout(push,20
      자동 수집 뉴스(#mktMacroNews) 바로 위(관련 기사 h2 아래)에 붙어 큐레이션 관점이 관련 기사와 한 묶음이 된다.
      narrative≠numbers — 등급·출처·라이프사이클 메타는 스트립 컴포넌트 그대로 유지(뉴스 .arow 로 평탄화하지 않는다). SimpleorNothing 지시 2026-07-18. */
   anchor('insStripMarket','#v-market','before','#mktMacroNews');
-  /* 숫자 반영 대기 스트립 = 05 리밸런싱(#v-decision) → 04 시장과 실적 전망(#v-thread) 최상단으로 이동.
+  /* 숫자 반영 대기 스트립 = 05 비중조절(#v-decision) → 04 시장과 실적 전망(#v-thread) 최상단으로 이동.
      실적 비트·가이던스 상향은 '실적 전망' 주제 → 로드맵(#dsAisd) 아래·강물 탐색(.vhead) 위에 뜬다.
      SimpleorNothing 지시 2026-07-18. narrative≠numbers — route·필터 불변, 앵커만 이동. */
   anchor('insStripDec','#v-thread','before','.vhead');
