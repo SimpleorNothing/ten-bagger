@@ -999,7 +999,7 @@ document.addEventListener('DOMContentLoaded',function(){var root=document.getEle
   <nav id="nav">
     <button class="tab on" data-v="market"><span class="n">01</span>시장 모니터링</button>
     <button class="tab" data-v="cycle"><span class="n">02</span>궁금한 것</button>
-    <button class="tab" data-v="port"><span class="n">03</span>리밸런싱</button>
+    <button class="tab" data-v="port"><span class="n">03</span>비중조절</button>
     <button class="tab" data-v="council"><span class="n">04</span>전문가 원탁</button>
     <button class="tab" data-v="memo"><span class="n">05</span>메모</button>
   </nav>
@@ -1075,7 +1075,7 @@ document.addEventListener('DOMContentLoaded',function(){var root=document.getEle
 
 <!-- 01 MACRO -->
 <section class="view" id="v-decision">
-  <div class="vhead"><div class="vkick">Decision Board · 리밸런싱 결정판</div>
+  <div class="vhead"><div class="vkick">Decision Board · 비중조절 결정판</div>
     <h1 class="vtitle">지금 <em>무엇을·언제</em> — 그리고 <em>어디로</em></h1>
     <p class="vsub">자산구성·게이트·타이밍 종합 + 미/한 모멘텀 전망 + <b>추정 리비전 트래커</b>. 값은 라이브(holdings·gamma·signals·cycle·charts·prices) 구동. <b>리비전은 관측이지 예측이 아니다</b> — 투자권유 아님.</p></div>
   <div class="decboard" id="decisionBoard" style="margin:2px 0 20px"></div>
@@ -5926,7 +5926,7 @@ function renderInstantAnswer(){
  var muO=G['MU']&&G['MU'].g==='open';
  var trim=(muO?'<span style="background:#e5f6ef;color:var(--st-dawn);padding:2px 9px;border-radius:20px;font-size:12px;font-weight:600">MU open 유지</span> → L3 트림 보류':'<span style="background:#fdecec;color:var(--st-hot);padding:2px 9px;border-radius:20px;font-size:12px;font-weight:600">MU γ 재확인</span> → 트림게이트 점검')+(spent.length?' <span style="color:var(--faint)">· spent '+spent.join('·')+'</span>':'');
  var gr=(typeof window.MACRO_GRADE==='number')?window.MACRO_GRADE:null;
- var gate=gr==null?'매크로 게이트 → <b>03 리밸런싱</b>':(gr===0?'매크로 게이트 <b>G0 (잠김)</b> — 신규매수 금지':'매크로 게이트 <b>G'+gr+'</b> 점등');
+ var gate=gr==null?'매크로 게이트 → <b>05 비중조절</b>':(gr===0?'매크로 게이트 <b>G0 (잠김)</b> — 신규매수 금지':'매크로 게이트 <b>G'+gr+'</b> 점등');
  var sig='';
  if(typeof SIGNAL_LOG!=='undefined'&&SIGNAL_LOG&&SIGNAL_LOG.length){var last=SIGNAL_LOG.slice().sort(function(a,b){return (a.at||a.date||'')<(b.at||b.date||'')?1:-1;})[0];if(last){var it=(last.items&&last.items[0])||{};var raw=(it.html||last.source||'').replace(/<[^>]+>/g,'');if(raw.length>84)raw=raw.slice(0,82)+'…';sig=(last.date||'')+' · '+raw;}}
  function row(q,a){return '<div style="display:grid;grid-template-columns:118px 1fr;gap:12px;padding:11px 0;border-top:1px solid var(--line)"><div style="font-size:13px;color:var(--dim)">'+q+'</div><div style="font-size:14px;color:var(--txt);line-height:1.5">'+a+'</div></div>';}
