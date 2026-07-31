@@ -1053,7 +1053,6 @@ document.addEventListener('DOMContentLoaded',function(){var root=document.getEle
   </div><!-- /sub-flow -->
 
   <div id="sub-stack" style="margin-top:34px;border-top:1px solid var(--line);padding-top:30px;position:relative">
-  <span class="updstamp abs" id="updThread" style="top:30px;right:0"></span>
   <div class="vhead"><div class="vkick">② The Stack · 8레이어 AI 인프라 척추</div>
     <h1 class="vtitle">capex 병목은 스택을 <em>타고 흐른다</em></h1>
     <p class="vsub">가이드 §2-C의 8레이어(+기타)를 한 트리로 — <b>층별 상태·보유·종목·2·3차 가치사슬을 한 카드에 통합</b>했습니다. 우측 막대는 그 층에 실제로 깔아둔 자본. 각 층 <b>헤더를 누르면 카드가 접히고</b>, <b>종목 칩</b>은 §2-C 분해, <b>'2·3차 가치사슬 펼치기'</b>는 파생 가치사슬 드릴다운을 엽니다. 위 강물 곡선의 노드를 누르면 해당 층 카드로 점프합니다. <b style="color:var(--st-hot)">⚑</b> = 종목의 <b>차트 단계(가격)</b>가 그 층·노드의 <b>테마 단계</b>보다 2단계 이상 앞선 경우 — 구조는 일러도 진입 가능한 대표주는 이미 더 성숙·과열이라는 뜻.</p></div>
@@ -1099,7 +1098,7 @@ document.addEventListener('DOMContentLoaded',function(){var root=document.getEle
   </div>
   <p class="vsub" style="margin-top:4px">매크로 충격은 노이즈가 아니라 거래 가능한 신호. 단 "펀더멘털 레짐 전환"이면 이 룰북은 폐기.</p>
 
-  <div class="mc-sec" style="display:flex;align-items:baseline;gap:8px">통합 매수 게이트 · 3등급 (2026-06-07 개편) · <span style="color:var(--faint)">현재값 signals.json 자동 연동(update-signals 크론)</span><span class="updstamp" id="updMacro" style="margin-left:auto"></span></div>
+  <div class="mc-sec" style="display:flex;align-items:baseline;gap:8px">통합 매수 게이트 · 3등급 (2026-06-07 개편) · <span style="color:var(--faint)">현재값 signals.json 자동 연동(update-signals 크론)</span></div>
   <table class="mc">
     <thead><tr><th>입력</th><th class="c">현재값</th><th class="c">G1 조정</th><th class="c">G2 급락</th><th class="c">G3 패닉</th><th class="c">매도(과열)</th><th class="c">상태</th></tr></thead>
     <tbody>
@@ -1231,7 +1230,7 @@ document.addEventListener('DOMContentLoaded',function(){var root=document.getEle
   <div class="cal-sec">다가오는 이벤트 <span class="sub">· 01 「다가오는 일정」 전체 · 8칸 제한 없음 · calendar.json + 수기 추가</span></div>
   <div id="calFull"><div class="mt" style="padding:10px 6px;color:var(--faint)">임박 이벤트 계산 대기 (calendar.json)</div></div>
 
-  <div class="cal-sec" style="margin-top:26px">아젠다 타임라인 <span class="sub">· 2026 6월 → 12월 · 상세 기록(수기)</span><span class="updstamp" id="updCal" style="margin-left:auto"></span></div>
+  <div class="cal-sec" style="margin-top:26px">아젠다 타임라인 <span class="sub">· 2026 6월 → 12월 · 상세 기록(수기)</span></div>
 
   <div class="cal-month">6월 <span class="mo-sub">— AVGO·SpaceX·CPI·FOMC·MU + 메가테크 키노트가 몰린 고밀도 구간</span></div>
   <div class="cal-row"><div class="date-chip">06.01~05</div><div class="cat-dot" style="background:var(--cat-event)"></div><div class="cal-body"><div class="ti">엔비디아 Computex·GTC Taipei 키노트 <span class="tk">NVDA</span> <span class="mbadge" style="background:#e8590c22;color:#e8590c">내러티브</span></div><div class="mt">6/1 젠슨 황 키노트(Vera Rubin VR200·RTX Spark·피지컬 AI), Computex 6/2~5. 강물①·⑤ 수요 확인 — <b>레이어 수요 확정이지 종목 채점 아님</b>(I/O 2026과 동일 처리·추격 경고).</div></div></div>
@@ -1928,7 +1927,7 @@ window.CYCLE=(function(){
 
   <div id="clResult"></div>
 
-  <h2 class="msec" style="margin-top:26px">토론 이력 <span class="mnote">최신순 · 새로고침 후에도 유지 · 전체 보관</span> <button class="cl-btn" id="clHistBtn" style="margin-left:8px;vertical-align:middle">새로고침</button></h2>
+  <h2 class="msec" style="margin-top:26px">토론 이력 <span class="mnote">최신순 · 새로고침 후에도 유지 · 최대 20건</span> <button class="cl-btn" id="clHistBtn" style="margin-left:8px;vertical-align:middle">새로고침</button></h2>
   <div id="clHistory"><div class="cl-note">불러오는 중…</div></div>
 
   <div class="cl-bar" id="clBar">
@@ -2399,7 +2398,7 @@ host.querySelectorAll('[data-clhistplay]').forEach(function(b){b.addEventListene
 
 <!-- 06 PORTFOLIO -->
 <section class="view" id="v-port">
-  <div class="vhead" style="position:relative"><span class="updstamp abs" id="updPort"></span><div class="vkick">Portfolio X-ray · thesis vs book</div>
+  <div class="vhead" style="position:relative"><div class="vkick">Portfolio X-ray · thesis vs book</div>
     <h1 class="vtitle">자본은 <em>현재 병목</em>에 80% — 다음 병목엔?</h1>
     <p class="vsub" id="portSub">자산현황 기준 보유를 8레이어에 투영. 핵심 질문: 당신이 "다음 병목"이라 지목한 곳에 자본이 가 있는가.</p></div>
   <div class="digest" id="portDigest"></div>
@@ -2439,7 +2438,6 @@ host.querySelectorAll('[data-clhistplay]').forEach(function(b){b.addEventListene
   </div>
 
   <div class="card" style="position:relative">
-    <span class="updstamp abs" id="updAlpha" style="top:12px;right:14px"></span>
     <svg id="plot" viewBox="0 0 860 470" preserveAspectRatio="xMidYMid meet"></svg>
   </div>
 
@@ -3236,14 +3234,14 @@ function infoAsof(){if(!SIGNAL_LOG||!SIGNAL_LOG.length)return null;let best=null
    "정보를 실제로 고칠 때만" 손으로 갱신하는 아래 상수에 연동한다.
    형식: ISO8601(+09:00 권장). 정보 변경 없는 배포에서는 절대 건드리지 말 것. */
 const VIEW_UPDATED='2026-06-28T21:30:00+09:00';
-let CAL_ASOF=null; /* calendar.json asOf → updCal 배지 자동연동(폴백 VIEW_UPDATED) */
+let CAL_ASOF=null;
 function fmtUpd(v){if(!v)return null;
  if(/KST$/.test(v))return v;                         // 이미 포맷된 상수
  if(/^\d{4}-\d{2}-\d{2}$/.test(v))return v+' KST';    // 날짜만(예: signals.json asOf)
  const k=fmtKST(v);return k==='—'?null:k;}            // ISO 타임스탬프
 function stampText(v){const f=fmtUpd(v);return f?'update : '+f:'';}
 function setStamp(id,v){const e=document.getElementById(id);if(e)e.textContent=stampText(v);}
-function stampStatics(){setStamp('updCal',CAL_ASOF||VIEW_UPDATED);setStamp('updThread',VIEW_UPDATED);}  /* updPort(06 상단 스탬프) 제거 — 기준일은 자산현황 줄에 단일 표기 */
+function stampStatics(){}
 /* ===== 임박 이벤트: 데이터 구동 자동 큐레이션 (2026-06-13 개편) =====
    매 접속 시 오늘(KST) 기준으로 ① 지난 이벤트 자동 제거 ② 날짜순 정렬
    ③ 가장 임박한 N개만 카드 렌더 ④ D-카운트 동적 계산.
@@ -3315,8 +3313,7 @@ function foldPastCal(){
  groups.forEach(function(g){
   if(g.rows.length&&g.rows.every(function(p){return p;}))g.head.classList.add('cal-past');
  });
- var uc=document.getElementById('updCal');
- var hdr=uc?uc.closest('.cal-sec'):null;if(!hdr)return;
+ var hdr=sec.querySelector('.cal-sec[style*="margin-top:26px"]');if(!hdr)return;
  /* 워치 요약 바 — 하단 .watch-card 에서 자동 파생(단일 소스) */
  var cards=sec.querySelectorAll('.watch-grid .watch-card');
  if(cards.length){
@@ -5905,7 +5902,7 @@ Promise.all([getJSON('alpha.json'),getJSON('earnings.json'),getJSON('judgment.js
  if(rv&&Array.isArray(rv.reviews)){window.REVIEWS=rv.reviews;window.REVIEWS_ASOF=rv.asOf||'';}
  if(cal&&Array.isArray(cal.events)){CAL_NOW=cal.events;CAL_ASOF=cal.asOf||null;if(typeof stampStatics==='function')stampStatics();}
  // 1) 자동(alpha.json) — 모멘텀 휴리스틱
- if(j&&j.asOf){setStamp('updAlpha',j.asOf);const _af=document.getElementById('alphaAsof');if(_af)_af.textContent=String(j.asOf).slice(0,10);}
+ if(j&&j.asOf){const _af=document.getElementById('alphaAsof');if(_af)_af.textContent=String(j.asOf).slice(0,10);}
  const q=j&&j.quotes;if(q)D.forEach(d=>{const a=q[d.t];if(a){if(Array.isArray(a.aN))d.aN=a.aN;if(Array.isArray(a.aK))d.aK=a.aK;}});
  // 2) 실적 IV (earnings.json)
  if(e&&e.moves){EM=e.moves;window.CAL_EARN_MOVES=e.moves;} if(e&&Array.isArray(e.playbook))EPLAY=e.playbook;
@@ -5953,7 +5950,6 @@ function renderInstantAnswer(){
   +row('트림게이트 γ',trim)
   +row('다음 재채점',IA_CFG.next+' · '+gate)
   +row('오늘 시그널',sig?(sig+' <span style="color:var(--faint)">(→ 하단 로그)</span>'):'<span style="color:var(--faint)">최근 시그널 없음</span>');
- var us=document.getElementById('updIA');if(us)us.textContent='update : '+((typeof fmtKST==='function'&&window.GAMMA_ASOF)?fmtKST(window.GAMMA_ASOF):(IA_CFG.updated));
 }
 </script>
 <script>
@@ -6036,7 +6032,6 @@ function renderInstantAnswer(){
     :(veloMarker?` · ⚠️🇰🇷속도 마커 점등이나 추세이탈 = 거부(떨어지는 칼)`:'');
    set('sigVerdict',`판정: ${txt}${veloTxt}`);
   }
-  setStamp('updMacro',S.asOf);
  }
  renderSignals();
  fetch('./signals.json',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{SIGNALS=j;renderSignals();}).catch(()=>renderSignals());
@@ -6930,7 +6925,8 @@ buildChips(); buildBands(); renderAll();
 })();
 </script>
 <script src="/insight.js?v=20260728-cal-delete" defer></script>
-<script src="/changelog.js?v=20260801-remove-council-sot" defer></script>
+<script src="/council-sot.js?v=20260731-longpress-delete" defer></script>
+<script src="/changelog.js?v=20260801-unified-update-history" defer></script>
 <script src="/news-dedup.js" defer></script>
 </body>
 </html>
