@@ -101,7 +101,7 @@
     if (!document.getElementById("csotHistDeleteStyle")) {
       var style = document.createElement("style");
       style.id = "csotHistDeleteStyle";
-      style.textContent = ".csot-hist-item{touch-action:pan-y;position:relative}.csot-hist-deletebtn{display:inline-flex;align-items:center;margin:6px 0 0 6px;padding:3px 9px;border:1px solid #d8b6b0;border-radius:5px;background:#fff4f2;color:#a4473b;cursor:pointer;font:inherit;font-size:10px;font-weight:600;line-height:1.4}.csot-hist-deletebtn:hover{background:#f8e9e6}";
+      style.textContent = ".csot-hist-item{touch-action:pan-y;position:relative}.csot-hist-deletebtn[hidden]{display:none}.csot-hist-deletebtn{align-items:center;margin:6px 0 0 6px;padding:3px 9px;border:1px solid #d8b6b0;border-radius:5px;background:#fff4f2;color:#a4473b;cursor:pointer;font:inherit;font-size:10px;font-weight:600;line-height:1.4}.csot-hist-delete-ready .csot-hist-deletebtn{display:inline-flex}.csot-hist-deletebtn:hover{background:#f8e9e6}";
       document.head.appendChild(style);
     }
 
@@ -207,7 +207,7 @@
       '<div class="csot-hist-topic">' + esc(topicText) + "</div>",
       '<div class="csot-hist-meta">' + tagHtml + "</div>",
       '<button type="button" class="csot-hist-playbtn" data-hist-idx="' + idx + '">▶ 음성 재생</button>',
-      '<button type="button" class="csot-hist-deletebtn" data-hist-idx="' + idx + '" aria-label="이 토론 삭제">삭제</button>',
+      '<button type="button" class="csot-hist-deletebtn" data-hist-idx="' + idx + '" aria-label="이 토론 삭제" hidden>삭제</button>',
       "</div>"
     ].join("");
   }
@@ -264,7 +264,18 @@
         moved = false; startX = e.clientX; startY = e.clientY; clear();
         timer = setTimeout(function () {
           timer = null;
-          if (!moved) deleteHistoryEntry(parseInt(item.getAttribute("data-hist-idx"), 10));
+          if (moved) return;
+          container.querySelectorAll(".csot-hist-item").forEach(function (other) {
+            other.classList.remove("csot-hist-delete-ready");
+            var otherBtn = other.querySelector(".csot-hist-deletebtn");
+            if (otherBtn) otherBtn.hidden = true;
+          });
+          item.classList.add("csot-hist-delete-ready");
+          var deleteBtn = item.querySelector(".csot-hist-deletebtn");
+          if (deleteBtn) {
+            deleteBtn.hidden = false;
+            deleteBtn.focus({ preventScroll: true });
+          }
         }, 550);
       });
       item.addEventListener("pointermove", function (e) {
