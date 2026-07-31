@@ -34,6 +34,14 @@ jobs:
             || { echo "::error::인사이트 FY/FQ 정규화 소실"; exit 1; }
           grep -Fq 'disableThinking: true' worker.js \
             || { echo "::error::Claude JSON 재시도 경로 소실"; exit 1; }
+          grep -Fq 'function mergeGaugeUpdates' worker.js \
+            || { echo "::error::게이지 부분 병합 보호 경로 소실"; exit 1; }
+          grep -Fq 'gauge_updates' worker.js \
+            || { echo "::error::게이지 부분 갱신 프롬프트 소실"; exit 1; }
+          if grep -Fq 'gauge shape mismatch' worker.js; then
+            echo "::error::구형 전체 배열 일치 검증 재유입"
+            exit 1
+          fi
           if grep -Fq 'claude response not json' worker.js; then
             echo "::error::구형 단발 JSON 파싱 경로 재유입"
             exit 1
