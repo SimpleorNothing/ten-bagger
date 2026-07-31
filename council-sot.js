@@ -4,6 +4,7 @@
    - 카드 렌더 후 council.json 값으로 .cl-view/stance/updated 를 패치한다.
      단 「관점 갱신」(/api/council-log KV) 이 있는 전문가는 건드리지 않는다 = 라이브가 파일을 이김.
    - synthesis(수렴/발산/긴장/인사이트/스틸맨)를 「관점 지형」(#clSynth)에 렌더.
+   - 토론 이력: 생성된 토론을 localStorage 에 저장·복원, 최신순 정렬, 음성 재생 연결.
    - 로드/파싱 실패 시 아무 것도 안 함 → 원본 인라인 COUNCIL 이 그대로 폴백. */
 (function () {
   "use strict";
@@ -16,6 +17,32 @@
 
   var DATA = null, KV = {}, patching = false;
   function byId(id) { var a = (DATA && DATA.experts) || []; for (var i = 0; i < a.length; i++) if (a[i].id === id) return a[i]; return null; }
+
+  // ── 토론 이력 localStorage 키
+  var HISTORY_KEY = "csot_debate_history";
+
+  // 이력 로드 (최신순 배열)
+  function loadHistory() {
+    try {
+      var raw = localStorage.getItem(HISTORY_KEY);
+      if (!raw) return [];
+      var arr = JSON.parse(raw);
+      return Array.isArray(arr) ? arr : [];
+    } catch (e) { return []; }
+  }
+
+  // 이력 저장
+  function saveHistory(arr) {
+    try { localStorage.setItem(HISTORY_KEY, JSON.stringify(arr)); } catch (e) {}
+  }
+
+  // 토론 항목 추가 (최신순 — 앞에 삽입, 최대 20개 유지)
+  function appendHistory(entry) {
+    var arr = loadHistory();
+    arr.unshift(entry);
+    if (arr.length > 20) arr = arr.slice(0, 20);
+    saveHistory(arr);
+  }
 
   function patchCards() {
     if (!DATA) return;
@@ -55,6 +82,18 @@
     d.tension = tensions.filter(function (x, i, a) { return a.indexOf(x) === i; }); // dedup
     d.consensus = s.converge || [];
     return d;
+  }
+
+  // 이력에서 d 구조 복원 (저장된 항목 직접 사용)
+  function buildDFromEntry(entry) {
+    if (!entry) return null;
+    return {
+      diagnosis: entry.diagnosis || "",
+      board: entry.board || [],
+      consensus: entry.consensus || [],
+      tension: entry.tension || [],
+      steelman: entry.steelman || ""
+    };
   }
 
   // ── CSS 주입 (첨부 UI 토큰 · 기존 .cl-* 무충돌 · csot- 네임스페이스)
@@ -100,6 +139,19 @@
       ".csot-playbtn:hover{background:#dce6f8}",
       // 래퍼
       ".csot-wrap{display:flex;flex-direction:column;gap:10px}",
+      // 이력 섹션
+      ".csot-hist-wrap{display:flex;flex-direction:column;gap:8px;margin-top:4px}",
+      ".csot-hist-item{background:#fff;border:1px solid #e4e2dc;border-radius:9px;padding:11px 13px}",
+      ".csot-hist-header{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px}",
+      ".csot-hist-num{font-size:10px;font-weight:700;color:#9e9b95;letter-spacing:.06em}",
+      ".csot-hist-date{font-size:10px;color:#b8b5ae}",
+      ".csot-hist-topic{font-size:12.5px;font-weight:600;color:#252525;margin-bottom:4px;line-height:1.5}",
+      ".csot-hist-meta{display:flex;gap:8px;flex-wrap:wrap}",
+      ".csot-hist-tag{font-size:10px;padding:2px 7px;border-radius:4px;background:#f0ede7;color:#6e6b65}",
+      ".csot-hist-playbtn{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:600;",
+      "padding:3px 9px;border-radius:5px;border:1px solid #bcc8ea;background:#eef2fb;color:#2a4a8a;",
+      "cursor:pointer;transition:background .15s;margin-top:6px}",
+      ".csot-hist-playbtn:hover{background:#dce6f8}",
     ].join("");
     document.head.appendChild(s);
   }
@@ -108,6 +160,73 @@
     return (arr || []).map(function (x) {
       return '<div class="csot-point-item">' + esc(x) + "</div>";
     }).join("");
+  }
+
+  // 날짜 포맷 (YYYYMMDDHHmmss → 읽기 편한 형태)
+  function fmtDate(ts) {
+    if (!ts) return "";
+    var s = String(ts);
+    if (s.length >= 12) {
+      return s.slice(0, 4) + "-" + s.slice(4, 6) + "-" + s.slice(6, 8) + " " + s.slice(8, 10) + ":" + s.slice(10, 12);
+    }
+    return s;
+  }
+
+  // 타임스탬프 생성
+  function nowTs() {
+    var d = new Date();
+    function pad(n) { return n < 10 ? "0" + n : "" + n; }
+    return "" + d.getFullYear() + pad(d.getMonth() + 1) + pad(d.getDate()) + pad(d.getHours()) + pad(d.getMinutes()) + pad(d.getSeconds());
+  }
+
+  // 이력 항목 렌더 (단일)
+  function renderHistItem(entry, idx) {
+    var num = idx + 1;
+    var dateStr = fmtDate(entry.ts);
+    var topicText = entry.topic || entry.diagnosis || "(주제 없음)";
+    var consensus = entry.consensus || [];
+    var tension = entry.tension || [];
+    var tags = [];
+    if (consensus.length) tags.push("합의 " + consensus.length + "건");
+    if (tension.length) tags.push("이견 " + tension.length + "건");
+    if (entry.material) tags.push("첨부 반영");
+    var tagHtml = tags.map(function (t) { return '<span class="csot-hist-tag">' + esc(t) + "</span>"; }).join("");
+    return [
+      '<div class="csot-hist-item" data-hist-idx="' + idx + '">',
+      '<div class="csot-hist-header">',
+      '<span class="csot-hist-num">토론 #' + num + "</span>",
+      '<span class="csot-hist-date">' + esc(dateStr) + "</span>",
+      "</div>",
+      '<div class="csot-hist-topic">' + esc(topicText) + "</div>",
+      '<div class="csot-hist-meta">' + tagHtml + "</div>",
+      '<button type="button" class="csot-hist-playbtn" data-hist-idx="' + idx + '">▶ 음성 재생</button>',
+      "</div>"
+    ].join("");
+  }
+
+  // 이력 섹션 전체 렌더
+  function renderHistSection(container) {
+    var arr = loadHistory();
+    if (!arr.length) {
+      container.innerHTML = '<div style="font-size:12px;color:#9e9b95;padding:8px 0">생성된 토론 이력이 없습니다.</div>';
+      return;
+    }
+    var items = arr.map(function (entry, idx) { return renderHistItem(entry, idx); }).join("");
+    container.innerHTML = '<div class="csot-hist-wrap">' + items + "</div>";
+    // 음성 재생 버튼 이벤트
+    container.querySelectorAll(".csot-hist-playbtn").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var idx = parseInt(btn.getAttribute("data-hist-idx"), 10);
+        var arr2 = loadHistory();
+        var entry = arr2[idx];
+        if (!entry) return;
+        var d = buildDFromEntry(entry);
+        if (!d) return;
+        if (window.COUNCIL && window.COUNCIL.playReport) {
+          window.COUNCIL.playReport(d);
+        }
+      });
+    });
   }
 
   function renderSynth() {
@@ -163,9 +282,46 @@
         }
       });
     }
+
+    // ── 이력 섹션 삽입
+    injectHistSection(el);
+  }
+
+  // 이력 섹션 (#clSynth 아래에 삽입)
+  function injectHistSection(synthEl) {
+    var histWrap = document.getElementById("csotHistSection");
+    if (!histWrap) {
+      var h2 = document.createElement("h2"); h2.className = "msec"; h2.style.marginTop = "22px";
+      h2.innerHTML = '토론 이력 <span class="mnote">최신순 · 새로고침 후에도 유지 · 최대 20건</span>';
+      histWrap = document.createElement("div"); histWrap.id = "csotHistSection";
+      synthEl.parentNode.insertBefore(h2, synthEl.nextSibling);
+      synthEl.parentNode.insertBefore(histWrap, h2.nextSibling);
+    }
+    renderHistSection(histWrap);
   }
 
   function apply() { if (patching) return; patching = true; try { patchCards(); renderSynth(); } catch (e) {} setTimeout(function () { patching = false; }, 0); }
+
+  // 외부(council-ask.js 또는 index.html 인라인) 에서 토론 생성 완료 시 이력에 저장하도록 훅 노출
+  // window.CSOT.saveDebate(d, topic, materialFlag) 호출
+  window.CSOT = window.CSOT || {};
+  window.CSOT.saveDebate = function (d, topic, hasMaterial) {
+    if (!d) return;
+    var entry = {
+      ts: nowTs(),
+      topic: topic || d.diagnosis || "",
+      diagnosis: d.diagnosis || "",
+      board: d.board || [],
+      consensus: d.consensus || [],
+      tension: d.tension || [],
+      steelman: d.steelman || "",
+      material: !!hasMaterial
+    };
+    appendHistory(entry);
+    // 이력 섹션 갱신
+    var histWrap = document.getElementById("csotHistSection");
+    if (histWrap) renderHistSection(histWrap);
+  };
 
   function boot() {
     Promise.all([gj("/council.json"), gj("/api/council-log")]).then(function (r) {
