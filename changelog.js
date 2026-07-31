@@ -1,12 +1,15 @@
-/* changelog.js — 업데이트 배지 (insight.js 처럼 자가 마운트).
-   배지 'update : YYYY.MM.DD HH:MM' = **라이브 데이터 최신 시각**(pulse.json asOf, 매 뉴스 세션 자동 갱신).
-   클릭하면 **사이트 변경 이력**(아래 MKT_CHANGELOG)을 팝업으로 띄운다.
-   ⚠️ 배지의 날짜/시각 = 데이터 신선도(자동) · 팝업 목록 = 코드 변경 로그(수동). 둘은 다른 시계다.
+/* changelog.js — 01~07 메뉴별 업데이트 배지 (자가 마운트).
+   배지: 'update : YYYY.MM.DD' — 각 메뉴의 최신 변경일만 표시한다.
+   클릭: 모든 메뉴의 변경 이력을 팝업으로 표시한다.
    index.html 의 기존 .cyc-upd(배지)·.cyc-pop(모달) CSS 를 재사용한다 — 신규 컴포넌트·토큰 없음.
-   마운트 위치 = **01 시장 모니터링 + 전문가 원탁**의 헤더(.vhead) 우상단(각 뷰 헤더에서 이력 접근).
    신규 변경 항목은 아래 MKT_CHANGELOG 맨 위에 {d:'YYYY-MM-DD',t:'주요내용'} 로 추가한다(최신순). */
 (function(){
+  var MENU_LAST={
+    market:'2026-07-31', insight:'2026-07-31', council:'2026-07-31',
+    thread:'2026-07-31', decision:'2026-07-31', brief:'2026-07-31', memo:'2026-07-31'
+  };
   var MKT_CHANGELOG=[
+    {d:'2026-07-31',t:'01~07 각 메뉴 헤더에 업데이트 날짜·전체 변경 이력 팝업 추가'},
     {d:'2026-07-31',t:'04 전문가 원탁 토론 이력에 삭제 버튼·롱 프레스 삭제 기능 추가'},
     {d:'2026-07-31',t:'01 미국 비농업고용(NFP) 월별 증감 그래프를 모든 기간에서 0선 기준 막대로 표시'},
     {d:'2026-07-30',t:'01 반도체 수출 카드의 판정 멘트를 그래프 위로 이동하고 다른 지표와 그래프 하단 위치 통일'},
@@ -55,7 +58,6 @@
   }
   function esc(s){return String(s==null?'':s).replace(/[&<>]/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[m];});}
   function sorted(){return MKT_CHANGELOG.slice().sort(function(a,b){return String(b.d).localeCompare(String(a.d));});}
-  var DATA_ASOF=null;
   var bg,pop;
   function els(){
     if(!bg){bg=document.createElement('div');bg.className='cyc-pop-bg';document.body.appendChild(bg);bg.addEventListener('click',hide);}
@@ -77,24 +79,16 @@
     n.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();open();}});
   }
   function render(n){
-    var list=sorted();
-    var his=list.length?'<span class="his">이력 '+list.length+'</span>':'';
-    if(DATA_ASOF){
-      // 라이브 데이터 시각 모드: 배지 = 데이터 최신 시각, 변경 로그는 '이력' 모달로만.
-      n.innerHTML='update : '+fmtStamp(DATA_ASOF)+(his?' · '+his:'');
-      n.setAttribute('title','데이터 최신 시각 · 클릭 시 사이트 변경 이력');
-    } else if(list.length){
-      // 폴백: 데이터 asOf 못 읽으면 종전처럼 변경 로그 날짜.
-      var top=list[0];
-      n.innerHTML='update : '+fmtDate(top.d)+' · <span class="mu-t">'+esc(top.t)+'</span> · '+his;
-      n.setAttribute('title','클릭 시 사이트 변경 이력');
-    } else { n.textContent=''; return; }
+    var list=sorted(), menu=n.getAttribute('data-menu')||'', last=MENU_LAST[menu]||(list[0]&&list[0].d);
+    if(!last){n.textContent='';return;}
+    n.textContent='update : '+fmtDate(last);
+    n.setAttribute('title','클릭 시 전체 변경 이력');
     wire(n);
   }
   var NODES=[];
   function renderAll(){for(var i=0;i<NODES.length;i++)render(NODES[i]);}
-  // 뷰 헤더(.vhead) 우상단에 배지 마운트 — 01·전문가 원탁 공통. .cyc-upd/.mkt-upd 스타일 재사용.
-  function mountHead(sel,id){
+  // 뷰 헤더(.vhead) 우상단에 배지 마운트 — 01~07 공통. .cyc-upd/.mkt-upd 스타일 재사용.
+  function mountHead(sel,id,menu){
     var vh=document.querySelector(sel);if(!vh)return;
     injectCSS();
     var n=vh.querySelector('.mkt-upd');
@@ -102,19 +96,12 @@
       if(getComputedStyle(vh).position==='static')vh.style.position='relative';
       n=document.createElement('span');
       n.className='cyc-upd mkt-upd';n.id=id;
+      n.setAttribute('data-menu',menu);
       n.setAttribute('role','button');n.setAttribute('tabindex','0');n.setAttribute('aria-haspopup','dialog');
       vh.appendChild(n);
     }
     NODES.push(n);
     render(n);      // 즉시 폴백(변경 로그 날짜) 렌더
-  }
-  function loadAsof(){
-    try{
-      fetch('/pulse.json?t='+Date.now(),{cache:'no-store'})
-        .then(function(r){return r.ok?r.json():null;})
-        .then(function(j){ if(j&&j.asOf){DATA_ASOF=j.asOf;renderAll();} })  // asOf 도착 시 전 배지 재렌더
-        .catch(function(){});
-    }catch(e){}
   }
   // 05 리밸런싱 추정 리비전 트래커 「기대수익 점수」 컬럼 로더(raer.js 자가 마운트).
   // index.html 무편집·worker 무편집을 위해 이미 로드되는 이 부트스트랩에서 <script>를 주입한다.
@@ -156,9 +143,13 @@
     (document.body||document.documentElement).appendChild(s);
   }
   function boot(){
-    mountHead('#v-market .vhead','mktUpd');        // 01 시장 모니터링 헤더 우상단
-    mountHead('#v-council .vhead','mktUpdCouncil'); // 전문가 원탁 헤더 우상단
-    loadAsof();
+    mountHead('#v-market .vhead','mktUpdMarket','market');
+    mountHead('#v-insight .vhead','mktUpdInsight','insight');
+    mountHead('#v-council .vhead','mktUpdCouncil','council');
+    mountHead('#v-thread .vhead','mktUpdThread','thread');
+    mountHead('#v-decision .vhead','mktUpdDecision','decision');
+    mountHead('#v-brief .vhead','mktUpdBrief','brief');
+    mountHead('#v-memo .vhead','mktUpdMemo','memo');
     loadRaer();                                     // 추정 리비전 트래커 기대수익 컬럼
     loadLead();                                     // 01 월간 선행지표(FRED) 카드
     loadRisk();                                     // 01 리스크 3축 보드
