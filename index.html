@@ -2231,7 +2231,21 @@ window.CYCLE=(function(){
       host.innerHTML=arr.map(function(d,i){var one=String(d.diagnosis||'').slice(0,80);var mem=(d.members||[]).join(' · ');return '<details class="rvw"><summary><span class="rvw-date">'+esc(fmtAt(d.at))+'</span><span class="rvw-one">'+esc(one)+'</span><span class="rvw-badge" style="flex:0 0 auto;font-size:11px;color:var(--dim)">'+((d.members&&d.members.length)?d.members.length+'인':'')+'</span></summary><div class="rvw-body"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:6px 0 8px"><span style="font-size:12px;color:var(--dim);flex:1">'+esc(mem)+'</span><button type="button" class="cl-btn" data-clhistplay="'+i+'">▶ 음성 토론 재생</button><button type="button" class="cl-btn cl-hist-delete" data-clhistdelete="'+i+'" hidden>삭제</button></div>'+discBody(d)+'</div></details>';}).join('');
 host.querySelectorAll('[data-clhistplay]').forEach(function(b){b.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();var d=arr[+b.getAttribute('data-clhistplay')];if(window.COUNCIL&&window.COUNCIL.playReport)window.COUNCIL.playReport(d);});});
       host.querySelectorAll('[data-clhistdelete]').forEach(function(b){b.addEventListener('click',async function(e){e.preventDefault();e.stopPropagation();var d=arr[+b.getAttribute('data-clhistdelete')];if(!d)return;if(!window.confirm('이 토론 이력을 삭제할까요?'))return;try{var r=await fetch('/api/council-discussions',{method:'DELETE',headers:{'content-type':'application/json'},credentials:'same-origin',body:JSON.stringify({at:d.at})});if(!r.ok)throw new Error('delete failed');await loadDiscussions();}catch(_){alert('삭제하지 못했습니다. 잠시 후 다시 시도해 주세요.');}});});
-      host.querySelectorAll('#clHistory details.rvw').forEach(function(row){var timer=null,moved=false,sx=0,sy=0,suppress=false;var clear=function(){if(timer){clearTimeout(timer);timer=null;}};var reveal=function(){var b=row.querySelector('[data-clhistdelete]');if(!b)return;row.open=true;b.hidden=false;b.focus({preventScroll:true});row.classList.add('cl-hist-delete-ready');};row.querySelector('summary').addEventListener('pointerdown',function(e){if(e.target.closest('button'))return;sx=e.clientX;sy=e.clientY;moved=false;suppress=false;clear();timer=setTimeout(function(){timer=null;if(!moved){suppress=true;reveal();}},550);});row.querySelector('summary').addEventListener('pointermove',function(e){if(Math.abs(e.clientX-sx)>10||Math.abs(e.clientY-sy)>10){moved=true;clear();}});['pointerup','pointercancel','pointerleave'].forEach(function(t){row.querySelector('summary').addEventListener(t,clear);});row.querySelector('summary').addEventListener('click',function(e){if(suppress){e.preventDefault();e.stopPropagation();suppress=false;}});});
+      host.querySelectorAll('#clHistory details.rvw').forEach(function(row){
+        var summary=row.querySelector('summary');
+        if(!summary)return;
+        summary.addEventListener('click',function(){
+          host.querySelectorAll('#clHistory details.rvw').forEach(function(other){
+            if(other===row)return;
+            other.classList.remove('cl-hist-delete-ready');
+            var otherBtn=other.querySelector('[data-clhistdelete]');
+            if(otherBtn)otherBtn.hidden=true;
+          });
+          row.classList.add('cl-hist-delete-ready');
+          var deleteBtn=row.querySelector('[data-clhistdelete]');
+          if(deleteBtn)deleteBtn.hidden=false;
+        });
+      });
     }
     async function loadDiscussions(){var host=document.getElementById('clHistory');try{var r=await fetch('/api/council-discussions',{credentials:'same-origin',cache:'no-store'});var arr=r.ok?await r.json():[];renderDiscussions(Array.isArray(arr)?arr:[]);}catch(e){if(host)host.innerHTML='<div class="cl-err">이력 불러오기 실패</div>';}}
     async function saveDiscussion(d){try{await fetch('/api/council-discussions',{method:'POST',headers:{'content-type':'application/json'},credentials:'same-origin',body:JSON.stringify(d)});}catch(e){}}
