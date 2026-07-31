@@ -85,6 +85,21 @@ window.BRIEF = (function () {
     '#v-brief .br-bub.done{opacity:.72}',
     '#v-brief .br-ctl{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin-top:10px;padding-top:11px;border-top:1px solid var(--line)}',
     '#v-brief .br-stat{font-size:11.5px;color:var(--faint);margin-top:8px}',
+    '#v-brief .br-prep{background:var(--panel);border:1px solid var(--line);padding:16px 18px;margin:0 0 14px}',
+    '#v-brief .br-preptop{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:12px}',
+    '#v-brief .br-preptitle{font-size:14px;font-weight:700;color:var(--txt)}',
+    '#v-brief .br-preptime{font-size:13px;font-variant-numeric:tabular-nums;color:var(--dim);white-space:nowrap}',
+    '#v-brief .br-prepbar{height:4px;overflow:hidden;border-radius:999px;background:var(--line);margin-bottom:15px}',
+    '#v-brief .br-prepbar i{display:block;width:34%;height:100%;border-radius:inherit;background:var(--dawn);animation:brPrepMove 1.35s ease-in-out infinite}',
+    '#v-brief .br-prepsteps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:0;padding:0;list-style:none}',
+    '#v-brief .br-prepstep{display:grid;grid-template-columns:24px 1fr;align-items:center;gap:7px;padding:8px;border:1px solid var(--line);color:var(--faint);font-size:12px;line-height:1.35}',
+    '#v-brief .br-prepnum{display:grid;place-items:center;width:24px;height:24px;border-radius:50%;border:1px solid var(--line2);font-size:11px;font-weight:700;background:var(--panel2)}',
+    '#v-brief .br-prepstep.done{color:var(--dim)}#v-brief .br-prepstep.done .br-prepnum{color:var(--onacc);border-color:var(--dawn);background:var(--dawn)}',
+    '#v-brief .br-prepstep.active{color:var(--txt);font-weight:700;border-color:var(--dawn)}#v-brief .br-prepstep.active .br-prepnum{color:var(--onacc);border-color:var(--dawn);background:var(--dawn)}',
+    '#v-brief .br-prepstat{font-size:12px;color:var(--dim);margin-top:10px}',
+    '@keyframes brPrepMove{0%{transform:translateX(-110%)}50%{transform:translateX(190%)}100%{transform:translateX(405%)}}',
+    '@media(max-width:700px){#v-brief .br-prepsteps{grid-template-columns:1fr 1fr}#v-brief .br-prepstep{padding:7px}}',
+    '@media(prefers-reduced-motion:reduce){#v-brief .br-prepbar i{animation-duration:3s}}',
     '#v-brief .br-err{border:1px solid var(--line2);background:var(--panel);padding:13px 15px;font-size:13.5px;color:var(--txt)}',
     '@media(max-width:700px){#v-brief .br-bd{max-width:90%}#v-brief .br-date{margin-left:0;width:100%}}'
   ].join('');
@@ -121,6 +136,7 @@ window.BRIEF = (function () {
   var p2pend = null, p2done = false, voices = [];
   // 고품질(Gemini) 오디오 — 준비되면 브라우저 TTS 대신 이걸로 재생. 실패 시 자동 폴백.
   var mode = 'tts', aud = null, aURL = {}, SEG = {}, aPart = 0, aT0 = [];
+  var regenStartedAt = 0, regenStage = 0, regenTimer = null;
 
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]; }); }
   function $(id) { return document.getElementById(id); }
@@ -462,6 +478,28 @@ window.BRIEF = (function () {
     });
   }
 
+  function regenStepHTML(n, title) {
+    var state = n < regenStage ? 'done' : (n === regenStage ? 'active' : 'wait');
+    return '<li class="br-prepstep ' + state + '"><span class="br-prepnum">' +
+      (n < regenStage ? '✓' : n) + '</span><span>' + title + '</span></li>';
+  }
+  function renderRegenPrep() {
+    var p = $('brPlayer'); if (!p || !regenStartedAt) return;
+    var sec = Math.max(0, Math.floor((Date.now() - regenStartedAt) / 1000));
+    var labels = ['전반 대본 만드는 중', '후반 대본 만드는 중', '전반 음성 굽는 중', '후반 음성 굽는 중'];
+    p.innerHTML = '<div class="br-prep" role="status" aria-live="polite">' +
+      '<div class="br-preptop"><span class="br-preptitle">대담을 새로 굽고 있습니다</span><span class="br-preptime">' +
+      sec + '초 경과</span></div><div class="br-prepbar" aria-hidden="true"><i></i></div>' +
+      '<ol class="br-prepsteps">' + regenStepHTML(1, '전반 대본') + regenStepHTML(2, '후반 대본') +
+      regenStepHTML(3, '전반 음성') + regenStepHTML(4, '후반 음성') + '</ol>' +
+      '<div class="br-prepstat">' + regenStage + '/4 · ' + labels[regenStage - 1] + ' · ' + sec + '초</div></div>';
+  }
+  function setRegenStage(stage) { regenStage = stage; renderRegenPrep(); }
+  function stopRegenPrep() {
+    if (regenTimer) { clearInterval(regenTimer); regenTimer = null; }
+    regenStartedAt = 0; regenStage = 0;
+  }
+
   // 「대담 다시 굽기」 실체 — 재생 흐름과 분리해 대본·오디오를 확실히 다시 굽는다.
   // 순서가 중요: 오디오(brief-audio)는 R2 의 대본을 읽어 굽기 때문에 대본(p1→p2)을 먼저
   // 재생성한 뒤 오디오(p1,p2)를 굽는다. 각 fetch 를 끝까지 기다려(worker 가 R2 put 을 마친 뒤
@@ -471,14 +509,19 @@ window.BRIEF = (function () {
   function regenDialogue(btn) {
     var orig = btn ? btn.textContent : '';
     if (btn) { btn.disabled = true; btn.textContent = '굽는 중…'; }
+    regenStartedAt = Date.now(); regenStage = 1; renderRegenPrep();
+    regenTimer = setInterval(renderRegenPrep, 1000);
     var drain = function (r) { return (r && r.arrayBuffer) ? r.arrayBuffer().catch(function () {}) : null; };
-    var done = function () { if (btn) { btn.disabled = false; btn.textContent = orig; } };
+    var done = function () { stopRegenPrep(); if (btn) { btn.disabled = false; btn.textContent = orig; } };
     return api(1, true)
-      .then(function () { return api(2, true); })
-      .then(function () { return fetch(audUrl(1, true), { credentials: 'same-origin' }).then(drain).catch(function () {}); })
-      .then(function () { return fetch(audUrl(2, true), { credentials: 'same-origin' }).then(drain).catch(function () {}); })
+      .then(function () { setRegenStage(2); return api(2, true); })
+      .then(function () { setRegenStage(3); return fetch(audUrl(1, true), { credentials: 'same-origin' }).then(drain).catch(function () {}); })
+      .then(function () { setRegenStage(4); return fetch(audUrl(2, true), { credentials: 'same-origin' }).then(drain).catch(function () {}); })
       .then(function () { done(); loadArch(); openPlayer(); })
-      .catch(function () { done(); });
+      .catch(function () {
+        done();
+        var p = $('brPlayer'); if (p) p.innerHTML = '<div class="br-err">대담 생성이 중단됐습니다. 잠시 후 다시 시도해 주세요.</div>';
+      });
   }
 
   function openPlayer() {
