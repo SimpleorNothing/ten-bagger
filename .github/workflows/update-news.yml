@@ -13,6 +13,7 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
 
 concurrency:
   group: update-news
@@ -58,23 +59,21 @@ jobs:
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: node scripts/fetch-pulse.mjs
-      - name: Commit & push if changed (rebase-safe)
+      - name: Create or update news refresh PR
         if: steps.guard.outputs.skip != 'true'
-        run: |
-          FILES="news.json news_digest.json news_archive.json archive pulse.json"
-          if [ -z "$(git status --porcelain $FILES)" ]; then
-            echo "No change in $FILES."; exit 0
-          fi
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add $FILES
-          git commit -m "chore: update news feed + digest + pulse"
-          for i in 1 2 3 4 5; do
-            if git pull --rebase --autostash origin main \
-               && git push origin HEAD:main; then
-              echo "pushed on attempt $i"; exit 0
-            fi
-            git rebase --abort 2>/dev/null || true
-            echo "push attempt $i lost the race; backing off"; sleep $(( RANDOM % 6 + 3 ))
-          done
-          echo "::error::push failed after 5 attempts"; exit 1
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore: update news feed + digest + pulse"
+          branch: automation/update-news
+          delete-branch: true
+          title: "chore: update news feed + digest + pulse"
+          body: |
+            Scheduled news, digest, archive and market-pulse refresh.
+            This PR is created because `main` is protected from direct workflow pushes.
+          add-paths: |
+            news.json
+            news_digest.json
+            news_archive.json
+            archive
+            pulse.json
