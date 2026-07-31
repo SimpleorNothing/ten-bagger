@@ -80,10 +80,17 @@
     n.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();open();}});
   }
   function render(n){
-    var list=sorted(), menu=n.getAttribute('data-menu')||'', last=MENU_LAST[menu]||(list[0]&&list[0].d);
-    if(!last){n.textContent='';return;}
-    n.textContent='update : '+fmtDate(last);
-    n.setAttribute('title','클릭 시 전체 변경 이력');
+    var list=sorted();
+    var his=list.length?'<span class="his">이력 '+list.length+'</span>':'';
+    if(list.length){
+      // update 배지는 데이터 최신 시각이 아니라 코드·UI 변경 이력의 최신 날짜를 표시한다.
+      var top=list[0];
+      n.innerHTML='update : '+fmtDate(top.d)+(his?' · '+his:'');
+      n.setAttribute('title','최신 코드 변경일 · 클릭 시 사이트 변경 이력');
+    } else {
+      n.textContent='';
+      return;
+    }
     wire(n);
   }
   var NODES=[];
