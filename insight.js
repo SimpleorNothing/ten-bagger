@@ -907,12 +907,7 @@ function persist(){cacheSet();clearTimeout(putTimer);putTimer=setTimeout(push,20
   strip('insStripDec',f.filter(function(o){return !!NUM[o.c.route]&&!o.c.applied;}).sort(byScore).slice(0,5),'관점과 정보 — 숫자 반영 대기',
    '실적·판단·단계·비중 파일은 자동으로 바뀌지 않습니다. 검증 후 반영하고 02 인사이트 찾기에서 <b>반영 완료</b>로 표시하세요.');
  }
- function stamp(){
-  var e=$('updIns');if(!e)return;
-  var t=0;recs.forEach(function(r){if(r.t>t)t=r.t;});
-  e.textContent=t?('update : '+new Date(t).toLocaleString('ko-KR',{hour12:false})):'';
- }
- function renderAll(){recomputeGrades();SIGCTX=sigCtx();renderLevel();renderGradeBoard();renderList();renderSigRest();renderStrips();stamp();}
+ function renderAll(){recomputeGrades();SIGCTX=sigCtx();renderLevel();renderGradeBoard();renderList();renderSigRest();renderStrips();}
 
  /* --- 파일 → 텍스트
     브라우저가 ZIP 기반 Office 파일(DOCX·PPTX)을 file.text() 로 읽으면 PK·word/document.xml
@@ -1274,7 +1269,7 @@ function persist(){cacheSet();clearTimeout(putTimer);putTimer=setTimeout(push,20
   '채택 관점은 <b>라이프사이클</b>(전제·발동조건·폐기트리거·점검일)을 달고, 점검일이 도래하면 <b>점검 필요</b>로 재부상해 발동/만료/유지를 트리아지한다.</p>';
  var SECTION_HTML='<div class="vhead" style="position:relative"><div class="vkick">Insight · 인사이트 찾기</div>'+
   '<h1 class="vtitle">자료에서 <em>유의미한 것</em>만 — 그리고 선별 반영</h1>'+
-  '<span class="updstamp abs" id="updIns"></span></div>'+
+  '</div>'+
   '<div class="ins-wrap">'+
    '<div class="ins-card">'+
     '<div class="ins-row"><input class="ins-in" id="insUrl" placeholder="URL (선택)"></div>'+
