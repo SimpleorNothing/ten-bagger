@@ -674,7 +674,6 @@ async function handleCouncilDiscPost(request, env) {
     steelman: String(e.steelman || "").slice(0, 2000),
   };
   arr.push(discussion);
-  if (arr.length > 20) arr = arr.slice(-20);
   await env.MEMO_BUCKET.put(COUNCIL_DISC_KEY, JSON.stringify(arr), { httpMetadata: { contentType: "application/json" } });
   return memoJson({ ok: true, count: arr.length }, 200);
 }
