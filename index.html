@@ -55,7 +55,7 @@ nav{display:flex;gap:3px;margin-left:auto;flex-wrap:wrap}
 main{padding:36px 0 calc(90px + var(--am-ticker-h));position:relative}
 .asof{margin:40px 0 8px;font-family:var(--mono);text-align:left;line-height:1.55;border-top:1px solid var(--line);padding-top:14px}
 .asof-row{display:flex;gap:8px;justify-content:flex-start;align-items:baseline}
-#v-port.on ~ #asofBox{display:none}  /* 06 리밸런싱: 시세/정보 스탬프 숨김 — 기준일은 자산현황 줄에 단일 표기 */
+#asofBox{display:none}  /* 메뉴별 공통 업데이트 이력으로 통일 — 본문의 시세·정보 갱신 시각은 표시하지 않음 */
 .digest{margin:14px 0 18px;border:1px solid var(--line);border-radius:10px;background:rgba(28,126,214,.045);padding:12px 14px;font-family:var(--mono)}
 .digest .dg-h{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;font-weight:700;font-size:13px;color:var(--txt)}
 .digest .dg-in{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:#1c7ed6;border:1px solid #1c7ed6;border-radius:4px;padding:0 5px}
@@ -1927,7 +1927,7 @@ window.CYCLE=(function(){
 
   <div id="clResult"></div>
 
-  <h2 class="msec" style="margin-top:26px">토론 이력 <span class="mnote">최신순 · 새로고침 후에도 유지 · 최대 20건</span> <button class="cl-btn" id="clHistBtn" style="margin-left:8px;vertical-align:middle">새로고침</button></h2>
+  <h2 class="msec" style="margin-top:26px">토론 이력 <span class="mnote">최근 생성 1건만 유지</span> <button class="cl-btn" id="clHistBtn" style="margin-left:8px;vertical-align:middle">새로고침</button></h2>
   <div id="clHistory"><div class="cl-note">불러오는 중…</div></div>
 
   <div class="cl-bar" id="clBar">
