@@ -9,7 +9,7 @@
     thread:'2026-08-01', decision:'2026-08-01', brief:'2026-08-01', memo:'2026-08-01'
   };
   var MKT_CHANGELOG=[
-    {d:'2026-08-01',t:'03 전문가 원탁의 council.json SoT 중복 결과·이력 블록 직접 로드 제거 — 기본 토론 이력만 표시'},
+    {d:'2026-08-01',t:'06 모닝 브리핑처럼 동적으로 생성되는 메뉴에도 제목 우측 공통 업데이트 이력이 자동 표시되도록 보완'},
     {d:'2026-08-01',t:'06 모닝 브리핑 본문의 시세·정보 갱신 시각을 제거하고, 모든 메뉴의 공통 업데이트 이력만 표시'},
     {d:'2026-08-01',t:'01 미국 지수·미 10년물·WTI 등 장 마감 데이터 갱신을 06:05 KST 1차 실행과 06:35 KST 재시도로 보강'},
     {d:'2026-08-01',t:'01~07 모든 메뉴의 업데이트 이력을 제목 우측 공통 배지로 통일하고, 화면 본문의 중복 업데이트 표시는 제거'},
@@ -115,7 +115,7 @@
       n.setAttribute('role','button');n.setAttribute('tabindex','0');n.setAttribute('aria-haspopup','dialog');
       vh.appendChild(n);
     }
-    NODES.push(n);
+    if(NODES.indexOf(n)<0)NODES.push(n);
     render(n);      // 즉시 폴백(변경 로그 날짜) 렌더
   }
   // 05 리밸런싱 추정 리비전 트래커 「기대수익 점수」 컬럼 로더(raer.js 자가 마운트).
@@ -157,7 +157,7 @@
     var s=document.createElement('script');s.id='quoteJs';s.src='/quote.js';s.defer=true;
     (document.body||document.documentElement).appendChild(s);
   }
-  function boot(){
+  function mountAll(){
     mountHead('#v-market .vhead','mktUpdMarket','market');
     mountHead('#v-insight .vhead','mktUpdInsight','insight');
     mountHead('#v-council .vhead','mktUpdCouncil','council');
@@ -165,6 +165,9 @@
     mountHead('#v-decision .vhead','mktUpdDecision','decision');
     mountHead('#v-brief .vhead','mktUpdBrief','brief');
     mountHead('#v-memo .vhead','mktUpdMemo','memo');
+  }
+  function boot(){
+    mountAll();
     loadRaer();                                     // 추정 리비전 트래커 기대수익 컬럼
     loadLead();                                     // 01 월간 선행지표(FRED) 카드
     loadRisk();                                     // 01 리스크 3축 보드
@@ -173,5 +176,11 @@
     loadQuote();                                    // 01 상단 투자 명언 스트립
   }
   document.addEventListener('keydown',function(e){if(e.key==='Escape')hide();});
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
+  function watchDynamicViews(){
+    if(!document.body||!window.MutationObserver)return;
+    new MutationObserver(function(){
+      if(document.getElementById('v-brief')&&!document.getElementById('mktUpdBrief'))mountHead('#v-brief .vhead','mktUpdBrief','brief');
+    }).observe(document.body,{childList:true,subtree:true});
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){boot();watchDynamicViews();});else{boot();watchDynamicViews();}
 })();
