@@ -3997,20 +3997,27 @@ var HIDDEN_KEY='am_topic_radar_hidden_v1',hiddenTopics=[];
       btn.remove();})
      .catch(function(){btn.disabled=false;btn.textContent='불러오지 못했습니다 · 다시 시도';});};
    var d=document.getElementById('mktDigestAsof');if(d&&dg&&dg.asOf)d.textContent='자동 요약 · '+dg.asOf.slice(0,10);
-   var html='',used={};
+   var html='',used={},nonHeldDigest={};
    if(dg){
     html+='<div class="dg-head">'+esc(dg.headline||'')+'</div>';
     (dg.groups||[]).forEach(function(g){
+     var heldItems=byHeld(g.items).filter(function(it){return WMAP[String(it.tk||'').toUpperCase()]>0;});
+     (g.items||[]).forEach(function(it){
+      var k=String(it.tk||'').toUpperCase();
+      if(!(WMAP[k]>0))nonHeldDigest[k]={tk:k,nm:it.nm||k};
+     });
+     if(!heldItems.length)return;
      html+='<div class="dg-grp">'+esc(g.title||'')+'</div>';
-     byHeld(g.items).forEach(function(it){var k=String(it.tk||'').toUpperCase();used[k]=1;
+     heldItems.forEach(function(it){var k=String(it.tk||'').toUpperCase();used[k]=1;
       html+='<div class="stk-blk" id="stknews-'+esc(k)+'"><div class="stk-hd"><span class="tk">'+esc(it.tk||'')+'</span><span class="nm">'+esc(it.nm||'')+'</span></div>'
-       +(it.s?'<div class="stk-sum">'+esc(it.s)+'</div>':'')   // 종목별 관전 포인트(향후 주가 영향) — 기사 위 1~2줄
+       +(it.s?'<div class="stk-sum">'+esc(it.s)+'</div>':'')
        +'<div class="stk-body"><div class="stk-left">'+artRows(k)+'</div>'+cCol(it.tk)+'</div></div>';});
     });
    }
    // 비보유 종목은 뉴스 없이 주가 그래프만 표시한다. charts.json 전체 시리즈를 기준으로 구성해 news.json 정리와 독립적으로 유지.
    var invKM={};Object.keys(KM).forEach(function(t){invKM[KM[t]]=t;});
    var chartStocks={};
+   Object.keys(nonHeldDigest).forEach(function(tk){chartStocks[tk]=nonHeldDigest[tk];});
    Object.keys(CH).forEach(function(ck){
     var tk=invKM[ck]||String(ck).toUpperCase();
     if(WMAP[tk]>0)return;
