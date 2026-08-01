@@ -1847,14 +1847,17 @@ window.CYCLE=(function(){
   #v-council .cl-card.on{border-color:var(--dawn);box-shadow:0 0 0 1px var(--dawn),0 4px 14px rgba(22,36,45,.08)}
   #v-council .cl-chk{position:absolute;top:12px;right:12px;width:20px;height:20px;border-radius:20px;border:1px solid var(--line2);display:flex;align-items:center;justify-content:center;color:var(--onacc);font-size:12px;font-weight:800}
   #v-council .cl-card.on .cl-chk{background:var(--dawn);border-color:var(--dawn)}
-  #v-council .cl-top{display:flex;gap:12px}
+  #v-council .cl-top{display:flex;gap:12px;min-width:0}
   #v-council .cl-nm{font-size:15px;font-weight:700;color:var(--txt)}
-  #v-council .cl-field{font-size:12.5px;color:var(--dim)}
-  #v-council .cl-chip{font-family:var(--mono);font-size:10px;font-weight:700;color:var(--dim);background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:2px 6px;white-space:nowrap}
+  #v-council .cl-meta{display:flex;align-items:center;gap:6px;margin-top:5px;min-width:0;overflow:hidden}
+  #v-council .cl-field{font-size:12.5px;color:var(--dim);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  #v-council .cl-chip{font-family:var(--mono);font-size:10px;font-weight:700;color:var(--dim);background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:2px 6px;white-space:nowrap;flex:0 1 auto;min-width:0;max-width:100%;overflow:hidden;text-overflow:ellipsis}
   #v-council .cl-pill{font-family:var(--mono);font-size:11px;font-weight:700;border-radius:20px;padding:2px 9px;white-space:nowrap}
-  #v-council .cl-view{font-size:14px;line-height:1.6;color:var(--txt);margin:12px 0 0;padding-left:10px;border-left:2px solid var(--line2)}
-  #v-council .cl-foot{display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:10px;border-top:1px solid var(--line)}
-  #v-council .cl-upd{font-size:12px;color:var(--faint)}
+  #v-council .mkt-grid .cl-card{height:100%;display:flex;flex-direction:column;min-width:0}
+  #v-council .cl-view{font-size:14px;line-height:1.6;color:var(--txt);margin:12px 0 0;padding-left:10px;border-left:2px solid var(--line2);flex:1}
+  #v-council .cl-foot{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:12px;padding-top:10px;border-top:1px solid var(--line)}
+  #v-council .cl-upd{font-size:12px;color:var(--faint);line-height:1.45;min-width:0;flex:1;overflow-wrap:anywhere}
+  #v-council .cl-foot .cl-btn{flex:0 0 auto;min-width:62px;white-space:nowrap;line-height:1.2;text-align:center}
   #v-council .cl-btn{background:var(--panel2);border:1px solid var(--line2);color:var(--txt);border-radius:3px;padding:5px 10px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit}
   #v-council .cl-btn:hover{border-color:var(--dawn)}
   #v-council .cl-btnp{background:var(--dawn);border:1px solid var(--dawn);color:var(--onacc);border-radius:3px;padding:9px 18px;font-size:13.5px;font-weight:700;cursor:pointer;font-family:inherit}
@@ -2017,7 +2020,7 @@ window.CYCLE=(function(){
         '<div class="cl-top">'+avatar(e.cfg,56)+
           '<div style="min-width:0;flex:1"><div style="display:flex;align-items:center;gap:8px"><span class="cl-nm">'+esc(e.name)+'</span>'+
           '<span class="cl-pill" style="color:'+c+';background:color-mix(in srgb,'+c+' 12%,transparent);border:1px solid color-mix(in srgb,'+c+' 45%,transparent)">'+esc(e.stance)+'</span></div>'+
-          '<div style="display:flex;align-items:center;gap:6px;margin-top:5px"><span class="cl-chip">'+esc(e.chip)+'</span><span class="cl-field">'+esc(e.field)+'</span></div></div></div>'+
+          '<div class="cl-meta"><span class="cl-chip" title="'+esc(e.chip)+'">'+esc(e.chip)+'</span><span class="cl-field" title="'+esc(e.field)+'">'+esc(e.field)+'</span></div></div></div>'+
         '<p class="cl-view" style="border-left-color:'+c+'">'+esc(e.view)+'</p>'+
         '<div class="cl-foot"><span class="cl-upd">업데이트 '+esc(e.updated)+'</span>'+
           '<button class="cl-btn" data-act="upd" data-id="'+e.id+'">관점 갱신</button></div></div>';
