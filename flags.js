@@ -192,3 +192,6 @@
   s.defer = true;
   document.head.appendChild(s);
 })();
+
+/* 03 전문가 카드 관점 본문 접기/펼치기 */
+(function(){var s=document.createElement("script");s.src="/council-view-collapse.js";s.defer=true;document.head.appendChild(s);})();
