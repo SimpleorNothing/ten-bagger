@@ -201,7 +201,7 @@ async function localVolDrift(sym) {
 async function handleTickerLive() {
   const symbols = {
     ixic: "^IXIC", gspc: "^GSPC", es: "ES=F", nq: "NQ=F", ks11: "^KS11", ksdaq: "^KQ11", fx: "KRW=X", wti: "CL=F",
-    nikkei: "^N225", twii: "^TWII", shc: "^SSEC", hsi: "^HSI", stoxx50: "^STOXX50E", us10y: "^TNX",
+    nikkei: "^N225", twii: "^TWII", shc: "^SSEC", hsi: "^HSI", stoxx50: "^STOXX50E", us10y: "^TNX", btc: "BTC-USD", gold: "GC=F",
   };
   const out = {};
   await Promise.all(Object.entries(symbols).map(async ([key, sym]) => {
