@@ -715,6 +715,15 @@ table.tk th.c{text-align:center}
 .stk-body{display:flex}.stk-left{flex:1 1 62%;min-width:0}
 .stk-chart{flex:0 0 36%;border-left:1px solid var(--line);border-top:1px solid var(--line);padding:10px 10px 6px;display:flex;flex-direction:column;justify-content:flex-start;background:var(--panel)}
 .stk-cv{width:100%;height:190px;flex:0 0 190px;display:block;cursor:crosshair}
+.stk-nonheld-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin:10px 0 14px}
+.stk-nonheld-card{min-width:0;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--panel)}
+.stk-nonheld-card .stk-hd{padding:9px 10px;gap:6px;white-space:nowrap;overflow:hidden}
+.stk-nonheld-card .stk-hd .tk{font-size:11px}.stk-nonheld-card .stk-hd .nm{font-size:12px;overflow:hidden;text-overflow:ellipsis}
+.stk-nonheld-card .stk-chart{border:0;padding:6px;background:var(--panel)}
+.stk-nonheld-card .stk-cv{height:125px;flex-basis:125px}
+@media(max-width:1100px){.stk-nonheld-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(max-width:800px){.stk-nonheld-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:560px){.stk-nonheld-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:700px){.stk-body{flex-direction:column}.stk-chart{border-left:0;flex-basis:auto}.stk-cv{height:150px;flex-basis:150px}}
 /* 토픽 레이더 = 상대 좌표 보드 + 절대 위치 카드. 초기값만 2열, 이후 포인터로 자유 배치. */
 #mktMacroNews{position:relative;display:block;min-height:56px}
@@ -3999,11 +4008,23 @@ var HIDDEN_KEY='am_topic_radar_hidden_v1',hiddenTopics=[];
        +'<div class="stk-body"><div class="stk-left">'+artRows(k)+'</div>'+cCol(it.tk)+'</div></div>';});
     });
    }
-   var rest=Object.keys(byTk).filter(function(k){return !used[k];}).sort();
+   // 비보유 종목은 뉴스 없이 주가 그래프만 표시한다. charts.json 전체 시리즈를 기준으로 구성해 news.json 정리와 독립적으로 유지.
+   var invKM={};Object.keys(KM).forEach(function(t){invKM[KM[t]]=t;});
+   var chartStocks={};
+   Object.keys(CH).forEach(function(ck){
+    var tk=invKM[ck]||String(ck).toUpperCase();
+    if(WMAP[tk]>0)return;
+    var st=(typeof STATE!=='undefined'?STATE.find(function(x){return String(x.ticker||'').toUpperCase()===tk;}):null);
+    chartStocks[tk]={tk:tk,nm:(st&& (st.name||st.nm))||((byTk[tk]&&byTk[tk][0]||{}).name)||tk,ck:ck};
+   });
+   var rest=Object.keys(chartStocks).sort();
    if(rest.length){
-    html+='<div class="dg-grp">기타 종목</div>';
-    rest.forEach(function(k){var nm=(byTk[k][0]||{}).name||k;
-     html+='<div class="stk-blk" id="stknews-'+esc(k)+'"><div class="stk-hd"><span class="tk">'+esc(k)+'</span><span class="nm">'+esc(nm)+'</span></div><div class="stk-body"><div class="stk-left">'+artRows(k)+'</div>'+cCol(k)+'</div></div>';});
+    html+='<div class="dg-grp">미보유 종목 · 주가 그래프</div><div class="stk-nonheld-grid">';
+    rest.forEach(function(tk){
+     var o=chartStocks[tk];
+     html+='<div class="stk-nonheld-card" id="stknews-'+esc(tk)+'"><div class="stk-hd"><span class="tk">'+esc(o.tk)+'</span><span class="nm">'+esc(o.nm)+'</span></div>'+cCol(o.tk)+'</div>';
+    });
+    html+='</div>';
    }
    if(dg&&dg.watch&&dg.watch.length)html+='<div class="dg-watch"><b>일정 주의</b> · '+dg.watch.map(esc).join(' · ')+'</div>';
    host.innerHTML=html||'<div class="mkt-ph">뉴스 없음</div>';
