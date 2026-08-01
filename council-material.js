@@ -8,10 +8,6 @@
   if (window.__councilMaterialMounted) return;
   window.__councilMaterialMounted = true;
 
-  var MAX_FILES = 6;
-  var MAX_FILE_BYTES = 25 * 1024 * 1024;
-  var MAX_FILE_CHARS = 40000;
-  var MAX_TOTAL_CHARS = 100000;
   var items = [];
   var busy = false;
   var lastSent = null;
@@ -34,8 +30,7 @@
   }
   function trimText(s) {
     s = norm(s);
-    if (s.length <= MAX_FILE_CHARS) return s;
-    return s.slice(0, 26000) + '\n\n[중간 내용 생략]\n\n' + s.slice(-14000);
+    return s;
   }
   function ext(name) {
     var m = String(name || '').toLowerCase().match(/\.([a-z0-9]+)$/);
@@ -116,7 +111,6 @@
   }
   async function readFile(file) {
     if (!file) throw new Error('파일이 없습니다.');
-    if (file.size > MAX_FILE_BYTES) throw new Error('파일당 25MB까지 지원합니다.');
     var x = ext(file.name);
     if (x === 'pdf') return trimText(await readPdf(file));
     if (x === 'docx') return trimText(await readDocx(file));
@@ -129,9 +123,7 @@
     var used = 0, parts = [];
     items.filter(function (x) { return x.ok; }).forEach(function (x, i) {
       var head = '[자료 ' + (i + 1) + ' · ' + x.name + ']\n';
-      var room = MAX_TOTAL_CHARS - used - head.length;
-      if (room <= 0) return;
-      var body = x.text.slice(0, room);
+      var body = x.text;
       parts.push(head + body);
       used += head.length + body.length;
     });
@@ -168,15 +160,11 @@
     var good = items.filter(function (x) { return x.ok; });
     if (busy) setMsg('자료를 읽고 있습니다. 완료되면 토론을 시작할 수 있습니다.');
     else if (good.length) setMsg(good.length + '개 자료 준비 완료 · 총 ' + totalText().length.toLocaleString() + '자 · 토론 시작 시 자동 첨부');
-    else setMsg('최대 6개 · 파일당 25MB · PDF·PPTX·DOCX·TXT·MD·CSV·JSON·SRT·VTT 지원');
+    else setMsg('');
   }
   async function addFiles(list) {
     var files = Array.prototype.slice.call(list || []);
     if (!files.length) return;
-    if (items.length + files.length > MAX_FILES) {
-      setMsg('자료는 최대 ' + MAX_FILES + '개까지 올릴 수 있습니다.', true);
-      files = files.slice(0, Math.max(0, MAX_FILES - items.length));
-    }
     var added = files.map(function (f) {
       return { file: f, name: f.name || '자료', type: f.type || '', text: '', ok: false, pending: true, error: '' };
     });
