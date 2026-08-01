@@ -219,7 +219,7 @@
     var sec = document.createElement('section');
     sec.id = 'clMaterial';
     sec.innerHTML =
-      '<h2 class="msec">분석 자료 <span class="mnote">실적 발표자료 · 프레젠테이션 · 컨콜 스크립트 · 여러 파일 통합</span></h2>' +
+      '<h2 class="msec">참고할 자료</h2>' +
       '<input id="clMatFile" type="file" multiple hidden accept=".pdf,.pptx,.ppt,.docx,.txt,.md,.csv,.json,.srt,.vtt,.html,.htm">' +
       '<div id="clMatDrop" class="cl-drop" role="button" tabindex="0">클릭 또는 드래그하여 자료 업로드</div>' +
       '<div id="clMatList"></div>' +
