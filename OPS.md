@@ -1,6 +1,8 @@
-**최종 갱신: 2026-08-02 18:30 (KST)**
+**최종 갱신: 2026-08-02 19:01 (KST)**
 
 # OPS — 알파맵 운영 가이드
+
+> 2026-08-02 19:01 · **04 분기 클라우드 차트 B 단위 정수 표기.** 왼쪽 수주잔고 축을 T에서 B로 바꾸고, 수주잔고·매출·CAPEX의 막대 값과 툴팁 합계·기업별 값을 모두 B 기준 정수로 통일했다. 괄호 안 비율·배수 표기는 기존 기준을 유지한다.
 
 > 2026-08-02 18:30 · **04 분기 클라우드 수요·투자 차트 전 구간 공시값 확정.** 24.1Q~26.2Q 수주잔고의 ‘없음’을 제거하고 Amazon 10-Q·10-K, Microsoft Commercial RPO, Alphabet Cloud backlog 기준으로 3사 합계를 채웠다. 매출은 Microsoft Cloud·AWS·Google Cloud, CAPEX는 각사 공시 기준으로 기업별 합계와 누적 비중을 재계산했다. Microsoft Cloud는 Intelligent Cloud와 범위가 다르고, Microsoft RPO·CAPEX 및 3사 CAPEX의 정의가 서로 다름을 화면 주석에 명시했다.
 
