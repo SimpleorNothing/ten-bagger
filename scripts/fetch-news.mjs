@@ -1,7 +1,7 @@
 // Daily news headline collector for the 初入 Observatory · Alpha Map.
 // Runs in GitHub Actions (has internet); this repo's sandbox blocks egress,
 // same as fetch-prices.mjs. Source of truth for tickers is the C array in
-// index.html. Pulls Google News RSS per holding/candidate into news.json.
+// index.html. Pulls Google News RSS per current holding into news.json.
 //
 // IMPORTANT: this collector SCREENS but never SCORES. It never touches
 // alpha.json / earnings.json / judgment.json / SIGNAL_LOG. Deciding signal
@@ -11,7 +11,7 @@
 // 스크리닝(items[].m)은 '무엇을 보여줄지'만 정한다(표시 창 방어) — 판단·숫자 변경이 아니다.
 // 사다리·정규식·소스 티어는 ./news-screen.mjs 가 단일 소스(MV=2).
 // m=2 논제(펀더멘털) / m=1 리비전·수급 실사건 / m=0 비물질(사후 등락 서술·홍보·추측·콘텐츠팜).
-// m=0 도 news_archive.json 에는 전건 보존된다(삭제 아님, 표시 제외일 뿐).
+// m=0·m=1 기사도 news_archive.json 에는 전건 보존된다(삭제 아님, 표시 제외일 뿐).
 // 수집 축은 셋: ① 종목축 ② 시그널축(확정 사실 키워드 결합) ③ 병목축(레이어 고정 — 리밸런싱 입력).
 //
 // news.json is repo-only review material: it is in .assetsignore and
@@ -28,7 +28,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 const PER_TICKER = 8;
 const PER_TICKER_SIG = 4;
-const MIN_M = 1;
+const MIN_M = 2;
 const PRUNE_DAYS = 95;
 const SITE_PER_TICKER = 5;
 const MAX_ITEMS = 2000;
@@ -49,7 +49,7 @@ function readCandidates() {
   const m = html.match(/const C=(\[[\s\S]*?\n\];)/);
   if (!m) throw new Error('C array not found in index.html');
   const C = eval(m[1].replace(/;\s*$/, ''));
-  return C.map((c) => ({ id: c.id, ticker: c.ticker, mkt: c.mkt, name: c.name }));
+  return C.map((c) => ({ id: c.id, ticker: c.ticker, mkt: c.mkt, name: c.name, held: c.held === true }));
 }
 
 function newsQuery(c) {
@@ -459,7 +459,7 @@ async function main() {
   try { prev = JSON.parse(fs.readFileSync(OUT, 'utf8')); } catch (e) { /* first run */ }
 
   const MACRO_TOPICS = await discoverMacroTopics(prev.macroTopics);
-  const candidates = [...readCandidates().filter((c) => !SKIP(c)), ...MACRO_TOPICS, ...BOTTLENECK_TOPICS];
+  const candidates = [...readCandidates().filter((c) => !SKIP(c) && c.held), ...MACRO_TOPICS, ...BOTTLENECK_TOPICS];
 
   const now = new Date();
   const collected = [];
@@ -558,7 +558,7 @@ async function main() {
   const payload = {
     asOf: now.toISOString(),
     source: 'Google News RSS · 종목축 + 시그널축 + 병목축 (기사별 한 줄 요약 + 물질성 스크리닝)',
-    note: `사이트 종목 카드의 "일자 + 요약" 행 소스. 최근 ${PRUNE_DAYS}일 창 · 종목당 최신 ${SITE_PER_TICKER}건(첫 로딩 페이로드 상한) · **물질성 스크리닝 통과분만**(items[].m>=${MIN_M} — 2=논제/펀더멘털, 1=리비전·수급 실사건, 0=사후 등락 서술·홍보·추측·콘텐츠팜으로 제외). 탈락 기사는 삭제가 아니라 ${ARCHIVE_OUT} 에 전건 보존. 나머지 3개월치는 ${SHARD_DIR}/{티커}.json 을 '더 보기'로 온디맨드 로드. 신호/소음 판단과 SIGNAL_LOG 반영은 사람/Claude의 몫 — 채점·차트에는 쓰이지 않는다.`,
+    note: `사이트 종목 카드의 "일자 + 요약" 행 소스. 최근 ${PRUNE_DAYS}일 창 · 종목당 최신 ${SITE_PER_TICKER}건(첫 로딩 페이로드 상한) · **투자 논제 스크리닝 통과분만**(items[].m>=${MIN_M} — 2=향후 실적·수주·투자·전략에 영향을 주는 펀더멘털 사실. 1=목표가·수급 이벤트, 0=사후 등락 서술·홍보·추측·콘텐츠팜으로 사이트에서 제외). 탈락 기사는 삭제가 아니라 ${ARCHIVE_OUT} 에 전건 보존. 나머지 3개월치는 ${SHARD_DIR}/{티커}.json 을 '더 보기'로 온디맨드 로드. 신호/소음 판단과 SIGNAL_LOG 반영은 사람/Claude의 몫 — 채점·차트에는 쓰이지 않는다.`,
     count: items.length,
     macroTopics: MACRO_TOPICS,
     bottleneck: BOTTLENECK_TOPICS,
