@@ -3813,11 +3813,35 @@ var HIDDEN_KEY='am_topic_radar_hidden_v1',hiddenTopics=[];
    // 토픽 레이더는 독립 목록에 머물지 않는다. 같은 화면의 시장 맥박과
    // 리스크·사이클 보드가 이 이벤트를 받아 관련 토픽을 각 카드에 표시한다.
    // 상태·수치 변경은 원자료 검증이 필요한 별도 판단이므로 여기서 하지 않는다.
-   window.TopicRadar={asOf:(nw&&nw.asOf)||'',items:order.map(function(k){
+   // 보드 연결에는 토픽 제목만으로는 부족하다. 예를 들어 "상류 · 하이퍼스케일러 capex"와
+   // "수주잔고 vs capex"는 연결돼야 하지만, 긴 카드 문구 전체를 서로 포함하는지는 비교할 수 없다.
+   // 축별 검증 가능한 핵심어만 별도로 둬서 표시 연결에 사용한다. 보드의 판정·수치에는 사용하지 않는다.
+   var TOPIC_TERMS={
+    china:['중국','china','cxmt','딥시크','deepseek','수출통제','반도체','관세','공급망'],
+    capex:['capex','캐펙스','캐팩스','자본지출','하이퍼스케일러','빅테크','ai 투자','ai지출'],
+    chip:['반도체','semiconductor','chip','수출통제','공급망','관세'],
+    power:['전력','power','grid','그리드','냉각','원전','송전'],
+    energy:['유가','oil','에너지','energy','중동','이란','호르무즈','원유'],
+    trade:['관세','tariff','무역','trade'],
+    rates:['금리','fed','fomc','cpi','pce','인플레','inflation','통화정책'],
+    fx:['환율','달러','dollar','fx','forex'],
+    bn_l3_dram:['dram','hbm','메모리','가격','공급'],
+    bn_l4_pkg:['패키징','packaging','cowos','후공정','캐파'],
+    bn_l6_opt:['옵티컬','optical','광통신','cpo','리드타임'],
+    bn_l8_pwr:['전력','power','grid','그리드','냉각','송전'],
+    bn_silicon:['실리콘','silicon','asic','자체칩','커스텀'],
+    bn_asic:['asic','커스텀','실리콘','전력효율','추론']
+   };
+   var topicItems=order.map(function(k){
      var lst=byA[k]||[],title=NM[k]||(lst[0]&&lst[0].name)||k;
      if(k==='china'){var cn=lst.find(function(it){return /중국 AI 부상/.test(it.name||'');});title=cn?cn.name:'중국 AI 부상·반도체 수출통제';}
-     return {key:k,name:title,summary:sums[k]||'',items:lst.slice(0,k==='china'?CHINA_MX:MX)};
-   })};
+     return {key:k,name:title,summary:sums[k]||'',items:lst.slice(0,k==='china'?CHINA_MX:MX),terms:TOPIC_TERMS[k]||[]};
+   });
+   window.TopicRadar={asOf:(nw&&nw.asOf)||'',items:topicItems,match:function(keys,max){
+     var query=(keys||[]).filter(Boolean).map(function(x){return String(x).toLowerCase();}).join(' ');
+     return topicItems.map(function(t){var score=(t.terms||[]).reduce(function(n,term){return n+(query.indexOf(String(term).toLowerCase())>=0?1:0);},0);return {topic:t,score:score};})
+      .filter(function(x){return x.score>0;}).sort(function(a,b){return b.score-a.score;}).slice(0,max||2).map(function(x){return x.topic;});
+   }};
    document.dispatchEvent(new CustomEvent('am:topic-radar'));
    var html='';
    order.forEach(function(k){
@@ -4081,7 +4105,7 @@ var HIDDEN_KEY='am_topic_radar_hidden_v1',hiddenTopics=[];
  var PDIR={risk:'위험',opp:'기회',opportunity:'기회',neu:'중립',neutral:'중립'};
  function pdirCls(d){d=String(d||'neu').toLowerCase();return d==='risk'?'risk':(d==='opp'||d==='opportunity')?'opp':'neu';}
  function topicText(t){return [t&&t.name,t&&t.summary].concat((t&&t.items)||[]).map(function(x){return typeof x==='string'?x:[x&&x.title,x&&x.a,x&&x.w].join(' ');}).join(' ').toLowerCase();}
- function topicHits(keys,max){var ts=(window.TopicRadar&&window.TopicRadar.items)||[],out=[];keys=(keys||[]).map(function(k){return String(k).toLowerCase();}).filter(Boolean);
+ function topicHits(keys,max){if(window.TopicRadar&&typeof window.TopicRadar.match==='function')return window.TopicRadar.match(keys,max);var ts=(window.TopicRadar&&window.TopicRadar.items)||[],out=[];keys=(keys||[]).map(function(k){return String(k).toLowerCase();}).filter(Boolean);
   ts.forEach(function(t){var hay=topicText(t);if(keys.some(function(k){return hay.indexOf(k)>=0;}))out.push(t);});return out.slice(0,max||2);}
  function topicRefsHTML(keys){var hits=topicHits(keys,2);if(!hits.length)return '';return '<div class="topic-ref"><b>토픽 레이더 연관</b> '+hits.map(function(t){return esc(t.name||'관련 토픽');}).join(' · ')+'</div>';}
  async function loadPulse(){
