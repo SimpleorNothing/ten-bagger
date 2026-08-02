@@ -270,13 +270,13 @@ window.INSIGHT=(function(){
     '<button type="button" class="ins-lc-x" data-x aria-label="닫기">✕</button></div>'+
    '<div class="ins-lc-claim">'+esc(c.text||'')+'</div>'+
    '<div class="ins-lc-bd">'+cards+
-    '<div class="ins-ap-note">「지금 반영」은 보드의 gauge/verdict 또는 01 시장 맥락·일정 설명을 기존 스키마 안에서 계산해 PR 없이 바로 커밋한다. 근거가 불충분하거나 이미 반영됐으면 변경하지 않는다.</div>'+
+    '<div class="ins-ap-note">「지금 반영」은 보드의 gauge/verdict 또는 01 시장 맥락·일정 설명을 기존 스키마 안에서 계산해 자동 PR·검증·병합으로 반영한다. 근거가 불충분하거나 이미 반영됐으면 변경하지 않는다.</div>'+
     '<textarea class="ins-lc-in ins-ap-ta" readonly rows="5">'+esc(order)+'</textarea></div>'+
    '<div class="ins-lc-ft"><button type="button" class="ins-btn primary" data-apply-now>🚀 지금 반영</button>'+
     '<button type="button" class="ins-btn" data-copy>📋 반영 지시 복사</button>'+
     '<button type="button" class="ins-btn" data-done>'+(c.siteDone?'처리 해제':'처리함 표시')+'</button>'+
     '<button type="button" class="ins-btn" data-x>닫기</button>'+
-    '<span class="ins-lc-note">지금 반영 = 커밋 직행 · 반영 지시 복사 = Claude에 수동 전달</span></div>'+
+    '<span class="ins-lc-note">지금 반영 = 자동 PR·병합 · 반영 지시 복사 = Claude에 수동 전달</span></div>'+
    '</div>';
   document.body.appendChild(ov);
   ov.addEventListener('click',function(e){if(e.target===ov)lcClose();});
@@ -305,7 +305,10 @@ window.INSIGHT=(function(){
      .then(function(r){return r.json().then(function(j){return {ok:r.ok,j:j};});})
      .then(function(res){
       if(!stEl)return;
-      if(!res.ok||res.j.error){stEl.textContent='❌ 실패 — '+esc(String(res.j.error||'오류'));return;}
+      if(!res.ok||res.j.error){
+       var detail=res.j.detail?(' · '+String(res.j.detail).replace(/\s+/g,' ').slice(0,180)):'';
+       stEl.textContent='❌ 실패 — '+esc(String(res.j.error||'오류')+detail);return;
+      }
       if(res.j.changed){anyChanged=true;stEl.textContent='✅ 반영됨'+(res.j.reason?' — '+esc(res.j.reason):'');}
       else{stEl.textContent='— 변경 없음'+(res.j.reason?' · '+esc(res.j.reason):'');}
      })
@@ -907,7 +910,12 @@ function persist(){cacheSet();clearTimeout(putTimer);putTimer=setTimeout(push,20
   strip('insStripDec',f.filter(function(o){return !!NUM[o.c.route]&&!o.c.applied;}).sort(byScore).slice(0,5),'관점과 정보 — 숫자 반영 대기',
    '실적·판단·단계·비중 파일은 자동으로 바뀌지 않습니다. 검증 후 반영하고 02 인사이트 찾기에서 <b>반영 완료</b>로 표시하세요.');
  }
- function renderAll(){recomputeGrades();SIGCTX=sigCtx();renderLevel();renderGradeBoard();renderList();renderSigRest();renderStrips();}
+ function stamp(){
+  var e=$('updIns');if(!e)return;
+  var t=0;recs.forEach(function(r){if(r.t>t)t=r.t;});
+  e.textContent=t?('update : '+new Date(t).toLocaleString('ko-KR',{hour12:false})):'';
+ }
+ function renderAll(){recomputeGrades();SIGCTX=sigCtx();renderLevel();renderGradeBoard();renderList();renderSigRest();renderStrips();stamp();}
 
  /* --- 파일 → 텍스트
     브라우저가 ZIP 기반 Office 파일(DOCX·PPTX)을 file.text() 로 읽으면 PK·word/document.xml
@@ -1269,7 +1277,7 @@ function persist(){cacheSet();clearTimeout(putTimer);putTimer=setTimeout(push,20
   '채택 관점은 <b>라이프사이클</b>(전제·발동조건·폐기트리거·점검일)을 달고, 점검일이 도래하면 <b>점검 필요</b>로 재부상해 발동/만료/유지를 트리아지한다.</p>';
  var SECTION_HTML='<div class="vhead" style="position:relative"><div class="vkick">Insight · 인사이트 찾기</div>'+
   '<h1 class="vtitle">자료에서 <em>유의미한 것</em>만 — 그리고 선별 반영</h1>'+
-  '</div>'+
+  '<span class="updstamp abs" id="updIns"></span></div>'+
   '<div class="ins-wrap">'+
    '<div class="ins-card">'+
     '<div class="ins-row"><input class="ins-in" id="insUrl" placeholder="URL (선택)"></div>'+
