@@ -139,9 +139,12 @@
     var title=document.querySelector('#dsAisd .ds-title');if(!title)return;
     var host=title.parentNode;if(!host)return;
     injectCSS();if(getComputedStyle(host).position==='static')host.style.position='relative';
-    var n=host.querySelector('.mkt-upd');
-    if(!n){n=document.createElement('span');n.className='cyc-upd mkt-upd';n.id='mktUpdThreadAisd';n.setAttribute('data-menu','thread');n.setAttribute('role','button');n.setAttribute('tabindex','0');n.setAttribute('aria-haspopup','dialog');host.appendChild(n);}
-    if(NODES.indexOf(n)<0)NODES.push(n);render(n);
+    var n=host.querySelector('.mkt-upd'),made=false;
+    if(!n){n=document.createElement('span');n.className='cyc-upd mkt-upd';n.id='mktUpdThreadAisd';n.setAttribute('data-menu','thread');n.setAttribute('role','button');n.setAttribute('tabindex','0');n.setAttribute('aria-haspopup','dialog');host.appendChild(n);made=true;}
+    if(NODES.indexOf(n)<0)NODES.push(n);
+    // MutationObserver가 감시 중인 DOM을 매번 다시 쓰면 자기 자신을 재호출한다.
+    // 신규 마운트일 때만 렌더하고, 이력 비동기 갱신은 renderAll()이 한 번 처리한다.
+    if(made)render(n);
   }
   // 05 리밸런싱 추정 리비전 트래커 「기대수익 점수」 컬럼 로더(raer.js 자가 마운트).
   // index.html 무편집·worker 무편집을 위해 이미 로드되는 이 부트스트랩에서 <script>를 주입한다.
