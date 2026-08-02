@@ -9,6 +9,8 @@
     thread:'2026-08-01', decision:'2026-08-01', brief:'2026-08-01', memo:'2026-08-01'
   };
   var MKT_CHANGELOG=[
+    {d:'2026-08-02',t:'04 클라우드 수요·투자 분기 차트를 수주잔고·매출·CAPEX 통합 막대그래프로 변경하고, 3사(Amazon·Microsoft·Alphabet)만 표시'},
+    {d:'2026-08-02',t:'04 분기 통합 차트에 좌측 수주잔고 축($2.0T·$0.5T 간격)과 우측 매출·CAPEX 축($300B·$100B 간격)을 적용'},
     {d:'2026-08-01',t:'03 전문가 원탁 카드의 하단 정렬을 통일하고, 레이어 태그 넘침과 관점 갱신 버튼의 글자 단위 줄바꿈을 보완'},
     {d:'2026-08-01',t:'03 전문가 원탁의 고정 결과 요약 블록과 중복 이력 안내를 제거하고, 실제 토론 이력만 표시하도록 배포 갱신'},
     {d:'2026-08-01',t:'06 모닝 브리핑처럼 동적으로 생성되는 메뉴에도 제목 우측 공통 업데이트 이력이 자동 표시되도록 보완'},
@@ -47,6 +49,18 @@
     {d:'2026-07-12',t:'종목 뉴스 1일 2회 갱신(06:12 미장·18:12 한장) + 3개월 창·더보기'},
     {d:'2026-07-12',t:'03 관점과 정보 얻기 — 관점 등급(관찰→확신) 자동 승격 도입'}
   ];
+  // main의 커밋 이력을 GitHub API에서 읽어 모든 화면의 변경 이력에 자동 합산한다.
+  // 수동 배열은 과거 이력 보존용이며, 이후 머지되는 변경은 별도 등록 없이 자동 표시된다.
+  var AUTO_READY=false;
+  function loadAutoHistory(){
+    if(AUTO_READY)return;AUTO_READY=true;
+    fetch('https://api.github.com/repos/SimpleorNothing/ten-bagger/commits?sha=main&per_page=100',{headers:{'Accept':'application/vnd.github+json'}})
+      .then(function(r){return r.ok?r.json():[];}).then(function(rows){
+        if(!Array.isArray(rows))return;
+        rows.forEach(function(x){var c=x&&x.commit||{},d=(c.author&&c.author.date||'').slice(0,10),t=String(c.message||'').split('\n')[0].trim();if(d&&t&&!MKT_CHANGELOG.some(function(h){return h.d===d&&h.t===t;}))MKT_CHANGELOG.push({d:d,t:t});});
+        renderAll();
+      }).catch(function(){});
+  }
   var CSS='.mkt-upd{position:absolute;top:2px;right:0;margin:0;max-width:min(52vw,440px);'
     +'white-space:nowrap;flex-wrap:nowrap;z-index:3}'
     +'.mkt-upd .mu-t{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}'
@@ -120,6 +134,15 @@
     if(NODES.indexOf(n)<0)NODES.push(n);
     render(n);      // 즉시 폴백(변경 로그 날짜) 렌더
   }
+  // 04는 aisd.js가 자체 헤더를 주입하므로, 해당 제목의 우측에도 같은 배지를 마운트한다.
+  function mountThreadAisd(){
+    var title=document.querySelector('#dsAisd .ds-title');if(!title)return;
+    var host=title.parentNode;if(!host)return;
+    injectCSS();if(getComputedStyle(host).position==='static')host.style.position='relative';
+    var n=host.querySelector('.mkt-upd');
+    if(!n){n=document.createElement('span');n.className='cyc-upd mkt-upd';n.id='mktUpdThreadAisd';n.setAttribute('data-menu','thread');n.setAttribute('role','button');n.setAttribute('tabindex','0');n.setAttribute('aria-haspopup','dialog');host.appendChild(n);}
+    if(NODES.indexOf(n)<0)NODES.push(n);render(n);
+  }
   // 05 리밸런싱 추정 리비전 트래커 「기대수익 점수」 컬럼 로더(raer.js 자가 마운트).
   // index.html 무편집·worker 무편집을 위해 이미 로드되는 이 부트스트랩에서 <script>를 주입한다.
   function loadRaer(){
@@ -170,6 +193,8 @@
   }
   function boot(){
     mountAll();
+    mountThreadAisd();
+    loadAutoHistory();
     loadRaer();                                     // 추정 리비전 트래커 기대수익 컬럼
     loadLead();                                     // 01 월간 선행지표(FRED) 카드
     loadRisk();                                     // 01 리스크 3축 보드
@@ -182,6 +207,7 @@
     if(!document.body||!window.MutationObserver)return;
     new MutationObserver(function(){
       if(document.getElementById('v-brief')&&!document.getElementById('mktUpdBrief'))mountHead('#v-brief .vhead','mktUpdBrief','brief');
+      mountThreadAisd();
     }).observe(document.body,{childList:true,subtree:true});
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){boot();watchDynamicViews();});else{boot();watchDynamicViews();}
