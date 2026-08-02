@@ -1170,6 +1170,8 @@ async function handleSiteApply(request, env) {
   const itemName = String((body && body.itemName) || "");
   const claimText = String((body && body.text) || "").slice(0, 2000);
   const why = String((body && body.why) || "").slice(0, 2000);
+  // 카드에 표시하지 않은 확정 수치도 같은 인테이크 원문에서 검증해 반영한다.
+  const evidenceText = String((body && body.evidenceText) || "").slice(0, 20000);
   const src = (body && body.src) || {};
   const route = String((body && body.route) || "signal_log");
   const claimType = String((body && body.type) || "narrative");
@@ -1413,6 +1415,7 @@ async function handleSiteApply(request, env) {
     `분류: route=${route} · type=${claimType}`,
     why ? ("근거: " + why) : "",
     (src && (src.title || src.publisher)) ? ("출처: " + [src.title, src.publisher, src.date].filter(Boolean).join(" · ")) : "",
+    evidenceText ? ("[입력 원문 발췌 — 이 자료에 명시된 확정 수치만 gauge에 반영]\n" + evidenceText) : "",
   ].filter(Boolean).join("\n");
 
   // Sonnet 5 adaptive thinking이 기본 활성화돼 작은 출력 예산에서는 사고 토큰만
