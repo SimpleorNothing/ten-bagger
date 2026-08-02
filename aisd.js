@@ -150,14 +150,14 @@ var CSS=`#dsAisd{margin:2px 0 38px}
 #dsAisd .ds-capex-toggles button[aria-pressed="false"]{opacity:.45;text-decoration:line-through}
 #dsAisd .ds-capex-toggles button:focus-visible{outline:2px solid var(--st-accel);outline-offset:2px}
 #dsAisd .ds-capex-tip{position:absolute;z-index:2;display:none;pointer-events:none;min-width:150px;padding:8px 10px;background:var(--panel);border:1px solid var(--line2);border-radius:3px;box-shadow:0 4px 14px rgba(22,36,45,.12);font-family:var(--mono);font-size:12px;line-height:1.55;color:var(--txt);white-space:nowrap}
-#dsAisd .ds-topcharts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:16px 0 28px}
+#dsAisd .ds-topcharts{display:grid;grid-template-columns:1fr;gap:12px;margin:16px 0 28px}
 #dsAisd .ds-topchart{background:var(--panel);border:1px solid var(--line);border-radius:3px;padding:14px 15px;min-width:0}
-#dsAisd .ds-topchart.wide{grid-column:span 3}
+#dsAisd .ds-topchart.wide{grid-column:auto}
 #dsAisd .ds-topchart h3{font-size:15px;margin:0 0 5px;letter-spacing:-.01em}
 #dsAisd .ds-topchart .ds-l2{font-size:13px;line-height:1.5;min-height:39px}
 #dsAisd .ds-topchart .ds-capex-chart{height:270px;min-height:250px;margin-top:8px}
 #dsAisd .ds-topchart .ds-capex-toggles{margin-top:10px;margin-bottom:4px}
-#dsAisd .ds-mini-chart{position:relative;height:230px;margin-top:8px;border-bottom:1px solid var(--line2)}
+#dsAisd .ds-mini-chart{position:relative;height:330px;margin-top:8px;border-bottom:1px solid var(--line2)}
 #dsAisd .ds-mini-chart canvas{display:block;width:100%;height:100%;touch-action:manipulation}
 #dsAisd .ds-mini-tip{position:absolute;z-index:2;display:none;pointer-events:none;min-width:128px;padding:7px 9px;background:var(--panel);border:1px solid var(--line2);border-radius:3px;box-shadow:0 4px 14px rgba(22,36,45,.12);font-family:var(--mono);font-size:12px;line-height:1.5;color:var(--txt);white-space:nowrap}
 #dsAisd .ds-topfn{font-family:var(--mono);font-size:11px;color:var(--faint);margin-top:7px;line-height:1.5}
@@ -222,7 +222,7 @@ var CSS=`#dsAisd{margin:2px 0 38px}
 #dsAisd .ds-topcharts{grid-template-columns:1fr;gap:10px;margin-bottom:22px}
 #dsAisd .ds-topchart.wide{grid-column:auto}
 #dsAisd .ds-topchart .ds-capex-chart{height:250px;min-height:230px}
-#dsAisd .ds-mini-chart{height:215px}
+#dsAisd .ds-mini-chart{height:260px}
  .ds-msheet{padding:15px 14px}
  .ds-mtitle{font-size:18px}
  .ds-mlg{gap:7px 12px}
@@ -234,24 +234,10 @@ var HTML=`<div style="position:relative">
 
 <div class="ds-topcharts" aria-label="컴퓨팅 판매자 핵심 지표 차트">
   <section class="ds-topchart wide">
-    <h3>① 4사 투자·실적 합계</h3>
-    <div class="ds-l2">Amazon·Microsoft·Alphabet·Meta의 매출·CAPEX·영업이익·FCF — 아래 상세 차트와 <b>동일 데이터</b></div>
-    <div class="ds-capex-chart" data-capex-chart="top"><canvas tabindex="0" role="img" aria-label="컴퓨팅 판매자 4사의 매출, CAPEX, 영업이익, FCF 차트"></canvas><div class="ds-capex-tip" role="status" aria-live="polite"></div></div>
-    <div class="ds-capex-toggles" role="group" aria-label="상단 투자·실적 차트 시리즈 표시">
-      <button type="button" data-series="revenue" aria-pressed="true">매출</button><button type="button" data-series="capex" aria-pressed="true">CAPEX</button><button type="button" data-series="op" aria-pressed="true">영업이익</button><button type="button" data-series="fcf" aria-pressed="true">FCF</button>
-    </div>
-  </section>
-  <section class="ds-topchart">
-    <h3>② 클라우드 서비스 매출 합계</h3>
-    <div class="ds-l2">AWS·Azure·GCP 합산 — Meta는 자가 사용 모델이라 제외</div>
-    <div class="ds-mini-chart" data-mini-chart="cloud"><canvas tabindex="0" role="img" aria-label="AWS, Azure, GCP 클라우드 서비스 매출 합계 차트"></canvas><div class="ds-mini-tip" role="status" aria-live="polite"></div></div>
-    <div class="ds-topfn">2023~25A는 공개·추정치 혼합, 2026E~28E는 컨센서스 중앙 시나리오 · Azure는 공시 성장률 기반 환산</div>
-  </section>
-  <section class="ds-topchart">
-    <h3>③ 클라우드 수주잔고 합계</h3>
-    <div class="ds-l2">MSFT 상업 RPO·AWS RPO·Google Cloud 잔고 합산 — Meta 제외</div>
-    <div class="ds-mini-chart" data-mini-chart="backlog"><canvas tabindex="0" role="img" aria-label="Microsoft, AWS, Google Cloud 수주잔고 합계 차트"></canvas><div class="ds-mini-tip" role="status" aria-live="polite"></div></div>
-    <div class="ds-topfn">2026년 공시 시점 합산 · AWS는 1Q26 기준(신규 OpenAI $100B 제외), MSFT·Google은 2Q26 기준</div>
+    <h3>① 클라우드 수요·투자 분기 추이</h3>
+    <div class="ds-l2">AWS·Azure·GCP 매출, MSFT 상업 RPO·AWS RPO·Google Cloud 수주잔고, 3사 CAPEX 합산 — Meta 제외</div>
+    <div class="ds-mini-chart" data-mini-chart="quarterly"><canvas tabindex="0" role="img" aria-label="2024년 1분기부터 2026년 2분기까지 클라우드 수주잔고, 매출, CAPEX 합산 차트"></canvas><div class="ds-mini-tip" role="status" aria-live="polite"></div></div>
+    <div class="ds-topfn">막대=수주잔고·CAPEX, 라인=클라우드 서비스 매출 · 매출 괄호는 수주잔고 대비, CAPEX 괄호는 매출 대비 · Azure 매출은 공시 성장률 기반 환산, AWS 수주잔고는 1Q26 기준(신규 OpenAI $100B 제외)</div>
   </section>
 </div>
 
@@ -769,19 +755,20 @@ function mountCapexChart(root,which){
  var controls=box.parentNode.querySelector('.ds-capex-toggles');(controls?controls.querySelectorAll('button'):[]).forEach(function(b){b.addEventListener('click',function(){var k=b.dataset.series;visible[k]=!visible[k];b.setAttribute('aria-pressed',String(visible[k]));active=-1;tip.style.display='none';draw()})});
  var ro=typeof ResizeObserver!=='undefined'?new ResizeObserver(draw):null;if(ro)ro.observe(box);else window.addEventListener('resize',draw);draw();
 }
-function mountMiniChart(root,key){
- var box=root.querySelector('[data-mini-chart="'+key+'"]'),canvas=box&&box.querySelector('canvas'),tip=box&&box.querySelector('.ds-mini-tip');if(!canvas)return;
- var sets={cloud:{label:'클라우드 매출',years:['2023','2024','2025','2026E','2027E','2028E'],values:[199,245,302,365,442,525],actual:3,source:'AWS·Azure·GCP'},backlog:{label:'수주잔고',years:['1Q25','2Q25','3Q25','4Q25','1Q26','2Q26'],values:[748,856,1011,1190,1451,1556],actual:6,source:'MSFT·AWS·Google Cloud'}};
- var d=sets[key],ctx=canvas.getContext('2d'),active=-1;
+function mountQuarterlyCloudChart(root){
+ var box=root.querySelector('[data-mini-chart="quarterly"]'),canvas=box&&box.querySelector('canvas'),tip=box&&box.querySelector('.ds-mini-tip');if(!canvas)return;
+ var d={years:['24.1Q','24.2Q','24.3Q','24.4Q','25.1Q','25.2Q','25.3Q','25.4Q','26.1Q','26.2Q'],backlog:[400,475,550,650,748,856,1011,1190,1451,1556],revenue:[52,58,65,74,81,88,96,107,123,140],capex:[36,45,52,61,68,75,88,105,145,150]},ctx=canvas.getContext('2d'),active=-1;
  function fmt(v){return v>=1000?'$'+(v/1000).toFixed(v%1000?2:1).replace(/0$/,'')+'T':'$'+v+'B'}
  function col(name){return getComputedStyle(root).getPropertyValue(name).trim()||'#496176'}
- function draw(){var r=box.getBoundingClientRect(),dpr=Math.min(window.devicePixelRatio||1,2),w=Math.max(240,Math.round(r.width)),h=Math.max(190,Math.round(r.height));canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,w,h);
-  var pad={l:42,r:12,t:19,b:35},pw=w-pad.l-pad.r,ph=h-pad.t-pad.b,max=Math.ceil(Math.max.apply(null,d.values)*1.2/100)*100,min=Math.floor(Math.min.apply(null,d.values)*.8/100)*100,span=max-min||1,x=function(i){return pad.l+pw*(i+.5)/d.years.length},y=function(v){return pad.t+ph*(1-(v-min)/span)};
-  ctx.font='11px '+getComputedStyle(root).getPropertyValue('--mono');ctx.textBaseline='middle';ctx.strokeStyle=col('--line');ctx.fillStyle=col('--faint');ctx.lineWidth=1;[min,(min+max)/2,max].forEach(function(v){var yy=y(v);ctx.beginPath();ctx.moveTo(pad.l,yy+.5);ctx.lineTo(w-pad.r,yy+.5);ctx.stroke();ctx.textAlign='right';ctx.fillText(fmt(Math.round(v)),pad.l-6,yy)});
-  var bw=Math.min(38,pw/d.years.length*.56);d.values.forEach(function(v,i){var xx=x(i)-bw/2,yy=y(v),actual=i<d.actual;ctx.fillStyle=actual?col('--dawn'):col('--panel2');ctx.strokeStyle=col('--dawn');ctx.fillRect(xx,yy,bw,y(min)-yy);if(!actual){ctx.setLineDash([4,3]);ctx.strokeRect(xx+.5,yy+.5,bw-1,y(min)-yy-1);ctx.setLineDash([])}ctx.textAlign='center';ctx.fillStyle=col('--txt');ctx.font='700 11px '+getComputedStyle(root).getPropertyValue('--mono');ctx.fillText(fmt(v),x(i),Math.max(11,yy-8));ctx.font='11px '+getComputedStyle(root).getPropertyValue('--mono');ctx.fillStyle=col('--faint');ctx.fillText(d.years[i],x(i),h-14)});
-  if(active>=0){ctx.fillStyle='rgba(73,97,118,.07)';ctx.fillRect(x(active)-pw/d.years.length/2,pad.t,pw/d.years.length,ph)}
+ function draw(){var r=box.getBoundingClientRect(),dpr=Math.min(window.devicePixelRatio||1,2),w=Math.max(290,Math.round(r.width)),h=Math.max(220,Math.round(r.height));canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,w,h);
+  var pad={l:47,r:16,t:24,b:39},pw=w-pad.l-pad.r,ph=h-pad.t-pad.b,max=1800,x=function(i){return pad.l+pw*(i+.5)/d.years.length},y=function(v){return pad.t+ph*(1-v/max)};
+  ctx.font='11px '+getComputedStyle(root).getPropertyValue('--mono');ctx.textBaseline='middle';ctx.strokeStyle=col('--line');ctx.fillStyle=col('--faint');ctx.lineWidth=1;[0,600,1200,1800].forEach(function(v){var yy=y(v);ctx.beginPath();ctx.moveTo(pad.l,yy+.5);ctx.lineTo(w-pad.r,yy+.5);ctx.stroke();ctx.textAlign='right';ctx.fillText(fmt(v),pad.l-7,yy)});
+  var bw=Math.max(8,Math.min(28,pw/d.years.length*.33));d.backlog.forEach(function(v,i){var xx=x(i)-bw-2,yy=y(v);ctx.fillStyle=col('--dawn');ctx.fillRect(xx,yy,bw,y(0)-yy);ctx.fillStyle=col('--txt');ctx.textAlign='center';ctx.font='700 10px '+getComputedStyle(root).getPropertyValue('--mono');ctx.fillText(fmt(v),x(i)-bw/2-2,Math.max(12,yy-8))});
+  d.capex.forEach(function(v,i){var xx=x(i)+2,yy=y(v);ctx.fillStyle=col('--st-mature');ctx.fillRect(xx,yy,bw,y(0)-yy);ctx.fillStyle=col('--st-mature');ctx.textAlign='center';ctx.font='700 10px '+getComputedStyle(root).getPropertyValue('--mono');ctx.fillText(fmt(v)+' ('+Math.round(v/d.revenue[i]*100)+'%)',x(i)+bw/2+2,Math.max(12,yy-8))});
+  ctx.strokeStyle=col('--st-hot');ctx.fillStyle=col('--st-hot');ctx.lineWidth=2;ctx.beginPath();d.revenue.forEach(function(v,i){var xx=x(i),yy=y(v);i?ctx.lineTo(xx,yy):ctx.moveTo(xx,yy)});ctx.stroke();d.revenue.forEach(function(v,i){var xx=x(i),yy=y(v);ctx.beginPath();ctx.arc(xx,yy,3.5,0,Math.PI*2);ctx.fill();ctx.fillStyle=col('--st-hot');ctx.textAlign='center';ctx.font='700 10px '+getComputedStyle(root).getPropertyValue('--mono');ctx.fillText(fmt(v)+' ('+Math.round(v/d.backlog[i]*100)+'%)',xx,Math.min(h-pad.b-9,yy+17))});
+  ctx.fillStyle=col('--faint');ctx.font='11px '+getComputedStyle(root).getPropertyValue('--mono');d.years.forEach(function(v,i){ctx.textAlign='center';ctx.fillText(v,x(i),h-14)});if(active>=0){ctx.fillStyle='rgba(73,97,118,.07)';ctx.fillRect(x(active)-pw/d.years.length/2,pad.t,pw/d.years.length,ph)}
  }
- function show(e){var r=canvas.getBoundingClientRect(),px=e.clientX-r.left;active=Math.max(0,Math.min(d.values.length-1,Math.round((px-42)/(r.width-54)*d.values.length-.5)));tip.innerHTML='<b>'+d.years[active]+'</b><br>'+d.label+' · '+fmt(d.values[active])+'<br><span style="color:var(--faint)">'+d.source+'</span>';tip.style.display='block';tip.style.left=Math.min(r.width-142,Math.max(4,px+10))+'px';tip.style.top='7px';draw()}
+ function show(e){var r=canvas.getBoundingClientRect(),px=e.clientX-r.left;active=Math.max(0,Math.min(d.years.length-1,Math.round((px-47)/(r.width-63)*d.years.length-.5)));var i=active;tip.innerHTML='<b>'+d.years[i]+'</b><br>수주잔고 · '+fmt(d.backlog[i])+'<br>매출 · '+fmt(d.revenue[i])+' ('+Math.round(d.revenue[i]/d.backlog[i]*100)+'%)<br>CAPEX · '+fmt(d.capex[i])+' ('+Math.round(d.capex[i]/d.revenue[i]*100)+'%)';tip.style.display='block';tip.style.left=Math.min(r.width-164,Math.max(4,px+10))+'px';tip.style.top='7px';draw()}
  canvas.addEventListener('pointermove',show);canvas.addEventListener('pointerdown',show);canvas.addEventListener('pointerleave',function(e){if(e.pointerType!=='touch'){active=-1;tip.style.display='none';draw()}});var ro=typeof ResizeObserver!=='undefined'?new ResizeObserver(draw):null;if(ro)ro.observe(box);else window.addEventListener('resize',draw);draw();
 }
 function mount(){
@@ -790,10 +777,8 @@ function mount(){
  var st=document.createElement('style');st.textContent=CSS;document.head.appendChild(st);
  var wrap=document.createElement('div');wrap.id='dsAisd';wrap.innerHTML=HTML;
  host.insertBefore(wrap,host.firstChild);
- mountCapexChart(wrap,'[data-capex-chart="top"]');
  mountCapexChart(wrap,'[data-capex-chart="detail"]');
- mountMiniChart(wrap,'cloud');
- mountMiniChart(wrap,'backlog');
+ mountQuarterlyCloudChart(wrap);
  wrap.querySelectorAll('tr.exp').forEach(function(r){
   function tg(){r.classList.toggle('on');var d=r.nextElementSibling;if(d&&d.classList.contains('dtl'))d.classList.toggle('on');}
   r.addEventListener('click',tg);
