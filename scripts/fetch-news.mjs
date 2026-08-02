@@ -542,18 +542,44 @@ async function main() {
   console.log(`shards: ${SHARD_DIR}/ ${winByTk.size}개 종목 (3개월 창 · 스크리닝 통과분)`);
 
   const perTk = new Map();
-  const items = all
+  const displayItems = all
+    .filter((it) => it.ticker !== 'MACRO')
     .filter((it) => {
       const t = it.published ? new Date(it.published).getTime() : 0;
       if (t && t < cutoff) return false;
       if (!material(it)) return false;
-      const k = it.ticker === 'MACRO' ? (it.ax || axisOf(it.name || it.id)) : (it.ticker || '?');
+      const k = it.ticker || '?';
       const n = (perTk.get(k) || 0) + 1;
-      if (n > (k === 'china' ? 12 : SITE_PER_TICKER)) return false;
+      if (n > SITE_PER_TICKER) return false;
       perTk.set(k, n);
       return true;
     })
     .slice(0, MAX_ITEMS);
+
+  // 토픽 레이더는 종목 뉴스의 전역 상한(MAX_ITEMS)과 별도다.
+  // 함께 잘라내면 보유 종목 기사만으로 상한이 찰 때 MACRO 기사가 0건이 되어
+  // 보드 전체가 사라진다. 축별 최신 근거를 별도 예약해 항상 렌더링한다.
+  const radarAxes = new Set([
+    ...MACRO_TOPICS.map((t) => t.ax || axisOf(t.name || t.id)),
+    ...BOTTLENECK_TOPICS.map((t) => t.ax || axisOf(t.name || t.id)),
+    'china', // 중국 AI·메모리 기사는 관세/공급망 축과 별도 카드로 정규화한다.
+  ]);
+  const perAxis = new Map();
+  const macroItems = all
+    .filter((it) => it.ticker === 'MACRO')
+    .filter((it) => {
+      const t = it.published ? new Date(it.published).getTime() : 0;
+      if (t && t < cutoff) return false;
+      if (!material(it)) return false;
+      const axis = it.ax || axisOf(it.name || it.id);
+      if (!radarAxes.has(axis)) return false;
+      const n = (perAxis.get(axis) || 0) + 1;
+      const cap = axis === 'china' ? 12 : SITE_PER_TICKER;
+      if (n > cap) return false;
+      perAxis.set(axis, n);
+      return true;
+    });
+  const items = [...displayItems, ...macroItems];
 
   const payload = {
     asOf: now.toISOString(),
