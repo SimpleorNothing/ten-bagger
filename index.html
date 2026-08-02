@@ -736,6 +736,8 @@ table.tk th.c{text-align:center}
 #mktMacroNews .stk-hd[aria-expanded="true"]::after{content:'−'}
 #mktMacroNews .stk-hd:focus-visible{outline:2px solid var(--st-accel);outline-offset:-3px}
 #mktMacroNews .stk-blk.is-collapsed>:not(.stk-hd){display:none}
+#mktPulse .topic-ref,#riskBoard .topic-ref,#gatesBoard .topic-ref{margin-top:9px;padding-top:8px;border-top:1px dashed var(--line2);font-size:12px;line-height:1.45;color:var(--dim)}
+#mktPulse .topic-ref b,#riskBoard .topic-ref b,#gatesBoard .topic-ref b{font:700 11px var(--mono);letter-spacing:.03em;color:var(--faint);margin-right:4px}
 #mktMacroNews .stk-blk.is-dragging{opacity:.78;box-shadow:0 10px 28px rgba(22,36,45,.18)}
 #mktMacroNews .stk-topic-del{display:none;margin-left:auto;padding:3px 8px;border:1px solid var(--st-hot);border-radius:3px;background:var(--panel);color:var(--st-hot);font:700 12px/1.35 var(--mono);cursor:pointer}
 #mktMacroNews .stk-blk.show-delete .stk-topic-del{display:block}
@@ -3808,6 +3810,15 @@ var HIDDEN_KEY='am_topic_radar_hidden_v1',hiddenTopics=[];
    var REVIVE_CHINA_KEY='am_topic_radar_revive_china_v1';
    try{if(!localStorage.getItem(REVIVE_CHINA_KEY)){hiddenTopics=hiddenTopics.filter(function(k){return k!=='china';});localStorage.setItem(HIDDEN_KEY,JSON.stringify(hiddenTopics));localStorage.setItem(REVIVE_CHINA_KEY,'1');}}catch(e){}
    order=order.filter(function(k){return hiddenTopics.indexOf(k)<0;});
+   // 토픽 레이더는 독립 목록에 머물지 않는다. 같은 화면의 시장 맥박과
+   // 리스크·사이클 보드가 이 이벤트를 받아 관련 토픽을 각 카드에 표시한다.
+   // 상태·수치 변경은 원자료 검증이 필요한 별도 판단이므로 여기서 하지 않는다.
+   window.TopicRadar={asOf:(nw&&nw.asOf)||'',items:order.map(function(k){
+     var lst=byA[k]||[],title=NM[k]||(lst[0]&&lst[0].name)||k;
+     if(k==='china'){var cn=lst.find(function(it){return /중국 AI 부상/.test(it.name||'');});title=cn?cn.name:'중국 AI 부상·반도체 수출통제';}
+     return {key:k,name:title,summary:sums[k]||'',items:lst.slice(0,k==='china'?CHINA_MX:MX)};
+   })};
+   document.dispatchEvent(new CustomEvent('am:topic-radar'));
    var html='';
    order.forEach(function(k){
     var lst=byA[k].slice(0,k==='china'?CHINA_MX:MX);
@@ -4069,6 +4080,10 @@ var HIDDEN_KEY='am_topic_radar_hidden_v1',hiddenTopics=[];
  //  심리 요소 포함. narrative != numbers: 관측 판정 전용. =====
  var PDIR={risk:'위험',opp:'기회',opportunity:'기회',neu:'중립',neutral:'중립'};
  function pdirCls(d){d=String(d||'neu').toLowerCase();return d==='risk'?'risk':(d==='opp'||d==='opportunity')?'opp':'neu';}
+ function topicText(t){return [t&&t.name,t&&t.summary].concat((t&&t.items)||[]).map(function(x){return typeof x==='string'?x:[x&&x.title,x&&x.a,x&&x.w].join(' ');}).join(' ').toLowerCase();}
+ function topicHits(keys,max){var ts=(window.TopicRadar&&window.TopicRadar.items)||[],out=[];keys=(keys||[]).map(function(k){return String(k).toLowerCase();}).filter(Boolean);
+  ts.forEach(function(t){var hay=topicText(t);if(keys.some(function(k){return hay.indexOf(k)>=0;}))out.push(t);});return out.slice(0,max||2);}
+ function topicRefsHTML(keys){var hits=topicHits(keys,2);if(!hits.length)return '';return '<div class="topic-ref"><b>토픽 레이더 연관</b> '+hits.map(function(t){return esc(t.name||'관련 토픽');}).join(' · ')+'</div>';}
  async function loadPulse(){
   var host=document.getElementById('mktPulse');if(!host)return;
   try{
@@ -4082,16 +4097,18 @@ var HIDDEN_KEY='am_topic_radar_hidden_v1',hiddenTopics=[];
     var l1=(d.layer?'<b>'+esc(d.layer)+'</b>':'')+esc(d.l1||'');
     var jc=pdirCls(d.dir)==='risk'?'wn':pdirCls(d.dir)==='opp'?'ok':'nt';   // 판정 색은 data가 아니라 dir에서 파생(HTML 주입 차단)
     var l2=esc(d.l2||'')+(d.verdict?' → <span class="'+jc+'">'+esc(d.verdict)+'</span>':'');
+    var dkeys=[d.name,d.layer,d.l1,d.l2,d.verdict].concat((d.keys||[]));
     html+='<div class="stk-blk"><div class="stk-hd"><span class="nm">'+esc(d.name||'')+'</span>'+badge+'</div>'
-     +'<div class="mkt-lens"><div class="l1">'+l1+'</div><div class="l2">'+l2+'</div></div>';
+     +'<div class="mkt-lens"><div class="l1">'+l1+'</div><div class="l2">'+l2+'</div></div>'+topicRefsHTML(dkeys);
     var srcs=(d.srcs||d.src||[]).filter(function(s){return s&&(s.u||s.url);});
     if(srcs.length){html+='<div class="nlist">';
      srcs.slice(0,3).forEach(function(s){html+='<a class="nrow" href="'+esc(s.u||s.url)+'" target="_blank" rel="noopener"><span class="ntt">'+esc(s.t||s.title||s.u||s.url)+'</span></a>';});
      html+='</div>';}
     html+='</div>';});
    host.innerHTML=html;}
-  catch(e){host.innerHTML='<div class="mkt-ph">동인 합성 대기 (pulse.json)</div>';}
+ catch(e){host.innerHTML='<div class="mkt-ph">동인 합성 대기 (pulse.json)</div>';}
  }
+ document.addEventListener('am:topic-radar',function(){loadPulse();});
  // ===== 심리·수급·환율 게이지 (런타임 — 페이지 열 때마다 최신) =====
  function gauge(key,nm,val,lns,extra){return '<div class="mkt-card" data-indicator-key="'+esc(key)+'"><div class="mkt-nm">'+esc(nm)+'</div><div class="mkt-val">'+val+'</div>'+(lns||'')+(extra||'')+'</div>';}
  function gaugePoints(base,live){var m={};(base||[]).concat(live||[]).forEach(function(x){if(Array.isArray(x)&&x[0]&&x[1]!=null&&isFinite(x[1]))m[x[0]]=[x[0],+x[1]];});return Object.keys(m).sort().map(function(d){return m[d];});}

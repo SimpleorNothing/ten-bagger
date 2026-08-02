@@ -124,6 +124,20 @@
       }).join('') + '</div>';
   }
 
+  // 토픽 레이더에서 수집된 관점·기사를 같은 키워드로 연결한다.
+  // 이는 확인 대상을 보여 주는 용도이며, 리스크 상태나 게이지를 자동 변경하지 않는다.
+  function topicRefs(keys) {
+    var topics = (window.TopicRadar && window.TopicRadar.items) || [], out = [];
+    keys = (keys || []).map(function (k) { return String(k || '').toLowerCase(); }).filter(Boolean);
+    topics.forEach(function (t) {
+      var hay = [t.name, t.summary].concat(t.items || []).map(function (x) {
+        return typeof x === 'string' ? x : [x && x.title, x && x.a, x && x.w].join(' ');
+      }).join(' ').toLowerCase();
+      if (keys.some(function (k) { return hay.indexOf(k) >= 0; })) out.push(t.name || '관련 토픽');
+    });
+    return out.length ? '<div class="topic-ref"><b>토픽 레이더 연관</b> ' + esc(out.slice(0, 2).join(' · ')) + '</div>' : '';
+  }
+
   function card(it, news) {
     var st = stCls(it.state);
     var g = (it.gauge || []).map(function (x) {
@@ -143,6 +157,7 @@
       '<div class="mkt-lens"><div class="l1"><b>' + esc(it.tag || '') + '</b> ' + esc(it.frame || '') + '</div>' +
       '<div class="l2"><span class="' + st + '">판정</span> ' + esc(it.verdict || '') + '</div></div>' +
       (g ? '<div class="rk-g">' + g + '</div>' : '') +
+      topicRefs((it.keys || []).concat([it.name, it.tag, it.frame, it.verdict])) +
       '<div class="rk-morebox"><button type="button" class="rk-more" aria-expanded="false">조건·근거 보기 ↑</button>' +
       '<div class="rk-detail" role="region">' + detail + '</div></div>' +
       '</div>';
@@ -204,6 +219,11 @@
     wireDeletes(host);
   }
 
+  document.addEventListener('am:topic-radar', function () {
+    var host = document.getElementById(MOUNT_ID);
+    if (host && host._riskData) render(host._riskData[0], host._riskData[1], host);
+  });
+
   /* 「보유 종목」 스파크라인 섹션 제거(h2 + #mktHoldings) — SimpleorNothing 지시 2026-07-25 */
   function dropHoldings() {
     var grid = document.getElementById('mktHoldings');
@@ -248,7 +268,7 @@
     Promise.all([
       fetch('risk.json?t=' + t, { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }),
       fetch('news.json?t=' + t, { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; })
-    ]).then(function (a) { render(a[0], a[1], grid); });
+    ]).then(function (a) { grid._riskData = a; render(a[0], a[1], grid); });
     return true;
   }
 
