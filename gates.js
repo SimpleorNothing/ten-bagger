@@ -130,6 +130,10 @@
   // 토픽 레이더의 관점·근거를 같은 주제의 사이클 카드에 표시한다.
   // 관점 연결만 수행하며 상태·게이지·수치를 자동으로 바꾸지 않는다.
   function topicRefs(keys) {
+    if (window.TopicRadar && typeof window.TopicRadar.match === 'function') {
+      var matched = window.TopicRadar.match(keys, 2).map(function (t) { return t.name || '관련 토픽'; });
+      return matched.length ? '<div class="topic-ref"><b>토픽 레이더 연관</b> ' + esc(matched.join(' · ')) + '</div>' : '';
+    }
     var topics = (window.TopicRadar && window.TopicRadar.items) || [], out = [];
     keys = (keys || []).map(function (k) { return String(k || '').toLowerCase(); }).filter(Boolean);
     topics.forEach(function (t) {
