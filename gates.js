@@ -127,6 +127,20 @@
       }).join('') + '</div>';
   }
 
+  // 토픽 레이더의 관점·근거를 같은 주제의 사이클 카드에 표시한다.
+  // 관점 연결만 수행하며 상태·게이지·수치를 자동으로 바꾸지 않는다.
+  function topicRefs(keys) {
+    var topics = (window.TopicRadar && window.TopicRadar.items) || [], out = [];
+    keys = (keys || []).map(function (k) { return String(k || '').toLowerCase(); }).filter(Boolean);
+    topics.forEach(function (t) {
+      var hay = [t.name, t.summary].concat(t.items || []).map(function (x) {
+        return typeof x === 'string' ? x : [x && x.title, x && x.a, x && x.w].join(' ');
+      }).join(' ').toLowerCase();
+      if (keys.some(function (k) { return hay.indexOf(k) >= 0; })) out.push(t.name || '관련 토픽');
+    });
+    return out.length ? '<div class="topic-ref"><b>토픽 레이더 연관</b> ' + esc(out.slice(0, 2).join(' · ')) + '</div>' : '';
+  }
+
   function card(it, news) {
     var st = stCls(it.state);
     var g = (it.gauge || []).map(function (x) {
@@ -146,6 +160,7 @@
       '<div class="mkt-lens"><div class="l1"><b>' + esc(it.tag || '') + '</b> ' + esc(it.frame || '') + '</div>' +
       '<div class="l2"><span class="' + st + '">판정</span> ' + esc(it.verdict || '') + '</div></div>' +
       (g ? '<div class="gt-g">' + g + '</div>' : '') +
+      topicRefs((it.keys || []).concat([it.name, it.tag, it.frame, it.verdict])) +
       '<div class="gt-morebox"><button type="button" class="gt-more" aria-expanded="false">조건·근거 보기 ↑</button>' +
       '<div class="gt-detail" role="region">' + detail + '</div></div>' +
       '</div>';
@@ -209,6 +224,11 @@
     wireDeletes(host);
   }
 
+  document.addEventListener('am:topic-radar', function () {
+    var host = document.getElementById(MOUNT_ID);
+    if (host && host._gatesData) render(host._gatesData[0], host._gatesData[1], host);
+  });
+
   /* 앵커 — 1순위: 리스크 보드(#riskBoard) 바로 뒤(다음 형제 앞).
    * 폴백(리스크 보드 장기 미출현): 「관련 기사」(#mktMacroNews) 앞 — 선행 H2 역행(lead/risk 동일 픽스). */
   function anchorAfterRisk() {
@@ -247,7 +267,7 @@
     Promise.all([
       fetch('gates.json?t=' + t, { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }),
       fetch('news.json?t=' + t, { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; })
-    ]).then(function (a2) { render(a2[0], a2[1], grid); });
+    ]).then(function (a2) { grid._gatesData = a2; render(a2[0], a2[1], grid); });
     return true;
   }
 
