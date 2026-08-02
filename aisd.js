@@ -150,6 +150,17 @@ var CSS=`#dsAisd{margin:2px 0 38px}
 #dsAisd .ds-capex-toggles button[aria-pressed="false"]{opacity:.45;text-decoration:line-through}
 #dsAisd .ds-capex-toggles button:focus-visible{outline:2px solid var(--st-accel);outline-offset:2px}
 #dsAisd .ds-capex-tip{position:absolute;z-index:2;display:none;pointer-events:none;min-width:150px;padding:8px 10px;background:var(--panel);border:1px solid var(--line2);border-radius:3px;box-shadow:0 4px 14px rgba(22,36,45,.12);font-family:var(--mono);font-size:12px;line-height:1.55;color:var(--txt);white-space:nowrap}
+#dsAisd .ds-topcharts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:16px 0 28px}
+#dsAisd .ds-topchart{background:var(--panel);border:1px solid var(--line);border-radius:3px;padding:14px 15px;min-width:0}
+#dsAisd .ds-topchart.wide{grid-column:span 3}
+#dsAisd .ds-topchart h3{font-size:15px;margin:0 0 5px;letter-spacing:-.01em}
+#dsAisd .ds-topchart .ds-l2{font-size:13px;line-height:1.5;min-height:39px}
+#dsAisd .ds-topchart .ds-capex-chart{height:270px;min-height:250px;margin-top:8px}
+#dsAisd .ds-topchart .ds-capex-toggles{margin-top:10px;margin-bottom:4px}
+#dsAisd .ds-mini-chart{position:relative;height:230px;margin-top:8px;border-bottom:1px solid var(--line2)}
+#dsAisd .ds-mini-chart canvas{display:block;width:100%;height:100%;touch-action:manipulation}
+#dsAisd .ds-mini-tip{position:absolute;z-index:2;display:none;pointer-events:none;min-width:128px;padding:7px 9px;background:var(--panel);border:1px solid var(--line2);border-radius:3px;box-shadow:0 4px 14px rgba(22,36,45,.12);font-family:var(--mono);font-size:12px;line-height:1.5;color:var(--txt);white-space:nowrap}
+#dsAisd .ds-topfn{font-family:var(--mono);font-size:11px;color:var(--faint);margin-top:7px;line-height:1.5}
 /* 밸류체인 헤더 우측 「L1↔L2 관계도」 버튼 + 모달 팝업 (신규 :root 토큰 0 · ds- 스코프 · 면 3px/부표 20px) */
 #dsAisd .ds-mapbtn{margin-left:auto;font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.03em;color:var(--txt);background:var(--panel2);border:1px solid var(--line2);border-radius:3px;padding:5px 11px;cursor:pointer;transition:border-color .12s,box-shadow .12s;white-space:nowrap}
 #dsAisd .ds-mapbtn:hover{border-color:var(--dawn);box-shadow:0 4px 14px rgba(22,36,45,.06)}
@@ -207,7 +218,11 @@ var CSS=`#dsAisd{margin:2px 0 38px}
  #dsAisd .ds-mtx.plan thead th:nth-child(2),#dsAisd .ds-mtx.plan tbody tr:not(.sumrow) td:nth-child(2){display:none}
  #dsAisd .ds-rt{gap:7px}
  #dsAisd .ds-rtv{margin-left:0;width:100%}
- #dsAisd .ds-capex-chart{height:340px;min-height:300px}
+#dsAisd .ds-capex-chart{height:340px;min-height:300px}
+#dsAisd .ds-topcharts{grid-template-columns:1fr;gap:10px;margin-bottom:22px}
+#dsAisd .ds-topchart.wide{grid-column:auto}
+#dsAisd .ds-topchart .ds-capex-chart{height:250px;min-height:230px}
+#dsAisd .ds-mini-chart{height:215px}
  .ds-msheet{padding:15px 14px}
  .ds-mtitle{font-size:18px}
  .ds-mlg{gap:7px 12px}
@@ -215,6 +230,29 @@ var CSS=`#dsAisd{margin:2px 0 38px}
 var HTML=`<div style="position:relative">
   <div class="ds-kick">AI Value Chain · Demand · Supply</div>
   <h2 class="ds-title">AI <em>수요·공급</em> — 밸류체인으로 보는 상류·병목</h2>
+</div>
+
+<div class="ds-topcharts" aria-label="컴퓨팅 판매자 핵심 지표 차트">
+  <section class="ds-topchart wide">
+    <h3>① 4사 투자·실적 합계</h3>
+    <div class="ds-l2">Amazon·Microsoft·Alphabet·Meta의 매출·CAPEX·영업이익·FCF — 아래 상세 차트와 <b>동일 데이터</b></div>
+    <div class="ds-capex-chart" data-capex-chart="top"><canvas tabindex="0" role="img" aria-label="컴퓨팅 판매자 4사의 매출, CAPEX, 영업이익, FCF 차트"></canvas><div class="ds-capex-tip" role="status" aria-live="polite"></div></div>
+    <div class="ds-capex-toggles" role="group" aria-label="상단 투자·실적 차트 시리즈 표시">
+      <button type="button" data-series="revenue" aria-pressed="true">매출</button><button type="button" data-series="capex" aria-pressed="true">CAPEX</button><button type="button" data-series="op" aria-pressed="true">영업이익</button><button type="button" data-series="fcf" aria-pressed="true">FCF</button>
+    </div>
+  </section>
+  <section class="ds-topchart">
+    <h3>② 클라우드 서비스 매출 합계</h3>
+    <div class="ds-l2">AWS·Azure·GCP 합산 — Meta는 자가 사용 모델이라 제외</div>
+    <div class="ds-mini-chart" data-mini-chart="cloud"><canvas tabindex="0" role="img" aria-label="AWS, Azure, GCP 클라우드 서비스 매출 합계 차트"></canvas><div class="ds-mini-tip" role="status" aria-live="polite"></div></div>
+    <div class="ds-topfn">2023~25A는 공개·추정치 혼합, 2026E~28E는 컨센서스 중앙 시나리오 · Azure는 공시 성장률 기반 환산</div>
+  </section>
+  <section class="ds-topchart">
+    <h3>③ 클라우드 수주잔고 합계</h3>
+    <div class="ds-l2">MSFT 상업 RPO·AWS RPO·Google Cloud 잔고 합산 — Meta 제외</div>
+    <div class="ds-mini-chart" data-mini-chart="backlog"><canvas tabindex="0" role="img" aria-label="Microsoft, AWS, Google Cloud 수주잔고 합계 차트"></canvas><div class="ds-mini-tip" role="status" aria-live="polite"></div></div>
+    <div class="ds-topfn">2026년 공시 시점 합산 · AWS는 1Q26 기준(신규 OpenAI $100B 제외), MSFT·Google은 2Q26 기준</div>
+  </section>
 </div>
 
 <div class="ds-sec">판정 <span class="ds-note">이 블록이 답하는 질문 · 결론 먼저</span></div>
@@ -406,7 +444,7 @@ var HTML=`<div style="position:relative">
   <div class="ds-capex-toggles" role="group" aria-label="차트 시리즈 표시">
     <button type="button" data-series="revenue" aria-pressed="true">매출</button><button type="button" data-series="capex" aria-pressed="true">CAPEX</button><button type="button" data-series="op" aria-pressed="true">영업이익</button><button type="button" data-series="fcf" aria-pressed="true">FCF</button>
   </div>
-  <div class="ds-capex-chart"><canvas tabindex="0" role="img" aria-label="2023년부터 2028년까지 컴퓨팅 판매자 4사의 CAPEX, 매출, FCF, 영업이익 차트"></canvas><div class="ds-capex-tip" role="status" aria-live="polite"></div></div>
+  <div class="ds-capex-chart" data-capex-chart="detail"><canvas tabindex="0" role="img" aria-label="2023년부터 2028년까지 컴퓨팅 판매자 4사의 CAPEX, 매출, FCF, 영업이익 차트"></canvas><div class="ds-capex-tip" role="status" aria-live="polite"></div></div>
   <div class="ds-rt"><span class="ds-rtl"><span style="color:var(--st-dawn)">&#9473;</span> &#9312; 매출 트랙<br>4사 합산 · 동일 $축</span><span class="ds-rts"><i>2023</i>$1.229T</span><span class="ds-rta">→</span><span class="ds-rts"><i>2024</i>$1.398T (+14%)</span><span class="ds-rta">→</span><span class="ds-rts"><i>2025</i>$1.602T (+15%)</span><span class="ds-rta">→</span><span class="ds-rts"><i>26E</i>~$1.904T (+19%)</span><span class="ds-rta">→</span><span class="ds-rts"><i>27E</i>~$2.224T (+17%)</span><span class="ds-rta">→</span><span class="ds-rts"><i>28E</i>~$2.511T (+13%)</span><span class="ds-rtv up">CAPEX/매출 11%(23)→38%E(26)</span></div>
   <div class="ds-rt"><span class="ds-rtl"><span style="color:var(--st-hot)">&#9473;</span> &#9313; FCF 트랙<br>4사 합산 · 동일 $축</span><span class="ds-rts"><i>2023</i>~$210B</span><span class="ds-rta">→</span><span class="ds-rts"><i>2024</i>~$237B</span><span class="ds-rta">→</span><span class="ds-rts"><i>2025</i>~$200B</span><span class="ds-rta">→</span><span class="ds-rts"><i>26E</i>~$64B</span><span class="ds-rta">→</span><span class="ds-rts"><i>27E</i>~$25B</span><span class="ds-rta">→</span><span class="ds-rts"><i>28E</i>~$50B</span><span class="ds-rtv" style="color:var(--st-accel)">▼ CAPEX 급증으로 26E 현금창출 급감</span></div>
   <div class="ds-rt"><span class="ds-rtl"><span style="color:var(--st-mature)">&#9473;</span> &#9314; 영업이익 트랙<br>4사 합산 · 동일 $축</span><span class="ds-rts"><i>2023</i>~$256B</span><span class="ds-rta">→</span><span class="ds-rts"><i>2024</i>~$360B</span><span class="ds-rta">→</span><span class="ds-rts"><i>2025</i>~$421B</span><span class="ds-rta">→</span><span class="ds-rts"><i>26E</i>~$520B</span><span class="ds-rta">→</span><span class="ds-rts"><i>27E</i>~$523B</span><span class="ds-rta">→</span><span class="ds-rts"><i>28E</i>~$613B</span><span class="ds-rtv" style="color:var(--st-accel)">▲ 증익 지속 · 26E CAPEX가 영업이익 재추월</span></div>  <div class="ds-rt"><span class="ds-rtl">CAPEX 최신 스냅샷<br>4사 합산 · 2026-07-27</span>
@@ -697,8 +735,8 @@ var HTML=`<div style="position:relative">
     <div class="ds-mfn">2026-07 · 공개 보도 기준 근사치 · narrative 층(숫자 파일 무관)</div>
   </div>
 </div>`;
-function mountCapexChart(root){
- var box=root.querySelector('.ds-capex-chart'),canvas=box&&box.querySelector('canvas'),tip=box&&box.querySelector('.ds-capex-tip');if(!canvas)return;
+function mountCapexChart(root,which){
+ var box=root.querySelector(which||'.ds-capex-chart'),canvas=box&&box.querySelector('canvas'),tip=box&&box.querySelector('.ds-capex-tip');if(!canvas)return;
  var ctx=canvas.getContext('2d'),years=['2023','2024','2025','2026E','2027E','2028E'],visible={capex:true,revenue:true,fcf:true,op:true},hit=[],active=-1,labels=[];
  var data={capex:{label:'CAPEX',values:[136,214,358,725,801,950],display:['~$136B','~$214B','~$358B','~$725B','~$801B','~$950B'],yoy:[null,57,67,103,10,19],color:'--dawn',bar:true},revenue:{label:'매출',values:[1229,1398,1602,1904,2224,2511],display:['$1.229T','$1.398T','$1.602T','~$1.904T','~$2.224T','~$2.511T'],yoy:[null,14,15,19,17,13],color:'--st-dawn'},fcf:{label:'FCF',values:[210,237,200,64,25,50],display:['~$210B','~$237B','~$200B','~$64B','~$25B','~$50B'],color:'--st-hot'},op:{label:'영업이익',values:[256,360,421,520,523,613],display:['~$256B','~$360B','~$421B','~$520B','~$523B','~$613B'],color:'--st-mature'}};
  function col(name){return getComputedStyle(root).getPropertyValue(name).trim()||'#496176'}
@@ -728,8 +766,23 @@ function mountCapexChart(root){
  }
  function show(e){var r=canvas.getBoundingClientRect(),px=e.clientX-r.left,idx=Math.max(0,Math.min(5,Math.round((px-48)/(r.width-64)*6-.5)));active=idx;var lines=['<b>'+years[idx]+'</b>'];Object.keys(data).forEach(function(k){var v=data[k].values[idx];if(visible[k]&&v!=null){var suffix=(k==='fcf'||k==='op')?' ('+Math.round(v/data.revenue.values[idx]*100)+'%)':'';lines.push(data[k].label+' · '+fmt(v)+suffix)}});tip.innerHTML=lines.join('<br>');tip.style.display='block';tip.style.left=Math.min(r.width-170,Math.max(4,px+12))+'px';tip.style.top='8px';draw()}
  canvas.addEventListener('pointermove',show);canvas.addEventListener('pointerdown',show);canvas.addEventListener('keydown',function(e){if(e.key==='ArrowRight'||e.key==='ArrowLeft'){e.preventDefault();active=Math.max(0,Math.min(5,(active<0?0:active)+(e.key==='ArrowRight'?1:-1)));var r=canvas.getBoundingClientRect();show({clientX:r.left+48+(r.width-64)*(active+.5)/6})}});canvas.addEventListener('pointerleave',function(e){if(e.pointerType!=='touch'){active=-1;tip.style.display='none';draw()}});
- root.querySelectorAll('.ds-capex-toggles button').forEach(function(b){b.addEventListener('click',function(){var k=b.dataset.series;visible[k]=!visible[k];b.setAttribute('aria-pressed',String(visible[k]));active=-1;tip.style.display='none';draw()})});
+ var controls=box.parentNode.querySelector('.ds-capex-toggles');(controls?controls.querySelectorAll('button'):[]).forEach(function(b){b.addEventListener('click',function(){var k=b.dataset.series;visible[k]=!visible[k];b.setAttribute('aria-pressed',String(visible[k]));active=-1;tip.style.display='none';draw()})});
  var ro=typeof ResizeObserver!=='undefined'?new ResizeObserver(draw):null;if(ro)ro.observe(box);else window.addEventListener('resize',draw);draw();
+}
+function mountMiniChart(root,key){
+ var box=root.querySelector('[data-mini-chart="'+key+'"]'),canvas=box&&box.querySelector('canvas'),tip=box&&box.querySelector('.ds-mini-tip');if(!canvas)return;
+ var sets={cloud:{label:'클라우드 매출',years:['2023','2024','2025','2026E','2027E','2028E'],values:[199,245,302,365,442,525],actual:3,source:'AWS·Azure·GCP'},backlog:{label:'수주잔고',years:['1Q25','2Q25','3Q25','4Q25','1Q26','2Q26'],values:[748,856,1011,1190,1451,1556],actual:6,source:'MSFT·AWS·Google Cloud'}};
+ var d=sets[key],ctx=canvas.getContext('2d'),active=-1;
+ function fmt(v){return v>=1000?'$'+(v/1000).toFixed(v%1000?2:1).replace(/0$/,'')+'T':'$'+v+'B'}
+ function col(name){return getComputedStyle(root).getPropertyValue(name).trim()||'#496176'}
+ function draw(){var r=box.getBoundingClientRect(),dpr=Math.min(window.devicePixelRatio||1,2),w=Math.max(240,Math.round(r.width)),h=Math.max(190,Math.round(r.height));canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,w,h);
+  var pad={l:42,r:12,t:19,b:35},pw=w-pad.l-pad.r,ph=h-pad.t-pad.b,max=Math.ceil(Math.max.apply(null,d.values)*1.2/100)*100,min=Math.floor(Math.min.apply(null,d.values)*.8/100)*100,span=max-min||1,x=function(i){return pad.l+pw*(i+.5)/d.years.length},y=function(v){return pad.t+ph*(1-(v-min)/span)};
+  ctx.font='11px '+getComputedStyle(root).getPropertyValue('--mono');ctx.textBaseline='middle';ctx.strokeStyle=col('--line');ctx.fillStyle=col('--faint');ctx.lineWidth=1;[min,(min+max)/2,max].forEach(function(v){var yy=y(v);ctx.beginPath();ctx.moveTo(pad.l,yy+.5);ctx.lineTo(w-pad.r,yy+.5);ctx.stroke();ctx.textAlign='right';ctx.fillText(fmt(Math.round(v)),pad.l-6,yy)});
+  var bw=Math.min(38,pw/d.years.length*.56);d.values.forEach(function(v,i){var xx=x(i)-bw/2,yy=y(v),actual=i<d.actual;ctx.fillStyle=actual?col('--dawn'):col('--panel2');ctx.strokeStyle=col('--dawn');ctx.fillRect(xx,yy,bw,y(min)-yy);if(!actual){ctx.setLineDash([4,3]);ctx.strokeRect(xx+.5,yy+.5,bw-1,y(min)-yy-1);ctx.setLineDash([])}ctx.textAlign='center';ctx.fillStyle=col('--txt');ctx.font='700 11px '+getComputedStyle(root).getPropertyValue('--mono');ctx.fillText(fmt(v),x(i),Math.max(11,yy-8));ctx.font='11px '+getComputedStyle(root).getPropertyValue('--mono');ctx.fillStyle=col('--faint');ctx.fillText(d.years[i],x(i),h-14)});
+  if(active>=0){ctx.fillStyle='rgba(73,97,118,.07)';ctx.fillRect(x(active)-pw/d.years.length/2,pad.t,pw/d.years.length,ph)}
+ }
+ function show(e){var r=canvas.getBoundingClientRect(),px=e.clientX-r.left;active=Math.max(0,Math.min(d.values.length-1,Math.round((px-42)/(r.width-54)*d.values.length-.5)));tip.innerHTML='<b>'+d.years[active]+'</b><br>'+d.label+' · '+fmt(d.values[active])+'<br><span style="color:var(--faint)">'+d.source+'</span>';tip.style.display='block';tip.style.left=Math.min(r.width-142,Math.max(4,px+10))+'px';tip.style.top='7px';draw()}
+ canvas.addEventListener('pointermove',show);canvas.addEventListener('pointerdown',show);canvas.addEventListener('pointerleave',function(e){if(e.pointerType!=='touch'){active=-1;tip.style.display='none';draw()}});var ro=typeof ResizeObserver!=='undefined'?new ResizeObserver(draw):null;if(ro)ro.observe(box);else window.addEventListener('resize',draw);draw();
 }
 function mount(){
  var host=document.getElementById('v-thread');
@@ -737,7 +790,10 @@ function mount(){
  var st=document.createElement('style');st.textContent=CSS;document.head.appendChild(st);
  var wrap=document.createElement('div');wrap.id='dsAisd';wrap.innerHTML=HTML;
  host.insertBefore(wrap,host.firstChild);
- mountCapexChart(wrap);
+ mountCapexChart(wrap,'[data-capex-chart="top"]');
+ mountCapexChart(wrap,'[data-capex-chart="detail"]');
+ mountMiniChart(wrap,'cloud');
+ mountMiniChart(wrap,'backlog');
  wrap.querySelectorAll('tr.exp').forEach(function(r){
   function tg(){r.classList.toggle('on');var d=r.nextElementSibling;if(d&&d.classList.contains('dtl'))d.classList.toggle('on');}
   r.addEventListener('click',tg);
