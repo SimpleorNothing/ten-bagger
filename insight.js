@@ -235,9 +235,9 @@ window.INSIGHT=(function(){
  }
  function applyBar(c){var b=applyBtn(c);return b?'<div class="ins-lcbar">'+b+'</div>':'';}
  function apFind(id){
-  if(cur){var f=(cur.claims||[]).filter(function(x){return x.id===id;});if(f[0])return {c:f[0],src:cur.src,saved:false};}
+  if(cur){var f=(cur.claims||[]).filter(function(x){return x.id===id;});if(f[0])return {c:f[0],src:cur.src,raw:cur.raw||'',saved:false};}
   var o=flat().filter(function(x){return x.c.id===id;})[0];
-  if(o){var rec=recs.filter(function(r){return (r.claims||[]).some(function(x){return x.id===id;});})[0];return {c:o.c,src:rec&&rec.src,saved:true};}
+  if(o){var rec=recs.filter(function(r){return (r.claims||[]).some(function(x){return x.id===id;});})[0];return {c:o.c,src:rec&&rec.src,raw:(rec&&rec.raw)||'',saved:true};}
   return null;
  }
  function apOrder(c,src,m){
@@ -300,7 +300,7 @@ window.INSIGHT=(function(){
     var stEl=ov.querySelector('[data-st="'+i+'"]');
     if(stEl)stEl.textContent='⏳ 확인 중…';
     fetch('/api/site-apply',{method:'POST',headers:{'content-type':'application/json'},
-     body:JSON.stringify({file:t.file,itemNo:t.no,itemName:t.name,text:c.text||'',why:c.why||'',src:o.src||{},
+     body:JSON.stringify({file:t.file,itemNo:t.no,itemName:t.name,text:c.text||'',why:c.why||'',src:o.src||{},evidenceText:String(o.raw||'').slice(0,20000),
       route:c.route||'signal_log',type:c.type||'narrative',layer:c.layer||'',tickers:c.tickers||[]})})
      .then(function(r){return r.json().then(function(j){return {ok:r.ok,j:j};});})
      .then(function(res){
