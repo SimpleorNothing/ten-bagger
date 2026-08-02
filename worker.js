@@ -1257,60 +1257,10 @@ async function handleSiteApply(request, env) {
       return { error: "github branch put failed", status: put.status, detail: t.slice(0, 300) };
     }
 
-    const opened = await fetch(`${apiBase}/pulls`, {
-      method: "POST",
-      headers: jsonHeaders,
-      body: JSON.stringify({
-        title: message,
-        head: workBranch,
-        base: BRANCH,
-        body: "02 인사이트 찾기 사이트 반영 버튼이 생성한 자동 PR입니다. main 보호 규칙과 필수 검사를 준수합니다.",
-        maintainer_can_modify: true,
-      }),
-    });
-    if (!opened.ok) {
-      const t = await opened.text();
-      // PR을 열지 못한 임시 브랜치는 남기지 않는다. 원래 데이터는 main에 전혀 쓰지 않는다.
-      await fetch(`${apiBase}/git/refs/heads/${encodeURIComponent(workBranch)}`, {
-        method: "DELETE", headers: gh,
-      }).catch(() => null);
-      return {
-        error: `github pr create failed (HTTP ${opened.status})`,
-        status: opened.status,
-        detail: t.slice(0, 300),
-      };
-    }
-    const pr = await opened.json();
-
-    const merged = await fetch(`${apiBase}/pulls/${pr.number}/merge`, {
-      method: "PUT",
-      headers: jsonHeaders,
-      body: JSON.stringify({
-        merge_method: "squash",
-        commit_title: message,
-        sha: pr.head && pr.head.sha,
-      }),
-    });
-    if (merged.ok) return null;
-
-    const auto = await fetch("https://api.github.com/graphql", {
-      method: "POST",
-      headers: jsonHeaders,
-      body: JSON.stringify({
-        query: "mutation($id:ID!){enablePullRequestAutoMerge(input:{pullRequestId:$id,mergeMethod:SQUASH}){pullRequest{number autoMergeRequest{enabledAt}}}}",
-        variables: { id: pr.node_id },
-      }),
-    });
-    const autoJson = await auto.json().catch(() => ({}));
-    if (!auto.ok || (autoJson.errors && autoJson.errors.length)) {
-      return {
-        error: "github auto merge failed",
-        status: auto.status,
-        detail: JSON.stringify(autoJson.errors || autoJson).slice(0, 300),
-        pr: pr.html_url,
-      };
-    }
-    return null;
+    // Worker 토큰은 Contents 권한만으로 동작하도록 제한한다. PR 생성은 저장소
+    // Actions의 GITHUB_TOKEN(명시적 pull-requests:write)이 수행한다. 이렇게 하면
+    // Cloudflare 비밀키에 PR 권한이 빠져 있어도 반영 요청이 403으로 실패하지 않는다.
+    return { queued: true, branch: workBranch };
   };
 
   // 01 시장 모니터링 「시장 맥락」 — 채택 관점을 기존 signal_log 스키마로 append.
@@ -1335,9 +1285,9 @@ async function handleSiteApply(request, env) {
       items: [{ tag, layer: layer || null, col: route === "macro" ? "#e03131" : "#868e96", html }],
     });
     doc.asOf = now.date;
-    const err = await commitDoc(`site-apply: signal_log 시장 맥락 추가 — ${claimText.slice(0, 60)}`);
-    if (err) return memoJson(err, 502);
-    return memoJson({ ok: true, changed: true, reason: "01 시장 모니터링의 시장 맥락에 추가" }, 200);
+    const queued = await commitDoc(`site-apply: signal_log 시장 맥락 추가 — ${claimText.slice(0, 60)}`);
+    if (queued && queued.error) return memoJson(queued, 502);
+    return memoJson({ ok: true, changed: true, queued: true, reason: "01 시장 맥락 반영 요청 접수 — 자동 검증·병합 진행" }, 202);
   }
 
   // 01 시장 모니터링 「다가오는 일정」 — 같은 이벤트의 D-day 카드 설명을 결과/새 관점으로 갱신.
@@ -1353,9 +1303,9 @@ async function handleSiteApply(request, env) {
     event.meta = [event.meta, `결과 업데이트: ${incoming}`].filter(Boolean).join(" · ").slice(0, 900);
     const now = kstNow();
     doc.asOf = now.at;
-    const err = await commitDoc(`site-apply: calendar ${event.lbl} 일정 맥락 갱신`);
-    if (err) return memoJson(err, 502);
-    return memoJson({ ok: true, changed: true, reason: "01 다가오는 일정의 해당 이벤트 설명 갱신" }, 200);
+    const queued = await commitDoc(`site-apply: calendar ${event.lbl} 일정 맥락 갱신`);
+    if (queued && queued.error) return memoJson(queued, 502);
+    return memoJson({ ok: true, changed: true, queued: true, reason: "일정 반영 요청 접수 — 자동 검증·병합 진행" }, 202);
   }
 
   const items = doc.items || doc.axes || [];
@@ -1493,12 +1443,12 @@ async function handleSiteApply(request, env) {
   item.upd = today;
   doc.asOf = today;
 
-  const commitErr = await commitDoc(
+  const queued = await commitDoc(
     `site-apply: ${file} ${item.no || item.id || item.name} 자동 반영 — ${String(patch.reason || "").slice(0, 80)}`);
-  if (commitErr) return memoJson(commitErr, 502);
+  if (queued && queued.error) return memoJson(queued, 502);
 
   return memoJson({
-    ok: true, changed: true, reason: patch.reason || "",
+    ok: true, changed: true, queued: true, reason: "보드 반영 요청 접수 — 자동 검증·병합 진행",
     item: { no: item.no, id: item.id, name: item.name, gauge: item.gauge, verdict: item.verdict },
     ...(gaugeMerge.rejected.length ? { ignored_gauge_labels: gaugeMerge.rejected } : {}),
   }, 200);
