@@ -309,14 +309,14 @@ window.INSIGHT=(function(){
        var detail=res.j.detail?(' · '+String(res.j.detail).replace(/\s+/g,' ').slice(0,180)):'';
        stEl.textContent='❌ 실패 — '+esc(String(res.j.error||'오류')+detail);return;
       }
-      if(res.j.changed){anyChanged=true;stEl.textContent='✅ 반영됨'+(res.j.reason?' — '+esc(res.j.reason):'');}
+      if(res.j.changed){anyChanged=true;stEl.textContent=(res.j.queued?'⏳ 반영 요청 접수':'✅ 반영됨')+(res.j.reason?' — '+esc(res.j.reason):'');}
       else{stEl.textContent='— 변경 없음'+(res.j.reason?' · '+esc(res.j.reason):'');}
      })
      .catch(function(){if(stEl)stEl.textContent='❌ 실패 — 네트워크 오류';})
      .then(function(){
       if(++done>=m.length){
-       an.textContent=anyChanged?'✓ 반영 완료':'완료(변경 없음)';
-       if(anyChanged){c.siteDone=true;if(o.saved)persist();else renderResult();}
+       an.textContent=anyChanged?'✓ 반영 요청 접수':'완료(변경 없음)';
+       /* 접수는 실제 병합이 아니다. 다음 새로고침에서 저장소 반영 결과를 다시 판단한다. */
       }
      });
    });
