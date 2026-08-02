@@ -1,0 +1,26 @@
+name: Open site-apply pull request
+
+on:
+  push:
+    branches:
+      - 'claude/site-apply-*'
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  open-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create protected-main pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          BRANCH: ${{ github.ref_name }}
+        run: |
+          gh pr create \
+            --head "$BRANCH" \
+            --base main \
+            --title "site-apply: ${BRANCH#claude/site-apply-}" \
+            --body "02 인사이트 찾기 사이트 반영 버튼이 생성한 자동 PR입니다. 필수 검증 후 자동 병합합니다."
