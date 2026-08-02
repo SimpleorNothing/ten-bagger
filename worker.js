@@ -221,98 +221,6 @@ async function handleTickerLive() {
   return new Response(JSON.stringify({ quotes: out, live: Object.keys(out).length > 0, at: new Date().toISOString() }), { headers: { "content-type": "application/json", "cache-control": "no-store" } });
 }
 
-// σ·μ 추정 — Anthropic Messages API 프록시 (브라우저 직접 호출은 CORS·키 부재로 실패하므로 서버측에서 중계)
-async function handleEstimate(request, env) {
-  const json = (obj, status) => new Response(JSON.stringify(obj),
-    { status, headers: { "content-type": "application/json" } });
-
-  let body;
-  try { body = await request.json(); }
-  catch { return json({ error: "invalid json" }, 400); }
-
-  const tk = (body && body.ticker ? String(body.ticker) : "").trim();
-  if (!tk) return json({ error: "ticker required" }, 400);
-
-  // ① 결정론 경로 — 무료 일봉으로 직접 계산(비용 0·검색 0회).
-  try {
-    const loc = await localVolDrift(tk.toUpperCase());
-    if (loc) return json({ content: [{ type: "text", text: JSON.stringify(loc) }], src: "local" }, 200);
-  } catch (_e) { /* ② LLM 폴백으로 */ }
-
-  if (!env.ANTHROPIC_API_KEY) {
-    return json({ error: "ANTHROPIC_API_KEY not configured" }, 503);
-  }
-
-  const prompt = 'You are a quant. For the stock/ETF ticker or name "' + tk + '", estimate its ANNUALIZED volatility (%) from recent ~1y daily returns, and a reasonable ANNUAL expected drift (%) assumption. Use web search for recent data. Respond with ONLY a compact JSON object, no prose, no markdown fences: {"ticker":"","name":"","annualizedVolPct":number,"suggestedDriftPct":number,"note":"one short sentence in Korean"}';
-
-  let upstream;
-  try {
-    upstream = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-        "x-api-key": env.ANTHROPIC_API_KEY,
-        "anthropic-version": "2023-06-01",
-      },
-      body: JSON.stringify({
-        // 비용 규율: 숫자 회수은 Sonnet + 검색 3회 상한 (판단계 호출만 Opus)
-        model: "claude-sonnet-5",
-        max_tokens: 800,
-        // 스트리밍 — Opus + web_search(서버툴)는 비스트리밍 시 첫 바이트까지
-        // 오래 걸려 api.anthropic.com(Cloudflare) 의 ~100s 한도를 넘기면 524 가 떴다
-        // (워커는 이를 502 "anthropic api failed" 로 전달). 스트리밍은 ping/델타로
-        // 연결을 유지해 타임아웃을 막는다. 서버측에서 텍스트를 재조립해 동일 형태로 반환.
-        stream: true,
-        messages: [{ role: "user", content: prompt }],
-        tools: [{ type: "web_search_20260209", name: "web_search", max_uses: 3 }],
-      }),
-    });
-  } catch (e) {
-    return json({ error: "anthropic fetch failed", detail: String(e && e.message ? e.message : e) }, 502);
-  }
-
-  if (!upstream.ok || !upstream.body) {
-    const t = await upstream.text().catch(() => "");
-    return json({ error: describeAnthropicError(upstream.status, t), status: upstream.status, detail: t.slice(0, 400) }, 502);
-  }
-
-  // SSE 스트림을 서버측에서 수집해 text 블록을 재조립 — 클라이언트 계약(data.content[].text) 유지.
-  let text = "", stopReason = null, errDetail = null;
-  try {
-    const reader = upstream.body.getReader();
-    const dec = new TextDecoder();
-    let buf = "";
-    for (;;) {
-      const { value, done } = await reader.read();
-      if (done) break;
-      buf += dec.decode(value, { stream: true });
-      let nl;
-      while ((nl = buf.indexOf("\n")) >= 0) {
-        const line = buf.slice(0, nl).trim();
-        buf = buf.slice(nl + 1);
-        if (!line.startsWith("data:")) continue;
-        const payload = line.slice(5).trim();
-        if (!payload || payload === "[DONE]") continue;
-        let ev;
-        try { ev = JSON.parse(payload); } catch { continue; }
-        if (ev.type === "content_block_delta" && ev.delta && ev.delta.type === "text_delta") {
-          text += ev.delta.text;
-        } else if (ev.type === "message_delta" && ev.delta && ev.delta.stop_reason) {
-          stopReason = ev.delta.stop_reason;
-        } else if (ev.type === "error") {
-          errDetail = (ev.error && ev.error.message) || "stream error";
-        }
-      }
-    }
-  } catch (e) {
-    return json({ error: "anthropic stream failed", detail: String(e && e.message ? e.message : e) }, 502);
-  }
-
-  if (errDetail) return json({ error: "anthropic api failed: " + errDetail.slice(0, 200), detail: errDetail.slice(0, 400) }, 502);
-
-  // 클라이언트는 data.content 의 text 블록만 사용 → 동일한 형태로 반환.
-  return json({ content: [{ type: "text", text: text }], stop_reason: stopReason }, 200);
-}
 
 // ===== 07 자문단(Council) — 원탁 토론(Claude) · 유튜브 관점 추출(Gemini) =====
 
@@ -2616,10 +2524,6 @@ export default {
       // signals 갱신 엔드포인트 (인증된 디바이스만 도달)
       if (request.method === "POST" && url.pathname === "/api/signals") {
         return handleSignalsUpdate(request, env);
-      }
-      // σ·μ AI 추정 프록시 (인증된 디바이스만 도달)
-      if (request.method === "POST" && url.pathname === "/api/estimate") {
-        return handleEstimate(request, env);
       }
       // US10Y 데이터 프록시 (인증된 디바이스만 도달) — 매일 자동 갱신 원본 중계
       if (request.method === "GET" && url.pathname === "/api/us10y") {
