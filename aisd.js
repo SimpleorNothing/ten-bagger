@@ -235,9 +235,9 @@ var HTML=`<div style="position:relative">
 <div class="ds-topcharts" aria-label="컴퓨팅 판매자 핵심 지표 차트">
   <section class="ds-topchart wide">
     <h3>① 클라우드 수요·투자 분기 추이</h3>
-    <div class="ds-l2">AWS·Azure·GCP 매출, MSFT 상업 RPO·AWS RPO·Google Cloud 수주잔고, 3사 CAPEX 합산 — Meta 제외</div>
+    <div class="ds-l2">AWS·Microsoft Cloud·Google Cloud 매출, Microsoft 상업 RPO·Google Cloud 수주잔고, 3사 CAPEX 합산 — Meta 제외</div>
     <div class="ds-mini-chart" data-mini-chart="quarterly"><canvas tabindex="0" role="img" aria-label="2024년 1분기부터 2026년 2분기까지 클라우드 수주잔고, 매출, CAPEX 합산 차트"></canvas><div class="ds-mini-tip" role="status" aria-live="polite"></div></div>
-    <div class="ds-topfn"><span style="color:#315b78">■ Microsoft</span> · <span style="color:#5f86a0">■ Amazon</span> · <span style="color:#9bb5c5">■ Alphabet</span> · 좌측 축=수주잔고(최대 2.00T · 0.50T 간격) · 우측 축=클라우드 서비스 매출·CAPEX(최대 300B · 100B 간격) · 각 막대는 3사 합산, 색상별로 기업 구분 · 수주잔고 괄호=연환산 매출 대비 배수 · 매출 괄호=3사 클라우드 영업이익률의 매출 가중평균 · Azure 매출·수익성은 공시 성장률·클라우드 수익성 지표 기반 환산, AWS 수주잔고는 1Q26 기준(신규 OpenAI $100B 제외)</div>
+    <div class="ds-topfn"><span style="color:#315b78">■ Microsoft</span> · <span style="color:#5f86a0">■ Amazon</span> · <span style="color:#9bb5c5">■ Alphabet</span> · 좌측 축=공개 수주잔고(최대 2.00T · 0.50T 간격) · 우측 축=클라우드 서비스 매출·CAPEX(최대 300B · 100B 간격) · 매출·CAPEX는 3사 합산, 수주잔고는 Microsoft 상업 RPO+Google Cloud backlog 합산(AWS는 분기 잔고 미공시로 제외) · 수주잔고 괄호=3사 연환산 매출 대비 배수 · 매출 괄호=AWS·Google Cloud 공개 영업이익률의 매출 가중평균(Microsoft는 클라우드 영업이익률 미공시로 제외)</div>
   </section>
 </div>
 
@@ -757,7 +757,10 @@ function mountCapexChart(root,which){
 }
 function mountQuarterlyCloudChart(root){
  var box=root.querySelector('[data-mini-chart="quarterly"]'),canvas=box&&box.querySelector('canvas'),tip=box&&box.querySelector('.ds-mini-tip');if(!canvas)return;
- var d={years:['24.1Q','24.2Q','24.3Q','24.4Q','25.1Q','25.2Q','25.3Q','25.4Q','26.1Q','26.2Q'],backlog:[400,475,550,650,748,856,1011,1190,1451,1556],revenue:[52,58,65,74,81,88,96,107,123,140],capex:[36,45,52,61,68,75,88,105,145,150],opMargin:[28,29,30,31,32,31,32,33,31,30],companies:[{name:'Microsoft',color:'#315b78',share:{backlog:[.47,.47,.47,.47,.48,.48,.48,.48,.47,.436],revenue:[.38,.38,.38,.38,.39,.39,.39,.39,.39,.39],capex:[.31,.31,.31,.31,.32,.32,.32,.32,.30,.28]}},{name:'Amazon',color:'#5f86a0',share:{backlog:[.30,.30,.30,.30,.29,.29,.29,.29,.28,.234],revenue:[.42,.42,.42,.42,.41,.41,.41,.41,.40,.39],capex:[.42,.42,.42,.42,.41,.41,.41,.41,.43,.39]}},{name:'Alphabet',color:'#9bb5c5',share:{backlog:[.23,.23,.23,.23,.23,.23,.23,.23,.25,.330],revenue:[.20,.20,.20,.20,.20,.20,.20,.20,.21,.22],capex:[.27,.27,.27,.27,.27,.27,.27,.27,.27,.33]}}]},ctx=canvas.getContext('2d'),active=-1;
+ // CY 기준. 매출=Microsoft Cloud·AWS·Google Cloud 각 분기 공시액.
+ // 수주잔고=Microsoft 상업 RPO+Google Cloud revenue backlog의 공시액만 합산(AWS는 분기 잔고 미공시).
+ // CAPEX=각사 분기 실적발표의 현금 CAPEX·금융리스 포함 인프라 투자 기준. 영업이익률=AWS·Google Cloud 공시 부문 수치. 단위: $B.
+ var d={years:['24.1Q','24.2Q','24.3Q','24.4Q','25.1Q','25.2Q','25.3Q','25.4Q','26.1Q','26.2Q'],backlog:[264,327,333,391,413,474,547,865,1091,1192],revenue:[70,73,78,82,84,91,97,105,114,126],capex:[36,45,52,61,68,75,88,105,145,150],opMargin:[30,29,32,31,33,29,31,36,36,38],companies:[{name:'Microsoft',color:'#315b78',share:{backlog:[.81,.82,.78,.76,.76,.78,.72,.72,.57,.57],revenue:[.503,.501,.500,.501,.505,.514,.505,.491,.479,.470],capex:[.31,.31,.31,.31,.32,.32,.32,.32,.30,.28]}},{name:'Amazon',color:'#5f86a0',share:{backlog:[0,0,0,0,0,0,0,0,0,0],revenue:[.357,.360,.354,.352,.349,.340,.339,.340,.334,.335],capex:[.42,.42,.42,.42,.41,.41,.41,.41,.43,.39]}},{name:'Alphabet',color:'#9bb5c5',share:{backlog:[.19,.18,.22,.24,.24,.22,.28,.28,.43,.43],revenue:[.140,.139,.146,.147,.146,.146,.156,.169,.187,.195],capex:[.27,.27,.27,.27,.27,.27,.27,.27,.27,.33]}}]},ctx=canvas.getContext('2d'),active=-1;
  function fmtLAxis(v){return (v/1000).toFixed(2)+'T'} function fmtLValue(v){return (v/1000).toFixed(2)} function fmtRAxis(v){return v+'B'} function fmtRValue(v){return String(v)}
  function col(name){return getComputedStyle(root).getPropertyValue(name).trim()||'#496176'}
  function draw(){var r=box.getBoundingClientRect(),dpr=Math.min(window.devicePixelRatio||1,2),w=Math.max(290,Math.round(r.width)),h=Math.max(220,Math.round(r.height));canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,w,h);
