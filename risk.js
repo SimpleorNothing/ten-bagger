@@ -127,6 +127,10 @@
   // 토픽 레이더에서 수집된 관점·기사를 같은 키워드로 연결한다.
   // 이는 확인 대상을 보여 주는 용도이며, 리스크 상태나 게이지를 자동 변경하지 않는다.
   function topicRefs(keys) {
+    if (window.TopicRadar && typeof window.TopicRadar.match === 'function') {
+      var matched = window.TopicRadar.match(keys, 2).map(function (t) { return t.name || '관련 토픽'; });
+      return matched.length ? '<div class="topic-ref"><b>토픽 레이더 연관</b> ' + esc(matched.join(' · ')) + '</div>' : '';
+    }
     var topics = (window.TopicRadar && window.TopicRadar.items) || [], out = [];
     keys = (keys || []).map(function (k) { return String(k || '').toLowerCase(); }).filter(Boolean);
     topics.forEach(function (t) {
