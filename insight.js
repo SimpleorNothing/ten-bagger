@@ -1140,35 +1140,44 @@ function persist(){cacheSet();clearTimeout(putTimer);putTimer=setTimeout(push,20
      증권사 리포트가 OCR 폴백으로 새지 않고 바로 추출된다. 스캔본·ToUnicode 파손 PDF 만
      실글자 판정에서 걸러 OCR 로 넘어간다(아래 realLetters 컷). */
   var doc=await lib.getDocument({data:buf, cMapUrl:PDFJS_CMAP, cMapPacked:true}).promise;
-  var out=[],N=Math.min(doc.numPages,40);
+  var out=[],ocrPages=[],N=Math.min(doc.numPages,40);
   for(var i=1;i<=N;i++){
    var pg=await doc.getPage(i);
    var tc=await pg.getTextContent();
-   out.push(tc.items.map(function(it){return it.str;}).join(' '));
+   var pageText=tc.items.map(function(it){return it.str;}).join(' ');
+   out.push(pageText);
+   /* 문서 전체가 아니라 페이지별로 판정한다. 표지·본문은 이미지이고 마지막 차트만
+      텍스트 레이어인 혼합 PDF에서 차트 숫자가 OCR 폴백을 막으면 본문이 통째로 빠진다. */
+   if(realLetters(pageText)<8)ocrPages.push(i);
   }
-  var txt=out.join('\n');
-  /* 텍스트 레이어가 비었거나 깨졌으면(실글자 < 페이지당 8자 수준) 렌더→OCR 폴백.
-     OCR 은 정상 텍스트 PDF 에도 안전(느릴 뿐)이라 컷은 보수적으로 둔다. */
-  if(realLetters(txt)<Math.max(24,N*8))return await pdfOcr(doc,N);
-  return txt;
+  if(ocrPages.length){
+   var ocr=await pdfOcrPages(doc,ocrPages,N);
+   Object.keys(ocr).forEach(function(page){out[+page-1]=ocr[page];});
+  }
+  return out.join('\n');
  }
- /* PDF 페이지를 캔버스로 렌더 → tesseract(kor+eng) OCR. 이미지 OCR 워커 재사용. 클라 전용·서버 무변경. */
- async function pdfOcr(doc,N){
+ /* 텍스트가 부족한 페이지만 캔버스로 렌더 → tesseract(kor+eng) OCR.
+    정상 텍스트 페이지는 원문을 유지해 정확도·속도를 함께 확보한다. */
+ async function pdfOcrPages(doc,pages,N){
   var w=await ocrWorker();
-  var M=Math.min(N,20),out=[];   /* OCR 은 느리다 → 앞 20페이지 상한(리포트 본문은 앞부분 집중) */
-  for(var i=1;i<=M;i++){
-   setMsg('텍스트 레이어가 없어 OCR 로 읽는 중 — '+i+'/'+M+' 페이지');
-   var pg=await doc.getPage(i);
+  var targets=pages.filter(function(page){return page<=20;}),out={};
+  for(var i=0;i<targets.length;i++){
+   var page=targets[i];
+   setMsg('텍스트가 없는 PDF 페이지 OCR 중 — '+(i+1)+'/'+targets.length+' (원문 '+page+'페이지)');
+   var pg=await doc.getPage(page);
    var vp=pg.getViewport({scale:2.2});   /* ~158dpi 상당 — 한글 인식 정확도 확보 */
    var cv=document.createElement('canvas');cv.width=vp.width;cv.height=vp.height;
    await pg.render({canvasContext:cv.getContext('2d'),viewport:vp}).promise;
    var r=await w.recognize(cv);
-   out.push(r&&r.data&&r.data.text?r.data.text:'');
+   out[page]=r&&r.data&&r.data.text?r.data.text:'';
    cv.width=cv.height=0;   /* 캔버스 메모리 해제 */
   }
-  var t=out.join('\n').replace(/[ \t]+\n/g,'\n').trim();
-  if(N>M)t+='\n\n…(총 '+N+'페이지 중 앞 '+M+'페이지만 OCR)';
-  return t;
+  if(pages.length>targets.length){
+   var last=targets[targets.length-1]||1;
+   out[last]=(out[last]||'')+'\n\n…(총 '+N+'페이지 중 20페이지 이후의 이미지 페이지는 OCR 제외)';
+  }
+  Object.keys(out).forEach(function(page){out[page]=cleanText(out[page]);});
+  return out;
  }
 
  /* --- 이미지(캡처·붙여넣기) → 글자 인식(OCR) --- */
