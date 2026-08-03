@@ -6,7 +6,7 @@
 // IMPORTANT: this collector SCREENS but never SCORES. It never touches
 // alpha.json / earnings.json / judgment.json / SIGNAL_LOG. Deciding signal
 // vs noise — and whether a headline is big enough to move a number — stays
-// with the operator/Claude (see OPS.md §2 "수시" + the daily intake loop).
+// with the operator/LLM (see OPS.md §2 "수시" + the daily intake loop).
 //
 // 스크리닝(items[].m)은 '무엇을 보여줄지'만 정한다(표시 창 방어) — 판단·숫자 변경이 아니다.
 // 사다리·정규식·소스 티어는 ./news-screen.mjs 가 단일 소스(MV=2).
@@ -25,6 +25,24 @@ const HTML = 'index.html';
 const OUT = 'news.json';
 const UA = { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36' };
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+
+async function generateText(key, prompt, maxOutputTokens) {
+  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${encodeURIComponent(key)}`;
+  const r = await fetch(endpoint, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      generationConfig: { maxOutputTokens, responseMimeType: 'application/json' },
+    }),
+  });
+  if (!r.ok) throw new Error('gemini HTTP ' + r.status + ' ' + (await r.text()).slice(0, 300));
+  const j = await r.json();
+  const text = (j.candidates || []).flatMap((c) => (c.content && c.content.parts) || []).map((p) => p.text || '').join('');
+  if (!text) throw new Error('gemini empty response');
+  return text;
+}
 
 const PER_TICKER = 8;
 const PER_TICKER_SIG = 4;
@@ -150,7 +168,7 @@ function preScreen(items) {
 
 const SCORE_BATCH = 60;
 async function scoreLegacy(items) {
-  const key = process.env.ANTHROPIC_API_KEY;
+  const key = process.env.GEMINI_API_KEY;
   const todo = items.filter(needsGrade);
   if (!todo.length) { console.log('screen(llm): 대상 없음'); return; }
   if (!key) {
@@ -164,14 +182,7 @@ async function scoreLegacy(items) {
     const lines = batch.map((it, n) => `${n}|${it.ticker}|${it.title}${it.a ? ' // ' + it.a : ''}`).join('\n');
     const prompt = `너는 AI 인프라 투자 관측소의 애널리스트다. 아래 기사 각각에 등급(m)만 매겨라.\n\n${LADDER}\n\n다음 JSON 배열만 출력하라(마크다운·설명 금지):\n[{"n":0,"m":2}]\n\n${lines}`;
     try {
-      const r = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01' },
-        body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 4000, messages: [{ role: 'user', content: prompt }] }),
-      });
-      if (!r.ok) throw new Error('anthropic HTTP ' + r.status);
-      const j = await r.json();
-      const text = (j.content || []).filter((b) => b.type === 'text').map((b) => b.text).join('');
+      const text = await generateText(key, prompt, 4000);
       const arr = parseArts(text);
       for (const x of arr) {
         if (x && Number.isInteger(x.n) && batch[x.n] && Number.isInteger(x.m)) {
@@ -262,7 +273,7 @@ function stabilizeTopics(topics, prevTopics) {
 }
 
 async function discoverMacroTopics(prevTopics) {
-  const key = process.env.ANTHROPIC_API_KEY;
+  const key = process.env.GEMINI_API_KEY;
   const heads = [];
   for (const u of DISCOVERY_FEEDS) {
     const got = await fetchUrlFeed(u, 25);
@@ -277,14 +288,7 @@ async function discoverMacroTopics(prevTopics) {
   }
   const prompt = `너는 AI 인프라 투자 관측소의 매크로 애널리스트다. 아래는 오늘의 경제·시장 헤드라인이다.\n\n지금 시장을 실제로 움직이고 있는 **트렌딩 매크로 이슈 ${MACRO_N}개**를 골라라.\n\n선별 기준:\n- AI 인프라 스택(L1 모델 ~ L8 발전/그리드) 투자 판단에 실제로 영향을 주는 축일 것.\n  (금리·유동성 / 지정학·공급망 / 관세·수출통제 / 전력·에너지 / 신용·환율 / 하이퍼스케일러 capex)\n- 개별 종목 뉴스가 아니라 **매크로 축**일 것.\n- 헤드라인에서 반복 등장하거나 새로 부상한 이슈를 우선한다. 식은 이슈는 버린다.\n- 서로 다른 축으로 분산한다(같은 축 2개 금지).\n\n각 이슈에 대해:\n- label: 사람이 읽는 이슈명(한글, 12자 내외)\n- q: 구글 뉴스 검색어(그 이슈의 기사를 잘 긁을 핵심어 2~5개. 한글 또는 영문)\n- ko: 한국 시장 관점 기사가 더 적합하면 true, 미국/글로벌이면 false\n\n다음 JSON 배열만 출력하라(마크다운·설명 금지):\n[{"label":"이슈명","q":"검색어","ko":true}]\n\n${heads.slice(0, 70).join('\n')}`;
   try {
-    const r = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01' },
-      body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 2000, messages: [{ role: 'user', content: prompt }] }),
-    });
-    if (!r.ok) throw new Error('anthropic HTTP ' + r.status);
-    const j = await r.json();
-    const text = (j.content || []).filter((b) => b.type === 'text').map((b) => b.text).join('');
+    const text = await generateText(key, prompt, 2000);
     const arr = JSON.parse(text.replace(/```json|```/g, '').trim());
     if (!Array.isArray(arr) || !arr.length) throw new Error('macro shape invalid');
     const topics = arr.slice(0, MACRO_N).map((x, i) => ({
@@ -337,8 +341,8 @@ function parseArts(text) {
 }
 
 async function summarizeArticles(items) {
-  const key = process.env.ANTHROPIC_API_KEY;
-  if (!key) { console.log('arts: ANTHROPIC_API_KEY 없음 → 스킵'); return 0; }
+  const key = process.env.GEMINI_API_KEY;
+  if (!key) { console.log('arts: GEMINI_API_KEY 없음 → 스킵'); return 0; }
   const todo = items.filter((it) => it.ticker !== 'MACRO' && it.m !== 0 && (!it.a || it.w === undefined)).slice(0, ART_MAX_NEW);
   if (!todo.length) { console.log('arts: 신규 기사 없음'); return 0; }
   let done = 0;
@@ -349,14 +353,7 @@ async function summarizeArticles(items) {
       .join('\n');
     const prompt = `너는 AI 인프라 투자 관측소의 애널리스트다. 아래는 추적 종목의 뉴스 기사다(번호|티커|종목명|날짜|제목).\n각 기사를 **두 점(a·w)** 으로 정리하라.\n\na = 기사 내용 요약\n- a와 w는 **반드시 자연스러운 한글**로 작성한다. 종목명·제품명·고유명사는 필요한 경우에만 영문을 병기한다.\n- 제목을 그대로 번역·복사하지 말고, 무엇이 일어났는가를 압축한다.\n- **반드시 명사형으로 종결한다.** ("~했다/~됐다" 금지 → "~ 급락", "~ 계약 체결", "~ 공개", "~ 전망 제기")\n- 30~70자. 사실만. 제목에 없는 내용을 지어내지 않는다.\n\nw = 그래서 무슨 의미인가 · 주가에 대한 영향\n- 한 문장. 사이트에서 "→" 뒤에 붙는다(화살표는 넣지 말 것).\n- **두 시계를 분리한다**: 실적·수주·가이던스 = 논제(펀더멘털) 영향 / 수급·센티먼트·지수 편출입·애널리스트 코멘트 = 가격 시계 노이즈.\n- 영향의 방향(호재/악재/중립)과 그 강도를 분명히 하되, 근거 없는 단정·매매 권유는 금지.\n- 확정 사실이 아니면 관측임을 드러낸다("~라는 관측", "~에 그침").\n\n${LADDER}\n\n해당 종목과 무관한 기사도 **n·a·w·m 네 키를 모두 포함**해 {"n":5,"a":"회사 무관 노이즈","w":"","m":0} 형태로 출력한다.\n어떤 경우에도 키 이름을 생략하지 말 것.\n\n다음 JSON 배열만 출력하라(마크다운·설명 금지):\n[{"n":0,"a":"명사형 요약","w":"의미·주가 영향 한 문장","m":2}]\n\n${lines}`;
     try {
-      const r = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01' },
-        body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 12000, messages: [{ role: 'user', content: prompt }] }),
-      });
-      if (!r.ok) throw new Error('anthropic HTTP ' + r.status);
-      const j = await r.json();
-      const text = (j.content || []).filter((b) => b.type === 'text').map((b) => b.text).join('');
+      const text = await generateText(key, prompt, 12000);
       const arr = parseArts(text);
       if (!arr.length) throw new Error('arts 파싱 결과 0건');
       for (const x of arr) {
@@ -377,8 +374,8 @@ async function summarizeArticles(items) {
 }
 
 async function summarizeMacro(items) {
-  const key = process.env.ANTHROPIC_API_KEY;
-  if (!key) { console.log('macro-arts: ANTHROPIC_API_KEY 없음 → 스킵'); return 0; }
+  const key = process.env.GEMINI_API_KEY;
+  if (!key) { console.log('macro-arts: GEMINI_API_KEY 없음 → 스킵'); return 0; }
   const todo = items.filter((it) => it.ticker === 'MACRO' && it.m !== 0 && (!it.a || it.w === undefined)).slice(0, ART_MAX_NEW);
   if (!todo.length) { console.log('macro-arts: 신규 기사 없음'); return 0; }
   let done = 0;
@@ -389,14 +386,7 @@ async function summarizeMacro(items) {
       .join('\n');
     const prompt = `너는 AI 인프라 투자 관측소의 매크로 애널리스트다. 아래는 매크로·병목 축의 뉴스 기사다(번호|축이름|날짜|제목).\n각 기사를 **두 점(a·w)** 으로 정리하라.\n\na = 기사 내용 요약\n- 제목을 그대로 번역·복사하지 말고, 무엇이 일어났는가를 압축한다.\n- **반드시 명사형으로 종결한다.**\n- 30~70자. 사실만.\n\nw = 그래서 무슨 의미인가 · 어느 레이어·게이트에 함의가 있나\n- 한 문장. 사이트에서 "→" 뒤에 붙는다(화살표는 넣지 말 것).\n- 개별 종목 주가가 아니라 **8레이어 스택(L1 모델~L8 발전/그리드)·매크로 게이트(드로다운·VIX·F&G)·상류 하이퍼스케일러 capex/수요** 관점의 함의로 쓴다.\n\n다음 JSON 배열만 출력하라(마크다운·설명 금지):\n[{"n":0,"a":"명사형 요약","w":"레이어·게이트 함의 한 문장"}]\n\n${lines}`;
     try {
-      const r = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01' },
-        body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 12000, messages: [{ role: 'user', content: prompt }] }),
-      });
-      if (!r.ok) throw new Error('anthropic HTTP ' + r.status);
-      const j = await r.json();
-      const text = (j.content || []).filter((b) => b.type === 'text').map((b) => b.text).join('');
+      const text = await generateText(key, prompt, 12000);
       const arr = parseArts(text);
       if (!arr.length) throw new Error('macro-arts 파싱 결과 0건');
       for (const x of arr) {
@@ -418,8 +408,8 @@ async function summarizeMacro(items) {
 const DIGEST_OUT = 'news_digest.json';
 
 async function buildDigest(items, newArts) {
-  const key = process.env.ANTHROPIC_API_KEY;
-  if (!key) { console.log('digest: ANTHROPIC_API_KEY 없음 → 스킵'); return; }
+  const key = process.env.GEMINI_API_KEY;
+  if (!key) { console.log('digest: GEMINI_API_KEY 없음 → 스킵'); return; }
   if (newArts === 0 && fs.existsSync(DIGEST_OUT)) {
     console.log('digest: 신규 기사 0건 → 재생성 스킵(기존 유지)');
     return;
@@ -435,18 +425,11 @@ async function buildDigest(items, newArts) {
     .join('\n');
   const prompt = `너는 AI 인프라 투자 관측소의 애널리스트다. 아래는 종목별 최근 뉴스 헤드라인이다(티커|이름|날짜|제목).\n\n보유 종목: ${holdings.join(', ')} (나머지는 워치리스트)\n레이어: L2 컴퓨트(GPU/ASIC) L3 메모리 L4 패키징/장비 L5 서버 L6 옵티컬 L7 전력/냉각 L8 발전/그리드\n\n다음 JSON 만 출력하라(마크다운·설명 금지):\n{"headline":"이번 피드의 축을 ①②③ 형식으로 요약한 결론 한 문장(한글)",\n "groups":[{"title":"보유 종목","items":[{"tk":"MU","nm":"마이크론"}]},\n           {"title":"워치리스트 · L2 컴퓨트","items":[...]},\n           {"title":"워치리스트 · L3/L4 메모리·장비","items":[...]},\n           {"title":"워치리스트 · L5~L8 서버·옵티컬·전력","items":[...]}],\n "watch":["실적 발표 임박 등 일정 주의 항목(있으면, 최대 4개)"],\n "macro":[{"id":"아래 매크로 헤드라인에 실제로 등장한 토픽id 그대로","s":"해당 토픽의 핵심 흐름 1~2문장 한글 요약"}]}\n\nid가 bneck_ 로 시작하면 **병목축**이다 — 그 레이어의 병목이 이번 주 **조여졌는지·풀렸는지** 방향을 반드시 명시한다.\n\n규칙: groups 는 종목 카드의 그룹핑·순서만 정한다(tk·nm 만). 종목별 요약(s)·불릿(b)·기사요약(arts)은 만들지 말 것.\n보유 종목은 전부 포함(뉴스 없으면 생략 가능), 워치리스트는 의미 있는 것만. macro는 아래 매크로 헤드라인의 토픽id별 1개씩. 요약은 사실만, 과장 금지, 헤드라인에 없는 내용 추가 금지.\n\n${lines}\n\n[매크로 토픽 헤드라인 (토픽id|토픽명|날짜|제목)]\n${macroLines}`;
   try {
-    const r = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01' },
-      body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 2500, messages: [{ role: 'user', content: prompt }] }),
-    });
-    if (!r.ok) throw new Error('anthropic HTTP ' + r.status);
-    const j = await r.json();
-    const text = (j.content || []).filter((b) => b.type === 'text').map((b) => b.text).join('');
+    const text = await generateText(key, prompt, 2500);
     const clean = text.replace(/```json|```/g, '').trim();
     const digest = JSON.parse(clean);
     if (!digest.headline || !Array.isArray(digest.groups)) throw new Error('digest shape invalid');
-    const out = { asOf: new Date().toISOString(), model: 'claude-sonnet-4-6', ...digest };
+    const out = { asOf: new Date().toISOString(), model: GEMINI_MODEL, ...digest };
     fs.writeFileSync(DIGEST_OUT, JSON.stringify(out, null, 2) + '\n');
     console.log(`digest: ${DIGEST_OUT} 작성 (groups=${digest.groups.length})`);
   } catch (e) {
@@ -584,7 +567,7 @@ async function main() {
   const payload = {
     asOf: now.toISOString(),
     source: 'Google News RSS · 종목축 + 시그널축 + 병목축 (기사별 한 줄 요약 + 물질성 스크리닝)',
-    note: `사이트 종목 카드의 "일자 + 요약" 행 소스. 최근 ${PRUNE_DAYS}일 창 · 종목당 최신 ${SITE_PER_TICKER}건(첫 로딩 페이로드 상한) · **투자 논제 스크리닝 통과분만**(items[].m>=${MIN_M} — 2=향후 실적·수주·투자·전략에 영향을 주는 펀더멘털 사실. 1=목표가·수급 이벤트, 0=사후 등락 서술·홍보·추측·콘텐츠팜으로 사이트에서 제외). 탈락 기사는 삭제가 아니라 ${ARCHIVE_OUT} 에 전건 보존. 나머지 3개월치는 ${SHARD_DIR}/{티커}.json 을 '더 보기'로 온디맨드 로드. 신호/소음 판단과 SIGNAL_LOG 반영은 사람/Claude의 몫 — 채점·차트에는 쓰이지 않는다.`,
+    note: `사이트 종목 카드의 "일자 + 요약" 행 소스. 최근 ${PRUNE_DAYS}일 창 · 종목당 최신 ${SITE_PER_TICKER}건(첫 로딩 페이로드 상한) · **투자 논제 스크리닝 통과분만**(items[].m>=${MIN_M} — 2=향후 실적·수주·투자·전략에 영향을 주는 펀더멘털 사실. 1=목표가·수급 이벤트, 0=사후 등락 서술·홍보·추측·콘텐츠팜으로 사이트에서 제외). 탈락 기사는 삭제가 아니라 ${ARCHIVE_OUT} 에 전건 보존. 나머지 3개월치는 ${SHARD_DIR}/{티커}.json 을 '더 보기'로 온디맨드 로드. 신호/소음 판단과 SIGNAL_LOG 반영은 사람/LLM의 몫 — 채점·차트에는 쓰이지 않는다.`,
     count: items.length,
     macroTopics: MACRO_TOPICS,
     bottleneck: BOTTLENECK_TOPICS,
