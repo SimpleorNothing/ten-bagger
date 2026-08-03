@@ -1,6 +1,6 @@
 name: Sync 02 insights to 01 market monitoring
 
-# R2에 이미 저장된 02 인사이트를 01 시장 맥락에 한 번 일괄 반영한다.
+# R2에 이미 저장된 02 인사이트를 01 시장 맥락 및 관련 일정 카드에 한 번 일괄 반영한다.
 # 이후 신규 자료는 사이트의 market-sync.js가 자동 처리한다.
 on:
   workflow_dispatch:
@@ -37,8 +37,9 @@ jobs:
       - name: Build 01 market-context update
         run: |
           set -euo pipefail
-          node scripts/sync-insights-market.mjs insights-r2.json signal_log.json
+          node scripts/sync-insights-market.mjs insights-r2.json signal_log.json calendar.json
           node -e "JSON.parse(require('fs').readFileSync('signal_log.json','utf8'));"
+          node -e "JSON.parse(require('fs').readFileSync('calendar.json','utf8'));"
           git diff --check
 
       - name: Open auto-merge pull request when changes exist
@@ -47,7 +48,7 @@ jobs:
           GH_REPO: ${{ github.repository }}
         run: |
           set -euo pipefail
-          if git diff --quiet -- signal_log.json; then
+          if git diff --quiet -- signal_log.json calendar.json; then
             echo "새로 반영할 매크로 관점이 없습니다."
             exit 0
           fi
@@ -55,9 +56,9 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           BR="claude/sync-insights-market-${GITHUB_RUN_ID}"
           git checkout -b "$BR"
-          git add signal_log.json
-          git commit -m "sync: 02 인사이트를 01 시장 맥락에 반영"
+          git add signal_log.json calendar.json
+          git commit -m "sync: 02 인사이트를 01 관련 화면에 반영"
           git push -u origin "$BR"
           gh pr create --base main --head "$BR" \
-            --title "sync: 02 인사이트를 01 시장 맥락에 반영" \
-            --body "Cloudflare R2의 insights.json에서 채택된 고신뢰 매크로 관점만 반영했습니다. 숫자 보드와 보유비중은 변경하지 않습니다. Claude PR Gate 검증 후 자동 병합됩니다."
+            --title "sync: 02 인사이트를 01 관련 화면에 반영" \
+            --body "Cloudflare R2의 insights.json에서 채택된 고신뢰 매크로 관점을 시장 맥락에 반영하고, FOMC·물가·고용 등 기존 일정 카드와 정확히 연결되는 확정 결과는 같은 일정 카드에도 반영했습니다. 숫자 보드와 보유비중은 변경하지 않습니다. Claude PR Gate 검증 후 자동 병합됩니다."
