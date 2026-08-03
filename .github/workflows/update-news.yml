@@ -10,6 +10,8 @@ on:
     - cron: '12,42 9 * * *'    # 18:12·18:42 KST — 한국 장 마감 (저녁 세션; 시세 18:37과 분산)
     - cron: '12 10 * * *'      # 19:12 KST — 저녁 백업 (앞 트리거 누락 시 흡수용)
   workflow_dispatch: {}      # 수동 실행 (가드 우회 — 첫 실행/강제 재수집용)
+  push:
+    paths: ['.github/workflows/update-news.yml'] # 자동화 수정 직후 1회 즉시 최신화
 
 permissions:
   contents: write
