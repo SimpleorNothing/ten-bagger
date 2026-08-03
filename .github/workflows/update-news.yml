@@ -60,6 +60,7 @@ jobs:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: node scripts/fetch-pulse.mjs
       - name: Create or update news refresh PR
+        id: cpr
         if: steps.guard.outputs.skip != 'true'
         uses: peter-evans/create-pull-request@v7
         with:
@@ -77,3 +78,10 @@ jobs:
             news_archive.json
             archive
             pulse.json
+      - name: Enable auto-merge for news refresh PR
+        if: steps.cpr.outputs.pull-request-number
+        uses: peter-evans/enable-pull-request-automerge@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          pull-request-number: ${{ steps.cpr.outputs.pull-request-number }}
+          merge-method: squash
