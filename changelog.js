@@ -5,10 +5,11 @@
    신규 변경 항목은 아래 MKT_CHANGELOG 맨 위에 {d:'YYYY-MM-DD',t:'주요내용'} 로 추가한다(최신순). */
 (function(){
   var MENU_LAST={
-    market:'2026-08-02', insight:'2026-08-01', council:'2026-08-01',
+    market:'2026-08-03', insight:'2026-08-03', council:'2026-08-01',
     thread:'2026-08-01', decision:'2026-08-01', brief:'2026-08-01', memo:'2026-08-01'
   };
   var MKT_CHANGELOG=[
+    {d:'2026-08-03',t:'02 인사이트 찾기에 저장된 고신뢰 매크로 관점을 01 시장 모니터링의 시장 맥락으로 자동 반영하고, R2 처리 이력으로 중복 반영을 차단'},
     {d:'2026-08-02',t:'01 토픽 레이더의 관점·근거를 핵심어 기준으로 시장 맥박·리스크 보드·사이클 판별 보드 카드에 표시하고, 토픽 갱신 시 즉시 다시 연결'},
     {d:'2026-08-02',t:'01 토픽 레이더 보드 복구: 종목 뉴스 상한으로 MACRO 기사가 누락되던 오류를 수정하고, 기존 아카이브의 축별 최신 근거를 다시 반영'},
     {d:'2026-08-02',t:'01 사이클 판별 보드의 AWS 수주잔고를 2Q 실적자료 기준 $496B로 갱신하고, 인사이트 반영 시 저장 원문을 함께 검증하도록 보완'},
@@ -195,6 +196,11 @@
     var s=document.createElement('script');s.id='quoteJs';s.src='/quote.js';s.defer=true;
     (document.body||document.documentElement).appendChild(s);
   }
+  function loadMarketSync(){
+    if(document.getElementById('marketSyncJs'))return;
+    var s=document.createElement('script');s.id='marketSyncJs';s.src='/market-sync.js?v=20260803';s.defer=true;
+    (document.body||document.documentElement).appendChild(s);
+  }
   function mountAll(){
     mountHead('#v-market .vhead','mktUpdMarket','market');
     mountHead('#v-insight .vhead','mktUpdInsight','insight');
@@ -214,6 +220,7 @@
     loadGates();                                        // 01 사이클 판별 보드(AI capex 4지표)
     loadTrade();                                    // 01 통합 지표 반도체 수출 카드
     loadQuote();                                    // 01 상단 투자 명언 스트립
+    loadMarketSync();                               // 02 고신뢰 매크로 관점 → 01 자동 동기화
   }
   document.addEventListener('keydown',function(e){if(e.key==='Escape')hide();});
   function watchDynamicViews(){

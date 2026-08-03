@@ -795,6 +795,69 @@ async function handleCaleventParse(request, env) {
 // 증권사 리포트·기사·유튜브에서 뽑아낸 "관점 카드"를 모든 인증 기기가 공유하도록 R2 에 보관.
 // 채택(adopted)된 클레임만 다른 메뉴(01/02/04/05)에 에코된다 — 선별은 사람이 한다.
 const INSIGHTS_KEY = "insights.json";
+// 02에서 채택한 고신뢰 매크로 관점의 처리 이력. 기기별 localStorage가 아니라 R2에 두어
+// 같은 자료가 여러 기기에서 중복 반영되는 것을 막는다.
+const MARKET_SYNC_KEY = "insight-market-sync.json";
+
+function marketEligible(c) {
+  const n = Number((c && c.novelty) || 0), i = Number((c && c.impact) || 0), f = Number((c && c.confidence) || 0);
+  return !!(c && c.pick !== false && c.route === "macro" && c.text && n + i + f >= 4 && i >= 1 && f >= 1);
+}
+
+// 02 인사이트 → 01 시장 모니터링 자동 동기화.
+// 클라이언트가 id만 전달하면 워커가 R2 원본을 다시 읽어 검증하므로, 화면에 보이는 임의 문구가
+// 시장 맥락에 쓰이는 경로는 없다. 숫자 보드에는 접근하지 않고 signal_log 서술 레이어만 갱신한다.
+async function handleMarketSync(request, env) {
+  if (!env.MEMO_BUCKET) return memoJson({ error: "MEMO_BUCKET not configured" }, 503);
+  let body;
+  try { body = await request.json(); } catch { return memoJson({ error: "invalid json" }, 400); }
+  const asks = Array.isArray(body && body.items) ? body.items.slice(0, 8) : [];
+  if (!asks.length) return memoJson({ ok: true, processed: 0, skipped: 0 }, 200);
+
+  const raw = await env.MEMO_BUCKET.get(INSIGHTS_KEY);
+  let records = [];
+  try { records = JSON.parse(raw ? await raw.text() : "[]"); } catch { records = []; }
+  const logObj = await env.MEMO_BUCKET.get(MARKET_SYNC_KEY);
+  let log = {};
+  try { log = JSON.parse(logObj ? await logObj.text() : "{}"); } catch { log = {}; }
+  if (!log || typeof log !== "object" || Array.isArray(log)) log = {};
+
+  let processed = 0, skipped = 0;
+  const results = [];
+  for (const ask of asks) {
+    const rid = String((ask && ask.recordId) || ""), cid = String((ask && ask.claimId) || "");
+    const key = rid + ":" + cid;
+    if (!rid || !cid || log[key]) { skipped++; continue; }
+    const rec = records.find((x) => x && String(x.id) === rid);
+    const claim = rec && Array.isArray(rec.claims) ? rec.claims.find((x) => x && String(x.id) === cid) : null;
+    if (!rec || !marketEligible(claim)) { skipped++; continue; }
+
+    const applyRequest = new Request(request.url, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        file: "signal_log.json", itemNo: "", itemName: "02 인사이트 자동 반영",
+        text: claim.text, why: claim.why || "", src: rec.src || {},
+        evidenceText: String(rec.raw || "").slice(0, 20000),
+        route: "macro", type: claim.type || "narrative", layer: claim.layer || "", tickers: claim.tickers || []
+      }),
+    });
+    const applied = await handleSiteApply(applyRequest, env);
+    let result = {};
+    try { result = await applied.json(); } catch { result = { error: "site apply 응답 해석 실패" }; }
+    if (!applied.ok || result.error) {
+      results.push({ key, ok: false, error: result.error || "site apply failed" });
+      continue;
+    }
+    log[key] = { at: new Date().toISOString(), changed: !!result.changed, reason: result.reason || "" };
+    processed++;
+    results.push({ key, ok: true, changed: !!result.changed, reason: result.reason || "" });
+  }
+  const keys = Object.keys(log);
+  if (keys.length > 600) keys.sort((a, b) => String(log[b].at || "").localeCompare(String(log[a].at || ""))).slice(600).forEach((k) => delete log[k]);
+  await env.MEMO_BUCKET.put(MARKET_SYNC_KEY, JSON.stringify(log), { httpMetadata: { contentType: "application/json" } });
+  return memoJson({ ok: true, processed, skipped, results }, 200);
+}
 
 async function handleInsightsGet(env) {
   if (!env.MEMO_BUCKET) return memoJson({ error: "MEMO_BUCKET not configured" }, 503);
@@ -2521,6 +2584,10 @@ export default {
       // 03 관점과 정보 — 관점 추출(Claude) · 인사이트 저장(R2) — 인증된 디바이스만 도달
       if (request.method === "POST" && url.pathname === "/api/insight") {
         return handleInsight(request, env);
+      }
+      // 02에서 저장된 고신뢰 매크로 관점을 01 시장 맥락으로 자동 반영(중복은 R2 이력으로 차단).
+      if (request.method === "POST" && url.pathname === "/api/market-sync") {
+        return handleMarketSync(request, env);
       }
       // 02 인사이트 「사이트 반영」 — 보호 규칙을 준수하는 자동 PR·병합 경로.
       if (request.method === "POST" && url.pathname === "/api/site-apply") {
