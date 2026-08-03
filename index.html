@@ -4132,7 +4132,7 @@ var HIDDEN_KEY='am_topic_radar_hidden_v1',hiddenTopics=[];
      +'<div class="mkt-lens"><div class="l1">'+l1+'</div><div class="l2">'+l2+'</div></div>'+topicRefsHTML(dkeys);
     var srcs=(d.srcs||d.src||[]).filter(function(s){return s&&(s.u||s.url);});
     if(srcs.length){html+='<div class="nlist">';
-     srcs.slice(0,3).forEach(function(s){html+='<a class="nrow" href="'+esc(s.u||s.url)+'" target="_blank" rel="noopener"><span class="ntt">'+esc(s.t||s.title||s.u||s.url)+'</span></a>';});
+     srcs.slice(0,3).forEach(function(s){var dt=String(s.d||s.date||'').match(/\d{4}-\d{2}-\d{2}/);var dateLabel=dt?dt[0].replace(/-/g,'.'):'날짜 미상';html+='<a class="nrow" href="'+esc(s.u||s.url)+'" target="_blank" rel="noopener"><span class="ntt">'+esc(dateLabel)+' · '+esc(s.t||s.title||s.u||s.url)+'</span></a>';});
      html+='</div>';}
     html+='</div>';});
    host.innerHTML=html;}

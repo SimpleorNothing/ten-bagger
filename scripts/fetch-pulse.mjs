@@ -49,13 +49,57 @@ function resolveSrcs(srcs, items) {
     }
     if (!/^https?:\/\//.test(link)) return;
     const src = items.find((it) => it.link === link);
-    out.push({ t: String(s.t || (src && src.title) || '').slice(0, 120), u: link });
+    const published = String((src && src.published) || '').match(/\d{4}-\d{2}-\d{2}/);
+    out.push({
+      t: String(s.t || (src && src.title) || '').slice(0, 120),
+      u: link,
+      d: published ? published[0] : null,
+    });
   });
   return out;
 }
 
+function textOnly(v) { return String(v || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim(); }
+
+// 02에서 채택·검증된 매크로 관점은 기사 헤드라인보다 우선한다. 과거 결과가 다음 회의
+// 일정 카드에 섞이는 문제와 달리, 시장 맥박은 현재의 할인율·조달 여건을 설명하는 자리이므로
+// 최근 45일 안의 관점은 해당 축에 계속 남긴다.
+function adoptedMacroContext(log) {
+  const cutoff = Date.now() - 45 * 86400000;
+  const seen = new Set(), out = [];
+  for (const entry of (log && log.log || []).slice().reverse()) {
+    if (Date.parse(String(entry.date || '')) < cutoff) continue;
+    for (const item of (entry.items || [])) {
+      const text = textOnly(item.html);
+      if (!/인사이트|FOMC|CPI|PPI|금통위|CDS|채권발행|조달/i.test(`${entry.source || ''} ${item.tag || ''} ${text}`)) continue;
+      if (!text || seen.has(text)) continue;
+      seen.add(text);
+      out.push({ text: text.slice(0, 520), source: String(entry.source || '').slice(0, 180) });
+    }
+  }
+  return out.slice(0, 12);
+}
+
+function pulseAxis(text) {
+  if (/FOMC|연준|금리|국채|할인율|PPI|CPI|PCE|조달|회사채|SPV|CDS|크레딧/i.test(text)) return /금리\/Fed/i;
+  if (/환율|원화|달러/i.test(text)) return /환율\/달러/i;
+  if (/반도체 수출|메모리 가격|AI 투자/i.test(text)) return /수급\/플로우/i;
+  return null;
+}
+
+function reinforceDrivers(drivers, adopted) {
+  for (const insight of adopted) {
+    const axis = pulseAxis(insight.text);
+    const driver = axis && (drivers || []).find((d) => axis.test(`${d.ax || ''} ${d.name || ''}`));
+    if (!driver || String(driver.l2 || '').includes(insight.text.slice(0, 60))) continue;
+    const prefix = '02 인사이트 확인: ';
+    driver.l2 = `${String(driver.l2 || '').trim()} · ${prefix}${insight.text}`.slice(0, 900);
+    driver.insightSource = insight.source;
+  }
+}
+
 function buildPrompt(ctx) {
-  const { macroLines, digestMacro, sig, stages, layers } = ctx;
+  const { macroLines, digestMacro, sig, stages, layers, adopted } = ctx;
   return `너는 AI 인프라 투자 관측소 '알파맵'의 시장 관측 파트너다. 아래 라이브 데이터로 **지금 시장을 움직이는 동인**을 6축으로 합성하라.
 
 [불변 규율]
@@ -79,6 +123,8 @@ function buildPrompt(ctx) {
 [레이어 stage] ${stages || '(gamma 없음)'}
 [보유 레이어] ${layers || '(holdings 없음)'}
 ${digestMacro ? '[매크로 다이제스트 요약]\n' + digestMacro + '\n' : ''}
+[02 인사이트 찾기에서 채택·검증된 매크로 관점 — 해당 축에 반드시 반영]
+${(adopted || []).map((x, i) => `${i + 1}. ${x.text}`).join('\n') || '(없음)'}
 [매크로 헤드라인 (번호|축|이름|날짜|제목)]
 ${macroLines || '(없음)'}
 
@@ -96,6 +142,8 @@ async function main() {
   const sig = readJSON('signals.json', {});
   const gamma = readJSON('gamma.json', {});
   const holdings = readJSON('holdings.json', {});
+  const signalLog = readJSON('signal_log.json', {});
+  const adopted = adoptedMacroContext(signalLog);
 
   const macroItems = (news.items || []).filter((it) => it.ticker === 'MACRO');
   const items0 = macroItems;
@@ -109,7 +157,7 @@ async function main() {
   const layers = (holdings.detail || []).filter((d) => d && d.ticker && (+d.w) > 0)
     .map((d) => `${d.ticker}=${d.layer || '?'}`).join(' · ');
 
-  const prompt = buildPrompt({ macroLines, digestMacro, sig, stages, layers });
+  const prompt = buildPrompt({ macroLines, digestMacro, sig, stages, layers, adopted });
 
   try {
     const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${encodeURIComponent(key)}`, {
@@ -137,6 +185,7 @@ async function main() {
       d.srcs = resolveSrcs(d.srcs, items0);
       nSrc += d.srcs.length; nDrop += Math.max(0, want - d.srcs.length);
     });
+    reinforceDrivers(parsed.drivers, adopted);
     console.log('pulse: link resolve ' + nSrc + (nDrop ? ' / dropped ' + nDrop : ''));
     if (nDrop) console.log('::warning::pulse: 해소 실패 링크 ' + nDrop + '건 제외');
     // asOf 는 KST 분단위(사이트 표시용). new Date() → UTC → +9h.
