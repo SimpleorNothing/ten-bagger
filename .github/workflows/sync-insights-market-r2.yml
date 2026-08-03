@@ -1,0 +1,63 @@
+name: Sync 02 insights to 01 market monitoring
+
+# R2에 이미 저장된 02 인사이트를 01 시장 맥락에 한 번 일괄 반영한다.
+# 이후 신규 자료는 사이트의 market-sync.js가 자동 처리한다.
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/sync-insights-market-r2.yml']
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          token: ${{ secrets.AUTO_MERGE_TOKEN }}
+
+      - name: Read saved insights from R2
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+          R2_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+        run: |
+          set -euo pipefail
+          test -n "$R2_ACCOUNT_ID" && test -n "$R2_BUCKET_NAME"
+          aws s3 cp "s3://$R2_BUCKET_NAME/insights.json" insights-r2.json \
+            --endpoint-url "https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com"
+          node -e "const x=require('./insights-r2.json');if(!Array.isArray(x))throw new Error('R2 insights.json 형식 오류');console.log('R2 인사이트',x.length,'건 확인')"
+
+      - name: Build 01 market-context update
+        run: |
+          set -euo pipefail
+          node scripts/sync-insights-market.mjs insights-r2.json signal_log.json
+          node -e "JSON.parse(require('fs').readFileSync('signal_log.json','utf8'));"
+          git diff --check
+
+      - name: Open auto-merge pull request when changes exist
+        env:
+          GH_TOKEN: ${{ secrets.AUTO_MERGE_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- signal_log.json; then
+            echo "새로 반영할 매크로 관점이 없습니다."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          BR="claude/sync-insights-market-${GITHUB_RUN_ID}"
+          git checkout -b "$BR"
+          git add signal_log.json
+          git commit -m "sync: 02 인사이트를 01 시장 맥락에 반영"
+          git push -u origin "$BR"
+          gh pr create --base main --head "$BR" \
+            --title "sync: 02 인사이트를 01 시장 맥락에 반영" \
+            --body "Cloudflare R2의 insights.json에서 채택된 고신뢰 매크로 관점만 반영했습니다. 숫자 보드와 보유비중은 변경하지 않습니다. Claude PR Gate 검증 후 자동 병합됩니다."
