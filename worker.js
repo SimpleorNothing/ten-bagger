@@ -804,6 +804,20 @@ function marketEligible(c) {
   return !!(c && c.pick !== false && c.route === "macro" && c.text && n + i + f >= 4 && i >= 1 && f >= 1);
 }
 
+// 01의 일정 카드는 이미 등록된 이벤트에만 결과를 덧붙인다. 제목·본문에서 분류가
+// 확실하지 않으면 null을 반환해, 새 일정 생성이나 다음 회의 카드 오염을 막는다.
+function macroCalendarTarget(c, rec) {
+  const text = `${c && c.text || ""} ${c && c.why || ""} ${rec && rec.src && rec.src.title || ""}`.toLowerCase();
+  if (/\bfomc\b|federal reserve|연방공개시장위원회|연준.{0,12}(금리|결정|통화정책)/i.test(text)) return "FOMC";
+  if (/\bcpi\b|소비자물가/i.test(text)) return "美 CPI · 6월분";
+  if (/\bpce\b|개인소비지출물가/i.test(text)) return "美 PCE";
+  if (/\bnfp\b|고용보고서|실업률|비농업/i.test(text)) return "美 고용보고서 (실업률·NFP) · 7월분";
+  if (/\becb\b|유럽중앙은행/i.test(text)) return "ECB";
+  if (/\bboj\b|일본은행.*(금정|금리|통화정책)/i.test(text)) return "일본은행 금정위";
+  if (/한국.*(금통위|기준금리)|한국은행.*(금통위|기준금리)/i.test(text)) return "한국 금통위";
+  return null;
+}
+
 // 02 인사이트 → 01 시장 모니터링 자동 동기화.
 // 클라이언트가 id만 전달하면 워커가 R2 원본을 다시 읽어 검증하므로, 화면에 보이는 임의 문구가
 // 시장 맥락에 쓰이는 경로는 없다. 숫자 보드에는 접근하지 않고 signal_log 서술 레이어만 갱신한다.
@@ -827,31 +841,49 @@ async function handleMarketSync(request, env) {
   for (const ask of asks) {
     const rid = String((ask && ask.recordId) || ""), cid = String((ask && ask.claimId) || "");
     const key = rid + ":" + cid;
-    if (!rid || !cid || log[key]) { skipped++; continue; }
+    if (!rid || !cid) { skipped++; continue; }
     const rec = records.find((x) => x && String(x.id) === rid);
     const claim = rec && Array.isArray(rec.claims) ? rec.claims.find((x) => x && String(x.id) === cid) : null;
     if (!rec || !marketEligible(claim)) { skipped++; continue; }
-
-    const applyRequest = new Request(request.url, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({
-        file: "signal_log.json", itemNo: "", itemName: "02 인사이트 자동 반영",
-        text: claim.text, why: claim.why || "", src: rec.src || {},
-        evidenceText: String(rec.raw || "").slice(0, 20000),
-        route: "macro", type: claim.type || "narrative", layer: claim.layer || "", tickers: claim.tickers || []
-      }),
-    });
-    const applied = await handleSiteApply(applyRequest, env);
-    let result = {};
-    try { result = await applied.json(); } catch { result = { error: "site apply 응답 해석 실패" }; }
-    if (!applied.ok || result.error) {
-      results.push({ key, ok: false, error: result.error || "site apply failed" });
-      continue;
+    const state = log[key] && typeof log[key] === "object" ? log[key] : {};
+    // 구 버전 기록은 시장 맥락 반영 완료로 해석한다. 이후에 추가된 일정 카드 반영만
+    // 한 번 수행해 기존 02 자료도 빠짐없이 보완한다.
+    const marketDone = state.market === true || (log[key] && state.market == null);
+    let market = { ok: true, changed: false, reason: "시장 맥락에 이미 반영된 관점" };
+    if (!marketDone) {
+      const applyRequest = new Request(request.url, {
+        method: "POST", headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          file: "signal_log.json", itemNo: "", itemName: "02 인사이트 자동 반영",
+          text: claim.text, why: claim.why || "", src: rec.src || {},
+          evidenceText: String(rec.raw || "").slice(0, 20000), route: "macro",
+          type: claim.type || "narrative", layer: claim.layer || "", tickers: claim.tickers || []
+        }),
+      });
+      const applied = await handleSiteApply(applyRequest, env);
+      try { market = await applied.json(); } catch { market = { error: "시장 맥락 응답 해석 실패" }; }
+      if (!applied.ok || market.error) { results.push({ key, ok: false, surface: "시장 맥락", error: market.error || "site apply failed" }); continue; }
+      state.market = true;
     }
-    log[key] = { at: new Date().toISOString(), changed: !!result.changed, reason: result.reason || "" };
+    const target = macroCalendarTarget(claim, rec);
+    let calendar = null;
+    if (target && state.calendar !== true) {
+      const calendarRequest = new Request(request.url, {
+        method: "POST", headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          file: "calendar.json", itemName: target, text: claim.text, why: claim.why || "", src: rec.src || {},
+          evidenceText: String(rec.raw || "").slice(0, 20000), route: "calendar", type: "narrative"
+        }),
+      });
+      const applied = await handleSiteApply(calendarRequest, env);
+      try { calendar = await applied.json(); } catch { calendar = { error: "일정 카드 응답 해석 실패" }; }
+      if (applied.ok && !calendar.error) state.calendar = true;
+    }
+    state.at = new Date().toISOString();
+    state.changed = !!market.changed || !!(calendar && calendar.changed);
+    log[key] = state;
     processed++;
-    results.push({ key, ok: true, changed: !!result.changed, reason: result.reason || "" });
+    results.push({ key, ok: true, market, ...(target ? { calendarTarget: target, calendar } : {}) });
   }
   const keys = Object.keys(log);
   if (keys.length > 600) keys.sort((a, b) => String(log[b].at || "").localeCompare(String(log[a].at || ""))).slice(600).forEach((k) => delete log[k]);
