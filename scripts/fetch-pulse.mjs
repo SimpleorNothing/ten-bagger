@@ -15,7 +15,7 @@
 import fs from 'node:fs';
 
 const OUT = 'pulse.json';
-const MODEL = 'claude-sonnet-4-6';
+const MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
 
 function readJSON(p, fb) { try { return JSON.parse(fs.readFileSync(p, 'utf8')); } catch (e) { return fb; } }
 
@@ -88,8 +88,8 @@ ${macroLines || '(없음)'}
 }
 
 async function main() {
-  const key = process.env.ANTHROPIC_API_KEY;
-  if (!key) { console.log('::warning::pulse: ANTHROPIC_API_KEY 없음 → 스킵(기존 유지)'); return; }
+  const key = process.env.GEMINI_API_KEY;
+  if (!key) { console.log('::warning::pulse: GEMINI_API_KEY 없음 → 스킵(기존 유지)'); return; }
 
   const news = readJSON('news.json', { items: [], macroTopics: [] });
   const digest = readJSON('news_digest.json', {});
@@ -112,18 +112,21 @@ async function main() {
   const prompt = buildPrompt({ macroLines, digestMacro, sig, stages, layers });
 
   try {
-    const r = await fetch('https://api.anthropic.com/v1/messages', {
+    const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${encodeURIComponent(key)}`, {
       method: 'POST',
-      headers: { 'content-type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01' },
-      body: JSON.stringify({ model: MODEL, max_tokens: 4096, messages: [{ role: 'user', content: prompt }] }),
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ role: 'user', parts: [{ text: prompt }] }],
+        generationConfig: { maxOutputTokens: 4096, responseMimeType: 'application/json' },
+      }),
     });
     if (!r.ok) {
       const body = await r.text().catch(() => '');
-      throw new Error('anthropic HTTP ' + r.status + ' ' + body.slice(0, 300));
+      throw new Error('gemini HTTP ' + r.status + ' ' + body.slice(0, 300));
     }
     const j = await r.json();
-    if (j.stop_reason === 'max_tokens') console.log('::warning::pulse: 응답이 max_tokens 로 잘렸을 수 있음 → 추출 시도');
-    const text = (j.content || []).filter((b) => b.type === 'text').map((b) => b.text).join('');
+    if ((j.candidates || []).some((c) => c.finishReason === 'MAX_TOKENS')) console.log('::warning::pulse: 응답이 max_tokens 로 잘렸을 수 있음 → 추출 시도');
+    const text = (j.candidates || []).flatMap((c) => (c.content && c.content.parts) || []).map((p) => p.text || '').join('');
     const clean = extractJSON(text);
     const parsed = JSON.parse(clean);
     if (!parsed.headline || !Array.isArray(parsed.drivers) || !parsed.drivers.length) throw new Error('pulse shape invalid');
