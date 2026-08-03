@@ -697,7 +697,7 @@ table.tk th.c{text-align:center}
 .stk-bul{margin:0;padding:11px 14px 11px 30px;border-top:1px solid var(--line);list-style:disc}
 .arow{display:flex;gap:10px;align-items:baseline;padding:9px 14px;background:var(--panel);text-decoration:none;border-top:1px solid var(--line);transition:.12s}
 .arow:hover{background:var(--panel2)}
-.arow .adt{flex:0 0 46px;font:600 12px var(--mono);color:var(--faint)}
+.arow .adt{flex:0 0 74px;font:700 12px var(--mono);color:var(--dim);font-variant-numeric:tabular-nums;white-space:nowrap}
 .arow .atx{flex:1;min-width:0;white-space:normal}
 .arow .asum{font-size:14px;color:var(--txt);line-height:1.55;font-weight:600}
 .arow .aimp{display:flex;gap:5px;margin-top:4px;font-size:14px;color:var(--dim);line-height:1.5}
@@ -3843,6 +3843,12 @@ var HIDDEN_KEY='am_topic_radar_hidden_v1',hiddenTopics=[];
       .filter(function(x){return x.score>0;}).sort(function(a,b){return b.score-a.score;}).slice(0,max||2).map(function(x){return x.topic;});
    }};
    document.dispatchEvent(new CustomEvent('am:topic-radar'));
+   /* 원문 발행일은 제목과 분리해 항상 표시한다. 날짜가 없는 RSS 항목은 임의로
+      수집일을 넣지 않고 '날짜 미상'으로 남겨 데이터 기준을 명확히 한다. */
+   function articleDate(v){
+    var m=String(v||'').match(/^(\d{4})-(\d{2})-(\d{2})/);
+    return m?m[1]+'.'+m[2]+'.'+m[3]:'날짜 미상';
+   }
    var html='';
    order.forEach(function(k){
     var lst=byA[k].slice(0,k==='china'?CHINA_MX:MX);
@@ -3854,7 +3860,7 @@ var HIDDEN_KEY='am_topic_radar_hidden_v1',hiddenTopics=[];
      var tx=String(it.a||'').trim()||String(it.title||'');   // a(요약) 없으면 제목 폴백(다음 크론 전까지)
      var im=String(it.w||'').trim();
      html+='<a class="arow" href="'+esc(it.link||'#')+'" target="_blank" rel="noopener">'
-      +'<span class="adt">'+esc((it.published||'').slice(5,10))+'</span>'
+      +'<span class="adt">'+esc(articleDate(it.published))+'</span>'
       +'<span class="atx"><span class="asum">'+esc(tx)+'</span>'
       +(im?'<span class="aimp"><span class="aar">→</span><span>'+esc(im)+'</span></span>':'')
       +'</span></a>';});
