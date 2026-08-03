@@ -33,9 +33,10 @@ jobs:
         id: guard
         env:
           MANUAL: ${{ github.event_name == 'workflow_dispatch' }}
+          FORCE_REFRESH: ${{ github.event_name == 'push' }}
         run: |
-          if [ "$MANUAL" = "true" ]; then
-            echo "수동 실행 → 가드 우회, 진행"
+          if [ "$MANUAL" = "true" ] || [ "$FORCE_REFRESH" = "true" ]; then
+            echo "수동 실행 또는 워크플로 수정 push → 가드 우회, 진행"
             echo "skip=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
