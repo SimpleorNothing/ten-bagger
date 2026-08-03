@@ -54,12 +54,12 @@ jobs:
       - name: Fetch latest news
         if: steps.guard.outputs.skip != 'true'
         env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: node scripts/fetch-news.mjs
       - name: Synthesize market pulse
         if: steps.guard.outputs.skip != 'true'
         env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: node scripts/fetch-pulse.mjs
       - name: Create or update news refresh PR
         id: cpr
