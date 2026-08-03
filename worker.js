@@ -1291,7 +1291,20 @@ async function handleSiteApply(request, env) {
   } catch {}
 
   const API = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${file}`;
-  const cur = await fetch(`${API}?ref=${encodeURIComponent(BRANCH)}`, { headers: gh });
+  const apiBase = `https://api.github.com/repos/${OWNER}/${REPO}`;
+  // 반영 요청은 수집·AI 검증 사이에 수 초가 걸린다. 이때 main이 자동 갱신되면
+  // "현재 파일 SHA"와 "새 브랜치의 기준 커밋"이 달라져 Contents API가 422로
+  // 거절한다. 먼저 기준 커밋을 고정하고, 정확히 그 커밋의 파일을 읽는다.
+  const baseRef = await fetch(`${apiBase}/git/ref/heads/${encodeURIComponent(BRANCH)}`, { headers: gh });
+  if (!baseRef.ok) {
+    const t = await baseRef.text();
+    return memoJson({ error: "github base ref failed", status: baseRef.status, detail: t.slice(0, 300) }, 502);
+  }
+  const baseJson = await baseRef.json();
+  const baseSha = baseJson && baseJson.object && baseJson.object.sha;
+  if (!baseSha) return memoJson({ error: "github base sha missing" }, 502);
+
+  const cur = await fetch(`${API}?ref=${encodeURIComponent(baseSha)}`, { headers: gh });
   if (!cur.ok) return memoJson({ error: "github get failed", status: cur.status }, 502);
   const curJson = await cur.json();
   const sha = curJson.sha;
@@ -1319,17 +1332,7 @@ async function handleSiteApply(request, env) {
     // Claude PR Gate의 auto-merge 대상은 claude/*뿐이다. site-apply/*로 만들면
     // PR을 만들어도 자동 병합 대상에서 빠지고, 보호 규칙 환경에서는 반영이 멈춘다.
     const workBranch = `claude/site-apply-${safeFile}-${suffix}`;
-    const apiBase = `https://api.github.com/repos/${OWNER}/${REPO}`;
     const jsonHeaders = { ...gh, "content-type": "application/json" };
-
-    const baseRef = await fetch(`${apiBase}/git/ref/heads/${encodeURIComponent(BRANCH)}`, { headers: gh });
-    if (!baseRef.ok) {
-      const t = await baseRef.text();
-      return { error: "github base ref failed", status: baseRef.status, detail: t.slice(0, 300) };
-    }
-    const baseJson = await baseRef.json();
-    const baseSha = baseJson && baseJson.object && baseJson.object.sha;
-    if (!baseSha) return { error: "github base sha missing" };
 
     const made = await fetch(`${apiBase}/git/refs`, {
       method: "POST",
