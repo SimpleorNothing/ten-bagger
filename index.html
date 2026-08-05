@@ -1868,7 +1868,7 @@ window.CYCLE=(function(){
 
   <div id="clResult"></div>
 
-  <h2 class="msec" style="margin-top:26px">토론 이력 <span class="mnote">최근 생성 1건만 유지</span> <button class="cl-btn" id="clHistBtn" style="margin-left:8px;vertical-align:middle">새로고침</button></h2>
+  <h2 class="msec" style="margin-top:26px">토론 이력</h2>
   <div id="clHistory"><div class="cl-note">불러오는 중…</div></div>
 
   <div class="cl-bar" id="clBar">
@@ -2112,7 +2112,6 @@ window.CYCLE=(function(){
       root.addEventListener('keydown',function(e){var card=e.target.closest('.cl-card');if(card&&(e.key==='Enter'||e.key===' ')){e.preventDefault();toggle(card.dataset.id);}});
       document.getElementById('clRun').addEventListener('click',runDiscussion);
       var _lb=document.getElementById('clLiveBtn');if(_lb)_lb.addEventListener('click',loadLiveCtx);
-      var _hb=document.getElementById('clHistBtn');if(_hb)_hb.addEventListener('click',loadDiscussions);
       document.getElementById('clLogBtn').addEventListener('click',openLog);
       var _lm=document.getElementById('clLogModal');
       _lm.addEventListener('click',function(e){if(e.target===_lm)_lm.hidden=true;});
