@@ -1,32 +1,32 @@
 {
-  "asOf": "2026-08-05T12:14:50.914Z",
+  "asOf": "2026-08-05T22:18:17.408Z",
   "source": "Google News RSS · 종목축 + 시그널축 + 병목축 (기사별 한 줄 요약 + 물질성 스크리닝)",
   "note": "사이트 종목 카드의 \"일자 + 요약\" 행 소스. 최근 95일 창 · 종목당 최신 5건(첫 로딩 페이로드 상한) · **투자 논제 스크리닝 통과분만**(items[].m>=2 — 2=향후 실적·수주·투자·전략에 영향을 주는 펀더멘털 사실. 1=목표가·수급 이벤트, 0=사후 등락 서술·홍보·추측·콘텐츠팜으로 사이트에서 제외). 탈락 기사는 삭제가 아니라 news_archive.json 에 전건 보존. 나머지 3개월치는 archive/{티커}.json 을 '더 보기'로 온디맨드 로드. 신호/소음 판단과 SIGNAL_LOG 반영은 사람/LLM의 몫 — 채점·차트에는 쓰이지 않는다.",
   "count": 187,
   "macroTopics": [
     {
-      "id": "macro_ai_기업_수익성_및_모멘텀_0",
-      "ticker": "MACRO",
-      "name": "AI 기업 수익성 및 모멘텀",
-      "q": "AI earnings momentum, NVIDIA stock valuation, AI profit growth",
-      "mkt": "US",
-      "ax": "x_ai기업수익성및모멘텀"
-    },
-    {
       "id": "macro_지정학적_리스크_완화_0",
       "ticker": "MACRO",
       "name": "지정학적 리스크 완화",
-      "q": "Strait of Hormuz oil prices, energy supply chain, Middle East geopolitical risk",
+      "q": "Strait of Hormuz tension, Middle East geopolitical risk, oil supply chain",
       "mkt": "US",
       "ax": "energy"
     },
     {
-      "id": "macro_한국_증시_변동성_및_자본시장_2",
+      "id": "macro_ai_반도체_섹터_변동성_확대_1",
       "ticker": "MACRO",
-      "name": "한국 증시 변동성 및 자본시장",
-      "q": "코스피 변동성, 한국 증시 저평가, 외국인 투자자 매매동향",
-      "mkt": "KOSPI",
-      "ax": "x_한국증시변동성및자본시장"
+      "name": "AI 반도체 섹터 변동성 확대",
+      "q": "Nvidia AMD AI chip market sentiment, semiconductor sector stock volatility",
+      "mkt": "US",
+      "ax": "chip"
+    },
+    {
+      "id": "macro_미국_거시경제_불확실성_2",
+      "ticker": "MACRO",
+      "name": "미국 거시경제 불확실성",
+      "q": "US economy slowdown, market valuation warning, S&P 500 record high risk",
+      "mkt": "US",
+      "ax": "x_미국거시경제불확실성"
     }
   ],
   "bottleneck": [
@@ -88,16 +88,16 @@
     }
   ],
   "archive": "news_archive.json",
-  "archiveCount": 2817,
+  "archiveCount": 2857,
   "shardDir": "archive",
   "winCounts": {
     "353200": 17,
-    "005930": 64,
-    "TSLA": 15,
-    "MRVL": 10,
-    "VRT": 26,
+    "005930": 65,
+    "TSLA": 16,
+    "MRVL": 12,
+    "VRT": 28,
     "MU": 7,
-    "LITE": 9,
+    "LITE": 10,
     "SMCI": 31,
     "SNDK": 6,
     "BE": 23,
@@ -162,6 +162,20 @@
       "mv": 3
     },
     {
+      "id": "tsla",
+      "ticker": "TSLA",
+      "name": "테슬라",
+      "title": "Imported car sales rise in Korea as Tesla leads one-third share - CHOSUNBIZ - Chosunbiz",
+      "link": "https://news.google.com/rss/articles/CBMiggFBVV95cUxPUGV3bVF2QWt0VjUyZlZLMU5BN0VDakU2S1p5SzktRnFzUkhVSWtXQVh6NXRpVzJQUVhMY1A1SVZNRXVYby11NUd3YUlra25zbEFMbUVBMzVldDhIQ0VLZWZzYUdwdmlLVkU3RUpsUTloTU9iTkVmdDhRTG53VmdwU0Fn0gGWAUFVX3lxTE1lc1pVck1hYks5eXRnb012QjRxckxleGVyMjdUb2ppSTBqOUswU2FmOGV3cF9nX1RocU1ES2xRRDRrQlk2ODNSTEFtWE9tNjVqbzlrTHFxVThmczRMcUlZX0M4cWJRcm9YSlRxOEd1QWNyZFdwZ1RONHRaRUxxLUpoQzllQmtzRThEU0F1OFFhYjJHUXJqQQ?oc=5",
+      "published": "2026-08-05T03:02:00.000Z",
+      "source": "Chosunbiz",
+      "st": 3,
+      "m": 2,
+      "a": "테슬라(Tesla)의 한국 내 수입차 시장 점유율 1/3 돌파",
+      "w": "국내 판매 호조는 매출 규모 확대에 긍정적이나 전체 실적에서 차지하는 비중을 고려할 때 제한적인 호재.",
+      "mv": 3
+    },
+    {
       "id": "sec",
       "ticker": "005930",
       "name": "삼성전자",
@@ -193,14 +207,14 @@
       "id": "sec",
       "ticker": "005930",
       "name": "삼성전자",
-      "title": "삼성전자, ‘HBM 8배 성능’ 차세대 메모리 선봬…“3D 메모리 선도” - dt.co.kr",
-      "link": "https://news.google.com/rss/articles/CBMiTkFVX3lxTE41ZkZERW1rVzVxbFdTY25YUUJuS3YySUFLd2JsQ1ZYYmc0WElvOGI4TnUwV01pZkE3Rm9CaUxOUkNJcUZacjRWSms2MkVDdw?oc=5",
-      "published": "2026-08-04T19:57:07.000Z",
-      "source": "dt.co.kr",
-      "st": 3,
+      "title": "삼성전자, HBM5 대비 성능 최대 8배 'zHBM' 공개 - 전자신문",
+      "link": "https://news.google.com/rss/articles/CBMiTkFVX3lxTE5kT1RSb2xHMXJDSDlyaUJ2ai1oZXZWYzF3N3VLUFhVOWlZZWUzbDQyVnJrSFk2eVNrdWpqVVd1OGpYU2lNNDhIMzExR3BfQQ?oc=5",
+      "published": "2026-08-04T22:37:27.000Z",
+      "source": "전자신문",
+      "st": 2,
       "m": 2,
-      "a": "삼성전자, HBM 대비 8배 성능 향상을 구현한 차세대 3D 메모리 기술 공개 및 시장 주도 의지 천명.",
-      "w": "차세대 제품의 기술적 우위 확보를 통해 AI 반도체 시장 내 경쟁력 강화가 기대되는 호재.",
+      "a": "삼성전자, 차세대 고대역폭 메모리인 zHBM 기술 공개",
+      "w": "성능 격차를 8배로 벌리는 차세대 기술 확보는 중장기적인 메모리 경쟁력 강화 및 수주 확대에 긍정적.",
       "mv": 3
     },
     {
@@ -246,6 +260,34 @@
       "mv": 3
     },
     {
+      "id": "mrvl",
+      "ticker": "MRVL",
+      "name": "Marvell",
+      "title": "Marvell (MRVL) Is Putting $250 Million Into India To Grow AI Chip R and D - Yahoo Finance",
+      "link": "https://news.google.com/rss/articles/CBMinAFBVV95cUxQcEZVcWI4OVlvS19vR0lYa1k5VU54bDUwQzNjd19iTF9rY3JFZF9PQ1VMLTdlNzhMOGxmQll3M3hiOGgxQzROTG5pNVdCN3NhS0pKalItV2U4bUhSazVjZ0xvYmgtQk9yS3A4cUZpOXgtMGRkU0pKVTFZNUhkM0lKbmR4Z2k1X3hFU2lpN2VTaFpZRklhUk1yNzhydlg?oc=5",
+      "published": "2026-08-03T17:09:15.000Z",
+      "source": "Yahoo Finance",
+      "st": 3,
+      "m": 2,
+      "a": "마벨 테크놀로지, 인도 내 AI 칩 연구개발 시설에 2억 5천만 달러 투자",
+      "w": "AI 인프라 연구 거점 확보를 통해 중장기적인 기술 경쟁력 제고 및 설계 역량 강화 효과 기대.",
+      "mv": 3
+    },
+    {
+      "id": "mrvl",
+      "ticker": "MRVL",
+      "name": "Marvell",
+      "title": "Marvell to Showcase Advanced AI Memory and Storage Infrastructure Portfolio for Agentic AI Inference at FMS 2026 - Marvell Technology",
+      "link": "https://news.google.com/rss/articles/CBMijAJBVV95cUxPU0hpdUJ3NnNjb09zMDEyTURsSkhuYVhEUkMxWEFUdjlVLUZhcFlYNzhab0NXVkdEblgxMmVka1dhQVdZbDc5Z1paOGJBUkt1NHlfMlNWLVZRdWU0Um1JWlU2czE3OFdZR0hpUXp5Tnlfcm9LNG5sRUFwSEp1LWxFeWZhX0VBZFVjMWR2OFpMekc3UzlSNWhvb2NqcmFLbW5jckM3LThXOVhtaThPcG55c29odHJubXp4ajJiNTdRWE83bkxSZUsxQ2FSdGtPeWxtbndhRmMtcERPcTBxdW02Smg3YnJVWXpnazFHSkZEcTlBRDZmQkR4ZGQwMGZ1bmh6YkNoNG1wa0JnQ0hG?oc=5",
+      "published": "2026-08-03T13:01:51.000Z",
+      "source": "Marvell Technology",
+      "st": 3,
+      "m": 2,
+      "a": "마벨 테크놀로지, 에이전트 AI 추론을 위한 AI 메모리 및 스토리지 인프라 제품군 공개",
+      "w": "신제품 공개를 통한 제품 포트폴리오 다변화는 향후 AI 추론 시장에서의 점유율 확대에 기여.",
+      "mv": 3
+    },
+    {
       "id": "tsla",
       "ticker": "TSLA",
       "name": "테슬라",
@@ -271,6 +313,20 @@
       "m": 2,
       "a": "삼성전자발 메모리 공급 부족으로 인한 AI 메모리 압박 심화",
       "w": "공급망 차질에 따른 단기 수급 불안 우려로 펀더멘털 영향 관측.",
+      "mv": 3
+    },
+    {
+      "id": "vrt",
+      "ticker": "VRT",
+      "name": "Vertiv",
+      "title": "VRT Stock Headed For Worst Single-Day Fall In Over 15 Months — Vertiv Says ‘Minor Timing Shifts’ Weighed On Q2 Revenue - Stocktwits",
+      "link": "https://news.google.com/rss/articles/CBMimgFBVV95cUxNUEo1U1hYZEdLcmpWNjAxdUh1YW14eDI5czlQS1VEMXhRSi1yaUl1V3dOUnV2TEVJWHhXNFQtVDVmaGU5Ny01bUZYZjZ2bFp0MFpnTEtDanZ5MGhSX2ZIYjJBa0R1a3BOaXA2QVNKRDY3Smt0dnY4VlBRLUNZb3BMUjM0Q1l4TlNWR3JwalRlSHpMRDl6MGlrd2Fn?oc=5",
+      "published": "2026-08-01T02:50:01.000Z",
+      "source": "Stocktwits",
+      "st": 9,
+      "m": 2,
+      "a": "버티브 홀딩스, 2분기 매출 부진 원인으로 일부 프로젝트의 시점 조정 언급",
+      "w": "매출 인식 시점 지연은 단기 실적 악화 요인이나 수주 취소가 아니라는 점에서 펀더멘털 영향은 중립적.",
       "mv": 3
     },
     {
@@ -342,6 +398,20 @@
       "mv": 3,
       "a": "SK하이닉스·삼성전자와 주요 기업 파트너십 강화에 따른 마이크론 입지 우려",
       "w": "경쟁 환경 변화에 따른 시장 점유율 하락 관측"
+    },
+    {
+      "id": "vrt",
+      "ticker": "VRT",
+      "name": "Vertiv",
+      "title": "Vertiv Q2 Earnings Beat Estimates, Net Sales Rise Year over Year - Yahoo Finance",
+      "link": "https://news.google.com/rss/articles/CBMinwFBVV95cUxNMUotM1F6NlRHTVhVVS1qVVpvMHd3eU5CNzJueTlOaGVLRXMySkpKQ2Zxb0M5WWxjRXJMOUlMd3E0elpMWEpjX00yRzlZaHpSQTZFbmVYQUNxWms1c29jOWEtanBZcTlaQnF1QW02TmI2X2g4eTZyU01SZm5xWTM2SnBQVEpYN1hVQmo3YjhYYmVuSFY3QjMxME1PVTg0Nkk?oc=5",
+      "published": "2026-07-30T16:36:00.000Z",
+      "source": "Yahoo Finance",
+      "st": 3,
+      "m": 2,
+      "a": "버티브 홀딩스의 2분기 실적 컨센서스 상회 및 전년 대비 매출 성장 달성",
+      "w": "예상을 상회하는 실적은 기업의 성장이 견조함을 입증하며 주가에 긍정적인 실적 기반의 모멘텀 제공.",
+      "mv": 3
     },
     {
       "id": "lite",
@@ -543,6 +613,20 @@
       "id": "lite",
       "ticker": "LITE",
       "name": "Lumentum",
+      "title": "AXT secures supply deal with Lumentum worth $87 million - Investing.com",
+      "link": "https://news.google.com/rss/articles/CBMisAFBVV95cUxPZE9kMmNlNWdUNkd2SHpGNUNPTHk2bXZ3MEQxYU5CNS1EQVBIX0dmT09BTndMZEs2Ulg0TmpfMlJaNmJPT3pWZDNQSzZCTUFyY1dwbEtxalFDRUt3cFNhWWNpTGltWXl1VXdkYzhlUF9SV3pJNEE3cnBOdk90SkY3LVJMZXZjMkNieV9IXy1sT0FneWpOQlEyaVJ2UmV2MzhrVnVhb2x4QkxGRjhvZm5kTQ?oc=5",
+      "published": "2026-07-29T20:26:48.000Z",
+      "source": "Investing.com",
+      "st": 3,
+      "m": 2,
+      "a": "AXT와 루멘텀(Lumentum) 간 8,700만 달러 규모의 공급 계약 체결",
+      "w": "구체적인 수주 물량 확보를 통해 안정적인 매출 기반을 마련한 것으로 향후 실적 가시성 증대.",
+      "mv": 3
+    },
+    {
+      "id": "lite",
+      "ticker": "LITE",
+      "name": "Lumentum",
       "title": "AXT, Inc. (NASDAQ: AXTI) secures Lumentum deal with two $43.5M deposits - Stock Titan",
       "link": "https://news.google.com/rss/articles/CBMinAFBVV95cUxOR3huVlQtTTh1Z2t2dTN3aHpWWUVSOW1UWVBTNjlZUGc3TkVvQkdaeGVRcUFLNlJnb2RCbjhQdnV0OWVtSWViXzFIY1Y1V0EzbjFkYmUtSTBnSFRHbWdnT0RKSHV3TGtwSmgxbHg2WkJJUENNTThpOXdhMmIyOXU0RzU0N3ZMSnk1NkNZTXM0aWFHTjdPa2hFSDlxMVo?oc=5",
       "published": "2026-07-29T20:18:32.000Z",
@@ -566,20 +650,6 @@
       "mv": 3,
       "a": "AXT, 루멘텀과 장기 공급 계약 체결",
       "w": "주요 고객사와의 장기 계약을 통해 안정적인 매출처 확보 및 실적 가시성 증대"
-    },
-    {
-      "id": "lite",
-      "ticker": "LITE",
-      "name": "Lumentum",
-      "title": "AXT, Inc. Announces Long-Term Supplier Agreement with Lumentum - Yahoo Finance",
-      "link": "https://news.google.com/rss/articles/CBMikgFBVV95cUxPc0ctNUdoODBPSklhYTFzblNHaWsyRDlXTkFscDFVT080MFg4ZlB3enRNWU9IcTd1Nm4xa2syWFpRNmg5c3haZFNLRUN4a1dpdGZlYWFDNHU2ZDRFXzdSb1RQenp2XzVPOHBBWlFsZEZlZGRZRnpLOWNGREpEaHdPMXlqX2M1cEp4MjJGdnJ0OWNLdw?oc=5",
-      "published": "2026-07-29T20:05:00.000Z",
-      "source": "Yahoo Finance",
-      "st": 3,
-      "m": 2,
-      "mv": 3,
-      "a": "Lumentum과 AXT, Inc. 간 장기 공급 계약 체결",
-      "w": "공급망 안정화에 기여할 수 있으나 주가 영향은 제한적일 것으로 관측됨"
     },
     {
       "id": "qcom",
@@ -708,20 +778,6 @@
       "w": "기술 내재화를 통한 포트폴리오 확장 효과 기대"
     },
     {
-      "id": "vrt",
-      "ticker": "VRT",
-      "name": "Vertiv",
-      "title": "Vertiv Shares Fall Despite Earnings Beat and Higher Full-Year Forecast - Yahoo Finance",
-      "link": "https://news.google.com/rss/articles/CBMiogFBVV95cUxQNVFNQjZFTXlHQzVvWTdoWEQxUGJ4Ni1OQWE1elFTRERzNURuZDRqbEtBajliSmNLWGtDcEZJN2hpeGk2MW1XT0hCNGxOOHdfR25neXRmRDRPUW5hei0zdkNwcWpNcmM3VEhReEprZUJYck15Qm5FMzNRalNrUmJSUWVITXY2aWl0V1I1U1Bkd0dvdUVtaGFwNUozY0xlM3ppZ1E?oc=5",
-      "published": "2026-07-29T12:13:27.000Z",
-      "source": "Yahoo Finance",
-      "st": 3,
-      "m": 2,
-      "mv": 3,
-      "a": "Vertiv의 실적 상회 및 연간 전망치 상향에도 매출 미달로 인한 주가 하락",
-      "w": "수급 노이즈가 펀더멘털 개선 전망을 단기적으로 압도하는 양상"
-    },
-    {
       "id": "amd",
       "ticker": "AMD",
       "name": "AMD",
@@ -734,34 +790,6 @@
       "mv": 3,
       "a": "AMD와 Core Scientific 간 2.5GW 규모 데이터 센터 용량 확보 계약",
       "w": "AI 가속기 수요 기반의 초대형 인프라 고객 확보로 장기 매출 기반 강화"
-    },
-    {
-      "id": "vrt",
-      "ticker": "VRT",
-      "name": "Vertiv",
-      "title": "Vertiv Holdings plunges on revenue miss, supply chain timing (VRT:NYSE) - Seeking Alpha",
-      "link": "https://news.google.com/rss/articles/CBMingFBVV95cUxNakM4M2JyYmJuSF80ZU54U1pjdjdDRHZjQXFfdzZ4MzhzbjFVVEdMRnVUZVJ6eGFhbGs3UklsbUtQR3NaN1FwdkM1OGhUazBtQTNTNzliUXVycUZVMGgxTHJrelByUmt0TExSbFdQUWR4NnFsQkFVRnB2azU1WmJ0UnBpOU55aUJZelpsd0V6QU52eG80UTRrR2dGbk9nUQ?oc=5",
-      "published": "2026-07-29T11:51:42.000Z",
-      "source": "Seeking Alpha",
-      "st": 3,
-      "m": 2,
-      "mv": 3,
-      "a": "Vertiv의 매출 미달 및 공급망 이슈에 따른 주가 급락",
-      "w": "공급망 병목이 단기 실적 가시성을 훼손하는 핵심 변수로 작용"
-    },
-    {
-      "id": "mrvl",
-      "ticker": "MRVL",
-      "name": "Marvell",
-      "title": "Marvell to Invest $250 Million in India, Expanding Bangalore Facility to Drive Next-generation AI Technology Development - Marvell Technology",
-      "link": "https://news.google.com/rss/articles/CBMilAJBVV95cUxQUG43eENDc0wybkFOdVkwTVVfbE45cVoyS3c3SHV0aDhuQ2tDVjg0MTJva0Z5NEdBWkV4Y3B6Z2ZMSVVrZ0dOM0JLWVo1dlVxRW5uSjRtblhEcWo0ZDR5NWN4Ny1KajZiNWdodzcwLS0wb0VsUkY5YkladGc2dGxGYmZMWXF6U05QOHhjd1Nhc3pPQnc1NnJ2YjJQUk1jdV92bU9tMGpiR1JBTU1mZVJuQVFvRE9OQjVhbV83VEtvMjFPU2N5Q0JYbm9NQkk4QVdMX2pHa2dKdEJsRzFIYWpYRWZySmZGeHN6aGVoWGg2ak5PdXVqNnpXSU11Nkg4d09aaTdEcmJkOFdBQkpUdnAtR3lUd18?oc=5",
-      "published": "2026-07-29T10:34:57.000Z",
-      "source": "Marvell Technology",
-      "st": 3,
-      "m": 2,
-      "mv": 3,
-      "a": "Marvell 인도 벵갈루루 시설에 2억 5천만 달러 투자",
-      "w": "AI 기술 개발 인프라 확충으로 장기적인 생산 능력 및 기술 경쟁력 강화가 기대됨."
     },
     {
       "id": "be",
@@ -972,20 +1000,6 @@
       "mv": 3,
       "a": "Core Scientific과 파트너십 발표에도 불구, 시장 예상치 상회하는 손실 기록",
       "w": "실적 부진은 펀더멘털 악재이나 파트너십 계약 자체는 향후 매출 시그널"
-    },
-    {
-      "id": "mrvl",
-      "ticker": "MRVL",
-      "name": "Marvell",
-      "title": "Performance, Connectivity and Programmability: How Teralynx T100 Sets a New Standard in AI Networking - Marvell Technology",
-      "link": "https://news.google.com/rss/articles/CBMifkFVX3lxTE0yT1VNdEhvZU9DSnR5SFBFam1HZnZ0UkZjQ2V0SXNyR3ByaUp2SzdRby1iNENiZy1CMklIZUxpVmtxWWNnWnRDeDVLTnBvZzJXM1BwTXlIT05pTHV5WXFOTTBqcFo1MW5hLUdOOHlITmRQZXdKVDAyUFFibWFqQQ?oc=5",
-      "published": "2026-07-28T16:44:52.000Z",
-      "source": "Marvell Technology",
-      "st": 3,
-      "m": 2,
-      "mv": 3,
-      "a": "AI 네트워킹용 신제품 Teralynx T100 출시 및 성능 표준 제시",
-      "w": "신제품을 통한 시장 경쟁력 강화는 펀더멘털 호재"
     },
     {
       "id": "rmbs",
@@ -1548,20 +1562,6 @@
       "mv": 3
     },
     {
-      "id": "tsla",
-      "ticker": "TSLA",
-      "name": "테슬라",
-      "title": "Sales were up at Tesla but so were costs and spending - Ars Technica",
-      "link": "https://news.google.com/rss/articles/CBMipAFBVV95cUxPR0N3RkZzSkIxaFdSNW1BdGRKOGNxdnF3RmxxNjcyb3llOC1Hd0JPaHdSZFRvSGRpNGlZeHU5a1kyU05IMkRqc3lPSkp4N2RJdWlKLU9ESkVFNGNONWpyenJVZGx1NFlmZzlyekVNdE9WU01wYk1CQkEzU0FUbTVBYUFZTlNoS0lTNmlyMXluNnFyU09UNko4SmgxeGpEX3o4X1AwUQ?oc=5",
-      "published": "2026-07-22T21:15:19.000Z",
-      "source": "Ars Technica",
-      "st": 3,
-      "m": 2,
-      "a": "테슬라 Q2 매출 증가에도 비용·지출 동반 급증 — 수익성 압박 확인",
-      "w": "매출 성장과 비용 구조 악화의 동시 확인은 마진 개선 지연 우려를 강화하는 펀더멘털 복합 신호.",
-      "mv": 3
-    },
-    {
       "id": "vicr",
       "ticker": "VICR",
       "name": "Vicor",
@@ -1884,6 +1884,58 @@
       "mv": 3
     },
     {
+      "id": "bneck_silicon",
+      "ticker": "MACRO",
+      "name": "상류 · 빅테크 자체 실리콘",
+      "ax": "bn_silicon",
+      "title": "Anthropic Confirms In-House Chip Team: Co-Design Bet Could Cut Claude Inference Costs in Half - Tech Times",
+      "link": "https://news.google.com/rss/articles/CBMi2AFBVV95cUxPUU4tSkppMHFPcHdDNTEwREt1ZG9JdHliZzJJTmtrQnNoZE40dE5YdExOcGhFcUVyS0w3R0tEZjVyM2s4WEZBanhfSXVZRWhKT1FDQ3JUTElPV1JBVjNqbzhVUGJSTmh3OS0xdVJ5ckd5ZmhINC0zVXk0ZWROaF90OUJLVmE3dnVqQTk3VXRYNW02Y0FIdUdvX0R2aV9KV0ItWC04UFV5VS1seW1zRkV4bGlTbFBVYm1jcWp5bV96RGdHZFdzODRibENpUDZzRXA2SVVoSXlacFI?oc=5",
+      "published": "2026-08-05T20:32:23.000Z",
+      "source": "Tech Times",
+      "st": 3,
+      "a": "앤스로픽의 자체 칩 설계 조직 구축을 통한 AI 추론 비용 절감 전략 추진 및 모델 가속화 시도.",
+      "w": "L1 모델 레이어의 수익성 개선을 위해 범용 GPU 의존도를 낮추고 자체 실리콘으로 전환하려는 수직적 통합 가속화."
+    },
+    {
+      "id": "macro_미국_거시경제_불확실성_2",
+      "ticker": "MACRO",
+      "name": "미국 거시경제 불확실성",
+      "ax": "x_미국거시경제불확실성",
+      "title": "CDX: Credit Spreads Are Flashing A Warning - Real Investment Advice",
+      "link": "https://news.google.com/rss/articles/CBMihwFBVV95cUxPeEJreWFkSS12UmRpMUNtTXhOYWpIZXM3bXVhWkExNXMxY3F5UE9kMGtpeUQ2bk1xV004RUR1OUdHTjgyZHc0NUo1SEFkbC1uYjhUR1drZWs3QURPR1c5QUs1cEF1XzlmbGpWT3VaYTNqbkY3MHlSWVZwMmxZOERFT29iODhrbXc?oc=5",
+      "published": "2026-08-05T20:25:12.000Z",
+      "source": "Real Investment Advice",
+      "st": 3,
+      "a": "신용 스프레드 확대를 통한 기업 부채 위험 증가 및 미국 금융 시장 내 잠재적 신용 경색 신호 포착.",
+      "w": "매크로 게이트인 드로다운 위험이 고조됨에 따라 하이퍼스케일러의 자본 조달 비용 상승 가능성 내포."
+    },
+    {
+      "id": "bneck_l8_pwr",
+      "ticker": "MACRO",
+      "name": "L7·L8 · 전력 병목",
+      "ax": "bn_l8_pwr",
+      "title": "AI’s Obstacle: Why the Grid Can’t Keep Pace With the Data Center Boom - POWER Magazine",
+      "link": "https://news.google.com/rss/articles/CBMilwFBVV95cUxNdmI4dUM0Nk10SHNkc1hDdTJDaUdWUmxFWUVyQVVlRU5uQk5weWFVU1lnSU4tSGVXTWZCb0FEYnozenRCbTBZcmMyTlljekxENVBMU09UVUw2MGY2U2tlalY0dzN0dWxycExzRmIxbk5YRHdLSUprd0RRS2g5QTRFaThMX3FWaS1xRDMxXzRLbGtxa25yM2Zz?oc=5",
+      "published": "2026-08-05T13:56:55.000Z",
+      "source": "POWER Magazine",
+      "st": 3,
+      "a": "데이터 센터의 전력 수요 급증을 기존 노후 전력망이 수용하지 못하는 인프라 수급 불균형 발생.",
+      "w": "L7 및 L8 발전·그리드 레이어의 물리적 한계가 상류 하이퍼스케일러의 증설 속도를 제약하는 핵심 병목으로 부상."
+    },
+    {
+      "id": "macro_미국_거시경제_불확실성_2",
+      "ticker": "MACRO",
+      "name": "미국 거시경제 불확실성",
+      "ax": "x_미국거시경제불확실성",
+      "title": "Warren Buffett Just Issued a Blunt Warning About the Stock Market. History Is Clear About What Comes Next. - The Globe and Mail",
+      "link": "https://news.google.com/rss/articles/CBMimwJBVV95cUxQYm9ONkpYOXV4SWJmcEtDYnBNWUQ4bWZNZl95cjlJUEJfTFRnOGFkWjJ2aEpzdnNwUU9BdjJfUHpRSm1vM0J3aEE0V3FrVXFlUU9mZVhYM3ZaUWd3OGtsTDdjd21OWm9qMnZnN21PVWx5VG5yNGU5VGNtLXBEMllkQTNQU1VKaERxcnp5NWdBdGJ6TUNNTll4b1hDcjJCZ2NSbkcyeDlKNVdKcmFWSlNxUXYtdDhYbkpxZlhrVkdYTzlqaS1YZzkzOVpmcDVZTHFlTTlkclliN25pcTVWcldXYXZxTGZxOExteWxsaEdiM2ZLQjBCVmtQMzdGRndER2dqMW5MUlI0ZV9XaGVPNnRVZUZjNF9SWUZHSnFB?oc=5",
+      "published": "2026-08-05T12:20:00.000Z",
+      "source": "The Globe and Mail",
+      "st": 3,
+      "a": "버핏의 시장 경고를 통한 고평가 논란 재점화 및 역사적 데이터 기반의 자산 배분 조정 필요성 제기.",
+      "w": "매크로 게이트 측면에서 위험 자산 선호 심리가 위축되며 AI 인프라 섹터로의 대규모 자금 유입이 둔화될 리스크."
+    },
+    {
       "id": "bneck_l3_dram",
       "ticker": "MACRO",
       "name": "L3 · DRAM/HBM 가격·공급",
@@ -1936,6 +1988,32 @@
       "w": "L7·L8 발전 및 그리드 인프라가 AI 확산의 결정적 병목으로 부상하며 상류 투자의 우선순위가 전력 설비로 이동함."
     },
     {
+      "id": "macro_지정학적_리스크_완화_0",
+      "ticker": "MACRO",
+      "name": "지정학적 리스크 완화",
+      "ax": "energy",
+      "title": "Iran War Oil Market Turmoil is Quietly Supercharging Biofuel Profit (2026-Q3-BF-Biofuels-Market-Update-Q4-2026) - resourcewise.com",
+      "link": "https://news.google.com/rss/articles/CBMipgFBVV95cUxPWTdNY1Z4WFpOYWlMU0dqYmM4aUtBMGZZWGgzNmtiZGtDSE42cUYwS1pqZlI2X3BnSWlnSFgtcXZrellORlhYc2p4djE1WkI4X2hkQldzNzMxajhYbWtsc1NVYllQNHpDeUJvLUdkRzNHUUEtSVM2RGJ3UjhDb0tsTmJ0LUtfZS1zeG5UNDNGOHBhcEkwbkRQQmFTaGhleXlvVFozX2VB0gG2AUFVX3lxTE0yWVNaMTVEVU52SFdubTlNVTJ0eDRPZVpMSm5XV0xXdnhpdnRXZFlmV0Z0YmM3WnE1ZzdzTy1vRFU3Wk1pUnBGR0YyLWctbGRVSGJCdDlYZTRHMUxtUER5ZnF3UzVKYkNJZTVycHkxUjVqdjNGVHJaSVo5eE1jWl9TMzBhdTFad05nb0ZLMUZiNlVncW1TaXFId282SGtpc1g5NnVrN0FjNzM3bnJzNmN0ZHk0UGh3?oc=5",
+      "published": "2026-08-04T20:05:39.000Z",
+      "source": "resourcewise.com",
+      "st": 3,
+      "a": "이란발 지정학적 긴장 심화로 인한 원유 수급 불안 속 바이오 연료의 대체재로서 수익성 급등.",
+      "w": "지정학적 리스크가 에너지 믹스 변화를 가속화하며 L8 그리드 및 에너지 인프라 전략에 영향을 주는 요소로 작용."
+    },
+    {
+      "id": "macro_ai_반도체_섹터_변동성_확대_1",
+      "ticker": "MACRO",
+      "name": "AI 반도체 섹터 변동성 확대",
+      "ax": "chip",
+      "title": "AI Semiconductor Investment Strategy 2026: Top Stocks & Market Outlook - Intellectia AI",
+      "link": "https://news.google.com/rss/articles/CBMieEFVX3lxTE56VmhqNmE0TDRJblpyT3RyeE5NVTlxNHV3ekR1UkJDU243X0hNNmVDM19tWmhBQnEycS04Y3FudFRoZ3ltM3VIRy1BUk5aR1pqWDRNbDhKZ3pUd3JYdkNrQTlVbHR0YmZkY1RwdFFrczg3MGV4bTY1Yw?oc=5",
+      "published": "2026-08-04T16:17:56.000Z",
+      "source": "Intellectia AI",
+      "st": 3,
+      "a": "AI 반도체 시장의 공급 과잉 및 기술 고도화에 따른 투자 전략의 차별화와 종목별 변동성 확대.",
+      "w": "L2 컴퓨팅 레이어 내 기술 성숙도에 따른 승자 독식 구도가 심화되며 투자자들의 하이퍼스케일러별 capex 지출 선별 관점 강화."
+    },
+    {
       "id": "bneck_l8_pwr",
       "ticker": "MACRO",
       "name": "L7·L8 · 전력 병목",
@@ -1960,6 +2038,19 @@
       "st": 3,
       "a": "열 스트레스와 전력 수요 급증에 대응하기 위해 유틸리티 기업들이 5년간 1.1조 달러 투자를 계획함.",
       "w": "L8 전력 인프라의 장기적 Capex 투자가 AI 산업의 물리적 한계를 극복하는 필수 관문이 됨."
+    },
+    {
+      "id": "macro_지정학적_리스크_완화_0",
+      "ticker": "MACRO",
+      "name": "지정학적 리스크 완화",
+      "ax": "energy",
+      "title": "WTI Price Outlook: Crude Oil Aims for $80 as US-Iran Tensions Intensify - CryptoRank",
+      "link": "https://news.google.com/rss/articles/CBMiggFBVV95cUxPbmFKTGtxcGVlbHB0eEs3QUE2Y25pSUJxTERlakhJN21iaEV4bnVPTmR3TTJ2al9ubXo2NjBiMUY1RlN2VFhhaUpOWHlZMmhTaUVRUU04SHhmSzRaSUxuOGxxdjZkdnNxTVcyWnJaT0dwUjg4YjNPbHJqa29pNHpnaDB3?oc=5",
+      "published": "2026-08-04T09:41:08.000Z",
+      "source": "CryptoRank",
+      "st": 3,
+      "a": "미국과 이란 간의 긴장 고조에 따른 국제 유가 변동성 확대 및 에너지 시장의 불확실성 노출.",
+      "w": "지정학적 리스크가 L8 전력망 공급 비용 및 데이터 센터 운영 원가에 직간접적 하방 압력으로 작용."
     },
     {
       "id": "bneck_l3_dram",
@@ -2014,19 +2105,6 @@
       "w": "L3 메모리 수급 불균형이 비-AI 섹터의 비용 상승을 유발하며 전체 산업의 인플레이션 압력으로 전이됨."
     },
     {
-      "id": "macro_한국_증시_변동성_및_자본시장_2",
-      "ticker": "MACRO",
-      "name": "한국 증시 변동성 및 자본시장",
-      "ax": "x_한국증시변동성및자본시장",
-      "title": "[증시 레이더] 코스피, 장중 300포인트 널뛰기 끝 반등…코스닥 3거래일 연속 사이드카 - 포커스온경제",
-      "link": "https://news.google.com/rss/articles/CBMiW0FVX3lxTFBNTVBiVVJJTXl4RDhOWkU0VXVJWTdXVjc0NFV5Q09IalljZlNDVkEySEhrT1l2ODNkWjNfYXozeTVnN0xmeUo5cy0xOFc1bmhkSkJlOHh5WTF1bmM?oc=5",
-      "published": "2026-08-04T06:57:19.000Z",
-      "source": "포커스온경제",
-      "st": 3,
-      "a": "국내 증시의 극심한 변동성으로 코스피 지수가 급등락을 반복하며 코스닥 시장에는 3거래일 연속 사이드카가 발동됨.",
-      "w": "한국 증시가 글로벌 매크로 게이트인 VIX 및 F&G 지표의 변동성 확대 구간에 직접적으로 노출됨."
-    },
-    {
       "id": "bneck_l3_dram",
       "ticker": "MACRO",
       "name": "L3 · DRAM/HBM 가격·공급",
@@ -2066,17 +2144,17 @@
       "w": "L7·L8 발전 및 전력망 레이어에서 데이터센터 전력 공급을 위한 인프라 설비 수요가 구조적 성장 국면에 진입함."
     },
     {
-      "id": "macro_한국_증시_변동성_및_자본시장_2",
+      "id": "macro_지정학적_리스크_완화_0",
       "ticker": "MACRO",
-      "name": "한국 증시 변동성 및 자본시장",
-      "ax": "x_한국증시변동성및자본시장",
-      "title": "\"韓, 중국처럼 '투자 부적합 국가' 전락\"…외신도 경고 날렸다 - 한국경제",
-      "link": "https://news.google.com/rss/articles/CBMiWkFVX3lxTE1NWk1kR0d0aVBSdEpybHIyekkxcEI1TVJPWDIwcm9Mb21BNlJ5eHRIcGVfVHY0MHFaZWlYWlNBTEx5Wi15NG5sYVNoZ2UwQmFZRFh6N3BuZzRUUQ?oc=5",
-      "published": "2026-08-04T00:10:22.000Z",
-      "source": "한국경제",
-      "st": 1,
-      "a": "외신이 한국 증시의 구조적 문제와 지정학적 리스크를 지적하며 투자 부적격 국가로의 전락 가능성을 경고함.",
-      "w": "한국 자본시장의 매력도 저하가 하이퍼스케일러 서플라이 체인 투자에 대한 외국인 자금 이탈을 가속화할 위험 존재."
+      "name": "지정학적 리스크 완화",
+      "ax": "energy",
+      "title": "Oil Steadies After Trump Says He Expects Strait of Hormuz to Reopen Soon - en.bloomingbit.io",
+      "link": "https://news.google.com/rss/articles/CBMiVEFVX3lxTFBzYUhCZW0xVHJmeHdIam9pOWUtZ2ZnOGxtVGMzY3ZvN1ByMUZmRnJvcXBjZHRqejd6eDRoQlJyNXhOdzlqMHVlMVJzUnAyY0c3WVJNSw?oc=5",
+      "published": "2026-08-04T00:21:31.000Z",
+      "source": "en.bloomingbit.io",
+      "st": 3,
+      "a": "호르무즈 해협 재개방 기대감을 반영한 원유 시장 안정세 회복 및 지정학적 리스크 프리미엄 축소.",
+      "w": "매크로 게이트 측면에서 원자재 가격 변동성 완화는 데이터 센터 가동을 위한 인프라 비용 안정화 신호."
     },
     {
       "id": "bneck_silicon",
@@ -2103,6 +2181,32 @@
       "st": 3,
       "a": "하이퍼스케일러들의 분기 실적을 통해 현재 진행 중인 AI 데이터 센터 투자 현황을 지속적으로 모니터링함.",
       "w": "L1 모델에서 L8 전력망에 이르는 AI 밸류체인 전체의 성장 궤적을 확인하는 핵심 지표임."
+    },
+    {
+      "id": "macro_ai_반도체_섹터_변동성_확대_1",
+      "ticker": "MACRO",
+      "name": "AI 반도체 섹터 변동성 확대",
+      "ax": "chip",
+      "title": "10 Best Tech Stocks to Buy for 2026 - U.S. News - Money",
+      "link": "https://news.google.com/rss/articles/CBMigwFBVV95cUxPTlNBMDg3UlhwZ1k5ZURWU0RMdEZXdlpRenJ1aFpGZm16SHpPam5MYlZRa0pYU2pVWlpuT0lEUXV0WklPLWVWUVdBZ3lIaEdnNF9xY2ZCOFZwckRyTmI1VXRlQ3dHWE90SWFSS1RDT0MzYWVIcVhTcHNUcTV5OWNjRHFjRQ?oc=5",
+      "published": "2026-08-03T19:04:00.000Z",
+      "source": "U.S. News - Money",
+      "st": 3,
+      "a": "2026년 기술주 투자 유망 종목 선별을 통한 AI 주도권 경쟁 및 시장 기대치 재조정.",
+      "w": "AI 인프라 레이어 전반의 성장 잠재력이 유지되나, 매크로 변동성 하에서 수익성 지표 기반의 선별적 capex 집행 강조."
+    },
+    {
+      "id": "bneck_capex",
+      "ticker": "MACRO",
+      "name": "상류 · 하이퍼스케일러 capex",
+      "ax": "capex",
+      "title": "Big Tech's cloud backlog just hit $2.3 trillion — and it's feeding AI capex plans - Yahoo Finance",
+      "link": "https://news.google.com/rss/articles/CBMi0gFBVV95cUxPeXVMZ0JkNjRqVVBaNXdOX3lkUzMtQzlKeFR6NWhaNWVDS0ViYkxEWEJZeFpyLW9Ed05Sd0dSR0pHdjFKV3lTOEhlZ3lvWDN5cHprSUlNVFVtOG80bkRsQWxmSmtiNXFpV1E3YldhVFlRMGVqdHdKNEtXQVJEN1ZNRHByT21aaE03TkpQM0ljU0JqYU5JMmJwVVl0SWEwZHBEY0FVczRtbDQwQ1JJVkhTNTlSUFVOR3c3dWhjazNRSnQ0TUUyOTFZTW5QLVNzd3RCOFE?oc=5",
+      "published": "2026-08-03T18:14:59.000Z",
+      "source": "Yahoo Finance",
+      "st": 3,
+      "a": "하이퍼스케일러의 클라우드 백로그 누적과 이에 따른 미래 AI 인프라 시설 투자 계획의 공격적 유지.",
+      "w": "상류 하이퍼스케일러의 강력한 capex 의지가 L2 반도체부터 L8 전력까지 이어지는 산업 생태계의 견조한 수요 기반 증명."
     },
     {
       "id": "bneck_capex",
@@ -2144,43 +2248,17 @@
       "w": "상류 하이퍼스케일러의 capex 집행 강도가 유지되면서 AI 인프라 스택 전반의 장기적인 수요 기반은 견조할 것으로 평가."
     },
     {
-      "id": "bneck_l8_pwr",
+      "id": "macro_미국_거시경제_불확실성_2",
       "ticker": "MACRO",
-      "name": "L7·L8 · 전력 병목",
-      "ax": "bn_l8_pwr",
-      "title": "The Quantum Dividend Is an Energy Dividend—If Washington Sequences It Right - The National Interest",
-      "link": "https://news.google.com/rss/articles/CBMiugFBVV95cUxPT2E0cWJ3OHhlMFpHRXkyQTRpSmxuUVBMRDY3RnQyNG9TeFpjbUdORWxlQUxiaFc4QkFDaHYwM3Foc21ueTNQYlVYV043UldVOFBsdEtiMFRMS2dlbUs1eFhmTHVqdEJHUWIyQVBzMC00ZFRSNXBRUkFFY0o1QjVHb2NuN2kybG5yQlpncVk4UC1VOVJMSHp3c1J0T1pBUEpyaXpLbzdHWUN2WFAyNVRpSmVaVWI2NFgzZFE?oc=5",
-      "published": "2026-08-03T12:01:51.000Z",
-      "source": "The National Interest",
+      "name": "미국 거시경제 불확실성",
+      "ax": "x_미국거시경제불확실성",
+      "title": "Stock Market Today: Live Updates 03.08.2026 - TechStock²",
+      "link": "https://news.google.com/rss/articles/CBMiX0FVX3lxTE03Y0NYZXl2TXhkSjd1YTA1dm5RMmRXNjVZYkZGX25LS1ZfSDVBVjVleFpHTHcxMFY0aGMtYmJNTTQyU2dIN3lrLUVLdVo3a3MwVGh5NGZydFQzRlRNRGM0?oc=5",
+      "published": "2026-08-03T08:00:02.000Z",
+      "source": "TechStock²",
       "st": 3,
-      "a": "양자 컴퓨팅과 AI 확산을 위한 국가 차원의 전략적 전력 인프라 우선순위 설정의 필요성 대두.",
-      "w": "L8 발전 및 그리드 인프라의 가용성이 AI 연산 규모의 물리적 한계를 결정짓는 핵심 변수로 부상함."
-    },
-    {
-      "id": "macro_지정학적_리스크_완화_0",
-      "ticker": "MACRO",
-      "name": "지정학적 리스크 완화",
-      "ax": "energy",
-      "title": "US-Iran Talks Set for Aug. 4 as Hormuz Reopening Paves Way for Nuclear Negotiations - en.bloomingbit.io",
-      "link": "https://news.google.com/rss/articles/CBMiVEFVX3lxTE50MVdFa29jSUJQWlJmRkZINTB0a2NKX0l2RUNyQkVldFNFcXpJYXM3bXVRU195VHZOOWZlaVRtTjF3eTdqU0I2MEloMUtMQ21pUjFHTg?oc=5",
-      "published": "2026-08-03T09:45:58.000Z",
-      "source": "en.bloomingbit.io",
-      "st": 3,
-      "a": "호르무즈 해협 재개방 및 핵 협상을 위한 미·이란 회담이 공식 추진됨.",
-      "w": "에너지 공급 리스크 해소는 글로벌 인플레이션 통제 및 통화 정책의 예측 가능성을 높임."
-    },
-    {
-      "id": "macro_지정학적_리스크_완화_0",
-      "ticker": "MACRO",
-      "name": "지정학적 리스크 완화",
-      "ax": "energy",
-      "title": "Global markets mixed as easing Middle East tensions face chip overvaluation concerns - Anadolu Ajansı",
-      "link": "https://news.google.com/rss/articles/CBMiwwFBVV95cUxPUWZab3Q3Q2R6QlhtSWt3akNSVFpNZlZWazhYUVVuOWlpUjV2WmZ4NkZFaW1JZmFkeWFGSExScnhYYUVXYVB4SkJGVmN2ME1GWlpjWnBmV2ZEdjlMNHRvQUJTd0NSN0tQZmhsLVZXS3Y4U3pVcHdJVXN4RnZtdjE0R3M2R0psSGhmcWJkbnVyeEhGdFJPZ3d4djVIMTMzd3Jza0pMT21FNzMtdU5EREx5d0dVd0ZJYmZoRUZVTDNWT3FleVk?oc=5",
-      "published": "2026-08-03T08:40:39.000Z",
-      "source": "Anadolu Ajansı",
-      "st": 3,
-      "a": "중동 긴장 완화에도 불구하고 반도체 섹터의 밸류에이션 고평가 논란으로 글로벌 시장이 혼조세를 보임.",
-      "w": "L3 메모리 및 L2 컴퓨팅 계층의 밸류에이션 부담이 매크로 게이트의 기술적 조정 변수로 작용함."
+      "a": "미국 주식 시장의 실시간 변동성 확인을 통한 거시경제적 불확실성 및 투자 심리 위축 상황 지속.",
+      "w": "매크로 게이트의 드로다운 경계심이 고조되는 가운데 하이퍼스케일러의 투자 지속 가능성을 가늠하는 관점 확대."
     },
     {
       "id": "bneck_l6_opt",
@@ -2196,17 +2274,17 @@
       "w": "L6 네트워킹 레이어에서 데이터 전송 병목 해소를 위한 광학 부품의 장기적 공급 부족 가능성 암시."
     },
     {
-      "id": "macro_중동_지정학_리스크_0",
+      "id": "macro_지정학_리스크와_에너지_공급망_2",
       "ticker": "MACRO",
-      "name": "중동 지정학 리스크",
-      "ax": "energy",
-      "title": "Oil price tumbles as Trump cancels attack on Iran - Gulf Business",
-      "link": "https://news.google.com/rss/articles/CBMipwFBVV95cUxQYzJpcHpBNzFaOVcwdHg4SVJ4QkpmdXQtQTA2WDJrWWRHTXh5UVQ0OGNlYThoWm5tbUlkWnVacGlWY2ZtdWhucTNfLXo3TGk5WHltRktNcFNNWjNlSjRHbHVzNnVJaWhWWF9MQ3pLdUlBYy1ZU3ZlN19OV291ZnlsSnpicDFpS0FPZ0VVcGY4REJzQjdJQmtBa3VueEJsWVZ0NXVkS1gtaw?oc=5",
-      "published": "2026-08-03T06:50:22.000Z",
-      "source": "Gulf Business",
+      "name": "지정학 리스크와 에너지 공급망",
+      "ax": "chip",
+      "title": "Oil Prices and Iran Tensions 2026: Market Impact Analysis - Intellectia AI",
+      "link": "https://news.google.com/rss/articles/CBMiaEFVX3lxTE0wbF9wV3RWRnFlWXBadlA2VVFVM0cwM3F6YWpNOTZ4eGNaZnRQeUJhdm9HMWpaUVpIMFI2WHZHeExVMXZsNlF5VnUyeUg0Y2JySzVzb1pGX1d4Z0trdjFvd1V0WlJMVjZs?oc=5",
+      "published": "2026-08-03T00:17:51.000Z",
+      "source": "Intellectia AI",
       "st": 3,
-      "a": "트럼프 전 대통령의 이란 공격 취소 발표 이후 지정학적 긴장감이 완화되며 국제 유가가 하락함.",
-      "w": "지정학적 리스크 완화는 매크로 게이트의 인플레이션 우려를 줄이고 위험 자산 선호 심리를 강화함."
+      "a": "중동 지역의 지정학적 긴장 고조로 인한 글로벌 원유 공급 차질 및 에너지 가격 변동성 확대 가능성.",
+      "w": "에너지 공급망 리스크는 L8 발전 비용 상승을 통해 데이터센터 운영비용(OPEX)을 직접적으로 자극하는 매크로 변수임."
     },
     {
       "id": "macro_트럼프_관세_공급망_2",
@@ -2248,17 +2326,17 @@
       "w": "상류 하이퍼스케일러의 Capex 가속화가 인프라 전 계층에 걸쳐 초과 수요를 유발함."
     },
     {
-      "id": "macro_빅테크_ai_capex_실적_1",
+      "id": "macro_트럼프_관세_공급망_2",
       "ticker": "MACRO",
-      "name": "빅테크 AI Capex 실적",
-      "ax": "capex",
-      "title": "5 Charts on What to Watch in SpaceX Earnings - Morningstar",
-      "link": "https://news.google.com/rss/articles/CBMihgFBVV95cUxPSlZqU1BXcWU3TmJOUnlrYVR0ZE5yS2I5enRON3pIQ1lxQ0trXzQwTkRNU3pTclN5VnFYSUFLX1ZOSDlCNTlWRTg1SlVVV19aSUZUM2QwdU1MeDg5aXNYWmxDUHJRbHN2dzlnLURuU0Zjc2drNU9MWktfa2NWU2Z3NUZMTE9fZw?oc=5",
-      "published": "2026-08-02T09:33:03.000Z",
-      "source": "Morningstar",
-      "st": 3,
-      "a": "스페이스X의 수익성과 우주 기반 AI 인프라 확장에 따른 대규모 자본 지출 전략 점검 필요성 제기.",
-      "w": "상류 하이퍼스케일러의 투자가 데이터 센터를 넘어 위성 통신 및 원격 인프라로 다변화되는 구조적 변화."
+      "name": "트럼프 관세 공급망",
+      "ax": "chip",
+      "title": "美中 ‘AI 외교전’…韓, 대처 전략 있나[김창영의 실리콘밸리View] - 서울경제",
+      "link": "https://news.google.com/rss/articles/CBMiU0FVX3lxTE9FYTBFWDhEQ2VrSkpsdDV6RVY3Rjh2dlVvN0s2ZDBKT1NRTFpwVDVwN1V1YmtBOGI5TXJzTEVEeFNXVWZwVnBsZThSN3JKbTVla1A00gFTQVVfeXFMT0VhMEVYOERDZWtKSmx0NXpFVjdGOHZ2VW83SzZkMEpPU1FMWnBUNXA3VXVia0E4YjlNcnNMRUR4U1dVZnBWcGxlOFI3ckptNWVrUDQ?oc=5",
+      "published": "2026-08-02T09:01:52.000Z",
+      "source": "서울경제",
+      "st": 1,
+      "a": "미·중 AI 패권 경쟁 심화 속 한국의 독자적인 기술 외교 전략 부재에 따른 공급망 리스크 가중.",
+      "w": "상류 하이퍼스케일러의 관세 정책 변화가 한국의 L4·L5 제조 생태계에 미치는 매크로 불확실성 증대."
     },
     {
       "id": "macro_트럼프_관세_공급망_2",
@@ -2287,19 +2365,6 @@
       "w": "L2 커스텀 실리콘의 최적화가 전력 병목을 극복하고 AI 모델 성능당 전력 비용을 낮추는 핵심 지렛대로 작동."
     },
     {
-      "id": "macro_ai_기업_수익성_및_모멘텀_0",
-      "ticker": "MACRO",
-      "name": "AI 기업 수익성 및 모멘텀",
-      "ax": "x_ai기업수익성및모멘텀",
-      "title": "AMD Stock Analysis 2026: Is $600 Per Share Within Reach? - Intellectia AI",
-      "link": "https://news.google.com/rss/articles/CBMiakFVX3lxTE5KT2xHcE0wSHQ0WFZSRE1xWjhiWXYzUHotSms4X3hOamFPdTZtTGNlOGdfMzQ3Yll4NTBndlBJeTQyNG4tRDJmX3lwN255cXlaQzhXTUphampLVklJUDJ3cUJJTzJiSjd1THc?oc=5",
-      "published": "2026-08-01T04:12:38.000Z",
-      "source": "Intellectia AI",
-      "st": 3,
-      "a": "AMD의 AI 가속기 성장세에 힘입어 주가 상승 잠재력에 대한 시장의 기대치가 고조됨.",
-      "w": "상류 하이퍼스케일러의 AI 가속기 다변화 전략이 개별 기업의 밸류에이션 리레이팅으로 연결됨."
-    },
-    {
       "id": "bneck_l4_pkg",
       "ticker": "MACRO",
       "name": "L4 · 패키징 캐파",
@@ -2326,69 +2391,30 @@
       "w": "L4 패키징 레이어의 공급 제약은 AI 인프라 전체의 확장 속도를 결정짓는 핵심 병목 변수임."
     },
     {
-      "id": "macro_한국_증시_변동성_및_자본시장_2",
+      "id": "macro_지정학_리스크와_에너지_공급망_2",
       "ticker": "MACRO",
-      "name": "한국 증시 변동성 및 자본시장",
-      "ax": "x_한국증시변동성및자본시장",
-      "title": "잔인한 7월, 마지막 반전 - 한국경제",
-      "link": "https://news.google.com/rss/articles/CBMiWkFVX3lxTFA2RjQwWDdQeE5ZZnI4QWpCX2FScGdFcEZKYnRZMG5fN1M2SDhEeVFaUHNkd0tEeTdNaWNmSE9BLVd0NDY3U25nOGdfaTM4dHJfRldVc3V0SXd3dw?oc=5",
-      "published": "2026-07-31T08:54:00.000Z",
-      "source": "한국경제",
-      "st": 1,
-      "a": "7월 한 달간 지속된 증시의 불확실성이 월말 극적인 반등과 함께 마무리됨.",
-      "w": "자본시장 매크로 게이트의 변동성 완화가 위험 자산 선호 심리를 회복시키며 IT 하드웨어 투자 여건을 개선함."
-    },
-    {
-      "id": "macro_한국_증시_변동성_및_자본시장_2",
-      "ticker": "MACRO",
-      "name": "한국 증시 변동성 및 자본시장",
-      "ax": "x_한국증시변동성및자본시장",
-      "title": "\"숫자 미쳤다\" 하루 만에 1000P 폭등…개미들 '도박판' 탄식 - 한국경제",
-      "link": "https://news.google.com/rss/articles/CBMiWkFVX3lxTE9EbEdNUFR2V3hvOC0wR0VZRFp5ZnR5NHh0djZWb1FvSEpyMGZSckp0S3ptZ0NlbE5NcGJMSTRhVlJzLXk5R0NOekZlYUVXeFBVVjQxdDNjZVdfdw?oc=5",
-      "published": "2026-07-31T06:43:55.000Z",
-      "source": "한국경제",
-      "st": 1,
-      "a": "극심한 증시 변동성 속에서 개인 투자자들의 심리적 동요와 투기적 거래가 증폭됨.",
-      "w": "자본시장 매크로 게이트의 불안정성이 하이퍼스케일러 관련주에 대한 단기 수급 왜곡을 유발함."
-    },
-    {
-      "id": "macro_ai_기업_수익성_및_모멘텀_0",
-      "ticker": "MACRO",
-      "name": "AI 기업 수익성 및 모멘텀",
-      "ax": "x_ai기업수익성및모멘텀",
-      "title": "NVDA News | NVIDIA CORP (NASDAQ:NVDA) - ChartMill",
-      "link": "https://news.google.com/rss/articles/CBMiW0FVX3lxTE5GaXJSY2xuaHhxaXFmZ3NJSEdhOW5lVTQyUTRDeDNVTHNaeDQwWmZzaUtNV01fQkVFTzhqWEZ1c2ZfYkdxZkFXWFFJMGRFaFRzdWl3VEx0dXFzVEU?oc=5",
-      "published": "2026-07-30T19:21:09.000Z",
-      "source": "ChartMill",
+      "name": "지정학 리스크와 에너지 공급망",
+      "ax": "chip",
+      "title": "COMMENTARY: Expect More Shocks to Crude Oil and Natural Gas Markets – Yogi Schulz - EnergyNow",
+      "link": "https://news.google.com/rss/articles/CBMirAFBVV95cUxNRUdLVEpLcGZlWDI3eTFuWGFUWm9tdXUwZVo1bW9MUnE0TlRMM1NUdWVmTE5yUk14bkdNZlV5M2E3SmkzRUlqcUF0TXNpbVFDVnJua0JWQ2FQZm00djVvNFlYV3lfY1ppempzejVQVEdiaGljbGpNRmFObGlTakpLcGVDVEhQekJTWGhsV19nQjU2WW5sYUtQVkRTTS1SUlZZemNUaFFMaHhpQTZG?oc=5",
+      "published": "2026-07-31T23:42:51.000Z",
+      "source": "EnergyNow",
       "st": 3,
-      "a": "엔비디아의 시장 지배력과 실적 모멘텀이 기술주 전반의 투심을 주도함.",
-      "w": "상류 하이퍼스케일러의 GPU 중심 Capex 기조가 L1~L4 전반의 산업 지형을 결정함."
+      "a": "지정학적 요인에 따른 원유 및 천연가스 시장의 공급 불안 지속과 에너지 가격 쇼크에 대한 경고.",
+      "w": "에너지 안보 문제는 인프라 상류 레이어의 운영 안정성을 흔들며 전력 의존도가 높은 데이터센터 산업의 비즈니스 리스크를 심화함."
     },
     {
-      "id": "macro_ai_기업_수익성_및_모멘텀_0",
+      "id": "macro_미국_거시경제_불확실성_2",
       "ticker": "MACRO",
-      "name": "AI 기업 수익성 및 모멘텀",
-      "ax": "x_ai기업수익성및모멘텀",
-      "title": "Arm's AI Momentum is Undeniable, but is ARM Stock a Hold? - TradingView",
-      "link": "https://news.google.com/rss/articles/CBMisAFBVV95cUxPT3ZyNUtmaXJMQTNPOUN6bDdCYTBPdkFwM2t5TDBPSFl3Zkd1Q3pqRWNUZ3JJTmYxQ0VhcjExY1lOZWVacThvaWJwN1JtcW91QXREZ0ZXS2xyVXg4RmJNcEZDRDMtU2ZMU3JwYV9tMjZJODlxZ0FLT3RLeGsyTFBBTnFDRXJiNUVhd0Q0MUtVUnBPVTE5SXZvNl93T0dvMnNPNXNmbk5iZFZWbDVvZFBiNQ?oc=5",
-      "published": "2026-07-30T18:09:00.000Z",
-      "source": "TradingView",
+      "name": "미국 거시경제 불확실성",
+      "ax": "x_미국거시경제불확실성",
+      "title": "The Best Defensive ETFs to Protect Your Portfolio - Kiplinger",
+      "link": "https://news.google.com/rss/articles/CBMilgFBVV95cUxOYmFMMlEzWHIyWFNnUjZrMjloM0laVkRsRzltU2VqX05HNFg5eTViOUk3MzI3UkotaHpGZlhldDF6RkhQNUk3Wk45Rmt2d0ZxY0Y1TjBoX3NrNjkwZGxVQzYwMld3R3RZcjF4YUVteDV6NTBCdkp5U0YzdmFRdHNub2t1bU40STJkZHE4X0RWTi0xSTR1Vmc?oc=5",
+      "published": "2026-07-31T13:59:55.000Z",
+      "source": "Kiplinger",
       "st": 3,
-      "a": "ARM의 AI 기반 매출 성장이 지속되고 있으나 높은 밸류에이션에 따른 시장의 관망세가 병존함.",
-      "w": "AI 연산 아키텍처의 설계 효율을 담당하는 L2/L4 레이어의 가치 평가가 전체 생태계의 투자 잣대가 됨."
-    },
-    {
-      "id": "macro_한국_증시_변동성_및_자본시장_2",
-      "ticker": "MACRO",
-      "name": "한국 증시 변동성 및 자본시장",
-      "ax": "x_한국증시변동성및자본시장",
-      "title": "\"지금은 팔 때 아냐\"…개미들 비명 쏟아졌는데 '반전' 전망 - 한국경제",
-      "link": "https://news.google.com/rss/articles/CBMiWkFVX3lxTE5VdHBjeDBzYUl0UkJBcjlGcEUyX2lqUC1FelBxV0FQb0NoUTJrSVQ3Mk9LZFlRYlpaNGkwM3ZNRGViQkpvN3V2YUFleTFRMTRkS3NMcWtDdDdYQQ?oc=5",
-      "published": "2026-07-30T08:47:05.000Z",
-      "source": "한국경제",
-      "st": 1,
-      "a": "시장 변동성 속에서도 기술주에 대한 저점 매수 의견과 낙관적인 반전 전망이 제기됨.",
-      "w": "매크로 게이트 변동성 완화 기대감이 L3·L4 중심의 반도체 공급망 기업들의 밸류에이션 방어를 뒷받침함."
+      "a": "시장 변동성 방어를 위한 방어적 성격의 상장지수펀드(ETF) 전략 및 자산 배분 비중 확대.",
+      "w": "하이퍼스케일러 투자가 매크로 위축기에 방어력을 가질 수 있을지에 대한 투자자들의 보수적 자산 운용 기조 투영."
     },
     {
       "id": "bneck_l6_opt",
@@ -2402,19 +2428,6 @@
       "st": 3,
       "a": "중국 광통신 기업 중지이노라이트의 글로벌 AI 인프라 시장 점유율 확대와 공급망 지배력 강화 본격화.",
       "w": "L6 레이어 내 광통신 부품 병목 현상을 해소하며 데이터센터 간 고속 데이터 전송 속도를 결정짓는 핵심 변수로 작용함."
-    },
-    {
-      "id": "macro_ai_기업_수익성_및_모멘텀_0",
-      "ticker": "MACRO",
-      "name": "AI 기업 수익성 및 모멘텀",
-      "ax": "x_ai기업수익성및모멘텀",
-      "title": "Verizon: The AI‑Driven Growth Story Is Beginning To Gain Momentum (NYSE:VZ) - Seeking Alpha",
-      "link": "https://news.google.com/rss/articles/CBMipwFBVV95cUxNN1BZYWJzalMzdE9CWkUwa0RBSXljMmFMbFpLbkIwRlJBOTV0amh1UDhhWUp3NTZCTlpaNDFTOUk2SmJ3SkRoZGN6YXA3R2VaeWs5MFRraE9sbW5jalhLZVllUkl6YVE5UzBRcU1VTl8zanB4LXdFNUNCUDVIMFNTRGFGRVZrQlRYRlFWalVQOG9nN0M5S25MS2ZSZHFuQ2JVbDZIQkNMbw?oc=5",
-      "published": "2026-07-29T20:44:24.000Z",
-      "source": "Seeking Alpha",
-      "st": 3,
-      "a": "버라이즌이 AI 도입을 통한 통신 서비스 성장 모멘텀을 가시화함.",
-      "w": "L6·L7 통신 인프라가 AI 서비스와 결합하며 새로운 수익 모델을 창출하는 레이어로 진화함."
     },
     {
       "id": "macro_트럼프_관세_공급망_2",
@@ -2623,19 +2636,6 @@
       "st": 3,
       "a": "HBM 시장 규모·점유율·트렌드 및 2035년 성장 전망 보고서 발간",
       "w": "L2 커스텀 실리콘·메모리 레이어에서 HBM 장기 수요 곡선이 확인되며, 하이퍼스케일러 AI 가속기 세대 교체 주기와 연동된 capex 사이클 지속성을 뒷받침."
-    },
-    {
-      "id": "bneck_silicon",
-      "ticker": "MACRO",
-      "name": "상류 · 빅테크 자체 실리콘",
-      "ax": "bn_silicon",
-      "title": "Google’s Frozen v2 Chip Hardwires Gemini Architecture: Up to Tenfold Inference Efficiency - Tech Times",
-      "link": "https://news.google.com/rss/articles/CBMi0gFBVV95cUxNY3hGZkk5aFV4djZYSk9MMzJzakEybkRfVmctMThXTG9nUWplY0NCbnVMMmtiMjVVcTlxbkpmTW9LRUNZdGY0b1NCZnNQSUFVUll4RjNQRDg0ODNuY1c1eUJBdGVRcFBsc3NUR1B2cW9NMmlnNXhZazdVaXZCc3NMUm1WamVGNjhDdVl2Wk1TRTBranNZM0ZaSHQxQVdIaDM2VUhLWmsyQWtPRHRPUzRyREFDdFIybXNSdHR3TnR1WFBjT3R1bFZZd2h3NXZWdEJKSXc?oc=5",
-      "published": "2026-07-21T11:03:14.000Z",
-      "source": "Tech Times",
-      "st": 3,
-      "a": "구글 Frozen v2 칩, Gemini 아키텍처 하드와이어링으로 추론 효율 최대 10배 향상 달성",
-      "w": "L1(모델)·L2(커스텀 실리콘) 경계 융합이 심화되어 범용 GPU 수요 일부를 내재화하고 하이퍼스케일러 외부 칩 조달 의존도를 구조적으로 압박"
     },
     {
       "id": "bneck_l6_opt",
