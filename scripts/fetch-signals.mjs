@@ -15,12 +15,13 @@ import fs from 'node:fs';
 const OUT = 'signals.json';
 const CHARTS = 'charts.json'; // 코스피 종가 백스톱(ks11 확정 일봉) — 야후 장중 필드 결측 대비
 const UA = { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36' };
+const FETCH_TIMEOUT_MS = 15_000;
 
 const clamp = (n, lo, hi) => (Number.isFinite(n) && n >= lo && n <= hi ? n : null);
 
 async function yahoo(sym, range = '5d', interval = '1d') {
   const u = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?interval=${interval}&range=${range}`;
-  const r = await fetch(u, { headers: UA });
+  const r = await fetch(u, { headers: UA, signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) });
   if (!r.ok) throw new Error('yahoo HTTP ' + r.status);
   const j = await r.json();
   const res = j?.chart?.result?.[0];
@@ -50,7 +51,7 @@ async function fetchSpDailyPct() {
 
 async function fetchFearGreed() {
   const u = 'https://production.dataviz.cnn.io/index/fearandgreed/graphdata';
-  const r = await fetch(u, { headers: UA });
+  const r = await fetch(u, { headers: UA, signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) });
   if (!r.ok) throw new Error('cnn HTTP ' + r.status);
   const j = await r.json();
   const score = j?.fear_and_greed?.score;
@@ -127,7 +128,7 @@ const LEAD_SERIES = [
 
 async function fredSeries(id) {
   const u = 'https://fred.stlouisfed.org/graph/fredgraph.csv?id=' + encodeURIComponent(id) + '&cosd=2019-01-01';
-  const r = await fetch(u, { headers: UA });
+  const r = await fetch(u, { headers: UA, signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) });
   if (!r.ok) throw new Error('fred HTTP ' + r.status);
   const rows = [];
   for (const line of (await r.text()).trim().split('\n').slice(1)) {
@@ -216,6 +217,9 @@ async function main() {
     try {
       const msg = await fn();
       ok++;
+      // 외부 소스 하나가 이후에 멈추거나 러너가 종료돼도 이미 수집한 일일값은 보존한다.
+      out.asOf = new Date().toISOString().slice(0, 10);
+      fs.writeFileSync(OUT, JSON.stringify(out, null, 2) + '\n');
       console.log(`OK   ${key} = ${msg}`);
     } catch (e) {
       console.log(`FAIL ${key}: ${e.message} (keeping last known)`);
