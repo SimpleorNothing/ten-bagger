@@ -1,24 +1,32 @@
 {
-  "asOf": "2026-08-06T11:30:31.726Z",
+  "asOf": "2026-08-07T01:01:55.190Z",
   "source": "Google News RSS · 종목축 + 시그널축 + 병목축 (기사별 한 줄 요약 + 물질성 스크리닝)",
   "note": "사이트 종목 카드의 \"일자 + 요약\" 행 소스. 최근 95일 창 · 종목당 최신 5건(첫 로딩 페이로드 상한) · **투자 논제 스크리닝 통과분만**(items[].m>=2 — 2=향후 실적·수주·투자·전략에 영향을 주는 펀더멘털 사실. 1=목표가·수급 이벤트, 0=사후 등락 서술·홍보·추측·콘텐츠팜으로 사이트에서 제외). 탈락 기사는 삭제가 아니라 news_archive.json 에 전건 보존. 나머지 3개월치는 archive/{티커}.json 을 '더 보기'로 온디맨드 로드. 신호/소음 판단과 SIGNAL_LOG 반영은 사람/LLM의 몫 — 채점·차트에는 쓰이지 않는다.",
-  "count": 183,
+  "count": 188,
   "macroTopics": [
     {
-      "id": "macro_글로벌_유동성_및_금리_0",
+      "id": "macro_호르무즈발_지정학적_리스크_0",
       "ticker": "MACRO",
-      "name": "글로벌 유동성 및 금리",
-      "q": "US bond yields, Fed policy, stock market inflation worries",
+      "name": "호르무즈발 지정학적 리스크",
+      "q": "Hormuz Strait Iran tensions oil price",
       "mkt": "US",
-      "ax": "rates"
+      "ax": "energy"
     },
     {
       "id": "macro_ai_반도체_섹터_변동성_확대_1",
       "ticker": "MACRO",
       "name": "AI 반도체 섹터 변동성 확대",
-      "q": "Hormuz Strait, oil supply chain, geopolitical risk",
+      "q": "chip rally software stocks earnings volatility",
       "mkt": "US",
       "ax": "chip"
+    },
+    {
+      "id": "macro_미국_고용시장과_경기_불확실성_2",
+      "ticker": "MACRO",
+      "name": "미국 고용시장과 경기 불확실성",
+      "q": "US jobs report economic slowdown",
+      "mkt": "US",
+      "ax": "x_미국고용시장과경기불확실성"
     }
   ],
   "bottleneck": [
@@ -80,14 +88,14 @@
     }
   ],
   "archive": "news_archive.json",
-  "archiveCount": 2884,
+  "archiveCount": 2920,
   "shardDir": "archive",
   "winCounts": {
     "353200": 17,
+    "005930": 69,
     "MRVL": 13,
     "VRT": 29,
     "LITE": 11,
-    "005930": 67,
     "TSLA": 16,
     "MU": 7,
     "SMCI": 31,
@@ -111,6 +119,20 @@
     "COHR": 8
   },
   "items": [
+    {
+      "id": "sec",
+      "ticker": "005930",
+      "name": "삼성전자",
+      "title": "삼성전자, HBM 1위 탈환 시동…SK하이닉스 추격 - DealSite경제TV",
+      "link": "https://news.google.com/rss/articles/CBMiVkFVX3lxTE9kcDZ5dEwwLVhCQkwySF8wVEFZcXMyRi1EYVQtRE01WE1CeUVTeHJxZHpGQXczVWhGdVh4bS11N0Y5cmpfVF96QTdpZnZpemM0UFc4UEZB?oc=5",
+      "published": "2026-08-06T23:00:26.000Z",
+      "source": "DealSite경제TV",
+      "st": 3,
+      "m": 2,
+      "a": "삼성전자가 차세대 고대역폭 메모리(HBM) 경쟁력 강화와 기술 혁신을 통해 SK하이닉스가 선점한 시장 점유율 탈환을 위한 본격적인 대응에 착수함.",
+      "w": "HBM 시장 내 지위 회복 여부는 중장기적 펀더멘털 개선과 실적 반등의 핵심 요소로 작용함.",
+      "mv": 3
+    },
     {
       "id": "mrvl",
       "ticker": "MRVL",
@@ -213,6 +235,20 @@
       "id": "sec",
       "ticker": "005930",
       "name": "삼성전자",
+      "title": "AMD, AI 가속기에 엔비디아보다 HBM 50% 더 탑재…삼성전자 선두 발판되나 [비즈360] - v.daum.net",
+      "link": "https://news.google.com/rss/articles/CBMiT0FVX3lxTE01MF9lYjlEeVVnSGNPbm91UUlTQzBYVGRSbGlrUEFCaEZYZlF3R3B5bU5OQ2EtRWpWSzZKX0ItTzhPX2FnVTJxcmFqNFYwTDg?oc=5",
+      "published": "2026-08-05T02:01:00.000Z",
+      "source": "v.daum.net",
+      "st": 3,
+      "m": 2,
+      "a": "AMD가 차세대 AI 가속기에 타사 대비 50% 증량된 HBM 탑재를 결정함에 따라 삼성전자의 고용량 HBM 공급 확대를 위한 반사이익 기대감 고조.",
+      "w": "주요 고객사의 HBM 사양 상향은 삼성전자의 출하량 증가 및 메모리 부문 매출 성장을 견인할 확정적 호재로 작용.",
+      "mv": 3
+    },
+    {
+      "id": "sec",
+      "ticker": "005930",
+      "name": "삼성전자",
       "title": "삼성전자, 성능 8배 향상 zHBM 목업 공개...\"AI 가속기 위에 적층\" - 디일렉",
       "link": "https://news.google.com/rss/articles/CBMiZkFVX3lxTE5nTTNOOWZqQkJ6TEQ2ckVCeXVWTi1XN1A0cEozeUFkdmR6NVphYzdoUjg3c2h4Z1N1enUyaGFuRTQzQTFOdVI2MXpFY20wbmpYU3diZFZEcEZ1RlVQZWEwUS1Mc19rZw?oc=5",
       "published": "2026-08-05T01:51:15.000Z",
@@ -221,34 +257,6 @@
       "m": 2,
       "a": "성능이 8배 향상된 zHBM 목업을 공개하고 AI 가속기 위에 직접 적층하는 새로운 설계 방식 제시",
       "w": "제품 경쟁력 입증을 통한 고객사 확보 기회 확대 및 차세대 HBM 기술 표준화 가능성 시사",
-      "mv": 3
-    },
-    {
-      "id": "sec",
-      "ticker": "005930",
-      "name": "삼성전자",
-      "title": "삼성전자, HBM 배치 구조 혁신…3D 아키텍처 'zHBM' 첫 선 - 블로터",
-      "link": "https://news.google.com/rss/articles/CBMiaEFVX3lxTFBLMzc4VVZEdlJ2cDFlVmNkQXd0WnZKNjRZQmZ0eGQ1SzJFN0UweF8zM011d01MNko2N0pvNDIxdExEM1pub0lkOFdsaEh4NVQxaVhua044M25EMWhYanpsUWhTbTVFa1o30gFsQVVfeXFMTXlleXNmYjNoYUZJTXdvQkdBNk5iYll6UklLeGFCX0Roek1VRFFkTGtmMzdMZENWNUpYbk0yWUg1a1U3cXNoOVpEbFptXzZQM1N4SVMxOVd5c2dvTEw5LWZ6RU5EOTZaMFRRTDFV?oc=5",
-      "published": "2026-08-05T00:51:11.000Z",
-      "source": "블로터",
-      "st": 3,
-      "m": 2,
-      "a": "3D 아키텍처를 도입한 zHBM을 공개하며 AI 가속기 내 메모리 배치 구조와 데이터 처리 속도 혁신 도모",
-      "w": "기술 리더십 회복의 구체적 지표로 향후 수주 경쟁에서 우위를 점할 수 있는 펀더멘털 근거",
-      "mv": 3
-    },
-    {
-      "id": "sec",
-      "ticker": "005930",
-      "name": "삼성전자",
-      "title": "삼성전자, HBM5 대비 성능 최대 8배 'zHBM' 공개 - 전자신문",
-      "link": "https://news.google.com/rss/articles/CBMiTkFVX3lxTE5kT1RSb2xHMXJDSDlyaUJ2ai1oZXZWYzF3N3VLUFhVOWlZZWUzbDQyVnJrSFk2eVNrdWpqVVd1OGpYU2lNNDhIMzExR3BfQQ?oc=5",
-      "published": "2026-08-04T22:37:27.000Z",
-      "source": "전자신문",
-      "st": 2,
-      "m": 2,
-      "a": "삼성전자, 차세대 고대역폭 메모리인 zHBM 기술 공개",
-      "w": "성능 격차를 8배로 벌리는 차세대 기술 확보는 중장기적인 메모리 경쟁력 강화 및 수주 확대에 긍정적.",
       "mv": 3
     },
     {
@@ -1880,6 +1888,84 @@
       "ticker": "MACRO",
       "name": "L7·L8 · 전력 병목",
       "ax": "bn_l8_pwr",
+      "title": "Envision Commissions World’s Largest AI Data Center Building Using On-Site Renewables - Tech Times",
+      "link": "https://news.google.com/rss/articles/CBMi0gFBVV95cUxQWWhLSlplYVppMFlWTl9zQ091VGVmRTRlS3EwUnVTZk00YWZoZWI5ODNaTng2RGZPRjBjWmJCb1BjSEZacGlTMTJhUm1OdlFISExXUEppU1hTR2JHTlpzTWNtQ0ZNWWRqQThRX0RTR1NHRzhELVFLYURqQUp4SkdNRVUwMmRTYUhENk9PaEphVjVROVhyM1Jpdl9TcjZTQi1HN0M1WENGb1BIUTNmOWNnOVdlSGJHU2NjaDVYajNLb0p4RlJoSnhUeWpKVDFDMTR2Z3c?oc=5",
+      "published": "2026-08-06T21:26:35.000Z",
+      "source": "Tech Times",
+      "st": 3,
+      "a": "엔비전이 재생에너지를 직접 활용하는 세계 최대 규모의 AI 데이터센터 건물을 완공함. 전력 자급형 인프라 구축의 본격화.",
+      "w": "L7 전력망 및 L8 에너지 공급원에서의 온사이트 발전 모델이 하이퍼스케일러의 전력 병목을 해결할 핵심 자산으로 부상함."
+    },
+    {
+      "id": "macro_미국_고용시장과_경기_불확실성_2",
+      "ticker": "MACRO",
+      "name": "미국 고용시장과 경기 불확실성",
+      "ax": "x_미국고용시장과경기불확실성",
+      "title": "What the lull in teen hiring this summer tells us about the job market ahead of Friday's report - KSL.com",
+      "link": "https://news.google.com/rss/articles/CBMiywFBVV95cUxPSTBiOUJPbU5xOTF1WUJGZDNZRXd0TjBhRDJyUndESjZ2ckpSNTY3SUlBSVAzRFd2M3hDOVk5bjFjUC0xb1JXVmtBV09DUFBFeUpsUElvT2VKTjZzRHBpX2VROVZfd2VIcmhSRnk3dG0tMWw1V3Y4UGE4UVZDRktnQ2pHM0djaEZ0aXRjS2R3ZWdnb3JqbURXbXRNQzk5eC1oczFHRGk4WjFmZFRVY0ZjQWhzajJWcVd4Qlg0cnBQZ09KTFZZMkZ1MzVvWQ?oc=5",
+      "published": "2026-08-06T19:08:34.000Z",
+      "source": "KSL.com",
+      "st": 3,
+      "a": "미국 청소년 고용 시장의 둔화 조짐이 고용 보고서 발표를 앞두고 경제 전반의 고용 냉각 우려를 심화시킴.",
+      "w": "고용 시장의 점진적 위축은 소비 여력 감퇴로 이어져 매크로 게이트인 경기 침체 확률을 상향시키는 요인으로 작용함."
+    },
+    {
+      "id": "macro_미국_고용시장과_경기_불확실성_2",
+      "ticker": "MACRO",
+      "name": "미국 고용시장과 경기 불확실성",
+      "ax": "x_미국고용시장과경기불확실성",
+      "title": "Black America Is Already In A Recession - National Urban League",
+      "link": "https://news.google.com/rss/articles/CBMiYkFVX3lxTE4zS1lVVDlsX3pCOWpoeENzYmU3Z2FReUREYm8xTk05R1JaWlNLUEdSY3ktVDh5RmVnb2NHVmdSUUZDaW1oVWVlX3JoWTQtdUpJRk5MVjBvUEhYaktFNzV2MHln?oc=5",
+      "published": "2026-08-06T15:00:00.000Z",
+      "source": "National Urban League",
+      "st": 3,
+      "a": "흑인 사회를 중심으로 실질적인 경기 침체 현상이 지속되며 계층 간 경제적 양극화가 심화되고 있음.",
+      "w": "내수 경기 지표의 균열은 전체 매크로 게이트의 드로다운 리스크를 가중시켜 하이퍼스케일러의 투자 지속성에 대한 경계감을 높임."
+    },
+    {
+      "id": "macro_ai_반도체_섹터_변동성_확대_1",
+      "ticker": "MACRO",
+      "name": "AI 반도체 섹터 변동성 확대",
+      "ax": "chip",
+      "title": "Stock Market News for Aug 6, 2026 - The Globe and Mail",
+      "link": "https://news.google.com/rss/articles/CBMitwFBVV95cUxPTVhHMmEwejV3Y0NnemxweWgwd3ZEUkI3R2U2U2ZEMUhPcm1nS0FFOFU0Y0VLa2ZDV3d0RDVzQ0lyN19xc1FLRlExdC1BX0hmX2QxWTdTSTdoaENJZndkbVV2V0FodUp3TzlMeG9qcUNzcFVSd1pFSGJlU2ExQUp5YTFBN0l1eEF6Rl92R0VKa3YxY0M4N21TZnJRbzBaSEZoNmIwZkM4S3BMLV80cmVSRktsMDlsVmM?oc=5",
+      "published": "2026-08-06T11:02:31.000Z",
+      "source": "The Globe and Mail",
+      "st": 3,
+      "a": "AI 반도체 섹터의 변동성이 확대되면서 시장 내 투자 심리가 위축되고 관련 종목의 매도세가 강화됨.",
+      "w": "AI 테마 내 가치 평가 조정은 상류 하이퍼스케일러 capex 규모를 재점검하게 만드는 매크로 게이트의 변동성 확대 신호임."
+    },
+    {
+      "id": "macro_호르무즈발_지정학적_리스크_0",
+      "ticker": "MACRO",
+      "name": "호르무즈발 지정학적 리스크",
+      "ax": "energy",
+      "title": "Oil prices hold as Iran-Oman near Strait of Hormuz deal - Upstream Online",
+      "link": "https://news.google.com/rss/articles/CBMitAFBVV95cUxOeXRscms1NEhIY2pvaXZWV0llVDl6dE1QT1hCMTFQTl9TaEpSOUxsMDRENlJDS3NOQ09hTERCdllEX2NoWmZRLTFib2hzd2U5X0s0VGlJVkFncjNPaXNONktIa3pYVjVOX0VteV81dUI1VmlxY1FaeTdia2VhMkNSc19HUTEzMG1vNnVBMnduY2JSc2ItSWVqc2FiSlZhS0lyS1BJTktnRF9OMFA4SHE3ZklxWi0?oc=5",
+      "published": "2026-08-06T10:48:21.000Z",
+      "source": "Upstream Online",
+      "st": 3,
+      "a": "이란과 오만의 호르무즈 해협 관련 협상 소식으로 국제 유가가 보합세를 유지하며 지정학적 불안이 다소 진정됨.",
+      "w": "에너지 공급망의 안정화는 인플레이션 압력을 제어하여 중앙은행의 통화 정책 유연성을 확보하고 매크로 안정성을 보조함."
+    },
+    {
+      "id": "macro_미국_고용시장과_경기_불확실성_2",
+      "ticker": "MACRO",
+      "name": "미국 고용시장과 경기 불확실성",
+      "ax": "x_미국고용시장과경기불확실성",
+      "title": "Market Minute: Lagging wages are the root of the affordability crisis - The Real Economy Blog",
+      "link": "https://news.google.com/rss/articles/CBMicEFVX3lxTE1uX3lyckxnQS1kc1ZVb0xqNUY3anZVRXFNVkZINTdNMTBZRW5ySDFxWm5keXllY3dMZ3lPak9VUUthV1lZZnZocWJ0aXktTkFpT251VFdpbU9DZ2thY2pJenBOejYteF9aTS1jaE9Hb0w?oc=5",
+      "published": "2026-08-06T10:00:15.000Z",
+      "source": "The Real Economy Blog",
+      "st": 3,
+      "a": "임금 상승률의 정체가 가계의 실질 구매력을 약화시키며 생활비 위기를 유발하는 근본 원인으로 지목됨.",
+      "w": "가계 소득 정체는 최종 수요 레이어의 위축을 유도하여 궁극적으로 하이퍼스케일러 인프라 투자의 수익성 의구심을 자극함."
+    },
+    {
+      "id": "bneck_l8_pwr",
+      "ticker": "MACRO",
+      "name": "L7·L8 · 전력 병목",
+      "ax": "bn_l8_pwr",
       "title": "Power Bottlenecks Reshaping Global Data Center Site Selection - Indiatimes",
       "link": "https://news.google.com/rss/articles/CBMi6wFBVV95cUxPQkJjcUVqTjRMRWJPMVhNNWFBTWZFQWVYRmN0WTdoX2JRNkFIQXVzMExLZmh2RHFObF9nQ1VYbmo4aWhWREVMQ3JUWnQxSGthMDVEekxKYzNLWXRINDN0LXZGNFllQzFtbnhSNTlSNWV2MlFxYU1QMXJTNlA5VWdHY2RkamVBa1VfaE1VYXlLbDBQSlJJcGlXaGh2WDNiT216M3hVYUZ3UUJnaFp1S1RkeFFzeVJkVEp1OElLaGRPNzVKd3d2VGxrX3lxMHhCeFpER2JrNE5UbjVJdWpSVmhsV3FXNjBkWFpQdWZN?oc=5",
       "published": "2026-08-06T05:26:45.000Z",
@@ -1887,6 +1973,19 @@
       "st": 3,
       "a": "전력 수급 제약이 글로벌 데이터센터의 입지 선정 기준을 근본적으로 재편하며 인프라 구축의 지리적 불균형을 심화함.",
       "w": "L7·L8 발전 및 전력망의 물리적 제약이 하이퍼스케일러의 데이터센터 확장 속도와 비용 구조를 결정짓는 핵심 병목으로 부상함."
+    },
+    {
+      "id": "macro_호르무즈발_지정학적_리스크_0",
+      "ticker": "MACRO",
+      "name": "호르무즈발 지정학적 리스크",
+      "ax": "energy",
+      "title": "Oil prices steady as investors cautious over Iran-Oman talks - WTVB",
+      "link": "https://news.google.com/rss/articles/CBMioAFBVV95cUxQVjNreE5EUk9sMFpmR0ZDRm9ORzhqUTNOVzZSdy1UeWpqU2FTTWtZbzBMRzNhYXcyMTRBc1Z3X3EzQ3VXaEJjamZiOEJhaUJTSE14TFU4VmtRZkhxRjVkUGM5Z0ZxdUx5MzV1LTZvc3lvTng0T3o2X05hY3FFbDlLQ1BuMExWaWNJSnkzNXhuZXhtLWFTQUV1UW9pdkZyUkZ5?oc=5",
+      "published": "2026-08-06T05:14:49.000Z",
+      "source": "WTVB",
+      "st": 3,
+      "a": "호르무즈 해협을 둘러싼 이란과 오만의 협상 진행 상황에 투자자들이 신중한 태도를 보이며 유가 변동을 최소화함.",
+      "w": "지정학적 리스크의 장기화 가능성은 에너지 물류 비용 상승을 유발해 L8 전력 생산 단가 및 인프라 운영 비용에 잠재적 악재가 됨."
     },
     {
       "id": "bneck_l3_dram",
@@ -1967,6 +2066,45 @@
       "w": "L7 및 L8 발전·그리드 레이어의 물리적 한계가 상류 하이퍼스케일러의 증설 속도를 제약하는 핵심 병목으로 부상."
     },
     {
+      "id": "macro_미국_고용시장과_경기_불확실성_2",
+      "ticker": "MACRO",
+      "name": "미국 고용시장과 경기 불확실성",
+      "ax": "x_미국고용시장과경기불확실성",
+      "title": "ADP says businesses added the fewest new jobs in six months. A summer slowdown in hiring? - MarketWatch",
+      "link": "https://news.google.com/rss/articles/CBMioAFBVV95cUxOeHpKT05ITE9fMWNEOTFjaTBKcm44S2FsUzEtZEdlVGc1UDhYQ3RPTEZrQTgteG5kU18zT29Kam5PTE1XLW5EVndhRE44SVhaM2lVQWhjLXRxYUx4QTd6ZmFNQW9iNlRLSEZNTWtzX09ZTVBKYWkwbnZlWm1VZ3FHcnprLVdFTTFQSUtBY0I0RnQwbzYtMmpHUk1fRGhwU2Yz?oc=5",
+      "published": "2026-08-05T13:43:00.000Z",
+      "source": "MarketWatch",
+      "st": 3,
+      "a": "6개월 만에 최저치를 기록한 ADP 민간 고용 지표가 미국 노동 시장의 여름철 고용 둔화 가능성을 시사함.",
+      "w": "고용 모멘텀의 약화는 경기 침체 게이트의 트리거가 될 수 있어 매크로 전반의 위험 회피 심리를 자극함."
+    },
+    {
+      "id": "macro_호르무즈발_지정학적_리스크_0",
+      "ticker": "MACRO",
+      "name": "호르무즈발 지정학적 리스크",
+      "ax": "energy",
+      "title": "Trump: Deal to reopen Strait of Hormuz could come Wednesday - The Hill",
+      "link": "https://news.google.com/rss/articles/CBMinwFBVV95cUxNZ0ttOGhkYmtnUG13Z0NZczV6S09MbDBnNHlnaGtrLVVEVmRMQnlzbjB4SnVTcjVmNXlyQjZFX3poRm4yYXYzbG9IUkFTNnFvNEZ4Y2NvdnNBMFpPOVJmNjlIOUEwcEtjdnp5SW11RlE5LW5pYmV2Z1htSWlwN3o3MUVURzNhTDdtTTZscFdBcUNNeS1nQVVwRVVhT0Q3N0HSAaQBQVVfeXFMUEFzSXFEaFQzNUVnWkE0Yndjb0dyeXJVNURJUFFmNXBvYm5SV09rMXVuemZKMldId3lWX2dUU2s1VXUwdWxucWVlNWFCeG9jMG1uQl9lTDJPX240R05Sb1lMZ0l4S3VrVnUxUXlKaE0xOTdnNC1hTVM3al81MGNYRFZ4d0xCdFJ1S2VuNTZhZklILWpjYzdhb2NQRkZoNk9UWUo3YlU?oc=5",
+      "published": "2026-08-05T11:54:00.000Z",
+      "source": "The Hill",
+      "st": 3,
+      "a": "트럼프 전 대통령이 호르무즈 해협 재개방을 위한 협상 타결 가능성을 언급하며 시장의 불확실성 해소 기대감을 자극함.",
+      "w": "지정학적 긴장 완화는 에너지 시장의 공급 리스크를 제거하여 물가 하향 안정화 및 매크로 투자 환경 개선에 기여함."
+    },
+    {
+      "id": "macro_호르무즈발_지정학적_리스크_0",
+      "ticker": "MACRO",
+      "name": "호르무즈발 지정학적 리스크",
+      "ax": "energy",
+      "title": "Oil Prices Steady as Investors Monitor Hormuz Strait & U.S.-Iran News - Global Banking & Finance Review",
+      "link": "https://news.google.com/rss/articles/CBMinAFBVV95cUxQd3ZSNDRZRFp2NGh0UmxYQzVFZHpfYV9NYjF5ZkMzcFFLa2ppY0lYV0VOYVlIZWpYNVVmekxaMko3MnotcE11MmlvZ0xnYUplRS1aVUozeEpDMGtqbW45XzdaZ2ZfdTJaNFMzNVJjVlh4NmFrc0FQSkp1N3pjSGptTjl3eTNLU0JEaGJvSzM0WUlpZVdOVjdIMlAzR3I?oc=5",
+      "published": "2026-08-05T05:41:16.000Z",
+      "source": "Global Banking & Finance Review",
+      "st": 3,
+      "a": "호르무즈 해협 상황과 미국-이란 관계에 대한 모니터링이 지속되면서 유가가 안정적인 흐름을 보임.",
+      "w": "에너지 시장의 불안정성 해소는 매크로 리스크 게이트를 안정시켜 기술주 중심의 자본 유입을 유도하는 환경을 조성함."
+    },
+    {
       "id": "bneck_l3_dram",
       "ticker": "MACRO",
       "name": "L3 · DRAM/HBM 가격·공급",
@@ -1978,19 +2116,6 @@
       "st": 3,
       "a": "범용 D램 및 낸드 가격 급등세 속 중국 CXMT의 생산 능력 확대가 글로벌 메모리 시장 점유율 경쟁을 심화시킴.",
       "w": "L3 레이어의 공급망 다변화와 중국발 물량 공세가 기존 HBM 중심의 프리미엄 메모리 수익성 방어에 변수로 작용함."
-    },
-    {
-      "id": "macro_글로벌_유동성_및_금리_0",
-      "ticker": "MACRO",
-      "name": "글로벌 유동성 및 금리",
-      "ax": "rates",
-      "title": "Gold, Silver, Platinum, Palladium Surge; Precious Metals Sector Up Over 6%, Shengda Resources and Sichuan Gold Hit Limit Up [SMM Flash] - Shanghai Metals Market",
-      "link": "https://news.google.com/rss/articles/CBMi_AFBVV95cUxQQkJUbE5jT3I0dm5ZWnp6b0hWZElPcUp2SUNSMlZPYlEyenB1NnlZaThjazdFcFNKay1NdllaYzdMb19DdVBEXzNta0VwbTVvTjF5cnN6V2NTdjl5cktvOThjWkxFWGktbUxqOUh0bVduWlpWbDFvVmRjdS0yMmlSeE96UzBzYUJwVWJvTGhuZVdkeFdpZ2pxelBZbFhOanNtcTMtTGREcnVZc2QwNzNiWVZNZlN4S09MWXcycWNKOHBsTkU5cjM1WGU1ZTVHWWo0Uk1YOWt2OVJaTGVOUy15RjNVVEtSMk92cThZVHBadjhnZG9VcldsUTlTX3k?oc=5",
-      "published": "2026-08-05T03:50:54.000Z",
-      "source": "Shanghai Metals Market",
-      "st": 3,
-      "a": "귀금속 시장의 급격한 가격 상승은 지정학적 불안에 따른 안전 자산 선호 현상과 헤지 수요의 급증을 방증함.",
-      "w": "매크로 게이트인 시장 변동성이 고조됨에 따라 AI 인프라 투자자들의 위험 자산 회피 심리와 자본 비용 상승 압력이 가중됨."
     },
     {
       "id": "bneck_l4_pkg",
@@ -2032,6 +2157,32 @@
       "w": "L7·L8 발전 및 그리드 인프라가 AI 확산의 결정적 병목으로 부상하며 상류 투자의 우선순위가 전력 설비로 이동함."
     },
     {
+      "id": "macro_지정학적_리스크_완화_0",
+      "ticker": "MACRO",
+      "name": "지정학적 리스크 완화",
+      "ax": "energy",
+      "title": "Iran War Oil Market Turmoil is Quietly Supercharging Biofuel Profit (2026-Q3-BF-Biofuels-Market-Update-Q4-2026) - resourcewise.com",
+      "link": "https://news.google.com/rss/articles/CBMipgFBVV95cUxPWTdNY1Z4WFpOYWlMU0dqYmM4aUtBMGZZWGgzNmtiZGtDSE42cUYwS1pqZlI2X3BnSWlnSFgtcXZrellORlhYc2p4djE1WkI4X2hkQldzNzMxajhYbWtsc1NVYllQNHpDeUJvLUdkRzNHUUEtSVM2RGJ3UjhDb0tsTmJ0LUtfZS1zeG5UNDNGOHBhcEkwbkRQQmFTaGhleXlvVFozX2VB0gG2AUFVX3lxTE0yWVNaMTVEVU52SFdubTlNVTJ0eDRPZVpMSm5XV0xXdnhpdnRXZFlmV0Z0YmM3WnE1ZzdzTy1vRFU3Wk1pUnBGR0YyLWctbGRVSGJCdDlYZTRHMUxtUER5ZnF3UzVKYkNJZTVycHkxUjVqdjNGVHJaSVo5eE1jWl9TMzBhdTFad05nb0ZLMUZiNlVncW1TaXFId282SGtpc1g5NnVrN0FjNzM3bnJzNmN0ZHk0UGh3?oc=5",
+      "published": "2026-08-04T20:05:39.000Z",
+      "source": "resourcewise.com",
+      "st": 3,
+      "a": "이란발 지정학적 긴장 심화로 인한 원유 수급 불안 속 바이오 연료의 대체재로서 수익성 급등.",
+      "w": "지정학적 리스크가 에너지 믹스 변화를 가속화하며 L8 그리드 및 에너지 인프라 전략에 영향을 주는 요소로 작용."
+    },
+    {
+      "id": "macro_미국_고용시장과_경기_불확실성_2",
+      "ticker": "MACRO",
+      "name": "미국 고용시장과 경기 불확실성",
+      "ax": "x_미국고용시장과경기불확실성",
+      "title": "US job openings fall as healthcare vacancies post largest drop in 11 months - Reuters",
+      "link": "https://news.google.com/rss/articles/CBMimAFBVV95cUxNRVRqNTQwX0d3cmUtT3BtY19iRndYWk5EdXN5OFBrUGFTOXJHNkJGdHhObXgwd3NXSjh3YnZwYzlRUDcyNFBrVldNbnR4VnI4emFKRU5ZNkdBSDJPY3ZDRXpJMnhUY0owYU16cDFaQXd1SG13SjE2UGwxemhIN2hLei1Oa3ZqcDhSSWRrSXhXWGREcEV2SDE4ag?oc=5",
+      "published": "2026-08-04T18:01:12.000Z",
+      "source": "Reuters",
+      "st": 1,
+      "a": "미국 내 구인 공고가 감소했으며 특히 헬스케어 분야의 감소세가 지난 11개월 중 최대치를 기록함.",
+      "w": "고용 시장의 수요 둔화는 노동 시장 과열 진정 효과와 함께 경기 연착륙 혹은 경착륙 여부를 결정짓는 핵심 매크로 지표임."
+    },
+    {
       "id": "macro_ai_반도체_섹터_변동성_확대_1",
       "ticker": "MACRO",
       "name": "AI 반도체 섹터 변동성 확대",
@@ -2043,19 +2194,6 @@
       "st": 3,
       "a": "AI 반도체 시장의 공급 과잉 및 기술 고도화에 따른 투자 전략의 차별화와 종목별 변동성 확대.",
       "w": "L2 컴퓨팅 레이어 내 기술 성숙도에 따른 승자 독식 구도가 심화되며 투자자들의 하이퍼스케일러별 capex 지출 선별 관점 강화."
-    },
-    {
-      "id": "bneck_l8_pwr",
-      "ticker": "MACRO",
-      "name": "L7·L8 · 전력 병목",
-      "ax": "bn_l8_pwr",
-      "title": "The power problem behind the AI boom: Why data centers are racing to upgrade their electrical infrastructure - Dataconomy",
-      "link": "https://news.google.com/rss/articles/CBMi2gFBVV95cUxNLVNYNTlBczIwLThiMThMcHE5UXF1aEpQU182N2FrSE0yN1FfdmZaQ3pSQ0d3cGE2LVo2V0t5YVU3UjI4aHJCa0RnMWFLbTdVcFMtSTlBejZRczNCTnUycDVNRGxva0dEZkRTcG9PNVZhejJ2YlZaZ19SZmttMDJaYzh3SXRyOFN2eXJDOWprdlR3MEtUTnd5NzJoM1o3LVlPX3FLM3FUYktqVV9BVTdEQ0JVdVJFaEtPZ0pOTHcxRjhKMldrUGNpTlJLTzRrUEZVOUo5ZzBlZ0dfZw?oc=5",
-      "published": "2026-08-04T13:15:50.000Z",
-      "source": "Dataconomy",
-      "st": 3,
-      "a": "AI 데이터센터 급증에 따른 전력 수요 대응을 위해 전기 인프라 고도화 작업이 본격화됨.",
-      "w": "L7 전력망 및 L8 발전 인프라에 대한 물리적 병목 현상이 차세대 핵심 투자처로 부상함."
     },
     {
       "id": "bneck_l3_dram",
@@ -2110,17 +2248,17 @@
       "w": "L3 메모리 수급 불균형이 비-AI 섹터의 비용 상승을 유발하며 전체 산업의 인플레이션 압력으로 전이됨."
     },
     {
-      "id": "macro_글로벌_유동성_및_금리_0",
+      "id": "bneck_capex",
       "ticker": "MACRO",
-      "name": "글로벌 유동성 및 금리",
-      "ax": "rates",
-      "title": "Is the US Economy Overheating and Should Bond Markets Be Worried? - Modern Diplomacy",
-      "link": "https://news.google.com/rss/articles/CBMipgFBVV95cUxOOHY2NXVJdWhIbHpaMkRGakVhNW9TNDkxZFJ4Zkt0Tzhjdjg2SkdXMjVXM2l3R191amVHVmhWS0g1ano3UkNra29JSmlYTWxFRnlXRS1mY0NySDQ2Z2ItOTE4LUV4amh5ZFh2NXRJemhaU3lCaG4xWXhhXzFXNl9GRTlkMl9oZWRVLW1VVVZPNDF1TVkxTEdITXFhOUNkMHhBcEpNTWFn?oc=5",
-      "published": "2026-08-04T06:12:38.000Z",
-      "source": "Modern Diplomacy",
+      "name": "상류 · 하이퍼스케일러 capex",
+      "ax": "capex",
+      "title": "Jim Cramer says the market has warmed up to Big Tech's AI spending. Here's what flipped the switch - CNBC",
+      "link": "https://news.google.com/rss/articles/CBMijgFBVV95cUxQeG9qaTdTdlc1eFRKaUNuUXN2VWVDNDFtVXVEbkFDWlp2a0RBZkFDUGR4MndSTEotSVdBbEdNWGhITlZZaURMY1FMaUdicnJBREhrQmJRUFpmRURqcVB6NURsaFFJQWtGdUxsZXM4RGt1enM0a3p2OEk1REJVZmdGUGVIN0hWQXJwbFVOUTRB0gGTAUFVX3lxTE9RbUhibGdELWMtTW9aTnR2dWE3cjAtZUk5MXdyTy1VX1MxWkRRbllGczlBSzIzM2ZTbHRENnNSRXh0QkdLYmZiWkhETXItQUotNTJJUHNTZ3AtRGJWQ2sxUU1CMjBIOGh4WkdIWS01RFpta2t1TENMZktlNkE5S2ZDeWdNak1ZOEdfYS1uRTdLbmtpcw?oc=5",
+      "published": "2026-08-03T22:20:01.000Z",
+      "source": "CNBC",
       "st": 3,
-      "a": "미국 경제의 과열 조짐과 국채 금리 상승세가 지속되면서 금융 시장 전반의 긴축 공포가 점진적으로 확산함.",
-      "w": "매크로 게이트의 금리 변동성 확대가 기술주 밸류에이션을 제약하여 하이퍼스케일러의 CAPEX 투자 여력에 심리적·물적 타격을 줄 수 있음."
+      "a": "빅테크 기업들의 AI 투자가 시장의 냉담한 반응을 뚫고 투자자들로부터 긍정적인 평가를 다시 얻어내기 시작함.",
+      "w": "상류 하이퍼스케일러의 capex 집행 정당성이 시장에서 다시 확보됨에 따라 L1 모델부터 L6 데이터센터까지의 인프라 투자가 지속될 동력 마련."
     },
     {
       "id": "bneck_silicon",
@@ -2214,32 +2352,6 @@
       "w": "L6 네트워킹 레이어에서 데이터 전송 병목 해소를 위한 광학 부품의 장기적 공급 부족 가능성 암시."
     },
     {
-      "id": "macro_통화정책과_국채_수익률_0",
-      "ticker": "MACRO",
-      "name": "美 통화정책과 국채 수익률",
-      "ax": "rates",
-      "title": "Why the U.S. stepped in after decades to prop up Japan's yen — and what's at stake - CNBC",
-      "link": "https://news.google.com/rss/articles/CBMihgFBVV95cUxNQzVUZFJ1N1drRUdKLVVEaXNMUUdVLXhTNTJkMXJyRFZzNV9qYWpzeXpJOU5LbGlEWERFOWo0R2QwMk5hMXJMSjMtVG1SbHU1MTFmM0c3NkhMSnRsdWptOHR4cG5kdkF6NzZlNUx2dUY4TllhaHViNExzaFl4U1dzc3lyXzBfZ9IBiwFBVV95cUxQV2ZGa2JpNEF4ZDFfQkQzOVRjRWNDQ2IzQy1uYjRZci1mckd4MWJOLTRMeThUdlhNdEYybFBMYWFqMjZvZDZDZURmVTFBa1JpS2tzVVVMR3hyV0dXbHFWV2NzXzVhRHhEME9GLW56dU43Z2xLbWNxdFYwTThxdEVaOUVVSDhlalh5Qktz?oc=5",
-      "published": "2026-08-03T04:01:19.000Z",
-      "source": "CNBC",
-      "st": 3,
-      "a": "미국 정부의 엔화 방어 개입으로 인한 국제 환율 시장 변동성과 글로벌 거시 경제 리스크 노출.",
-      "w": "매크로 게이트에서 통화 정책 간 괴리가 금융 시장 변동성을 높이며 자산 배분 전략의 위험 조정 수익률을 낮추는 요소로 작용."
-    },
-    {
-      "id": "macro_지정학_리스크와_에너지_공급망_2",
-      "ticker": "MACRO",
-      "name": "지정학 리스크와 에너지 공급망",
-      "ax": "chip",
-      "title": "Oil Prices and Iran Tensions 2026: Market Impact Analysis - Intellectia AI",
-      "link": "https://news.google.com/rss/articles/CBMiaEFVX3lxTE0wbF9wV3RWRnFlWXBadlA2VVFVM0cwM3F6YWpNOTZ4eGNaZnRQeUJhdm9HMWpaUVpIMFI2WHZHeExVMXZsNlF5VnUyeUg0Y2JySzVzb1pGX1d4Z0trdjFvd1V0WlJMVjZs?oc=5",
-      "published": "2026-08-03T00:17:51.000Z",
-      "source": "Intellectia AI",
-      "st": 3,
-      "a": "중동 지역의 지정학적 긴장 고조로 인한 글로벌 원유 공급 차질 및 에너지 가격 변동성 확대 가능성.",
-      "w": "에너지 공급망 리스크는 L8 발전 비용 상승을 통해 데이터센터 운영비용(OPEX)을 직접적으로 자극하는 매크로 변수임."
-    },
-    {
       "id": "macro_트럼프_관세_공급망_2",
       "ticker": "MACRO",
       "name": "트럼프 관세 공급망",
@@ -2253,19 +2365,6 @@
       "w": "지정학적 리스크와 관세 장벽이 상류 하이퍼스케일러의 공급망 다변화 및 메모리 조달 단가에 미치는 영향 증대."
     },
     {
-      "id": "macro_통화정책과_국채_수익률_0",
-      "ticker": "MACRO",
-      "name": "美 통화정책과 국채 수익률",
-      "ax": "rates",
-      "title": "A Major Breakout In Treasury Yields May Be Underway - Seeking Alpha",
-      "link": "https://news.google.com/rss/articles/CBMilAFBVV95cUxPX25RQXZFQWhwT0dtVnNIeEQzcFQzb2JDY3FSYlZDdzM3bDRfWTgzXzBXUUpOZmlmSkJ4aFN2NGFJVm1MQlkyb1R0UFFlajM1cmpIZ0Z0WkJ3aEtIeHh0TUFzaERxZ1Y0U2xKMXA2aFNxZlpONnNJVjNCaE04YjI1bl9SbGpTZTNBazlLYkhKT1c3bFNi?oc=5",
-      "published": "2026-08-02T13:55:00.000Z",
-      "source": "Seeking Alpha",
-      "st": 3,
-      "a": "미국 국채 수익률의 유의미한 상승세가 지속되며 금융 시장 내 자산 재평가 압력 가중.",
-      "w": "매크로 게이트에서 금리 상승은 빅테크의 조달 비용을 높여 과도한 AI 설비 투자의 경제성을 저해하는 하방 압력으로 작용."
-    },
-    {
       "id": "bneck_l4_pkg",
       "ticker": "MACRO",
       "name": "L4 · 패키징 캐파",
@@ -2277,19 +2376,6 @@
       "st": 3,
       "a": "패키징 캐파 부족과 메모리 수급난이 2030년까지 장기화될 수 있다는 산업계의 비관적 전망 확산.",
       "w": "L4 패키징 및 메모리 공급망 병목이 AI 모델 배포 지연과 하이퍼스케일러의 실질 생산성 향상 저해 요인으로 작용."
-    },
-    {
-      "id": "bneck_capex",
-      "ticker": "MACRO",
-      "name": "상류 · 하이퍼스케일러 capex",
-      "ax": "capex",
-      "title": "Amazon Raises 2026 AI Capex to $220B, Says Capacity Won't Meet Demand Through 2027 - MLQ.ai",
-      "link": "https://news.google.com/rss/articles/CBMiogFBVV95cUxPYUR4OER0U0JhQjFpd0IwR1ZsdnJET0hmMHpjcVNkWlFTOHM2RlRtTkRoNDlJQkdudnNpeXNZWERqZ2xNMEptdG5IZ0RqV0FhazczQkxIZjl1R2o0eFN0U1FFaEFUbFYyVk15bXVDYkdvREFjVURkUVR5LWlNYURzWTJhc211ZlZ2cEw1d2J0QnZrZkxEVkZqWm1jcEFTQUg3c1E?oc=5",
-      "published": "2026-08-02T11:36:57.000Z",
-      "source": "MLQ.ai",
-      "st": 3,
-      "a": "아마존이 2026년 AI 투자액을 2,200억 달러로 상향했으나 여전히 수요가 공급을 초과하는 상태임.",
-      "w": "상류 하이퍼스케일러의 Capex 가속화가 인프라 전 계층에 걸쳐 초과 수요를 유발함."
     },
     {
       "id": "macro_트럼프_관세_공급망_2",
@@ -2342,19 +2428,6 @@
       "st": 3,
       "a": "7월 마지막 주 반도체 공급망 전반의 핵심 데이터를 종합하여 패키징 캐파 및 생산 병목 현상을 진단함.",
       "w": "L4 패키징 레이어의 공급 제약은 AI 인프라 전체의 확장 속도를 결정짓는 핵심 병목 변수임."
-    },
-    {
-      "id": "macro_글로벌_유동성_및_금리_0",
-      "ticker": "MACRO",
-      "name": "글로벌 유동성 및 금리",
-      "ax": "rates",
-      "title": "Amazon surges as US stocks shrug off bond yield worries - Yahoo Finance",
-      "link": "https://news.google.com/rss/articles/CBMiqgFBVV95cUxQLUFMak1MTC1fdlpGSWtMSWM3ZW1tN212MmRDMHhxdWNpUmhnaU9BeGdxWFgtQ05oU2hGUU9PblBGSmUwQXgwNzg1eU1CWDRlOGl6M0Q1aXVuaHJocjZGUHlUT0p6RV9OUGxTdnZLVV9DMzlNVG9VcnRxeHh1MkpES29JQk9ua0FhMkhYLXBCclFlSjZZM1B6X2FIdWxBQ0RpOG1EWDdFTlZZZw?oc=5",
-      "published": "2026-07-31T20:41:19.000Z",
-      "source": "Yahoo Finance",
-      "st": 3,
-      "a": "국채 금리 상승에도 불구하고 아마존 등 대형 기술주가 견조한 실적을 바탕으로 주가 강세를 시현하며 시장을 견인함.",
-      "w": "L1 모델 및 클라우드 서비스의 실적이 금리 발 매크로 리스크를 상쇄하며 하이퍼스케일러의 투자 지속성을 방어함."
     },
     {
       "id": "bneck_l6_opt",
