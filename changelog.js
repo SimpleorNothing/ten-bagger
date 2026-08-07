@@ -167,12 +167,6 @@
     var s=document.createElement('script');s.id='raerJs';s.src='/raer.js';s.defer=true;
     (document.body||document.documentElement).appendChild(s);
   }
-  // 01 시장 모니터링 「월간 선행지표」 카드 로더(lead.js 자가 마운트).
-  function loadLead(){
-    if(document.getElementById('leadJs'))return;
-    var s=document.createElement('script');s.id='leadJs';s.src='/lead.js';s.defer=true;
-    (document.body||document.documentElement).appendChild(s);
-  }
   // 01 시장 모니터링 「리스크 보드」 로더(risk.js 자가 마운트).
   // 보유 종목 스파크라인 섹션 제거 + 리스크 3축 보드 주입을 함께 맡는다.
   function loadRisk(){
@@ -218,7 +212,6 @@
     mountThreadAisd();
     loadAutoHistory();
     loadRaer();                                     // 추정 리비전 트래커 기대수익 컬럼
-    loadLead();                                     // 01 월간 선행지표(FRED) 카드
     loadRisk();                                     // 01 리스크 3축 보드
     loadGates();                                        // 01 사이클 판별 보드(AI capex 4지표)
     loadTrade();                                    // 01 통합 지표 반도체 수출 카드
