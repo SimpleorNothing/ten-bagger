@@ -2430,7 +2430,9 @@ async function handleBriefAudio(request, env) {
 // 브라우저 TTS 로 자동 폴백(무해). 키 접두 `cnclaud_` — 다른 캐시 정규식과 무충돌.
 const COUNCIL_TTS_ALLOW = ["Kore", "Puck", "Charon", "Aoede", "Iapetus", "Fenrir", "Orus", "Zephyr", "Leda", "Umbriel"];
 const COUNCIL_TTS_STYLE =
-  "다음 한국어 문장을 뉴스 토론에서 자기 의견을 또렷하게 말하듯 자연스럽게 읽어 주세요. " +
+  "다음 한국어 문장을 실제 전문가 원탁토론에서 상대 의견을 듣고 답하는 것처럼 자연스럽고 대화체로 읽어 주세요. " +
+  "문장 사이에는 짧고 자연스러운 호흡을 두고, 강조할 숫자·판단은 또렷하게 말하되 앵커 원고처럼 딱딱하거나 과장되게 읽지 마세요. " +
+  "영어 티커와 약어는 철자대로 읽지 말고, 대본에 적힌 회사명·풀네임으로 자연스럽게 읽습니다. " +
   "처음부터 끝까지 같은 성량·같은 속도를 유지하고, 인사말이나 마무리 멘트를 새로 지어내지 마세요.";
 const COUNCIL_AUD_KEY = (h) => `cnclaud_${h}.wav`;
 

@@ -57,22 +57,48 @@
   function getEx(id) { var a = getExperts(); for (var i = 0; i < a.length; i++) { if (a[i].id === id) return a[i]; } return { name: id }; }
   function idByName(name) { var a = getExperts(); for (var i = 0; i < a.length; i++) { if (a[i].name === name) return a[i].id; } return name; }
 
-  // TTS 낭독용 평문 — 기호를 말로 푼다(감마·레이어·퍼센트 …). 화면 말풍선은 원문 그대로 둔다.
+  // TTS 낭독용 평문 — 화면의 원문·티커 표기는 보존하고, 음성만 실제 대화처럼 풀어 읽는다.
+  // 짧은 영어 약어는 철자 단위로 읽지 않는다. 회사 티커는 회사명, 재무·시장 용어는 통용되는 풀네임으로 변환한다.
   function sayNorm(s) {
     return String(s || '')
+      .replace(/NASDAQ\s*(?:DD|Draw\s*Down)/gi, '나스닥 드로다운')
       .replace(/S&P\s*500/gi, '에스앤피 오백')
+      .replace(/S&P/gi, '에스앤피')
+      .replace(/Free\s+Cash\s+Flow|\bFCF\b/g, '프리 캐시 플로우')
+      .replace(/\bAMZN\b/g, '아마존')
+      .replace(/\bMSFT\b/g, '마이크로소프트')
+      .replace(/\bGOOGL?\b/g, '알파벳')
+      .replace(/\bMETA\b/g, '메타')
+      .replace(/\bNVDA\b/g, '엔비디아')
+      .replace(/\bAVGO\b/g, '브로드컴')
+      .replace(/\bTSM\b/g, '타이완 반도체 제조 회사')
+      .replace(/\bTSLA\b/g, '테슬라')
+      .replace(/\bMU\b/g, '마이크론')
+      .replace(/\bMRVL\b/g, '마벨')
+      .replace(/\bORCL\b/g, '오라클')
+      .replace(/\bVRT\b/g, '버티브')
+      .replace(/\bRPO\b/g, '잔여 수행 의무')
+      .replace(/\bCAPEX\b/gi, '자본 지출')
+      .replace(/\bEPS\b/g, '주당순이익')
+      .replace(/\bEBITDA\b/g, '이자 세금 감가상각 전 이익')
+      .replace(/\bROIC\b/g, '투하자본수익률')
+      .replace(/\bDCF\b/g, '할인현금흐름')
+      .replace(/\bCDS\b/g, '신용부도스와프')
+      .replace(/\bFOMC\b/g, '연방공개시장위원회')
+      .replace(/\bCPI\b/g, '소비자물가지수')
+      .replace(/\bGDP\b/g, '국내총생산')
+      .replace(/\bVIX\b/gi, '빅스')
       .replace(/F&G/g, '공포탐욕지수')
       .replace(/DXI/g, '메모리 현물 지수')
       .replace(/\bL([1-8])\b/g, '레이어 $1')
-      .replace(/VIX/gi, '빅스')
       .replace(/γ/g, '감마')
       .replace(/%p/g, '퍼센트포인트')
       .replace(/%/g, '퍼센트')
-      .replace(/→/g, ' 로 ')
-      .replace(/↑/g, ' 상승 ')
-      .replace(/↓/g, ' 하락 ')
+      .replace(/→/g, '로')
+      .replace(/↑/g, '상승')
+      .replace(/↓/g, '하락')
       .replace(/·/g, ', ')
-      .replace(/&/g, ' 앤드 ')
+      .replace(/&/g, '앤드')
       .replace(/\s+/g, ' ').trim();
   }
 
