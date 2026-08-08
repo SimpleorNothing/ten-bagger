@@ -2206,7 +2206,16 @@ host.querySelectorAll('[data-clhistplay]').forEach(function(b){b.addEventListene
     function clLoadVoice(){try{var vs=speechSynthesis.getVoices();function sco(v){var n=((v.name||'')+' '+(v.voiceURI||'')).toLowerCase();var s=/ko/i.test(v.lang)?100:0;if(/natural|neural/.test(n))s+=70;if(/google/.test(n))s+=55;if(/enhanced|premium|siri/.test(n))s+=45;if(v.localService===false)s+=12;return s;}var ko=vs.filter(function(v){return /ko/i.test(v.lang);}).sort(function(a,b){return sco(b)-sco(a);});_koVoice=ko[0]||null;}catch(e){}}
     if(typeof speechSynthesis!=='undefined'){clLoadVoice();try{speechSynthesis.onvoiceschanged=clLoadVoice;}catch(e){}}
     var CLV={chair:[0.98,1.0],kimjh:[1.03,0.95],kimjy:[1.0,1.06],ohgy:[0.97,0.85],kimhj:[1.0,1.2],leegs:[0.99,1.08]};
+    function clVoiceText(text){
+      return String(text||'')
+        .replace(/빅테크\s*(?:→|->|➔|⟶)\s*메모리\s*밸류에이션/gi,'빅테크에서 메모리 밸류에이션으로')
+        .replace(/\bNFP\b/g,'비농업고용자수')
+        .replace(/\bAMZN\b/g,'아마존').replace(/\bMSFT\b/g,'마이크로소프트')
+        .replace(/\bFCF\b/g,'Free Cash Flow').replace(/\bCAPEX\b/g,'CAPEX').replace(/\bEPS\b/g,'EPS')
+        .replace(/\b(→|->|➔|⟶)\b/g,'에서').replace(/\s+/g,' ').trim();
+    }
     function clSpeak(text,vid,onEnd){
+      text=clVoiceText(text);
       if(!_clAudioOn||typeof speechSynthesis==='undefined'){return void setTimeout(onEnd,Math.min(6000,1200+text.length*55));}
       try{speechSynthesis.cancel();}catch(e){}
       var u=new SpeechSynthesisUtterance(text);u.lang='ko-KR';if(_koVoice)u.voice=_koVoice;var v=CLV[vid]||[1,1];u.rate=v[0];u.pitch=v[1];
