@@ -140,6 +140,12 @@ async function handleSignalsUpdate(request, env) {
     { status: 200, headers: { "content-type": "application/json" } });
 }
 
+// Anthropic prompt caching — 반복되는 system prefix를 5분 ephemeral cache로 재사용한다.
+// 고정 지시문만 캐시하고 사용자 입력·라이브 데이터는 캐시 블록 밖에 둔다.
+function cacheableSystem(text) {
+  return [{ type: "text", text, cache_control: { type: "ephemeral" } }];
+}
+
 // Anthropic 오류 응답을 상태코드별 조치 안내가 붙은 한국어 메시지로 변환.
 // 프론트는 error 필드만 표시하므로(insight.js) 원인·조치를 여기서 문자열에 접어 넣는다.
 // 상태코드·타입별로 무엇을 해야 하는지가 갈린다: 키(401)·권한(403)·모델(404)·레이트리밋(429)·크레딧(400)·과부하(529).
@@ -354,7 +360,7 @@ async function handleCouncil(request, env) {
     up = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: { "content-type": "application/json", "x-api-key": env.ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01" },
-      body: JSON.stringify({ model: "claude-opus-4-8", max_tokens: (material || siteContextText) ? 4200 : 2500, system: sys,
+      body: JSON.stringify({ model: "claude-opus-4-8", max_tokens: (material || siteContextText) ? 4200 : 2500, system: cacheableSystem(sys),
         messages: [{ role: "user", content: JSON.stringify({ topic: topic, personas: personas, situation: situation, material: material, siteContext: siteContextText }) }] }),
     });
   } catch (e) {
@@ -398,7 +404,7 @@ async function handleCouncilAsk(request, env) {
     up = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: { "content-type": "application/json", "x-api-key": env.ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01" },
-      body: JSON.stringify({ model: "claude-opus-4-8", max_tokens: 3500, system: sys,
+      body: JSON.stringify({ model: "claude-opus-4-8", max_tokens: 3500, system: cacheableSystem(sys),
         messages: [{ role: "user", content: JSON.stringify({ expert: { name: expert.name, field: expert.field || "", stance: expert.stance || "", view: expert.view || "" }, question: question, situation: situation }) }] }),
     });
   } catch (e) {
@@ -481,7 +487,7 @@ async function handleCouncilRead(request, env) {
     up = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: { "content-type": "application/json", "x-api-key": env.ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01" },
-      body: JSON.stringify({ model: "claude-sonnet-5", max_tokens: 700, system: sys, messages: [{ role: "user", content: user }] }),
+      body: JSON.stringify({ model: "claude-sonnet-5", max_tokens: 700, system: cacheableSystem(sys), messages: [{ role: "user", content: user }] }),
     });
   } catch (e) {
     return json({ error: "anthropic fetch failed", detail: String(e && e.message ? e.message : e) }, 502);
@@ -516,7 +522,7 @@ async function handleCouncilSummary(request, env) {
     up = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: { "content-type": "application/json", "x-api-key": env.ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01" },
-      body: JSON.stringify({ model: "claude-sonnet-5", max_tokens: 700, system: sys, messages: [{ role: "user", content: user }] }),
+      body: JSON.stringify({ model: "claude-sonnet-5", max_tokens: 700, system: cacheableSystem(sys), messages: [{ role: "user", content: user }] }),
     });
   } catch (e) {
     return json({ error: "anthropic fetch failed", detail: String(e && e.message ? e.message : e) }, 502);
@@ -800,7 +806,7 @@ async function handleCaleventParse(request, env) {
     up = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: { "content-type": "application/json", "x-api-key": env.ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01" },
-      body: JSON.stringify({ model: "claude-opus-4-8", max_tokens: 400, system: sys,
+      body: JSON.stringify({ model: "claude-opus-4-8", max_tokens: 400, system: cacheableSystem(sys),
         messages: [{ role: "user", content: text }] }),
     });
   } catch (e) {
@@ -1006,6 +1012,9 @@ async function anthropicText(env, prompt, useSearch, maxTokens, options) {
     stream: true,
     messages: [{ role: "user", content: prompt }],
   };
+  // 같은 긴 요청의 자동 복구 재호출은 prefix가 동일하므로 cache hit를 활용한다.
+  // 일반 단발 요청에서도 Anthropic이 cacheable prefix를 자동 탐색한다.
+  payload.cache_control = { type: "ephemeral" };
   // 검색 턴마다 전체 컨텍스트가 재전송된다(입력 2차식 증가) → 상한 고정.
   if (useSearch) payload.tools = [{ type: "web_search_20260209", name: "web_search", max_uses: 3 }];
   // Sonnet 5는 adaptive thinking이 기본 켜짐. JSON 본문이 비는 실패에 한해
@@ -2217,7 +2226,7 @@ async function handleBrief(request, env) {
       headers: { "content-type": "application/json", "x-api-key": env.ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01" },
       body: JSON.stringify({
         // 텍스트 회차(part 0)는 섹션이 9개라 4000 으로는 잘린다. 대담(1·2)은 100s 한도 여유를 위해 그대로 둔다.
-        model: "claude-opus-4-8", max_tokens: part === 0 ? 6500 : 4000, system: sys,
+        model: "claude-opus-4-8", max_tokens: part === 0 ? 6500 : 4000, system: cacheableSystem(sys),
         messages: [{ role: "user", content: JSON.stringify(payload) }],
       }),
     });
