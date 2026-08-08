@@ -111,26 +111,35 @@
       upcomingEvents: events
     };
   }
+  // 02는 저장된 원문(raw)까지 포함해 항상 전량 전달한다. 요약·절단 금지.
   function insightSection(records) {
     if (!Array.isArray(records)) return [];
-    var out = [];
-    records.forEach(function (r) {
-      (Array.isArray(r.claims) ? r.claims : []).forEach(function (c) {
-        out.push({
-          savedAt: r.t || '', source: cut((r.src && (r.src.title || r.src.publisher || r.src.url)) || '', 220),
-          text: cut(c.text || '', 520), layer: c.layer || '', tickers: Array.isArray(c.tickers) ? c.tickers.slice(0, 6) : [],
-          type: c.type || '', route: c.route || '', novelty: num(c.novelty), impact: num(c.impact), confidence: num(c.confidence),
-          why: cut(c.why || '', 360), verify: cut(c.verify || '', 260),
-          lifecycle: { state: c.lcState || '', premise: cut(c.hyp || '', 260), trigger: cut(c.trig || '', 260), discard: cut(c.until || '', 260), review: c.review || '' }
-        });
-      });
+    return records.map(function (r) {
+      return { id: r.id || '', savedAt: r.t || '', source: r.src || {}, originalText: String(r.raw || ''), claims: Array.isArray(r.claims) ? r.claims : [] };
     });
-    out.sort(function (a, b) {
-      var sa = (a.impact || 0) + (a.confidence || 0) + (a.novelty || 0);
-      var sb = (b.impact || 0) + (b.confidence || 0) + (b.novelty || 0);
-      return sb - sa || String(b.savedAt).localeCompare(String(a.savedAt));
+  }
+  function fingerprint(x) {
+    var s = JSON.stringify(x == null ? null : x), h = 2166136261;
+    for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h += (h << 1) + (h << 4) + (h << 7) + (h << 8) + (h << 24); }
+    return (h >>> 0).toString(36) + ':' + s.length;
+  }
+  function deltaObject(previous, current) {
+    if (!previous || typeof current !== 'object' || current == null || Array.isArray(current)) return current;
+    var out = {}, changed = false;
+    Object.keys(current).forEach(function (k) { if (fingerprint(previous[k]) !== fingerprint(current[k])) { out[k] = current[k]; changed = true; } });
+    return changed ? out : null;
+  }
+  function prepareDelta(full) {
+    var key = 'council_context_snapshot_v2', old = {};
+    try { old = JSON.parse(localStorage.getItem(key) || '{}') || {}; } catch (_) {}
+    var next = {}, result = { generatedAt: full.generatedAt, rule: full.rule, sources: full.sources, transfer: {} };
+    ['menu01_marketMonitoring','menu03_portfolioRebalance','menu04_marketAndEarnings','menu05_cycleAndForecast','menu06_memos'].forEach(function (name) {
+      var changed = deltaObject(old[name], full[name]); next[name] = full[name];
+      if (changed !== null) { result[name] = changed; result.transfer[name] = 'updated'; } else result.transfer[name] = 'unchanged — not sent';
     });
-    return out.slice(0, 20);
+    result.menu02_insights = full.menu02_insights; result.transfer.menu02_insights = 'full — original documents included'; next.menu02_insights = full.menu02_insights;
+    try { localStorage.setItem(key, JSON.stringify(next)); } catch (_) {}
+    return result;
   }
   function boardItems(d) {
     return d && Array.isArray(d.items) ? d.items.map(function (x) {
@@ -232,7 +241,7 @@
     var Pulse = vals[12], News = vals[13], Digest = vals[14], Alpha = vals[15], Snapshots = vals[16], MarketHistory = vals[17], Memo = vals[18];
     cache = {
       generatedAt: new Date().toISOString(),
-      rule: '알파맵 01~06 메뉴의 최신 내부 컨텍스트. 각 전문가는 모든 메뉴를 먼저 확인하고 논제와 직접 관련된 근거만 인용한다. 숫자와 narrative를 구분한다.',
+      rule: '02 인사이트는 저장 원문을 포함한 전체 자료를 항상 공유한다. 01·03·04·05·06은 직전 원탁 이후 변경된 자료만 공유한다. 각 전문가는 수치와 해석을 구분하고 메뉴·기준일·근거를 발언에 남긴다.',
       sources: {
         assets: compactSource(H), market: compactSource(S), cycle: compactSource(C),
         insights: { asOf: new Date().toISOString(), source: 'R2 /api/insights · 운영자가 채택한 관점' },
@@ -240,7 +249,7 @@
         pulse: compactSource(Pulse), news: compactSource(News), digest: compactSource(Digest), alpha: compactSource(Alpha), memo: { asOf: new Date().toISOString(), source: '/api/memo · 사용자가 저장한 메모' }
       },
       menu01_marketMonitoring: Object.assign(marketSection(S, C, G, L, Cal, H), newsSection(Pulse, Cal, News, Digest)),
-      menu02_insights: { adoptedInsights: insightSection(Ins), alphaMap: Alpha ? { asOf: Alpha.asOf || '', summary: cut(Alpha.insight || Alpha.summary || '', 900) } : null },
+      menu02_insights: { allInsightsWithOriginals: insightSection(Ins), alphaMap: Alpha ? { asOf: Alpha.asOf || '', summary: cut(Alpha.insight || Alpha.summary || '', 900) } : null },
       menu03_portfolioRebalance: portfolioSection(H, P, G, Judgment, Alpha, Snapshots),
       menu04_marketAndEarnings: outlookSection(Gates, Risk, Earnings, Judgment, H),
       menu05_cycleAndForecast: cycleForecastSection(C, Gates, Risk, Earnings, MarketHistory),
@@ -262,7 +271,7 @@
     p.id = 'clAutoCtxStatus';
     p.className = 'cl-note';
     p.style.margin = '6px 0 12px';
-    p.textContent = '기본 참조: 01~06 모든 메뉴의 최신 자료 · 토론 시작 시 자동 갱신';
+    p.textContent = '기본 참조: 02는 원문 포함 전체 · 01·03~06은 마지막 원탁 이후 변경분만';
     ta.insertAdjacentElement('afterend', p);
     return true;
   }
@@ -273,11 +282,11 @@
       return (async function () {
         setStatus('알파맵 최신 컨텍스트를 모으는 중…');
         try {
-          var ctx = await buildContext();
+          var ctx = prepareDelta(await buildContext());
           var body = JSON.parse(init.body || '{}');
           body.siteContext = ctx;
           init = Object.assign({}, init, { body: JSON.stringify(body) });
-          setStatus('기본 참조 완료: 01~06 전체 메뉴 자료');
+          setStatus('참조 완료: 02 원문 포함 전체 · 01·03~06은 변경분만 전달');
         } catch (e) {
           setStatus('일부 알파맵 컨텍스트를 읽지 못해 현 상황 입력으로 토론합니다.', true);
         }
