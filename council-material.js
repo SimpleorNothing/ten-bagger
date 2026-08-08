@@ -214,9 +214,16 @@
   function addClipboard(e) {
     var cd = e.clipboardData;
     if (!cd) return false;
+    // Chromium 계열 브라우저는 clipboardData.files 를 비워 두고 items 에만
+    // 스크린샷 File 을 넣는 경우가 있다. 두 경로를 함께 읽어야 붙여넣기가 안정적이다.
     var files = Array.prototype.slice.call(cd.files || []).filter(function (f) { return /^image\//.test(f.type || ''); });
+    if (!files.length && cd.items) {
+      files = Array.prototype.slice.call(cd.items).map(function (item) {
+        return /^image\//.test(item.type || '') && item.getAsFile ? item.getAsFile() : null;
+      }).filter(Boolean);
+    }
     if (files.length) { e.preventDefault(); addFiles(files); return true; }
-    var text = cd.getData('text/plain');
+    var text = cd.getData('text/plain') || cd.getData('text');
     if (text && text.trim()) { e.preventDefault(); addText(text, '붙여넣은 텍스트'); return true; }
     return false;
   }
@@ -256,13 +263,15 @@
     drop.addEventListener('drop', function (e) { e.preventDefault(); addFiles(e.dataTransfer.files); });
     drop.addEventListener('paste', addClipboard);
     input.addEventListener('change', function () { addFiles(input.files); input.value = ''; });
+    // capture 단계에서 처리해야 다른 화면 스크립트가 버블 단계에서 이벤트를
+    // 중단해도 원탁 자료 붙여넣기가 누락되지 않는다.
     document.addEventListener('paste', function (e) {
       var view = $('v-council');
       if (!view || !view.classList.contains('on') || e.defaultPrevented) return;
       var target = e.target;
       if (target && /^(INPUT|TEXTAREA)$/i.test(target.tagName) && target !== drop) return;
       addClipboard(e);
-    });
+    }, true);
     $('clMatList').addEventListener('click', function (e) {
       var b = e.target.closest('[data-clmat-rm]');
       if (!b) return;
