@@ -1,5 +1,5 @@
 /* council-material.js — 03 전문가 원탁 자료 기반 토론
- * PDF·PPTX·DOCX·텍스트·CSV·자막을 브라우저에서 텍스트로 추출하고,
+ * PDF·PPTX·DOCX·텍스트·CSV·자막과 붙여넣은 텍스트·캡처 이미지를 자료 텍스트로 만들고,
  * 기존 /api/council 요청에 material 을 덧붙인다. 원탁 렌더·이력·Gemini 음성은 기존 경로 재사용.
  * index.html 무편집 · 신규 :root 토큰 0 · narrative≠numbers. */
 (function () {
@@ -12,6 +12,8 @@
   var busy = false;
   var lastSent = null;
   var nativeFetch = window.fetch.bind(window);
+  var MAX_ITEM_CHARS = 40000;
+  var MAX_TOTAL_CHARS = 100000;
 
   function $(id) { return document.getElementById(id); }
   function esc(s) {
@@ -30,7 +32,8 @@
   }
   function trimText(s) {
     s = norm(s);
-    return s;
+    if (s.length <= MAX_ITEM_CHARS) return s;
+    return s.slice(0, 26000) + '\n\n[중간 생략: 자료 글자 수 제한]\n\n' + s.slice(-14000);
   }
   function ext(name) {
     var m = String(name || '').toLowerCase().match(/\.([a-z0-9]+)$/);
@@ -116,6 +119,7 @@
     if (x === 'docx') return trimText(await readDocx(file));
     if (x === 'pptx') return trimText(await readPptx(file));
     if (x === 'ppt') throw new Error('구형 PPT는 PPTX 또는 PDF로 저장해 올려주세요.');
+    if (/^image\//.test(file.type || '')) return readImage(file);
     if (/^(txt|md|csv|json|srt|vtt|html|htm)$/.test(x)) return trimText(await file.text());
     throw new Error('지원하지 않는 형식입니다. PDF·PPTX·DOCX·텍스트·CSV·자막을 사용하세요.');
   }
@@ -123,7 +127,9 @@
     var used = 0, parts = [];
     items.filter(function (x) { return x.ok; }).forEach(function (x, i) {
       var head = '[자료 ' + (i + 1) + ' · ' + x.name + ']\n';
-      var body = x.text;
+      var room = MAX_TOTAL_CHARS - used - head.length;
+      if (room <= 0) return;
+      var body = x.text.slice(0, room);
       parts.push(head + body);
       used += head.length + body.length;
     });
@@ -186,6 +192,34 @@
     busy = items.some(function (x) { return x.pending; });
     render();
   }
+  async function readImage(file) {
+    if (file.size > 8 * 1024 * 1024) throw new Error('이미지는 8MB 이하로 붙여넣어 주세요.');
+    var data = await new Promise(function (resolve, reject) {
+      var reader = new FileReader();
+      reader.onload = function () { resolve(String(reader.result || '')); };
+      reader.onerror = function () { reject(new Error('이미지를 읽지 못했습니다.')); };
+      reader.readAsDataURL(file);
+    });
+    var r = await nativeFetch('/api/council-image', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ name: file.name || '붙여넣은 캡처 이미지', data: data }) });
+    var j = await r.json().catch(function () { return null; });
+    if (!r.ok || !j || !j.text) throw new Error((j && j.error) || '이미지 내용을 읽지 못했습니다.');
+    return trimText('[캡처 이미지에서 확인된 내용]\n' + j.text);
+  }
+  function addText(text, name) {
+    text = trimText(text);
+    if (!text) return;
+    items.push({ name: name || '붙여넣은 텍스트', type: 'text', text: text, ok: true, pending: false, error: '' });
+    render();
+  }
+  function addClipboard(e) {
+    var cd = e.clipboardData;
+    if (!cd) return false;
+    var files = Array.prototype.slice.call(cd.files || []).filter(function (f) { return /^image\//.test(f.type || ''); });
+    if (files.length) { e.preventDefault(); addFiles(files); return true; }
+    var text = cd.getData('text/plain');
+    if (text && text.trim()) { e.preventDefault(); addText(text, '붙여넣은 텍스트'); return true; }
+    return false;
+  }
   function reportMaterial() {
     var rep = document.querySelector('#clResult .cl-rep');
     if (!rep || !lastSent || rep.querySelector('#clMatUsed')) return;
@@ -208,8 +242,8 @@
     sec.id = 'clMaterial';
     sec.innerHTML =
       '<h2 class="msec">참고할 자료</h2>' +
-      '<input id="clMatFile" type="file" multiple hidden accept=".pdf,.pptx,.ppt,.docx,.txt,.md,.csv,.json,.srt,.vtt,.html,.htm">' +
-      '<div id="clMatDrop" class="cl-drop" role="button" tabindex="0">클릭 또는 드래그하여 자료 업로드</div>' +
+      '<input id="clMatFile" type="file" multiple hidden accept=".pdf,.pptx,.ppt,.docx,.txt,.md,.csv,.json,.srt,.vtt,.html,.htm,image/*">' +
+      '<div id="clMatDrop" class="cl-drop" role="button" tabindex="0">클릭 또는 드래그하여 자료 업로드 · 텍스트 또는 캡처 이미지를 이 영역에 붙여넣기</div>' +
       '<div id="clMatList"></div>' +
       '<p id="clMatMsg" class="cl-note" style="margin:6px 0 16px"></p>';
     heading.parentNode.insertBefore(sec, heading);
@@ -220,7 +254,15 @@
     });
     drop.addEventListener('dragover', function (e) { e.preventDefault(); });
     drop.addEventListener('drop', function (e) { e.preventDefault(); addFiles(e.dataTransfer.files); });
+    drop.addEventListener('paste', addClipboard);
     input.addEventListener('change', function () { addFiles(input.files); input.value = ''; });
+    document.addEventListener('paste', function (e) {
+      var view = $('v-council');
+      if (!view || !view.classList.contains('on') || e.defaultPrevented) return;
+      var target = e.target;
+      if (target && /^(INPUT|TEXTAREA)$/i.test(target.tagName) && target !== drop) return;
+      addClipboard(e);
+    });
     $('clMatList').addEventListener('click', function (e) {
       var b = e.target.closest('[data-clmat-rm]');
       if (!b) return;
