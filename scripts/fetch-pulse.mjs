@@ -93,7 +93,8 @@ function reinforceDrivers(drivers, adopted) {
     const driver = axis && (drivers || []).find((d) => axis.test(`${d.ax || ''} ${d.name || ''}`));
     if (!driver || String(driver.l2 || '').includes(insight.text.slice(0, 60))) continue;
     const prefix = '02 인사이트 확인: ';
-    driver.l2 = `${String(driver.l2 || '').trim()} · ${prefix}${insight.text}`.slice(0, 900);
+    const insightBrief = String(insight.text || '').split(/[.!?]/)[0].trim();
+    driver.l2 = `${String(driver.l2 || '').trim()} · ${prefix}${insightBrief}`.slice(0, 180);
     driver.insightSource = insight.source;
   }
 }
@@ -114,8 +115,8 @@ function buildPrompt(ctx) {
 [각 축 판정]
 - dir: "risk"(위험·부담) | "opp"(기회·우호) | "neutral"(중립·미확정)
 - layer: 이 동인이 닿는 알파맵 레이어나 성격(예: "L7 전력·에너지", "할인율·L8", "L3 메모리", "수급·외국인", "센티먼트")
-- l1: 이 축에서 지금 벌어지는 일(프레임) 한 줄
-- l2: 라이브 상황·수치 요약(1~2문장)
+- l1: 이 축에서 지금 벌어지는 일. 55자 이내의 결론형 한 문장
+- l2: 근거·영향을 합친 요약 한 문장. 90자 이내. 다른 축·02 인사이트 원문을 길게 나열하지 않는다.
 - verdict: → 뒤에 붙을 판정 한 조각(간결)
 - srcs: 아래 헤드라인 중 이 축과 맞는 기사 1~2개를 번호로 지목: {t: 한국어 제목 축약, si: 기사번호} — URL 은 쓰지 않는다
 
