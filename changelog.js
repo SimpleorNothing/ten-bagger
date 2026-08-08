@@ -72,8 +72,7 @@
     fetch('https://api.github.com/repos/SimpleorNothing/ten-bagger/commits?sha=main&per_page=100',{headers:{'Accept':'application/vnd.github+json'}})
       .then(function(r){return r.ok?r.json():[];}).then(function(rows){
         if(!Array.isArray(rows))return;
-        rows.forEach(function(x){var c=x&&x.commit||{},d=(c.author&&c.author.date||'').slice(0,10),t=String(c.message||'').split('
-')[0].trim();if(d&&t&&!MKT_CHANGELOG.some(function(h){return h.d===d&&h.t===t;}))MKT_CHANGELOG.push({d:d,t:t});});
+        rows.forEach(function(x){var c=x&&x.commit||{},d=(c.author&&c.author.date||'').slice(0,10),t=String(c.message||'').split('\\n')[0].trim();if(d&&t&&!MKT_CHANGELOG.some(function(h){return h.d===d&&h.t===t;}))MKT_CHANGELOG.push({d:d,t:t});});
         renderAll();
       }).catch(function(){});
   }
