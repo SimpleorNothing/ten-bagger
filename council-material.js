@@ -250,11 +250,16 @@
     sec.innerHTML =
       '<h2 class="msec">참고할 자료</h2>' +
       '<input id="clMatFile" type="file" multiple hidden accept=".pdf,.pptx,.ppt,.docx,.txt,.md,.csv,.json,.srt,.vtt,.html,.htm,image/*">' +
-      '<div id="clMatDrop" class="cl-drop" role="button" tabindex="0">클릭 또는 드래그하여 자료 업로드 · 텍스트 또는 캡처 이미지를 이 영역에 붙여넣기</div>' +
+      '<div id="clMatDrop" class="cl-drop" role="button" tabindex="0">클릭 또는 드래그하여 자료 업로드</div>' +
+      '<div style="margin-top:8px;display:flex;gap:8px;align-items:flex-start">' +
+        '<textarea id="clMatText" class="cl-ta" rows="4" placeholder="여기에 텍스트 또는 캡처 이미지를 붙여넣으세요. 텍스트는 직접 입력 후 추가할 수도 있습니다." aria-label="참고자료 텍스트 입력"></textarea>' +
+        '<button type="button" id="clMatTextAdd" class="cl-btn" style="margin-top:1px;white-space:nowrap">텍스트 추가</button>' +
+      '</div>' +
+      '<p class="cl-note" style="margin:5px 0 0">텍스트·캡처 이미지는 위 입력칸에 Ctrl+V로 붙여넣으세요. 이미지는 내용 인식 후 자료 목록에 추가됩니다.</p>' +
       '<div id="clMatList"></div>' +
       '<p id="clMatMsg" class="cl-note" style="margin:6px 0 16px"></p>';
     heading.parentNode.insertBefore(sec, heading);
-    var input = $('clMatFile'), drop = $('clMatDrop');
+    var input = $('clMatFile'), drop = $('clMatDrop'), textInput = $('clMatText');
     drop.addEventListener('click', function () { input.click(); });
     drop.addEventListener('keydown', function (e) {
       if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); input.click(); }
@@ -263,13 +268,26 @@
     drop.addEventListener('drop', function (e) { e.preventDefault(); addFiles(e.dataTransfer.files); });
     drop.addEventListener('paste', addClipboard);
     input.addEventListener('change', function () { addFiles(input.files); input.value = ''; });
+    // 파일 선택 영역은 클릭 시 file input으로 포커스가 이동한다. 따라서 실제 텍스트
+    // 붙여넣기 대상은 별도 textarea로 두어 Ctrl+V가 브라우저별로 항상 수신되게 한다.
+    textInput.addEventListener('paste', function (e) {
+      if (addClipboard(e)) return;
+      // 일반 텍스트는 textarea에 남겨 사용자가 확인한 뒤 「텍스트 추가」로 넣는다.
+    });
+    $('clMatTextAdd').addEventListener('click', function () {
+      var text = textInput.value;
+      if (!text.trim()) { setMsg('추가할 텍스트를 입력하거나 붙여넣어 주세요.', true); textInput.focus(); return; }
+      addText(text, '직접 입력한 텍스트');
+      textInput.value = '';
+      setMsg('텍스트 자료를 추가했습니다.');
+    });
     // capture 단계에서 처리해야 다른 화면 스크립트가 버블 단계에서 이벤트를
     // 중단해도 원탁 자료 붙여넣기가 누락되지 않는다.
     document.addEventListener('paste', function (e) {
       var view = $('v-council');
       if (!view || !view.classList.contains('on') || e.defaultPrevented) return;
       var target = e.target;
-      if (target && /^(INPUT|TEXTAREA)$/i.test(target.tagName) && target !== drop) return;
+      if (target && /^(INPUT|TEXTAREA)$/i.test(target.tagName)) return;
       addClipboard(e);
     }, true);
     $('clMatList').addEventListener('click', function (e) {
