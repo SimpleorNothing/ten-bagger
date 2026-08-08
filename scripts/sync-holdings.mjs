@@ -5,6 +5,8 @@
 // · 레이어 집계는 6/13 holdings.json 전 레이어 역산 검증 완료(2026-06-20).
 // · 토요일 엑셀 = 금액(평가) 전체를 그대로 리셋(권위값). 추가로 수량·티커·통화·NH환율을 기록해
 //   평일 하루 2회 시가평가(fetch-prices revalueHoldings)가 '수량 고정 × 최신가 × NH환율'로 돌게 한다.
+// · 평단 블록 4칸(평가·수량·매입·현재) 전부 0 = 매도(청산) — 정상 상태. avg[id] 미기입하고 넘어간다(throw 금지).
+//   일부만 비면 여전히 스키마 드리프트 의심으로 throw(§1 침묵 오류 차단 원칙 유지, 2026-08-08).
 
 import { google } from 'googleapis';
 import * as XLSX from 'xlsx';
@@ -148,17 +150,25 @@ function build({ asOf, cell, cellAt }) {
     return row;
   });
 
-  // 평단(주당 매입가) — 블록 오프셋 +2. 수량·현재가 동시 검증으로 행 이동(스키마 드리프트) 침묵 오류 차단.
+  // 평단(주당 매입가) — 블록 오프셋 +2. 4칸(평가·수량·매입·현재) 전부 0 = 매도(청산) → 정상, avg 미기입하고 skip.
+  // 일부만 비어 있으면(예: 평가는 있는데 매입가만 빔) 여전히 스키마 드리프트 의심 → throw(침묵 오류 차단, OPS §1).
   const avg = {};
+  const soldOut = [];
   for (const [id, key] of AVG_KEYS) {
+    const amt = cell(key);
     const qty = cellAt(key, 1), px = cellAt(key, 2), cur = cellAt(key, 3);
+    if (amt === 0 && qty === 0 && px === 0 && cur === 0) {
+      soldOut.push(id);
+      continue;
+    }
     if (!(qty > 0 && px > 0 && cur > 0))
-      throw new Error(`평단 블록 드리프트 의심: ${id}(${key}) 수량=${qty} 매입가=${px} 현재가=${cur}. ` +
+      throw new Error(`평단 블록 드리프트 의심: ${id}(${key}) 평가=${amt} 수량=${qty} 매입가=${px} 현재가=${cur}. ` +
                       `ROW 맵과 시트 블록(평가/수량/매입/현재) 정렬을 대조하라.`);
     avg[id] = +px.toFixed(2);
   }
 
   // NH 적용환율 = US 개별주 KRW평가합 ÷ USD가치합(수량×현재가). 평일 시가평가에서 USD 라인에 곱함.
+  // 매도 종목은 평가·수량·현재가 전부 0이라 자동으로 usKRW·usUSD 기여분 0 — fx 역산에 영향 없음.
   let usKRW = 0, usUSD = 0;
   for (const key of ['marvell', 'micron', 'lumentum', 'vertiv', 'bloom', 'tesla']) {
     usKRW += cell(key); usUSD += cellAt(key, 1) * cellAt(key, 3);
@@ -167,7 +177,7 @@ function build({ asOf, cell, cellAt }) {
   if (!(fx > 500 && fx < 3000))
     throw new Error(`NH 환율 역산 이상: ${fx} (usKRW=${usKRW} usUSD=${usUSD}). US 블록 정렬 확인.`);
 
-  return { asOf, total: Math.round(totalNH / 1e6), holdings, detail, avg, fx, totalNH };
+  return { asOf, total: Math.round(totalNH / 1e6), holdings, detail, avg, fx, totalNH, soldOut };
 }
 
 const next = build(parse(await downloadXlsx()));
@@ -185,7 +195,8 @@ const out = {
   note: `자산현황 ${next.asOf} 자동 동기화 · total ${next.total}M` +
         (wow !== null ? ` (WoW ${wow >= 0 ? '+' : ''}${wow}%)` : '') +
         `. 금액·비중은 하루 2회 시가 파생(fetch-prices, 수량 고정×최신가×NH환율) · 수량(체결)은 이 주간 동기만 갱신. ` +
-        `레이어=holdings[].w·종목=detail[].w·수량=detail[].qty·평단=avg{}·환율=fx.usdkrw. ※ 괴리율·이벤트 등 편집성 메모는 수동 보강.`,
+        `레이어=holdings[].w·종목=detail[].w·수량=detail[].qty·평단=avg{}·환율=fx.usdkrw. ※ 괴리율·이벤트 등 편집성 메모는 수동 보강.` +
+        (next.soldOut.length ? ` ※ 매도 반영(평단 제거): ${next.soldOut.join(', ')}.` : ''),
   holdings: next.holdings,
   detail: next.detail,
   avg: next.avg,
@@ -194,4 +205,5 @@ fs.writeFileSync(OUT, JSON.stringify(out, null, 1) + '\n');
 const missing = next.detail.filter(d => d.priceKey && d.qty == null).map(d => d.name);
 console.log(`holdings.json 갱신: asOf=${out.asOf} total=${out.total}M fx=${next.fx} ` +
             `drift=${Math.round(Math.abs(next.totalNH - next.holdings.reduce((s,h)=>s+h.amt*1e6,0))).toLocaleString()}원` +
-            (missing.length ? ` · 수량 역산 실패(플랫 유지): ${missing.join(', ')}` : ''));
+            (missing.length ? ` · 수량 역산 실패(플랫 유지): ${missing.join(', ')}` : '') +
+            (next.soldOut.length ? ` · 매도(평단 없음): ${next.soldOut.join(', ')}` : ''));
