@@ -1,0 +1,46 @@
+name: Update FedWatch December 2026
+on:
+  schedule:
+    - cron: '15 22 * * 1-5'
+  workflow_dispatch: {}
+permissions:
+  contents: write
+  pull-requests: write
+concurrency:
+  group: update-fedwatch-dec26
+  cancel-in-progress: false
+jobs:
+  fedwatch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { ref: main, fetch-depth: 0 }
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: python3 scripts/fetch-fedwatch.py
+      - id: commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          d=json.load(open('fedwatch.json')); h=d.get('history') or []
+          assert h and h[-1].get('date') and len(h[-1].get('ranges') or []) >= 2
+          PY
+          if [ -z "$(git status --porcelain fedwatch.json)" ]; then echo "changed=false" >> "$GITHUB_OUTPUT"; exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add fedwatch.json && git commit -m "chore: update December 2026 FedWatch"
+          BRANCH="automation/update-fedwatch-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          git push origin "HEAD:$BRANCH"
+          echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+      - if: steps.commit.outputs.changed == 'true'
+        uses: actions/github-script@v7
+        env: { UPDATE_BRANCH: ${{ steps.commit.outputs.branch }} }
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { owner, repo } = context.repo;
+            const pr = await github.rest.pulls.create({owner,repo,head:process.env.UPDATE_BRANCH,base:'main',title:'chore: update December 2026 FedWatch',body:'Automated CME FedWatch daily snapshot.'});
+            await github.graphql('mutation($id:ID!){enablePullRequestAutoMerge(input:{pullRequestId:$id,mergeMethod:SQUASH}){pullRequest{number}}}',{id:pr.data.node_id});
