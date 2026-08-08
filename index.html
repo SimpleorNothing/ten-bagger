@@ -751,7 +751,11 @@ table.tk th.c{text-align:center}
 #mktPulse .p-hl b{color:var(--dawn);font-weight:700}
 #mktPulse .p-hl .p-as{font:600 12px var(--mono);color:var(--faint);letter-spacing:.03em;margin-left:6px}
 #mktPulse .mkt-ph{grid-column:1/-1}
-#mktPulse .mkt-lens{padding:10px 14px;margin:0}
+#mktPulse .p-sum{list-style:none;margin:0;padding:9px 14px 10px;display:grid;gap:6px;font-size:14px;line-height:1.5;color:var(--dim)}
+#mktPulse .p-sum li{position:relative;padding-left:11px}
+#mktPulse .p-sum li::before{content:'·';position:absolute;left:0;color:var(--dawn);font-weight:800}
+#mktPulse .p-sum li:first-child{color:var(--txt);font-weight:650}
+#mktPulse .p-sum .p-verdict{color:var(--txt);font-weight:650}
 #mktPulse .stk-blk .nlist{border-top:1px solid var(--line)}
 .stk-hd .pdir{margin-left:auto;flex:0 0 auto;align-self:center;font:700 11px var(--mono);border-radius:20px;padding:2px 9px;letter-spacing:.02em;border:1px solid var(--line)}
 .pdir.risk{color:var(--st-hot);background:rgba(180,71,47,.08);border-color:rgba(180,71,47,.28)}
@@ -4115,6 +4119,8 @@ var HIDDEN_KEY='am_topic_radar_hidden_v1',hiddenTopics=[];
  function topicHits(keys,max){if(window.TopicRadar&&typeof window.TopicRadar.match==='function')return window.TopicRadar.match(keys,max);var ts=(window.TopicRadar&&window.TopicRadar.items)||[],out=[];keys=(keys||[]).map(function(k){return String(k).toLowerCase();}).filter(Boolean);
   ts.forEach(function(t){var hay=topicText(t);if(keys.some(function(k){return hay.indexOf(k)>=0;}))out.push(t);});return out.slice(0,max||2);}
  function topicRefsHTML(keys){var hits=topicHits(keys,2);if(!hits.length)return '';return '<div class="topic-ref"><b>토픽 레이더 연관</b> '+hits.map(function(t){return esc(t.name||'관련 토픽');}).join(' · ')+'</div>';}
+ function pulsePoint(s,max){s=String(s||'').replace(/\s*·\s*02 인사이트 확인:[\s\S]*/,'').replace(/\s*narrative≠numbers[^.]*[.]?/g,'').trim();if(!s)return '';var cut=s.search(/[.!?](?:\s|$)/);if(cut>=0)s=s.slice(0,cut+1);return s.length>max?s.slice(0,max-1).replace(/[\s,·]+$/,'')+'…':s;}
+ function pulseSummary(d){var out=[],a=pulsePoint(d.l1,72),b=pulsePoint(d.l2,100),v=pulsePoint(d.verdict,50);if(a)out.push(a);if(b&&b!==a)out.push(b);if(v)out.push('<span class="p-verdict">판정: '+esc(v)+'</span>');return '<ul class="p-sum">'+out.slice(0,3).map(function(x){return '<li>'+((x.indexOf('<span')===0)?x:esc(x))+'</li>';}).join('')+'</ul>';}
  async function loadPulse(){
   var host=document.getElementById('mktPulse');if(!host)return;
   try{
@@ -4125,12 +4131,9 @@ var HIDDEN_KEY='am_topic_radar_hidden_v1',hiddenTopics=[];
    var html=p.headline?'<div class="p-hl"><b>오늘의 시장</b> '+esc(p.headline)+as+'</div>':'';
    ds.forEach(function(d){
     var badge='<span class="pdir '+pdirCls(d.dir)+'">'+esc(PDIR[String(d.dir||'').toLowerCase()]||'중립')+'</span>';
-    var l1=(d.layer?'<b>'+esc(d.layer)+'</b>':'')+esc(d.l1||'');
-    var jc=pdirCls(d.dir)==='risk'?'wn':pdirCls(d.dir)==='opp'?'ok':'nt';   // 판정 색은 data가 아니라 dir에서 파생(HTML 주입 차단)
-    var l2=esc(d.l2||'')+(d.verdict?' → <span class="'+jc+'">'+esc(d.verdict)+'</span>':'');
     var dkeys=[d.name,d.layer,d.l1,d.l2,d.verdict].concat((d.keys||[]));
     html+='<div class="stk-blk"><div class="stk-hd"><span class="nm">'+esc(d.name||'')+'</span>'+badge+'</div>'
-     +'<div class="mkt-lens"><div class="l1">'+l1+'</div><div class="l2">'+l2+'</div></div>'+topicRefsHTML(dkeys);
+     +pulseSummary(d)+topicRefsHTML(dkeys);
     var srcs=(d.srcs||d.src||[]).filter(function(s){return s&&(s.u||s.url);});
     if(srcs.length){html+='<div class="nlist">';
      srcs.slice(0,3).forEach(function(s){var dt=String(s.d||s.date||'').match(/\d{4}-\d{2}-\d{2}/);var dateLabel=dt?dt[0].replace(/-/g,'.'):'날짜 미상';html+='<a class="nrow" href="'+esc(s.u||s.url)+'" target="_blank" rel="noopener"><span class="ntt">'+esc(dateLabel)+' · '+esc(s.t||s.title||s.u||s.url)+'</span></a>';});
