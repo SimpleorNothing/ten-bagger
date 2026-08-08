@@ -72,7 +72,8 @@
     fetch('https://api.github.com/repos/SimpleorNothing/ten-bagger/commits?sha=main&per_page=100',{headers:{'Accept':'application/vnd.github+json'}})
       .then(function(r){return r.ok?r.json():[];}).then(function(rows){
         if(!Array.isArray(rows))return;
-        rows.forEach(function(x){var c=x&&x.commit||{},d=(c.author&&c.author.date||'').slice(0,10),t=String(c.message||'').split('\n')[0].trim();if(d&&t&&!MKT_CHANGELOG.some(function(h){return h.d===d&&h.t===t;}))MKT_CHANGELOG.push({d:d,t:t});});
+        rows.forEach(function(x){var c=x&&x.commit||{},d=(c.author&&c.author.date||'').slice(0,10),t=String(c.message||'').split('
+')[0].trim();if(d&&t&&!MKT_CHANGELOG.some(function(h){return h.d===d&&h.t===t;}))MKT_CHANGELOG.push({d:d,t:t});});
         renderAll();
       }).catch(function(){});
   }
@@ -194,7 +195,13 @@
     var s=document.createElement('script');s.id='quoteJs';s.src='/quote.js';s.defer=true;
     (document.body||document.documentElement).appendChild(s);
   }
-  // 01 시장 모니터링 「FedWatch 26년 12월」 일별 전망 카드 로더.\n  function loadFedwatch(){\n    if(document.getElementById('fedwatchJs'))return;\n    var s=document.createElement('script');s.id='fedwatchJs';s.src='/fedwatch.js?v=20260808';s.defer=true;\n    (document.body||document.documentElement).appendChild(s);\n  }\n  function loadMarketSync(){
+  // 01 시장 모니터링 「FedWatch 26년 12월」 일별 전망 카드 로더.
+  function loadFedwatch(){
+    if(document.getElementById('fedwatchJs'))return;
+    var s=document.createElement('script');s.id='fedwatchJs';s.src='/fedwatch.js?v=20260808';s.defer=true;
+    (document.body||document.documentElement).appendChild(s);
+  }
+  function loadMarketSync(){
     if(document.getElementById('marketSyncJs'))return;
     var s=document.createElement('script');s.id='marketSyncJs';s.src='/market-sync.js?v=20260803';s.defer=true;
     (document.body||document.documentElement).appendChild(s);
@@ -217,7 +224,8 @@
     loadGates();                                        // 01 사이클 판별 보드(AI capex 4지표)
     loadTrade();                                    // 01 통합 지표 반도체 수출 카드
     loadQuote();                                    // 01 상단 투자 명언 스트립
-    loadFedwatch();                                // 01 CME FedWatch 26년 12월 일별 전망\n    loadMarketSync();                               // 02 고신뢰 매크로 관점 → 01 자동 동기화
+    loadFedwatch();                                // 01 CME FedWatch 26년 12월 일별 전망
+    loadMarketSync();                               // 02 고신뢰 매크로 관점 → 01 자동 동기화
   }
   document.addEventListener('keydown',function(e){if(e.key==='Escape')hide();});
   function watchDynamicViews(){
