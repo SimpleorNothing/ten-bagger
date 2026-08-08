@@ -186,6 +186,7 @@ var CSS=`#dsAisd{margin:2px 0 38px}
 .ds-msvg .mm-col{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.06em;fill:var(--faint)}
 .ds-msvg .mm-nl{font-size:15px;font-weight:700;fill:var(--txt)}
 .ds-msvg .mm-ns{font-family:var(--mono);font-size:12px;fill:var(--faint)}
+.ds-msvg .mm-customer{font-family:var(--mono);font-size:11px;font-weight:700;fill:var(--dim)}
 .ds-msvg .mm-el{font-family:var(--mono);font-size:12px;font-weight:600;fill:var(--dim)}
 .ds-msvg .nd{fill:var(--panel)}
 .ds-msvg .nd-l1{stroke:var(--dawn);stroke-width:1.6}
@@ -648,7 +649,7 @@ var HTML=`<div style="position:relative">
         <h3 class="ds-mtitle">AI <em>서비스사 ↔ 컴퓨팅 공급사</em> 관계도</h3></div>
       <button type="button" class="ds-mx" data-close aria-label="닫기">✕</button>
     </div>
-    <p class="ds-msub">화살표 = 컴퓨팅이 흐르는 방향(공급사 → 서비스사). 밸류체인 <b>② AI 판매자(L1)</b>가 <b>③ 컴퓨팅 판매자(L2)</b>와 맺는 투자·공급·경쟁 관계를 편 그림 — 2026년 7월 기준.</p>
+    <p class="ds-msub">화살표 = 컴퓨팅이 흐르는 방향(<b>CSP·컴퓨팅 공급사 → 고객 서비스사</b>). 오른쪽 각 CSP의 박스 안에는 대표 고객을 함께 표시했다. 밸류체인 <b>② AI 판매자(L1)</b>와 <b>③ 컴퓨팅 판매자(L2)</b>의 공급·투자·경쟁 관계 — 2026년 7월 기준.</p>
     <div class="ds-mlg">
       <span><i style="border-color:var(--st-accel)"></i>컴퓨팅 공급</span>
       <span><i class="dsh" style="border-color:var(--st-dawn)"></i>지분 투자(+공급)</span>
@@ -664,28 +665,28 @@ var HTML=`<div style="position:relative">
         <marker id="mm-ver" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path class="mk-ver" d="M0,0 L7,3 L0,6 Z"/></marker>
         <marker id="mm-riv" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path class="mk-riv" d="M0,0 L7,3 L0,6 Z"/></marker>
       </defs>
-      <text x="130" y="30" text-anchor="middle" class="mm-col">AI 서비스 판매 · L1</text>
-      <text x="825" y="30" text-anchor="middle" class="mm-col">컴퓨팅 자원 판매 · L2</text>
+      <text x="130" y="30" text-anchor="middle" class="mm-col">AI 서비스 고객 · L1</text>
+      <text x="825" y="30" text-anchor="middle" class="mm-col">CSP·컴퓨팅 공급 · L2</text>
 
-      <path class="ed ed-inv" d="M230,116 C430,116 560,98 720,98" stroke-width="3" stroke-dasharray="7 5" marker-end="url(#mm-inv)"/>
+      <path class="ed ed-inv" d="M230,116 C430,116 560,98 720,98" stroke-width="3" stroke-dasharray="7 5" marker-start="url(#mm-inv)"/>
       <text x="475" y="96" text-anchor="middle" class="mm-el">투자 $13B+·Azure 공급</text>
-      <path class="ed ed-sup" d="M230,128 C430,150 560,205 720,208" stroke-width="3" marker-end="url(#mm-sup)"/>
+      <path class="ed ed-sup" d="M230,128 C430,150 560,205 720,208" stroke-width="3" marker-start="url(#mm-sup)"/>
       <text x="472" y="176" text-anchor="middle" class="mm-el">Stargate ~$300B</text>
-      <path class="ed ed-sup" d="M230,140 C400,220 560,315 720,318" stroke-width="2.4" marker-end="url(#mm-sup)"/>
+      <path class="ed ed-sup" d="M230,140 C400,220 560,315 720,318" stroke-width="2.4" marker-start="url(#mm-sup)"/>
       <text x="424" y="258" text-anchor="middle" class="mm-el">CoreWeave 계약</text>
 
-      <path class="ed ed-inv" d="M230,318 C430,340 560,425 720,428" stroke-width="3.4" stroke-dasharray="7 5" marker-end="url(#mm-inv)"/>
+      <path class="ed ed-inv" d="M230,318 C430,340 560,425 720,428" stroke-width="3.4" stroke-dasharray="7 5" marker-start="url(#mm-inv)"/>
       <text x="476" y="372" text-anchor="middle" class="mm-el">투자 $80B+·Trainium 5GW</text>
-      <path class="ed ed-inv" d="M230,330 C430,420 560,535 720,538" stroke-width="3" stroke-dasharray="7 5" marker-end="url(#mm-inv)"/>
+      <path class="ed ed-inv" d="M230,330 C430,420 560,535 720,538" stroke-width="3" stroke-dasharray="7 5" marker-start="url(#mm-inv)"/>
       <text x="452" y="462" text-anchor="middle" class="mm-el">투자·TPU 수 GW</text>
-      <path class="ed ed-riv" d="M230,342 C380,520 560,640 720,646" stroke-width="2.6" marker-end="url(#mm-riv)"/>
+      <path class="ed ed-riv" d="M230,342 C380,520 560,640 720,646" stroke-width="2.6" marker-start="url(#mm-riv)"/>
       <text x="398" y="566" text-anchor="middle" class="mm-el el-riv">경쟁사 컴퓨팅 ~$15B/년</text>
 
-      <path class="ed ed-ver" d="M230,500 C420,510 560,520 720,534" stroke-width="4" marker-end="url(#mm-ver)"/>
+      <path class="ed ed-ver" d="M230,500 C420,510 560,520 720,534" stroke-width="4" marker-start="url(#mm-ver)"/>
       <text x="470" y="500" text-anchor="middle" class="mm-el el-ver">자체 인프라(TPU)</text>
-      <path class="ed ed-ver" d="M230,632 C400,650 560,648 720,650" stroke-width="4" marker-end="url(#mm-ver)"/>
+      <path class="ed ed-ver" d="M230,632 C400,650 560,648 720,650" stroke-width="4" marker-start="url(#mm-ver)"/>
       <text x="470" y="676" text-anchor="middle" class="mm-el el-ver">자체 인프라(Colossus)</text>
-      <path class="ed ed-sup" d="M230,620 C420,470 560,235 720,214" stroke-width="2.2" stroke-dasharray="2 4" marker-end="url(#mm-sup)"/>
+      <path class="ed ed-sup" d="M230,620 C420,470 560,235 720,214" stroke-width="2.2" stroke-dasharray="2 4" marker-start="url(#mm-sup)"/>
       <text x="604" y="300" text-anchor="middle" class="mm-el">OCI 배포·확장</text>
 
       <g>
@@ -700,17 +701,17 @@ var HTML=`<div style="position:relative">
       </g>
       <g>
         <rect class="nd nd-l2" x="720" y="72" width="210" height="52" rx="11"/>
-        <text x="736" y="96" class="mm-nl">Microsoft Azure</text><text x="736" y="113" class="mm-ns">클라우드</text>
+        <text x="736" y="96" class="mm-nl">Microsoft Azure</text><text x="736" y="113" class="mm-customer">고객 · OpenAI</text>
         <rect class="nd nd-l2" x="720" y="182" width="210" height="52" rx="11"/>
-        <text x="736" y="206" class="mm-nl">Oracle OCI</text><text x="736" y="223" class="mm-ns">중립 컴퓨팅 허브</text>
+        <text x="736" y="206" class="mm-nl">Oracle OCI</text><text x="736" y="223" class="mm-customer">고객 · OpenAI · xAI</text>
         <rect class="nd nd-l2" x="720" y="292" width="210" height="52" rx="11"/>
-        <text x="736" y="316" class="mm-nl">CoreWeave</text><text x="736" y="333" class="mm-ns">GPU 전문 클라우드</text>
+        <text x="736" y="316" class="mm-nl">CoreWeave</text><text x="736" y="333" class="mm-customer">고객 · OpenAI</text>
         <rect class="nd nd-l2" x="720" y="402" width="210" height="52" rx="11"/>
-        <text x="736" y="426" class="mm-nl">Amazon AWS</text><text x="736" y="443" class="mm-ns">클라우드 · Trainium</text>
+        <text x="736" y="426" class="mm-nl">Amazon AWS</text><text x="736" y="443" class="mm-customer">고객 · Anthropic</text>
         <rect class="nd nd-l2" x="720" y="512" width="210" height="52" rx="11"/>
-        <text x="736" y="536" class="mm-nl">Google GCP</text><text x="736" y="553" class="mm-ns">클라우드 · TPU</text>
+        <text x="736" y="536" class="mm-nl">Google GCP</text><text x="736" y="553" class="mm-customer">고객 · Anthropic · Gemini</text>
         <rect class="nd nd-l2" x="720" y="620" width="210" height="52" rx="11"/>
-        <text x="736" y="644" class="mm-nl">xAI Colossus</text><text x="736" y="661" class="mm-ns">자체 데이터센터</text>
+        <text x="736" y="644" class="mm-nl">xAI Colossus</text><text x="736" y="661" class="mm-customer">고객 · xAI · Anthropic</text>
       </g>
     </svg>
     <div class="ds-mnote">
