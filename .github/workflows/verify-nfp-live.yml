@@ -1,5 +1,6 @@
 name: Verify NFP live once
 
+# simpleornothing.com is Cloudflare Access protected for non-browser automation; verify the deployed Worker origin directly.
 on:
   push:
     branches: [main]
@@ -15,8 +16,9 @@ jobs:
       - name: Verify deployed NFP data and renderer
         run: |
           set -euo pipefail
-          curl -fsSL --retry 3 --retry-delay 2 'https://simpleornothing.com/nfp.json' -o /tmp/nfp.json
-          curl -fsSL --retry 3 --retry-delay 2 'https://simpleornothing.com/' -o /tmp/index.html
+          BASE='https://ten-bagger.cw120-park.workers.dev'
+          curl -fsSL --retry 3 --retry-delay 2 "$BASE/nfp.json" -o /tmp/nfp.json
+          curl -fsSL --retry 3 --retry-delay 2 "$BASE/" -o /tmp/index.html
           node - <<'NODE'
           const fs=require('fs');
           const n=JSON.parse(fs.readFileSync('/tmp/nfp.json','utf8'));
@@ -44,7 +46,7 @@ jobs:
           (async()=>{
             const browser=await chromium.launch({headless:true});
             const page=await browser.newPage({viewport:{width:1440,height:1200}});
-            await page.goto('https://simpleornothing.com/',{waitUntil:'networkidle',timeout:90000});
+            await page.goto('https://ten-bagger.cw120-park.workers.dev/',{waitUntil:'networkidle',timeout:90000});
             await page.waitForTimeout(4000);
             const result=await page.evaluate(()=>{
               const all=[...document.querySelectorAll('*')];
@@ -58,7 +60,7 @@ jobs:
               return {found:true,text:(title.parentElement?.innerText||title.textContent||'')};
             });
             console.log('LIVE CARD:', JSON.stringify(result,null,2));
-            if(!result.found) throw new Error('NFP card not found on live page');
+            if(!result.found) throw new Error('NFP card not found on deployed Worker page');
             if(!/(^|\s)-23K(\s|$)/.test(result.text)) throw new Error('live card does not show -23K');
             if(!/전월비\s*-43K/.test(result.text)) throw new Error('live card does not show 전월비 -43K');
             await browser.close();
