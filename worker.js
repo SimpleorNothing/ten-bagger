@@ -2741,7 +2741,7 @@ export default {
             el.append('<script src="/flags.js" defer></scr' + 'ipt>', { html: true });
             el.append('<script src="/aisd.js?v=20260802-cloud-monotone" defer></scr' + 'ipt>', { html: true });
             el.append('<script src="/council-context.js" defer></scr' + 'ipt>', { html: true });
-            el.append('<script src="/council-material.js" defer></scr' + 'ipt>', { html: true });
+            el.append('<script src="/council-material.js?v=20260808-pastefix" defer></scr' + 'ipt>', { html: true });
             el.append('<script src="/council-ask.js" defer></scr' + 'ipt>', { html: true });
             el.append('<script src="/council-audio.js" defer></scr' + 'ipt>', { html: true });
             el.append('<script src="/council-roster.js" defer></scr' + 'ipt>', { html: true });
