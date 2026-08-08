@@ -1,6 +1,9 @@
-**최종 갱신: 2026-08-08 14:05 (KST)**
+**최종 갱신: 2026-08-08 21:40 (KST)**
 
 # OPS — 알파맵 운영 가이드
+
+> 2026-08-08 21:40 · **01 CME FedWatch 2026년 12월 일별 전망 카드 추가.** CME 공개 FedWatch XLSX에서 12월 FOMC 목표금리 구간별 확률을 평일 07:15 KST에 스냅샷으로 저장한다. 화면은 가장 가능성 높은 구간·상위 3개 구간과 확률가중 예상 정책금리의 일별 추이를 표시하며, 수집 실패 시 직전 수치를 복제하지 않고 `자료 대기`로 표시한다.
+
 
 > 2026-08-08 14:05 · **sync-holdings.mjs 매도(청산) 종목 오탐 수정 — Drive 동기화 3주째 무갱신 해소.** 평단 4칸(평가·수량·매입·현재) 전부 0을 매도로 인정하지 않고 매번 throw하던 가드 때문에 버티브(VRT) 청산 이후 `holdings.json` Drive 동기화가 7/18부터 전량 실패(§8). 전부 0=매도로 인정·avg 미기입+skip하도록 수정. SimpleorNothing 지시("없으면 보유하지 않는 것이니 그에 맞춰 처리") 반영.
 
@@ -124,6 +127,7 @@
 | 정보명 | 자동/수동 | 주기 | 소스 |
 |---|---|---|---|
 | **시장 맥박**(동인 6축) | 자동(LLM) | `update-pulse.yml` | `pulse.json`(`fetch-pulse.mjs`). **근거 링크는 LLM 이 만들지 않는다** — 모델은 기사 번호(`si`)로 지목만, URL 은 `resolveSrcs()` 가 `news.json` 원본에서 채운다. 실패분 렌더 제외 |
+| **FedWatch 2026년 12월 전망** (목표금리 구간·확률가중 예상 정책금리 추이) | 자동 | 평일 07:15 KST | `scripts/fetch-fedwatch.py` → `fedwatch.json` · `.github/workflows/update-fedwatch.yml`. 소스는 **CME FedWatch** 공개 XLSX이며, 해당일 스냅샷만 저장·같은 날짜는 교체한다. 수집·검증 실패 시 파일을 변경하지 않아 화면은 `자료 대기`로 표시한다. |
 | **다가오는 일정** (거시·실적 게이트 D-N 카드+범례 · 2026-07-17 06서 흡수) | 혼합 | 데일리 프루닝·asOf / 큐레이션 수시 | `calendar.json` `events`(수기+`derive-calendar.mjs` 프루닝) + `earnings.json` moves(`CAL_EARN_MOVES`). `renderCalNow()`가 오늘 기준 경과 제거·D-N·임박 `CAL_NOW_MAX`(8) 렌더. **02 연동**: 채택·고신뢰 매크로 관점 중 FOMC·물가·고용·중앙은행처럼 기존 이벤트와 날짜·종류가 일치하는 확정 결과는 R2 일괄 동기화와 화면 자동 동기화가 해당 카드 `meta`에도 반영한다(원문 날짜 ±10일, 가장 가까운 1개만). **운영자 오버레이(2026-07-26)**: 카드 **롱프레스(마우스·터치 600ms) → 삭제**, 그리드 끝 **「＋ 이벤트 추가」** 모달 — 텍스트 붙여넣기 → `/api/calevent-parse`(Claude, 오늘 KST 기준 상대날짜 환산·cat 6분류·렌즈 meta 초안)로 필드 자동 추출(뽑기≠반영·사람이 저장) → `/api/calevents` R2 `calevents.json` `{added,removed:["d|lbl"키]}` 전 기기 공유·`renderCalNow()` 병합(added 추가·removed 필터 — earnings moves 카드도 키 일치 시 숨김). `calendar.json`(리포 SoT)·숫자 파일 불변 — 표시 큐레이션(narrative≠numbers). `#calNow`·`--cat-*` `#v-market` 스코프. 크론 `update-calendar.yml`(운영자 수동) |
 | 업데이트 이력(변경 로그) | 수동(인라인) | 사이트 변경 시 | `changelog.js` 인라인 `MKT_CHANGELOG`(`{d,t}` 최신순·자가 마운트=insight.js 패턴). `mountHead()`가 **01 시장 모니터링(`#v-market`) + 전문가 원탁(`#v-council`) 헤더(`.vhead`) 우상단**에 각각 `.mkt-upd` 배지를 마운트 → 클릭 시 `.cyc-pop` 모달(`.cyc-upd`/`.cyc-pop` 재사용 · 신규 토큰 0). **사용자 향 변경만** 기록 · 신규 항목은 배열 맨 위 |
 | **오늘의 투자 명언** (뷰 최상단 스트립 · `quote.js` 자가 마운트 · `.vhead` 위) | 자동(런타임) | 페이지 로딩 시 · 스트립 클릭 시 교체 | `quote.js` 내장 명언 풀(공포/중립/과열 레짐별 8개) + `signals.json`(CNN F&G·VIX·나스닥 DD 합산 스코어)으로 레짐 판정 → 레짐 풀에서 랜덤 1개. 로더=`changelog.js` `loadQuote()`(raer·lead 패턴, index.html·worker 무편집). **레짐은 명언 「선곡」 전용** — 매크로 게이트(3중 AND) 판정과 별개 렌즈, narrative≠numbers·숫자 파일 불변. signals 실패 시 중립 풀 + 「지표 수집 대기」 칩(STYLE_GUIDE §6-6) |
