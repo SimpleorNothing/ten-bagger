@@ -5,6 +5,8 @@
 // · 레이어 집계는 6/13 holdings.json 전 레이어 역산 검증 완료(2026-06-20).
 // · 토요일 엑셀 = 금액(평가) 전체를 그대로 리셋(권위값). 추가로 수량·티커·통화·NH환율을 기록해
 //   평일 하루 2회 시가평가(fetch-prices revalueHoldings)가 '수량 고정 × 최신가 × NH환율'로 돌게 한다.
+// · 평단 블록 4칸(평가·수량·매입·현재) 전부 0 = 매도(청산) — 정상 상태. avg[id] 미기입하고 넘어간다(throw 금지).
+//   일부만 비면 여전히 스키마 드리프트 의심으로 throw(§1 침묵 오류 차단 원칙 유지, 2026-08-08).
 
 import { google } from 'googleapis';
 import * as XLSX from 'xlsx';
@@ -154,6 +156,7 @@ function build({ asOf, cell, cellAt }) {
   const avg = {};
   const closedPositions = [];
   for (const [id, key] of AVG_KEYS) {
+    const amt = cell(key);
     const qty = cellAt(key, 1), px = cellAt(key, 2), cur = cellAt(key, 3);
     const allEmpty = !(qty > 0) && !(px > 0) && !(cur > 0);
     if (allEmpty) {
@@ -161,7 +164,7 @@ function build({ asOf, cell, cellAt }) {
       continue;   // 미보유로 처리 — avg에 항목 자체를 넣지 않는다
     }
     if (!(qty > 0 && px > 0 && cur > 0))
-      throw new Error(`평단 블록 드리프트 의심: ${id}(${key}) 수량=${qty} 매입가=${px} 현재가=${cur}. ` +
+      throw new Error(`평단 블록 드리프트 의심: ${id}(${key}) 평가=${amt} 수량=${qty} 매입가=${px} 현재가=${cur}. ` +
                       `ROW 맵과 시트 블록(평가/수량/매입/현재) 정렬을 대조하라.`);
     avg[id] = +px.toFixed(2);
   }
