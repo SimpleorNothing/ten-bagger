@@ -241,7 +241,7 @@
     var Pulse = vals[12], News = vals[13], Digest = vals[14], Alpha = vals[15], Snapshots = vals[16], MarketHistory = vals[17], Memo = vals[18];
     cache = {
       generatedAt: new Date().toISOString(),
-      rule: '02 인사이트는 저장 원문을 포함한 전체 자료를 항상 공유한다. 01·03·04·05·06은 직전 원탁 이후 변경된 자료만 공유한다. 각 전문가는 수치와 해석을 구분하고 메뉴·기준일·근거를 발언에 남긴다.',
+      rule: '02 인사이트는 저장 원문을 포함한 전체 자료를 항상 공유한다. 01·03·04·05·06은 직전 원탁 이후 변경된 자료만 공유한다. 각 전문가는 수치와 해석을 구분하고 메뉴·기준일·근거를 발언에 남긴다. 팩트체크 규율: 입력 자료의 퍼센트·배수·증가율은 원시 수치로 반드시 재계산해 산술오류를 그대로 인용하지 않는다. 회사별 RPO·backlog처럼 정의·범위가 다른 지표는 동일 개념으로 단순 합산하거나 같은 수주잔고라고 단정하지 않고, 비교 한계를 함께 밝힌다. RPO 잔액 증가를 신규수주와 동일시하지 않는다. 직접 인용·공개 발언과 전문가 렌즈의 해석을 분리하며, 당사자가 실제로 말하지 않은 자인·의도·예측은 사실처럼 쓰지 않는다. 숫자·발행액·전망치·보유비중의 기준일과 분모가 확인되지 않으면 자료에서 확인되지 않음으로 표시한다. 버블·리스크 게이트는 단일 지표로 확정하지 말고 RPO 성장 둔화, 클라우드 매출 성장 둔화, CAPEX 고성장 지속, 감가상각비/매출 상승, 클라우드 마진 악화를 분리 점검한다. 실행 규율은 1개 악화=관찰 강화, 2개 악화=신규매수 중단·비중 동결, 3개 이상이 2개 분기 연속 악화=본격 축소 검토로 단계화한다.',
       sources: {
         assets: compactSource(H), market: compactSource(S), cycle: compactSource(C),
         insights: { asOf: new Date().toISOString(), source: 'R2 /api/insights · 운영자가 채택한 관점' },
@@ -261,7 +261,7 @@
   function setStatus(text, bad) {
     var el = $('clAutoCtxStatus');
     if (!el) return;
-    el.textContent = text;
+    el.textContent = text || '';
     el.style.color = bad ? 'var(--st-hot,#b4472f)' : 'var(--dim)';
   }
   function mountNote() {
