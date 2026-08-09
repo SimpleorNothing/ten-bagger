@@ -1,0 +1,39 @@
+name: Fix site runtime after zero-base score
+
+on:
+  push:
+    branches:
+      - fix/site-runtime-zb
+    paths:
+      - .github/workflows/fix-site-runtime-zb.yml
+      - scripts/fix_site_runtime_zb.py
+      - scripts/check_inline_js.py
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/site-runtime-zb
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Apply runtime fix
+        run: python scripts/fix_site_runtime_zb.py
+      - name: Check HTML diff
+        run: git diff --check
+      - name: Check inline JavaScript syntax
+        run: python scripts/check_inline_js.py
+      - name: Commit runtime fix
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git commit -m "fix: restore alpha map javascript runtime"
+          git push origin HEAD:fix/site-runtime-zb
