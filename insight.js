@@ -1246,13 +1246,13 @@ function persist(){cacheSet();clearTimeout(putTimer);putTimer=setTimeout(push,20
   var cb=e.clipboardData||window.clipboardData||{},items=cb.items||[],imgs=[];
   /* 브라우저·캡처 도구별로 clipboardData.items와 files 중 한쪽만 채워질 수 있다. */
   for(var i=0;i<items.length;i++){
-   if(items[i].kind==='file'&&/^image\\//.test(items[i].type||'')){
+   if(items[i].kind==='file'&&/^image\//.test(items[i].type||'')){
     var f=items[i].getAsFile();if(f)imgs.push(f);
    }
   }
   if(!imgs.length){
    var files=cb.files||[];
-   for(var j=0;j<files.length;j++)if(/^image\\//.test(files[j].type||''))imgs.push(files[j]);
+   for(var j=0;j<files.length;j++)if(/^image\//.test(files[j].type||''))imgs.push(files[j]);
   }
   if(imgs.length){
    e.preventDefault();
