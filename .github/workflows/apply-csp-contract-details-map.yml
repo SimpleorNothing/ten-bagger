@@ -1,0 +1,36 @@
+name: Apply CSP contract details map
+
+on:
+  push:
+    branches:
+      - feat/csp-contract-details-map
+    paths:
+      - .github/workflows/apply-csp-contract-details-map.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feat/csp-contract-details-map
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Apply source update
+        run: python scripts/apply_csp_contract_details_map.py
+      - name: Validate
+        run: |
+          node --check aisd.js
+          git diff --check
+      - name: Commit source update
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add aisd.js
+          git commit -m "feat: add CSP contract details to L1-L2 map"
+          git push origin HEAD:feat/csp-contract-details-map
