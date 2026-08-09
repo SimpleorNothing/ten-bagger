@@ -268,7 +268,7 @@ var HTML=`<div style="position:relative">
     <div class="ds-vq">종합 · 주가 상승 여력</div>
     <div class="ds-vt"><span class="ds-lamp g"></span>여력 유지 — 수요 리비전 ↑ × 공급 타이트 = γ open</div>
     <div class="ds-vd0">추정이 가격보다 빨리 오르는 국면 = 논제 유지. 상승 여력은 「수요 추정의 상향 속도 − 공급 캐파의 추격 속도」에서 나온다.</div>
-    <div class="ds-vtr"><b>재판정 트리거(하나라도 점등 시 재판정):</b> ① 2026E~2028E 추정 <span class="ds-rev dn">▼하향</span> 전환(수요 둔화 경보) · ② DDR5 현물&lt;계약 롤오버(공급 과잉 신호) · ③ 가격 상승률이 리비전 속도 추월(성숙 전환)</div>
+    <div class="ds-vtr"><b>재판정 트리거(하나라도 점등 시 재판정):</b> ① 2026E~2028E 추정 <span class="ds-rev dn">▼하향</span> 전환(수요 둔화 경보) · ② DDR5 현물&lt;계약 롤오버(공급 과잉 신호) · ③ 가격 상승률이 리비전 속도 추월(성숙 전환) · ④ <b>CSP 외부 Compute 구매 축소·미갱신</b>(Google→xAI/SpaceX, Microsoft·OpenAI→CoreWeave 등) — 자체 캐파를 놀리기 전에 외부 임차를 먼저 줄일 가능성이 있어 RPO·CAPEX 하향보다 빠른 AI 수요 조기경보</div>
   </div>
 </div>
 
