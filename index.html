@@ -4904,15 +4904,7 @@ function vcOpenTab(span){
  const hdr=vc?'value chain <span>알파 찾기</span>':'<span>종목 정보</span>';
  const body='<div class="vc-page"><div class="vc-pop-h"><b>'+name+'</b> · '+hdr+'</div>'+cards+'</div>';
  w.document.open();
- w.document.write('<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+name+(vc?' · value chain':' · 종목 정보')+'</title><style>'+styles+'\n'+extra+'</style></head><body>'+body+'
-
-
-
-
-
-
-
-</body></html>');
+ w.document.write('<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+name+(vc?' · value chain':' · 종목 정보')+'</title><style>'+styles+'\n'+extra+'</style></head><body>'+body+'</body></html>');
  w.document.close();
  try{w.document.querySelectorAll('.cnode .cos .ct').forEach(ct=>{if(nm&&ct.textContent.includes(nm))ct.classList.add('vc-hit');});}catch(e){}
 }
