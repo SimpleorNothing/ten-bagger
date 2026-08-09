@@ -167,12 +167,18 @@
     BASE = copy(C.getExperts());
     injectBtn();
     var data = await jget('/api/council-roster');
-    if (data && Array.isArray(data.experts) && data.experts.length) {
-      WORK = data.experts.map(function (e) { if (!e.cfg) e.cfg = copy(PRESETS[0].cfg); return e; });
-      C.setExperts(copy(WORK));
-    } else {
-      WORK = copy(BASE);
-    }
+    // 서버에 저장된 명단이 과거 버전일 수 있으므로 council.json의 신규 전문가를 누락시키지 않는다.
+    // 저장 명단의 편집값은 유지하고, 기본 SoT에만 존재하는 전문가는 뒤에 추가한다.
+    var sot = await jget('/council.json');
+    var saved = data && Array.isArray(data.experts) && data.experts.length ? data.experts : BASE;
+    var sotExperts = sot && Array.isArray(sot.experts) ? sot.experts : BASE;
+    var byId = {};
+    saved.forEach(function (e) { if (e && e.id) byId[e.id] = e; });
+    sotExperts.forEach(function (e) {
+      if (e && e.id && !byId[e.id]) { byId[e.id] = e; saved.push(e); }
+    });
+    WORK = saved.map(function (e) { if (!e.cfg) e.cfg = copy(PRESETS[0].cfg); return e; });
+    C.setExperts(copy(WORK));
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
 })();
