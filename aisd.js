@@ -675,7 +675,7 @@ var HTML=`<div style="position:relative">
       <text x="825" y="30" text-anchor="middle" class="mm-col">CSP·컴퓨팅 공급 · L2</text>
 
       <path class="ed ed-inv" d="M230,116 C430,116 560,98 720,98" stroke-width="3" stroke-dasharray="7 5" marker-start="url(#mm-inv)"/>
-      <text x="475" y="96" text-anchor="middle" class="mm-el">투자 $13B+·Azure 공급</text>
+      <text x="475" y="96" text-anchor="middle" class="mm-el">Azure primary · Cloud 구매액 미공개 · 수익배분 ~2030</text>
       <path class="ed ed-sup" d="M230,128 C430,150 560,205 720,208" stroke-width="3" marker-start="url(#mm-sup)"/>
       <text x="472" y="176" text-anchor="middle" class="mm-el">Stargate ~$300B</text>
       <path class="ed ed-sup" d="M230,140 C400,220 560,315 720,318" stroke-width="2.4" marker-start="url(#mm-sup)"/>
@@ -725,7 +725,15 @@ var HTML=`<div style="position:relative">
       <span class="stl"><b>탈단일 클라우드·라이벌이 고객:</b> OpenAI는 Microsoft 독점에서 Oracle·CoreWeave로, Anthropic은 AWS·GCP에 더해 <b>경쟁사 xAI Colossus까지 연 ~$15B</b>에 사들인다 — GPU 물량이 최상위 병목(L2·L3)이라는 증거.</span>
       <span class="stl"><b>스틸맨:</b> 이 그림은 계약·투자의 방향이지 <b>협상력의 방향</b>은 아니다 — 대규모 선약정·순환거래(round-tripping)가 얽히면 모델사가 클라우드의 앵커 고객이 되어 의존의 화살표가 역전될 수 있다.</span>
     </div>
-    <div class="ds-mfn">2026-07 · 공개 보도 기준 근사치 · narrative 층(숫자 파일 무관)</div>
+    <div class="ds-mnote" style="margin-top:10px">
+      <b>주요 장기 Cloud 계약·Commitment</b>
+      <span class="stl"><b>AWS ↔ Anthropic:</b> AWS 기술 지출 <b>$100B+ / 10년</b> · 최대 <b>5GW</b> 컴퓨팅 · Amazon의 Anthropic 누적 투자 <b>$8B+</b>.</span>
+      <span class="stl"><b>AWS ↔ OpenAI:</b> 기존 <b>$38B / 7년</b> + 추가 <b>$100B / 8년</b> 공개 계약. 단순 합산 최대 <b>~$138B</b>이나 계약범위 중복 여부는 공개자료에서 확인 필요.</span>
+      <span class="stl"><b>Azure ↔ OpenAI:</b> Microsoft는 primary cloud partner 관계 유지 · revenue sharing은 <b>2030년</b>까지, IP 라이선스는 <b>2032년</b>까지. Azure Cloud 구매 commitment 총액은 <b>미공개</b>.</span>
+      <span class="stl"><b>Google Cloud ↔ Anthropic:</b> TPU 기반 다년 컴퓨팅 계약은 확인되나 총 구매금액·세부 기간은 <b>자료에서 확인되지 않음</b>.</span>
+      <span class="stl"><b>RPO 질 점검:</b> 장기계약 금액뿐 아니라 CSP의 고객사 지분투자, 해지·감액 가능성, 고객집중도를 함께 봐야 함.</span>
+    </div>
+    <div class="ds-mfn">2026-08 · 공개계약/회사발표 기준 · 금액 중복 가능성은 별도 표시 · narrative 층(숫자 파일 무관)</div>
   </div>
 </div>`;
 function mountCapexChart(root,which){
