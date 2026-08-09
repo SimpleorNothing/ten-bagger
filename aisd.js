@@ -244,7 +244,7 @@ var HTML=`<div style="position:relative">
     <h3>② 클라우드 RPO·매출·CAPEX 연도별 추이</h3>
     <div class="ds-l2">AWS·Microsoft Cloud·Google Cloud 기준 · 2024~2025 실제 · 2026E~2030E Base Case 전망</div>
     <div class="ds-mini-chart" data-mini-chart="annual"><canvas tabindex="0" role="img" aria-label="2024년부터 2030년까지 클라우드 RPO 매출 CAPEX 연도별 전망"></canvas><div class="ds-mini-tip" role="status" aria-live="polite"></div></div>
-    <div class="ds-topfn">단위 $B · RPO=연말 잔액 · 매출=AWS+Microsoft Cloud+Google Cloud · CAPEX=Amazon+Microsoft+Alphabet 전사 기준 · 2026E 이후 전망치는 Base Case이며 실적과 구분해 E 표기로 표시 · 꺾은선 그래프 · 단일 축(0~3,000B) · 단일 축(0~3,000B)</div>
+    <div class="ds-topfn">단위 $B · RPO=연말 잔액 · 매출=AWS+Microsoft Cloud+Google Cloud · CAPEX=Amazon+Microsoft+Alphabet 전사 기준 · 2026E 이후 전망치는 Base Case이며 실적과 구분해 E 표기로 표시 · 꺾은선 그래프 · 단일 축(0~3,000B) · 단일 축(0~3,000B) · 단일 축(0~3,000B)</div>
   </section>
 </div>
 
@@ -790,9 +790,9 @@ function mountAnnualCloudChart(root){
   var pad={l:52,r:18,t:30,b:40},pw=w-pad.l-pad.r,ph=h-pad.t-pad.b,yMax=3000,x=function(i){return pad.l+pw*i/(d.years.length-1)},y=function(v){return pad.t+ph*(1-v/yMax)};
   ctx.font='11px '+getComputedStyle(root).getPropertyValue('--mono');ctx.textBaseline='middle';ctx.lineWidth=1;ctx.strokeStyle=col('--line');ctx.fillStyle=col('--faint');
   [0,500,1000,1500,2000,2500,3000].forEach(function(v){var yy=y(v);ctx.beginPath();ctx.moveTo(pad.l,yy+.5);ctx.lineTo(w-pad.r,yy+.5);ctx.stroke();ctx.textAlign='right';ctx.fillText(fmt(v),pad.l-7,yy)});
-  function line(vals,color,labelDy){ctx.strokeStyle=col(color);ctx.lineWidth=2.2;ctx.lineJoin='round';ctx.lineCap='round';ctx.beginPath();vals.forEach(function(v,i){var xx=x(i),yy=y(v);if(i===0)ctx.moveTo(xx,yy);else ctx.lineTo(xx,yy)});ctx.stroke();vals.forEach(function(v,i){var xx=x(i),yy=y(v),ly=yy+labelDy;ctx.fillStyle=col('--panel');ctx.strokeStyle=col(color);ctx.lineWidth=2;ctx.beginPath();ctx.arc(xx,yy,4,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.fillStyle=col(color);ctx.font='700 10px '+getComputedStyle(root).getPropertyValue('--mono');ctx.textAlign='center';ctx.fillText(Math.round(v),xx,Math.max(12,Math.min(h-pad.b-6,ly)))})}
+  function line(vals,color,labelDx,labelDy){ctx.strokeStyle=col(color);ctx.lineWidth=2.2;ctx.lineJoin='round';ctx.lineCap='round';ctx.beginPath();vals.forEach(function(v,i){var xx=x(i),yy=y(v);if(i===0)ctx.moveTo(xx,yy);else ctx.lineTo(xx,yy)});ctx.stroke();vals.forEach(function(v,i){var xx=x(i),yy=y(v),lx=xx+labelDx,ly=yy+labelDy;ctx.fillStyle=col('--panel');ctx.strokeStyle=col(color);ctx.lineWidth=2;ctx.beginPath();ctx.arc(xx,yy,4,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.fillStyle=col(color);ctx.font='700 10px '+getComputedStyle(root).getPropertyValue('--mono');ctx.textAlign='center';ctx.fillText(Math.round(v),lx,Math.max(12,Math.min(h-pad.b-6,ly)))})}
   if(active>=0){var xx=x(active);ctx.fillStyle='rgba(73,97,118,.07)';ctx.fillRect(xx-pw/(d.years.length-1)/2,pad.t,pw/(d.years.length-1),ph)}
-  line(d.rpo,'--dawn',-11);line(d.revenue,'--st-hot',-13);line(d.capex,'--st-mature',13);
+  line(d.rpo,'--dawn',0,-12);line(d.revenue,'--st-hot',-8,-20);line(d.capex,'--st-mature',8,20);
   d.years.forEach(function(yr,i){ctx.fillStyle=i>=2?col('--st-mature'):col('--faint');ctx.font='11px '+getComputedStyle(root).getPropertyValue('--mono');ctx.textAlign='center';ctx.fillText(yr,x(i),h-14)});
   ctx.font='10px '+getComputedStyle(root).getPropertyValue('--mono');ctx.textAlign='left';ctx.fillStyle=col('--dawn');ctx.fillText('— RPO',pad.l,pad.t-15);ctx.fillStyle=col('--st-hot');ctx.fillText('— 매출',pad.l+58,pad.t-15);ctx.fillStyle=col('--st-mature');ctx.fillText('— CAPEX',pad.l+112,pad.t-15)
  }
