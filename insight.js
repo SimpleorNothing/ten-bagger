@@ -1242,28 +1242,74 @@ function persist(){cacheSet();clearTimeout(putTimer);putTimer=setTimeout(push,20
   }
  }
 
+ /* --- 캡처 붙여넣기 ---
+    붙여넣기가 '안 들어오는' 경우는 세 가지다 — ①items/files 한쪽만 채움 ②포커스가
+    입력칸 밖(본문·파일 대화상자)이라 paste 이벤트 자체가 안 오는 경우 ③이미지가 없는데
+    화면이 침묵해 실패로 보이는 경우. 세 경로를 전부 막고 항상 상태를 말한다. */
+ function clipImgs(cb){
+  var out=[],i,f,items=(cb&&cb.items)||[],files=(cb&&cb.files)||[];
+  for(i=0;i<items.length;i++){
+   if(/^image\//.test(items[i].type||'')&&items[i].getAsFile){f=items[i].getAsFile();if(f)out.push(f);}
+  }
+  if(!out.length)for(i=0;i<files.length;i++)if(/^image\//.test(files[i].type||''))out.push(files[i]);
+  return out;
+ }
+ function insightOn(){var v=$('v-insight');return !!(v&&v.classList.contains('on'));}
+ var _pasteSeen=0;
  function pasteImgs(e){
-  var cb=e.clipboardData||window.clipboardData||{},items=cb.items||[],imgs=[];
-  /* 브라우저·캡처 도구별로 clipboardData.items와 files 중 한쪽만 채워질 수 있다. */
-  for(var i=0;i<items.length;i++){
-   if(items[i].kind==='file'&&/^image\//.test(items[i].type||'')){
-    var f=items[i].getAsFile();if(f)imgs.push(f);
+  if(e.__insPaste)return false;e.__insPaste=1;
+  if(!insightOn())return false;
+  _pasteSeen=Date.now();
+  var cb=e.clipboardData||window.clipboardData||{},imgs=clipImgs(cb);
+  if(!imgs.length){
+   var txt='';try{txt=cb.getData?(cb.getData('text/plain')||''):'';}catch(_e){}
+   if(!txt)setMsg('붙여넣기를 받았지만 클립보드에 이미지가 없습니다 — 화면을 다시 캡처해 복사하거나 「캡처 붙여넣기」를 눌러 주세요');
+   return false;   /* 텍스트 붙여넣기는 그대로 통과 */
+  }
+  e.preventDefault();e.stopPropagation();
+  setMsg('붙여넣은 캡처 이미지 '+imgs.length+'장을 읽는 중입니다');
+  addFiles(imgs);
+  return true;
+ }
+ /* 포커스가 입력칸 밖이면 브라우저가 paste 이벤트를 아예 안 줄 수 있다.
+    그때는 Clipboard API 로 직접 읽는다(버튼 = 확실한 사용자 제스처 경로). */
+ async function readClipboard(manual){
+  if(!(navigator.clipboard&&navigator.clipboard.read)){
+   if(manual)setMsg('이 브라우저는 클립보드 직접 읽기를 지원하지 않습니다 — 아래 입력칸을 클릭한 뒤 Ctrl+V를 눌러 주세요');
+   return;
+  }
+  var imgs=[];
+  try{
+   var its=await navigator.clipboard.read();
+   for(var i=0;i<its.length;i++){
+    var ts=its[i].types||[];
+    for(var j=0;j<ts.length;j++){
+     if(/^image\//.test(ts[j])){
+      var bl=await its[i].getType(ts[j]);
+      imgs.push(new File([bl],'붙여넣은 캡처.'+((ts[j].split('/')[1]||'png').split('+')[0]),{type:ts[j]}));
+      break;
+     }
+    }
    }
+  }catch(err){
+   if(manual)setMsg('클립보드 읽기가 차단됐습니다 — 주소창 왼쪽 아이콘에서 클립보드를 허용하거나, 아래 입력칸을 클릭하고 Ctrl+V를 눌러 주세요');
+   return;
   }
   if(!imgs.length){
-   var files=cb.files||[];
-   for(var j=0;j<files.length;j++)if(/^image\//.test(files[j].type||''))imgs.push(files[j]);
+   if(manual)setMsg('클립보드에 이미지가 없습니다 — 화면을 캡처해 복사한 뒤 다시 눌러 주세요');
+   return;
   }
-  if(imgs.length){
-    e.preventDefault();
-    e.stopPropagation();
-    setMsg('붙여넣은 캡처 이미지를 읽는 중입니다');
-    addFiles(imgs);
-    return true;
-  }
-  return false;
+  setMsg('붙여넣은 캡처 이미지 '+imgs.length+'장을 읽는 중입니다');
+  addFiles(imgs);
  }
-
+ /* Ctrl/⌘+V 를 직접 받아, paste 이벤트가 오지 않으면 클립보드를 직접 읽는 폴백. */
+ function pasteKey(e){
+  if(!insightOn())return;
+  if(!(e.ctrlKey||e.metaKey)||e.altKey)return;
+  if(String(e.key||'').toLowerCase()!=='v')return;
+  var at=Date.now();
+  setTimeout(function(){if(_pasteSeen>=at)return;readClipboard(false);},400);
+ }
  /* --- 바인딩 --- */
  function bind(){
   $('insRun').onclick=run;
@@ -1275,9 +1321,17 @@ function persist(){cacheSet();clearTimeout(putTimer);putTimer=setTimeout(push,20
   ['dragover','dragenter'].forEach(function(ev){dz.addEventListener(ev,function(e){e.preventDefault();dz.classList.add('drag');});});
   dz.addEventListener('dragleave',function(e){e.preventDefault();dz.classList.remove('drag');});
   dz.addEventListener('drop',function(e){e.preventDefault();dz.classList.remove('drag');addFiles(Array.prototype.slice.call((e.dataTransfer||{}).files||[]));});
-  /* 캡처 도구에서 오는 이미지는 입력창·드롭 영역·페이지 어디에서나 우선 수신한다.
-     capture 단계로 받아 다른 붙여넣기 처리에 가로막히지 않게 하되, 텍스트 붙여넣기는 그대로 둔다. */
+  /* 캡처 이미지는 입력창·드롭 영역·페이지 어디서든 받는다.
+     window → document 순으로 capture 단계에 걸어 다른 화면 스크립트가 먼저 먹지 못하게 하고,
+     입력칸·드롭 영역엔 엘리먼트 리스너도 같이 달아 capture 가 막혀도 살아남게 한다.
+     중복 호출은 e.__insPaste 가드가 막는다. 텍스트 붙여넣기는 그대로 통과한다. */
+  window.addEventListener('paste',pasteImgs,true);
   document.addEventListener('paste',pasteImgs,true);
+  $('insText').addEventListener('paste',pasteImgs);
+  dz.addEventListener('paste',pasteImgs);
+  /* 포커스가 어디에 있든 Ctrl+V 가 먹힐 때를 대비한 키 폴백 + 명시 버튼. */
+  document.addEventListener('keydown',pasteKey,true);
+  if($('insPaste'))$('insPaste').onclick=function(){setMsg('클립보드를 읽는 중입니다');readClipboard(true);};
   $('insSearch').oninput=function(e){q=(e.target.value||'').trim();renderList();};
   $('insFilter').onchange=function(e){filt=e.target.value;renderGradeBoard();renderList();};
  }
@@ -1300,9 +1354,10 @@ function persist(){cacheSet();clearTimeout(putTimer);putTimer=setTimeout(push,20
     '<div class="ins-row"><input class="ins-in" id="insUrl" placeholder="URL (선택)"></div>'+
     '<textarea class="ins-ta" id="insText" style="margin-top:8px" placeholder="본문·스크립트를 붙여넣으세요"></textarea>'+
     '<input type="file" id="insFile" accept=".pdf,.docx,.pptx,.xlsx,.xls,.xlsm,.xlsb,.csv,.tsv,.txt,.md,.json,.yaml,.yml,.log,.ini,.html,.htm,.xml,.rtf,.odt,.ods,.odp,.hwpx,.srt,.vtt,.eml,.png,.jpg,.jpeg,.gif,.bmp,.webp,image/*" multiple hidden>'+
-    '<div class="ins-drop" id="insDrop" role="button" tabindex="0">PDF·Word·PowerPoint·Excel·HWPX·TXT·이미지 파일 끌어놓기 또는 클릭</div>'+
+    '<div class="ins-drop" id="insDrop" role="button" tabindex="0">PDF·Word·PowerPoint·Excel·HWPX·TXT·이미지 파일 끌어놓기 또는 클릭 · 캡처는 Ctrl+V</div>'+
     '<div class="ins-bar">'+
      '<button class="ins-btn primary" id="insRun">관점 뽑기</button>'+
+     '<button class="ins-btn" id="insPaste">캡처 붙여넣기</button>'+
      '<button class="ins-btn" id="insClear">비우기</button>'+
      '<span class="ins-msg" id="insMsg"></span>'+
     '</div>'+

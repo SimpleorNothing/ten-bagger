@@ -824,6 +824,9 @@ async function handleCaleventParse(request, env) {
   return json({ event: clamped }, 200);
 }
 
+// 정적 자산 버전 핀 값 — 바꾸면 모든 클라이언트가 새 URL 로 insight.js 를 다시 받는다.
+const ASSET_VER = "20260809-paste-fallback";
+
 // ===== 03 관점과 정보 — 인사이트 저장(R2 · insights.json) =====
 // 증권사 리포트·기사·유튜브에서 뽑아낸 "관점 카드"를 모든 인증 기기가 공유하도록 R2 에 보관.
 // 채택(adopted)된 클레임만 다른 메뉴(01/02/04/05)에 에코된다 — 선별은 사람이 한다.
@@ -2743,8 +2746,18 @@ export default {
       const res = await env.ASSETS.fetch(request);
       // HTML 응답에 1Y 호버 차트 모듈 주입 (index.html 본문은 그대로 유지하기 위한 worker-side 주입).
       const ct = res.headers.get("content-type") || "";
+      // 스크립트·스타일은 캐시 금지 — 구 배포본이 브라우저에 남아 기능 수정이 화면에 안 들어오는 사고를
+      // 막는다(02 캡처 붙여넣기 사례). HTML·JSON 에만 적용돼 있던 규칙을 .js/.css 로 넓힌다.
+      if (ct.includes("javascript") || ct.includes("text/css") || /\.(js|css)$/.test(url.pathname)) {
+        const sh = new Headers(res.headers);
+        sh.set("cache-control", "no-store");
+        return new Response(res.body, { status: res.status, headers: sh });
+      }
       if (ct.includes("text/html")) {
         const transformed = new HTMLRewriter()
+          // 자산 버전 핀 — index.html 은 손대지 않고(대용량 패치 최소화) 여기서 src 를 갱신한다.
+          // insight.js 는 수정이 잦아 엣지·브라우저가 옛 파일을 쥐고 있으면 배포는 됐는데 화면은 그대로가 된다.
+          .on('script[src^="/insight.js"]', { element(el) { el.setAttribute("src", "/insight.js?v=" + ASSET_VER); } })
           .on("body", { element(el) {
             el.append('<script src="/hover-chart.js" defer></scr' + 'ipt>', { html: true });
             el.append('<script src="/flags.js" defer></scr' + 'ipt>', { html: true });
