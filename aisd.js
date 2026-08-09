@@ -240,6 +240,12 @@ var HTML=`<div style="position:relative">
     <div class="ds-mini-chart" data-mini-chart="quarterly"><canvas tabindex="0" role="img" aria-label="2024년 1분기부터 2026년 2분기까지 클라우드 수주잔고, 매출, CAPEX 합산 차트"></canvas><div class="ds-mini-tip" role="status" aria-live="polite"></div></div>
     <div class="ds-topfn"><span style="color:#315b78">■ Microsoft</span> · <span style="color:#5f86a0">■ Amazon</span> · <span style="color:#9bb5c5">■ Alphabet</span> · 좌측 축=공개 수주잔고(최대 2.00T · 0.50T 간격) · 우측 축=클라우드 서비스 매출·CAPEX(최대 300B · 100B 간격) · 수주잔고·매출·CAPEX는 3사 분기 공시값 합산 · Microsoft 매출은 Microsoft Cloud 기준이며 회계상 보고부문인 Intelligent Cloud와 범위가 다름(Microsoft 365 Commercial Cloud·Azure·LinkedIn 상업·Dynamics 365 포함) · Microsoft 수주잔고는 전체 Commercial RPO, CAPEX는 금융리스 포함 · Amazon·Alphabet CAPEX는 회사 전체 기준 · 수주잔고 괄호=3사 연환산 매출 대비 배수 · 매출 괄호=공개 부문 영업이익률의 매출 가중치</div>
   </section>
+  <section class="ds-topchart wide">
+    <h3>② 클라우드 RPO·매출·CAPEX 연도별 전망</h3>
+    <div class="ds-l2">AWS·Microsoft Cloud·Google Cloud 기준 · 2024~2025 실제 · 2026E~2030E Base Case 전망</div>
+    <div class="ds-mini-chart" data-mini-chart="annual"><canvas tabindex="0" role="img" aria-label="2024년부터 2030년까지 클라우드 RPO 매출 CAPEX 연도별 전망"></canvas><div class="ds-mini-tip" role="status" aria-live="polite"></div></div>
+    <div class="ds-topfn">단위 $B · RPO=연말 잔액 · 매출=AWS+Microsoft Cloud+Google Cloud · CAPEX=Amazon+Microsoft+Alphabet 전사 기준 · 2026E 이후 전망치는 Base Case이며 실적과 구분해 점선·테두리로 표시</div>
+  </section>
 </div>
 
 <div class="ds-sec">판정 <span class="ds-note">이 블록이 답하는 질문 · 결론 먼저</span></div>
@@ -775,6 +781,27 @@ function mountQuarterlyCloudChart(root){
  function lines(key,i){return d.companies.map(function(c){var total=d[key][i],share=c.share[key][i];return '<span style="color:'+c.color+'">■</span> '+c.name+' '+(total==null||share==null?'미공개':fmtRValue(Math.round(total*share)))}).join('<br>')} function show(e){var r=canvas.getBoundingClientRect(),px=e.clientX-r.left;active=Math.max(0,Math.min(d.years.length-1,Math.round((px-47)/(r.width-63)*d.years.length-.5)));var i=active,hasBacklog=d.backlog[i]!=null,backlogHtml=hasBacklog?'수주잔고 · '+fmtLValue(d.backlog[i])+'<br>'+lines('backlog',i)+'<br>연환산 매출 대비 · '+(d.backlog[i]/(d.revenue[i]*4)).toFixed(1)+'배':'수주잔고 · 없음<br>3사 중 한 곳 이상 분기 수치 미공개';tip.innerHTML='<b>'+d.years[i]+'</b><br>'+backlogHtml+'<br>매출 · '+fmtRValue(d.revenue[i])+'<br>'+lines('revenue',i)+'<br>영업이익률 가중평균 · '+d.opMargin[i]+'<br>CAPEX · '+fmtRValue(d.capex[i])+'<br>'+lines('capex',i)+'<br>('+Math.round(d.capex[i]/d.revenue[i]*100)+')';tip.style.display='block';tip.style.left=Math.min(r.width-164,Math.max(4,px+10))+'px';tip.style.top='7px';draw()}
  canvas.addEventListener('pointermove',show);canvas.addEventListener('pointerdown',show);canvas.addEventListener('pointerleave',function(e){if(e.pointerType!=='touch'){active=-1;tip.style.display='none';draw()}});var ro=typeof ResizeObserver!=='undefined'?new ResizeObserver(draw):null;if(ro)ro.observe(box);else window.addEventListener('resize',draw);draw();
 }
+function mountAnnualCloudChart(root){
+ var box=root.querySelector('[data-mini-chart="annual"]'),canvas=box&&box.querySelector('canvas'),tip=box&&box.querySelector('.ds-mini-tip');if(!canvas)return;
+ var d={years:['2024','2025','2026E','2027E','2028E','2029E','2030E'],rpo:[568,1112,1900,2300,2600,2800,2800],revenue:[303,377,465,570,670,765,850],capex:[211,341,585,700,750,700,620]},ctx=canvas.getContext('2d'),active=-1;
+ function col(name){return getComputedStyle(root).getPropertyValue(name).trim()||'#496176'}
+ function fmt(v){return Math.round(v)+'B'}
+ function draw(){var r=box.getBoundingClientRect(),dpr=Math.min(window.devicePixelRatio||1,2),w=Math.max(290,Math.round(r.width)),h=Math.max(240,Math.round(r.height));canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,w,h);
+  var pad={l:48,r:48,t:28,b:40},pw=w-pad.l-pad.r,ph=h-pad.t-pad.b,leftMax=3000,rightMax=900,x=function(i){return pad.l+pw*(i+.5)/d.years.length},yL=function(v){return pad.t+ph*(1-v/leftMax)},yR=function(v){return pad.t+ph*(1-v/rightMax)};
+  ctx.font='11px '+getComputedStyle(root).getPropertyValue('--mono');ctx.textBaseline='middle';ctx.lineWidth=1;ctx.strokeStyle=col('--line');ctx.fillStyle=col('--faint');
+  [0,500,1000,1500,2000,2500,3000].forEach(function(v){var yy=yL(v);ctx.beginPath();ctx.moveTo(pad.l,yy+.5);ctx.lineTo(w-pad.r,yy+.5);ctx.stroke();ctx.textAlign='right';ctx.fillText(fmt(v),pad.l-7,yy)});
+  [0,300,600,900].forEach(function(v){ctx.fillStyle=col('--dim');ctx.textAlign='left';ctx.fillText(fmt(v),w-pad.r+7,yR(v))});
+  var bw=Math.max(10,Math.min(28,pw/d.years.length*.22));
+  d.years.forEach(function(yr,i){var est=i>=2,xx=x(i);if(active===i){ctx.fillStyle='rgba(73,97,118,.07)';ctx.fillRect(xx-pw/d.years.length/2,pad.t,pw/d.years.length,ph)}
+   var specs=[{v:d.rpo[i],x:xx-bw-3,y:yL(d.rpo[i]),c:'--dawn'},{v:d.revenue[i],x:xx,y:yR(d.revenue[i]),c:'--st-hot'},{v:d.capex[i],x:xx+bw+3,y:yR(d.capex[i]),c:'--st-mature'}];
+   specs.forEach(function(o,j){var base=j===0?yL(0):yR(0);ctx.fillStyle=est?col('--panel2'):col(o.c);ctx.strokeStyle=col(o.c);ctx.lineWidth=1.4;ctx.fillRect(o.x-bw/2,o.y,bw,base-o.y);if(est){ctx.setLineDash([4,3]);ctx.strokeRect(o.x-bw/2+.7,o.y+.7,bw-1.4,base-o.y-1.4);ctx.setLineDash([])}ctx.fillStyle=col(o.c);ctx.font='700 10px '+getComputedStyle(root).getPropertyValue('--mono');ctx.textAlign='center';ctx.fillText(Math.round(o.v),o.x,Math.max(12,o.y-10))});
+   ctx.fillStyle=est?col('--st-mature'):col('--faint');ctx.font='11px '+getComputedStyle(root).getPropertyValue('--mono');ctx.textAlign='center';ctx.fillText(yr,xx,h-14)
+  });
+  ctx.font='10px '+getComputedStyle(root).getPropertyValue('--mono');ctx.textAlign='left';ctx.fillStyle=col('--dawn');ctx.fillText('■ RPO',pad.l,pad.t-14);ctx.fillStyle=col('--st-hot');ctx.fillText('■ 매출',pad.l+58,pad.t-14);ctx.fillStyle=col('--st-mature');ctx.fillText('■ CAPEX',pad.l+112,pad.t-14)
+ }
+ function show(e){var r=canvas.getBoundingClientRect(),px=e.clientX-r.left;active=Math.max(0,Math.min(d.years.length-1,Math.round((px-48)/(r.width-96)*d.years.length-.5)));var i=active;tip.innerHTML='<b>'+d.years[i]+'</b><br>RPO · '+fmt(d.rpo[i])+'<br>Cloud 매출 · '+fmt(d.revenue[i])+'<br>CAPEX · '+fmt(d.capex[i])+'<br>RPO/매출 · '+(d.rpo[i]/d.revenue[i]).toFixed(1)+'배'+(i>=2?'<br><span style="color:var(--st-mature)">Base Case 전망</span>':'<br>실제');tip.style.display='block';tip.style.left=Math.min(r.width-170,Math.max(4,px+10))+'px';tip.style.top='8px';draw()}
+ canvas.addEventListener('pointermove',show);canvas.addEventListener('pointerdown',show);canvas.addEventListener('pointerleave',function(e){if(e.pointerType!=='touch'){active=-1;tip.style.display='none';draw()}});var ro=typeof ResizeObserver!=='undefined'?new ResizeObserver(draw):null;if(ro)ro.observe(box);else window.addEventListener('resize',draw);draw();
+}
 function mount(){
  var host=document.getElementById('v-thread');
  if(!host||document.getElementById('dsAisd'))return;
@@ -783,6 +810,7 @@ function mount(){
  host.insertBefore(wrap,host.firstChild);
  mountCapexChart(wrap,'[data-capex-chart="detail"]');
  mountQuarterlyCloudChart(wrap);
+ mountAnnualCloudChart(wrap);
  wrap.querySelectorAll('tr.exp').forEach(function(r){
   function tg(){r.classList.toggle('on');var d=r.nextElementSibling;if(d&&d.classList.contains('dtl'))d.classList.toggle('on');}
   r.addEventListener('click',tg);
