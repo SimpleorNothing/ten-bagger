@@ -791,7 +791,17 @@ function mountQuarterlyCloudChart(root){
 }
 function mountAnnualCloudChart(root){
  var box=root.querySelector('[data-mini-chart="annual"]'),canvas=box&&box.querySelector('canvas'),tip=box&&box.querySelector('.ds-mini-tip');if(!canvas)return;
- var d={years:['2024','2025','2026E','2027E','2028E','2029E','2030E'],rpo:[568,1112,1900,2300,2600,2800,2800],revenue:[303,377,465,570,670,765,850],capex:[211,341,585,700,750,700,620]},ctx=canvas.getContext('2d'),active=-1;
+ // 연도별 한 행에 RPO·매출·CAPEX를 함께 보관한다. 시리즈별 배열 인덱스가
+ // 어긋나 서로 다른 연도의 값이 연결되는 것을 방지하기 위한 구조다. 단위: $B.
+ var annualRows=[
+  {year:'2024',rpo:568,revenue:303,capex:211},
+  {year:'2025',rpo:1112,revenue:377,capex:341},
+  {year:'2026E',rpo:1900,revenue:465,capex:585},
+  {year:'2027E',rpo:2300,revenue:570,capex:700},
+  {year:'2028E',rpo:2600,revenue:670,capex:750},
+  {year:'2029E',rpo:2800,revenue:765,capex:700},
+  {year:'2030E',rpo:2800,revenue:850,capex:620}
+ ],d={years:annualRows.map(function(row){return row.year}),rpo:annualRows.map(function(row){return row.rpo}),revenue:annualRows.map(function(row){return row.revenue}),capex:annualRows.map(function(row){return row.capex})},ctx=canvas.getContext('2d'),active=-1;
  function col(name){return getComputedStyle(root).getPropertyValue(name).trim()||'#496176'}
  function fmt(v){return Math.round(v)+'B'}
  function draw(){var r=box.getBoundingClientRect(),dpr=Math.min(window.devicePixelRatio||1,2),w=Math.max(290,Math.round(r.width)),h=Math.max(240,Math.round(r.height));canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,w,h);
