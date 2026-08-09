@@ -1,0 +1,35 @@
+name: Apply zero-base investment score
+
+on:
+  push:
+    branches:
+      - feat/zero-base-investment-score
+    paths:
+      - .github/workflows/apply-zero-base-investment-score.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feat/zero-base-investment-score
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Apply source update
+        run: python scripts/apply_zero_base_investment_score.py
+      - name: Validate
+        run: |
+          git diff --check
+      - name: Commit source update
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git commit -m "feat: replace risk score with zero-base investment attractiveness"
+          git push origin HEAD:feat/zero-base-investment-score
