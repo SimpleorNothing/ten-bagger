@@ -61,6 +61,11 @@
   // 짧은 영어 약어는 철자 단위로 읽지 않는다. 회사 티커는 회사명, 재무·시장 용어는 통용되는 풀네임으로 변환한다.
   function sayNorm(s) {
     return String(s || '')
+      // 음성용 날짜·분기·금액 표기 정규화: 화면 원문은 그대로 보존한다.
+      .replace(/\(\s*(?:20\d{2}[.\-/]\d{1,2}[.\-/]\d{1,2}|\d{1,2}[.\-/]\d{1,2}[.\-/]\d{2,4})\s*\)/g, '')
+      .replace(/\b([1-4])Q(\d{2})(F)?\b/gi, function (_, q, yy, f) { return yy + '년 ' + q + '분기' + (f ? ' 전망' : ''); })
+      .replace(/\$([0-9][0-9,]*(?:\.\d+)?)B\b/gi, function (_, n) { return (parseFloat(n.replace(/,/g, '')) * 10).toLocaleString('ko-KR') + '억 달러'; })
+      .replace(/증액\s*→\s*변화/g, '증액에서 변화로')
       .replace(/NASDAQ\s*(?:DD|Draw\s*Down)/gi, '나스닥 드로다운')
       .replace(/S&P\s*500/gi, '에스앤피 오백')
       .replace(/S&P/gi, '에스앤피')
