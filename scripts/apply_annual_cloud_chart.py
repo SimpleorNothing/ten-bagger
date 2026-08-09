@@ -48,9 +48,9 @@ if 'function mountAnnualCloudChart(root)' not in s:
     s = s.replace(needle, func + needle, 1)
 
 if 'mountAnnualCloudChart(wrap);' not in s:
-    needle = '  mountQuarterlyCloudChart(wrap);\n'
+    needle = 'mountQuarterlyCloudChart(wrap);'
     if needle not in s:
         raise SystemExit('mount call point not found')
-    s = s.replace(needle, needle + '  mountAnnualCloudChart(wrap);\n', 1)
+    s = s.replace(needle, needle + '\n mountAnnualCloudChart(wrap);', 1)
 
 p.write_text(s, encoding='utf-8')
