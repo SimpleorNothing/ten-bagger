@@ -1,10 +1,10 @@
 name: Apply annual cloud line chart
 
-# trigger label overlap fix
+# trigger stronger label overlap fix
 on:
   push:
     branches:
-      - fix/annual-chart-label-overlap-apply
+      - fix/annual-chart-label-overlap-v2
     paths:
       - .github/workflows/apply-annual-cloud-chart-direct.yml
 
@@ -17,7 +17,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: fix/annual-chart-label-overlap-apply
+          ref: fix/annual-chart-label-overlap-v2
           fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
@@ -33,5 +33,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add aisd.js
-          git commit -m "fix: separate annual cloud chart value labels"
-          git push origin HEAD:fix/annual-chart-label-overlap-apply
+          git commit -m "fix: strongly separate annual cloud chart value labels"
+          git push origin HEAD:fix/annual-chart-label-overlap-v2
