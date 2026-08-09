@@ -1255,10 +1255,13 @@ function persist(){cacheSet();clearTimeout(putTimer);putTimer=setTimeout(push,20
    for(var j=0;j<files.length;j++)if(/^image\//.test(files[j].type||''))imgs.push(files[j]);
   }
   if(imgs.length){
-   e.preventDefault();
-   e.stopPropagation();
-   addFiles(imgs);
+    e.preventDefault();
+    e.stopPropagation();
+    setMsg('붙여넣은 캡처 이미지를 읽는 중입니다');
+    addFiles(imgs);
+    return true;
   }
+  return false;
  }
 
  /* --- 바인딩 --- */
@@ -1272,10 +1275,9 @@ function persist(){cacheSet();clearTimeout(putTimer);putTimer=setTimeout(push,20
   ['dragover','dragenter'].forEach(function(ev){dz.addEventListener(ev,function(e){e.preventDefault();dz.classList.add('drag');});});
   dz.addEventListener('dragleave',function(e){e.preventDefault();dz.classList.remove('drag');});
   dz.addEventListener('drop',function(e){e.preventDefault();dz.classList.remove('drag');addFiles(Array.prototype.slice.call((e.dataTransfer||{}).files||[]));});
-  /* 텍스트 입력창뿐 아니라 드롭 영역·페이지 어디에서 붙여넣어도 캡처 이미지를 수신한다. */
-  document.addEventListener('paste',pasteImgs);
-  $('insText').addEventListener('paste',pasteImgs);
-  dz.addEventListener('paste',pasteImgs);
+  /* 캡처 도구에서 오는 이미지는 입력창·드롭 영역·페이지 어디에서나 우선 수신한다.
+     capture 단계로 받아 다른 붙여넣기 처리에 가로막히지 않게 하되, 텍스트 붙여넣기는 그대로 둔다. */
+  document.addEventListener('paste',pasteImgs,true);
   $('insSearch').oninput=function(e){q=(e.target.value||'').trim();renderList();};
   $('insFilter').onchange=function(e){filt=e.target.value;renderGradeBoard();renderList();};
  }
