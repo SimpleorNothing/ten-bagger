@@ -1,0 +1,43 @@
+name: Refine zero-base investment score
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - fix/zero-base-overheat-valuation
+    paths:
+      - scripts/refine_zero_base_score.py
+      - .github/workflows/refine-zero-base-score.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/zero-base-overheat-valuation
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Refine canonical score logic
+        run: python scripts/refine_zero_base_score.py
+      - name: Rebuild index injection
+        run: python scripts/apply_zero_base_investment_score.py
+      - name: Validate
+        run: |
+          git diff --check
+          grep -q "목표가 여력 45%" scripts/apply_zero_base_investment_score.py
+          grep -q "G.stage==='과열'" scripts/apply_zero_base_investment_score.py
+          grep -q "목표가 여력 45%" index.html
+          grep -q "G.stage==='과열'" index.html
+      - name: Commit source update
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add scripts/apply_zero_base_investment_score.py index.html
+          git commit -m "fix: calibrate valuation and overheat penalties"
+          git push origin HEAD:fix/zero-base-overheat-valuation
