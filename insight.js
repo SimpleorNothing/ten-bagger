@@ -1243,13 +1243,22 @@ function persist(){cacheSet();clearTimeout(putTimer);putTimer=setTimeout(push,20
  }
 
  function pasteImgs(e){
-  var items=((e.clipboardData||window.clipboardData||{}).items)||[],imgs=[];
+  var cb=e.clipboardData||window.clipboardData||{},items=cb.items||[],imgs=[];
+  /* 브라우저·캡처 도구별로 clipboardData.items와 files 중 한쪽만 채워질 수 있다. */
   for(var i=0;i<items.length;i++){
-   if(items[i].kind==='file'&&/^image\//.test(items[i].type||'')){
+   if(items[i].kind==='file'&&/^image\\//.test(items[i].type||'')){
     var f=items[i].getAsFile();if(f)imgs.push(f);
    }
   }
-  if(imgs.length){e.preventDefault();addFiles(imgs);}
+  if(!imgs.length){
+   var files=cb.files||[];
+   for(var j=0;j<files.length;j++)if(/^image\\//.test(files[j].type||''))imgs.push(files[j]);
+  }
+  if(imgs.length){
+   e.preventDefault();
+   e.stopPropagation();
+   addFiles(imgs);
+  }
  }
 
  /* --- 바인딩 --- */
@@ -1263,6 +1272,8 @@ function persist(){cacheSet();clearTimeout(putTimer);putTimer=setTimeout(push,20
   ['dragover','dragenter'].forEach(function(ev){dz.addEventListener(ev,function(e){e.preventDefault();dz.classList.add('drag');});});
   dz.addEventListener('dragleave',function(e){e.preventDefault();dz.classList.remove('drag');});
   dz.addEventListener('drop',function(e){e.preventDefault();dz.classList.remove('drag');addFiles(Array.prototype.slice.call((e.dataTransfer||{}).files||[]));});
+  /* 텍스트 입력창뿐 아니라 드롭 영역·페이지 어디에서 붙여넣어도 캡처 이미지를 수신한다. */
+  document.addEventListener('paste',pasteImgs);
   $('insText').addEventListener('paste',pasteImgs);
   dz.addEventListener('paste',pasteImgs);
   $('insSearch').oninput=function(e){q=(e.target.value||'').trim();renderList();};
