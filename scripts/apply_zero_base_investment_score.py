@@ -114,7 +114,8 @@ script = r'''
 </script>
 '''
 
-if '</body>' not in s:
+pos = s.rfind('</body>')
+if pos < 0:
     raise SystemExit('body close not found')
-s = s.replace('</body>', script + '\n</body>', 1)
+s = s[:pos] + script + '\n' + s[pos:]
 p.write_text(s, encoding='utf-8')
