@@ -2105,7 +2105,13 @@ window.CYCLE=(function(){
         setActions('preview');
       }catch(err){showErr(err.message);setActions('run');}
     }
-    async function applyPreview(){var pv=window.__clPrev;if(!pv||!modalFor)return;modalFor.view=pv.view;modalFor.stance=pv.stance;modalFor.updated='방금 · '+pv.source;renderCards();
+    async function applyPreview(){var pv=window.__clPrev;if(!pv||!modalFor)return;
+      // 신규 소스 관점은 기존 관점을 대체하지 않고 누적한다. 이후 갱신도 누적된 카드 내용을 기준으로 이어진다.
+      var previous=String(modalFor.view||'').trim(), incoming=String(pv.view||'').trim();
+      if(incoming){
+        modalFor.view=previous ? (previous+'\\n\\n[추가 관점 · '+(pv.source||'신규 소스')+'\\n'+nowLocal()+']\\n'+incoming) : incoming;
+      }
+      modalFor.stance=pv.stance;modalFor.updated='방금 · '+pv.source;renderCards();
       try{await fetch('/api/council-log',{method:'POST',headers:{'content-type':'application/json'},credentials:'same-origin',body:JSON.stringify({at:nowLocal(),expertId:modalFor.id,expert:modalFor.name,field:modalFor.field,source:pv.source,ref:pv.ref||'',refs:pv.refs||[],stance:pv.stance,view:pv.view})});}catch(_e){}
       closeModal();}
 
