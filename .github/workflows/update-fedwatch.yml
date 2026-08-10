@@ -14,9 +14,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with: { ref: main, fetch-depth: 0 }
+        with:
+          ref: main
+          fetch-depth: 0
       - uses: actions/setup-python@v5
-        with: { python-version: '3.12' }
+        with:
+          python-version: '3.12'
       - run: python3 scripts/fetch-fedwatch.py
       - id: commit
         shell: bash
@@ -37,9 +40,10 @@ jobs:
           echo "changed=true" >> "$GITHUB_OUTPUT"
       - if: steps.commit.outputs.changed == 'true'
         uses: actions/github-script@v7
-        env: { UPDATE_BRANCH: ${{ steps.commit.outputs.branch }} }
+        env:
+          UPDATE_BRANCH: "${{ steps.commit.outputs.branch }}"
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
           script: |
             const { owner, repo } = context.repo;
             const pr = await github.rest.pulls.create({owner,repo,head:process.env.UPDATE_BRANCH,base:'main',title:'chore: update December 2026 FedWatch',body:'Automated CME FedWatch daily snapshot.'});
