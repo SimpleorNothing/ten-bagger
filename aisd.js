@@ -574,9 +574,9 @@ var HTML=`<div style="position:relative">
   </table>
 </div>
 
-<div class="ds-sec">④ Factory — 칩 제조사별 Capex <span class="ds-note">공급 · 삼성전자·SK하이닉스·마이크론·TSMC · 캐파 로드맵 · 연도별 · 한경 2026-07-20</span></div>
+<div class="ds-sec">④ Factory — 칩 제조사별 Capex <span class="ds-note">공급 · 삼성전자·SK하이닉스·마이크론·TSMC·인텔 · 캐파 로드맵 · 연도별 · 한경 2026-07-20 · 인텔 2026-08-11</span></div>
 <div class="ds-lens">
-  <div class="ds-l1"><b>④ · 칩 제조사</b> 삼성전자·SK하이닉스·마이크론·TSMC — 누가 얼마를 언제 짓나(메모리 L3 · 파운드리 L2·L4)</div>
+  <div class="ds-l1"><b>④ · 칩 제조사</b> 삼성전자·SK하이닉스·마이크론·TSMC·인텔 — 누가 얼마를 언제 짓나(메모리 L3 · 파운드리 L2·L4)</div>
   <div class="ds-l2">2026 전후 <span class="ds-wn">일제히 대규모 캐파 증설로 전환</span> · 메모리 3사 HBM D램 + TSMC 파운드리·CoWoS → 컴퓨트 병목 완화 신호 vs <span class="ds-nt">2028E 메모리 과잉 리스크</span></div>
 </div>
 <div class="ds-card">
@@ -603,11 +603,16 @@ var HTML=`<div style="position:relative">
         <td>설비투자 <b>$60~64B로 상향</b>(기존 $52~56B) <span class="ds-rev up">▲</span> · 애리조나 <b>총 $265B(₩392조·+$100B)</b> <span class="ds-rev up">▲</span></td>
         <td>대만 <b>5년간 25개 팹 착공</b> — 완공 시 캐파 <b>1.5배</b> <span class="ds-rev up">▲</span></td>
         <td>CoWoS·선단 공정 캐파 대폭 확대 — 컴퓨트 공급 완화의 열쇠</td></tr>
+      <tr><td class="ds-co">인텔<small>파운드리 · IDM</small><span class="ds-lb sem">L2·L4</span></td>
+        <td>18A 양산 준비 · 파운드리 외부고객 확보 미흡 · 아일랜드 팹34 $57B</td>
+        <td>설비투자 <b>$20B+로 상향</b>(기존 $18B) <span class="ds-rev up">▲</span> · 증분 ~$3B는 <b>Intel 3·18A·18A-P 툴링</b> · 상장(1971) 후 첫 <b>유상증자 $15B(₩21조)</b> <span class="ds-rev up">▲</span></td>
+        <td>CAPEX <b>「2026 대비 크게 상회」</b> 가이던스 <span class="ds-rev up">▲</span> · 미국 중심 지출 · CHIPS Act 투자세액공제 활용</td>
+        <td>외부 파운드리 고객·수율 확정 전까지 실공급 기여 제한</td></tr>
       <tr class="sumrow"><td class="ds-co">관통 판정</td>
-        <td colspan="4">4사 모두 대규모 캐파 증설 발표 — <b>캐파 증설 = 컴퓨트 부족 프리미엄 소멸의 선행 신호</b>(TSMC CoWoS·3사 HBM). 단 메모리는 <b>2028E 신규 캐파 동시 램프 = 과잉 리스크 최대 구간</b> → γ-닫힘 3트리거(MU 목표가 리비전·fwd P/E·DRAM 롤오버)·01 DXI로 라이브 감시. <span style="font-family:var(--mono);font-size:12px;color:var(--faint)">인텔 아일랜드 팹34 $57B 별도 · 발표·계획 = narrative(숫자 파일 미변경)</span></td></tr>
+        <td colspan="4">5사 모두 대규모 캐파 증설 발표 — <b>캐파 증설 = 컴퓨트 부족 프리미엄 소멸의 선행 신호</b>(TSMC CoWoS·3사 HBM). 단 메모리는 <b>2028E 신규 캐파 동시 램프 = 과잉 리스크 최대 구간</b> → γ-닫힘 3트리거(MU 목표가 리비전·fwd P/E·DRAM 롤오버)·01 DXI로 라이브 감시. <span style="font-family:var(--mono);font-size:12px;color:var(--faint)">인텔은 CAPEX 상향·유상증자로 실탄은 확보했으나 <b>파운드리 외부고객·수율이 확정되기 전까지 실공급 물량에 산입하지 않음</b> · 발표·계획 = narrative(숫자 파일 미변경)</span></td></tr>
     </tbody>
   </table>
-  <div class="ds-fn">발표·로드맵 기준(확정 수주·실적 아님) · 출처 한국경제 2026-07-20 「TSMC도 증설 가세」 — <span class="ds-rev up">▲</span> = 이번 캡처에서 상향</div>
+  <div class="ds-fn">발표·로드맵 기준(확정 수주·실적 아님) · 출처 한국경제 2026-07-20 「TSMC도 증설 가세」 · 인텔 행 = 인텔 2Q26 실적발표(2026-07-23, CFO David Zinsner 2026 CAPEX $18B→$20B+ 상향·2027 「significantly above」)·유상증자 공시(2026-08-10, $15B) — <span class="ds-rev up">▲</span> = 이번 캡처에서 상향</div>
 </div>
 
 <div class="ds-sec">④ Factory — 중국 업체 확대 계획 <span class="ds-note">공급 · CXMT·YMTC·SMIC · 캐파 2배 시도 · 선단 격차 존재</span></div>
