@@ -202,7 +202,7 @@
     });
     var r = await nativeFetch('/api/council-image', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ name: file.name || '붙여넣은 캡처 이미지', data: data }) });
     var j = await r.json().catch(function () { return null; });
-    if (!r.ok || !j || !j.text) throw new Error((j && j.error) || '이미지 내용을 읽지 못했습니다.');
+    if (!r.ok || !j || !j.text) { var reason = (j && (j.detail || j.error)) || '이미지 내용을 읽지 못했습니다.'; throw new Error(String(reason).slice(0, 320)); }
     return trimText('[캡처 이미지에서 확인된 내용]\n' + j.text);
   }
   function addText(text, name) {
