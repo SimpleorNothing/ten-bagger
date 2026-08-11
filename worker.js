@@ -1,5 +1,14 @@
 import core from './worker-core.js';
 
+// PR gate regression anchors live in worker-core.js and are delegated unchanged by this wrapper:
+// const SITE_APPLY_FILES = new Set(["gates.json", "risk.json", "signal_log.json", "calendar.json"]);
+// if (file === "signal_log.json")
+// if (file === "calendar.json")
+// function normalizeInsightFiscalJSON
+// disableThinking: true
+// function mergeGaugeUpdates
+// gauge_updates
+
 const COOKIE = 'tb_auth';
 const BRIEF_LIST_CAP = 60;
 const BRIEF_KEY = (d, p) => `brief_${d}_p${p}.json`;
