@@ -3797,7 +3797,8 @@ window.MARKET=(function(){
     ['energy',/중동|이란|호르무즈|유가|원유|석유|oil|opec|에너지|energy|지정학|geopolit|전쟁|war|이스라엘|israel/],
     ['trade',/관세|무역|tariff|trade/],
     ['rates',/금리|연준|기준금리|통화정책|물가|인플레|cpi|pce|fomc|fed|inflation|rate/],
-    ['fx',/환율|원화|달러|dollar|forex|fx/]];
+    ['fx',/환율|원화|달러|dollar|forex|fx/],
+    ['ai_financing',/금융화|담보|리스|대출|차입|증권화|순환금융|financing|collateral|leasing|debt|securiti[sz]|circularfinance/]];
    function axOf(s){var t=String(s||'').toLowerCase().replace(/[^0-9a-z가-힣]/g,'');
     for(var i=0;i<AXR.length;i++)if(AXR[i][1].test(t))return AXR[i][0];
     return 'x_'+(t||'macro');}
@@ -3822,7 +3823,7 @@ window.MARKET=(function(){
    var NM={},order=[];   // 이번 실행 채택 축 먼저 → 식은 축은 최신순
    (((nw||{}).macroTopics)||[]).forEach(function(t){var k=axOf(t.name||t.id);
     if(!NM[k])NM[k]=t.name;
-    if(byA[k]&&order.indexOf(k)<0)order.push(k);});
+    if(order.indexOf(k)<0)order.push(k);});
    Object.keys(byA).filter(function(k){return order.indexOf(k)<0;})
     .sort(function(a,b){return new Date((byA[b][0]||{}).published||0)-new Date((byA[a][0]||{}).published||0);})
     .forEach(function(k){order.push(k);});
@@ -3852,7 +3853,8 @@ var HIDDEN_KEY='am_topic_radar_hidden_v1',hiddenTopics=[];
     bn_l6_opt:['옵티컬','optical','광통신','cpo','리드타임'],
     bn_l8_pwr:['전력','power','grid','그리드','냉각','송전'],
     bn_silicon:['실리콘','silicon','asic','자체칩','커스텀'],
-    bn_asic:['asic','커스텀','실리콘','전력효율','추론']
+    bn_asic:['asic','커스텀','실리콘','전력효율','추론'],
+    ai_financing:['금융화','gpu 담보','리스','대출','차입','증권화','순환금융','financing','collateral','leasing','debt']
    };
    var topicItems=order.map(function(k){
      var lst=byA[k]||[],title=NM[k]||(lst[0]&&lst[0].name)||k;
@@ -3873,7 +3875,7 @@ var HIDDEN_KEY='am_topic_radar_hidden_v1',hiddenTopics=[];
    }
    var html='';
    order.forEach(function(k){
-    var lst=byA[k].slice(0,k==='china'?CHINA_MX:MX);
+    var lst=(byA[k]||[]).slice(0,k==='china'?CHINA_MX:MX);
     var title=NM[k]||(lst[0]&&lst[0].name)||k;if(k==='china'){var chinaNamed=lst.find(function(it){return /중국 AI 부상/.test(it.name||'');});title=chinaNamed?chinaNamed.name:'중국 AI 부상·반도체 수출통제';}
     html+='<div class="stk-blk is-collapsed" data-topic-key="'+esc(k)+'"><div class="stk-hd" role="button" tabindex="0" aria-expanded="false" aria-label="'+esc(title)+' 펼치기"><span class="nm">'+esc(title)+'</span><button type="button" class="stk-topic-del" aria-label="'+esc(title)+' 토픽 삭제">삭제</button></div>';
     html+=sums[k]?'<div class="stk-sum">'+esc(sums[k])+'</div>'
