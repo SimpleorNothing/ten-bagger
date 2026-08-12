@@ -1,7 +1,7 @@
 name: Update FedWatch December 2026
 on:
   schedule:
-    - cron: '15 22 * * 1-5'
+    - cron: '15 22 * * *'
   workflow_dispatch: {}
 permissions:
   contents: write
@@ -27,13 +27,17 @@ jobs:
           set -euo pipefail
           python3 - <<'PY'
           import json
-          d=json.load(open('fedwatch.json')); h=d.get('history') or []
-          assert h and h[-1].get('date') and len(h[-1].get('ranges') or []) >= 2
+          d=json.load(open('fedwatch.json'))
+          checks=d.get('checks') or []
+          assert checks and checks[-1].get('date') and checks[-1].get('status') in ('확인','확인 필요')
+          if checks[-1]['status']=='확인':
+              h=d.get('history') or []
+              assert h and h[-1].get('date')==checks[-1].get('date') and len(h[-1].get('ranges') or []) >= 2
           PY
           if [ -z "$(git status --porcelain fedwatch.json)" ]; then echo "changed=false" >> "$GITHUB_OUTPUT"; exit 0; fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add fedwatch.json && git commit -m "chore: update December 2026 FedWatch"
+          git add fedwatch.json && git commit -m "chore: update December 2026 FedWatch status"
           BRANCH="automation/update-fedwatch-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
           git push origin "HEAD:$BRANCH"
           echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
@@ -46,5 +50,5 @@ jobs:
           github-token: "${{ secrets.GITHUB_TOKEN }}"
           script: |
             const { owner, repo } = context.repo;
-            const pr = await github.rest.pulls.create({owner,repo,head:process.env.UPDATE_BRANCH,base:'main',title:'chore: update December 2026 FedWatch',body:'Automated CME FedWatch daily snapshot.'});
+            const pr = await github.rest.pulls.create({owner,repo,head:process.env.UPDATE_BRANCH,base:'main',title:'chore: update December 2026 FedWatch status',body:'Automated CME FedWatch daily check. Records an official snapshot when available; otherwise marks the source as 확인 필요 instead of presenting stale probabilities as current.'});
             await github.graphql('mutation($id:ID!){enablePullRequestAutoMerge(input:{pullRequestId:$id,mergeMethod:SQUASH}){pullRequest{number}}}',{id:pr.data.node_id});
