@@ -206,6 +206,13 @@ const MACRO_SEED = [
   { id: 'macro_tariff', ticker: 'MACRO', name: '미국 관세 무역협상', mkt: 'KOSPI' },
   { id: 'macro_ai_capex', ticker: 'MACRO', name: 'AI 데이터센터 capex', mkt: 'KOSPI' },
 ];
+// 사용자가 고정한 핵심 축은 일시적인 헤드라인 변화와 무관하게 유지한다.
+// 매일 RSS를 다시 조회하므로 각 토픽의 관련 기사는 지속적으로 최신화된다.
+const PINNED_MACRO_TOPICS = [
+  { id: 'macro_us_inflation_rates', ticker: 'MACRO', name: '美 물가·금리 불확실성', q: 'US CPI PCE inflation Federal Reserve rate cuts', mkt: 'US', ax: 'rates' },
+  { id: 'macro_geopolitical_energy', ticker: 'MACRO', name: '지정학적 에너지 리스크', q: 'Middle East Iran Hormuz oil energy geopolitical risk', mkt: 'US', ax: 'energy' },
+  { id: 'macro_china_ai_export_controls', ticker: 'MACRO', name: '중국 AI 부상·반도체 수출통제', q: 'China AI semiconductor export controls DeepSeek CXMT', mkt: 'US', ax: 'china' },
+];
 const MACRO_N = 3;
 const DISCOVERY_FEEDS = [
   'https://news.google.com/rss/search?q=' + encodeURIComponent('증시 when:2d') + '&hl=ko&gl=KR&ceid=KR:ko',
@@ -282,7 +289,7 @@ async function discoverMacroTopics(prevTopics) {
   }
   console.log(`macro 발굴: 헤드라인 ${heads.length}건 수집`);
   if (!key || heads.length < 5) {
-    const fb = (prevTopics && prevTopics.length) ? prevTopics : MACRO_SEED;
+    const fb = [...PINNED_MACRO_TOPICS, ...((prevTopics && prevTopics.length) ? prevTopics : MACRO_SEED)];
     console.log('macro 발굴 스킵 → 폴백 주제 사용');
     return stabilizeTopics(fb, prevTopics);
   }
@@ -299,12 +306,12 @@ async function discoverMacroTopics(prevTopics) {
       mkt: x.ko === false ? 'US' : 'KOSPI',
     })).filter((x) => x.q);
     if (!topics.length) throw new Error('macro 주제 0건');
-    const fixed = stabilizeTopics(topics, prevTopics);
-    console.log('macro 트렌딩 주제: ' + fixed.map((t) => `${t.name}[${t.ax}](${t.q})`).join(' · '));
+    const fixed = stabilizeTopics([...PINNED_MACRO_TOPICS, ...topics], prevTopics);
+    console.log('macro 고정·트렌딩 주제: ' + fixed.map((t) => `${t.name}[${t.ax}](${t.q})`).join(' · '));
     return fixed;
   } catch (e) {
     console.log(`macro 발굴 실패(${e.message}) → 폴백 주제 사용`);
-    return stabilizeTopics((prevTopics && prevTopics.length) ? prevTopics : MACRO_SEED, prevTopics);
+    return stabilizeTopics([...PINNED_MACRO_TOPICS, ...((prevTopics && prevTopics.length) ? prevTopics : MACRO_SEED)], prevTopics);
   }
 }
 
