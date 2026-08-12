@@ -2,11 +2,16 @@ name: Update global CPI
 
 on:
   schedule:
-    - cron: '23 22 3,18 * *'   # 매월 3·18일 07:23 KST — OECD 월 갱신 반영(여유분 2회)
-  workflow_dispatch: {}        # allow manual run from the Actions tab
+    - cron: '35 22 * * *'      # 매일 07:35 KST — 발표일 직후 자동 반영, 평소에는 no-op
+  workflow_dispatch: {}
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/update-cpi.yml'
 
 permissions:
   contents: write
+  pull-requests: write
 
 concurrency:
   group: update-cpi
@@ -23,24 +28,25 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - name: Fetch latest CPI (OECD)
+      - name: Fetch latest CPI series
         run: node scripts/fetch-cpi.mjs
-      - name: Commit & push if changed (rebase-safe)
+      - name: Sync official US CPI release across consumers
+        run: node scripts/sync-us-cpi-release.mjs
+      - name: Create PR and merge if changed
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          FILES="cpi.json"
+          FILES="cpi.json calendar.json pulse.json changelog.js"
           if [ -z "$(git status --porcelain $FILES)" ]; then
-            echo "No change in $FILES."; exit 0
+            echo "No CPI changes."; exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          BRANCH="automation/update-cpi-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          git checkout -b "$BRANCH"
           git add $FILES
-          git commit -m "chore: update global CPI (OECD)"
-          for i in 1 2 3 4 5; do
-            if git pull --rebase --autostash origin main \
-               && git push origin HEAD:main; then
-              echo "pushed on attempt $i"; exit 0
-            fi
-            git rebase --abort 2>/dev/null || true
-            echo "push attempt $i lost the race; backing off"; sleep $(( RANDOM % 6 + 3 ))
-          done
-          echo "::error::push failed after 5 attempts"; exit 1
+          git commit -m "chore: sync official CPI release"
+          git push -u origin "$BRANCH"
+          PR_URL=$(gh pr create --base main --head "$BRANCH" --title "chore: sync official CPI release" --body "BLS 공식 CPI 발표를 CPI 시계열, 01 캘린더, 시장 맥락, 변경 이력에 동기화합니다. 자동화가 main 보호규칙을 우회하지 않고 PR 경로만 사용합니다.")
+          echo "Created $PR_URL"
+          gh pr merge "$PR_URL" --squash --auto --delete-branch
