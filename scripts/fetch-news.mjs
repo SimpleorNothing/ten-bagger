@@ -209,6 +209,7 @@ const MACRO_SEED = [
 // 사용자가 고정한 핵심 축은 일시적인 헤드라인 변화와 무관하게 유지한다.
 // 매일 RSS를 다시 조회하므로 각 토픽의 관련 기사는 지속적으로 최신화된다.
 const PINNED_MACRO_TOPICS = [
+  { id: 'macro_ai_infra_financing', ticker: 'MACRO', name: 'AI 인프라 금융화·GPU 담보', q: 'AI infrastructure financing GPU collateral leasing debt securitization circular financing', mkt: 'US', ax: 'ai_financing' },
   { id: 'macro_us_inflation_rates', ticker: 'MACRO', name: '美 물가·금리 불확실성', q: 'US CPI PCE inflation Federal Reserve rate cuts', mkt: 'US', ax: 'rates' },
   { id: 'macro_geopolitical_energy', ticker: 'MACRO', name: '지정학적 에너지 리스크', q: 'Middle East Iran Hormuz oil energy geopolitical risk', mkt: 'US', ax: 'energy' },
   { id: 'macro_china_ai_export_controls', ticker: 'MACRO', name: '중국 AI 부상·반도체 수출통제', q: 'China AI semiconductor export controls DeepSeek CXMT', mkt: 'US', ax: 'china' },
