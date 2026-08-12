@@ -2569,7 +2569,7 @@ const RIVERS=[
   note:'하이퍼스케일러 임대(AWS·Azure·GCP)는 기본값으로 선반영. 강물의 머리는 <b style="color:var(--dawn)">뉴클라우드·주권 AI</b>를 지나 <b style="color:var(--nascent)">GPU 담보 파이낸싱</b>으로 — 컴퓨트의 소유·자본이 다음 축.',
   nodes:[
    {code:'HS',label:'하이퍼스케일러 임대',sub:'AWS·Azure·GCP',stage:'성숙',pos:.88,why:'클라우드 임대 = 기본값, 선반영',plays:'MSFT · AMZN · GOOGL (1차·컨센서스)'},
-   {code:'네오',label:'뉴클라우드',sub:'GPU 전용 클라우드',stage:'가속',pos:.62,why:'GPU 순수 노출 — 하이퍼스케일러 캐파 부족분 흡수. 26.6월 상장 양극화: NBIS ATH·+600%(γ 잔존) vs CRWV ATH−42% 냉각',plays:'CoreWeave · Nebius · Crusoe · Lambda · xAI Colossus(SPCX·앤쓰로픽 임대)'},
+   {code:'네오',label:'뉴클라우드',sub:'GPU 전용 클라우드',stage:'가속',pos:.62,why:'GPU 순수 노출 — 하이퍼스케일러 캐파 부족분 흡수. 자금조달 구조 양극화: NBIS는 고객 선불·현금, CRWV는 GPU 담보 부채, IREN은 전력·부지+희석/파이낸싱. 매크로 게이트 잠김 → 전부 관측',plays:'Nebius · CoreWeave · IREN · Crusoe · Lambda · xAI Colossus(SPCX·앤쓰로픽 임대)'},
    {code:'주권',label:'주권 AI',sub:'국가·소버린',stage:'초입',pos:.42,why:'국가별 자국 컴퓨트 구축 — NVDA가 지목한 신수요축(ACIE 소버린 +80%)',plays:'G42 · Humain(사우디) · Stargate UAE · 통신사 AI클라우드'},
    {code:'자본',label:'GPU 파이낸싱',sub:'SPV·GPU 담보',stage:'초입',pos:.28,why:'빌드아웃 = 자본 게임 — GPU 담보대출·SPV·프라이빗 크레딧',plays:'프라이빗 크레딧(Blackstone 등) · CoreWeave형 GPU 담보 채권 · SPV'},
    {code:'중립',label:'중립 코로케이션',sub:'뉴트럴 호스트',stage:'초입',pos:.18,why:'뉴클라우드도 부지·전력은 코로케이션에 의존. SoftBank가 DBRG를 $16/주에 인수($4B·H2 26 상폐) — 강물 3 내부 통합 진행',plays:'DLR · EQIX · DBRG(SoftBank 인수)'},
@@ -2625,7 +2625,7 @@ const RIVER_CHAINS={
   'HS':[
    {n:'하이퍼스케일러 capex',why:'클라우드 임대=기본값, 선반영',cos:[['MSFT','성숙'],['AMZN','성숙'],['GOOGL','성숙']],stage:'성숙'}],
   '네오':[
-   {n:'뉴클라우드(상장)',why:'하이퍼스케일러 캐파 부족분 흡수 — GPU 순수 노출. 26.6월 양극화: NBIS ATH 부근·1년 +600%(저점 $34.7→~$242)·Q1 매출 +684%·Citi 목표가 +70% = 추정 리비전이 주가를 앞서 γ 잔존(가속 유지·단 FV +189% 프리미엄으로 S5 리셋 리스크). CRWV는 ATH($187) 대비 −42%·1년 보합·마진압박·다운그레이드·목표가(~$81) 주가 하회 = 식는 중(가속 하단·상대 공포쪽)',cos:[['Nebius NBIS·~$242·+600%·ATH','가속'],['CoreWeave CRWV·~$109·ATH−42% 냉각','가속']],stage:'가속'},
+   {n:'뉴클라우드(상장)',why:'2Q26 기준 NBIS는 매출 $582M(+454%)·조정 EBITDA $236M, 현금 $8.04B와 고객 선불 구조로 조달 부담이 상대적으로 낮아 관측 1순위. CRWV는 backlog $104B이나 GPU 담보 부채·이자비용 리스크를 정면 부담해 베이스 재형성 관측. IREN은 BTC 채굴 유산이 남았지만 전력·부지 보유형으로 구분 — 매출 미스·희석 위험을 확인. 모두 GPU 수익창보다 긴 임대/조달 듀레이션과 Meta Compute 같은 수요측 통합 리스크를 공유하며, 매크로 게이트 잠김 동안 신규 편입은 보류.',cos:[['Nebius NBIS·2Q26 실적 비트·관측 1순위','가속'],['CoreWeave CRWV·backlog $104B·베이스 관측','가속'],['IREN·전력·부지 보유형·실적/희석 관측','초입']],stage:'가속'},
    {n:'뉴클라우드(비상장)',why:'IPO 파이프라인 — Lambda($59억, 26H2 추진설)',cos:[['Lambda·비상장','초입'],['Crusoe·비상장','초입'],['Nscale·비상장','초입']],stage:'초입'}],
   '주권':[
    {n:'주권 AI 칩 공급사',why:'걸프 $2조 — 빌더는 국부/비상장, 칩 공급사가 상장 수혜',cos:[['NVDA','가속'],['AMD(Humain 1GW JV)','가속']],stage:'가속',cand:'amd'},
@@ -2705,6 +2705,7 @@ const RV_PX=[
  {t:'GOOGL',id:'googl',name:'알파벳',          mkt:'NASDAQ', stage:'성숙'},
  {t:'NBIS', id:'nbis', name:'Nebius',        mkt:'NASDAQ', stage:'가속'},
  {t:'CRWV', id:'crwv', name:'CoreWeave',     mkt:'NASDAQ', stage:'가속'},
+ {t:'IREN', id:'iren', name:'IREN',          mkt:'NASDAQ', stage:'초입'},
  {t:'CSCO', id:'csco', name:'시스코',          mkt:'NASDAQ', stage:'가속'},
  {t:'ORCL', id:'orcl', name:'오라클',          mkt:'NYSE',   stage:'가속'},
  {t:'9984', id:'sb',   name:'소프트뱅크',       mkt:'TSE',    stage:'초입'},
