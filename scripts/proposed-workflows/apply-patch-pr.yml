@@ -1,0 +1,108 @@
+name: Apply index.html patch (PR 경로)
+
+# 현행 .github/workflows/apply-patch.yml 의 교체 제안본.
+#
+# 문제: main 룰셋이 "Changes must be made through a pull request" 를 강제하면서
+#       현행 워크플로의 `git push origin HEAD:main` 이 GH013 으로 거부된다.
+#       → patches/*.b64 가 머지돼도 본문이 반영되지 않는다(2026-08-13 실측, run 31704911169).
+#
+# 해법: main 에 직접 push 하지 않고 claude/* 브랜치를 만들어 PR 을 연다.
+#       claude-pr-gate.yml 이 base=main·head=claude/* PR 을 validate → 자동 squash 머지하므로
+#       머지까지 무인으로 이어지고, 머지 push 가 deploy.yml 을 정상 트리거한다
+#       (그래서 이 워크플로에는 wrangler deploy 스텝이 없다 — 현행본과의 차이점).
+#
+# 적용: 이 파일을 .github/workflows/apply-patch.yml 로 덮어쓴다(운영자 수동 · App 은 403).
+
+on:
+  push:
+    branches: [main]
+    paths: ['patches/*.b64']
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: apply-patch
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Apply new patches
+        id: apply
+        run: |
+          set -e
+          mkdir -p patches/applied
+          # git pathspec 의 '*' 는 '/' 도 매칭하므로 'patches/*.b64' 가 이미 적용·보관된
+          # patches/applied/*.b64 까지 잡는다. applied/ 는 재처리 대상이 아니므로 제외한다.
+          CHANGED=$(git diff --name-only HEAD^ HEAD -- 'patches/*.b64' ':(exclude)patches/applied/*' 2>/dev/null || true)
+          # FALLBACK=1 은 push diff 로 새 패치를 못 찾아 patches/*.b64 전체를 훑는 경우(주로 수동 dispatch).
+          # 이때 잡히는 건 이미 적용됐으나 applied/ 로 옮겨지지 않은 '잔여 패치' 일 수 있으므로,
+          # 적용 불가 패치를 실패시키지 않고 applied/ 로 보관만 해 재리스트를 막는다.
+          FALLBACK=0
+          if [ -z "$CHANGED" ]; then CHANGED=$(ls patches/*.b64 2>/dev/null || true); FALLBACK=1; fi
+          if [ -z "$CHANGED" ]; then echo "no new patch"; echo "changed=0" >> "$GITHUB_OUTPUT"; exit 0; fi
+          for B in $CHANGED; do
+            case "$B" in patches/applied/*) continue;; esac  # 보관 패치는 재적용 금지
+            [ -f "$B" ] || continue
+            echo "== checking $B =="
+            base64 -d "$B" > /tmp/p.patch
+            if ! git apply --check /tmp/p.patch 2>/dev/null; then
+              if [ "$FALLBACK" = "1" ]; then
+                # 수동 dispatch 의 폴백에서 잡힌 적용 불가/기적용 잔여 패치 → 실패 대신 보관 후 계속
+                echo "skip stale (does not apply), archiving: $B"
+                git mv "$B" "patches/applied/$(basename "$B")"
+                continue
+              fi
+              # push 로 새로 들어온 패치가 적용 안 되면 원자적으로 중단(손상 없음)
+              echo "::error::patch does not apply: $B"; exit 1
+            fi
+            echo "== applying $B =="
+            git apply /tmp/p.patch
+            git mv "$B" "patches/applied/$(basename "$B")"
+          done
+          echo "changed=1" >> "$GITHUB_OUTPUT"
+
+      - name: Validate inline script syntax
+        run: |
+          node -e 'const fs=require("fs");const s=fs.readFileSync("index.html","utf8");const m=[...s.matchAll(/<script>([\s\S]*?)<\/script>/g)];m.forEach((x,i)=>fs.writeFileSync("/tmp/s"+i+".js",x[1]));console.log("script blocks:",m.length);'
+          for f in /tmp/s*.js; do node --check "$f"; done
+
+      - name: Open pull request (main 직접 push 금지 — 룰셋 준수)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then echo "nothing to commit"; exit 0; fi
+
+          # 게이트 자동 머지 대상이 되려면 head 가 claude/* 여야 한다(claude-pr-gate.yml).
+          BRANCH="claude/apply-patch-${GITHUB_RUN_ID}"
+          git checkout -b "$BRANCH"
+          git commit -m "chore: apply index.html patch via patches/*.b64 (≤200KB MCP 파이프라인)"
+
+          for i in 1 2 3 4 5; do
+            if git push -u origin "$BRANCH"; then echo "pushed on attempt $i"; break; fi
+            sleep $(( RANDOM % 6 + 3 ))
+            if [ "$i" = "5" ]; then echo "::error::push failed after 5 attempts"; exit 1; fi
+          done
+
+          gh pr create \
+            --head "$BRANCH" \
+            --base main \
+            --title "chore: apply index.html patch (${BRANCH#claude/})" \
+            --body "\`patches/*.b64\` 를 저장소 안에서 적용한 자동 PR입니다. claude-pr-gate 검증 통과 시 자동 squash 머지되고, 머지 push 가 deploy.yml 을 트리거합니다."
