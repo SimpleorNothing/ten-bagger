@@ -9,6 +9,7 @@
     thread:'2026-08-01', decision:'2026-08-01', brief:'2026-08-01', memo:'2026-08-01'
   };
   var MKT_CHANGELOG=[
+    {d:'2026-08-13',t:'사이트 변경 이력에 커밋 이력 자동 보충을 복구 — 수기 등록이 누락돼도 이후 변경이 목록에 자동으로 채워지고, 시세·뉴스 갱신 같은 내부 작업 커밋은 제외'},
     {d:'2026-08-13',t:'01 SIGNAL_LOG에 TSMC 8/11 이사회 자본전용 $294.4억 승인 반영 — 첨단패키징 배분·CY26 CAPEX 가이던스 상향을 L4 소부장·L2 상류 수요 관측으로 기록(숫자 파일 불변)'},
     {d:'2026-08-13',t:'01 미국 CPI 7월분 공식값 반영 — 헤드라인 전월비 +0.1%·전년비 +3.4%, 근원 전월비 +0.2%·전년비 +2.5%; CPI 시계열·캘린더·시장 맥락 동기화'},
     {d:'2026-08-08',t:'03 전문가 원탁 참고자료에 텍스트·캡처 이미지 붙여넣기를 추가하고, 캡처의 표·그래프·문구를 읽어 토론 자료로 첨부'},
@@ -68,16 +69,50 @@
     {d:'2026-07-12',t:'03 관점과 정보 얻기 — 관점 등급(관찰→확신) 자동 승격 도입'}
   ];
   // main의 커밋 이력을 GitHub API에서 읽어 모든 화면의 변경 이력에 자동 합산한다.
-  // 수동 배열은 과거 이력 보존용이며, 이후 머지되는 변경은 별도 등록 없이 자동 표시된다.
+  // 수기 등록(MKT_CHANGELOG)이 정본이고, 이건 등록 누락을 메우는 안전망이다.
+  // OPS §3 「사용자 향 변경만 기록」 규율에 맞춰 크론·내부 작업 커밋은 AUTO_SKIP으로 배제한다.
   var AUTO_READY=false;
+  // 크론·내부 작업 커밋(conventional commit 타입) — 사용자 향 변경이 아니라 이력에 노출하지 않는다.
+  // 예: 'chore: update stock prices', 'ci: ...', 'docs: ...'
+  var AUTO_SKIP=/^(chore|ci|build|docs|test|style|refactor|perf|revert)(\([^)]*\))?!?:/i;
+  // 머지·리버트 커밋 제목도 사용자 향 정보가 아니다.
+  var AUTO_NOISE=/^(Merge |Revert )/;
+  // 수기 등록 정본의 최신 날짜. 자동 합산은 이 날짜를 "넘는" 커밋만 메운다.
+  // 같은 날 수기 항목이 있다면 그 날은 이미 사람이 기술했다는 뜻이므로 커밋 제목을 겹쳐 싣지 않는다
+  // (안 걸면 수기 1건 + 그 변경의 커밋들이 같은 날짜에 중복 표시된다).
+  var CURATED_MAX=MKT_CHANGELOG.reduce(function(m,h){return h.d>m?h.d:m;},'');
+  // 표시용 정리: 커밋 제목의 conventional 타입 프리픽스만 떼어낸다.
+  // 'feat(changelog): 본문 (#964)' → '본문 (#964)'. PR 번호는 추적용으로 남긴다.
+  // [a-z]+ 이므로 '01 시장…' 같은 숫자 시작 제목이나 한글 제목은 건드리지 않는다.
+  function autoTitle(msg){
+    return String(msg||'').split('\n')[0].trim().replace(/^[a-z]+(\([^)]*\))?!?:\s*/i,'').trim();
+  }
   function loadAutoHistory(){
     if(AUTO_READY)return;AUTO_READY=true;
     fetch('https://api.github.com/repos/SimpleorNothing/ten-bagger/commits?sha=main&per_page=100',{headers:{'Accept':'application/vnd.github+json'}})
-      .then(function(r){return r.ok?r.json():[];}).then(function(rows){
+      .then(function(r){
+        if(!r.ok)throw new Error('commits HTTP '+r.status);
+        return r.json();
+      }).then(function(rows){
         if(!Array.isArray(rows))return;
-        rows.forEach(function(x){var c=x&&x.commit||{},d=(c.author&&c.author.date||'').slice(0,10),t=String(c.message||'').split('\\n')[0].trim();if(d&&t&&!MKT_CHANGELOG.some(function(h){return h.d===d&&h.t===t;}))MKT_CHANGELOG.push({d:d,t:t});});
-        renderAll();
-      }).catch(function(){});
+        var added=0;
+        rows.forEach(function(x){
+          var c=x&&x.commit||{};
+          var d=(c.author&&c.author.date||'').slice(0,10);
+          var head=String(c.message||'').split('\n')[0].trim();
+          if(!d||!head)return;
+          if(d<=CURATED_MAX)return;                       // 수기 정본이 커버하는 날짜는 건너뛴다
+          if(AUTO_SKIP.test(head)||AUTO_NOISE.test(head))return;
+          var t=autoTitle(c.message);
+          if(!t)return;
+          if(MKT_CHANGELOG.some(function(h){return h.d===d&&h.t===t;}))return;
+          MKT_CHANGELOG.push({d:d,t:t});added++;
+        });
+        if(added)renderAll();
+      }).catch(function(e){
+        // 실패를 빈 배열로 삼키면 이력 누락이 무증상으로 남는다(2026-08-13 원인) — 콘솔에는 남긴다.
+        if(window.console&&console.warn)console.warn('[changelog] 커밋 이력 자동 합산 실패:',(e&&e.message)||e);
+      });
   }
   var CSS='.mkt-upd{position:absolute;top:2px;right:0;margin:0;max-width:min(52vw,440px);'
     +'white-space:nowrap;flex-wrap:nowrap;z-index:3}'
