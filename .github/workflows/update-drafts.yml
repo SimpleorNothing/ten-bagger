@@ -3,10 +3,11 @@ name: Derive signal drafts
 on:
   schedule:
     - cron: '45 21 * * *'   # 06:45 KST · 1일 1회 (update-news 8분 뒤)
-  workflow_dispatch: {}      # 수동 실행도 가능 (첫 실행 권장)
+  workflow_dispatch: {}
 
 permissions:
   contents: write
+  pull-requests: write
 
 concurrency:
   group: derive-drafts
@@ -25,22 +26,31 @@ jobs:
           node-version: '20'
       - name: Derive signal drafts from news.json
         run: node scripts/derive-drafts.mjs
-      - name: Commit & push if changed (rebase-safe)
+      - name: Create PR and merge if changed
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           FILE="signal_drafts.json"
           if [ -z "$(git status --porcelain "$FILE")" ]; then
-            echo "No change in $FILE."; exit 0
+            echo "No change in $FILE."
+            exit 0
           fi
+
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          BRANCH="automation/update-drafts-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          git switch -c "$BRANCH"
           git add "$FILE"
           git commit -m "chore: derive signal drafts from news"
-          for i in 1 2 3 4 5; do
-            if git pull --rebase --autostash origin main \
-               && git push origin HEAD:main; then
-              echo "pushed on attempt $i"; exit 0
-            fi
-            git rebase --abort 2>/dev/null || true
-            echo "push attempt $i lost the race; backing off"; sleep $(( RANDOM % 6 + 3 ))
-          done
-          echo "::error::push failed after 5 attempts"; exit 1
+          git push origin "$BRANCH"
+
+          PR_URL=$(gh pr create \
+            --base main \
+            --head "$BRANCH" \
+            --title "chore: derive signal drafts from news" \
+            --body "Automated daily signal draft refresh. Uses PR-only writes to comply with the protected main branch.")
+
+          echo "Created $PR_URL"
+          gh pr merge "$PR_URL" --squash --delete-branch --auto || \
+            gh pr merge "$PR_URL" --squash --delete-branch
