@@ -1,0 +1,29 @@
+name: Auto-open automation PR
+
+on:
+  push:
+    branches:
+      - 'claude/automation-apply-patch-*'
+      - 'claude/automation-update-fedwatch-*'
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  open-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Open PR when none exists
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          BRANCH: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          EXISTING=$(gh pr list --state open --head "$BRANCH" --base main --json number --jq '.[0].number // empty')
+          if [ -n "$EXISTING" ]; then
+            echo "PR #$EXISTING already open for $BRANCH"
+            exit 0
+          fi
+          gh pr create --base main --head "$BRANCH" --title "chore: automated data update" --body "Automated update routed through the protected-main PR path. Claude PR Gate validates and auto-merges this branch."
