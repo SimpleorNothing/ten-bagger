@@ -1,13 +1,13 @@
 name: Sync holdings from Drive
 
 # 매주 토요일 자산현황 업데이트 후 자동 동기화(22:00 KST) + Actions 탭 수동 실행.
-# holdings.json을 OPS §9-2(수동) → §9-1(자동 cron)로 승격.
+# 최신 토요일 엑셀을 보유종목·평가금액·보유비중의 단일 기준으로 사용한다.
 on:
   schedule:
-    - cron: '0 13 * * 6'              # 토 22:00 KST 안전망(유지)
+    - cron: '0 13 * * 6'
   workflow_dispatch: {}
   repository_dispatch:
-    types: [drive-holdings-updated]   # ← Apps Script가 쏘는 이벤트
+    types: [drive-holdings-updated]
 
 permissions:
   contents: write
@@ -30,10 +30,22 @@ jobs:
           node-version: '20'
       - name: Install deps
         run: npm i googleapis xlsx --no-save
-      - name: Build holdings.json from 자산현황
+      - name: Build holdings.json from latest 자산현황 Excel
         run: node scripts/sync-holdings.mjs
         env:
-          GDRIVE_SA_KEY: ${{ secrets.GDRIVE_SA_KEY }}   # 서비스계정 JSON 전체
+          GDRIVE_SA_KEY: ${{ secrets.GDRIVE_SA_KEY }}
+      - name: Validate latest Saturday Excel authority
+        run: |
+          node - <<'NODE'
+          const fs = require('fs');
+          const h = JSON.parse(fs.readFileSync('holdings.json','utf8'));
+          const d = String(h.qtyAsOf || '');
+          if (!/^\d{4}-\d{2}-\d{2}$/.test(d)) throw new Error('holdings.qtyAsOf missing/invalid: ' + d);
+          if (new Date(d + 'T00:00:00Z').getUTCDay() !== 6) throw new Error('holdings source is not Saturday Excel: ' + d);
+          if (!(Number(h.total) > 0)) throw new Error('holdings.total invalid');
+          if (!Array.isArray(h.detail) || !h.detail.length) throw new Error('holdings.detail empty');
+          console.log('Saturday holdings authority verified:', d, 'total=', h.total);
+          NODE
       - name: Commit and push update branch
         id: commit
         run: |
@@ -47,8 +59,8 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add "$FILE"
-          git commit -m "chore: sync holdings.json from 자산현황 (auto)"
-          BRANCH="claude/automation-sync-holdings-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          git commit -m "chore: sync holdings.json from latest Saturday 자산현황"
+          BRANCH="automation-sync-holdings-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
           git push origin "HEAD:$BRANCH"
           echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
           echo "changed=true" >> "$GITHUB_OUTPUT"
@@ -65,8 +77,8 @@ jobs:
             const { owner, repo } = context.repo;
             const pr = await github.rest.pulls.create({
               owner, repo, head: branch, base: 'main',
-              title: 'chore: sync holdings.json from 자산현황 (auto)',
-              body: 'Automated Drive holdings refresh. This PR is created because main is protected and direct pushes are rejected.',
+              title: 'chore: sync holdings.json from latest Saturday 자산현황',
+              body: 'Latest Saturday Excel is the authoritative holdings source. This workflow validates qtyAsOf is Saturday before creating the protected-main PR.',
             });
             try {
               await github.graphql(`
