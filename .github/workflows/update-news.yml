@@ -2,16 +2,13 @@ name: Update news feed
 
 on:
   schedule:
-    # GitHub Actions 스케줄러는 정시(0분) 부하로 누락이 잦음 → 정시 회피 + 짧은 창에 다중 트리거.
-    # 가드 스텝이 "최근 6h 내 이미 갱신됐으면 스킵"하므로 세션당 1회 성격은 유지(중복 수집 없음).
-    # 아침·저녁 세션은 ~12h 간격이라 가드(6h)에 걸리지 않고 각 세션 첫 트리거가 실제 수집.
-    - cron: '12,42 21 * * *'   # 06:12·06:42 KST — 미 장 마감 (아침 세션; 시세 06:37과 분산)
-    - cron: '12 22 * * *'      # 07:12 KST — 아침 백업 (앞 트리거 누락 시 흡수용)
-    - cron: '12,42 9 * * *'    # 18:12·18:42 KST — 한국 장 마감 (저녁 세션; 시세 18:37과 분산)
-    - cron: '12 10 * * *'      # 19:12 KST — 저녁 백업 (앞 트리거 누락 시 흡수용)
-  workflow_dispatch: {}      # 수동 실행 (가드 우회 — 첫 실행/강제 재수집용)
+    - cron: '12,42 21 * * *'
+    - cron: '12 22 * * *'
+    - cron: '12,42 9 * * *'
+    - cron: '12 10 * * *'
+  workflow_dispatch: {}
   push:
-    paths: ['.github/workflows/update-news.yml'] # 자동화 수정 또는 Gemini 키·모델 전환 직후 1회 즉시 최신화
+    paths: ['.github/workflows/update-news.yml']
 
 permissions:
   contents: write
@@ -29,60 +26,42 @@ jobs:
         with:
           ref: main
           fetch-depth: 0
-      - name: Guard - 최근에 이미 갱신됐으면 스킵 (수동 실행은 우회)
+      - name: Guard - 최근에 이미 갱신됐으면 스킵
         id: guard
         env:
           MANUAL: ${{ github.event_name == 'workflow_dispatch' }}
           FORCE_REFRESH: ${{ github.event_name == 'push' }}
         run: |
           if [ "$MANUAL" = "true" ] || [ "$FORCE_REFRESH" = "true" ]; then
-            echo "수동 실행 또는 워크플로 수정 push → 가드 우회, 진행"
-            echo "skip=false" >> "$GITHUB_OUTPUT"
-            exit 0
+            echo "skip=false" >> "$GITHUB_OUTPUT"; exit 0
           fi
-          DECISION=$(node -e "try{const d=require('./news.json');const ageH=(Date.now()-new Date(d.asOf).getTime())/3600000;process.stderr.write('asOf='+d.asOf+' age='+ageH.toFixed(2)+'h\n');process.stdout.write(ageH<6?'skip':'run')}catch(e){process.stderr.write('no valid asOf: '+e.message+'\n');process.stdout.write('run')}")
-          if [ "$DECISION" = "skip" ]; then
-            echo "이번 사이클(6h 이내) 이미 갱신됨 → 후속 트리거 스킵"
-            echo "skip=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "미갱신(또는 asOf 없음) → 진행"
-            echo "skip=false" >> "$GITHUB_OUTPUT"
-          fi
+          DECISION=$(node -e "try{const d=require('./news.json');const ageH=(Date.now()-new Date(d.asOf).getTime())/3600000;process.stdout.write(ageH<6?'skip':'run')}catch(e){process.stdout.write('run')}")
+          if [ "$DECISION" = "skip" ]; then echo "skip=true" >> "$GITHUB_OUTPUT"; else echo "skip=false" >> "$GITHUB_OUTPUT"; fi
       - uses: actions/setup-node@v4
         if: steps.guard.outputs.skip != 'true'
         with:
           node-version: '20'
-      - name: Fetch latest news
+      - name: Fetch raw news without paid LLM API
         if: steps.guard.outputs.skip != 'true'
-        env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: node scripts/fetch-news.mjs
-      - name: Synthesize market pulse
-        if: steps.guard.outputs.skip != 'true'
-        env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-        run: node scripts/fetch-pulse.mjs
-      - name: Create or update news refresh PR
+      - name: Create or update raw-news refresh PR
         id: cpr
         if: steps.guard.outputs.skip != 'true'
         uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: "chore: update news feed + digest + pulse"
+          commit-message: "chore: update raw news feed"
           branch: automation/update-news
           branch-suffix: timestamp
           delete-branch: true
-          title: "chore: update news feed + digest + pulse"
+          title: "chore: update raw news feed"
           body: |
-            Scheduled news, digest, archive and market-pulse refresh.
-            This PR is created because `main` is protected from direct workflow pushes.
+            Deterministic RSS/news refresh only. Paid LLM scoring, summarization and market-pulse synthesis are intentionally disabled and handled by the ChatGPT routine.
           add-paths: |
             news.json
-            news_digest.json
             news_archive.json
             archive
-            pulse.json
-      - name: Enable auto-merge for news refresh PR
+      - name: Enable auto-merge for raw-news refresh PR
         if: steps.cpr.outputs.pull-request-number
         uses: peter-evans/enable-pull-request-automerge@v3
         with:
