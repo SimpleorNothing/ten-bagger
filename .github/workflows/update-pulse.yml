@@ -1,68 +1,14 @@
-# update-pulse.yml — 「시장 맥박」 동인 브리핑(pulse.json) 재합성
-# ─────────────────────────────────────────────────────────────
-# 2026-07-15: 자동 스케줄 은퇴 → 맥박 합성을 update-news.yml 에 편승(뉴스 세션마다 1일 2회 재합성).
-#             검증 안 된 별도 크론 대신 검증된 크론에 편승 → 침묵 실패 위험 제거(OPS §4 편승 패턴).
-# 여기 남은 workflow_dispatch 는 전시 급변 시 '지금 당장 맥박만' 강제 재합성하는 escape hatch.
-# 전제: repo secret ANTHROPIC_API_KEY. pulse.json 은 deploy.yml paths-ignore 밖 → 커밋 시 자동 배포.
-
 name: Update market pulse
 
 on:
-  workflow_dispatch: {}     # 수동(가드 우회 — 전시 급변 시 강제 재합성). 정기 갱신은 update-news 편승.
+  workflow_dispatch: {}
 
 permissions:
-  contents: write
-
-concurrency:
-  group: update-pulse
-  cancel-in-progress: false
+  contents: read
 
 jobs:
-  pulse:
+  disabled:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: main
-          fetch-depth: 0
-      - name: Guard - 최근 3h 내 이미 합성됐으면 스킵 (수동은 우회)
-        id: guard
-        env:
-          MANUAL: ${{ github.event_name == 'workflow_dispatch' }}
-        run: |
-          if [ "$MANUAL" = "true" ]; then
-            echo "수동 실행 → 가드 우회"; echo "skip=false" >> "$GITHUB_OUTPUT"; exit 0
-          fi
-          DECISION=$(node -e "try{const d=require('./pulse.json');const ageH=(Date.now()-(d.gen||0))/3600000;process.stderr.write('gen age='+ageH.toFixed(2)+'h\n');process.stdout.write(ageH<3?'skip':'run')}catch(e){process.stdout.write('run')}")
-          if [ "$DECISION" = "skip" ]; then
-            echo "3h 이내 합성됨 → 스킵"; echo "skip=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "미합성/노후 → 진행"; echo "skip=false" >> "$GITHUB_OUTPUT"
-          fi
-      - uses: actions/setup-node@v4
-        if: steps.guard.outputs.skip != 'true'
-        with:
-          node-version: '20'
-      - name: Synthesize market pulse
-        if: steps.guard.outputs.skip != 'true'
-        env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-        run: node scripts/fetch-pulse.mjs
-      - name: Commit & push if changed (rebase-safe)
-        if: steps.guard.outputs.skip != 'true'
-        run: |
-          if [ -z "$(git status --porcelain pulse.json)" ]; then
-            echo "No change in pulse.json."; exit 0
-          fi
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add pulse.json
-          git commit -m "chore: update market pulse"
-          for i in 1 2 3 4 5; do
-            if git pull --rebase --autostash origin main && git push origin HEAD:main; then
-              echo "pushed on attempt $i"; exit 0
-            fi
-            git rebase --abort 2>/dev/null || true
-            echo "push attempt $i lost the race; backing off"; sleep $(( RANDOM % 6 + 3 ))
-          done
-          echo "::error::push failed after 5 attempts"; exit 1
+      - name: Disabled by policy
+        run: echo "Paid LLM market-pulse workflow disabled. ChatGPT scheduled routine owns this update."
