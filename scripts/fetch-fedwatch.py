@@ -84,7 +84,6 @@ def fetch_json(url):
 
 
 def globex_to_yahoo(symbol):
-    # pyfedwatch requests symbols like ZQU26. Yahoo commonly exposes CME contracts as ZQU26.CBT.
     if not re.fullmatch(r"ZQ[FGHJKMNQUVXZ]\d{2}", symbol):
         raise ValueError(f"unexpected Fed Funds future symbol: {symbol}")
     return symbol + ".CBT"
@@ -121,13 +120,16 @@ def latest_fred(series_id):
     req = Request(url, headers={"User-Agent": UA})
     with urlopen(req, timeout=30) as r:
         df = pd.read_csv(r)
-    df["DATE"] = pd.to_datetime(df["DATE"])
+    date_col = "DATE" if "DATE" in df.columns else "observation_date" if "observation_date" in df.columns else df.columns[0]
+    if series_id not in df.columns:
+        raise RuntimeError(f"FRED {series_id} column unavailable")
+    df[date_col] = pd.to_datetime(df[date_col], errors="coerce")
     df[series_id] = pd.to_numeric(df[series_id], errors="coerce")
-    df = df.dropna(subset=[series_id])
+    df = df.dropna(subset=[date_col, series_id])
     if df.empty:
         raise RuntimeError(f"FRED {series_id} unavailable")
     row = df.iloc[-1]
-    return float(row[series_id]), row["DATE"].date().isoformat()
+    return float(row[series_id]), row[date_col].date().isoformat()
 
 
 def normalize_ranges(row):
@@ -156,7 +158,6 @@ def normalize_ranges(row):
 def main():
     doc = load_doc()
     try:
-        # Official Fed calendar through pyfedwatch helper.
         fomc_dates = get_fomc_data_fed()
         if TARGET_MEETING not in set(map(str, fomc_dates.index)):
             raise RuntimeError(f"Federal Reserve calendar missing {TARGET_MEETING}")
@@ -167,7 +168,6 @@ def main():
             raise RuntimeError(f"FRED target-range dates differ: {ll_date} vs {ul_date}")
 
         watch_date = today_iso()
-        # Three meetings remain from mid-August 2026 (Sep/Oct/Dec); request four to be robust.
         fw = FedWatch(
             watch_date=watch_date,
             fomc_dates=fomc_dates,
@@ -176,7 +176,6 @@ def main():
         )
         expectations = fw.generate_hike_info(rate_cols=True, watch_rate_range=(ll, ul))
 
-        # MultiIndex: (WatchDate, FOMCDate)
         target_key = None
         for idx in expectations.index:
             if isinstance(idx, tuple) and str(idx[-1]) == TARGET_MEETING:
