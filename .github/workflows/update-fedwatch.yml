@@ -25,7 +25,7 @@ jobs:
         with:
           python-version: '3.11'
       - name: Install PyFedWatch dependencies
-        run: pip install --disable-pip-version-check pyfedwatch==1.2.0 pandas pandas-datareader requests beautifulsoup4
+        run: pip install --disable-pip-version-check pyfedwatch==1.2.0 'pandas<3' pandas-datareader==0.10.0 requests beautifulsoup4
       - name: Compute December 2026 probabilities with PyFedWatch
         run: python3 scripts/fetch-fedwatch.py
       - name: Validate and push automation branch when changed
