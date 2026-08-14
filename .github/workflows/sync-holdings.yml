@@ -46,53 +46,20 @@ jobs:
           if (!Array.isArray(h.detail) || !h.detail.length) throw new Error('holdings.detail empty');
           console.log('Saturday holdings authority verified:', d, 'total=', h.total);
           NODE
-      - name: Commit and push update branch
-        id: commit
+      - name: Create protected-main PR when changed
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           FILE="holdings.json"
           if [ -z "$(git status --porcelain "$FILE")" ]; then
-            echo "No change in $FILE."
-            echo "changed=false" >> "$GITHUB_OUTPUT"
-            exit 0
+            echo "No change in $FILE."; exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          BRANCH="claude/automation-sync-holdings-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          git switch -c "$BRANCH"
           git add "$FILE"
           git commit -m "chore: sync holdings.json from latest Saturday 자산현황"
-          BRANCH="automation-sync-holdings-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
-          git push origin "HEAD:$BRANCH"
-          echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
-          echo "changed=true" >> "$GITHUB_OUTPUT"
-
-      - name: Open PR and enable auto-merge
-        if: steps.commit.outputs.changed == 'true'
-        uses: actions/github-script@v7
-        env:
-          UPDATE_BRANCH: ${{ steps.commit.outputs.branch }}
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const branch = process.env.UPDATE_BRANCH;
-            const { owner, repo } = context.repo;
-            const pr = await github.rest.pulls.create({
-              owner, repo, head: branch, base: 'main',
-              title: 'chore: sync holdings.json from latest Saturday 자산현황',
-              body: 'Latest Saturday Excel is the authoritative holdings source. This workflow validates qtyAsOf is Saturday before creating the protected-main PR.',
-            });
-            try {
-              await github.graphql(`
-                mutation($id: ID!) {
-                  enablePullRequestAutoMerge(input: {pullRequestId: $id, mergeMethod: SQUASH}) {
-                    pullRequest { number }
-                  }
-                }`, { id: pr.data.node_id });
-              core.info(`auto-merge enabled for PR #${pr.data.number}`);
-            } catch (e) {
-              core.warning(`auto-merge could not be enabled: ${e.message}`);
-              try {
-                await github.rest.pulls.merge({ owner, repo, pull_number: pr.data.number, merge_method: 'squash' });
-              } catch (mergeError) {
-                core.warning(`PR #${pr.data.number} remains open for required checks: ${mergeError.message}`);
-              }
-            }
+          git push origin "$BRANCH"
+          gh pr create --base main --head "$BRANCH" --title "chore: sync holdings.json from latest Saturday 자산현황" --body "Latest Saturday Excel is the authoritative holdings source. Claude PR Gate validates qtyAsOf and squash-merges this protected-main PR."

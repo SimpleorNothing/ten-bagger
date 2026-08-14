@@ -2,14 +2,15 @@ name: Update stock prices
 
 on:
   push:
+    branches: [main]
     paths:
       - 'index.html'
       - 'scripts/fetch-prices.mjs'
   schedule:
-    - cron: '5 21 * * *'    # 06:05 KST 예약 → 미장 마감 데이터 반영
-    - cron: '35 21 * * *'   # 06:35 KST 재시도 → 예약 지연·야후 마감 캔들 지연 방어
-    - cron: '52 7 * * *'    # 16:52 KST 예약 → 실측지연 ~98분 → ~18:30 KST 완료 (한국 장마감 15:30 이후)
-  workflow_dispatch: {}      # allow manual run from the Actions tab
+    - cron: '5 21 * * *'
+    - cron: '35 21 * * *'
+    - cron: '52 7 * * *'
+  workflow_dispatch: {}
 
 permissions:
   contents: write
@@ -45,24 +46,16 @@ jobs:
           const p = JSON.parse(fs.readFileSync('prices.json', 'utf8'));
           const c = JSON.parse(fs.readFileSync('charts.json', 'utf8'));
           const now = new Date();
-          // 한국 장마감(16:52 KST) 실행은 미국 전일 종가가 정상이다.
-          // 미국 장 마감 후(20:00 UTC 이후)에는 당일 미국 종가가 반드시 있어야 한다.
           if (now.getUTCHours() >= 20) {
             const expected = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()) / 86400000;
             const asOfDay = String(p.asOf || '').slice(0, 10);
             for (const id of ['gspc', 'ixic', 'us10y']) {
-              if (!p.quotes?.[id] || !Number.isFinite(Number(p.quotes[id].price))) {
-                throw new Error('required quote missing: ' + id);
-              }
+              if (!p.quotes?.[id] || !Number.isFinite(Number(p.quotes[id].price))) throw new Error('required quote missing: ' + id);
               const s = c.series?.[id];
               const last = s?.t?.[s.t.length - 1];
-              if (!(Number.isFinite(last) && last >= expected)) {
-                throw new Error('stale chart for ' + id + ': expected ' + expected + ', got ' + last);
-              }
+              if (!(Number.isFinite(last) && last >= expected)) throw new Error('stale chart for ' + id + ': expected ' + expected + ', got ' + last);
             }
-            if (asOfDay !== now.toISOString().slice(0, 10)) {
-              throw new Error('stale prices.asOf: expected ' + now.toISOString().slice(0, 10) + ', got ' + asOfDay);
-            }
+            if (asOfDay !== now.toISOString().slice(0, 10)) throw new Error('stale prices.asOf: expected ' + now.toISOString().slice(0, 10) + ', got ' + asOfDay);
           }
           console.log('price freshness validation passed');
           NODE
@@ -71,56 +64,20 @@ jobs:
             sleep $((attempt * 15))
           done
           test "$ok" -eq 1
- 
-      - name: Commit & push update branch
-        id: commit
-        shell: bash
+      - name: Create protected-main PR when changed
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           FILES="prices.json charts.json gamma.json cycle.json holdings.json"
           if [ -z "$(git status --porcelain $FILES)" ]; then
-            echo "No change in $FILES."
-            echo "changed=false" >> "$GITHUB_OUTPUT"
-            exit 0
+            echo "No change in $FILES."; exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          BRANCH="claude/automation-update-prices-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          git switch -c "$BRANCH"
           git add $FILES
           git commit -m "chore: update stock prices + 1y charts"
-          BRANCH="automation/update-prices-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
-          git push origin "HEAD:$BRANCH"
-          echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
-          echo "changed=true" >> "$GITHUB_OUTPUT"
-
-      - name: Open PR and enable auto-merge
-        if: steps.commit.outputs.changed == 'true'
-        uses: actions/github-script@v7
-        env:
-          UPDATE_BRANCH: ${{ steps.commit.outputs.branch }}
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const branch = process.env.UPDATE_BRANCH;
-            const { owner, repo } = context.repo;
-            const pr = await github.rest.pulls.create({
-              owner, repo, head: branch, base: 'main',
-              title: 'chore: update stock prices + 1y charts',
-              body: 'Automated market data refresh. This PR is created because main is protected and direct pushes are rejected.',
-            });
-            try {
-              await github.graphql(`
-                mutation($id: ID!) {
-                  enablePullRequestAutoMerge(input: {pullRequestId: $id, mergeMethod: SQUASH}) {
-                    pullRequest { number }
-                  }
-                }`, { id: pr.data.node_id });
-              core.info(`auto-merge enabled for PR #${pr.data.number}`);
-            } catch (e) {
-              core.warning(`auto-merge could not be enabled: ${e.message}`);
-              // If the branch is already clean, merge immediately; otherwise checks will remain visible.
-              try {
-                await github.rest.pulls.merge({ owner, repo, pull_number: pr.data.number, merge_method: 'squash' });
-              } catch (mergeError) {
-                core.warning(`PR #${pr.data.number} remains open for required checks: ${mergeError.message}`);
-              }
-            }
+          git push origin "$BRANCH"
+          gh pr create --base main --head "$BRANCH" --title "chore: update stock prices + 1y charts" --body "Automated market-data refresh. Claude PR Gate validates and squash-merges this protected-main PR."
