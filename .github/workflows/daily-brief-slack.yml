@@ -1,7 +1,7 @@
 name: daily-brief-slack
 on:
   schedule:
-    - cron: '45 22 * * 1-5'   # 22:45 UTC = 07:45 KST(익일), 월~금 US마감
+    - cron: '45 22 * * 1-5'
   workflow_dispatch:
 jobs:
   brief:
@@ -10,9 +10,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: '20' }
-      - run: node scripts/daily-brief-slack.mjs
+      - name: Send deterministic daily brief only
+        run: node scripts/daily-brief-slack.mjs
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
           SLACK_DM_CHANNEL: U0BED4031U6
-          SITE_PASSWORD: ${{ secrets.SITE_PASSWORD }}
-          BRIEF_WARM_PODCAST: "1"
