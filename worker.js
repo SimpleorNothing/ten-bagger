@@ -109,12 +109,17 @@ function withoutPaidLlmCredentials(env) {
   });
 }
 
+function allowPaidLlmForPath(pathname) {
+  return pathname === '/api/insight' || pathname.startsWith('/api/council') || pathname.startsWith('/api/brief');
+}
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
     if (request.method === 'GET' && url.pathname === '/api/briefs' && await isAuthorized(request, env)) {
       return fastBriefList(env);
     }
-    return core.fetch(request, withoutPaidLlmCredentials(env), ctx);
+    const routedEnv = allowPaidLlmForPath(url.pathname) ? env : withoutPaidLlmCredentials(env);
+    return core.fetch(request, routedEnv, ctx);
   },
 };
