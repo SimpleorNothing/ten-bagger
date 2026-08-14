@@ -1,0 +1,48 @@
+name: Automation macro 2026-08-15
+on:
+  push:
+    branches: [claude/automation-macro-20260815]
+permissions:
+  contents: write
+jobs:
+  update:
+    if: ${{ !contains(github.event.head_commit.message, '[macro-data]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: claude/automation-macro-20260815
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Update official releases
+        run: |
+          node <<'NODE'
+          const fs=require('fs');
+          const p='calendar.json'; const j=JSON.parse(fs.readFileSync(p,'utf8'));
+          j.asOf='2026-08-15T07:31:00+09:00';
+          j.note=(j.note||'')+' 2026-08-15 정기 발표 점검에서 BLS 7월 PPI와 Census 7월 소매판매 공식값을 확정 반영.';
+          for(const e of j.events||[]){
+            if(e.lbl==='美 PPI · 7월분'){
+              e.meta='BLS 확정 · 최종수요 PPI 전월비 0.0%, 전년비 +4.7%. 식품·에너지·무역서비스 제외 최종수요 PPI 전월비 +0.4%, 전년비 +4.7%. 3~6월 일부 수치는 지연 보고·응답자 수정 반영으로 재수정됨. 헤드라인은 안정됐지만 기조 생산단 물가가 높아 CPI 둔화만으로 금리부담 완화를 단정하기 어려운 입력. · 원문: https://www.bls.gov/news.release/ppi.nr0.htm · 등록일: 2026-08-13 · 확인/갱신: 2026-08-15 07:31 KST';
+              e.when='08-13 (21:30 KST·확정)';
+            }
+            if(e.lbl==='美 소매판매 · 7월분'){
+              e.meta='Census 확정 · 7월 소매·음식서비스 판매 $763.6B, 전월비 -0.6%(계절조정), 전년비 +5.0%. 5~7월 합계는 전년동기 대비 +6.3%. 5월→6월 증감률은 +0.2%로 수정 없음. 소비는 전월비 둔화해 성장 모멘텀에는 약한 입력. · 원문: https://www.census.gov/retail/sales.html · 등록일: 2026-08-14 · 확인/갱신: 2026-08-15 07:31 KST';
+              e.when='08-14 (21:30 KST·확정)';
+            }
+          }
+          fs.writeFileSync(p,JSON.stringify(j,null,2)+'\n');
+          const pp='pulse.json'; const q=JSON.parse(fs.readFileSync(pp,'utf8'));
+          q.asOf='2026-08-15T07:31'; q.model='ChatGPT automation · official sources';
+          const r=(q.drivers||[]).find(x=>x.ax==='rates');
+          if(r){r.dir='neutral';r.l1='7월 CPI는 둔화했지만 7월 PPI의 기조 생산단 물가는 높은 수준';r.l2='CPI는 전월비 +0.1%·전년비 +3.4%, 근원 CPI 전년비 +2.5%로 둔화. 반면 최종수요 PPI는 전월비 0.0%였지만 식품·에너지·무역서비스 제외 PPI가 전월비 +0.4%·전년비 +4.7%로 높아 금리경로는 혼재. 고밸류 AI 인프라의 할인율 부담 완화를 일방적으로 강화하는 신호로 보지 않음.';r.verdict='CPI 둔화 vs 기조 PPI 압력 · 혼재';r.srcs=[{t:'BLS Consumer Price Index - July 2026',u:'https://www.bls.gov/news.release/cpi.nr0.htm',d:'2026-08-12'},{t:'BLS Producer Price Index - July 2026',u:'https://www.bls.gov/news.release/ppi.nr0.htm',d:'2026-08-13'}];}
+          fs.writeFileSync(pp,JSON.stringify(q,null,2)+'\n');
+          NODE
+      - name: Commit
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add calendar.json pulse.json
+          git diff --cached --quiet || git commit -m 'data: update July PPI and retail sales [macro-data]'
+          git push origin HEAD:claude/automation-macro-20260815
