@@ -2,7 +2,7 @@ name: Update global CPI
 
 on:
   schedule:
-    - cron: '35 22 * * *'      # 매일 07:35 KST — 발표일 직후 자동 반영, 평소에는 no-op
+    - cron: '35 22 * * *'
   workflow_dispatch: {}
   push:
     branches: [main]
@@ -32,21 +32,20 @@ jobs:
         run: node scripts/fetch-cpi.mjs
       - name: Sync official US CPI release across consumers
         run: node scripts/sync-us-cpi-release.mjs
-      - name: Create PR and merge if changed
+      - name: Create protected-main PR if changed
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          set -euo pipefail
           FILES="cpi.json calendar.json pulse.json changelog.js"
           if [ -z "$(git status --porcelain $FILES)" ]; then
             echo "No CPI changes."; exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          BRANCH="automation/update-cpi-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          BRANCH="claude/automation-update-cpi-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
           git checkout -b "$BRANCH"
           git add $FILES
           git commit -m "chore: sync official CPI release"
           git push -u origin "$BRANCH"
-          PR_URL=$(gh pr create --base main --head "$BRANCH" --title "chore: sync official CPI release" --body "BLS 공식 CPI 발표를 CPI 시계열, 01 캘린더, 시장 맥락, 변경 이력에 동기화합니다. 자동화가 main 보호규칙을 우회하지 않고 PR 경로만 사용합니다.")
-          echo "Created $PR_URL"
-          gh pr merge "$PR_URL" --squash --auto --delete-branch
+          gh pr create --base main --head "$BRANCH" --title "chore: sync official CPI release" --body "BLS 공식 CPI 발표를 CPI 시계열, 01 캘린더, 시장 맥락, 변경 이력에 동기화합니다. Claude PR Gate가 검증 후 squash merge합니다."
