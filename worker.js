@@ -73,8 +73,6 @@ async function fastBriefList(env) {
   const fallbackNo = {};
   asc.forEach((d, i) => { fallbackNo[d] = i + 1; });
 
-  // 기존 구현은 최대 60개 p0를 한 번에 R2 GET해 제목을 읽었다.
-  // 최신 12개만 4개씩 제한해 읽어 목록 조회가 UI를 막지 않게 한다.
   const meta = {};
   const titleDates = recent.filter((d) => (seen[d] || []).includes(0)).slice(-12);
   for (let i = 0; i < titleDates.length; i += 4) {
@@ -102,12 +100,21 @@ async function fastBriefList(env) {
   return new Response(JSON.stringify({ dates }), { status: 200, headers });
 }
 
+function withoutPaidLlmCredentials(env) {
+  return new Proxy(env, {
+    get(target, prop, receiver) {
+      if (prop === 'ANTHROPIC_API_KEY' || prop === 'GEMINI_API_KEY' || prop === 'OPENAI_API_KEY') return undefined;
+      return Reflect.get(target, prop, receiver);
+    },
+  });
+}
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
     if (request.method === 'GET' && url.pathname === '/api/briefs' && await isAuthorized(request, env)) {
       return fastBriefList(env);
     }
-    return core.fetch(request, env, ctx);
+    return core.fetch(request, withoutPaidLlmCredentials(env), ctx);
   },
 };

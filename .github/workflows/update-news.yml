@@ -44,28 +44,23 @@ jobs:
       - name: Fetch raw news without paid LLM API
         if: steps.guard.outputs.skip != 'true'
         run: node scripts/fetch-news.mjs
-      - name: Create or update raw-news refresh PR
-        id: cpr
+        env:
+          GEMINI_API_KEY: ''
+      - name: Create protected-main PR when changed
         if: steps.guard.outputs.skip != 'true'
-        uses: peter-evans/create-pull-request@v7
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: "chore: update raw news feed"
-          branch: automation/update-news
-          branch-suffix: timestamp
-          delete-branch: true
-          title: "chore: update raw news feed"
-          body: |
-            Deterministic RSS/news refresh only. Paid LLM scoring, summarization and market-pulse synthesis are intentionally disabled and handled by the ChatGPT routine.
-          add-paths: |
-            news.json
-            news_archive.json
-            archive
-      - name: Enable auto-merge for raw-news refresh PR
-        if: steps.cpr.outputs.pull-request-number
-        continue-on-error: true
-        uses: peter-evans/enable-pull-request-automerge@v3
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          pull-request-number: ${{ steps.cpr.outputs.pull-request-number }}
-          merge-method: squash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          FILES="news.json news_archive.json archive"
+          if [ -z "$(git status --porcelain $FILES)" ]; then
+            echo "No news changes."; exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          BRANCH="claude/automation-update-news-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          git switch -c "$BRANCH"
+          git add $FILES
+          git commit -m "chore: update raw news feed"
+          git push origin "$BRANCH"
+          gh pr create --base main --head "$BRANCH" --title "chore: update raw news feed" --body "Deterministic RSS/news refresh only. Paid LLM scoring, summarization and market-pulse synthesis are disabled. Claude PR Gate validates and squash-merges this protected-main PR."
