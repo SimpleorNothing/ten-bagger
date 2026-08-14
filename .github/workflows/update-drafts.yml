@@ -2,7 +2,7 @@ name: Derive signal drafts
 
 on:
   schedule:
-    - cron: '45 21 * * *'   # 06:45 KST · 1일 1회 (update-news 8분 뒤)
+    - cron: '45 21 * * *'
   workflow_dispatch: {}
 
 permissions:
@@ -26,31 +26,20 @@ jobs:
           node-version: '20'
       - name: Derive signal drafts from news.json
         run: node scripts/derive-drafts.mjs
-      - name: Create PR and merge if changed
+      - name: Create protected-main PR if changed
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          set -euo pipefail
           FILE="signal_drafts.json"
           if [ -z "$(git status --porcelain "$FILE")" ]; then
-            echo "No change in $FILE."
-            exit 0
+            echo "No change in $FILE."; exit 0
           fi
-
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
-          BRANCH="automation/update-drafts-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          BRANCH="claude/automation-update-drafts-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
           git switch -c "$BRANCH"
           git add "$FILE"
           git commit -m "chore: derive signal drafts from news"
           git push origin "$BRANCH"
-
-          PR_URL=$(gh pr create \
-            --base main \
-            --head "$BRANCH" \
-            --title "chore: derive signal drafts from news" \
-            --body "Automated daily signal draft refresh. Uses PR-only writes to comply with the protected main branch.")
-
-          echo "Created $PR_URL"
-          gh pr merge "$PR_URL" --squash --delete-branch --auto || \
-            gh pr merge "$PR_URL" --squash --delete-branch
+          gh pr create --base main --head "$BRANCH" --title "chore: derive signal drafts from news" --body "Automated daily signal draft refresh. Claude PR Gate validates and squash-merges this protected-main PR."
