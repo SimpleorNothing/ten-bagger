@@ -2,8 +2,8 @@ name: Update macro signals
 
 on:
   schedule:
-    - cron: '47 21 * * *'    # 06:47 KST · 1일 1회 (시세 06:37·뉴스 06:42와 분산 — 같은 브랜치 push 충돌 방지)
-  workflow_dispatch: {}        # allow manual run from the Actions tab
+    - cron: '47 21 * * *'
+  workflow_dispatch: {}
 
 permissions:
   contents: write
@@ -26,53 +26,20 @@ jobs:
           node-version: '20'
       - name: Fetch macro signals (VIX · S&P · CNN F&G)
         run: node scripts/fetch-signals.mjs
-      - name: Commit & push update branch
-        id: commit
-        shell: bash
+      - name: Create protected-main PR if changed
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           FILE="signals.json"
           if [ -z "$(git status --porcelain "$FILE")" ]; then
-            echo "No change in $FILE."
-            echo "changed=false" >> "$GITHUB_OUTPUT"
-            exit 0
+            echo "No change in $FILE."; exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          BRANCH="claude/automation-update-signals-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          git switch -c "$BRANCH"
           git add "$FILE"
           git commit -m "chore: update macro signals (VIX·S&P·F&G)"
-          BRANCH="automation/update-signals-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
-          git push origin "HEAD:$BRANCH"
-          echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
-          echo "changed=true" >> "$GITHUB_OUTPUT"
-
-      - name: Open PR and enable auto-merge
-        if: steps.commit.outputs.changed == 'true'
-        uses: actions/github-script@v7
-        env:
-          UPDATE_BRANCH: ${{ steps.commit.outputs.branch }}
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const branch = process.env.UPDATE_BRANCH;
-            const { owner, repo } = context.repo;
-            const pr = await github.rest.pulls.create({
-              owner, repo, head: branch, base: 'main',
-              title: 'chore: update macro signals (VIX·S&P·F&G)',
-              body: 'Automated macro-signal refresh. Uses a PR because main is protected.',
-            });
-            try {
-              await github.graphql(`
-                mutation($id: ID!) {
-                  enablePullRequestAutoMerge(input: {pullRequestId: $id, mergeMethod: SQUASH}) {
-                    pullRequest { number }
-                  }
-                }`, { id: pr.data.node_id });
-            } catch (e) {
-              core.warning(`auto-merge could not be enabled: ${e.message}`);
-              try {
-                await github.rest.pulls.merge({ owner, repo, pull_number: pr.data.number, merge_method: 'squash' });
-              } catch (mergeError) {
-                core.warning(`PR #${pr.data.number} remains open: ${mergeError.message}`);
-              }
-            }
+          git push origin "$BRANCH"
+          gh pr create --base main --head "$BRANCH" --title "chore: update macro signals (VIX·S&P·F&G)" --body "Automated macro-signal refresh. Claude PR Gate validates and squash-merges this protected-main PR."
