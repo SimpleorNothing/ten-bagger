@@ -1,0 +1,50 @@
+name: Update US PPI
+
+on:
+  schedule:
+    - cron: '45 22 * * *'
+  workflow_dispatch: {}
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/update-ppi.yml'
+      - 'scripts/sync-ppi-release.mjs'
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: update-ppi
+  cancel-in-progress: false
+
+jobs:
+  ppi:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Sync latest BLS PPI release into calendar
+        run: node scripts/sync-ppi-release.mjs
+      - name: Create protected-main PR if changed
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          FILE="calendar.json"
+          if [ -z "$(git status --porcelain "$FILE")" ]; then
+            echo "No PPI changes."; exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          BRANCH="claude/automation-update-ppi-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          git switch -c "$BRANCH"
+          git add "$FILE"
+          git commit -m "chore: sync official BLS PPI release"
+          git push origin "$BRANCH"
+          gh pr create --base main --head "$BRANCH" --title "chore: sync official BLS PPI release" --body "BLS 공식 PPI 발표를 calendar.json에 동기화합니다. Claude PR Gate가 검증 후 squash merge합니다."
