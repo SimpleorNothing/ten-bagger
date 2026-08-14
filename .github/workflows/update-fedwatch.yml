@@ -24,11 +24,15 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - name: Install PyFedWatch dependencies
-        run: pip install --disable-pip-version-check pyfedwatch==1.2.0 'pandas<3' pandas-datareader==0.10.0 requests beautifulsoup4
-      - name: Compute December 2026 probabilities with PyFedWatch
+      - name: Install FedWatch dependencies
+        run: pip install --disable-pip-version-check requests beautifulsoup4 pyfedwatch==1.2.0 'pandas<3' pandas-datareader==0.10.0
+      - name: Fetch December 2026 FedWatch with source priority
         run: python3 scripts/fetch-fedwatch.py
+        env:
+          CME_FEDWATCH_TOKEN: ${{ secrets.CME_FEDWATCH_TOKEN }}
       - name: Validate and push automation branch when changed
+        env:
+          GH_TOKEN: ${{ github.token }}
         shell: bash
         run: |
           set -euo pipefail
@@ -37,8 +41,8 @@ jobs:
           d=json.load(open('fedwatch.json'))
           checks=d.get('checks') or []
           assert checks and checks[-1].get('date') and checks[-1].get('status') in ('확인','확인 필요')
-          assert d.get('methodology') == 'ARahimiQuant/pyfedwatch 1.2.0'
           if checks[-1]['status']=='확인':
+              assert d.get('source') in ('CME FedWatch End-of-Day API','Investing.com Fed Rate Monitor','PyFedWatch methodology')
               h=d.get('history') or []
               assert h and h[-1].get('date')==checks[-1].get('date') and len(h[-1].get('ranges') or []) >= 2
               total=sum(float(x.get('probability',0)) for x in h[-1]['ranges'])
@@ -48,6 +52,6 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add fedwatch.json
-          git commit -m "chore: update December 2026 FedWatch via pyfedwatch"
+          git commit -m "chore: update December 2026 FedWatch"
           BRANCH="claude/automation-update-fedwatch-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
           git push origin "HEAD:$BRANCH"
