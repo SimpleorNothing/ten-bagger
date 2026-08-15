@@ -64,6 +64,20 @@ jobs:
             sleep $((attempt * 15))
           done
           test "$ok" -eq 1
+      - name: Rebase data generation onto latest main
+        shell: bash
+        run: |
+          set -euo pipefail
+          START_SHA=$(git rev-parse HEAD)
+          git fetch origin main
+          LATEST_SHA=$(git rev-parse origin/main)
+          if [ "$START_SHA" != "$LATEST_SHA" ]; then
+            echo "main moved during price refresh: $START_SHA -> $LATEST_SHA; regenerating from latest main"
+            git reset --hard origin/main
+            node scripts/fetch-prices.mjs
+            node scripts/fetch-gamma.mjs
+            node scripts/derive-cycle-e.mjs
+          fi
       - name: Create protected-main PR when changed
         env:
           GH_TOKEN: ${{ github.token }}
