@@ -1,0 +1,36 @@
+name: Initialize capital scarcity data
+
+on:
+  push:
+    branches:
+      - agent/add-capital-scarcity-monitor
+
+permissions:
+  contents: write
+
+jobs:
+  init:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/add-capital-scarcity-monitor
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Validate scripts
+        run: |
+          node --check capital-scarcity.js
+          node --check scripts/fetch-capital-scarcity.mjs
+      - name: Fetch initial data
+        run: node scripts/fetch-capital-scarcity.mjs
+      - name: Commit initial snapshot
+        run: |
+          if git diff --quiet -- capital_scarcity.json; then exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add capital_scarcity.json
+          git commit -m "chore: initialize AI capital scarcity data"
+          git push origin HEAD:agent/add-capital-scarcity-monitor
