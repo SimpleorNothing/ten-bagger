@@ -1,0 +1,45 @@
+name: Update AI capital scarcity monitor
+
+on:
+  schedule:
+    - cron: '57 21 * * 1-5'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: update-capital-scarcity
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Fetch real yield, breakeven and term premium
+        run: node scripts/fetch-capital-scarcity.mjs
+      - name: Create protected-main PR if changed
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          FILE="capital_scarcity.json"
+          if [ -z "$(git status --porcelain "$FILE")" ]; then
+            echo "No change in $FILE."; exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          BRANCH="claude/automation-capital-scarcity-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          git switch -c "$BRANCH"
+          git add "$FILE"
+          git commit -m "chore: update AI capital scarcity monitor"
+          git push origin "$BRANCH"
+          gh pr create --base main --head "$BRANCH" --title "chore: update AI capital scarcity monitor" --body "Daily real-yield, breakeven and term-premium refresh. Protected-main PR gate validates and merges this update."
