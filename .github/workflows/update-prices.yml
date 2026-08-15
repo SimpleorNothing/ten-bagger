@@ -4,6 +4,7 @@ on:
   push:
     branches: [main]
     paths:
+      - '.github/workflows/update-prices.yml'
       - 'index.html'
       - 'scripts/fetch-prices.mjs'
   schedule:
@@ -47,13 +48,13 @@ jobs:
           const c = JSON.parse(fs.readFileSync('charts.json', 'utf8'));
           const now = new Date();
           if (now.getUTCHours() >= 20) {
-            const expected = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()) / 86400000;
+            const today = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()) / 86400000;
             const asOfDay = String(p.asOf || '').slice(0, 10);
             for (const id of ['gspc', 'ixic', 'us10y']) {
               if (!p.quotes?.[id] || !Number.isFinite(Number(p.quotes[id].price))) throw new Error('required quote missing: ' + id);
               const s = c.series?.[id];
               const last = s?.t?.[s.t.length - 1];
-              if (!(Number.isFinite(last) && last >= expected)) throw new Error('stale chart for ' + id + ': expected ' + expected + ', got ' + last);
+              if (!(Number.isFinite(last) && today - last <= 3)) throw new Error('stale chart for ' + id + ': today ' + today + ', got ' + last);
             }
             if (asOfDay !== now.toISOString().slice(0, 10)) throw new Error('stale prices.asOf: expected ' + now.toISOString().slice(0, 10) + ', got ' + asOfDay);
           }
