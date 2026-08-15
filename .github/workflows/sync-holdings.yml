@@ -8,6 +8,10 @@ on:
   workflow_dispatch: {}
   repository_dispatch:
     types: [drive-holdings-updated]
+  push:
+    paths:
+      - 'scripts/reconcile-held-consumers.mjs'
+      - '.github/workflows/sync-holdings.yml'
 
 permissions:
   contents: write
@@ -46,20 +50,22 @@ jobs:
           if (!Array.isArray(h.detail) || !h.detail.length) throw new Error('holdings.detail empty');
           console.log('Saturday holdings authority verified:', d, 'total=', h.total);
           NODE
+      - name: Reconcile all holdings consumers
+        run: node scripts/reconcile-held-consumers.mjs
       - name: Create protected-main PR when changed
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          FILE="holdings.json"
-          if [ -z "$(git status --porcelain "$FILE")" ]; then
-            echo "No change in $FILE."; exit 0
+          FILES="holdings.json index.html news_digest.json"
+          if [ -z "$(git status --porcelain $FILES)" ]; then
+            echo "No holdings consumer changes."; exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           BRANCH="claude/automation-sync-holdings-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
           git switch -c "$BRANCH"
-          git add "$FILE"
-          git commit -m "chore: sync holdings.json from latest Saturday 자산현황"
+          git add $FILES
+          git commit -m "chore: sync holdings and reconcile consumers"
           git push origin "$BRANCH"
-          gh pr create --base main --head "$BRANCH" --title "chore: sync holdings.json from latest Saturday 자산현황" --body "Latest Saturday Excel is the authoritative holdings source. Claude PR Gate validates qtyAsOf and squash-merges this protected-main PR."
+          gh pr create --base main --head "$BRANCH" --title "chore: sync holdings and reconcile consumers" --body "Latest Saturday Excel is the authoritative holdings source. This PR reconciles holdings.json, index.html held flags, and news_digest holdings to the same qtyAsOf. Claude PR Gate validates and squash-merges this protected-main PR."
