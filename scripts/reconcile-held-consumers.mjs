@@ -5,11 +5,38 @@ const HTML = 'index.html';
 const DIGEST = 'news_digest.json';
 
 const h = JSON.parse(fs.readFileSync(HOLDINGS, 'utf8'));
+const activeDetail = (h.detail || []).filter((d) => d && Number(d.amt) > 0);
+const activeNames = new Set(activeDetail.map((d) => d.name));
 const active = new Map(
-  (h.detail || [])
-    .filter((d) => d && d.ticker && d.ticker !== '—' && Number(d.amt) > 0)
+  activeDetail
+    .filter((d) => d.ticker && d.ticker !== '—')
     .map((d) => [String(d.ticker).toUpperCase(), d])
 );
+
+// 레이어 members/label도 최신 토요일 엑셀의 실제 보유금액(amt>0)과 맞춘다.
+// 청산 종목의 detail 행은 추적·재진입 기준을 위해 남기되, 보유 members와 0원 레이어에서는 제거한다.
+if (Array.isArray(h.holdings)) {
+  h.holdings = h.holdings.map((row) => {
+    const before = Array.isArray(row.members) ? row.members : [];
+    const members = row.layer === '현금'
+      ? before.filter((name) => name === '현금' || activeNames.has(name))
+      : before.filter((name) => activeNames.has(name));
+    let label = row.label;
+    if (members.length !== before.length) {
+      const base = String(label || row.layer || '').replace(/\s*\([^)]*\)\s*$/, '').trim();
+      if (row.layer === '현금') label = '현금';
+      else if (row.layer === '기타' && members.length === 1) label = members[0];
+      else if (members.length) label = `${base} (${members.join('·')})`;
+    }
+    return { ...row, label, members };
+  }).filter((row) => row.layer === '현금' || Number(row.amt) > 0 || (row.members || []).length > 0);
+}
+
+// 주간 엑셀 원장 total과 평일 시가평가 total을 혼동하지 않도록 note의 원장 총액 표기를 명시한다.
+if (typeof h.note === 'string') {
+  h.note = h.note.replace(/자동 동기화 · total /, '자동 동기화 · 주간 원장 total ');
+}
+fs.writeFileSync(HOLDINGS, JSON.stringify(h, null, 1) + '\n');
 
 function splitTopLevelObjects(src) {
   const ranges = [];
