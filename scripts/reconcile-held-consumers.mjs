@@ -1,0 +1,103 @@
+import fs from 'node:fs';
+
+const HOLDINGS = 'holdings.json';
+const HTML = 'index.html';
+const DIGEST = 'news_digest.json';
+
+const h = JSON.parse(fs.readFileSync(HOLDINGS, 'utf8'));
+const active = new Map(
+  (h.detail || [])
+    .filter((d) => d && d.ticker && d.ticker !== '—' && Number(d.amt) > 0)
+    .map((d) => [String(d.ticker).toUpperCase(), d])
+);
+
+function splitTopLevelObjects(src) {
+  const ranges = [];
+  let quote = '', esc = false, depth = 0, start = -1;
+  for (let i = 0; i < src.length; i++) {
+    const c = src[i];
+    if (quote) {
+      if (esc) esc = false;
+      else if (c === '\\') esc = true;
+      else if (c === quote) quote = '';
+      continue;
+    }
+    if (c === "'" || c === '"' || c === '`') { quote = c; continue; }
+    if (c === '{') { if (depth === 0) start = i; depth++; }
+    else if (c === '}') {
+      depth--;
+      if (depth === 0 && start >= 0) { ranges.push([start, i + 1]); start = -1; }
+      if (depth < 0) throw new Error('candidate object brace underflow');
+    }
+  }
+  if (depth !== 0) throw new Error('candidate object braces unbalanced');
+  return ranges;
+}
+
+function candidateArrayRange(html) {
+  const marker = 'const C=[';
+  const p = html.indexOf(marker);
+  if (p < 0) throw new Error('const C array not found');
+  const open = html.indexOf('[', p);
+  let quote = '', esc = false, depth = 0;
+  for (let i = open; i < html.length; i++) {
+    const c = html[i];
+    if (quote) {
+      if (esc) esc = false;
+      else if (c === '\\') esc = true;
+      else if (c === quote) quote = '';
+      continue;
+    }
+    if (c === "'" || c === '"' || c === '`') { quote = c; continue; }
+    if (c === '[') depth++;
+    else if (c === ']') {
+      depth--;
+      if (depth === 0) return [open, i];
+    }
+  }
+  throw new Error('const C array closing bracket not found');
+}
+
+function reconcileObject(obj) {
+  const tm = obj.match(/ticker\s*:\s*['"]([^'"]+)['"]/);
+  if (!tm) return obj;
+  const ticker = tm[1].toUpperCase();
+  const shouldHold = active.has(ticker);
+
+  // held/heldNote는 최신 토요일 holdings.json만 권위값으로 삼는다.
+  let out = obj
+    .replace(/\s*,\s*held\s*:\s*true\s*/g, '')
+    .replace(/\s*,\s*heldNote\s*:\s*['"][^'"]*['"]\s*/g, '');
+
+  if (shouldHold) {
+    const re = /(ticker\s*:\s*['"][^'"]+['"])/;
+    out = out.replace(re, "$1,held:true,heldNote:'보유'");
+  }
+  return out;
+}
+
+let html = fs.readFileSync(HTML, 'utf8');
+const [a0, a1] = candidateArrayRange(html);
+let body = html.slice(a0 + 1, a1);
+const ranges = splitTopLevelObjects(body);
+for (let i = ranges.length - 1; i >= 0; i--) {
+  const [s, e] = ranges[i];
+  body = body.slice(0, s) + reconcileObject(body.slice(s, e)) + body.slice(e);
+}
+html = html.slice(0, a0 + 1) + body + html.slice(a1);
+fs.writeFileSync(HTML, html);
+
+if (fs.existsSync(DIGEST)) {
+  const d = JSON.parse(fs.readFileSync(DIGEST, 'utf8'));
+  d.holdingsAsOf = h.qtyAsOf || h.asOf || null;
+  const items = [...active.values()].map((x) => ({ tk: x.ticker, nm: x.name }));
+  const groups = Array.isArray(d.groups) ? d.groups : [];
+  let g = groups.find((x) => x && x.title === '보유 종목');
+  if (!g) { g = { title: '보유 종목', items: [] }; groups.unshift(g); }
+  g.items = items;
+  d.groups = groups;
+  fs.writeFileSync(DIGEST, JSON.stringify(d, null, 2) + '\n');
+}
+
+const heldTickers = [...active.keys()].sort();
+console.log(`Reconciled ${heldTickers.length} active non-cash holdings from ${h.qtyAsOf || h.asOf}: ${heldTickers.join(', ')}`);
