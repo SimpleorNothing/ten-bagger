@@ -35,7 +35,7 @@ jobs:
           set -euo pipefail
           mapfile -t PRS < <(gh pr list --state open --base main --limit 200 \
             --json number,title,headRefName,createdAt,author \
-            --jq '.[] | select(.headRefName | startswith("claude/")) | select(.author.login == "app/github-actions" or .author.login == "github-actions") | [.number,.createdAt,.title] | @tsv' \
+            --jq '.[] | select((.headRefName | startswith("claude/")) or (.headRefName | startswith("automation/"))) | select(.author.login == "app/github-actions" or .author.login == "github-actions") | [.number,.createdAt,.title] | @tsv' \
             | sort -t$'\t' -k2,2r)
 
           declare -A SEEN=()
@@ -66,7 +66,7 @@ jobs:
           set -u
           mapfile -t PRS < <(gh pr list --state open --base main --limit 200 \
             --json number,headRefName,headRefOid,author,isDraft \
-            --jq '.[] | select(.headRefName | startswith("claude/")) | select(.author.login == "app/github-actions" or .author.login == "github-actions") | select(.isDraft == false) | [.number,.headRefName,.headRefOid] | @tsv')
+            --jq '.[] | select((.headRefName | startswith("claude/")) or (.headRefName | startswith("automation/"))) | select(.author.login == "app/github-actions" or .author.login == "github-actions") | select(.isDraft == false) | [.number,.headRefName,.headRefOid] | @tsv')
 
           validate_pr() {
             local pr="$1"
