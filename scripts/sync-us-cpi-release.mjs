@@ -51,12 +51,16 @@ const lbl = `美 CPI · ${month}월분`;
 
 const cal = JSON.parse(fs.readFileSync(CAL, 'utf8'));
 const ev = cal.events.find(e => e.lbl === lbl);
-if (!ev) throw new Error(`calendar event not found: ${lbl}`);
-ev.meta = `BLS 확정 · CPI 전월비 ${fmt(headlineMom)}, 전년비 ${fmt(headlineYoy)}. 근원 CPI 전월비 ${fmt(coreMom)}, 전년비 ${fmt(coreYoy)}. 물가 상승률은 직전월보다 완화됐고 근원 물가도 둔화해 Fed 금리경로의 상방 압력을 일부 낮추는 입력. AI 인프라에는 수요 숫자보다 할인율·조달비용 경로에 우호적. · 원문: ${URL} · 등록일: ${releaseDate} · 확인/갱신: ${stamp.replace('T',' ').slice(0,16)} KST`;
-ev.when = `${releaseDate.slice(5)} (21:30 KST·확정)`;
-cal.asOf = stamp;
-cal.note = (cal.note || '') + ` ${stamp.slice(0,10)} 정기 발표 점검에서 BLS ${month}월 CPI 공식값을 확정 반영.`;
-fs.writeFileSync(CAL, JSON.stringify(cal, null, 2) + '\n');
+if (ev) {
+  ev.meta = `BLS 확정 · CPI 전월비 ${fmt(headlineMom)}, 전년비 ${fmt(headlineYoy)}. 근원 CPI 전월비 ${fmt(coreMom)}, 전년비 ${fmt(coreYoy)}. 물가 상승률은 직전월보다 완화됐고 근원 물가도 둔화해 Fed 금리경로의 상방 압력을 일부 낮추는 입력. AI 인프라에는 수요 숫자보다 할인율·조달비용 경로에 우호적. · 원문: ${URL} · 등록일: ${releaseDate} · 확인/갱신: ${stamp.replace('T',' ').slice(0,16)} KST`;
+  ev.when = `${releaseDate.slice(5)} (21:30 KST·확정)`;
+  cal.asOf = stamp;
+  const noteEntry = `${stamp.slice(0,10)} 정기 발표 점검에서 BLS ${month}월 CPI 공식값을 확정 반영.`;
+  if (!(cal.note || '').includes(noteEntry)) cal.note = `${cal.note || ''} ${noteEntry}`.trim();
+  fs.writeFileSync(CAL, JSON.stringify(cal, null, 2) + '\n');
+} else {
+  console.log(`calendar event already rolled off or absent; skip calendar sync: ${lbl}`);
+}
 
 if (fs.existsSync(PULSE)) {
   const pulse = JSON.parse(fs.readFileSync(PULSE, 'utf8'));
@@ -80,4 +84,4 @@ if (fs.existsSync(CHANGELOG)) {
   fs.writeFileSync(CHANGELOG, s);
 }
 
-console.log(JSON.stringify({month:`${year}-${String(month).padStart(2,'0')}`,releaseDate,headlineMom,headlineYoy,coreMom,coreYoy,stamp}));
+console.log(JSON.stringify({month:`${year}-${String(month).padStart(2,'0')}`,releaseDate,headlineMom,headlineYoy,coreMom,coreYoy,stamp,calendarUpdated:Boolean(ev)}));
