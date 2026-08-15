@@ -21,7 +21,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GH_REPO: ${{ github.repository }}
-      GH_TOKEN: ${{ secrets.AUTO_MERGE_TOKEN || github.token }}
+      GH_TOKEN: ${{ github.token }}
+      AUTO_MERGE_TOKEN: ${{ secrets.AUTO_MERGE_TOKEN }}
     steps:
       - name: Checkout main
         uses: actions/checkout@v4
@@ -50,8 +51,8 @@ jobs:
               "chore: derive signal drafts from news"|\
               "chore: update stock prices + 1y charts")
                 if [[ -n "${SEEN[$title]:-}" ]]; then
-                  gh pr comment "$pr" --body "자동화 중복 PR 정리: 더 최신 PR #${SEEN[$title]}가 열려 있어 이 PR을 종료합니다."
-                  gh pr close "$pr" --delete-branch || gh pr close "$pr"
+                  gh pr comment "$pr" --body "자동화 중복 PR 정리: 더 최신 PR #${SEEN[$title]}가 열려 있어 이 PR을 종료합니다." || true
+                  gh pr close "$pr" --delete-branch || gh pr close "$pr" || true
                 else
                   SEEN[$title]="$pr"
                 fi
@@ -62,50 +63,75 @@ jobs:
       - name: Validate and merge trusted automation PRs
         shell: bash
         run: |
-          set -euo pipefail
+          set -u
           mapfile -t PRS < <(gh pr list --state open --base main --limit 200 \
             --json number,headRefName,headRefOid,author,isDraft \
             --jq '.[] | select(.headRefName | startswith("claude/")) | select(.author.login == "app/github-actions" or .author.login == "github-actions") | select(.isDraft == false) | [.number,.headRefName,.headRefOid] | @tsv')
 
+          validate_pr() {
+            local pr="$1"
+            local sha="$2"
+
+            git fetch origin "pull/$pr/head:refs/remotes/origin/pr-$pr" --force || return 1
+            git reset --hard "origin/pr-$pr" || return 1
+
+            local size
+            size=$(stat -c%s index.html) || return 1
+            [ "$size" -gt 150000 ] || return 1
+            grep -q "const D=" index.html || return 1
+            grep -q "HOLDINGS" index.html || return 1
+
+            for f in alpha.json earnings.json judgment.json news.json prices.json; do
+              if [ -f "$f" ]; then
+                python3 -c "import json; json.load(open('$f'))" || return 1
+              fi
+            done
+
+            node --check worker.js || return 1
+            grep -Fq 'const SITE_APPLY_FILES = new Set(["gates.json", "risk.json", "signal_log.json", "calendar.json"]);' worker.js || return 1
+            grep -Fq 'if (file === "signal_log.json")' worker.js || return 1
+            grep -Fq 'if (file === "calendar.json")' worker.js || return 1
+            grep -Fq 'function normalizeInsightFiscalJSON' worker.js || return 1
+            grep -Fq 'disableThinking: true' worker.js || return 1
+            grep -Fq 'function mergeGaugeUpdates' worker.js || return 1
+            grep -Fq 'gauge_updates' worker.js || return 1
+            if grep -Fq 'gauge shape mismatch' worker.js; then return 1; fi
+            if grep -Fq 'claude response not json' worker.js; then return 1; fi
+
+            gh api --method POST "repos/$GH_REPO/statuses/$sha" \
+              -f state=success \
+              -f context='Claude PR Gate / validate' \
+              -f description='Validated by automation PR sweeper' >/dev/null || return 1
+          }
+
+          failures=0
           for row in "${PRS[@]:-}"; do
             [ -n "$row" ] || continue
             IFS=$'\t' read -r pr branch sha <<< "$row"
             echo "Processing PR #$pr ($branch @ $sha)"
 
-            git fetch origin "pull/$pr/head:refs/remotes/origin/pr-$pr" --force
-            git reset --hard "origin/pr-$pr"
+            if ! validate_pr "$pr" "$sha"; then
+              echo "Validation/status failed for PR #$pr; leaving it open for inspection"
+              gh pr comment "$pr" --body "Automation PR Sweeper가 검증 또는 상태 기록에 실패해 자동 병합을 건너뛰었습니다. 다음 실행에서 다시 시도합니다." || true
+              failures=$((failures + 1))
+              continue
+            fi
 
-            SIZE=$(stat -c%s index.html)
-            [ "$SIZE" -gt 150000 ]
-            grep -q "const D=" index.html
-            grep -q "HOLDINGS" index.html
-
-            for f in alpha.json earnings.json judgment.json news.json prices.json; do
-              if [ -f "$f" ]; then
-                python3 -c "import json; json.load(open('$f'))"
+            if [ -n "${AUTO_MERGE_TOKEN:-}" ]; then
+              if GH_TOKEN="$AUTO_MERGE_TOKEN" gh pr merge "$pr" --squash --delete-branch; then
+                echo "Merged PR #$pr with AUTO_MERGE_TOKEN"
+                continue
               fi
-            done
-
-            node --check worker.js
-            grep -Fq 'const SITE_APPLY_FILES = new Set(["gates.json", "risk.json", "signal_log.json", "calendar.json"]);' worker.js
-            grep -Fq 'if (file === "signal_log.json")' worker.js
-            grep -Fq 'if (file === "calendar.json")' worker.js
-            grep -Fq 'function normalizeInsightFiscalJSON' worker.js
-            grep -Fq 'disableThinking: true' worker.js
-            grep -Fq 'function mergeGaugeUpdates' worker.js
-            grep -Fq 'gauge_updates' worker.js
-            ! grep -Fq 'gauge shape mismatch' worker.js
-            ! grep -Fq 'claude response not json' worker.js
-
-            gh api --method POST "repos/$GH_REPO/statuses/$sha" \
-              -f state=success \
-              -f context='Claude PR Gate / validate' \
-              -f description='Validated by automation PR sweeper' >/dev/null
+            fi
 
             if gh pr merge "$pr" --squash --delete-branch; then
-              echo "Merged PR #$pr"
+              echo "Merged PR #$pr with GITHUB_TOKEN"
             else
               echo "Direct merge blocked for PR #$pr; enabling auto-merge"
               gh pr merge "$pr" --squash --auto --delete-branch || true
             fi
           done
+
+          if [ "$failures" -gt 0 ]; then
+            echo "Completed with $failures PR validation/status failures; other PRs were still processed."
+          fi
