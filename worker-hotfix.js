@@ -1,20 +1,10 @@
-// Paid-LLM kill switch wrapper.
-// User policy (2026-08-13): GitHub/Worker code must not call paid LLM APIs.
-// ChatGPT scheduled routines perform judgment/summarization instead.
+// Paid-LLM policy wrapper.
+// User policy (2026-08-15): external paid LLM APIs are allowed for
+// 02 insight, 03 council, and 06 briefing. Other paid-LLM routes stay blocked.
 import baseWorker from "./worker.js";
 
 const BLOCKED_LLM_PATHS = new Set([
-  "/api/insight",
   "/api/site-apply",
-  "/api/yt-view",
-  "/api/council-image",
-  "/api/council",
-  "/api/council-summary",
-  "/api/council-ask",
-  "/api/council-read",
-  "/api/brief",
-  "/api/brief-audio",
-  "/api/council-audio",
   "/api/calevent-parse",
 ]);
 
@@ -22,7 +12,7 @@ function disabledResponse(path) {
   return new Response(JSON.stringify({
     error: "외부 유료 LLM API 사용이 비활성화됐습니다.",
     path,
-    policy: "ChatGPT 데일리/주간 루틴에서 웹 검색과 자체 추론으로 처리",
+    policy: "02 인사이트, 03 원탁, 06 브리핑만 외부 LLM API 허용",
     code: "PAID_LLM_DISABLED",
   }), {
     status: 503,
