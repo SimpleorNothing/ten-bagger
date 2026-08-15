@@ -42,6 +42,15 @@ jobs:
           for row in "${PRS[@]:-}"; do
             [ -n "$row" ] || continue
             IFS=$'\t' read -r pr created title <<< "$row"
+
+            key="$title"
+            case "$title" in
+              site-apply:\ signal-log-*) key="site-apply: signal-log" ;;
+              site-apply:\ calendar-*)   key="site-apply: calendar" ;;
+              site-apply:\ risk-*)       key="site-apply: risk" ;;
+              site-apply:\ gates-*)      key="site-apply: gates" ;;
+            esac
+
             case "$title" in
               "chore: sync holdings.json from latest Saturday 자산현황"|\
               "chore: recompute alpha map estimates"|\
@@ -49,12 +58,16 @@ jobs:
               "chore: update raw news feed"|\
               "chore: update macro signals (VIX·S&P·F&G)"|\
               "chore: derive signal drafts from news"|\
-              "chore: update stock prices + 1y charts")
-                if [[ -n "${SEEN[$title]:-}" ]]; then
-                  gh pr comment "$pr" --body "자동화 중복 PR 정리: 더 최신 PR #${SEEN[$title]}가 열려 있어 이 PR을 종료합니다." || true
+              "chore: update stock prices + 1y charts"|\
+              site-apply:\ signal-log-*|\
+              site-apply:\ calendar-*|\
+              site-apply:\ risk-*|\
+              site-apply:\ gates-*)
+                if [[ -n "${SEEN[$key]:-}" ]]; then
+                  gh pr comment "$pr" --body "자동화 중복 PR 정리: 같은 작업의 더 최신 PR #${SEEN[$key]}가 열려 있어 이 PR을 종료합니다." || true
                   gh pr close "$pr" --delete-branch || gh pr close "$pr" || true
                 else
-                  SEEN[$title]="$pr"
+                  SEEN[$key]="$pr"
                 fi
                 ;;
             esac
@@ -65,8 +78,8 @@ jobs:
         run: |
           set -u
           mapfile -t PRS < <(gh pr list --state open --base main --limit 200 \
-            --json number,headRefName,headRefOid,author,isDraft \
-            --jq '.[] | select((.headRefName | startswith("claude/")) or (.headRefName | startswith("automation/"))) | select(.author.login == "app/github-actions" or .author.login == "github-actions") | select(.isDraft == false) | [.number,.headRefName,.headRefOid] | @tsv')
+            --json number,headRefName,headRefOid,author,isDraft,title \
+            --jq '.[] | select((.headRefName | startswith("claude/")) or (.headRefName | startswith("automation/"))) | select(.author.login == "app/github-actions" or .author.login == "github-actions") | select(.isDraft == false) | [.number,.headRefName,.headRefOid,.title] | @tsv')
 
           validate_pr() {
             local pr="$1"
@@ -107,7 +120,7 @@ jobs:
           failures=0
           for row in "${PRS[@]:-}"; do
             [ -n "$row" ] || continue
-            IFS=$'\t' read -r pr branch sha <<< "$row"
+            IFS=$'\t' read -r pr branch sha title <<< "$row"
             echo "Processing PR #$pr ($branch @ $sha)"
 
             if ! validate_pr "$pr" "$sha"; then
@@ -127,8 +140,14 @@ jobs:
             if gh pr merge "$pr" --squash --delete-branch; then
               echo "Merged PR #$pr with GITHUB_TOKEN"
             else
-              echo "Direct merge blocked for PR #$pr; enabling auto-merge"
-              gh pr merge "$pr" --squash --auto --delete-branch || true
+              mergeable=$(gh pr view "$pr" --json mergeable --jq '.mergeable' 2>/dev/null || echo UNKNOWN)
+              if [ "$mergeable" = "CONFLICTING" ]; then
+                echo "PR #$pr is conflicting with main; leaving it open for scheduled/operator recovery"
+                gh pr comment "$pr" --body "현재 main과 충돌해 자동 병합하지 않았습니다. 중복 PR이면 다음 sweep에서 정리되고, 최신 단일 PR이면 주기 점검 루틴에서 재생성/정리합니다." || true
+              else
+                echo "Direct merge blocked for PR #$pr; enabling auto-merge"
+                gh pr merge "$pr" --squash --auto --delete-branch || true
+              fi
             fi
           done
 
