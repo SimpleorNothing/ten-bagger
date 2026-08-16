@@ -39,7 +39,7 @@ jobs:
             "https://simpleornothing.com/__version?t=$(date +%s%N)" > /tmp/prev-version.json || echo '{}' > /tmp/prev-version.json
           curl -fsS --connect-timeout 5 --max-time 10 \
             -H 'Cache-Control: no-cache' \
-            "https://simpleornothing.com/site-change-commits.json?t=$(date +%s%N)" > /tmp/prev-site-history.json || echo '[]' > /tmp/prev-site-history.json
+            "https://simpleornothing.com/__site_changes?t=$(date +%s%N)" > /tmp/prev-site-history.json || echo '[]' > /tmp/prev-site-history.json
 
           PREV_SHA=$(node -e "try{const j=require('/tmp/prev-version.json');process.stdout.write(j.sha||'')}catch(e){}")
           if [ -n "$PREV_SHA" ] && git cat-file -e "$PREV_SHA^{commit}" 2>/dev/null; then
@@ -51,7 +51,6 @@ jobs:
 
           node <<'NODE'
           const fs = require('fs');
-          const path = require('path');
           const prev = (() => { try { const x=JSON.parse(fs.readFileSync('/tmp/prev-site-history.json','utf8')); return Array.isArray(x)?x:[]; } catch { return []; } })();
           const files = fs.readFileSync('/tmp/site-changed-files.txt','utf8').split(/\r?\n/).filter(Boolean);
           const title = fs.readFileSync('/tmp/site-change-title.txt','utf8').trim();
@@ -78,7 +77,8 @@ jobs:
             {sha:'verified-20260816-duplicate',commit:{author:{date:'2026-08-16T03:16:07+09:00'},message:'05 추정 리비전 트래커의 중복 설명 블록 제거'}},
             {sha:'verified-20260816-negative',commit:{author:{date:'2026-08-16T03:24:05+09:00'},message:'05 음수 수치를 빨간색으로 표시'}},
             {sha:'verified-20260816-sort',commit:{author:{date:'2026-08-16T03:28:57+09:00'},message:'05 투자매력도·실제 비중조절 등 주요 항목 헤더 클릭 정렬 추가'}},
-            {sha:'859adaac5a27d345f38465eaa23d13232b3b8634',commit:{author:{date:'2026-08-16T12:46:36+09:00'},message:'배포 후 simpleornothing.com이 최신 GitHub SHA를 실제 서비스하는지 자동 검증하고 주요 화면 캐시를 방지'}}
+            {sha:'859adaac5a27d345f38465eaa23d13232b3b8634',commit:{author:{date:'2026-08-16T12:46:36+09:00'},message:'배포 후 simpleornothing.com이 최신 GitHub SHA를 실제 서비스하는지 자동 검증하고 주요 화면 캐시를 방지'}},
+            {sha:'8d7722b92d7c3f0a3fa5816d29eb584034ae61ec',commit:{author:{date:'2026-08-16T12:54:28+09:00'},message:'사이트 변경 이력을 GitHub 커밋이 아니라 실제 사용자 향 변경·custom domain 배포 기준으로 전환'}}
           ];
 
           const rows = [...prev];
@@ -149,7 +149,7 @@ jobs:
           if [ "${{ steps.site_history.outputs.expected }}" = "1" ]; then
             history=$(curl -fsS --connect-timeout 10 --max-time 20 \
               -H 'Cache-Control: no-cache' \
-              "https://simpleornothing.com/site-change-commits.json?t=$(date +%s%N)")
+              "https://simpleornothing.com/__site_changes?t=$(date +%s%N)")
             printf '%s' "$history" | grep -Fq "${GITHUB_SHA}" || {
               echo "ERROR: actual site changed but site change history does not contain ${GITHUB_SHA}"
               exit 1
