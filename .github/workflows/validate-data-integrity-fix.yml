@@ -1,0 +1,76 @@
+name: Validate data integrity fix
+
+on:
+  push:
+    branches: [fix/data-integrity-audit-20260816]
+    paths:
+      - 'scripts/audit-revision-integrity.mjs'
+      - 'scripts/build-revision-report.mjs'
+      - 'scripts/audit-ops.mjs'
+      - '.github/workflows/update-prices.yml'
+      - '.github/workflows/validate-data-integrity-fix.yml'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/data-integrity-audit-20260816
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Refresh and run full market-data integrity chain
+        run: |
+          set -euo pipefail
+          node scripts/fetch-prices.mjs
+          node scripts/fetch-gamma.mjs
+          node scripts/fetch-revision-provenance.mjs
+          node scripts/validate-revision-provenance.mjs
+          node scripts/audit-revision-integrity.mjs
+          node scripts/build-revision-report.mjs
+          node scripts/derive-cycle-e.mjs
+      - name: Verify LITE fiscal rollover is not scored when ambiguous
+        run: |
+          node - <<'NODE'
+          const fs=require('fs');
+          const g=JSON.parse(fs.readFileSync('gamma.json','utf8'));
+          const lite=g.gamma?.LITE;
+          if(!lite?.rev?.quality) throw new Error('LITE quality missing');
+          if(lite.rev.epsSemantics?.periodState==='rollover-stale'){
+            if(lite.rev.eps) throw new Error('LITE ambiguous EPS still used');
+            if(lite.rev.epsSemantics.scoringEligible!==false) throw new Error('LITE scoringEligible must be false');
+          }
+          const rr=JSON.parse(fs.readFileSync('raw/revisions/latest.json','utf8'));
+          const r=rr.rows.find(x=>x.티커==='LITE');
+          if(!r) throw new Error('LITE report missing');
+          for(const k of ['EPS현재연도값','EPS다음연도값','EPS다음연도30일전','EPS다음연도90일전','EPS기간검증','EPS스코어사용여부']) if(!(k in r)) throw new Error('missing '+k);
+          console.log('LITE',JSON.stringify({quality:lite.rev.quality,semantics:lite.rev.epsSemantics,report:r},null,2));
+          NODE
+      - name: Record OPS rule
+        shell: python
+        run: |
+          from pathlib import Path
+          p=Path('OPS.md')
+          s=p.read_text(encoding='utf-8')
+          s=s.replace('**최종 갱신: 2026-08-16 13:01 (KST)**','**최종 갱신: 2026-08-16 16:00 (KST)**',1)
+          entry='> 2026-08-16 16:00 · **시장·리비전 데이터 무결성 게이트 강화.** 원천 스냅샷과 산식 일치만 확인하던 검증을 폐기하고 `재현성 검증 → 의미 검증` 2단계로 강화했다. 현재가는 독립 chart/price 피드와 교차검증하고, TP는 평균값의 high/low 범위와 애널리스트 수를 검사한다. EPS는 Yahoo `0y=Current Year`, `+1y=Next Year`로 정의하되 두 연간 종료일 구조와 fiscal-year rollover를 검증한다. `0y` 종료 후 Yahoo 기간 롤오버가 지연된 경우 원자료는 보존하지만 EPS·EPS 리비전·강등게이트를 투자매력도 계산에서 즉시 제외한다. Raw CSV/JSON에는 Current Year/Next Year EPS, 30·90일 전 값, 원기간 종료일, 기간검증 상태, 스코어 사용 여부를 저장한다. 근거가 애매하면 직전값 유지·임의 보정하지 않고 `제외/자료부족`으로 처리한다.\n\n'
+          marker='# OPS — 알파맵 운영 가이드\n\n'
+          if entry not in s:s=s.replace(marker,marker+entry,1)
+          p.write_text(s,encoding='utf-8')
+      - name: Run OPS audit
+        run: node scripts/audit-ops.mjs
+      - name: Commit validated generated data and OPS
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add OPS.md prices.json charts.json gamma.json cycle.json holdings.json raw/revisions
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'data: apply semantic integrity audit to live revisions'
+          git push origin HEAD:fix/data-integrity-audit-20260816
