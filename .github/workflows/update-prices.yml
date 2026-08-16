@@ -7,6 +7,9 @@ on:
       - '.github/workflows/update-prices.yml'
       - 'index.html'
       - 'scripts/fetch-prices.mjs'
+      - 'scripts/fetch-gamma.mjs'
+      - 'scripts/fetch-revision-provenance.mjs'
+      - 'scripts/validate-revision-provenance.mjs'
   schedule:
     - cron: '5 21 * * *'
     - cron: '35 21 * * *'
@@ -32,20 +35,23 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - name: Fetch and validate latest prices (retry ×3)
+      - name: Fetch and validate latest prices + sourced revisions (retry ×3)
         shell: bash
         run: |
           set -euo pipefail
           ok=0
           for attempt in 1 2 3; do
-            echo "price refresh attempt $attempt/3"
+            echo "market refresh attempt $attempt/3"
             if node scripts/fetch-prices.mjs \
               && node scripts/fetch-gamma.mjs \
+              && node scripts/fetch-revision-provenance.mjs \
+              && node scripts/validate-revision-provenance.mjs \
               && node scripts/derive-cycle-e.mjs \
               && node - <<'NODE'
           const fs = require('fs');
           const p = JSON.parse(fs.readFileSync('prices.json', 'utf8'));
           const c = JSON.parse(fs.readFileSync('charts.json', 'utf8'));
+          const g = JSON.parse(fs.readFileSync('gamma.json', 'utf8'));
           const now = new Date();
           if (now.getUTCHours() >= 20) {
             const today = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()) / 86400000;
@@ -58,7 +64,13 @@ jobs:
             }
             if (asOfDay !== now.toISOString().slice(0, 10)) throw new Error('stale prices.asOf: expected ' + now.toISOString().slice(0, 10) + ', got ' + asOfDay);
           }
-          console.log('price freshness validation passed');
+          if (!g.revisionAudit) throw new Error('revisionAudit missing');
+          for (const [tk,e] of Object.entries(g.gamma || {})) {
+            if (!e.rev) continue;
+            const pr=e.rev.provenance;
+            if (!pr?.provider || !pr?.sourceUrl || !pr?.rawRef || !fs.existsSync(pr.rawRef)) throw new Error('unsourced revision survived audit: '+tk);
+          }
+          console.log('price freshness + revision provenance validation passed');
           NODE
             then ok=1; break; fi
             echo "attempt $attempt failed; waiting before retry"
@@ -73,10 +85,12 @@ jobs:
           git fetch origin main
           LATEST_SHA=$(git rev-parse origin/main)
           if [ "$START_SHA" != "$LATEST_SHA" ]; then
-            echo "main moved during price refresh: $START_SHA -> $LATEST_SHA; regenerating from latest main"
+            echo "main moved during market refresh: $START_SHA -> $LATEST_SHA; regenerating from latest main"
             git reset --hard origin/main
             node scripts/fetch-prices.mjs
             node scripts/fetch-gamma.mjs
+            node scripts/fetch-revision-provenance.mjs
+            node scripts/validate-revision-provenance.mjs
             node scripts/derive-cycle-e.mjs
           fi
       - name: Create protected-main PR when changed
@@ -84,7 +98,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          FILES="prices.json charts.json gamma.json cycle.json holdings.json"
+          FILES="prices.json charts.json gamma.json cycle.json holdings.json raw/revisions"
           if [ -z "$(git status --porcelain $FILES)" ]; then
             echo "No change in $FILES."; exit 0
           fi
@@ -93,6 +107,6 @@ jobs:
           BRANCH="claude/automation-update-prices-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
           git switch -c "$BRANCH"
           git add $FILES
-          git commit -m "chore: update stock prices + 1y charts"
+          git commit -m "chore: update market data + sourced revision snapshots"
           git push origin "$BRANCH"
-          gh pr create --base main --head "$BRANCH" --title "chore: update stock prices + 1y charts" --body "Automated market-data refresh. Claude PR Gate validates and squash-merges this protected-main PR."
+          gh pr create --base main --head "$BRANCH" --title "chore: update market data + sourced revisions" --body "Automated market-data refresh. Revision values are retained only when provider metadata and a reproducible raw snapshot are stored under raw/revisions/. Claude PR Gate validates and squash-merges this protected-main PR."
