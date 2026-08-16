@@ -9,6 +9,7 @@
   // 04 시장·실적전망과 05 알파맵의 종목 호버 차트 기본 기간.
   // 차트 데이터·수익률·표시 라벨이 항상 같은 기간을 사용하도록 단일 상수로 고정한다.
   var DEFAULT_RANGE = '1Y';
+  var DEFAULT_RANGE_DAYS = 252;
   if (!matchMedia('(hover:hover)').matches) return; // 터치 전용 기기는 기존 탭→드로어 흐름 유지
   if (typeof C === 'undefined') return;             // 잠금 페이지 등 대시보드가 아닌 HTML
 
@@ -42,6 +43,15 @@
     return (cur === 'KRW' ? '₩' : '$') + Math.round(v).toLocaleString();
   }
   function kst(iso) { return typeof fmtKST === 'function' ? fmtKST(iso) : (iso || '—'); }
+
+  // charts.json은 최대 5년치이므로 호버 카드에서는 최근 252거래일만 사용한다.
+  // 날짜와 종가 배열을 같은 길이로 맞춰 차트와 수익률의 기준 구간이 어긋나지 않게 한다.
+  function defaultRangeSeries(s) {
+    if (!s || !Array.isArray(s.t) || !Array.isArray(s.c)) return null;
+    var n = Math.min(DEFAULT_RANGE_DAYS, s.t.length, s.c.length);
+    if (n < 2) return null;
+    return { t: s.t.slice(-n), c: s.c.slice(-n) };
+  }
 
   function chartSVG(s) {
     var T = s.t, Cv = s.c, W = 308, H = 128, pl = 36, pr = 4, pt = 6, pb = 18, cw = W - pl - pr, ch = H - pt - pb;
@@ -77,7 +87,7 @@
 
   function popHTML(co) {
     var q = (typeof PRICES !== 'undefined' && PRICES[co.id]) || null;
-    var s = CHARTS[co.id] && CHARTS[co.id].c && CHARTS[co.id].c.length > 1 ? CHARTS[co.id] : null;
+    var s = defaultRangeSeries(CHARTS[co.id]);
     var sc = (typeof STAGE_HEX !== 'undefined' && STAGE_HEX[co.stage]) || '#5c6f7e';
     var px = q && q.price != null ? money(q.price, q.currency) : '—';
     var ytd = q && q.changePct != null ? ('YTD ' + (q.changePct >= 0 ? '▲' : '▼') + Math.abs(Math.round(q.changePct)) + '%') : '';
