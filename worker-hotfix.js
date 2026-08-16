@@ -18,6 +18,7 @@ const FRESH_PATHS = new Set([
   "/cycle.json",
   "/changelog.js",
   "/capital-scarcity.js",
+  "/site-change-commits.json",
 ]);
 
 function disabledResponse(path) {
@@ -58,6 +59,23 @@ function withFreshnessHeaders(response) {
   });
 }
 
+async function patchChangelogResponse(response) {
+  if (!response || !response.ok) return response;
+  const text = await response.text();
+  const patched = text
+    .replace(
+      "https://api.github.com/repos/SimpleorNothing/ten-bagger/commits?sha=main&per_page=100",
+      "/site-change-commits.json"
+    )
+    // 같은 날 여러 번 실제 사이트가 바뀌어도 각각 이력에 남긴다.
+    .replace("if(d<=CURATED_MAX)return;", "if(d<CURATED_MAX)return;");
+  return withFreshnessHeaders(new Response(patched, {
+    status: response.status,
+    statusText: response.statusText,
+    headers: response.headers,
+  }));
+}
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
@@ -65,6 +83,9 @@ export default {
     if (BLOCKED_LLM_PATHS.has(url.pathname)) return disabledResponse(url.pathname);
 
     const response = await baseWorker.fetch(request, env, ctx);
+    if (url.pathname === "/changelog.js" && response && response.ok) {
+      return patchChangelogResponse(response);
+    }
     if ((request.method === "GET" || request.method === "HEAD") &&
         (FRESH_PATHS.has(url.pathname) || url.pathname.startsWith("/raw/revisions/"))) {
       return withFreshnessHeaders(response);
