@@ -51,7 +51,25 @@ jobs:
     runs-on: ubuntu-latest
     if: startsWith(github.event.pull_request.head.ref, 'claude/')
     steps:
-      - run: gh pr merge "$PR" --squash --delete-branch
+      - name: Merge validated PR idempotently
+        shell: bash
+        run: |
+          set -euo pipefail
+          if gh pr merge "$PR" --squash --delete-branch; then
+            echo "Merged PR #$PR"
+            exit 0
+          fi
+
+          state=$(gh pr view "$PR" --json state,mergedAt --jq '[.state, (.mergedAt // "")] | @tsv')
+          pr_state=${state%%$'\t'*}
+          merged_at=${state#*$'\t'}
+          if [ "$pr_state" = "MERGED" ] || [ -n "$merged_at" ]; then
+            echo "PR #$PR was merged concurrently; treating as success."
+            exit 0
+          fi
+
+          echo "::error::PR #$PR merge failed and PR is still open"
+          exit 1
         env:
           GH_TOKEN: ${{ secrets.AUTO_MERGE_TOKEN }}
           PR: ${{ github.event.pull_request.number }}
