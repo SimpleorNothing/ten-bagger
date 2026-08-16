@@ -4,6 +4,7 @@ const GAMMA='gamma.json';
 const INDEX='raw/revisions/index.json';
 const OUT_CSV='raw/revisions/latest.csv';
 const OUT_JSON='raw/revisions/latest.json';
+const EXCLUDED_ETFS=new Set(['471990','0173Y0']);
 
 const readJson=(p)=>JSON.parse(fs.readFileSync(p,'utf8'));
 const esc=(v)=>{
@@ -42,6 +43,7 @@ const curMap=latestFileMap(curRun),prevMap=latestFileMap(prevRun);
 
 const rows=[];
 for(const [tk,e] of Object.entries(g.gamma||{})){
+  if(EXCLUDED_ETFS.has(tk))continue;
   const curRef=curMap.get(tk)?.ref||e.rev?.provenance?.rawRef||'';
   const prevRef=prevMap.get(tk)?.ref||'';
   const cur=loadSnap(curRef),prev=loadSnap(prevRef);
@@ -57,7 +59,7 @@ for(const [tk,e] of Object.entries(g.gamma||{})){
   const provider=cur?.provider||e.rev?.provenance?.provider||'';
   const quoteSource=sourceUrl(cur)||e.rev?.provenance?.sourceUrl||'';
   const chartSource='Yahoo Finance chart API → charts.json';
-  const rawSource=curRef;
+  const rawSource=curRef||'미수집(원천 소스 미지원 또는 수집 실패 · 스코어 사용 제외)';
   const sem=e.rev?.epsSemantics||{};
   const quality=e.rev?.quality||{};
   const epsEligible=sem.scoringEligible===true;
@@ -98,10 +100,10 @@ for(const [tk,e] of Object.entries(g.gamma||{})){
     주가30일:e.rev?.px?.c30??null,
     주가90일:e.rev?.px?.c90??null,
     강등게이트:epsEligible?(e.rev?.gate?.d30??null):null,
-    현재가소스:`${provider} financialData.currentPrice | ${quoteSource}`,
-    TP소스:`${provider} financialData.targetMeanPrice | ${quoteSource}`,
-    EPS소스:`${provider} earningsTrend.trend period=0y/+1y | ${quoteSource}`,
-    상향하향소스:`${provider} earningsTrend(+1y).epsRevisions | ${quoteSource}`,
+    현재가소스:`${provider||'미수집'} financialData.currentPrice | ${quoteSource||'원천 소스 미지원/수집 실패'}`,
+    TP소스:`${provider||'미수집'} financialData.targetMeanPrice | ${quoteSource||'원천 소스 미지원/수집 실패'}`,
+    EPS소스:`${provider||'미수집'} earningsTrend.trend period=0y/+1y | ${quoteSource||'원천 소스 미지원/수집 실패'}`,
+    상향하향소스:`${provider||'미수집'} earningsTrend(+1y).epsRevisions | ${quoteSource||'원천 소스 미지원/수집 실패'}`,
     주가30일90일소스:chartSource,
     강등게이트소스:'계산값 = 주가30일 변화율 - 검증된 Next Year EPS 30일 리비전율',
     원천데이터:rawSource
