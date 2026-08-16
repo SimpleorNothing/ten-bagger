@@ -25,6 +25,16 @@ const FRESH_PATHS = new Set([
 
 const TOPIC_RADAR_PREFS_PATH = "/api/topic-radar-prefs";
 const TOPIC_RADAR_PREFS_KEY = "topic-radar-prefs.json";
+const CHANGELOG_VISIBLE_MARKER = "alpha-map-visible-changelog-20260816-v2";
+const VERIFIED_VISIBLE_ROWS = [
+  "    {d:'2026-08-16',t:'05 투자매력도와 실제 비중조절 우선순위를 분리하고 포트폴리오 집중·중복 노출을 실제 비중조절에 반영'},",
+  "    {d:'2026-08-16',t:'05 순위 근거를 EPS 리비전·상승여력 등 실제 점수 기여도로 표시'},",
+  "    {d:'2026-08-16',t:'05 추정 리비전 트래커의 중복 설명 블록 제거'},",
+  "    {d:'2026-08-16',t:'05 추정 리비전 트래커에서 음수 수치를 빨간색으로 표시'},",
+  "    {d:'2026-08-16',t:'05 투자매력도·실제 비중조절 등 주요 항목을 헤더 클릭으로 정렬 가능하게 변경'},",
+  "    {d:'2026-08-16',t:'01 토픽 레이더에서 삭제한 카드를 다른 기기에서도 동일하게 유지하도록 서버 동기화'},",
+  "    {d:'2026-08-16',t:'사이트 변경 이력 팝업을 실제 배포된 사용자향 변경 기준으로 갱신하도록 수정'},"
+].join("\n");
 
 function disabledResponse(path) {
   return new Response(JSON.stringify({
@@ -142,16 +152,26 @@ async function siteChangesResponse(request, env) {
   return withFreshnessHeaders(r);
 }
 
+function patchChangelogText(text) {
+  let patched = String(text || "");
+  patched = patched.replace(
+    "https://api.github.com/repos/SimpleorNothing/ten-bagger/commits?sha=main&per_page=100",
+    "/__site_changes"
+  );
+  patched = patched.replace("if(d<=CURATED_MAX)return;", "if(d<CURATED_MAX)return;");
+  if (!patched.includes(CHANGELOG_VISIBLE_MARKER) && patched.includes("var MKT_CHANGELOG=[")) {
+    patched = patched.replace(
+      "var MKT_CHANGELOG=[",
+      "var MKT_CHANGELOG=[\n    /* " + CHANGELOG_VISIBLE_MARKER + " */\n" + VERIFIED_VISIBLE_ROWS
+    );
+  }
+  return patched;
+}
+
 async function patchChangelogResponse(response) {
   if (!response || !response.ok) return response;
   const text = await response.text();
-  const patched = text
-    .replace(
-      "https://api.github.com/repos/SimpleorNothing/ten-bagger/commits?sha=main&per_page=100",
-      "/__site_changes"
-    )
-    // 같은 날 여러 번 실제 사이트가 바뀌어도 각각 이력에 남긴다.
-    .replace("if(d<=CURATED_MAX)return;", "if(d<CURATED_MAX)return;");
+  const patched = patchChangelogText(text);
   return withFreshnessHeaders(new Response(patched, {
     status: response.status,
     statusText: response.statusText,
@@ -159,16 +179,28 @@ async function patchChangelogResponse(response) {
   }));
 }
 
+async function changelogProbeResponse(request, env) {
+  if (!env.ASSETS) return jsonResponse({ ok:false, marker:false, reason:"ASSETS unavailable" }, 503);
+  const u = new URL(request.url);
+  u.pathname = "/changelog.js";
+  u.search = "";
+  const raw = await env.ASSETS.fetch(new Request(u.toString(), { method:"GET" }));
+  if (!raw.ok) return jsonResponse({ ok:false, marker:false, status:raw.status }, 503);
+  const patched = patchChangelogText(await raw.text());
+  const marker = patched.includes(CHANGELOG_VISIBLE_MARKER);
+  const rankSplit = patched.includes("투자매력도와 실제 비중조절 우선순위를 분리");
+  const negativeRed = patched.includes("음수 수치를 빨간색으로 표시");
+  return jsonResponse({ ok: marker && rankSplit && negativeRed, marker, rankSplit, negativeRed });
+}
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
     if (url.pathname === "/__version") return versionResponse(env);
-    // 배포 검증 및 changelog 로더 전용 공개 메타데이터. 사이트 본문/개인 데이터는 포함하지 않는다.
     if (url.pathname === "/__site_changes") return siteChangesResponse(request, env);
+    if (url.pathname === "/__changelog_probe") return changelogProbeResponse(request, env);
     if (BLOCKED_LLM_PATHS.has(url.pathname)) return disabledResponse(url.pathname);
 
-    // 인증은 기존 baseWorker가 먼저 수행한다. 미인증 기기는 401, 비밀번호 미설정은 503이므로
-    // 이 응답을 그대로 반환하고 R2 상태에는 접근하지 않는다.
     const response = await baseWorker.fetch(request, env, ctx);
     if (url.pathname === TOPIC_RADAR_PREFS_PATH) {
       if (response.status === 401 || response.status === 503) return response;
