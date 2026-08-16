@@ -1394,17 +1394,17 @@ function persist(){cacheSet();clearTimeout(putTimer);putTimer=setTimeout(push,20
    b.innerHTML='<span class="n"></span>인사이트 찾기';
    /* 상단 메뉴 재구성 — index.html 정적 nav 무편집(대용량 패치 최소화 = 자가 마운트 패턴)
       정적 nav : market · cycle · port · council · memo
-      목표     : 01 시장 모니터링 · 02 인사이트 찾기 · 03 전문가 원탁 · 04 시장과 실적 전망 · 05 비중조절 · 06 메모
+      목표     : 01 시장 모니터링 · 02 인사이트 찾기 · 03 전문가 원탁 · 04 알파 찾기 · 05 비중조절 · 06 메모
       (SimpleorNothing 지시 2026-07-18 · data-v·뷰·데이터 소스는 불변, 라벨·순서만 재구성) */
    var market=nav.querySelector('.tab[data-v="market"]');
    var council=nav.querySelector('.tab[data-v="council"]');
    var cycle=nav.querySelector('.tab[data-v="cycle"]');
    /* ① 인사이트 찾기 = 시장 모니터링(market) 뒤 주입 */
    if(market)nav.insertBefore(b,market.nextSibling);else nav.appendChild(b);
-   /* ② 전문가 원탁(council)을 시장과 실적 전망(cycle) 앞으로 이동 → …insight·council·cycle·port·memo */
+   /* ② 전문가 원탁(council)을 알파 찾기(cycle) 앞으로 이동 → …insight·council·cycle·port·memo */
    if(council&&cycle)nav.insertBefore(council,cycle);
-   /* ③ 시장과 실적 전망 = 구 「궁금한 것」(cycle) 라벨 개명 */
-   if(cycle)cycle.innerHTML='<span class="n"></span>시장과 실적 전망';
+   /* ③ 알파 찾기 = 구 「궁금한 것」(cycle) 라벨 개명 */
+   if(cycle)cycle.innerHTML='<span class="n"></span>알파 찾기';
    /* ④ index 순 재번호 → 01~06 */
    Array.prototype.forEach.call(nav.querySelectorAll('.tab'),function(t,i){
     var n=t.querySelector('.n');if(n)n.textContent=(i+1<10?'0':'')+(i+1);});
@@ -1433,7 +1433,7 @@ function persist(){cacheSet();clearTimeout(putTimer);putTimer=setTimeout(push,20
      자동 수집 뉴스(#mktMacroNews) 바로 위(관련 기사 h2 아래)에 붙어 큐레이션 관점이 관련 기사와 한 묶음이 된다.
      narrative≠numbers — 등급·출처·라이프사이클 메타는 스트립 컴포넌트 그대로 유지(뉴스 .arow 로 평탄화하지 않는다). SimpleorNothing 지시 2026-07-18. */
   anchor('insStripMarket','#v-market','before','#mktMacroNews');
-  /* 숫자 반영 대기 스트립 = 05 비중조절(#v-decision) → 04 시장과 실적 전망(#v-thread) 최상단으로 이동.
+  /* 숫자 반영 대기 스트립 = 05 비중조절(#v-decision) → 04 알파 찾기(#v-thread) 최상단으로 이동.
      실적 비트·가이던스 상향은 '실적 전망' 주제 → 로드맵(#dsAisd) 아래·강물 탐색(.vhead) 위에 뜬다.
      SimpleorNothing 지시 2026-07-18. narrative≠numbers — route·필터 불변, 앵커만 이동. */
   anchor('insStripDec','#v-thread','before','.vhead');
