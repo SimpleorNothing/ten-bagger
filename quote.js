@@ -52,15 +52,29 @@
     return p.join(' · ') || '지표 수집 대기';
   }
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function applyFearGreedTone(host, sig) {
+    var fg = sig && +sig.fearGreed;
+    if (!isFinite(fg)) {
+      host.style.removeProperty('--qz-bg');
+      host.style.removeProperty('--qz-border');
+      return;
+    }
+    fg = Math.max(0, Math.min(100, fg));
+    var fear = fg < 50;
+    var strength = Math.abs(fg - 50) / 50;
+    var rgb = fear ? '28,126,214' : '224,49,49';
+    host.style.setProperty('--qz-bg', 'rgba(' + rgb + ',' + (0.025 + strength * 0.155).toFixed(3) + ')');
+    host.style.setProperty('--qz-border', 'rgba(' + rgb + ',' + (0.14 + strength * 0.42).toFixed(3) + ')');
+  }
   function css() {
     if (document.getElementById('quote-css')) return;
     var s = document.createElement('style'); s.id = 'quote-css';
-    s.textContent = ['#mktQuote{display:flex;align-items:baseline;gap:10px 14px;flex-wrap:wrap;background:var(--panel);border:1px solid var(--line);border-radius:3px;padding:12px 16px;margin:0 0 18px;cursor:pointer;user-select:none}','#mktQuote:hover{border-color:var(--line2)}','#mktQuote .qz-tx{font-size:15px;font-weight:600;color:var(--txt);line-height:1.55}','#mktQuote .qz-tx::before{content:"\\201C";color:var(--dawn);font-weight:700;margin-right:2px}','#mktQuote .qz-tx::after{content:"\\201D";color:var(--dawn);font-weight:700;margin-left:2px}','#mktQuote .qz-by{font-family:var(--mono);font-size:12px;color:var(--faint);white-space:nowrap}','#mktQuote .qz-rg{font-family:var(--mono);font-size:12px;color:var(--faint);margin-left:auto;white-space:nowrap}','#mktQuote .qz-rg b{font-weight:700}','#mktQuote .qz-rg b.fear{color:var(--st-accel)}','#mktQuote .qz-rg b.greed{color:var(--st-hot)}','#mktQuote .qz-rg b.neutral{color:var(--dim)}','@media(max-width:600px){#mktQuote .qz-rg{margin-left:0;flex-basis:100%}}'].join('\n');
+    s.textContent = ['#mktQuote{display:flex;align-items:baseline;gap:10px 14px;flex-wrap:wrap;background:var(--qz-bg,var(--panel));border:1px solid var(--qz-border,var(--line));border-radius:3px;padding:12px 16px;margin:0 0 18px;cursor:pointer;user-select:none;transition:background-color .25s ease,border-color .25s ease}','#mktQuote:hover{filter:saturate(1.08)}','#mktQuote .qz-tx{font-size:15px;font-weight:600;color:var(--txt);line-height:1.55}','#mktQuote .qz-tx::before{content:"\\201C";color:var(--dawn);font-weight:700;margin-right:2px}','#mktQuote .qz-tx::after{content:"\\201D";color:var(--dawn);font-weight:700;margin-left:2px}','#mktQuote .qz-by{font-family:var(--mono);font-size:12px;color:var(--faint);white-space:nowrap}','#mktQuote .qz-rg{font-family:var(--mono);font-size:12px;color:var(--faint);margin-left:auto;white-space:nowrap}','#mktQuote .qz-rg b{font-weight:700}','#mktQuote .qz-rg b.fear{color:var(--st-accel)}','#mktQuote .qz-rg b.greed{color:var(--st-hot)}','#mktQuote .qz-rg b.neutral{color:var(--dim)}','@media(max-width:600px){#mktQuote .qz-rg{margin-left:0;flex-basis:100%}}'].join('\n');
     document.head.appendChild(s);
   }
   var ST = { rg: 'neutral', sig: null, last: -1 };
   function pick() { var pool = POOL[ST.rg] || POOL.neutral; if (pool.length < 2) return pool[0]; var i; do { i = Math.floor(Math.random() * pool.length); } while (i === ST.last); ST.last = i; return pool[i]; }
-  function render(host) { var q = pick(); host.innerHTML = '<span class="qz-tx">' + esc(q.t) + '</span>' + '<span class="qz-by">— ' + esc(q.by) + '</span>' + '<span class="qz-rg"><b class="' + ST.rg + '">' + RG_LB[ST.rg] + '</b> · ' + esc(chipTx(ST.sig)) + '</span>'; }
+  function render(host) { var q = pick(); applyFearGreedTone(host, ST.sig); host.innerHTML = '<span class="qz-tx">' + esc(q.t) + '</span>' + '<span class="qz-by">— ' + esc(q.by) + '</span>' + '<span class="qz-rg"><b class="' + ST.rg + '">' + RG_LB[ST.rg] + '</b> · ' + esc(chipTx(ST.sig)) + '</span>'; }
   function removeStrayLiteralNewlines(v) {
     Array.prototype.slice.call(v.childNodes).forEach(function (node) {
       if (node.nodeType === 3 && /^(?:\\n|\\r|\s)+$/.test(node.nodeValue || '')) node.remove();
