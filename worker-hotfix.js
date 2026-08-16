@@ -12,6 +12,8 @@ const FRESH_PATHS = new Set([
   "/",
   "/index.html",
   "/gamma.json",
+  "/revision-benchmark.json",
+  "/scores.json",
   "/holdings.json",
   "/prices.json",
   "/charts.json",
@@ -28,6 +30,7 @@ const TOPIC_RADAR_PREFS_PATH = "/api/topic-radar-prefs";
 const TOPIC_RADAR_PREFS_KEY = "topic-radar-prefs.json";
 const CHANGELOG_VISIBLE_MARKER = "alpha-map-visible-changelog-20260816-v2";
 const VERIFIED_VISIBLE_ROWS = [
+  "    {d:'2026-08-16',t:'05 투자매력도 V4 적용 — Nasdaq-100 순위 백분위·중복 감점 제거·외생 데이터와 내부 판단 분리·일일 점수 스냅샷'},",
   "    {d:'2026-08-16',t:'05 투자매력도와 실제 비중조절 우선순위를 분리하고 포트폴리오 집중·중복 노출을 실제 비중조절에 반영'},",
   "    {d:'2026-08-16',t:'05 순위 근거를 EPS 리비전·상승여력 등 실제 점수 기여도로 표시'},",
   "    {d:'2026-08-16',t:'05 추정 리비전 트래커의 중복 설명 블록 제거'},",
