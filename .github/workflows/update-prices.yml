@@ -10,6 +10,7 @@ on:
       - 'scripts/fetch-gamma.mjs'
       - 'scripts/fetch-revision-provenance.mjs'
       - 'scripts/validate-revision-provenance.mjs'
+      - 'scripts/build-revision-report.mjs'
   schedule:
     - cron: '5 21 * * *'
     - cron: '35 21 * * *'
@@ -46,12 +47,14 @@ jobs:
               && node scripts/fetch-gamma.mjs \
               && node scripts/fetch-revision-provenance.mjs \
               && node scripts/validate-revision-provenance.mjs \
+              && node scripts/build-revision-report.mjs \
               && node scripts/derive-cycle-e.mjs \
               && node - <<'NODE'
           const fs = require('fs');
           const p = JSON.parse(fs.readFileSync('prices.json', 'utf8'));
           const c = JSON.parse(fs.readFileSync('charts.json', 'utf8'));
           const g = JSON.parse(fs.readFileSync('gamma.json', 'utf8'));
+          const rr = JSON.parse(fs.readFileSync('raw/revisions/latest.json', 'utf8'));
           const now = new Date();
           if (now.getUTCHours() >= 20) {
             const today = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()) / 86400000;
@@ -70,7 +73,16 @@ jobs:
             const pr=e.rev.provenance;
             if (!pr?.provider || !pr?.sourceUrl || !pr?.rawRef || !fs.existsSync(pr.rawRef)) throw new Error('unsourced revision survived audit: '+tk);
           }
-          console.log('price freshness + revision provenance validation passed');
+          if (!Array.isArray(rr.rows) || !rr.rows.length) throw new Error('revision report rows missing');
+          for (const r of rr.rows) {
+            for (const k of ['업데이트시점','TP소스','EPS소스','상향하향소스','주가30일90일소스','강등게이트소스','원천데이터']) {
+              if (!r[k]) throw new Error('revision report source/timestamp missing: '+r.티커+' '+k);
+            }
+            for (const k of ['TP이전값','TP현재값','EPS이전값','EPS현재값']) {
+              if (!(k in r)) throw new Error('revision report before/after column missing: '+k);
+            }
+          }
+          console.log('price freshness + revision provenance + report validation passed');
           NODE
             then ok=1; break; fi
             echo "attempt $attempt failed; waiting before retry"
@@ -91,6 +103,7 @@ jobs:
             node scripts/fetch-gamma.mjs
             node scripts/fetch-revision-provenance.mjs
             node scripts/validate-revision-provenance.mjs
+            node scripts/build-revision-report.mjs
             node scripts/derive-cycle-e.mjs
           fi
       - name: Create protected-main PR when changed
@@ -109,4 +122,4 @@ jobs:
           git add $FILES
           git commit -m "chore: update market data + sourced revision snapshots"
           git push origin "$BRANCH"
-          gh pr create --base main --head "$BRANCH" --title "chore: update market data + sourced revisions" --body "Automated market-data refresh. Revision values are retained only when provider metadata and a reproducible raw snapshot are stored under raw/revisions/. Claude PR Gate validates and squash-merges this protected-main PR."
+          gh pr create --base main --head "$BRANCH" --title "chore: update market data + sourced revisions" --body "Automated market-data refresh. Revision values are retained only when provider metadata and a reproducible raw snapshot are stored under raw/revisions/. The generated raw/revisions/latest.csv and latest.json include update timestamps, TP/EPS before-after values, and per-field sources. Claude PR Gate validates and squash-merges this protected-main PR."
