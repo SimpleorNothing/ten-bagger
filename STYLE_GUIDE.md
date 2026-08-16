@@ -442,3 +442,5 @@ pantone.css :root       ← 현행 팔레트 (팬튼 A안, index.html 하단 <li
 - (v1) · 기획 도구 모음 시절 디자인 토큰 문서 — 폐기.
 | nav 하이드레이션 가드 | `#nav{visibility:hidden}` → 자가 마운트(`insight.js`·`brief.js` defer) 재구성 후 인라인 스크립트가 `DOMContentLoaded`→`rAF`에 `.rdy` 부여해 표시. **정적 5탭(옛 라벨) 플래시(FOUC) 억제** · `visibility`라 레이아웃 시프트 0 · 3s 폴백. `</head>` 앞 `#nav-fouc-guard`. |
 - 2026-07-25 22:00 · **nav 새로고침 FOUC 억제.** 정적 `#nav` 5탭(옛 「02 궁금한 것」)이 `insight.js`·`brief.js`(defer) 재구성 전 순간 보이던 문제 → `</head>` 앞 `#nav-fouc-guard`(`#nav{visibility:hidden}`+`DOMContentLoaded`→`rAF` `.rdy`·3s 폴백). §4 「nav 하이드레이션 가드」 행 신설. (OPS §3·§9 동반)
+
+- 2026-08-16 · 추정 리비전 트래커 헤더 액션: 기존 mp-card/mp-hd 시각언어를 유지한 우측 Raw data 다운로드 details 메뉴. 전체 CSV·현재 JSON·누적 이력·종목별 JSON을 한 메뉴에 수직 배치하고 좁은 화면에서는 가로 스크롤/우측 정렬을 유지한다.
