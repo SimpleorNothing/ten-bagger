@@ -1,0 +1,59 @@
+name: Materialize investment attractiveness only
+
+on:
+  push:
+    branches:
+      - fix/investment-attractiveness-only-20260816
+    paths:
+      - 'scripts/apply_dual_rank_ui.py'
+      - '.github/workflows/materialize-investment-attractiveness-only.yml'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/investment-attractiveness-only-20260816
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Apply single-rank UI
+        run: python scripts/apply_dual_rank_ui.py
+      - name: Update OPS
+        shell: python
+        run: |
+          from pathlib import Path
+          p=Path('OPS.md')
+          s=p.read_text(encoding='utf-8')
+          entry='> 2026-08-16 15:19 · **05 투자매력도 단일화.** 추정 리비전 트래커에서 `실제 비중조절` 열과 현재 보유비중·레이어 집중도·동일 레이어 중복노출 감점을 제거했다. 투자매력도는 현재 포트폴리오와 무관한 제로베이스 100점 점수만 사용하며, 점수 기여도는 유지한다. `holdings.json`은 이 순위 계산에 더 이상 읽거나 사용하지 않는다.\n\n'
+          if entry not in s:
+              marker='# OPS — 알파맵 운영 가이드\n\n'
+              if marker in s:s=s.replace(marker,marker+entry,1)
+              else:s=entry+s
+              p.write_text(s,encoding='utf-8')
+      - name: Validate removal
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q 'DUAL_RANK_UI_V3' index.html
+          grep -q '투자매력도' index.html
+          ! grep -A120 'DUAL_RANK_UI_V3' index.html | grep -q '실제 비중조절'
+          ! grep -A120 'DUAL_RANK_UI_V3' index.html | grep -q 'holdings.json'
+          ! grep -A120 'DUAL_RANK_UI_V3' index.html | grep -q 'concentrationPenalty'
+          ! grep -A120 'DUAL_RANK_UI_V3' index.html | grep -q 'overlapPenalty'
+      - name: Commit materialized files
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html OPS.md
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'ui: show investment attractiveness only'
+          git push origin HEAD:fix/investment-attractiveness-only-20260816
