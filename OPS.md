@@ -389,60 +389,55 @@
 
 ---
 
-### 6-8. 투자매력도·EPS 리비전 벤치마크 운영 (2026-08-16 신설)
+### 6-8. 투자매력도 V4 운영 (2026-08-16 개정)
 
-상세 산식과 예시는 [투자매력도 점수 산출 기준](docs/INVESTMENT_ATTRACTIVENESS_SCORE.md)을 단일 설명 문서로 사용한다. 운영 매뉴얼에는 생성·검증·장애 대응 절차만 둔다.
+상세 산식은 [투자매력도 V4 산출 기준](docs/INVESTMENT_ATTRACTIVENESS_SCORE.md)을 단일 기준 문서로 사용한다.
 
-**운영 데이터 흐름**
+**데이터 흐름**
 
-1. `scripts/fetch-revision-benchmark.mjs`가 Nasdaq 공식 API에서 Nasdaq-100 구성 증권을 조회한다.
-2. 각 구성 증권의 Yahoo Finance `earningsTrend`에서 Q1/FY+1의 30일·90일 EPS 리비전을 계산한다.
-3. 지표별 P10·P50·P90과 표본 수를 `revision-benchmark.json`에 기록한다.
-4. 투자매력도는 P10=0점, P90=100점으로 환산한다. P50은 감사용이다.
-5. `update-prices.yml`이 주가·개별 종목 리비전과 함께 벤치마크를 갱신하고 보호된 main에 PR을 만든다.
+1. `fetch-revision-benchmark.mjs`: Nasdaq-100 전체의 EPS 리비전·EPS 성장·Forward P/E·GARP·평점 분포와 순위 백분위 생성
+2. `build-investment-scores.mjs`: `gamma.json`과 벤치마크로 V3·V4 전 종목 계산
+3. `scores.json`: V3·V4·점수차·외생 데이터 점수·내부 판단 보정·커버리지 저장
+4. 화면: 클라이언트 재계산 없이 `scores.json`의 V4 표시
+5. 실제 비중조절: 보유비중·집중도·중복 노출·매크로 게이트를 별도 적용
 
-**정상 판정 기준**
+**정상 판정**
 
-- `schema = revision-benchmark-v1`
-- `universe = Nasdaq-100`
-- 공식 구성 증권 수 90개 이상
-- `q1_c30`, `q1_c90`, `fy1_c30`, `fy1_c90` 각각 유효 표본 50개 이상
-- 모든 지표에서 `P10 < P90`
-- 기준일과 출처가 비어 있지 않음
-- 사용자 화면 툴팁의 기준일·범위가 `revision-benchmark.json`과 일치
+- 벤치마크 스키마 `revision-benchmark-v2`
+- 점수 스키마 `investment-scores-v4`, `displayedModel=v4`
+- 각 벤치마크 유효표본 50개 이상
+- `distributions`와 `ranks` 존재
+- 모든 점수 행에 V3·V4·delta 존재
+- V4 데이터 커버리지 55% 미만 종목은 점수 미표시
+- 화면·`scores.json`·배포 SHA 일치
 
-**정기 점검**
-
-- 매일: `Update stock prices` 워크플로 성공 여부와 자동 PR 병합 여부 확인
-- 매일: 표본 수 급감, 실패 종목 수 증가, P10/P90 역전 여부 확인
-- 월 1회: Nasdaq 구성종목 수와 공식 목록 변경 여부 확인
-- 분기 1회: P10/P90 구간과 점수 분포가 특정 업종에 과도하게 유리한지 검토
-- 모델 변경 시: 마이크론을 포함한 주요 보유종목의 변경 전·후 점수를 비교해 PR 본문에 기록
-
-**수동 재현 명령**
+**수동 검증**
 
 ```bash
 node scripts/fetch-revision-benchmark.mjs
+node scripts/build-investment-scores.mjs
 node --check scripts/fetch-revision-benchmark.mjs
-node -e "const b=require('./revision-benchmark.json'); for(const [k,m] of Object.entries(b.metrics)){if(m.n<50||!(m.p10<m.p90)) throw new Error(k)}; console.log(b.asOf,b.metrics)"
+node --check scripts/build-investment-scores.mjs
+node -e "const s=require('./scores.json'); if(s.schema!=='investment-scores-v4') throw Error('schema'); console.table(Object.values(s.rows).map(x=>({ticker:x.ticker,v3:x.v3.score,v4:x.v4.score,delta:x.delta,coverage:x.v4.coverage})))"
 ```
 
 **장애 대응**
 
-| 증상 | 확인 | 조치 |
-|---|---|---|
-| Nasdaq 구성종목 조회 실패 | Nasdaq API HTTP 상태와 응답 행 수 | 직전 기준 자동 재사용 금지. 워크플로 실패 유지 후 공식 API 복구 확인 |
-| Yahoo 다수 종목 조회 실패 | `failedCount`와 `failures` | 인증 crumb/cookie, 호출 제한, 응답 스키마 확인 후 재실행 |
-| 유효 표본 50개 미만 | 지표별 `n` | 점수 적용 중단. EPS 기간 또는 데이터 제공자 스키마 변경 여부 확인 |
-| P10과 P90 동일·역전 | 원자료 분포와 파싱 결과 | 벤치마크 파일 병합 금지. 퍼센트 계산 분모와 EPS 음수 처리 확인 |
-| 화면 점수와 재현값 불일치 | 기준일, `gamma.json`, `revision-benchmark.json` | 같은 기준일 파일로 재계산하고 캐시·배포 SHA 확인 |
-| 점수가 일시에 크게 변함 | 원자료 변화와 벤치마크 변화 분리 | 개별 EPS 변화인지 모집단 분포 이동인지 나눠 변경 이력에 기록 |
+| 증상 | 처리 |
+|---|---|
+| 벤치마크 수집 실패·표본 미달 | 워크플로 실패. 이전 기준 조용한 재사용 금지 |
+| `scores.json` 누락·스키마 불일치 | 화면에 ‘산출 실패’ 표시, 점수 셀 부분 렌더 금지 |
+| V3·V4 차이 급증 | 원자료·벤치마크·모델 효과를 분리해 PR에 기록 |
+| 특정 업종 점수 편향 | Nasdaq-100 분포와 업종별 가격배수 적합성 검토 |
+| 화면과 스냅샷 불일치 | 캐시·배포 SHA·기준일 확인 |
+| 자동 PR 미병합 | Claude PR Gate 결과와 보호규칙 확인 후 원인 수정 |
 
 **변경 통제**
 
-- 가중치·환산법·백분위·감점 규칙을 바꿀 때는 `scripts/apply_zero_base_investment_score.py`, `index.html`, 산출 기준 문서와 본 절을 같은 PR에서 수정한다.
-- 임의 숫자 임계값을 추가하지 않는다. 불가피한 휴리스틱은 이름·근거·한계와 검토 일정을 문서에 명시한다.
-- 점수 모델 변경 PR은 실제 종목 1개 이상의 계산 예시와 변경 전·후 점수를 포함해야 한다.
+- 가중치·순위법·보정·라벨 변경은 산출 코드, UI, 기준 문서, OPS, 변경 이력을 같은 PR에서 수정한다.
+- 기존 모델을 즉시 삭제하지 않고 `scores.json`에 비교 모델로 보존한다.
+- 외생 데이터와 내부 판단값을 한 항목에 혼합하지 않는다.
+- 실제 비중조절 우선순위를 제로베이스 투자매력도와 혼동하지 않는다.
 
 ## 7. 자기갱신 매핑표 (무엇이 바뀌면 어디를 고치나)
 
@@ -492,6 +487,8 @@ node -e "const b=require('./revision-benchmark.json'); for(const [k,m] of Object
 - 2026-07-27 23:40 · **02 aisd ③ 4사 재무 숫자·성장률 재산정.** 오류가 있던 입력표를 그대로 사용하지 않고 2023~25 공시 실적, 26E 컨센서스/가이던스, 27~28E 저신뢰 전망으로 층위를 분리. 매출 성장률 24A +14%·25A +15%·26E +19%·27E +17%·28E +13%; CAPEX·FCF·영업이익·회사별 상세·설명·출처 동기화. narrative≠numbers 규율에 따라 과거 signal_log 캡처는 불변. STYLE_GUIDE 동반.
 
 ## 9. 갱신 이력
+
+- 2026-08-16: 투자매력도 V4 전환 — 순위 백분위, 중복 감점 제거, 외생 데이터·내부 판단 분리, scores.json 감사 스냅샷 추가
 
 - 2026-08-16: Nasdaq-100 EPS 리비전 백분위 기반 투자매력도 산출·검증·장애 대응 절차와 상세 산식 문서 추가
 
