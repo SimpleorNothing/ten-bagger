@@ -19,6 +19,7 @@ const FRESH_PATHS = new Set([
   "/changelog.js",
   "/capital-scarcity.js",
   "/site-change-commits.json",
+  "/site-change-live.js",
   "/topic-radar-sync.js",
 ]);
 
@@ -118,12 +119,13 @@ async function topicRadarPrefsResponse(request, env) {
   return jsonResponse({ ok: true, hidden }, 200);
 }
 
-async function injectTopicRadarSync(response) {
+async function injectSiteEnhancements(response) {
   if (!response || !response.ok) return response;
   const contentType = response.headers.get("content-type") || "";
   if (!contentType.includes("text/html")) return response;
   const transformed = new HTMLRewriter()
     .on("body", { element(el) {
+      el.append('<script src="/site-change-live.js?v=20260816-live-verified" defer></scr' + 'ipt>', { html: true });
       el.append('<script src="/topic-radar-sync.js?v=20260816-server-delete-sync" defer></scr' + 'ipt>', { html: true });
     } })
     .transform(response);
@@ -176,7 +178,7 @@ export default {
       return patchChangelogResponse(response);
     }
     if ((request.method === "GET" || request.method === "HEAD") && (url.pathname === "/" || url.pathname === "/index.html")) {
-      return injectTopicRadarSync(response);
+      return injectSiteEnhancements(response);
     }
     if ((request.method === "GET" || request.method === "HEAD") &&
         (FRESH_PATHS.has(url.pathname) || url.pathname.startsWith("/raw/revisions/"))) {
