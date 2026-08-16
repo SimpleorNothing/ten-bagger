@@ -10,6 +10,7 @@ on:
       - 'scripts/fetch-gamma.mjs'
       - 'scripts/fetch-revision-provenance.mjs'
       - 'scripts/validate-revision-provenance.mjs'
+      - 'scripts/audit-revision-integrity.mjs'
       - 'scripts/build-revision-report.mjs'
   schedule:
     - cron: '5 21 * * *'
@@ -47,6 +48,7 @@ jobs:
               && node scripts/fetch-gamma.mjs \
               && node scripts/fetch-revision-provenance.mjs \
               && node scripts/validate-revision-provenance.mjs \
+              && node scripts/audit-revision-integrity.mjs \
               && node scripts/build-revision-report.mjs \
               && node scripts/derive-cycle-e.mjs \
               && node - <<'NODE'
@@ -68,21 +70,24 @@ jobs:
             if (asOfDay !== now.toISOString().slice(0, 10)) throw new Error('stale prices.asOf: expected ' + now.toISOString().slice(0, 10) + ', got ' + asOfDay);
           }
           if (!g.revisionAudit) throw new Error('revisionAudit missing');
+          if (!g.revisionIntegrity) throw new Error('revisionIntegrity missing');
           for (const [tk,e] of Object.entries(g.gamma || {})) {
             if (!e.rev) continue;
             const pr=e.rev.provenance;
             if (!pr?.provider || !pr?.sourceUrl || !pr?.rawRef || !fs.existsSync(pr.rawRef)) throw new Error('unsourced revision survived audit: '+tk);
+            if (!e.rev.quality?.fields) throw new Error('semantic quality missing: '+tk);
+            if (e.rev.quality.fields.eps !== 'verified' && e.rev.eps) throw new Error('blocked EPS survived scoring gate: '+tk);
           }
           if (!Array.isArray(rr.rows) || !rr.rows.length) throw new Error('revision report rows missing');
           for (const r of rr.rows) {
-            for (const k of ['업데이트시점','TP소스','EPS소스','상향하향소스','주가30일90일소스','강등게이트소스','원천데이터']) {
-              if (!r[k]) throw new Error('revision report source/timestamp missing: '+r.티커+' '+k);
+            for (const k of ['업데이트시점','데이터검증상태','TP소스','EPS소스','주가30일90일소스','원천데이터','EPS기간검증','EPS스코어사용여부']) {
+              if (!(k in r) || r[k] === '') throw new Error('revision report audit field missing: '+r.티커+' '+k);
             }
-            for (const k of ['TP이전값','TP현재값','EPS이전값','EPS현재값']) {
-              if (!(k in r)) throw new Error('revision report before/after column missing: '+k);
+            for (const k of ['TP이전값','TP현재값','EPS현재연도값','EPS다음연도값','EPS다음연도30일전','EPS다음연도90일전']) {
+              if (!(k in r)) throw new Error('revision report audit column missing: '+k);
             }
           }
-          console.log('price freshness + revision provenance + report validation passed');
+          console.log('price freshness + provenance + semantic integrity + report validation passed');
           NODE
             then ok=1; break; fi
             echo "attempt $attempt failed; waiting before retry"
@@ -103,6 +108,7 @@ jobs:
             node scripts/fetch-gamma.mjs
             node scripts/fetch-revision-provenance.mjs
             node scripts/validate-revision-provenance.mjs
+            node scripts/audit-revision-integrity.mjs
             node scripts/build-revision-report.mjs
             node scripts/derive-cycle-e.mjs
           fi
@@ -120,6 +126,6 @@ jobs:
           BRANCH="claude/automation-update-prices-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
           git switch -c "$BRANCH"
           git add $FILES
-          git commit -m "chore: update market data + sourced revision snapshots"
+          git commit -m "chore: update market data + integrity-audited revisions"
           git push origin "$BRANCH"
-          gh pr create --base main --head "$BRANCH" --title "chore: update market data + sourced revisions" --body "Automated market-data refresh. Revision values are retained only when provider metadata and a reproducible raw snapshot are stored under raw/revisions/. The generated raw/revisions/latest.csv and latest.json include update timestamps, TP/EPS before-after values, and per-field sources. Claude PR Gate validates and squash-merges this protected-main PR."
+          gh pr create --base main --head "$BRANCH" --title "chore: update market data + integrity-audited revisions" --body "Automated market-data refresh. Raw provider snapshots are retained, then reproducibility and semantic integrity gates validate price/TP/EPS separately. Ambiguous fiscal-period EPS is excluded from ranking rather than carried forward. raw/revisions/latest.csv and latest.json expose period semantics, before/after values, quality status, and per-field sources. Claude PR Gate validates and squash-merges this protected-main PR."
