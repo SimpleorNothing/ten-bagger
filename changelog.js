@@ -9,6 +9,7 @@
     thread:'2026-08-01', decision:'2026-08-01', brief:'2026-08-01', memo:'2026-08-01'
   };
   var MKT_CHANGELOG=[
+    {d:'2026-08-16',t:'05 추정 리비전 트래커의 목표가 상승여력 수치 아래에 0~100% 동일 기준 가로 막대를 추가해 종목 간 여력을 한눈에 비교'},
     {d:'2026-08-13',t:'사이트 변경 이력에 커밋 이력 자동 보충을 복구 — 수기 등록이 누락돼도 이후 변경이 목록에 자동으로 채워지고, 시세·뉴스 갱신 같은 내부 작업 커밋은 제외'},
     {d:'2026-08-13',t:'01 SIGNAL_LOG에 TSMC 8/11 이사회 자본전용 $294.4억 승인 반영 — 첨단패키징 배분·CY26 CAPEX 가이던스 상향을 L4 소부장·L2 상류 수요 관측으로 기록(숫자 파일 불변)'},
     {d:'2026-08-13',t:'01 미국 CPI 7월분 공식값 반영 — 헤드라인 전월비 +0.1%·전년비 +3.4%, 근원 전월비 +0.2%·전년비 +2.5%; CPI 시계열·캘린더·시장 맥락 동기화'},
@@ -206,6 +207,12 @@
     var s=document.createElement('script');s.id='raerJs';s.src='/raer.js';s.defer=true;
     (document.body||document.documentElement).appendChild(s);
   }
+  // 05 목표가 상승여력 수치 아래 공통 스케일 막대(upside-bars.js 자가 마운트).
+  function loadUpsideBars(){
+    if(document.getElementById('upsideBarsJs'))return;
+    var s=document.createElement('script');s.id='upsideBarsJs';s.src='/upside-bars.js?v=20260816';s.defer=true;
+    (document.body||document.documentElement).appendChild(s);
+  }
   // 01 시장 모니터링 「리스크 보드」 로더(risk.js 자가 마운트).
   // 보유 종목 스파크라인 섹션 제거 + 리스크 3축 보드 주입을 함께 맡는다.
   function loadRisk(){
@@ -257,6 +264,7 @@
     mountThreadAisd();
     loadAutoHistory();
     loadRaer();                                     // 추정 리비전 트래커 기대수익 컬럼
+    loadUpsideBars();                               // 목표가 상승여력 공통 스케일 막대
     loadRisk();                                     // 01 리스크 3축 보드
     loadGates();                                        // 01 사이클 판별 보드(AI capex 4지표)
     loadTrade();                                    // 01 통합 지표 반도체 수출 카드
