@@ -16,7 +16,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - name: Restore PPI context and prevent CPI overwrite
+      - name: Restore CPI + PPI market context
         run: |
           node <<'NODE'
           const fs=require('fs');
@@ -35,14 +35,6 @@ jobs:
             {t:'BLS Producer Price Index - July 2026',u:'https://www.bls.gov/news.release/ppi.nr0.htm',d:'2026-08-13'}
           ];
           fs.writeFileSync(p,JSON.stringify(q,null,2)+'\n');
-
-          const sfile='scripts/sync-us-cpi-release.mjs';
-          let s=fs.readFileSync(sfile,'utf8');
-          const old=`    rates.l1 = \`${month}월 CPI 전년비 \${headlineYoy.toFixed(1)}%, 근원 CPI \${coreYoy.toFixed(1)}%로 직전월보다 둔화\`;\n    rates.l2 = \`헤드라인 CPI 전월비 \${fmt(headlineMom)}, 근원 \${fmt(coreMom)}로 물가 재가속 우려가 완화됐다. Fed의 금리경로에는 완화적 입력이며 고밸류 AI 인프라의 할인율·조달비용 부담을 일부 낮추는 방향.\`;\n    rates.verdict = '물가 둔화 · 금리 부담 완화';\n    rates.srcs = [{t:\`BLS Consumer Price Index - \${monthName} \${year}\`,u:URL,d:releaseDate}];`;
-          const neu=`    const existingPpi = Array.isArray(rates.srcs) ? rates.srcs.find(x => /producer price|ppi/i.test(String(x?.t||'')) || /ppi\\.nr0/.test(String(x?.u||''))) : null;\n    if (existingPpi) {\n      rates.dir = 'neutral';\n      rates.l1 = \`${month}월 CPI는 둔화했지만 최근 PPI의 기조 생산단 물가 압력은 병존\`;\n      rates.l2 = \`헤드라인 CPI 전월비 \${fmt(headlineMom)}·전년비 \${fmt(headlineYoy)}, 근원 CPI 전월비 \${fmt(coreMom)}·전년비 \${fmt(coreYoy)}로 소비자물가는 둔화했다. 다만 최근 공식 PPI에서 확인된 기조 생산단 물가 압력도 함께 보존해 금리경로를 혼재로 판단한다.\`;\n      rates.verdict = 'CPI 둔화 vs 기조 PPI 압력 · 혼재';\n      rates.srcs = [{t:\`BLS Consumer Price Index - \${monthName} \${year}\`,u:URL,d:releaseDate}, existingPpi];\n    } else {\n      rates.l1 = \`${month}월 CPI 전년비 \${headlineYoy.toFixed(1)}%, 근원 CPI \${coreYoy.toFixed(1)}%로 직전월보다 둔화\`;\n      rates.l2 = \`헤드라인 CPI 전월비 \${fmt(headlineMom)}, 근원 \${fmt(coreMom)}로 물가 재가속 우려가 완화됐다. Fed의 금리경로에는 완화적 입력이며 고밸류 AI 인프라의 할인율·조달비용 부담을 일부 낮추는 방향.\`;\n      rates.verdict = '물가 둔화 · 금리 부담 완화';\n      rates.srcs = [{t:\`BLS Consumer Price Index - \${monthName} \${year}\`,u:URL,d:releaseDate}];\n    }`;
-          if(!s.includes(old)) throw new Error('CPI pulse block target not found');
-          s=s.replace(old,neu);
-          fs.writeFileSync(sfile,s);
           NODE
       - name: Validate and commit
         run: |
