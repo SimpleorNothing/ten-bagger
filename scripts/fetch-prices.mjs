@@ -71,6 +71,7 @@ function yahooSymbol(ticker, mkt) {
     case 'TSE': return ticker + '.T';
     case 'KOSPI': return ticker + '.KS';
     case 'KOSDAQ': return ticker + '.KQ';
+    case 'Euronext(삼성증권 통로)': return ticker + '.AS';
     case 'INDEX': return ticker;
     default: return null;
   }
