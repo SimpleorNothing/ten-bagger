@@ -6322,7 +6322,19 @@ function renderInstantAnswer(){
       ? '<div class="mp-note" style="border-top:none;padding-top:0;color:var(--st-hot)">리비전 미수집 '+pend+'종목 — 다음 크론(06:37 KST · update-prices)에서 채워집니다.</div>'
       : '';
 
-    el.innerHTML='<div class="mp-card"><div class="mp-hd">추정 리비전 트래커 <span class="sub">gamma '+asOf+' · TP·EPS 리비전 · 강등 게이트</span></div>'
+    var rawItems=rows.map(function(o){
+      var pr=o.r&&o.r.provenance,ref=pr&&pr.rawRef;
+      return ref?'<a href="/'+ref+'" download style="display:block;padding:6px 10px;color:var(--txt);text-decoration:none;white-space:nowrap;border-top:1px solid var(--line)">'+(NM[o.tk]||o.tk)+' <span style="color:var(--faint)">'+o.tk+' · JSON</span></a>':'';
+    }).join('');
+    var rawMenu='<details id="revRawMenu" style="position:relative;margin-left:auto">'
+      +'<summary style="list-style:none;cursor:pointer;border:1px solid var(--line);border-radius:7px;padding:6px 10px;font-size:12px;color:var(--txt);background:var(--panel)">Raw data 다운로드</summary>'
+      +'<div style="position:absolute;right:0;top:calc(100% + 5px);z-index:30;min-width:230px;max-height:360px;overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.18)">'
+      +'<button type="button" id="revCsvDownload" style="width:100%;text-align:left;border:0;background:none;padding:8px 10px;color:var(--txt);cursor:pointer;font:inherit">현재 표 전체 · CSV</button>'
+      +'<a href="/gamma.json" download style="display:block;padding:8px 10px;color:var(--txt);text-decoration:none;border-top:1px solid var(--line)">현재 전체 데이터 · JSON</a>'
+      +'<a href="/raw/revisions/index.json" download style="display:block;padding:8px 10px;color:var(--txt);text-decoration:none;border-top:1px solid var(--line)">업데이트 누적 이력 · JSON</a>'
+      +rawItems+'</div></details>';
+
+    el.innerHTML='<div class="mp-card"><div class="mp-hd" style="display:flex;align-items:center;gap:10px"><span>추정 리비전 트래커 <span class="sub">gamma '+asOf+' · TP·EPS 리비전 · 강등 게이트</span></span>'+rawMenu+'</div>'
       +(rows.length?'<div style="padding:11px 16px 0;font-size:12.5px;line-height:1.55;color:var(--txt)">'+verdict+'</div>':'')
       +'<div style="overflow-x:auto"><table class="pe-tbl"><thead><tr>'
         +'<th>종목</th>'
@@ -6335,6 +6347,17 @@ function renderInstantAnswer(){
         +'<th class="c">★ 강등 게이트<br><span style="font-weight:400;color:var(--faint)">주가−EPS, 30d</span></th>'
       +'</tr></thead><tbody>'+(body||'<tr><td colspan="8" style="color:var(--faint);padding:14px">리비전 수집 대기</td></tr>')+'</tbody></table></div>'
       +pendMsg
+    var csvBtn=document.getElementById('revCsvDownload');
+    if(csvBtn)csvBtn.addEventListener('click',function(){
+      var cols=['종목','티커','목표가','상승여력(%)','TP리비전7일(%)','TP리비전30일(%)','FY+1 EPS','EPS리비전30일(%)','EPS리비전90일(%)','상향30일','하향30일','주가30일(%)','주가90일(%)','강등게이트30일(%p)','원천데이터'];
+      var val=function(v){return v==null?'':v;};
+      var lines=[cols].concat(rows.map(function(o){var r=o.r,f=o.f1||{},tp=r.tp||{},px=r.px||{},pr=r.provenance||{};return [NM[o.tk]||o.tk,o.tk,val(tp.now),val(o.e.pct),val(tp.c7),val(tp.c30),val(f.now),val(f.c30),val(f.c90),val(f.up30),val(f.dn30),val(px.c30),val(px.c90),val(o.gate),val(pr.rawRef)];}));
+      var csv='\ufeff'+lines.map(function(a){return a.map(function(v){return '"'+String(v).replace(/"/g,'""')+'"';}).join(',');}).join('\r\n');
+      var url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'})),a=document.createElement('a');
+      a.href=url;a.download='revision-tracker-'+asOf+'.csv';document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url);},0);
+      var d=document.getElementById('revRawMenu');if(d)d.open=false;
+    });
+
       +'<div class="mp-note"><b>강등 게이트(§2-4)</b> = 30일 주가 변화율 − 30일 EPS(FY+1) 리비전율. '
         +'<b style="color:var(--st-hot)">양수 = 가격이 추정을 추월</b>(성숙 강등 후보) · '
         +'<b style="color:var(--st-dawn)">음수 = 추정이 앞섬</b>(γ open 유지). '

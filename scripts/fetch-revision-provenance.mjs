@@ -74,8 +74,11 @@ function normalize(sym,url,res,retrievedAt){
 }
 
 const g=JSON.parse(fs.readFileSync(GAMMA,'utf8'));
-const day=new Date().toISOString().slice(0,10);
-const dir=path.join(OUT_ROOT,day);fs.mkdirSync(dir,{recursive:true});
+const runAt=new Date().toISOString();
+const day=runAt.slice(0,10);
+const runKey=runAt.replace(/[:.]/g,'-');
+const dir=path.join(OUT_ROOT,day,runKey);fs.mkdirSync(dir,{recursive:true});
+const run={retrievedAt:runAt,day,files:[]};
 await auth();
 let ok=0,fail=0;
 for(const [tk,e] of Object.entries(g.gamma||{})){
@@ -86,6 +89,7 @@ for(const [tk,e] of Object.entries(g.gamma||{})){
     const snap=normalize(sym,url,res,retrievedAt);
     const ref=path.join(dir,`${tk}.json`).replaceAll('\\','/');
     fs.writeFileSync(ref,JSON.stringify(snap,null,2)+'\n');
+    run.files.push({ticker:tk,symbol:sym,ref,provider:snap.provider,retrievedAt});
     e.rev=e.rev||{};
     e.rev.provenance={provider:'Yahoo Finance',sourceUrl:snap.sourceUrl,retrievedAt,rawRef:ref,schema:snap.schema};
     ok++;
@@ -98,4 +102,13 @@ for(const [tk,e] of Object.entries(g.gamma||{})){
   await sleep(250);
 }
 fs.writeFileSync(GAMMA,JSON.stringify(g,null,2)+'\n');
-console.log(`revision provenance: ${ok} ok, ${fail} failed`);
+const indexPath=path.join(OUT_ROOT,'index.json');
+let history={schema:'revision-history-v1',updatedAt:runAt,runs:[]};
+try{
+  const prev=JSON.parse(fs.readFileSync(indexPath,'utf8'));
+  if(prev&&Array.isArray(prev.runs))history.runs=prev.runs;
+}catch{}
+history.updatedAt=runAt;
+history.runs.push(run);
+fs.writeFileSync(indexPath,JSON.stringify(history,null,2)+'\n');
+console.log(`revision provenance: ${ok} ok, ${fail} failed -> ${dir}; history runs ${history.runs.length}`);
