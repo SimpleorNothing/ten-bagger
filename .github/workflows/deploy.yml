@@ -110,7 +110,8 @@ jobs:
           set -euo pipefail
           DEPLOYED_AT=$(date -u +%Y-%m-%dT%H:%M:%SZ)
           for attempt in 1 2 3; do
-            if wrangler deploy --var DEPLOY_SHA:"${GITHUB_SHA}" --var DEPLOYED_AT:"${DEPLOYED_AT}"; then
+            # Wrangler 공식 형식은 각 --var를 하나의 "KEY:VALUE" 인자로 전달한다.
+            if wrangler deploy --var "DEPLOY_SHA:${GITHUB_SHA}" --var "DEPLOYED_AT:${DEPLOYED_AT}"; then
               exit 0
             fi
             if [ "$attempt" -eq 3 ]; then
