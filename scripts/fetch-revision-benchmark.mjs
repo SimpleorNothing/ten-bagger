@@ -40,18 +40,25 @@ function periodRevision(trend, period) {
   const t = trend.find((x) => x?.period === period);
   const e = t?.epsTrend || {};
   const now = num(e.current);
-  return { c30: changePct(now, num(e['30daysAgo'])), c90: changePct(now, num(e['90daysAgo'])) };
+  return { now, c30: changePct(now, num(e['30daysAgo'])), c90: changePct(now, num(e['90daysAgo'])) };
 }
 
 async function revisions(symbol) {
   const q = crumb && !crumb.includes('<') ? `&crumb=${encodeURIComponent(crumb)}` : '';
-  const url = `https://query1.finance.yahoo.com/v10/finance/quoteSummary/${encodeURIComponent(symbol)}?modules=earningsTrend${q}`;
+  const url = `https://query1.finance.yahoo.com/v10/finance/quoteSummary/${encodeURIComponent(symbol)}?modules=earningsTrend,financialData${q}`;
   const r = await fetch(url, { headers: { ...UA, ...(cookie ? { Cookie: cookie } : {}) } });
   if (!r.ok) throw new Error(`Yahoo ${symbol} HTTP ${r.status}`);
   const j = await r.json();
-  const trend = j?.quoteSummary?.result?.[0]?.earningsTrend?.trend;
+  const result = j?.quoteSummary?.result?.[0];
+  const trend = result?.earningsTrend?.trend;
   if (!Array.isArray(trend)) throw new Error(`Yahoo ${symbol} earningsTrend missing`);
-  return { q1: periodRevision(trend, '+1q'), fy1: periodRevision(trend, '+1y') };
+  const q1 = periodRevision(trend, '+1q'), fy1 = periodRevision(trend, '+1y'), fy0 = periodRevision(trend, '0y');
+  const price = num(result?.financialData?.currentPrice);
+  const rating = num(result?.financialData?.recommendationMean);
+  const epsGrowth = fy1.now > 0 && fy0.now > 0 ? (fy1.now / fy0.now - 1) * 100 : null;
+  const fwdPE = price > 0 && fy1.now > 0 ? price / fy1.now : null;
+  const garp = epsGrowth != null && epsGrowth > 0 && fwdPE > 0 ? epsGrowth / fwdPE : null;
+  return { q1, fy1, fy0, price, rating, epsGrowth, fwdPE, garp };
 }
 
 function percentile(values, p) {
@@ -72,6 +79,20 @@ function metric(rows, path) {
   };
 }
 
+function rankMap(rows, valueOf) {
+  const valid = rows.map((r) => ({ symbol: r.symbol, value: valueOf(r) })).filter((r) => Number.isFinite(r.value)).sort((a, b) => a.value - b.value);
+  const out = {};
+  for (let i = 0; i < valid.length;) {
+    let j = i;
+    while (j + 1 < valid.length && valid[j + 1].value === valid[i].value) j++;
+    const mid = (i + j) / 2;
+    const pct = valid.length === 1 ? 50 : mid / (valid.length - 1) * 100;
+    for (let k = i; k <= j; k++) out[valid[k].symbol] = +pct.toFixed(2);
+    i = j + 1;
+  }
+  return out;
+}
+
 const official = await constituents();
 await yahooAuth();
 const rows = [];
@@ -86,19 +107,25 @@ const metrics = {
   q1_c90: metric(rows, ['q1', 'c90']),
   fy1_c30: metric(rows, ['fy1', 'c30']),
   fy1_c90: metric(rows, ['fy1', 'c90']),
+  eps_growth: metric(rows, ['epsGrowth']),
+  fwd_pe: metric(rows, ['fwdPE']),
+  garp: metric(rows, ['garp']),
+  rating: metric(rows, ['rating']),
 };
 for (const [name, m] of Object.entries(metrics)) {
   if (m.n < MIN_SAMPLE || !(m.p10 < m.p90)) throw new Error(`invalid benchmark ${name}: ${JSON.stringify(m)}`);
 }
 const output = {
-  schema: 'revision-benchmark-v1',
+  schema: 'revision-benchmark-v2',
   asOf: new Date().toISOString(),
   universe: 'Nasdaq-100',
   constituentCount: official.symbols.length,
   constituentAsOf: official.asOf,
-  methodology: 'Nasdaq-100 cross-section; P10=0, P90=100; linear interpolation; winsorized outside anchors',
+  methodology: 'Nasdaq-100 cross-section; empirical mid-rank percentile; P50=50; P10/P50/P90 retained for audit',
   minimumSample: MIN_SAMPLE,
   metrics,
+  distributions: {},
+  ranks: Object.fromEntries(official.symbols.map((symbol) => [symbol, {}])),
   sources: {
     constituents: { provider: 'Nasdaq', url: official.url },
     revisions: { provider: 'Yahoo Finance', module: 'quoteSummary.earningsTrend' },
@@ -106,5 +133,15 @@ const output = {
   failedCount: failures.length,
   failures,
 };
+const rankFields = {
+  q1_c30: (r) => r.q1?.c30, q1_c90: (r) => r.q1?.c90,
+  fy1_c30: (r) => r.fy1?.c30, fy1_c90: (r) => r.fy1?.c90,
+  eps_growth: (r) => r.epsGrowth, fwd_pe: (r) => r.fwdPE,
+  garp: (r) => r.garp, rating: (r) => r.rating,
+};
+for (const [key, getter] of Object.entries(rankFields)) {
+  output.distributions[key] = rows.map(getter).filter(Number.isFinite).sort((a, b) => a - b).map((v) => +v.toFixed(4));
+  for (const [symbol, rank] of Object.entries(rankMap(rows, getter))) output.ranks[symbol][key] = rank;
+}
 fs.writeFileSync(OUT, JSON.stringify(output, null, 2) + '\n');
 console.log(`wrote ${OUT}: ${rows.length}/${official.symbols.length} symbols, ${failures.length} failures`);
