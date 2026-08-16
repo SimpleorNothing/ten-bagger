@@ -7,6 +7,10 @@ const required = [
   "prices.json", "charts.json", "signals.json", "gamma.json", "cycle.json",
   ".github/workflows/update-prices.yml",
   "scripts/apply_dual_rank_ui.py",
+  "scripts/fetch-revision-provenance.mjs",
+  "scripts/validate-revision-provenance.mjs",
+  "scripts/audit-revision-integrity.mjs",
+  "scripts/build-revision-report.mjs",
 ];
 
 const fail = (message) => { console.error("::error::" + message); process.exitCode = 1; };
@@ -59,6 +63,17 @@ for (const cron of ["5 21 * * *", "35 21 * * *", "52 7 * * *"]) {
 if (!/node scripts\/fetch-gamma\.mjs/.test(priceWorkflow)) fail("update-prices.yml no longer refreshes gamma.json");
 if (!/node scripts\/fetch-revision-provenance\.mjs/.test(priceWorkflow)) fail("update-prices.yml no longer stores revision provenance");
 if (!/node scripts\/validate-revision-provenance\.mjs/.test(priceWorkflow)) fail("update-prices.yml no longer validates revision provenance");
+if (!/node scripts\/audit-revision-integrity\.mjs/.test(priceWorkflow)) fail("update-prices.yml no longer runs semantic revision integrity gate");
+if (!/node scripts\/build-revision-report\.mjs/.test(priceWorkflow)) fail("update-prices.yml no longer builds auditable revision report");
+
+const integrity = read("scripts/audit-revision-integrity.mjs");
+for (const token of ["currentPrice divergence","target mean outside range","annual EPS period structure invalid","rollover-stale","scoringEligible"]){
+  if (!integrity.includes(token)) fail("semantic integrity rule missing: " + token);
+}
+const report = read("scripts/build-revision-report.mjs");
+for (const token of ["EPS현재연도값","EPS다음연도값","EPS다음연도30일전","EPS다음연도90일전","EPS기간검증","EPS스코어사용여부"]){
+  if (!report.includes(token)) fail("revision audit report field missing: " + token);
+}
 
 const rankUi = read("scripts/apply_dual_rank_ui.py");
 if (!/fetch\('\.\/gamma\.json',\{cache:'no-store'\}\)/.test(rankUi)) fail("investment-attractiveness gamma fetch must be no-store");
@@ -79,4 +94,4 @@ const changelog = read("changelog.js");
 if (!/MKT_CHANGELOG\s*=\s*\[/.test(changelog)) fail("changelog.js MKT_CHANGELOG missing");
 
 if (process.exitCode) process.exit(1);
-console.log("OPS daily audit passed: required files, data freshness, revision cadence, zero-base investment-attractiveness ranking, chart integrity, cache-buster, and changelog linkage.");
+console.log("OPS daily audit passed: required files, data freshness, revision provenance + semantic integrity wiring, zero-base investment-attractiveness ranking, chart integrity, cache-buster, and changelog linkage.");
