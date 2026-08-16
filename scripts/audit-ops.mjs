@@ -5,6 +5,7 @@ import fs from "node:fs";
 const required = [
   "OPS.md", "STYLE_GUIDE.md", "index.html", "changelog.js",
   "prices.json", "charts.json", "signals.json", "gamma.json", "cycle.json",
+  "revision-tracker-fix.js",
   ".github/workflows/update-prices.yml",
   "scripts/apply_dual_rank_ui.py",
   "scripts/fetch-revision-provenance.mjs",
@@ -75,6 +76,12 @@ for (const token of ["EPS현재연도값","EPS다음연도값","EPS다음연도3
   if (!report.includes(token)) fail("revision audit report field missing: " + token);
 }
 
+const tracker = read("revision-tracker-fix.js");
+try { new Function(tracker); } catch (e) { fail("revision-tracker-fix.js syntax error: " + e.message); }
+for (const token of ["TARGET_YEAR=(new Date()).getFullYear()+1","yearOf(candidates[i].end)===TARGET_YEAR","현재가<br>","px/eps","fetch('/prices.json?t='"]) {
+  if (!tracker.includes(token)) fail("forward metric tracker rule missing: " + token);
+}
+
 const rankUi = read("scripts/apply_dual_rank_ui.py");
 if (!/fetch\('\.\/gamma\.json',\{cache:'no-store'\}\)/.test(rankUi)) fail("investment-attractiveness gamma fetch must be no-store");
 if (/fetch\('\.\/holdings\.json'/.test(rankUi)) fail("investment-attractiveness ranking must not fetch holdings.json");
@@ -94,4 +101,4 @@ const changelog = read("changelog.js");
 if (!/MKT_CHANGELOG\s*=\s*\[/.test(changelog)) fail("changelog.js MKT_CHANGELOG missing");
 
 if (process.exitCode) process.exit(1);
-console.log("OPS daily audit passed: required files, data freshness, revision provenance + semantic integrity wiring, zero-base investment-attractiveness ranking, chart integrity, cache-buster, and changelog linkage.");
+console.log("OPS daily audit passed: required files, data freshness, revision provenance + semantic integrity wiring, calendar-year forward EPS/PER tracker, zero-base investment-attractiveness ranking, chart integrity, cache-buster, and changelog linkage.");
