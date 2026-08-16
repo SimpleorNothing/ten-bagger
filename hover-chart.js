@@ -6,6 +6,9 @@
    이벤트는 document 위임 → renderAll 재렌더에도 리바인딩 불필요. 터치 기기는 기존 클릭(드로어) 유지. */
 (function () {
   'use strict';
+  // 04 시장·실적전망과 05 알파맵의 종목 호버 차트 기본 기간.
+  // 차트 데이터·수익률·표시 라벨이 항상 같은 기간을 사용하도록 단일 상수로 고정한다.
+  var DEFAULT_RANGE = '1Y';
   if (!matchMedia('(hover:hover)').matches) return; // 터치 전용 기기는 기존 탭→드로어 흐름 유지
   if (typeof C === 'undefined') return;             // 잠금 페이지 등 대시보드가 아닌 HTML
 
@@ -78,18 +81,18 @@
     var sc = (typeof STAGE_HEX !== 'undefined' && STAGE_HEX[co.stage]) || '#5c6f7e';
     var px = q && q.price != null ? money(q.price, q.currency) : '—';
     var ytd = q && q.changePct != null ? ('YTD ' + (q.changePct >= 0 ? '▲' : '▼') + Math.abs(Math.round(q.changePct)) + '%') : '';
-    var y1 = '';
+    var rangeChange = '';
     if (s) {
       var r1 = (s.c[s.c.length - 1] / s.c[0] - 1) * 100;
-      y1 = (ytd ? ' · ' : '') + '1Y ' + (r1 >= 0 ? '▲' : '▼') + Math.abs(Math.round(r1)) + '%';
+      rangeChange = (ytd ? ' · ' : '') + DEFAULT_RANGE + ' ' + (r1 >= 0 ? '▲' : '▼') + Math.abs(Math.round(r1)) + '%';
     }
-    var chart = s ? chartSVG(s) : '<div class="pxp-none">1Y 차트 데이터 준비 전 — 다음 시세 크론(06:37 KST) 이후 표시</div>';
+    var chart = s ? chartSVG(s) : '<div class="pxp-none">' + DEFAULT_RANGE + ' 차트 데이터 준비 전 — 다음 시세 크론(06:37 KST) 이후 표시</div>';
     var asof = CHARTS_ASOF || (typeof PRICES_ASOF !== 'undefined' ? PRICES_ASOF : null);
     return '<div class="pxp-h"><b>' + co.name + '</b><span class="pxp-tk">' + co.ticker + '</span>' +
       '<span class="pxp-stg" style="background:' + sc + '22;color:' + sc + '">' + co.stage + '</span></div>' +
-      '<div class="pxp-p">' + px + '<span class="pxp-chg">' + ytd + y1 + '</span></div>' +
+      '<div class="pxp-p">' + px + '<span class="pxp-chg">' + ytd + rangeChange + '</span></div>' +
       '<div class="pxp-c">' + chart + '</div>' +
-      '<div class="pxp-m">' + kst(asof) + ' · 일봉 1Y</div>';
+      '<div class="pxp-m">' + kst(asof) + ' · 일봉 ' + DEFAULT_RANGE + '</div>';
   }
 
   var hideT = null, curId = null;
