@@ -9,7 +9,6 @@ on:
       - 'OPS.md'
       - 'STYLE_GUIDE.md'
       - 'scripts/audit-ops.mjs'
-      - 'scripts/patch-ops-revision-cadence-once.mjs'
       - 'prices.json'
       - 'charts.json'
       - 'signals.json'
@@ -17,10 +16,9 @@ on:
       - 'cycle.json'
       - 'index.html'
       - 'changelog.js'
-      - '.github/workflows/audit-ops.yml'
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   audit:
@@ -28,20 +26,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.ref_name }}
+          ref: main
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - name: Materialize one-time OPS cadence documentation
-        if: github.ref_name == 'claude/ops-revision-cadence-20260816'
-        run: |
-          node scripts/patch-ops-revision-cadence-once.mjs
-          if [ -n "$(git status --porcelain OPS.md)" ]; then
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add OPS.md
-            git commit -m "docs: document revision ranking cadence"
-            git push origin HEAD:${{ github.ref_name }}
-          fi
       - name: Run OPS compliance audit
         run: node scripts/audit-ops.mjs
