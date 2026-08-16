@@ -37,11 +37,17 @@ jobs:
             [ -f "$B" ] || continue
             base64 -d "$B" > /tmp/p.patch
             if ! git apply --check /tmp/p.patch 2>/dev/null; then
-              if [ "$FALLBACK" = "1" ]; then
+              if git apply --reverse --check /tmp/p.patch 2>/dev/null; then
+                echo "patch already applied; archiving: $B"
                 git mv "$B" "patches/applied/$(basename "$B")"
                 continue
               fi
-              echo "::error::patch does not apply: $B"; exit 1
+              if [ "$FALLBACK" = "1" ]; then
+                echo "fallback cleanup for stale patch: $B"
+                git mv "$B" "patches/applied/$(basename "$B")"
+                continue
+              fi
+              echo "::error::patch neither applies nor is already applied: $B"; exit 1
             fi
             git apply /tmp/p.patch
             git mv "$B" "patches/applied/$(basename "$B")"
