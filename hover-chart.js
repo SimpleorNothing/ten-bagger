@@ -1,5 +1,5 @@
 /* ===== 1Y HOVER PRICE CHART (worker.js가 모든 HTML에 주입) =====
-   스택 트리의 종목 칩(.chip[data-id])에 마우스를 올리면 1Y 일봉 차트 팝업.
+   스택 트리의 종목 칩과 추정 리비전 트래커 종목명에 마우스를 올리면 1Y 일봉 차트 팝업.
    시계열은 charts.json {series:{id:{t:[epoch day],c:[close]}}} — update-prices 크론이 생성.
    index.html 본문을 수정하지 않기 위해 별도 파일 + worker 주입으로 분리.
    페이지 전역(C·PRICES·PRICES_ASOF·fmtMoney·fmtKST·STAGE_HEX)을 재사용하며, 전부 typeof 가드.
@@ -101,6 +101,10 @@
       var e = RV_BY_ID[id];
       co = { id: e.id, name: e.name, ticker: e.t, stage: e.stage };
     }
+    // 추정 리비전 트래커처럼 자체 data-* 메타를 가진 종목명은 C/RV_PX 등록 여부와 무관하게 표시.
+    if (!co && chip.dataset.name) {
+      co = { id: id, name: chip.dataset.name, ticker: chip.dataset.ticker || id.toUpperCase(), stage: chip.dataset.stage || '—' };
+    }
     if (!co) return;
     curId = id;
     pop.innerHTML = popHTML(co);
@@ -117,13 +121,13 @@
   function hide() { pop.classList.remove('on'); curId = null; }
 
   document.addEventListener('mouseover', function (e) {
-    var ch = e.target.closest && e.target.closest('.chip[data-id],.wchip[data-id]');
+    var ch = e.target.closest && e.target.closest('.chip[data-id],.wchip[data-id],.pe-nm[data-id]');
     if (!ch) return;
     clearTimeout(hideT);
     if (curId !== ch.dataset.id) show(ch);
   });
   document.addEventListener('mouseout', function (e) {
-    var ch = e.target.closest && e.target.closest('.chip[data-id],.wchip[data-id]');
+    var ch = e.target.closest && e.target.closest('.chip[data-id],.wchip[data-id],.pe-nm[data-id]');
     if (!ch) return;
     hideT = setTimeout(hide, 150);
   });
