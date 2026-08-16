@@ -48,7 +48,7 @@ for (const [name, value] of [["prices.json", prices?.asOf], ["signals.json", sig
   if (age > maxAgeMs) fail(name + " is stale: " + value);
 }
 
-// 05 실제 비중조절 우선순위는 독립 크론이 아니라 최신 gamma+holdings를 페이지 로드 때 재계산한다.
+// 05 투자매력도는 현재 보유비중과 무관한 제로베이스 점수만 사용한다.
 // 원천 데이터 예약 주기는 update-prices.yml의 06:05·06:35·16:52 KST(UTC 21:05·21:35·07:52) 3회다.
 const priceWorkflow = read(".github/workflows/update-prices.yml");
 for (const cron of ["5 21 * * *", "35 21 * * *", "52 7 * * *"]) {
@@ -60,10 +60,11 @@ if (!/node scripts\/fetch-gamma\.mjs/.test(priceWorkflow)) fail("update-prices.y
 if (!/node scripts\/fetch-revision-provenance\.mjs/.test(priceWorkflow)) fail("update-prices.yml no longer stores revision provenance");
 if (!/node scripts\/validate-revision-provenance\.mjs/.test(priceWorkflow)) fail("update-prices.yml no longer validates revision provenance");
 
-const dualRank = read("scripts/apply_dual_rank_ui.py");
-if (!/fetch\('\.\/holdings\.json',\{cache:'no-store'\}\)/.test(dualRank)) fail("dual-rank holdings fetch must be no-store");
-if (!/fetch\('\.\/gamma\.json',\{cache:'no-store'\}\)/.test(dualRank)) fail("dual-rank gamma fetch must be no-store");
-if (!/actual=zb==null\?null:Math\.round\(clamp\(zb-pen,0,100\)\)/.test(dualRank)) fail("dual-rank actual score derivation missing");
+const rankUi = read("scripts/apply_dual_rank_ui.py");
+if (!/fetch\('\.\/gamma\.json',\{cache:'no-store'\}\)/.test(rankUi)) fail("investment-attractiveness gamma fetch must be no-store");
+if (/fetch\('\.\/holdings\.json'/.test(rankUi)) fail("investment-attractiveness ranking must not fetch holdings.json");
+if (/concentrationPenalty|overlapPenalty|actual=zb/.test(rankUi)) fail("portfolio weighting/penalty logic must not remain in investment-attractiveness ranking");
+if (!/투자매력도/.test(rankUi)) fail("investment-attractiveness label missing");
 
 for (const path of ["OPS.md", "STYLE_GUIDE.md"]) {
   const m = read(path).match(/최종 갱신:\s*(\d{4}-\d{2}-\d{2})/);
@@ -71,8 +72,11 @@ for (const path of ["OPS.md", "STYLE_GUIDE.md"]) {
 }
 const index = read("index.html");
 if (!/changelog\.js\?v=/.test(index)) fail("index.html changelog cache-buster missing");
+if (!/DUAL_RANK_UI_V3/.test(index)) fail("investment-attractiveness-only UI marker missing");
+if (/DUAL_RANK_UI_V3[\s\S]{0,7000}실제 비중조절/.test(index)) fail("actual allocation column survived in investment-attractiveness UI");
+if (/DUAL_RANK_UI_V3[\s\S]{0,7000}holdings\.json/.test(index)) fail("holdings dependency survived in investment-attractiveness UI");
 const changelog = read("changelog.js");
 if (!/MKT_CHANGELOG\s*=\s*\[/.test(changelog)) fail("changelog.js MKT_CHANGELOG missing");
 
 if (process.exitCode) process.exit(1);
-console.log("OPS daily audit passed: required files, data freshness, revision-ranking cadence, no-store ranking inputs, chart integrity, cache-buster, and changelog linkage.");
+console.log("OPS daily audit passed: required files, data freshness, revision cadence, zero-base investment-attractiveness ranking, chart integrity, cache-buster, and changelog linkage.");
