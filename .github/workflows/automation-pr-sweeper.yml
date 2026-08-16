@@ -3,6 +3,9 @@ name: Automation PR Sweeper
 on:
   push:
     branches: [main]
+  workflow_run:
+    workflows: ["Update stock prices"]
+    types: [completed]
   schedule:
     - cron: '*/15 * * * *'
   workflow_dispatch:
