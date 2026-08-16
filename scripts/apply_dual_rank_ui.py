@@ -4,7 +4,7 @@ import re
 p = Path('index.html')
 s = p.read_text(encoding='utf-8')
 
-# Replace prior rank UI injection instead of stacking versions.
+# Replace prior rank UI injection instead of stacking versions and keep contribution colors canonical.
 s = re.sub(r'\n?<!-- DUAL_RANK_UI_V[123] -->\n<script>.*?</script>\n?', '\n', s, flags=re.S)
 
 script = r'''
