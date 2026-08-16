@@ -1,5 +1,5 @@
-/* ===== 02 인사이트 찾기 → 04 시장과 실적 전망 반영 (자가 마운트) =====
-   02 「04 시장과 실적 전망에 반영」 버튼 → /api/insight-apply(worker→Claude)가 채택 관점을
+/* ===== 02 인사이트 찾기 → 04 알파 찾기 반영 (자가 마운트) =====
+   02 「04 알파 찾기에 반영」 버튼 → /api/insight-apply(worker→Claude)가 채택 관점을
    04 라이브 상태(γ·단계·사이클 군집·강물·매크로)에 대조해 '반영 가능/보류'를 판정하고,
    반영분만 04 상단 카드(#insApThread)에 서술 레이어로 얹는다. 결과는 R2 저장 → 모든 기기 공유.
 
@@ -90,7 +90,7 @@ window.INSIGHT_APPLY=(function(){
     if(!o.ok||o.j.error)throw new Error(o.j.error||'검토 실패');
     last=o.j;render();stamp();
     var n=(last.items||[]).filter(function(i){return i.apply;}).length;
-    msg('반영 완료 — '+n+'건이 04 시장과 실적 전망에 얹혔습니다(보류 '+((last.items||[]).length-n)+'건).');
+    msg('반영 완료 — '+n+'건이 04 알파 찾기에 얹혔습니다(보류 '+((last.items||[]).length-n)+'건).');
    })
    .catch(function(e){msg('실패 — '+(e&&e.message?e.message:e));})
    .then(function(){clearInterval(tmr);busy=false;if(b)b.disabled=false;});
@@ -103,7 +103,7 @@ window.INSIGHT_APPLY=(function(){
    var gb=$('insGradeBoard');
    if(gb&&gb.parentNode){
     var bar=document.createElement('div');bar.className='ins-ap-bar';bar.id='insApBar';
-    bar.innerHTML='<button class="ins-btn primary" id="insApRun">04 시장과 실적 전망에 반영</button>'+
+    bar.innerHTML='<button class="ins-btn primary" id="insApRun">04 알파 찾기에 반영</button>'+
      '<span class="ins-msg" id="insApMsg"></span><span class="ins-ap-when" id="insApWhen"></span>'+
      '<div class="ins-ap-hint">채택한 관점을 04 블록(로드맵·사이클·사분면·γ/단계·강물·즉답요약)에 대조해 '+
      '<b>반영 가능한 것만</b> 04 상단에 얹습니다. 숫자 파일은 바뀌지 않습니다.</div>';
