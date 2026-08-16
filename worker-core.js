@@ -2756,7 +2756,7 @@ export default {
           // insight.js 는 수정이 잦아 엣지·브라우저가 옛 파일을 쥐고 있으면 배포는 됐는데 화면은 그대로가 된다.
           .on('script[src^="/insight.js"]', { element(el) { el.setAttribute("src", "/insight.js?v=" + ASSET_VER); } })
           .on("body", { element(el) {
-            el.append('<script src="/hover-chart.js?v=20260816-default-1y" defer></scr' + 'ipt>', { html: true });
+            el.append('<script src="/hover-chart.js?v=20260816-actual-1y" defer></scr' + 'ipt>', { html: true });
             el.append('<script src="/flags.js" defer></scr' + 'ipt>', { html: true });
             el.append('<script src="/aisd.js?v=20260802-cloud-monotone" defer></scr' + 'ipt>', { html: true });
             el.append('<script src="/council-context.js" defer></scr' + 'ipt>', { html: true });
