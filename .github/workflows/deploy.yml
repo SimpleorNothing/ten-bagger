@@ -20,6 +20,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: main
+          fetch-depth: 0
 
       - uses: actions/setup-node@v4
         with:
@@ -27,6 +28,81 @@ jobs:
 
       - name: Install Wrangler v4
         run: npm install -g wrangler@4
+
+      - name: Build site change history from last verified deployment
+        id: site_history
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsS --connect-timeout 5 --max-time 10 \
+            -H 'Cache-Control: no-cache' \
+            "https://simpleornothing.com/__version?t=$(date +%s%N)" > /tmp/prev-version.json || echo '{}' > /tmp/prev-version.json
+          curl -fsS --connect-timeout 5 --max-time 10 \
+            -H 'Cache-Control: no-cache' \
+            "https://simpleornothing.com/site-change-commits.json?t=$(date +%s%N)" > /tmp/prev-site-history.json || echo '[]' > /tmp/prev-site-history.json
+
+          PREV_SHA=$(node -e "try{const j=require('/tmp/prev-version.json');process.stdout.write(j.sha||'')}catch(e){}")
+          if [ -n "$PREV_SHA" ] && git cat-file -e "$PREV_SHA^{commit}" 2>/dev/null; then
+            git diff --name-only "$PREV_SHA" "$GITHUB_SHA" > /tmp/site-changed-files.txt
+          else
+            git show --pretty='' --name-only "$GITHUB_SHA" > /tmp/site-changed-files.txt
+          fi
+          git log -1 --format=%s > /tmp/site-change-title.txt
+
+          node <<'NODE'
+          const fs = require('fs');
+          const path = require('path');
+          const prev = (() => { try { const x=JSON.parse(fs.readFileSync('/tmp/prev-site-history.json','utf8')); return Array.isArray(x)?x:[]; } catch { return []; } })();
+          const files = fs.readFileSync('/tmp/site-changed-files.txt','utf8').split(/\r?\n/).filter(Boolean);
+          const title = fs.readFileSync('/tmp/site-change-title.txt','utf8').trim();
+          const sha = process.env.GITHUB_SHA;
+          const date = new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+
+          // 사이트 변경의 기준:
+          // 1) simpleornothing.com에 배포되는 사용자 화면·기능·표시 콘텐츠 파일이 실제 변경되고,
+          // 2) 단순 크론/빌드/문서/테스트/리팩터링 같은 내부 작업이 아니며,
+          // 3) 이후 단계에서 custom domain이 해당 SHA를 실제 서비스하는지 검증돼야 한다.
+          const internalPrefix = /^(chore|ci|build|docs|test|style|refactor|perf|revert)(\([^)]*\))?!?:/i;
+          const excluded = /^(\.github\/|scripts\/|raw\/|history\/|archive\/|patches\/|node_modules\/)/;
+          const configOnly = /^(package(-lock)?\.json|wrangler\.jsonc|\.assetsignore|\.gitignore|.*\.md)$/i;
+          const userFacing = files.filter(f => {
+            if (excluded.test(f) || configOnly.test(f)) return false;
+            if (!f.includes('/')) return /\.(html?|js|css|json|svg|png|jpe?g|webp|ico)$/i.test(f);
+            return /\.(html?|js|css|json|svg|png|jpe?g|webp|ico)$/i.test(f);
+          });
+          const shouldAdd = !!title && !internalPrefix.test(title) && userFacing.length > 0;
+
+          const seed = [
+            {sha:'verified-20260816-rank-split',commit:{author:{date:'2026-08-16T00:50:34+09:00'},message:'05 투자매력도와 실제 비중조절 순위를 분리하고 포트폴리오 집중·중복 노출을 별도 반영'}},
+            {sha:'verified-20260816-contribution',commit:{author:{date:'2026-08-16T03:13:39+09:00'},message:'05 순위 근거를 EPS·상승여력의 실제 점수 기여도로 변경'}},
+            {sha:'verified-20260816-duplicate',commit:{author:{date:'2026-08-16T03:16:07+09:00'},message:'05 추정 리비전 트래커의 중복 설명 블록 제거'}},
+            {sha:'verified-20260816-negative',commit:{author:{date:'2026-08-16T03:24:05+09:00'},message:'05 음수 수치를 빨간색으로 표시'}},
+            {sha:'verified-20260816-sort',commit:{author:{date:'2026-08-16T03:28:57+09:00'},message:'05 투자매력도·실제 비중조절 등 주요 항목 헤더 클릭 정렬 추가'}},
+            {sha:'859adaac5a27d345f38465eaa23d13232b3b8634',commit:{author:{date:'2026-08-16T12:46:36+09:00'},message:'배포 후 simpleornothing.com이 최신 GitHub SHA를 실제 서비스하는지 자동 검증하고 주요 화면 캐시를 방지'}}
+          ];
+
+          const rows = [...prev];
+          for (const s of seed) if (!rows.some(x => x && x.sha === s.sha)) rows.push(s);
+          if (shouldAdd && !rows.some(x => x && x.sha === sha)) {
+            rows.unshift({
+              sha,
+              siteVerifiedRequired:true,
+              userFacingFiles:userFacing,
+              commit:{author:{date:date+'T00:00:00+09:00'},message:title.replace(/\s*\(#\d+\)\s*$/,'')}
+            });
+          }
+          const seen = new Set();
+          const clean = rows.filter(x => {
+            const key = (x&&x.sha) || JSON.stringify(x);
+            if (seen.has(key)) return false;
+            seen.add(key); return true;
+          }).sort((a,b)=>String(b?.commit?.author?.date||'').localeCompare(String(a?.commit?.author?.date||''))).slice(0,100);
+          fs.writeFileSync('site-change-commits.json', JSON.stringify(clean,null,2)+'\n');
+          fs.writeFileSync('/tmp/site-history-expected.txt', shouldAdd?'1':'0');
+          console.log('site-facing files:', userFacing);
+          console.log('record current deploy:', shouldAdd, title);
+          NODE
+          echo "expected=$(cat /tmp/site-history-expected.txt)" >> "$GITHUB_OUTPUT"
 
       - name: Deploy
         shell: bash
@@ -47,7 +123,7 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
-      - name: Verify deployed SHA on Workers and custom domain
+      - name: Verify deployed SHA and site change history on custom domain
         shell: bash
         run: |
           set -euo pipefail
@@ -69,3 +145,13 @@ jobs:
           }
           verify "https://ten-bagger.cw120-park.workers.dev"
           verify "https://simpleornothing.com"
+
+          if [ "${{ steps.site_history.outputs.expected }}" = "1" ]; then
+            history=$(curl -fsS --connect-timeout 10 --max-time 20 \
+              -H 'Cache-Control: no-cache' \
+              "https://simpleornothing.com/site-change-commits.json?t=$(date +%s%N)")
+            printf '%s' "$history" | grep -Fq "${GITHUB_SHA}" || {
+              echo "ERROR: actual site changed but site change history does not contain ${GITHUB_SHA}"
+              exit 1
+            }
+          fi
