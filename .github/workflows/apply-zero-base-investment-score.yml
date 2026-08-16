@@ -9,6 +9,7 @@ on:
       - .github/workflows/apply-zero-base-investment-score.yml
       - scripts/apply_zero_base_investment_score.py
       - scripts/fix_zero_base_injection.py
+      - scripts/apply_dual_rank_ui.py
 
 permissions:
   contents: write
@@ -28,6 +29,7 @@ jobs:
         run: |
           python scripts/apply_zero_base_investment_score.py
           python scripts/fix_zero_base_injection.py
+          python scripts/apply_dual_rank_ui.py
       - name: Validate
         run: |
           git diff --check
@@ -40,5 +42,5 @@ jobs:
             echo "No index.html changes"
             exit 0
           fi
-          git commit -m "feat: expand zero-base investment attractiveness model"
+          git commit -m "feat: show zero-base and portfolio-adjusted priority"
           git push origin HEAD:feat/zero-base-investment-score
