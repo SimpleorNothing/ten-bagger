@@ -128,10 +128,12 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          # workers.dev에는 먼저 반영되고 custom domain은 수십 초 늦게 전파되는 경우가 반복됐다.
+          # 배포 자체가 성공했는데 전파 지연만으로 실패 처리하지 않도록 약 2분까지 재검증한다.
           verify() {
             local base="$1"
             local body=""
-            for attempt in 1 2 3 4 5; do
+            for attempt in 1 2 3 4 5 6 7 8; do
               body=$(curl -fsS --connect-timeout 10 --max-time 20 \
                 -H 'Cache-Control: no-cache' \
                 "${base}/__version?t=$(date +%s%N)" || true)
@@ -139,16 +141,18 @@ jobs:
               if printf '%s' "$body" | grep -Fq "${GITHUB_SHA}"; then
                 return 0
               fi
-              sleep $((attempt * 3))
+              if [ "$attempt" -lt 8 ]; then
+                sleep $((attempt * 4))
+              fi
             done
-            echo "ERROR: ${base} is not serving deployed SHA ${GITHUB_SHA}"
+            echo "ERROR: ${base} is not serving deployed SHA ${GITHUB_SHA} after propagation retries"
             return 1
           }
           verify "https://ten-bagger.cw120-park.workers.dev"
           verify "https://simpleornothing.com"
 
           probe_ok=0
-          for attempt in 1 2 3 4 5; do
+          for attempt in 1 2 3 4 5 6 7 8; do
             probe=$(curl -fsS --connect-timeout 10 --max-time 20 \
               -H 'Cache-Control: no-cache' \
               "https://simpleornothing.com/__changelog_probe?t=$(date +%s%N)" || true)
@@ -157,16 +161,18 @@ jobs:
               probe_ok=1
               break
             fi
-            sleep $((attempt * 3))
+            if [ "$attempt" -lt 8 ]; then
+              sleep $((attempt * 4))
+            fi
           done
           if [ "$probe_ok" -ne 1 ]; then
-            echo "ERROR: deployed site does not expose the expected visible changelog rows"
+            echo "ERROR: deployed site does not expose the expected visible changelog rows after propagation retries"
             exit 1
           fi
 
           if [ "${{ steps.site_history.outputs.expected }}" = "1" ]; then
             ok=0
-            for attempt in 1 2 3 4 5; do
+            for attempt in 1 2 3 4 5 6 7 8; do
               history=$(curl -fsS --connect-timeout 10 --max-time 20 \
                 -H 'Cache-Control: no-cache' \
                 "https://simpleornothing.com/__site_changes?t=$(date +%s%N)" || true)
@@ -175,7 +181,9 @@ jobs:
                 ok=1
                 break
               fi
-              sleep $((attempt * 3))
+              if [ "$attempt" -lt 8 ]; then
+                sleep $((attempt * 4))
+              fi
             done
             if [ "$ok" -ne 1 ]; then
               echo "ERROR: actual site changed but site change history does not contain ${GITHUB_SHA} after propagation retries"
