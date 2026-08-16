@@ -66,10 +66,21 @@ if (fs.existsSync(PULSE)) {
   const pulse = JSON.parse(fs.readFileSync(PULSE, 'utf8'));
   const rates = Array.isArray(pulse.drivers) ? pulse.drivers.find(d => d.ax === 'rates') : null;
   if (rates) {
-    rates.l1 = `${month}월 CPI 전년비 ${headlineYoy.toFixed(1)}%, 근원 CPI ${coreYoy.toFixed(1)}%로 직전월보다 둔화`;
-    rates.l2 = `헤드라인 CPI 전월비 ${fmt(headlineMom)}, 근원 ${fmt(coreMom)}로 물가 재가속 우려가 완화됐다. Fed의 금리경로에는 완화적 입력이며 고밸류 AI 인프라의 할인율·조달비용 부담을 일부 낮추는 방향.`;
-    rates.verdict = '물가 둔화 · 금리 부담 완화';
-    rates.srcs = [{t:`BLS Consumer Price Index - ${monthName} ${year}`,u:URL,d:releaseDate}];
+    const existingPpi = Array.isArray(rates.srcs)
+      ? rates.srcs.find(x => /producer price|ppi/i.test(String(x?.t || '')) || /ppi\.nr0/.test(String(x?.u || '')))
+      : null;
+    if (existingPpi) {
+      rates.dir = 'neutral';
+      rates.l1 = `${month}월 CPI는 둔화했지만 최근 PPI의 기조 생산단 물가 압력은 병존`;
+      rates.l2 = `헤드라인 CPI 전월비 ${fmt(headlineMom)}·전년비 ${fmt(headlineYoy)}, 근원 CPI 전월비 ${fmt(coreMom)}·전년비 ${fmt(coreYoy)}로 소비자물가는 둔화했다. 다만 최근 공식 PPI에서 확인된 기조 생산단 물가 압력도 함께 보존해 금리경로를 혼재로 판단한다.`;
+      rates.verdict = 'CPI 둔화 vs 기조 PPI 압력 · 혼재';
+      rates.srcs = [{t:`BLS Consumer Price Index - ${monthName} ${year}`,u:URL,d:releaseDate}, existingPpi];
+    } else {
+      rates.l1 = `${month}월 CPI 전년비 ${headlineYoy.toFixed(1)}%, 근원 CPI ${coreYoy.toFixed(1)}%로 직전월보다 둔화`;
+      rates.l2 = `헤드라인 CPI 전월비 ${fmt(headlineMom)}, 근원 ${fmt(coreMom)}로 물가 재가속 우려가 완화됐다. Fed의 금리경로에는 완화적 입력이며 고밸류 AI 인프라의 할인율·조달비용 부담을 일부 낮추는 방향.`;
+      rates.verdict = '물가 둔화 · 금리 부담 완화';
+      rates.srcs = [{t:`BLS Consumer Price Index - ${monthName} ${year}`,u:URL,d:releaseDate}];
+    }
     pulse.asOf = stamp.slice(0,16);
     fs.writeFileSync(PULSE, JSON.stringify(pulse, null, 2) + '\n');
   }
