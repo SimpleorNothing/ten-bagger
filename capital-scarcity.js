@@ -25,11 +25,47 @@
   mo.observe(document.documentElement,{childList:true,subtree:true,characterData:true});
   setTimeout(function(){paintNegativeTrackerValues();mo.disconnect();},10000);
  }
+ function trackerTable(){var row=document.querySelector('tr[data-zb-score-value]');return row&&row.closest('table');}
+ function firstNumber(txt){
+  var m=String(txt||'').replace(/,/g,'').match(/[+\-−]?\d+(?:\.\d+)?/);
+  if(!m)return null;
+  var n=Number(m[0].replace('−','-'));return isFinite(n)?n:null;
+ }
+ function sortValue(th,td,tr){
+  var h=(th.textContent||'').replace(/\s+/g,' ').trim();
+  if(/투자매력도|제로베이스/.test(h)){var z=Number(tr.dataset.zbScoreValue);return isFinite(z)?z:null;}
+  if(/실제 비중조절/.test(h)){var b=td&&td.querySelector('b');return firstNumber(b?b.textContent:td&&td.textContent);}
+  if(/점수 기여도/.test(h)){var vals=Array.from((td&&td.querySelectorAll('span'))||[]).map(function(x){return firstNumber(x.textContent);}).filter(function(x){return x!=null;});return vals.length?Math.max.apply(Math,vals):null;}
+  return firstNumber(td&&td.textContent);
+ }
+ function setupTrackerSort(){
+  var table=trackerTable();if(!table)return false;
+  var head=table.querySelector('thead tr')||table.querySelector('tr');var body=table.querySelector('tbody');if(!head||!body)return false;
+  Array.from(head.children).forEach(function(th,idx){
+   var name=(th.textContent||'').replace(/\s+/g,' ').trim();
+   if(!name||/^종목/.test(name)||th.dataset.sortReady==='1')return;
+   th.dataset.sortReady='1';th.dataset.sortDir='';th.style.cursor='pointer';th.style.userSelect='none';th.title='클릭하여 정렬';
+   var mark=document.createElement('span');mark.dataset.sortMark='1';mark.style.cssText='margin-left:4px;font-size:9px;color:var(--faint)';mark.textContent='↕';th.appendChild(mark);
+   th.addEventListener('click',function(){
+    var dir=th.dataset.sortDir==='desc'?'asc':'desc';
+    Array.from(head.children).forEach(function(x){x.dataset.sortDir='';var m=x.querySelector('[data-sort-mark]');if(m)m.textContent='↕';});
+    th.dataset.sortDir=dir;mark.textContent=dir==='desc'?'↓':'↑';
+    var rows=Array.from(body.querySelectorAll('tr')).map(function(tr,order){return {tr:tr,order:order,v:sortValue(th,tr.children[idx],tr)};});
+    rows.sort(function(a,b){if(a.v==null&&b.v==null)return a.order-b.order;if(a.v==null)return 1;if(b.v==null)return -1;if(a.v===b.v)return a.order-b.order;return dir==='desc'?b.v-a.v:a.v-b.v;});
+    rows.forEach(function(x){body.appendChild(x.tr);});
+   });
+  });
+  return true;
+ }
+ function watchTrackerSort(){
+  if(setupTrackerSort())return;
+  var tries=0,t=setInterval(function(){tries++;if(setupTrackerSort()||tries>40)clearInterval(t);},250);
+ }
  function paint(){var grid=document.getElementById('mktIndicators');if(!grid)return;var el=document.getElementById('mkt_capital_scarcity');if(!el){el=document.createElement('div');el.className='mkt-card';el.id='mkt_capital_scarcity';el.setAttribute('data-indicator-key','capital_scarcity');grid.appendChild(el);}
   fetch('capital_scarcity.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():Promise.reject()).then(function(j){var v=j.values||{},c=j.changeBp||{};var lv=j.level||'green';var ko=lv==='red'?'경고':lv==='amber'?'주의':'정상';var cls=lv==='red'?'wn':lv==='amber'?'nt':'ok';var mx=j.scoreMax||4;
    el.innerHTML='<div class="mkt-nm">AI 자본 희소성</div><div class="mkt-val">실질 '+f(v.real10y)+'%</div><div class="mkt-lens"><div class="l1"><b>할인율 분해</b> 10Y TIPS · BEI · 기간 프리미엄</div><div class="l2">BEI '+f(v.breakeven10y)+'% · TP '+f(v.termPremium10y)+'% · 실질 3M '+(c.real10y_3m==null?'—':(c.real10y_3m>=0?'+':'')+c.real10y_3m+'bp')+' → <span class="'+cls+'">'+ko+' '+(j.score||0)+'/'+mx+'</span></div></div><div class="mkt-span">'+(j.asOf||'수집 대기')+' · U.S. Treasury / NY Fed</div>';
   }).catch(function(){el.innerHTML='<div class="mkt-nm">AI 자본 희소성</div><div class="mkt-ph">실질금리·기간 프리미엄 수집 대기</div>';});}
- function wire(){watchDuplicateZeroBaseNote();watchNegativeTrackerValues();paint();var t=document.querySelector('.tab[data-v="market"]');if(t)t.addEventListener('click',function(){setTimeout(function(){paint();paintNegativeTrackerValues();},80);});}
+ function wire(){watchDuplicateZeroBaseNote();watchNegativeTrackerValues();watchTrackerSort();paint();var t=document.querySelector('.tab[data-v="market"]');if(t)t.addEventListener('click',function(){setTimeout(function(){paint();paintNegativeTrackerValues();setupTrackerSort();},80);});}
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',wire);else wire();
  window.renderCapitalScarcity=paint;
 })();
