@@ -10,11 +10,15 @@ const prices=read(PRICES);
 const charts=read(CHARTS);
 const now=new Date();
 const DAY=86400000;
-const aliases={'005930':'sec','000660':'skh'};
 const num=(v)=>Number.isFinite(Number(v))?Number(v):null;
 const pctDiff=(a,b)=>{a=num(a);b=num(b);return a==null||b==null||b===0?null:Math.abs(a-b)/Math.abs(b)*100;};
 const dateMs=(s)=>{const t=Date.parse(s||'');return Number.isFinite(t)?t:null;};
-const chartKey=(tk)=>aliases[tk]||String(tk).toLowerCase();
+const priceKey=(tk)=>{
+  const direct=String(tk).toLowerCase();
+  if(prices.quotes?.[direct])return direct;
+  for(const [k,v] of Object.entries(prices.quotes||{}))if(String(v?.ticker||'').toUpperCase()===String(tk).toUpperCase())return k;
+  return null;
+};
 
 let verified=0,blocked=0,warned=0;
 const issues=[];
@@ -33,14 +37,15 @@ for(const [tk,e] of Object.entries(g.gamma||{})){
   }
 
   const fd=raw.financialData||{};
-  const key=chartKey(tk);
-  const sitePrice=num(prices.quotes?.[key]?.price);
+  const key=priceKey(tk);
+  const sitePrice=key?num(prices.quotes?.[key]?.price):null;
   const rawPrice=num(fd.currentPrice);
-  const lastChart=(()=>{const s=charts.series?.[key];return Array.isArray(s?.c)&&s.c.length?num(s.c[s.c.length-1]):null;})();
+  const lastChart=(()=>{const s=key?charts.series?.[key]:null;return Array.isArray(s?.c)&&s.c.length?num(s.c[s.c.length-1]):null;})();
   const priceDiv=Math.max(pctDiff(rawPrice,sitePrice)??0,pctDiff(rawPrice,lastChart)??0);
   if(rawPrice==null){q.fields.price='blocked';q.blocking.push('currentPrice missing');}
   else if((sitePrice!=null||lastChart!=null)&&priceDiv>3){q.fields.price='blocked';q.blocking.push(`currentPrice divergence ${priceDiv.toFixed(2)}%`);}
   else if(priceDiv>1){q.fields.price='warning';q.warnings.push(`currentPrice divergence ${priceDiv.toFixed(2)}%`);}
+  if(key==null)q.warnings.push('independent price key not found');
 
   const mean=num(fd.targetMeanPrice),hi=num(fd.targetHighPrice),lo=num(fd.targetLowPrice),n=num(fd.numberOfAnalystOpinions);
   if(mean==null||mean<=0){q.fields.tp='blocked';q.blocking.push('targetMeanPrice missing/non-positive');}
