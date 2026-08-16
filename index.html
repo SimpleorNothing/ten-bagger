@@ -6832,10 +6832,19 @@ function renderInstantAnswer(){
  function label(s){return s==null?'자료부족':s>=80?'최우선':s>=68?'우선':s>=55?'중립':s>=45?'관찰':'후순위';}
  function tone(s){return s==null?'var(--faint)':s>=80?'var(--st-dawn)':s>=68?'var(--st-accel)':s>=55?'var(--st-mature)':'var(--st-hot)';}
  function heldSet(){const out={};((ZB.holdings&&ZB.holdings.detail)||[]).forEach(x=>{if(x&&x.ticker&&x.qty!=null&&Number(x.qty)>0)out[String(x.ticker).toUpperCase()]=x;});return out;}
+ function renderBenchmarkNote(root,table){
+   const b=ZB.benchmark,m=b&&b.metrics;if(!m)return;
+   let note=root.querySelector('[data-zb-benchmark-note]');
+   if(!note){note=document.createElement('div');note.dataset.zbBenchmarkNote='1';table.parentNode.insertBefore(note,table);}
+   const ns=Object.values(m).map(x=>Number(x&&x.n)).filter(Number.isFinite),nMin=ns.length?Math.min(...ns):null,nMax=ns.length?Math.max(...ns):null;
+   note.style.cssText='margin:0 0 8px;padding:7px 10px;border:1px solid var(--line);border-radius:7px;background:var(--panel);font-size:10.5px;color:var(--dim);line-height:1.45';
+   note.innerHTML='<b style="color:var(--txt)">EPS 리비전 점수 기준</b> · Nasdaq-100 당일 분포 P10=0점 · P90=100점 · 기준 '+String(b.asOf||'').slice(0,10)+' · 유효표본 '+(nMin==null?'—':nMin+(nMax!==nMin?'~'+nMax:''))+'개';
+ }
  function render(){
    const h=findTracker();if(!h)return false;
    const root=h.closest('section,.card,.panel,.box,article')||h.parentElement;if(!root)return false;
    const table=root.querySelector('table');if(!table)return false;
+   renderBenchmarkNote(root,table);
    const head=table.querySelector('thead tr')||table.querySelector('tr');if(!head)return false;
    table.querySelectorAll('[data-zb-score]').forEach(e=>e.remove());
    const ths=Array.from(head.children),stockIdx=ths.findIndex(x=>/종목/.test(x.textContent||''));if(stockIdx<0)return false;
