@@ -123,7 +123,7 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
-      - name: Verify deployed SHA and site change history on custom domain
+      - name: Verify deployed SHA and visible site change on custom domain
         shell: bash
         run: |
           set -euo pipefail
@@ -145,6 +145,23 @@ jobs:
           }
           verify "https://ten-bagger.cw120-park.workers.dev"
           verify "https://simpleornothing.com"
+
+          probe_ok=0
+          for attempt in 1 2 3 4 5; do
+            probe=$(curl -fsS --connect-timeout 10 --max-time 20 \
+              -H 'Cache-Control: no-cache' \
+              "https://simpleornothing.com/__changelog_probe?t=$(date +%s%N)" || true)
+            echo "verify visible changelog attempt ${attempt}: ${probe}"
+            if printf '%s' "$probe" | grep -Fq '"ok":true'; then
+              probe_ok=1
+              break
+            fi
+            sleep $((attempt * 3))
+          done
+          if [ "$probe_ok" -ne 1 ]; then
+            echo "ERROR: deployed site does not expose the expected visible changelog rows"
+            exit 1
+          fi
 
           if [ "${{ steps.site_history.outputs.expected }}" = "1" ]; then
             ok=0
