@@ -6286,6 +6286,7 @@ function renderInstantAnswer(){
     var rows=[],pend=0,upN=0,dnN=0,hotN=0;
     Object.keys(G).forEach(function(tk){
       var e=G[tk]; if(!e)return; var r=e.rev;
+      if(e.instrumentType==='ETF')return;
       if(!r)pend++;
       r=r||{};
       var f1=(r.eps&&r.eps.fy1)?r.eps.fy1:null;

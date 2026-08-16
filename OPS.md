@@ -1,5 +1,7 @@
 **최종 갱신: 2026-08-16 19:10 (KST)**
 
+> 2026-08-16 19:53 · **Value Chain 투자매력도 개별종목 데이터 보완 및 ETF 제외.** 04 알파 찾기의 개별종목 13개에 Yahoo Finance 목표가·FY+1 EPS 리비전·컨센서스 원자료를 수집해 `gamma.json`과 `scores.json`을 갱신했다. 투자매력도 산출 및 추정 리비전 표에서는 ETF 2개를 제외하며, 회귀검사는 개별종목 26/26 포함과 ETF 제외를 함께 확인한다. 출처 데이터가 점수 커버리지 기준에 못 미치는 Cerebras·Oklo는 임의값 없이 `자료부족`을 유지한다.
+
 # OPS — 알파맵 운영 가이드
 
 > 2026-08-16 19:10 · **04 Value Chain 전체 투자매력도 커버리지.** 알파 찾기 Value Chain 28개 종목·ETF를 `gamma.json`과 `scores.json` 산출 대상으로 통일했다. 기존 누락 15개를 추가하고 미국·한국·코스닥·홍콩 심볼 변환을 연결했다. EPS 원자료가 없는 ETF나 공급자 미지원 종목은 추정값을 만들지 않고 `자료부족`으로 표시한다. `test-value-chain-score-coverage.mjs`가 Value Chain→gamma→scores 누락을 회귀검사한다.
