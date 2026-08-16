@@ -9,6 +9,8 @@ on:
       - 'scripts/fetch-prices.mjs'
       - 'scripts/fetch-gamma.mjs'
       - 'scripts/fetch-revision-benchmark.mjs'
+      - 'scripts/build-investment-scores.mjs'
+      - 'scores.json'
       - 'revision-benchmark.json'
       - 'scripts/fetch-revision-provenance.mjs'
       - 'scripts/validate-revision-provenance.mjs'
@@ -49,6 +51,7 @@ jobs:
             if node scripts/fetch-prices.mjs \
               && node scripts/fetch-gamma.mjs \
               && node scripts/fetch-revision-benchmark.mjs \
+              && node scripts/build-investment-scores.mjs \
               && node scripts/fetch-revision-provenance.mjs \
               && node scripts/validate-revision-provenance.mjs \
               && node scripts/audit-revision-integrity.mjs \
@@ -61,6 +64,7 @@ jobs:
           const g = JSON.parse(fs.readFileSync('gamma.json', 'utf8'));
           const rr = JSON.parse(fs.readFileSync('raw/revisions/latest.json', 'utf8'));
           const rb = JSON.parse(fs.readFileSync('revision-benchmark.json', 'utf8'));
+          const sc = JSON.parse(fs.readFileSync('scores.json', 'utf8'));
           const now = new Date();
           if (now.getUTCHours() >= 20) {
             const today = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()) / 86400000;
@@ -73,7 +77,11 @@ jobs:
             }
             if (asOfDay !== now.toISOString().slice(0, 10)) throw new Error('stale prices.asOf: expected ' + now.toISOString().slice(0, 10) + ', got ' + asOfDay);
           }
-          if (rb.schema !== 'revision-benchmark-v1' || rb.universe !== 'Nasdaq-100') throw new Error('revision benchmark metadata invalid');
+          if (rb.schema !== 'revision-benchmark-v2' || rb.universe !== 'Nasdaq-100' || !rb.distributions || !rb.ranks) throw new Error('revision benchmark metadata invalid');
+          if (sc.schema !== 'investment-scores-v4' || sc.displayedModel !== 'v4') throw new Error('investment score snapshot invalid');
+          for (const [tk,row] of Object.entries(sc.rows || {})) {
+            if (!row.v3 || !row.v4 || !('delta' in row)) throw new Error('score audit fields missing: '+tk);
+          }
           for (const [key,m] of Object.entries(rb.metrics || {})) {
             if (m.n < 50 || !(m.p10 < m.p90)) throw new Error('revision benchmark invalid: '+key);
           }
@@ -115,6 +123,7 @@ jobs:
             node scripts/fetch-prices.mjs
             node scripts/fetch-gamma.mjs
             node scripts/fetch-revision-benchmark.mjs
+            node scripts/build-investment-scores.mjs
             node scripts/fetch-revision-provenance.mjs
             node scripts/validate-revision-provenance.mjs
             node scripts/audit-revision-integrity.mjs
@@ -126,7 +135,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          FILES="prices.json charts.json gamma.json cycle.json holdings.json revision-benchmark.json raw/revisions"
+          FILES="prices.json charts.json gamma.json cycle.json holdings.json revision-benchmark.json scores.json raw/revisions"
           if [ -z "$(git status --porcelain $FILES)" ]; then
             echo "No change in $FILES."; exit 0
           fi
