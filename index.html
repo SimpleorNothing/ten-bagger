@@ -6762,12 +6762,14 @@ function renderInstantAnswer(){
 
 
 
-<!-- ZERO_BASE_INVESTMENT_SCORE_V2 -->
+<!-- ZERO_BASE_INVESTMENT_SCORE_V3 -->
 <script>
 (function(){
- const ZB={gamma:null,holdings:null};
+ const ZB={gamma:null,holdings:null,benchmark:null};
  const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
  const scoreRange=(v,lo,hi)=>v==null?null:clamp((v-lo)/(hi-lo)*100,0,100);
+ const revisionScore=(key,v)=>{const m=ZB.benchmark&&ZB.benchmark.metrics&&ZB.benchmark.metrics[key];return v==null||!m||m.n<(ZB.benchmark.minimumSample||50)||!(m.p10<m.p90)?null:scoreRange(v,m.p10,m.p90);};
+ const revisionAnchor=(key)=>ZB.benchmark&&ZB.benchmark.metrics&&ZB.benchmark.metrics[key];
  const invRange=(v,lo,hi)=>v==null?null:100-scoreRange(v,lo,hi);
  const weighted=(items)=>{let sw=0,sv=0,full=0;items.forEach(x=>{full+=x[1];if(x[0]!=null&&isFinite(x[0])){sw+=x[1];sv+=x[0]*x[1]}});return {score:sw?sv/sw:null,coverage:full?sw/full:0};};
  const fmt=(v)=>v==null?'—':String(Math.round(v));
@@ -6777,21 +6779,21 @@ function renderInstantAnswer(){
  function gammaScore(g){return ({open:88,flagged:55,spent:20})[g]??null;}
  function breadth(up,dn){if(up==null&&dn==null)return null;up=up||0;dn=dn||0;return up+dn?100*up/(up+dn):null;}
  function calc(G){
-   if(!G)return {score:null,coverage:0,penalty:0,detail:{}};
+   if(!G||!ZB.benchmark||ZB.benchmark.schema!=='revision-benchmark-v1')return {score:null,coverage:0,penalty:0,detail:{}};
    const R=G.rev||{}, E=R.eps||{}, fy1=E.fy1||{}, fy0=E.fy0||{}, q1=E.q1||{}, px=R.px||{}, tp=R.tp||{}, rating=R.rating||{};
    const epsGrowth=(fy1.now!=null&&fy0.now!=null&&fy0.now>0&&fy1.now>0)?((fy1.now/fy0.now)-1)*100:null;
    const fwdPE=(G.price!=null&&fy1.now!=null&&fy1.now>0)?G.price/fy1.now:null;
    const garp=(epsGrowth!=null&&fwdPE!=null&&fwdPE>0)?epsGrowth/fwdPE:null;
    const br=breadth(fy1.up30,fy1.dn30);
    const s3=weighted([
-     [scoreRange(q1.c30,-8,15),50],
-     [scoreRange(q1.c90,-15,30),20],
-     [scoreRange(fy1.c30,-8,15),30]
+     [revisionScore('q1_c30',q1.c30),50],
+     [revisionScore('q1_c90',q1.c90),20],
+     [revisionScore('fy1_c30',fy1.c30),30]
    ]);
    const s6=weighted([
      [scoreRange(epsGrowth,-10,60),60],
-     [scoreRange(fy1.c90,-15,40),25],
-     [scoreRange(fy1.c30,-8,15),15]
+     [revisionScore('fy1_c90',fy1.c90),25],
+     [revisionScore('fy1_c30',fy1.c30),15]
    ]);
    const val=weighted([
      [scoreRange(G.pct,-10,60),45],
@@ -6799,7 +6801,7 @@ function renderInstantAnswer(){
      [scoreRange(tp.c30,-5,10),20]
    ]);
    const cat=weighted([
-     [scoreRange(q1.c30,-8,15),25],
+     [revisionScore('q1_c30',q1.c30),25],
      [scoreRange(tp.c30,-5,10),20],
      [gammaScore(G.g),25],
      [stageScore(G.stage),15],
@@ -6814,8 +6816,8 @@ function renderInstantAnswer(){
    const coverage=ew/100;
    let penalty=0;
    if(px.c30!=null&&fy1.c30!=null){const gap=px.c30-fy1.c30;if(gap>10)penalty+=clamp((gap-10)/20*6,0,6);}
-   if(q1.c30!=null&&q1.c30<0)penalty+=clamp(-q1.c30/8*4,0,4);
-   if(fy1.c30!=null&&fy1.c30<0)penalty+=clamp(-fy1.c30/8*4,0,4);
+   if(q1.c30!=null&&q1.c30<0){const a=revisionAnchor('q1_c30');if(a&&a.p10<0)penalty+=clamp(-q1.c30/Math.abs(a.p10)*4,0,4);}
+   if(fy1.c30!=null&&fy1.c30<0){const a=revisionAnchor('fy1_c30');if(a&&a.p10<0)penalty+=clamp(-fy1.c30/Math.abs(a.p10)*4,0,4);}
    if(G.g==='spent')penalty+=6;else if(G.flagged||G.g==='flagged')penalty+=3;
    if(G.stage==='과열')penalty+=8;
    if(G.pct!=null&&G.pct>60&&tp.c30!=null&&tp.c30<=0){
@@ -6853,6 +6855,8 @@ function renderInstantAnswer(){
        baseLine,
        '',
        '최종 = 가중 기초점수 - 리스크 페널티',
+       'EPS 리비전 환산 = Nasdaq-100 당일 횡단면 P10 0점 · P90 100점 (구성 '+(ZB.benchmark.constituentCount||'—')+'개, 기준 '+String(ZB.benchmark.asOf||'').slice(0,10)+')',
+       '실제 기준: Q1 30d '+revisionAnchor('q1_c30').p10+'~'+revisionAnchor('q1_c30').p90+'% · Q1 90d '+revisionAnchor('q1_c90').p10+'~'+revisionAnchor('q1_c90').p90+'% · FY+1 30d '+revisionAnchor('fy1_c30').p10+'~'+revisionAnchor('fy1_c30').p90+'% · FY+1 90d '+revisionAnchor('fy1_c90').p10+'~'+revisionAnchor('fy1_c90').p90+'%',
        '가중 기초점수 = (3M×30% + 6M×25% + 밸류×20% + 촉매×15% + 컨센×10%) / 유효 데이터 가중치',
        '3M = 다음분기 EPS 30일 리비전×50% + 다음분기 EPS 90일 리비전×20% + FY+1 EPS 30일 리비전×30%',
        '6M = FY+1 EPS 성장률×60% + FY+1 EPS 90일 리비전×25% + FY+1 EPS 30일 리비전×15%',
@@ -6872,7 +6876,7 @@ function renderInstantAnswer(){
    return true;
  }
  async function boot(){
-   try{const rr=await Promise.all([fetch('./gamma.json',{cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null),fetch('./holdings.json',{cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null)]);ZB.gamma=rr[0];ZB.holdings=rr[1];}catch(e){}
+   try{const rr=await Promise.all([fetch('./gamma.json',{cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null),fetch('./holdings.json',{cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null),fetch('./revision-benchmark.json',{cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null)]);ZB.gamma=rr[0];ZB.holdings=rr[1];ZB.benchmark=rr[2];}catch(e){}
    if(!render()){const mo=new MutationObserver(()=>{if(render())mo.disconnect();});mo.observe(document.documentElement,{childList:true,subtree:true});setTimeout(()=>{render();mo.disconnect();},10000);}
  }
  boot();

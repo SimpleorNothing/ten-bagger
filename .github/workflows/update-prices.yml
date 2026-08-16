@@ -8,6 +8,8 @@ on:
       - 'index.html'
       - 'scripts/fetch-prices.mjs'
       - 'scripts/fetch-gamma.mjs'
+      - 'scripts/fetch-revision-benchmark.mjs'
+      - 'revision-benchmark.json'
       - 'scripts/fetch-revision-provenance.mjs'
       - 'scripts/validate-revision-provenance.mjs'
       - 'scripts/audit-revision-integrity.mjs'
@@ -46,6 +48,7 @@ jobs:
             echo "market refresh attempt $attempt/3"
             if node scripts/fetch-prices.mjs \
               && node scripts/fetch-gamma.mjs \
+              && node scripts/fetch-revision-benchmark.mjs \
               && node scripts/fetch-revision-provenance.mjs \
               && node scripts/validate-revision-provenance.mjs \
               && node scripts/audit-revision-integrity.mjs \
@@ -57,6 +60,7 @@ jobs:
           const c = JSON.parse(fs.readFileSync('charts.json', 'utf8'));
           const g = JSON.parse(fs.readFileSync('gamma.json', 'utf8'));
           const rr = JSON.parse(fs.readFileSync('raw/revisions/latest.json', 'utf8'));
+          const rb = JSON.parse(fs.readFileSync('revision-benchmark.json', 'utf8'));
           const now = new Date();
           if (now.getUTCHours() >= 20) {
             const today = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()) / 86400000;
@@ -68,6 +72,10 @@ jobs:
               if (!(Number.isFinite(last) && today - last <= 3)) throw new Error('stale chart for ' + id + ': today ' + today + ', got ' + last);
             }
             if (asOfDay !== now.toISOString().slice(0, 10)) throw new Error('stale prices.asOf: expected ' + now.toISOString().slice(0, 10) + ', got ' + asOfDay);
+          }
+          if (rb.schema !== 'revision-benchmark-v1' || rb.universe !== 'Nasdaq-100') throw new Error('revision benchmark metadata invalid');
+          for (const [key,m] of Object.entries(rb.metrics || {})) {
+            if (m.n < 50 || !(m.p10 < m.p90)) throw new Error('revision benchmark invalid: '+key);
           }
           if (!g.revisionAudit) throw new Error('revisionAudit missing');
           if (!g.revisionIntegrity) throw new Error('revisionIntegrity missing');
@@ -106,6 +114,7 @@ jobs:
             git reset --hard origin/main
             node scripts/fetch-prices.mjs
             node scripts/fetch-gamma.mjs
+            node scripts/fetch-revision-benchmark.mjs
             node scripts/fetch-revision-provenance.mjs
             node scripts/validate-revision-provenance.mjs
             node scripts/audit-revision-integrity.mjs
@@ -117,7 +126,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          FILES="prices.json charts.json gamma.json cycle.json holdings.json raw/revisions"
+          FILES="prices.json charts.json gamma.json cycle.json holdings.json revision-benchmark.json raw/revisions"
           if [ -z "$(git status --porcelain $FILES)" ]; then
             echo "No change in $FILES."; exit 0
           fi
