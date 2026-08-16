@@ -6206,10 +6206,15 @@ function renderInstantAnswer(){
   var J=function(u){return fetch(u,{cache:'no-store'}).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;});};
   // gamma 티커 → 표시명
   var NM={MRVL:'마벨','005930':'삼성전자',MU:'마이크론',LITE:'루멘텀',VRT:'버티브',BE:'블룸에너지',
-          AMD:'AMD',RMBS:'램버스',CEG:'컨스텔레이션',QCOM:'퀄컴',APH:'앰페놀',BESI:'BESI','000660':'SK하이닉스',TSLA:'테슬라'};
+          AMD:'AMD',RMBS:'램버스',CEG:'컨스텔레이션',QCOM:'퀄컴',APH:'앰페놀',BESI:'BESI','000660':'SK하이닉스',TSLA:'테슬라',
+          PLTR:'Palantir',ALAB:'Astera Labs',CBRS:'Cerebras',SNDK:'SanDisk','009150':'삼성전기','353200':'대덕전자',
+          '471990':'KODEX AI반도체핵심장비','089030':'테크윙','0522':'ASMPT',SMCI:'Supermicro',COHR:'Coherent',
+          '0173Y0':'KODEX 미국AI광통신네트워크',VICR:'Vicor',OKLO:'Oklo',TER:'테라다인'};
   // gamma 티커 → charts.json/prices.json 키. 종목명 hover는 전역 hover-chart.js를 재사용한다.
   var PXID={MRVL:'mrvl','005930':'sec',MU:'mu',LITE:'lite',VRT:'vrt',BE:'be',AMD:'amd',RMBS:'rmbs',
-            CEG:'ceg',QCOM:'qcom',APH:'aph',BESI:'besi','000660':'skhynix',TSLA:'tsla'};
+            CEG:'ceg',QCOM:'qcom',APH:'aph',BESI:'besi','000660':'skhynix',TSLA:'tsla',PLTR:'pltr',ALAB:'alab',
+            CBRS:'cbrs',SNDK:'sndk','009150':'sem','353200':'ddk','471990':'kodexeq','089030':'twng','0522':'asmpt',
+            SMCI:'smci',COHR:'cohr','0173Y0':'optetf',VICR:'vicr',OKLO:'oklo',TER:'ter'};
   function series(CH,k){ if(!k||!CH||!CH.series||!CH.series[k])return null; var s=CH.series[k]; return Array.isArray(s.c)?s.c.filter(function(x){return typeof x==='number'&&x>0;}):null; }
   function trend(c){ if(!c||c.length<22)return {dir:'—',r20:null,r63:null}; var last=c[c.length-1]; var r20=last/c[c.length-21]-1; var r63=c.length>=64?last/c[c.length-64]-1:null; var dir=r20>0.02?'상승':(r20<-0.02?'하락':'횡보'); return {dir:dir,r20:r20,r63:r63}; }
   function sp(x){return (x>=0?'+':'')+Math.round(x*100)+'%';}
@@ -6281,7 +6286,8 @@ function renderInstantAnswer(){
     var rows=[],pend=0,upN=0,dnN=0,hotN=0;
     Object.keys(G).forEach(function(tk){
       var e=G[tk]; if(!e)return; var r=e.rev;
-      if(!r){pend++;return;}
+      if(!r)pend++;
+      r=r||{};
       var f1=(r.eps&&r.eps.fy1)?r.eps.fy1:null;
       var gate=r.gate?r.gate.d30:null;
       if(f1&&f1.c30!=null){ if(f1.c30>0)upN++; else if(f1.c30<0)dnN++; }
@@ -6292,8 +6298,8 @@ function renderInstantAnswer(){
     rows.sort(function(a,b){var x=a.gate==null?-1e9:a.gate,y=b.gate==null?-1e9:b.gate;return y-x;});
 
     var body=rows.map(function(o){
-      var e=o.e,r=o.r,f1=o.f1,g=o.gate;
-      var nm=NM[o.tk]||o.tk;
+      var e=o.e,r=o.r||{},f1=o.f1,g=o.gate;
+      var nm=e.name||NM[o.tk]||o.tk;
       var tp=r.tp||{},px=r.px||{};
       var bd=(f1&&(f1.up30!=null||f1.dn30!=null))
         ? '<span style="color:var(--st-dawn)">▲'+(f1.up30||0)+'</span> / <span style="color:var(--st-hot)">▼'+(f1.dn30||0)+'</span>'

@@ -17,7 +17,10 @@ const pct=(now,prev)=>(Number.isFinite(Number(now))&&Number.isFinite(Number(prev
 
 const NAMES={
   CEG:'컨스텔레이션',LITE:'루멘텀',MRVL:'마벨',MU:'마이크론',QCOM:'퀄컴',BESI:'BESI',RMBS:'램버스',
-  APH:'앰페놀','005930':'삼성전자',VRT:'버티브','000660':'SK하이닉스',BE:'블룸에너지',AMD:'AMD',TSLA:'테슬라'
+  APH:'앰페놀','005930':'삼성전자',VRT:'버티브','000660':'SK하이닉스',BE:'블룸에너지',AMD:'AMD',TSLA:'테슬라',
+  PLTR:'Palantir',ALAB:'Astera Labs',CBRS:'Cerebras',SNDK:'SanDisk','009150':'삼성전기','353200':'대덕전자',
+  '471990':'KODEX AI반도체핵심장비','089030':'테크윙','0522':'ASMPT',SMCI:'Supermicro',COHR:'Coherent',
+  '0173Y0':'KODEX 미국AI광통신네트워크',VICR:'Vicor',OKLO:'Oklo',TER:'테라다인'
 };
 
 function loadSnap(ref){

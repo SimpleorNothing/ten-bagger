@@ -55,6 +55,7 @@ function gammaSymbol(ticker, mkt) {
     case 'US': case 'NASDAQ': case 'NYSE': return ticker;
     case 'KR': case 'KOSPI': return ticker + '.KS';
     case 'KOSDAQ': return ticker + '.KQ';
+    case 'HKEX': return ticker.padStart(4, '0') + '.HK';
     case 'EU': return ticker + '.AS';
     case 'TWSE': return ticker + '.TW';
     case 'TSE': return ticker + '.T';
