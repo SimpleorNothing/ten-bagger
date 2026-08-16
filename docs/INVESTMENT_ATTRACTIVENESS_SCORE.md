@@ -13,6 +13,7 @@ V4 최종 투자매력도 = 외생 데이터 점수 + 내부 판단 보정
 - 내부 판단 보정: γ와 사이클 단계의 영향을 별도 표시한다.
 - 실제 비중조절: 보유비중·집중도·중복 노출·매크로 게이트를 별도 로직에서 반영한다.
 - V3 점수도 `scores.json`에 함께 저장하지만 화면에는 V4를 표시한다.
+- 산출 대상은 04 알파 찾기 Value Chain의 전체 상장 종목·ETF다. 원자료가 없는 대상도 목록과 `scores.json`에서 누락하지 않고 `자료부족`으로 표시한다.
 
 ## 2. 외생 데이터 점수
 
@@ -101,6 +102,7 @@ EPS 하향은 리비전 순위와 컨센서스 폭에서 반영되고, 과열은
 | `scripts/fetch-revision-benchmark.mjs` | 벤치마크 생성 |
 | `scripts/build-investment-scores.mjs` | V3·V4 서버 계산과 스냅샷 생성 |
 | `scripts/apply_zero_base_investment_score.py` | 저장된 점수를 화면에 표시 |
+| `scripts/test-value-chain-score-coverage.mjs` | Value Chain 전체 티커의 gamma·scores 포함 여부 회귀검사 |
 
 클라이언트는 점수를 다시 계산하지 않는다. `scores.json` 또는 벤치마크가 없거나 스키마가 다르면 `산출 실패`를 명시한다.
 

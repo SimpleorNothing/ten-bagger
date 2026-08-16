@@ -105,7 +105,6 @@ function v4(G) {
 const held = new Set((holdings.detail || []).filter((x) => Number(x.qty) > 0).map((x) => String(x.ticker).toUpperCase()));
 const rows = {};
 for (const [ticker, G] of Object.entries(gammaDoc.gamma || {})) {
-  if (!G?.rev) continue;
   const oldScore = v3(G), nextScore = v4(G);
   rows[ticker] = { ticker, held: held.has(ticker), v3: oldScore, v4: nextScore, delta: oldScore.score == null || nextScore.score == null ? null : nextScore.score - oldScore.score };
 }
