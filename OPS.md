@@ -129,8 +129,8 @@
 **스틸맨:** 「07:00 KST 스냅샷으로는 장중 급락을 놓친다」 — 유효하나 매크로 게이트는 **VIX 종가·F&G 일일값** 기준으로 설계돼 장중 해상도를 요구하지 않는다. 실제로 장중 해상도가 필요한 건 **DRM3 스파이크 타임박스**뿐이고 그건 예외 ②로 커버된다.
 
 ### 현행 메뉴 (7탭 · 런타임 렌더 순)
-`01 시장 모니터링(v-market)` · `02 인사이트 찾기(v-insight · insight.js 자가 마운트)` · `03 전문가 원탁(v-council)` · `04 시장과 실적 전망(v-thread · v-cycle·v-alpha 2026-07-18 렌더 제외)` · `05 리밸런싱(v-decision)` · **`06 모닝 브리핑(v-brief · brief.js 자가 마운트 · 2026-07-19 신설)`** · `07 메모(v-memo)`
-※ 위는 **런타임 렌더 순**(§3 내부번호 = 이 순서). `nav` 정적 버튼은 5개(market·cycle·port·council·memo · **index.html 무편집**)이고, `insight.js` `mount()`가 런타임에 ①`insight` 탭을 `market` 뒤 주입 ②`council`을 `cycle` 앞으로 이동 ③`cycle` 라벨 「궁금한 것」→「시장과 실적 전망」 개명 ④전 탭 index 순 재번호 → 위 순서 확정(정적 폴백은 마운트 전 구 5탭 · `insight.js` 로드 전 잠깐). **이 「잠깐」이 새로고침 플래시(FOUC)였고 `</head>` 앞 `#nav-fouc-guard`(`#nav{visibility:hidden}`→하이드레이션 후 `.rdy`)로 억제(2026-07-25·STYLE_GUIDE §4·§9).** **`data-v`·뷰 id·데이터 소스는 불변 — 라벨·순서만 재구성**(2026-07-18). ※ 04 뷰 제목은 #424가 옛 `#instantAnswer` vhead(「지금 궁금한 것」)를 삭제해 별도 개명 불필요 — v-thread 최상단은 `#dsAisd`(AI 수요·공급 로드맵). `v-port`·`v-tracker`·`v-macro`·`v-cal`은 **뷰서 제외·코드 잔존**(v-cal은 2026-07-17 06 캘린더 삭제로 합류 — 임박 이벤트는 01로 흡수, `#v-cal` CSS는 비활성 잔존).
+`01 시장 모니터링(v-market)` · `02 인사이트 찾기(v-insight · insight.js 자가 마운트)` · `03 전문가 원탁(v-council)` · `04 알파 찾기(v-thread · v-cycle·v-alpha 2026-07-18 렌더 제외)` · `05 리밸런싱(v-decision)` · **`06 모닝 브리핑(v-brief · brief.js 자가 마운트 · 2026-07-19 신설)`** · `07 메모(v-memo)`
+※ 위는 **런타임 렌더 순**(§3 내부번호 = 이 순서). `nav` 정적 버튼은 5개(market·cycle·port·council·memo · **index.html 무편집**)이고, `insight.js` `mount()`가 런타임에 ①`insight` 탭을 `market` 뒤 주입 ②`council`을 `cycle` 앞으로 이동 ③`cycle` 라벨 「궁금한 것」→「알파 찾기」 개명 ④전 탭 index 순 재번호 → 위 순서 확정(정적 폴백은 마운트 전 구 5탭 · `insight.js` 로드 전 잠깐). **이 「잠깐」이 새로고침 플래시(FOUC)였고 `</head>` 앞 `#nav-fouc-guard`(`#nav{visibility:hidden}`→하이드레이션 후 `.rdy`)로 억제(2026-07-25·STYLE_GUIDE §4·§9).** **`data-v`·뷰 id·데이터 소스는 불변 — 라벨·순서만 재구성**(2026-07-18). ※ 04 뷰 제목은 #424가 옛 `#instantAnswer` vhead(「지금 궁금한 것」)를 삭제해 별도 개명 불필요 — v-thread 최상단은 `#dsAisd`(AI 수요·공급 로드맵). `v-port`·`v-tracker`·`v-macro`·`v-cal`은 **뷰서 제외·코드 잔존**(v-cal은 2026-07-17 06 캘린더 삭제로 합류 — 임박 이벤트는 01로 흡수, `#v-cal` CSS는 비활성 잔존).
 
 ### 01 시장 모니터링 (`v-market`)
 
@@ -225,7 +225,7 @@
 | 원탁 음성 토론 재생 | **고품질 Gemini(Google AI Studio) 우선** · 실패 시 브라우저 TTS 폴백 | 재생 시 | 원탁 진단 리포트(diagnosis·board·consensus·tension·steelman)를 화자별 음성으로 메신저형 극화 재생. `council-audio.js` 자가 마운트가 `window.COUNCIL.playReport`와 원탁 재생 버튼을 가로채 리포트 DOM을 발언 목록으로 구성하고, worker `POST /api/council-audio`에 `{turns:[{say,voice}]}`를 전송한다. worker는 발언별 단일 화자 Gemini TTS를 병렬 생성해 RMS 정규화·간격 삽입 후 단일 WAV로 연결하고, R2 `cnclaud_{sha256}.wav`에 내용 해시 캐시한다. `X-Council-Starts` 시작 시각으로 말풍선 하이라이트를 동기화한다. 좌장=Kore, 나머지는 `VOICE_POOL` 순환 배정. Gemini 호출·R2·WAV 생성 실패 시 기존 브라우저 TTS(`_orig`)로 자동 폴백. index.html 무편집·신규 `:root` 토큰 0·기존 `.cl-*` 플레이어 재사용. narrative≠numbers |
 | 원탁 업데이트 배지 | 자동(런타임) | 로딩 시 | `changelog.js` `mountHead()` — 01 시장 모니터링과 동일 `.mkt-upd` 배지 재사용 |
 
-### 04 시장과 실적 전망 (`v-thread`만 렌더 · `v-cycle`·`v-alpha` 2026-07-18 렌더 제외)
+### 04 알파 찾기 (`v-thread`만 렌더 · `v-cycle`·`v-alpha` 2026-07-18 렌더 제외)
 
 | 정보명 | 자동/수동 | 주기 | 소스 |
 |---|---|---|---|
