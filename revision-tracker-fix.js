@@ -2,8 +2,7 @@
  * - 현재가 컬럼 추가
  * - 포워드 PER = 현재가 / 다음 달력연도 EPS
  * - 포워드 EPS는 provider의 단순 +1y가 아니라 '현재 달력연도 + 1' 종료연도를 선택
- *   예: 2026년에는 FY2027(종료일 year=2027)을 사용. LITE처럼 Yahoo가 0y=FY2027,
- *   +1y=FY2028로 롤오버된 종목도 2027 EPS를 일관되게 사용한다.
+ * - 화면에는 중복 FY+1 EPS를 숨기고 검증된 다음 달력연도 EPS만 표시
  */
 (function(){
   'use strict';
@@ -24,25 +23,28 @@
   function headIndex(head,re){return Array.from(head.children).findIndex(function(x){return re.test(cleanHead(x));});}
   function makeHead(html){var th=document.createElement('th');th.className='c';th.setAttribute('data-forward-metric','1');th.innerHTML=html;return th;}
   function makeCell(html){var td=document.createElement('td');td.className='c';td.setAttribute('data-forward-metric','1');td.innerHTML=html;return td;}
+  function hideLegacyFy1(table){var head=table&&table.querySelector('thead tr');if(!head)return;var hs=Array.from(head.children);hs.forEach(function(th,idx){var name=cleanHead(th);if(/^EPS\s*FY\+1/.test(name)||(/^EPS\b/.test(name)&&/FY\+1/.test(name))){th.style.display='none';Array.from(table.querySelectorAll('tbody tr')).forEach(function(tr){if(tr.children[idx])tr.children[idx].style.display='none';});}});}
   function enhanceMetrics(){
-    var table=trackerTable();if(!table||!STATE.gamma||!STATE.prices)return false;var head=table.querySelector('thead tr'),body=table.querySelector('tbody');if(!head||!body)return false;if(table.dataset.forwardMetrics==='1')return true;
+    var table=trackerTable();if(!table||!STATE.gamma||!STATE.prices)return false;var head=table.querySelector('thead tr'),body=table.querySelector('tbody');if(!head||!body)return false;
+    hideLegacyFy1(table);
+    if(table.dataset.forwardMetrics==='1')return true;
     var targetIdx=headIndex(head,/^목표가/);if(targetIdx<0)return false;
     head.insertBefore(makeHead('현재가<br><span style="font-weight:400;color:var(--faint)">latest</span>'),head.children[targetIdx+1]||null);
     head.insertBefore(makeHead('PER<br><span style="font-weight:400;color:var(--faint)">Forward '+TARGET_YEAR+'E</span>'),head.children[targetIdx+2]||null);
-    var epsIdx=headIndex(head,/^EPS\b/);if(epsIdx>=0)head.children[epsIdx].innerHTML='EPS<br><span style="font-weight:400;color:var(--faint)">Forward '+TARGET_YEAR+'E</span>';
+    var epsIdx=headIndex(head,/^EPS\b/);if(epsIdx>=0&&head.children[epsIdx].style.display!=='none')head.children[epsIdx].innerHTML='EPS<br><span style="font-weight:400;color:var(--faint)">Forward '+TARGET_YEAR+'E</span>';
     var revIdx=headIndex(head,/^EPS 리비전/),udIdx=headIndex(head,/^상향\/하향/),gateIdx=headIndex(head,/강등 게이트/);
     Array.from(body.querySelectorAll('tr')).forEach(function(tr){
       if(tr.children.length<2)return;var tk=tickerOf(tr),G=tk?gammaRow(tk):null,F=forwardPeriod(G),px=tk?priceFor(tk,G):null;var eps=F&&Number.isFinite(Number(F.now))?Number(F.now):null;var pe=(px!=null&&eps!=null&&eps>0)?px/eps:null;
       tr.insertBefore(makeCell('<b>'+fmtPrice(px)+'</b><div class="pe-p">현재가</div>'),tr.children[targetIdx+1]||null);
       tr.insertBefore(makeCell('<b>'+(pe==null?'—':pe.toFixed(1)+'x')+'</b><div class="pe-p">'+TARGET_YEAR+'E</div>'),tr.children[targetIdx+2]||null);
-      if(epsIdx>=0){var ecell=tr.children[epsIdx];if(ecell)ecell.innerHTML='<b>'+fmtEps(eps)+'</b><div class="pe-p">'+(F?TARGET_YEAR:'자료없음')+'</div>';}
+      if(epsIdx>=0){var ecell=tr.children[epsIdx];if(ecell&&ecell.style.display!=='none')ecell.innerHTML='<b>'+fmtEps(eps)+'</b><div class="pe-p">'+(F?TARGET_YEAR:'자료없음')+'</div>';}
       if(revIdx>=0){var rcell=tr.children[revIdx],c30=F&&F.c30,c90=F&&F.c90;if(rcell)rcell.innerHTML='<b style="color:'+color(c30)+'">'+signed(c30,'%')+'</b><div class="pe-p">90d '+signed(c90,'%')+'</div>';}
       if(udIdx>=0){var ucell=tr.children[udIdx],up=F&&F.up30,dn=F&&F.dn30;if(ucell)ucell.innerHTML='<b style="color:var(--st-dawn)">▲'+(up==null?'—':up)+'</b> / <b style="color:var(--st-hot)">▼'+(dn==null?'—':dn)+'</b><div class="pe-p">애널 30d</div>';}
       if(gateIdx>=0){var gcell=tr.children[gateIdx],p30=G&&G.rev&&G.rev.px&&G.rev.px.c30,c30g=F&&F.c30,gap=(p30==null||c30g==null)?null:Number(p30)-Number(c30g);if(gcell)gcell.innerHTML='<b style="color:'+color(-gap)+'">'+signed(gap,'p')+'</b><div class="pe-p">주가−EPS 30d</div>';}
-    });table.dataset.forwardMetrics='1';return true;
+    });table.dataset.forwardMetrics='1';hideLegacyFy1(table);return true;
   }
   function sortValue(th,td,tr){var h=cleanHead(th);if(/투자매력도|제로베이스/.test(h)){var z=Number(tr.dataset.zbScoreValue);return Number.isFinite(z)?z:null;}if(/실제 비중조절/.test(h)){var b=td&&td.querySelector('b');return firstNumber(b?b.textContent:td&&td.textContent);}if(/점수 기여도/.test(h)){var vals=Array.from((td&&td.querySelectorAll('span'))||[]).map(function(x){return firstNumber(x.textContent);}).filter(function(x){return x!=null;});return vals.length?vals.reduce(function(a,b){return a+b;},0):null;}if(/상향\/하향/.test(h)){var t=String(td&&td.textContent||'').replace(/,/g,'');var up=t.match(/▲\s*(\d+(?:\.\d+)?)/),dn=t.match(/▼\s*(\d+(?:\.\d+)?)/);return (up?Number(up[1]):0)-(dn?Number(dn[1]):0);}return firstNumber(td&&td.textContent);}
-  function decorate(){var table=trackerTable();if(!table)return false;enhanceMetrics();var head=table.querySelector('thead tr');if(!head)return false;Array.from(head.children).forEach(function(th){var name=cleanHead(th);if(!name||/^종목/.test(name))return;th.setAttribute('data-rev-sort','1');th.style.cursor='pointer';th.style.userSelect='none';th.title='클릭하여 정렬';var mark=th.querySelector('[data-rev-sort-mark]');if(!mark){mark=document.createElement('span');mark.setAttribute('data-rev-sort-mark','1');mark.style.cssText='margin-left:4px;font-size:9px;color:var(--faint)';mark.textContent='↕';th.appendChild(mark);}});return true;}
+  function decorate(){var table=trackerTable();if(!table)return false;enhanceMetrics();hideLegacyFy1(table);var head=table.querySelector('thead tr');if(!head)return false;Array.from(head.children).forEach(function(th){var name=cleanHead(th);if(!name||/^종목/.test(name)||th.style.display==='none')return;th.setAttribute('data-rev-sort','1');th.style.cursor='pointer';th.style.userSelect='none';th.title='클릭하여 정렬';var mark=th.querySelector('[data-rev-sort-mark]');if(!mark){mark=document.createElement('span');mark.setAttribute('data-rev-sort-mark','1');mark.style.cssText='margin-left:4px;font-size:9px;color:var(--faint)';mark.textContent='↕';th.appendChild(mark);}});return true;}
   function sort(th){var table=th&&th.closest('table');if(!table)return;var head=table.querySelector('thead tr'),body=table.querySelector('tbody');if(!head||!body)return;var idx=Array.from(head.children).indexOf(th);if(idx<0)return;var dir=th.getAttribute('data-sort-dir')==='desc'?'asc':'desc';Array.from(head.children).forEach(function(x){x.removeAttribute('data-sort-dir');var m=x.querySelector('[data-rev-sort-mark]');if(m)m.textContent='↕';});th.setAttribute('data-sort-dir',dir);var mark=th.querySelector('[data-rev-sort-mark]');if(mark)mark.textContent=dir==='desc'?'↓':'↑';var all=Array.from(body.children).filter(function(tr){return tr.tagName==='TR';});var sortable=all.filter(function(tr){return tr.hasAttribute('data-zb-score-value');});if(!sortable.length)sortable=all.filter(function(tr){return tr.children.length>1;});var mapped=sortable.map(function(tr,order){return {tr:tr,order:order,v:sortValue(th,tr.children[idx],tr)};});mapped.sort(function(a,b){if(a.v==null&&b.v==null)return a.order-b.order;if(a.v==null)return 1;if(b.v==null)return -1;if(a.v===b.v)return a.order-b.order;return dir==='desc'?b.v-a.v:a.v-b.v;});mapped.forEach(function(x){body.appendChild(x.tr);});}
   document.addEventListener('click',function(e){var th=e.target&&e.target.closest?e.target.closest('th[data-rev-sort="1"]'):null;if(!th)return;e.preventDefault();e.stopPropagation();sort(th);},true);
   function boot(){Promise.all([fetch('/gamma.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;}),fetch('/prices.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;})]).then(function(x){STATE.gamma=x[0];STATE.prices=x[1];decorate();});var host=document.getElementById('probEst')||document.body;if(window.MutationObserver&&host){var queued=false;new MutationObserver(function(){if(queued)return;queued=true;requestAnimationFrame(function(){queued=false;decorate();});}).observe(host,{childList:true,subtree:true});}var tries=0,t=setInterval(function(){tries++;if((decorate()&&STATE.gamma&&STATE.prices)||tries>80)clearInterval(t);},250);}
