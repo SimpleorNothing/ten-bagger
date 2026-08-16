@@ -147,11 +147,20 @@ jobs:
           verify "https://simpleornothing.com"
 
           if [ "${{ steps.site_history.outputs.expected }}" = "1" ]; then
-            history=$(curl -fsS --connect-timeout 10 --max-time 20 \
-              -H 'Cache-Control: no-cache' \
-              "https://simpleornothing.com/__site_changes?t=$(date +%s%N)")
-            printf '%s' "$history" | grep -Fq "${GITHUB_SHA}" || {
-              echo "ERROR: actual site changed but site change history does not contain ${GITHUB_SHA}"
+            ok=0
+            for attempt in 1 2 3 4 5; do
+              history=$(curl -fsS --connect-timeout 10 --max-time 20 \
+                -H 'Cache-Control: no-cache' \
+                "https://simpleornothing.com/__site_changes?t=$(date +%s%N)" || true)
+              echo "verify site change history attempt ${attempt}: ${history:0:500}"
+              if printf '%s' "$history" | grep -Fq "${GITHUB_SHA}"; then
+                ok=1
+                break
+              fi
+              sleep $((attempt * 3))
+            done
+            if [ "$ok" -ne 1 ]; then
+              echo "ERROR: actual site changed but site change history does not contain ${GITHUB_SHA} after propagation retries"
               exit 1
-            }
+            fi
           fi
