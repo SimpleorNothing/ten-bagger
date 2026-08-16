@@ -93,7 +93,22 @@ script = r'''
      tr.dataset.zbTicker=ticker||'';tr.dataset.zbHeld=isHeld?'1':'0';tr.dataset.zbScoreValue=r.score==null?'':String(r.score);
      const td=document.createElement('td');td.dataset.zbScore='1';td.style.minWidth='124px';
      const d=r.detail||{};const cov=Math.round((r.coverage||0)*100),rankTag=isHeld?'<span data-zb-rank style="font-weight:700;color:var(--dim)"></span>':'<span style="font-size:10px;color:var(--faint)">후보</span>';
-     const title=['3M '+fmt(d.s3),'6M '+fmt(d.s6),'밸류 '+fmt(d.val),'촉매 '+fmt(d.cat),'컨센 '+fmt(d.con),'리스크 -'+r.penalty.toFixed(1),'데이터 '+cov+'%',d.epsGrowth!=null?'FY+1 EPS증가 '+d.epsGrowth.toFixed(1)+'%':null,d.fwdPE!=null?'FY+1 P/E '+d.fwdPE.toFixed(1)+'x':null].filter(Boolean).join(' · ');
+     const baseLine=r.base!=null?'기초점수 '+r.base.toFixed(1)+' - 리스크 '+r.penalty.toFixed(1)+' = 최종 '+fmt(r.score):'기초점수 계산 불가';
+     const title=[
+       '현재값: 3M '+fmt(d.s3)+' · 6M '+fmt(d.s6)+' · 밸류 '+fmt(d.val)+' · 촉매 '+fmt(d.cat)+' · 컨센 '+fmt(d.con)+' · 리스크 -'+r.penalty.toFixed(1)+' · 데이터 '+cov+'%',
+       baseLine,
+       '',
+       '최종 = 가중 기초점수 - 리스크 페널티',
+       '가중 기초점수 = (3M×30% + 6M×25% + 밸류×20% + 촉매×15% + 컨센×10%) / 유효 데이터 가중치',
+       '3M = 다음분기 EPS 30일 리비전×50% + 다음분기 EPS 90일 리비전×20% + FY+1 EPS 30일 리비전×30%',
+       '6M = FY+1 EPS 성장률×60% + FY+1 EPS 90일 리비전×25% + FY+1 EPS 30일 리비전×15%',
+       '밸류 = 목표가 상승여력×45% + (EPS성장률/FY+1 P/E)×35% + 목표가 30일 리비전×20%',
+       '촉매 = 다음분기 EPS 30일 리비전×25% + 목표가 30일 리비전×20% + γ×25% + 사이클 단계×15% + EPS 상향 비율×15%',
+       '컨센 = FY+1 EPS 상향 비율×60% + 애널리스트 평점×40%',
+       '리스크 = 주가가 EPS30 개선을 10%p 초과 선반영 + 단기/FY+1 EPS 하향 + γ spent/flagged + 과열 + 과도한 목표가 괴리 + 하향 리비전 우세 (합계 최대 20점)',
+       d.epsGrowth!=null?'참고: FY+1 EPS증가 '+d.epsGrowth.toFixed(1)+'%':null,
+       d.fwdPE!=null?'참고: FY+1 P/E '+d.fwdPE.toFixed(1)+'x':null
+     ].filter(x=>x!=null).join('\n');
      if(r.score==null){td.innerHTML='<div style="font-weight:800;color:var(--faint)">자료부족</div><div style="font-size:10px;color:var(--faint)">데이터 '+cov+'%</div>';}
      else td.innerHTML='<div style="display:flex;gap:6px;align-items:baseline;white-space:nowrap">'+rankTag+'<b style="font-size:19px;color:'+tone(r.score)+'">'+r.score+'</b><span style="font-size:10px;color:var(--faint)">'+label(r.score)+'</span></div><div style="font-size:9.5px;color:var(--dim);white-space:nowrap">3M '+fmt(d.s3)+' · 6M '+fmt(d.s6)+' · V '+fmt(d.val)+'</div><div style="font-size:9.5px;color:var(--faint);white-space:nowrap">촉매 '+fmt(d.cat)+' · 리스크 -'+Math.round(r.penalty)+' · '+cov+'%</div>';
      td.title=title;tr.insertBefore(td,tr.children[stockIdx+1]||null);rows.push({tr,score:r.score,isHeld,order});
