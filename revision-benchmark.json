@@ -1,0 +1,47 @@
+{
+  "schema": "revision-benchmark-v1",
+  "asOf": "2026-08-16T08:05:28.910Z",
+  "universe": "Nasdaq-100",
+  "constituentCount": 102,
+  "constituentAsOf": "Aug 13, 2026",
+  "methodology": "Nasdaq-100 cross-section; P10=0, P90=100; linear interpolation; winsorized outside anchors",
+  "minimumSample": 50,
+  "metrics": {
+    "q1_c30": {
+      "n": 97,
+      "p10": -2.57,
+      "p50": 0.54,
+      "p90": 16.69
+    },
+    "q1_c90": {
+      "n": 94,
+      "p10": -3.04,
+      "p50": 1.4,
+      "p90": 19.28
+    },
+    "fy1_c30": {
+      "n": 99,
+      "p10": -2.22,
+      "p50": 1.02,
+      "p90": 13.23
+    },
+    "fy1_c90": {
+      "n": 97,
+      "p10": -4.36,
+      "p50": 2.06,
+      "p90": 16.95
+    }
+  },
+  "sources": {
+    "constituents": {
+      "provider": "Nasdaq",
+      "url": "https://api.nasdaq.com/api/quote/list-type/nasdaq100"
+    },
+    "revisions": {
+      "provider": "Yahoo Finance",
+      "module": "quoteSummary.earningsTrend"
+    }
+  },
+  "failedCount": 0,
+  "failures": []
+}
