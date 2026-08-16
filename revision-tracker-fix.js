@@ -32,11 +32,13 @@
     head.insertBefore(makeHead('현재가<br><span style="font-weight:400;color:var(--faint)">latest</span>'),head.children[targetIdx+1]||null);
     head.insertBefore(makeHead('PER<br><span style="font-weight:400;color:var(--faint)">Forward '+TARGET_YEAR+'E</span>'),head.children[targetIdx+2]||null);
     var epsIdx=headIndex(head,/^EPS\b/);if(epsIdx>=0&&head.children[epsIdx].style.display!=='none')head.children[epsIdx].innerHTML='EPS<br><span style="font-weight:400;color:var(--faint)">Forward '+TARGET_YEAR+'E</span>';
-    var revIdx=headIndex(head,/^EPS 리비전/),udIdx=headIndex(head,/^상향\/하향/),gateIdx=headIndex(head,/강등 게이트/);
+    var revIdx=headIndex(head,/^EPS 리비전/),udIdx=headIndex(head,/^상향\/하향/),gateIdx=headIndex(head,/강등 게이트/),revInserted=false;
+    if(revIdx<0&&udIdx>=0){head.insertBefore(makeHead('EPS 리비전<br><span style="font-weight:400;color:var(--faint)">30d · 90d</span>'),head.children[udIdx]||null);revIdx=udIdx;udIdx++;if(gateIdx>=0)gateIdx++;revInserted=true;}
     Array.from(body.querySelectorAll('tr')).forEach(function(tr){
       if(tr.children.length<2)return;var tk=tickerOf(tr),G=tk?gammaRow(tk):null,F=forwardPeriod(G),px=tk?priceFor(tk,G):null;var eps=F&&Number.isFinite(Number(F.now))?Number(F.now):null;var pe=(px!=null&&eps!=null&&eps>0)?px/eps:null;
       tr.insertBefore(makeCell('<b>'+fmtPrice(px)+'</b><div class="pe-p">현재가</div>'),tr.children[targetIdx+1]||null);
       tr.insertBefore(makeCell('<b>'+(pe==null?'—':pe.toFixed(1)+'x')+'</b><div class="pe-p">'+TARGET_YEAR+'E</div>'),tr.children[targetIdx+2]||null);
+      if(revInserted)tr.insertBefore(makeCell(''),tr.children[revIdx]||null);
       if(epsIdx>=0){var ecell=tr.children[epsIdx];if(ecell&&ecell.style.display!=='none')ecell.innerHTML='<b>'+fmtEps(eps)+'</b><div class="pe-p">'+(F?TARGET_YEAR:'자료없음')+'</div>';}
       if(revIdx>=0){var rcell=tr.children[revIdx],c30=F&&F.c30,c90=F&&F.c90;if(rcell)rcell.innerHTML='<b style="color:'+color(c30)+'">'+signed(c30,'%')+'</b><div class="pe-p">90d '+signed(c90,'%')+'</div>';}
       if(udIdx>=0){var ucell=tr.children[udIdx],up=F&&F.up30,dn=F&&F.dn30;if(ucell)ucell.innerHTML='<b style="color:var(--st-dawn)">▲'+(up==null?'—':up)+'</b> / <b style="color:var(--st-hot)">▼'+(dn==null?'—':dn)+'</b><div class="pe-p">애널 30d</div>';}
