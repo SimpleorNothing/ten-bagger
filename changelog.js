@@ -202,13 +202,6 @@
     // 신규 마운트일 때만 렌더하고, 이력 비동기 갱신은 renderAll()이 한 번 처리한다.
     if(made)render(n);
   }
-  // 05 리밸런싱 추정 리비전 트래커 「기대수익 점수」 컬럼 로더(raer.js 자가 마운트).
-  // index.html 무편집·worker 무편집을 위해 이미 로드되는 이 부트스트랩에서 <script>를 주입한다.
-  function loadRaer(){
-    if(document.getElementById('raerJs'))return;
-    var s=document.createElement('script');s.id='raerJs';s.src='/raer.js';s.defer=true;
-    (document.body||document.documentElement).appendChild(s);
-  }
   // 05 목표가 상승여력 수치 아래 공통 스케일 막대(upside-bars.js 자가 마운트).
   function loadUpsideBars(){
     if(document.getElementById('upsideBarsJs'))return;
@@ -265,7 +258,6 @@
     mountAll();
     mountThreadAisd();
     loadAutoHistory();
-    loadRaer();                                     // 추정 리비전 트래커 기대수익 컬럼
     loadUpsideBars();                               // 목표가 상승여력 공통 스케일 막대
     loadRisk();                                     // 01 리스크 3축 보드
     loadGates();                                        // 01 사이클 판별 보드(AI capex 4지표)
