@@ -29,9 +29,12 @@ jobs:
         run: npm install -g wrangler@4
 
       - name: Deploy
+        shell: bash
         run: |
+          set -euo pipefail
+          DEPLOYED_AT=$(date -u +%Y-%m-%dT%H:%M:%SZ)
           for attempt in 1 2 3; do
-            if wrangler deploy; then
+            if wrangler deploy --var DEPLOY_SHA:"${GITHUB_SHA}" --var DEPLOYED_AT:"${DEPLOYED_AT}"; then
               exit 0
             fi
             if [ "$attempt" -eq 3 ]; then
@@ -43,3 +46,26 @@ jobs:
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+      - name: Verify deployed SHA on Workers and custom domain
+        shell: bash
+        run: |
+          set -euo pipefail
+          verify() {
+            local base="$1"
+            local body=""
+            for attempt in 1 2 3 4 5; do
+              body=$(curl -fsS --connect-timeout 10 --max-time 20 \
+                -H 'Cache-Control: no-cache' \
+                "${base}/__version?t=$(date +%s%N)" || true)
+              echo "verify ${base} attempt ${attempt}: ${body}"
+              if printf '%s' "$body" | grep -Fq "${GITHUB_SHA}"; then
+                return 0
+              fi
+              sleep $((attempt * 3))
+            done
+            echo "ERROR: ${base} is not serving deployed SHA ${GITHUB_SHA}"
+            return 1
+          }
+          verify "https://ten-bagger.cw120-park.workers.dev"
+          verify "https://simpleornothing.com"
