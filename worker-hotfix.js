@@ -18,6 +18,7 @@ const FRESH_PATHS = new Set([
   "/cycle.json",
   "/changelog.js",
   "/capital-scarcity.js",
+  "/revision-tracker-fix.js",
   "/site-change-commits.json",
   "/site-change-live.js",
   "/topic-radar-sync.js",
@@ -135,6 +136,7 @@ async function injectSiteEnhancements(response) {
   if (!contentType.includes("text/html")) return response;
   const transformed = new HTMLRewriter()
     .on("body", { element(el) {
+      el.append('<script src="/revision-tracker-fix.js?v=20260816-sort-v2" defer></scr' + 'ipt>', { html: true });
       el.append('<script src="/site-change-live.js?v=20260816-live-verified" defer></scr' + 'ipt>', { html: true });
       el.append('<script src="/topic-radar-sync.js?v=20260816-server-delete-sync" defer></scr' + 'ipt>', { html: true });
     } })
