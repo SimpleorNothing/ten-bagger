@@ -12,6 +12,13 @@ on:
 permissions:
   contents: read
 
+# main이 짧은 간격으로 연속 갱신될 때 여러 Wrangler 배포가 겹치면
+# 이전 실행의 SHA 검증이 더 최신 배포에 의해 무효화될 수 있다.
+# 실제 서비스에는 최신 main만 필요하므로 진행 중인 구형 배포는 취소하고 최신 1건만 유지한다.
+concurrency:
+  group: cloudflare-production-deploy
+  cancel-in-progress: true
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
