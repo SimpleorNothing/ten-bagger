@@ -28,13 +28,12 @@
       var t=(li.querySelector('.n')||{}).textContent||'';
       existing.add(keyOf(d.replace(/\./g,'-'),t));
     });
-    var added=0;
     rows.slice().sort(function(a,b){return String(b.d).localeCompare(String(a.d));}).forEach(function(r){
       if(existing.has(keyOf(r.d,r.t)))return;
       var li=document.createElement('li');
       li.setAttribute('data-live-site-change',r.sha||'1');
       li.innerHTML='<span class="d">'+fmtDate(r.d)+'</span><span class="n">'+esc(r.t)+'</span>';
-      ul.insertBefore(li,ul.firstChild);added++;
+      ul.insertBefore(li,ul.firstChild);
     });
     var total=ul.querySelectorAll('li').length;
     var count=pop.querySelector('.cyc-pop-h span');
@@ -64,7 +63,7 @@
 (function(){
   if(document.querySelector('script[data-company-analysis-loader]'))return;
   var s=document.createElement('script');
-  s.src='/company.js?v=20260817-lumentum-switcher';
+  s.src='/company.js?v=20260817-native-render';
   s.defer=true;
   s.setAttribute('data-company-analysis-loader','1');
   document.body.appendChild(s);
