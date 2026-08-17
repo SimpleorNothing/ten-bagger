@@ -17,10 +17,18 @@ jobs:
           [ "$SIZE" -gt 150000 ] || { echo "::error::index.html 비정상 축소($SIZE) - 잘림 의심"; exit 1; }
           grep -q "const D=" index.html  || { echo "::error::const D= 앵커 소실"; exit 1; }
           grep -q "HOLDINGS" index.html  || { echo "::error::HOLDINGS 앵커 소실"; exit 1; }
-          for f in alpha.json earnings.json judgment.json news.json prices.json; do
+          for f in alpha.json earnings.json judgment.json news.json prices.json calendar.json marvell/data.json lumentum/data.json; do
             if [ -f "$f" ]; then python3 -c "import json;json.load(open('$f'))" \
               || { echo "::error::$f JSON 깨짐"; exit 1; }; fi
           done
+      - name: 기업분석 회귀 가드
+        run: |
+          node --check company.js
+          node --check company-clock.js
+          node --check site-change-live.js
+          if [ -f scripts/validate-company-analysis.mjs ]; then
+            node scripts/validate-company-analysis.mjs
+          fi
       - name: worker.js 회귀 가드
         run: |
           node --check worker.js
