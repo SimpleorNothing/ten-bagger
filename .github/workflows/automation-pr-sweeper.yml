@@ -56,6 +56,7 @@ jobs:
 
             case "$title" in
               "chore: sync holdings.json from latest Saturday 자산현황"|\
+              "chore: sync holdings and reconcile consumers"|\
               "chore: recompute alpha map estimates"|\
               "chore: sync official CPI release"|\
               "chore: update raw news feed"|\
@@ -121,6 +122,26 @@ jobs:
               -f description='Validated by automation PR sweeper' >/dev/null || return 1
           }
 
+          stale_holdings_pr() {
+            local branch="$1"
+            [ -f holdings.json ] || return 1
+            git show origin/main:holdings.json > /tmp/main-holdings.json 2>/dev/null || return 1
+            python3 - <<'PY'
+          import json, sys
+          with open('/tmp/main-holdings.json', encoding='utf-8') as f:
+              main = json.load(f)
+          with open('holdings.json', encoding='utf-8') as f:
+              pr = json.load(f)
+          def qty_map(x):
+              return {str(d.get('ticker') or d.get('name')): d.get('qty') for d in x.get('detail', [])}
+          main_qty_asof = str(main.get('qtyAsOf') or '')
+          pr_qty_asof = str(pr.get('qtyAsOf') or '')
+          same_or_older_source = bool(pr_qty_asof) and bool(main_qty_asof) and pr_qty_asof <= main_qty_asof
+          same_quantities = qty_map(main) == qty_map(pr)
+          sys.exit(0 if same_or_older_source and same_quantities else 1)
+          PY
+          }
+
           failures=0
           for row in "${PRS[@]:-}"; do
             [ -n "$row" ] || continue
@@ -146,8 +167,14 @@ jobs:
             else
               mergeable=$(gh pr view "$pr" --json mergeable --jq '.mergeable' 2>/dev/null || echo UNKNOWN)
               if [ "$mergeable" = "CONFLICTING" ]; then
-                echo "PR #$pr is conflicting with main; leaving it open for scheduled/operator recovery"
-                gh pr comment "$pr" --body "현재 main과 충돌해 자동 병합하지 않았습니다. 중복 PR이면 다음 sweep에서 정리되고, 최신 단일 PR이면 주기 점검 루틴에서 재생성/정리합니다." || true
+                if [ "$title" = "chore: sync holdings and reconcile consumers" ] && stale_holdings_pr "$branch"; then
+                  echo "PR #$pr is a stale holdings refresh with unchanged quantities; closing it"
+                  gh pr comment "$pr" --body "현재 main의 qtyAsOf가 같거나 더 최신이고 보유 수량도 동일합니다. 이 PR은 오래된 시가 파생 금액·비중만 되돌리는 충돌 PR이라 자동 종료합니다." || true
+                  gh pr close "$pr" --delete-branch || gh pr close "$pr" || true
+                else
+                  echo "PR #$pr is conflicting with main; leaving it open for scheduled/operator recovery"
+                  gh pr comment "$pr" --body "현재 main과 충돌해 자동 병합하지 않았습니다. 중복 PR이면 다음 sweep에서 정리되고, 최신 단일 PR이면 주기 점검 루틴에서 재생성/정리합니다." || true
+                fi
               else
                 echo "Direct merge blocked for PR #$pr; enabling auto-merge"
                 gh pr merge "$pr" --squash --auto --delete-branch || true
