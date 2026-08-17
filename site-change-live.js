@@ -59,3 +59,13 @@
   if(window.MutationObserver&&document.body){new MutationObserver(function(){patchModal();}).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});}
   fetchRows();
 })();
+
+/* 02 기업분석 자가 마운트 로더. index.html 대용량 파일을 직접 패치하지 않는다. */
+(function(){
+  if(document.querySelector('script[data-company-analysis-loader]'))return;
+  var s=document.createElement('script');
+  s.src='/company.js?v=20260817-marvell-matrix';
+  s.defer=true;
+  s.setAttribute('data-company-analysis-loader','1');
+  document.body.appendChild(s);
+})();
