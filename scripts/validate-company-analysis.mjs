@@ -28,6 +28,6 @@ const clock=fs.readFileSync('company-clock.js','utf8');
 if(!clock.includes("fetch('/gamma.json?t='")||!clock.includes("cache:'no-store'"))fail('company clock must read gamma.json no-store');
 if(!clock.includes('fy1.c30')||!clock.includes('fy1.c90')||!clock.includes('px.c30')||!clock.includes('px.c90'))fail('30/90 day clocks missing');
 const company=fs.readFileSync('company.js','utf8');
-if(company.includes('<iframe')||company.includes('companyFrame'))fail('iframe regression in company analysis');
+if(company.includes('<iframe')||/createElement\(['"]iframe['"]\)/.test(company))fail('iframe regression in company analysis');
 
 console.log('company analysis integrity: OK');
