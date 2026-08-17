@@ -64,7 +64,7 @@
 (function(){
   if(document.querySelector('script[data-company-analysis-loader]'))return;
   var s=document.createElement('script');
-  s.src='/company.js?v=20260817-marvell-matrix';
+  s.src='/company.js?v=20260817-lumentum-switcher';
   s.defer=true;
   s.setAttribute('data-company-analysis-loader','1');
   document.body.appendChild(s);
