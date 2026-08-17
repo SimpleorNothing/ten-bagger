@@ -78,3 +78,13 @@
   s.setAttribute('data-company-clock-loader','1');
   document.body.appendChild(s);
 })();
+
+/* 기업별 data schema 표시 보정과 CANDIDATES/CASCADES stage를 gamma.json SoT로 동기화한다. */
+(function(){
+  if(document.querySelector('script[data-company-patch-loader]'))return;
+  var s=document.createElement('script');
+  s.src='/company-patch.js?v=20260817-lumentum-audit';
+  s.defer=true;
+  s.setAttribute('data-company-patch-loader','1');
+  document.body.appendChild(s);
+})();
