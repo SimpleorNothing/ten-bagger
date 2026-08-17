@@ -146,4 +146,18 @@ jobs:
           git add $FILES
           git commit -m "chore: update market data + integrity-audited revisions"
           git push origin "$BRANCH"
-          gh pr create --base main --head "$BRANCH" --title "chore: update market data + integrity-audited revisions" --body "Automated market-data refresh. Raw provider snapshots are retained, then reproducibility and semantic integrity gates validate price/TP/EPS separately. Ambiguous fiscal-period EPS is excluded from ranking rather than carried forward. raw/revisions/latest.csv and latest.json expose period semantics, before/after values, quality status, and per-field sources. Claude PR Gate validates and squash-merges this protected-main PR."
+
+          PR_BODY="Automated market-data refresh. Raw provider snapshots are retained, then reproducibility and semantic integrity gates validate price/TP/EPS separately. Ambiguous fiscal-period EPS is excluded from ranking rather than carried forward. raw/revisions/latest.csv and latest.json expose period semantics, before/after values, quality status, and per-field sources. Claude PR Gate validates and squash-merges this protected-main PR."
+          for attempt in 1 2 3; do
+            if gh pr create --base main --head "$BRANCH" --title "chore: update market data + integrity-audited revisions" --body "$PR_BODY"; then
+              exit 0
+            fi
+            echo "PR creation attempt $attempt/3 failed; checking whether the PR was created despite the API error"
+            if gh pr view "$BRANCH" --json number,url >/dev/null 2>&1; then
+              echo "PR already exists for $BRANCH"
+              exit 0
+            fi
+            if [ "$attempt" -lt 3 ]; then sleep $((attempt * 10)); fi
+          done
+          echo "Unable to create PR after retries; branch remains pushed for recovery"
+          exit 1
