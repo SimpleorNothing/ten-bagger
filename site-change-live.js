@@ -63,8 +63,18 @@
 (function(){
   if(document.querySelector('script[data-company-analysis-loader]'))return;
   var s=document.createElement('script');
-  s.src='/company.js?v=20260817-native-render';
+  s.src='/company.js?v=20260817-marvell-audit';
   s.defer=true;
   s.setAttribute('data-company-analysis-loader','1');
+  document.body.appendChild(s);
+})();
+
+/* 02 기업분석 두 시계는 gamma.json을 별도 SoT로 no-store 조회한다. */
+(function(){
+  if(document.querySelector('script[data-company-clock-loader]'))return;
+  var s=document.createElement('script');
+  s.src='/company-clock.js?v=20260817-marvell-audit';
+  s.defer=true;
+  s.setAttribute('data-company-clock-loader','1');
   document.body.appendChild(s);
 })();
