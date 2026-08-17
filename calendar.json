@@ -1,7 +1,7 @@
 {
-  "asOf": "2026-08-15T15:30:00+09:00",
-  "source": "수기 큐레이션 + derive-calendar.mjs 데일리 refresh",
-  "note": "01 시장 모니터링 「다가오는 일정」 임박 이벤트 소스. index.html 런타임 fetch → CAL_NOW → renderCalNow()가 #v-market #calNow에 D-N 카드 렌더. 2026-08-15 테크윙 8/18 2Q26 실적발표 카드는 회사 공식 IR에서 2026-07-13 연결재무제표기준 영업(잠정)실적 공시가 확인되어 삭제. 국내 상장사 실적 이벤트는 derive-calendar.mjs에서 DART·KRX·회사 공식 IR 등 구조화된 공식 검증 정보가 없는 경우 자동 제외한다.",
+  "asOf": "2026-08-17T18:12:00+09:00",
+  "source": "수기 큐레이션 + derive-calendar.mjs 데일리 refresh · Marvell 공식 IR Calendar의 FY27 Q2 실적 및 Investor Day 확정 일정 반영",
+  "note": "01 시장 모니터링 「다가오는 일정」 임박 이벤트 소스. index.html 런타임 fetch → CAL_NOW → renderCalNow()가 #v-market #calNow에 D-N 카드 렌더. 국내 상장사 실적 이벤트는 DART·KRX·회사 공식 IR 등 구조화된 공식 검증 정보가 없는 경우 자동 제외한다. 해외 기업도 공식 IR에서 확정된 시각을 우선하며 d는 KST 기준 실제 공개일을 사용한다.",
   "grace": 0,
   "events": [
     {
@@ -41,6 +41,14 @@
       "when": "08-27 (목)"
     },
     {
+      "d": "2026-08-28",
+      "cat": "earn",
+      "lbl": "Marvell FY27 Q2 실적",
+      "tk": "MRVL",
+      "meta": "확정 · Marvell 공식 IR Calendar: 2026-08-27 13:45 PDT earnings call. 확인 포인트=Q2 매출 $2.70B 중간값, 데이터센터·interconnect 성장, GM, custom XPU·1.6T·51.2T ramp. · 확인: 2026-08-17 KST",
+      "when": "08-28 05:45 KST (美 08-27 13:45 PDT)"
+    },
+    {
       "d": "2026-09-16",
       "cat": "macro",
       "lbl": "미국 FOMC 금리결정",
@@ -60,6 +68,14 @@
       "lbl": "미·중 정상회담",
       "meta": "미국·중국 정상 간 회담 일정 · 핵심 확인: 관세·수출통제·AI 반도체 및 공급망 협상 결과, 후속 공동성명. · 일정 기준: 사용자 지정 2026-09-24",
       "when": "09-24 (목)"
+    },
+    {
+      "d": "2026-10-06",
+      "cat": "earn",
+      "lbl": "Marvell Investor Day 2026",
+      "tk": "MRVL",
+      "meta": "확정 · Marvell 공식 IR Calendar: 2026-10-06 New York City, 오전 개최. 정확한 시작 시각은 아직 미공개. 확인 포인트=FY28~FY29 custom silicon·networking 장기 로드맵, AI 매출 구성, 장기 마진·FCF·자본배분. · 확인: 2026-08-17 KST",
+      "when": "10-06 (NYC 오전·정확한 시간 미공개)"
     },
     {
       "d": "2026-10-15",
