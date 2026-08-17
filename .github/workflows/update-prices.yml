@@ -3,6 +3,9 @@ name: Update stock prices
 on:
   push:
     branches: [main]
+    # Trigger only when refresh logic or its UI contract changes. Generated market
+    # outputs (scores/revision-benchmark/etc.) must not re-trigger this workflow,
+    # otherwise each auto-merged refresh starts another refresh indefinitely.
     paths:
       - '.github/workflows/update-prices.yml'
       - 'index.html'
@@ -10,8 +13,6 @@ on:
       - 'scripts/fetch-gamma.mjs'
       - 'scripts/fetch-revision-benchmark.mjs'
       - 'scripts/build-investment-scores.mjs'
-      - 'scores.json'
-      - 'revision-benchmark.json'
       - 'scripts/fetch-revision-provenance.mjs'
       - 'scripts/validate-revision-provenance.mjs'
       - 'scripts/audit-revision-integrity.mjs'
