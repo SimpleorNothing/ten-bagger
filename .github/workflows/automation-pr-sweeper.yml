@@ -4,7 +4,13 @@ on:
   push:
     branches: [main]
   workflow_run:
-    workflows: ["Update stock prices"]
+    workflows:
+      - "Update stock prices"
+      - "Update news feed"
+      - "Update global CPI"
+      - "Update macro signals"
+      - "Derive signal drafts"
+      - "Update AI capital scarcity monitor"
     types: [completed]
   schedule:
     - cron: '*/15 * * * *'
