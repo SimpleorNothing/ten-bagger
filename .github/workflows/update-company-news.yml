@@ -5,6 +5,7 @@ on:
     - cron: '25 22 * * *' # 07:25 KST
   workflow_dispatch: {}
   push:
+    branches: [main]
     paths:
       - '.github/workflows/update-company-news.yml'
       - 'scripts/fetch-company-news.mjs'
