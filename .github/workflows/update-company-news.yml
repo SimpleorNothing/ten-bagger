@@ -37,7 +37,9 @@ jobs:
           node --check company-news.js
       - name: Create protected-main PR when changed
         env:
-          GH_TOKEN: ${{ github.token }}
+          # PR 생성 이벤트가 Claude PR Gate를 실제로 트리거하도록 PAT를 사용한다.
+          # github.token으로 만든 PR은 GitHub 재귀 방지 정책 때문에 action_required에서 멈출 수 있다.
+          GH_TOKEN: ${{ secrets.AUTO_MERGE_TOKEN }}
         run: |
           set -euo pipefail
           FILES="company_news.json archive/company_news_archive.json"
