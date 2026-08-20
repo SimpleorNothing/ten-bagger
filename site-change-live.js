@@ -88,3 +88,13 @@
   s.setAttribute('data-company-patch-loader','1');
   document.body.appendChild(s);
 })();
+
+/* 02 기업분석 주요 뉴스는 company_news.json을 no-store로 읽는 별도 오버레이로 유지한다. */
+(function(){
+  if(document.querySelector('script[data-company-news-loader]'))return;
+  var s=document.createElement('script');
+  s.src='/company-news.js?v=20260820-daily-material-news';
+  s.defer=true;
+  s.setAttribute('data-company-news-loader','1');
+  document.body.appendChild(s);
+})();
