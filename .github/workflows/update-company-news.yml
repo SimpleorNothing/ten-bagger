@@ -1,0 +1,59 @@
+name: Update company analysis news
+
+on:
+  schedule:
+    - cron: '25 22 * * *' # 07:25 KST
+  workflow_dispatch: {}
+  push:
+    paths:
+      - '.github/workflows/update-company-news.yml'
+      - 'scripts/fetch-company-news.mjs'
+      - 'scripts/validate-company-news.mjs'
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: update-company-analysis-news
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Search and screen company news
+        run: node scripts/fetch-company-news.mjs
+      - name: Validate company news payload
+        run: |
+          node scripts/validate-company-news.mjs
+          node --check company-news.js
+      - name: Create protected-main PR when changed
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          FILES="company_news.json archive/company_news_archive.json"
+          if [ -z "$(git status --porcelain $FILES)" ]; then
+            echo "No company news changes."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          BRANCH="claude/automation-company-news-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          git switch -c "$BRANCH"
+          git add $FILES
+          git commit -m "data: refresh company analysis news"
+          git push origin "$BRANCH"
+          gh pr create \
+            --base main \
+            --head "$BRANCH" \
+            --title "data: refresh company analysis news" \
+            --body "Daily material-news refresh for every company registered in 02 기업분석. Excludes analyst target changes, daily price moves and simple flow commentary. Claude PR Gate validates and squash-merges the protected-main PR."
