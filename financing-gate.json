@@ -1,0 +1,26 @@
+{
+  "asOf": "2026-08-20",
+  "state": "pending",
+  "stateLabel": "자료 대기",
+  "summary": "금리 자체가 아니라 무위험금리 + 크레딧 스프레드로 실제 AI 인프라 조달환경을 판별한다. 검증 가능한 DC/네오클라우드 조달 스프레드 원자료가 연결되기 전에는 임의 수치나 직전값을 사용하지 않는다.",
+  "formula": "기업/프로젝트 조달금리 ≈ Treasury benchmark + Credit Spread",
+  "regimes": [
+    {"name":"10Y↑ / Spread↔↓","read":"성장·인플레·국채공급 가능. AI CAPEX 훼손 여부를 별도 확인"},
+    {"name":"10Y↑ / Spread↑","read":"경고. 실제 조달비용 동반 상승, 자본집약 AI 인프라 우선 점검"},
+    {"name":"10Y↓ / Spread↑","read":"경고. 경기둔화·기업 신용위험 가능성 점검"},
+    {"name":"10Y↓ / Spread↓","read":"우호. 할인율과 신용환경이 함께 완화"}
+  ],
+  "layers": [
+    {"layer":"L8","name":"발전/그리드","sensitivity":"매우 높음","why":"장기 회수·대규모 프로젝트 금융"},
+    {"layer":"L7","name":"전력/냉각","sensitivity":"높음","why":"데이터센터 CAPEX와 장기 설비투자에 직접 연동"},
+    {"layer":"L5","name":"서버","sensitivity":"중상","why":"고객의 DC 구축·리스·장비금융 둔화가 빠르게 주문에 반영"},
+    {"layer":"L2","name":"컴퓨트","sensitivity":"중간","why":"직접 금융비용보다 고객 AI CAPEX 경로를 통해 후행 영향"},
+    {"layer":"L6","name":"옵티컬","sensitivity":"중간","why":"클러스터 증설 지연 시 네트워크 투자에 후행 영향"},
+    {"layer":"L4","name":"패키징/장비","sensitivity":"중하","why":"고객 CAPEX 영향은 있으나 공급병목·공정 전환의 영향이 더 큼"},
+    {"layer":"L3","name":"메모리","sensitivity":"중하","why":"금리보다 HBM/DRAM 가격·재고·공급계약 사이클의 영향이 더 큼"},
+    {"layer":"L1","name":"모델/SW","sensitivity":"직접 낮음","why":"인프라 금융비용의 직접 노출은 낮음. 단 주가 할인율 민감도는 별도"}
+  ],
+  "propagation": ["Treasury/Term Premium","Credit Spread","실제 조달금리","DC IRR/Payback","AI CAPEX","수주","매출","EPS"],
+  "scoreRule": "10Y 상승만으로 투자매력도를 감점하지 않는다. 조달비용 악화가 고객 CAPEX·수주·EPS 전망에 전이됐다는 검증 가능한 근거가 확인될 때만 반영한다.",
+  "sourcePolicy": "Treasury/Fed/공식기관, 기업 공시·실적콜, 신뢰할 수 있는 원문 보도만 사용. 데이터센터 ABS/CMBS·회사채·전환사채·GPU 담보금융은 실제 발행조건을 우선한다. 근거 부재 시 없음/자료 대기."
+}
