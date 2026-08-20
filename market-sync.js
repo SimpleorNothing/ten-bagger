@@ -1,6 +1,7 @@
 /* market-sync.js — 02 인사이트 찾기 → 01 시장 모니터링 자동 반영.
    저장된 자료 중 사용자가 채택한(pick) 매크로 관점만 후보로 보내며, 실제 원문·점수 검증과
-   중복 차단은 Worker/R2에서 수행한다. 숫자 보드에는 쓰지 않고 signal_log 서술 레이어만 갱신한다. */
+   중복 차단은 Worker/R2에서 수행한다. 숫자 보드에는 쓰지 않고 signal_log 서술 레이어만 갱신한다.
+   2026-08-20: 01 AI Financing Gate 보조 모듈도 함께 로드한다. */
 (function(){
   var busy=false, timer=null;
   function eligible(c){
@@ -24,7 +25,13 @@
     fetch('/api/market-sync',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({items:items})})
       .catch(function(){}).then(function(){busy=false;});
   }
+  function loadFinancingGate(){
+    if(document.getElementById('financingGateJs'))return;
+    var s=document.createElement('script');s.id='financingGateJs';s.src='/financing-gate.js?v=20260820';s.defer=true;
+    (document.body||document.documentElement).appendChild(s);
+  }
   function boot(){
+    loadFinancingGate();
     clearTimeout(timer);timer=setTimeout(run,1600);
     setInterval(run,30000);
   }
