@@ -38,6 +38,20 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Delete orphaned company-news automation branches
+        shell: bash
+        run: |
+          set -euo pipefail
+          git ls-remote --heads origin 'refs/heads/claude/automation-company-news-*' | while read -r sha ref; do
+            [ -n "${ref:-}" ] || continue
+            branch="${ref#refs/heads/}"
+            open_count=$(gh pr list --state open --head "$branch" --json number --jq 'length')
+            if [ "$open_count" = "0" ]; then
+              gh api --method DELETE "repos/$GH_REPO/git/refs/heads/$branch"
+              echo "Deleted orphan company-news branch $branch"
+            fi
+          done
+
       - name: Close superseded duplicate automation PRs
         shell: bash
         run: |
