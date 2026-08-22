@@ -7,6 +7,7 @@
   var rows=[];
   var ready=false;
   var modal=null;
+  var badgePatchQueued=false;
   function fmtDate(s){
     var m=String(s||'').match(/(\d{4})-(\d{2})-(\d{2})/);
     return m?m[1]+'.'+m[2]+'.'+m[3]:'—';
@@ -71,18 +72,25 @@
     document.documentElement.style.overflow='';
   }
   function patchBadges(){
+    badgePatchQueued=false;
     if(!rows.length)return;
     var latest=latestRows()[0];
     var total=rows.length;
+    var html='update : '+fmtDate(latest.d)+' · <span class="his">이력 '+total+'</span>';
     Array.prototype.forEach.call(document.querySelectorAll('.mkt-upd'),function(n){
-      n.innerHTML='update : '+fmtDate(latest.d)+' · <span class="his">이력 '+total+'</span>';
-      n.setAttribute('title','실제 배포 확인된 사이트 변경일 · 클릭 시 사이트 변경 이력');
-      n.setAttribute('role','button');
-      n.setAttribute('tabindex','0');
-      n.style.cursor='pointer';
+      if(n.innerHTML!==html)n.innerHTML=html;
+      if(n.getAttribute('title')!=='실제 배포 확인된 사이트 변경일 · 클릭 시 사이트 변경 이력')n.setAttribute('title','실제 배포 확인된 사이트 변경일 · 클릭 시 사이트 변경 이력');
+      if(n.getAttribute('role')!=='button')n.setAttribute('role','button');
+      if(n.getAttribute('tabindex')!=='0')n.setAttribute('tabindex','0');
+      if(n.style.cursor!=='pointer')n.style.cursor='pointer';
     });
   }
-  function finish(data){rows=data;ready=true;patchBadges();if(modal&&modal.style.display==='flex')renderModal();}
+  function queueBadgePatch(){
+    if(badgePatchQueued)return;
+    badgePatchQueued=true;
+    (window.requestAnimationFrame||function(cb){return setTimeout(cb,16);})(patchBadges);
+  }
+  function finish(data){rows=data;ready=true;queueBadgePatch();if(modal&&modal.style.display==='flex')renderModal();}
   function fetchCurated(){
     return fetch('/changelog.js?t='+Date.now(),{cache:'no-store',credentials:'same-origin'})
       .then(function(r){if(!r.ok)throw new Error('changelog HTTP '+r.status);return r.text();})
@@ -107,7 +115,20 @@
     if(e.key==='Escape'&&modal&&modal.style.display==='flex'){e.preventDefault();closeModal();return;}
     if((e.key==='Enter'||e.key===' ')&&e.target&&e.target.closest&&e.target.closest('.mkt-upd')){e.preventDefault();openModal();}
   },true);
-  if(window.MutationObserver&&document.body){new MutationObserver(function(){patchBadges();}).observe(document.body,{childList:true,subtree:true});}
+  if(window.MutationObserver&&document.body){
+    new MutationObserver(function(mutations){
+      var needs=false;
+      for(var i=0;i<mutations.length&&!needs;i++){
+        var added=mutations[i].addedNodes||[];
+        for(var j=0;j<added.length;j++){
+          var node=added[j];
+          if(!node||node.nodeType!==1)continue;
+          if((node.matches&&node.matches('.mkt-upd'))||(node.querySelector&&node.querySelector('.mkt-upd')))needs=true;
+        }
+      }
+      if(needs)queueBadgePatch();
+    }).observe(document.body,{childList:true,subtree:true});
+  }
   fetchRows();
 })();
 
