@@ -27,12 +27,25 @@ jobs:
           node --check company-clock.js
           node --check company-news.js
           node --check site-change-live.js
+          node --check allocation-dynamic.js
           if [ -f scripts/validate-company-analysis.mjs ]; then
             node scripts/validate-company-analysis.mjs
           fi
           if [ -f scripts/validate-company-news.mjs ]; then
             node scripts/validate-company-news.mjs
           fi
+      - name: 렌더러 안전 회귀 가드
+        run: |
+          grep -Fq "if(n.innerHTML!==html)n.innerHTML=html" site-change-live.js \
+            || { echo "::error::업데이트 이력 배지 idempotent guard 소실"; exit 1; }
+          grep -Fq "badgePatchQueued" site-change-live.js \
+            || { echo "::error::업데이트 이력 mutation coalescing 소실"; exit 1; }
+          if grep -Fq "new MutationObserver" allocation-dynamic.js; then
+            echo "::error::06 비중조절 자체 DOM MutationObserver 재유입"
+            exit 1
+          fi
+          grep -Fq "setInterval(function(){if(!document.getElementById('dynamicAllocHurdle')" allocation-dynamic.js \
+            || { echo "::error::06 비중조절 저빈도 복구 경로 소실"; exit 1; }
       - name: worker.js 회귀 가드
         run: |
           node --check worker.js
