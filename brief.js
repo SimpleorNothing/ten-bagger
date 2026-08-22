@@ -137,6 +137,7 @@ window.BRIEF = (function () {
   // 고품질(Gemini) 오디오 — 준비되면 브라우저 TTS 대신 이걸로 재생. 실패 시 자동 폴백.
   var mode = 'tts', aud = null, aURL = {}, SEG = {}, aPart = 0, aT0 = [];
   var regenStartedAt = 0, regenStage = 0, regenTimer = null;
+  var archiveRetry = 0;
 
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]; }); }
   function $(id) { return document.getElementById(id); }
@@ -572,9 +573,34 @@ window.BRIEF = (function () {
 
   /* ── 보관분 목록 ──────────────────────────────────────
      뉴스레터 「지난 호」처럼 **회차 번호 + 날짜 + 제목** 한 줄씩. 클릭 = 그 호 열람. */
+  function fetchJsonWithTimeout(url, ms) {
+    var ctl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    var timer = setTimeout(function () { if (ctl) ctl.abort(); }, ms);
+    return fetch(url, { credentials: 'same-origin', cache: 'no-store', signal: ctl ? ctl.signal : undefined })
+      .then(function (r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+      })
+      .finally(function () { clearTimeout(timer); });
+  }
+
   function loadArch() {
     var a = $('brArch'); if (!a) return;
-    fetch('/api/briefs', { credentials: 'same-origin' }).then(function (r) { return r.json(); }).then(function (j) {
+    a.innerHTML = '<span style="font-size:13px;color:var(--faint)">저장된 회차를 불러오는 중 …</span>';
+    fetchJsonWithTimeout('/api/briefs', 12000).then(function (j) {
+      // R2 목록 조회가 일시적으로 늦으면 워커가 빈 목록 대신 delayed를 돌려준다.
+      // 바로 재시도해 실제 저장본을 우선 표시하되, 무기한 로딩 상태는 남기지 않는다.
+      if (j && j.delayed) {
+        if (archiveRetry >= 2) {
+          a.innerHTML = '<span style="font-size:13px;color:var(--faint)">저장본 연결이 지연되고 있습니다. 잠시 후 이 메뉴를 다시 열어주세요.</span>';
+          return;
+        }
+        archiveRetry += 1;
+        a.innerHTML = '<span style="font-size:13px;color:var(--faint)">저장본 연결이 지연되어 다시 확인하는 중 …</span>';
+        setTimeout(loadArch, 1600);
+        return;
+      }
+      archiveRetry = 0;
       var ds = (j && j.dates) || [];
       if (!ds.length) { a.innerHTML = '<span style="font-size:13px;color:var(--faint)">아직 저장된 회차가 없습니다 — 오늘이 제1호입니다.</span>'; return; }
       var today = kst();
@@ -595,7 +621,7 @@ window.BRIEF = (function () {
           loadText(false).then(loadArch);
         };
       });
-    }).catch(function () { a.innerHTML = '<span style="font-size:13px;color:var(--faint)">목록을 불러오지 못했습니다.</span>'; });
+    }).catch(function () { a.innerHTML = '<span style="font-size:13px;color:var(--faint)">저장본을 불러오지 못했습니다. 잠시 후 이 메뉴를 다시 열어주세요.</span>'; });
   }
 
   /* ── 마운트 ───────────────────────────────────────────── */
