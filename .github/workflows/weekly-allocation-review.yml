@@ -2,7 +2,7 @@ name: Weekly allocation review
 
 on:
   schedule:
-    - cron: '10 0 * * 6'
+    - cron: '10 0 * * 6' # 09:10 KST Saturday
   workflow_dispatch: {}
 
 permissions:
@@ -30,7 +30,8 @@ jobs:
         run: node -e "JSON.parse(require('fs').readFileSync('allocation-review.json','utf8')); console.log('allocation-review.json OK')"
       - name: Open protected-main PR if changed
         env:
-          GH_TOKEN: ${{ github.token }}
+          # User PAT is required so pull_request workflows actually fire.
+          GH_TOKEN: ${{ secrets.AUTO_MERGE_TOKEN }}
         run: |
           set -euo pipefail
           FILE="allocation-review.json"
