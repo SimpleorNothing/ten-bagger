@@ -63,10 +63,20 @@ async function fastBriefList(env) {
   if (!env.MEMO_BUCKET) return new Response(JSON.stringify({ dates: [] }), { status: 200, headers });
 
   let seen;
-  try { seen = await briefDateMap(env); }
+  // R2 list가 일시적으로 지연돼도 API 요청을 매달아 두지 않는다. 프런트는 delayed를
+  // 짧게 재시도하므로 저장본은 복구되는 즉시 표시되고, 사용자는 무한 로딩을 보지 않는다.
+  let deadline;
+  try {
+    seen = await Promise.race([
+      briefDateMap(env),
+      new Promise((resolve) => { deadline = setTimeout(() => resolve(null), 8000); }),
+    ]);
+  }
   catch (e) {
     return new Response(JSON.stringify({ dates: [], error: String(e && e.message ? e.message : e) }), { status: 200, headers });
   }
+  finally { if (deadline) clearTimeout(deadline); }
+  if (!seen) return new Response(JSON.stringify({ dates: [], delayed: true }), { status: 200, headers });
 
   const asc = Object.keys(seen).sort();
   const recent = asc.slice(-BRIEF_LIST_CAP);
