@@ -168,16 +168,14 @@ async function runtimeProbeResponse(request, env) {
     const r = await env.ASSETS.fetch(new Request(u.toString(),{method:"GET"}));
     return {ok:r.ok,text:r.ok?await r.text():"",status:r.status};
   }
-  const [history,alloc,review] = await Promise.all([
-    asset('/site-change-live.js'),asset('/allocation-dynamic.js'),asset('/allocation-review.json')
+  const [history,alloc] = await Promise.all([
+    asset('/site-change-live.js'),asset('/allocation-dynamic.js')
   ]);
-  let reviewJson=null;try{reviewJson=review.ok?JSON.parse(review.text):null;}catch{}
   const checks={
     historyModal:history.ok&&history.text.includes('siteChangeHistoryModal'),
-    allocationMount:alloc.ok&&alloc.text.includes('weeklyAllocationReview'),
-    allocationData:!!(reviewJson&&Array.isArray(reviewJson.actions)&&reviewJson.actions.length),
+    allocationMount:alloc.ok&&alloc.text.includes('dynamicAllocHurdle')&&!alloc.text.includes('weeklyAllocationReview'),
   };
-  return jsonResponse({ok:Object.values(checks).every(Boolean),checks,asOf:reviewJson&&reviewJson.asOf||null});
+  return jsonResponse({ok:Object.values(checks).every(Boolean),checks});
 }
 
 function patchChangelogText(text) {
