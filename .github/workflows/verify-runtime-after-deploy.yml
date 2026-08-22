@@ -1,0 +1,39 @@
+name: Verify runtime after deploy
+
+on:
+  workflow_run:
+    workflows: ["Deploy to Cloudflare Workers"]
+    types: [completed]
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify production runtime features
+        shell: bash
+        run: |
+          set -euo pipefail
+          ok=0
+          for attempt in 1 2 3 4 5 6 7 8; do
+            body=$(curl -fsS --connect-timeout 10 --max-time 20 \
+              -H 'Cache-Control: no-cache' \
+              "https://simpleornothing.com/__runtime_probe?t=$(date +%s%N)" || true)
+            echo "runtime probe ${attempt}: ${body}"
+            if printf '%s' "$body" | grep -Fq '"ok":true' && \
+               printf '%s' "$body" | grep -Fq '"historyModal":true' && \
+               printf '%s' "$body" | grep -Fq '"allocationMount":true' && \
+               printf '%s' "$body" | grep -Fq '"allocationData":true'; then
+              ok=1
+              break
+            fi
+            sleep $((attempt * 4))
+          done
+          if [ "$ok" -ne 1 ]; then
+            echo "ERROR: production runtime does not expose the update-history popup and allocation review"
+            exit 1
+          fi

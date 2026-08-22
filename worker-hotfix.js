@@ -23,6 +23,8 @@ const FRESH_PATHS = new Set([
   "/revision-tracker-fix.js",
   "/site-change-commits.json",
   "/site-change-live.js",
+  "/allocation-dynamic.js",
+  "/allocation-review.json",
   "/topic-radar-sync.js",
 ]);
 
@@ -140,7 +142,8 @@ async function injectSiteEnhancements(response) {
   const transformed = new HTMLRewriter()
     .on("body", { element(el) {
       el.append('<script src="/revision-tracker-fix.js?v=20260816-sort-v2" defer></scr' + 'ipt>', { html: true });
-      el.append('<script src="/site-change-live.js?v=20260816-live-verified" defer></scr' + 'ipt>', { html: true });
+      el.append('<script src="/site-change-live.js?v=20260822-clickfix" defer></scr' + 'ipt>', { html: true });
+      el.append('<script src="/allocation-dynamic.js?v=20260822-runtime" defer></scr' + 'ipt>', { html: true });
       el.append('<script src="/topic-radar-sync.js?v=20260816-server-delete-sync" defer></scr' + 'ipt>', { html: true });
     } })
     .transform(response);
@@ -155,6 +158,26 @@ async function siteChangesResponse(request, env) {
   const r = await env.ASSETS.fetch(new Request(u.toString(), {method:"GET"}));
   if (!r.ok) return new Response('[]', {status:200, headers:{'content-type':'application/json','cache-control':'no-store'}});
   return withFreshnessHeaders(r);
+}
+
+async function runtimeProbeResponse(request, env) {
+  if (!env.ASSETS) return jsonResponse({ok:false,reason:"ASSETS unavailable"},503);
+  const base = new URL(request.url);
+  async function asset(path) {
+    const u = new URL(base);u.pathname=path;u.search="";
+    const r = await env.ASSETS.fetch(new Request(u.toString(),{method:"GET"}));
+    return {ok:r.ok,text:r.ok?await r.text():"",status:r.status};
+  }
+  const [history,alloc,review] = await Promise.all([
+    asset('/site-change-live.js'),asset('/allocation-dynamic.js'),asset('/allocation-review.json')
+  ]);
+  let reviewJson=null;try{reviewJson=review.ok?JSON.parse(review.text):null;}catch{}
+  const checks={
+    historyModal:history.ok&&history.text.includes('siteChangeHistoryModal'),
+    allocationMount:alloc.ok&&alloc.text.includes('weeklyAllocationReview'),
+    allocationData:!!(reviewJson&&Array.isArray(reviewJson.actions)&&reviewJson.actions.length),
+  };
+  return jsonResponse({ok:Object.values(checks).every(Boolean),checks,asOf:reviewJson&&reviewJson.asOf||null});
 }
 
 function patchChangelogText(text) {
@@ -203,6 +226,7 @@ export default {
     const url = new URL(request.url);
     if (url.pathname === "/__version") return versionResponse(env);
     if (url.pathname === "/__site_changes") return siteChangesResponse(request, env);
+    if (url.pathname === "/__runtime_probe") return runtimeProbeResponse(request, env);
     if (url.pathname === "/__changelog_probe") return changelogProbeResponse(request, env);
     if (BLOCKED_LLM_PATHS.has(url.pathname)) return disabledResponse(url.pathname);
 
