@@ -1,7 +1,7 @@
 // scripts/sync-holdings.mjs
 // 자산현황_YYMMDD.xlsx (Google Drive, 고정 파일ID) → holdings.json 자동 동기화.
 // · 파일명은 매주 바뀌지만 파일ID는 영구 고정 → ID로 fetch (리네임 무관).
-// · 행 매핑은 '정리(26년)' 시트 고정 행 규칙(자산현황 작업가이드)을 따름. 행은 고정, 열만 매주 우측 누적.
+// · 행은 계좌 구간(B열)과 종목 라벨(C열)로 매번 재탐색한다. 종목 추가로 행이 밀려도 잘못된 셀을 읽지 않는다.
 // · 레이어 집계는 6/13 holdings.json 전 레이어 역산 검증 완료(2026-06-20).
 // · 토요일 엑셀 = 금액(평가) 전체를 그대로 리셋(권위값). 추가로 수량·티커·통화·NH환율을 기록해
 //   평일 하루 2회 시가평가(fetch-prices revalueHoldings)가 '수량 고정 × 최신가 × NH환율'로 돌게 한다.
@@ -11,29 +11,34 @@
 import { google } from 'googleapis';
 import * as XLSX from 'xlsx';
 import fs from 'node:fs';
+import { pathToFileURL } from 'node:url';
 
 const FILE_ID = '12dHsxFAc3ZfQrIySL6CDfvA9mO9HPpxe';   // 자산현황 (리네임돼도 ID 불변)
 const SHEET   = '정리(26년)';
 const OUT     = 'holdings.json';
 const YEAR    = 2026;
 
-// '평가금액' 행 = 각 종목 4셀 블록(평가/수량/매입/현재)의 첫 셀. 1-indexed 시트행 → 0-indexed.
-const R = n => n - 1;
-const ROW = {
-  tesla:R(5), marvell:R(9), micron:R(13), lumentum:R(17), vertiv:R(21),
-  bloom:R(25), samsung:R(29), pCash:R(33),                         // 개인투자
-  irpKospi:R(35), irpBond:R(36), irpHBM:R(37), irpSSK:R(38),       // IRP
-  dcBond:R(40), dcTop3:R(44), dcHBM:R(48), dcSSK:R(52),            // DC
-  dcEquip:R(56), dcOptic:R(60), dcPower:R(64), dcSolPower:R(68), dcCash:R(72),
-  total:R(73),                                                     // NH합계(총자산)=권위값
-  kospi50px:R(117),                                                // 시장지수비교 'PLUS 코스피50' 종가(코스피50 IRP 수량 역산용)
+// [B열 계좌 구간, C열 라벨]. null 구간은 시트 전체에서 정확히 한 번만 나오는 라벨이다.
+const ROW_SPEC = {
+  tesla:['개인투자','테슬라'], marvell:['개인투자','마벨'], micron:['개인투자','마이크론'],
+  lumentum:['개인투자','루멘텀'], vertiv:['개인투자','버티브'], bloom:['개인투자','블룸에너지'],
+  samsung:['개인투자','삼성전자'], pDram3x:['개인투자','레버리지셰어즈 메모리DRAM3배'],
+  pHanmi:['개인투자','한미반도체'], pEquip:['개인투자','KODEX AI반도체핵심장비'],
+  pCash:['개인투자','나머지(현금)'],
+  irpKospi:['IRP','PLUS 코스피50'], irpBond:['IRP','RISE 200채권혼합50'],
+  irpHBM:['IRP','PLUS 글로벌HBM반도체'], irpSSK:['IRP','RISE 삼성전자SK하이닉스채권혼합50'],
+  dcBond:['퇴직연금','RISE 200채권혼합50'], dcTop3:['퇴직연금','KODEX 미국AI반도체TOP3플러스'],
+  dcHBM:['퇴직연금','PLUS 글로벌HBM반도체'], dcSSK:['퇴직연금','RISE 삼성전자SK하이닉스채권혼합50'],
+  dcEquip:['퇴직연금','KODEX AI반도체핵심장비'], dcOptic:['퇴직연금','KODEX 미국AI광통신네트워크'],
+  dcPower:['퇴직연금','KODEX AI전력핵심설비'], dcSolPower:['퇴직연금','SOL 미국AI전력인프라'],
+  dcCash:['퇴직연금','나머지(현금)'], total:[null,'합계'], kospi50px:[null,'코스피50'],
 };
 
 // 레이어 집계 정의 (OPS §7 · 6/13 역산 검증) — [layer, label, [ROW 키…], [detail name…](members)]
 const LAYERS = [
   ['L2','연산칩 (마벨·KODEX 미국AI반도체TOP3+)',              ['marvell','dcTop3'],                                  ['마벨','KODEX 미국AI반도체TOP3+']],
-  ['L3','메모리 (마이크론·삼성전자·HBM ETF·삼성SK채권혼합·지수혼합)', ['micron','samsung','irpHBM','dcHBM','irpSSK','dcSSK','irpKospi','irpBond','dcBond'], ['마이크론','삼성전자','글로벌HBM반도체','삼성·SK 채권혼합','코스피50','코스피200 채권혼합']],  // 7/27 재분류: 지수·채권 방어 서브슬리브 편입(주식레그 삼전·하이닉스>50%)
-  ['L4','소부장 (KODEX AI반도체핵심장비)',                    ['dcEquip'],                                           ['KODEX AI반도체핵심장비']],
+  ['L3','메모리 (마이크론·삼성전자·DRAM3배·HBM ETF·삼성SK채권혼합·지수혼합)', ['micron','samsung','pDram3x','irpHBM','dcHBM','irpSSK','dcSSK','irpKospi','irpBond','dcBond'], ['마이크론','삼성전자','레버리지셰어즈 메모리DRAM3배','글로벌HBM반도체','삼성·SK 채권혼합','코스피50','코스피200 채권혼합']],
+  ['L4','소부장 (한미반도체·KODEX AI반도체핵심장비)',          ['pHanmi','pEquip','dcEquip'],                           ['한미반도체','KODEX AI반도체핵심장비']],
   ['L6','연결 (루멘텀·KODEX 미국AI광통신네트워크)',            ['lumentum','dcOptic'],                                ['루멘텀','KODEX 미국AI광통신네트워크']],
   ['L7','전력·냉각 in-rack (버티브)',                         ['vertiv'],                                            ['버티브']],
   ['L8','그리드·송전·발전 (KODEX·SOL 전력ETF + 블룸)',        ['bloom','dcPower','dcSolPower'],                      ['블룸에너지','KODEX AI전력핵심설비','SOL 미국AI전력인프라']],
@@ -50,12 +55,14 @@ const DETAIL = [
   ['마벨','MRVL','L2',['marvell'],                 {priceKey:'mrvl',ccy:'USD',mkt:'NASDAQ',qk:['marvell']}],
   ['KODEX 미국AI반도체TOP3+','0151S0','L2',['dcTop3'],{priceKey:'k_semitop3',ccy:'KRW',mkt:'KOSPI',qk:['dcTop3']}],
   ['마이크론','MU','L3',['micron'],                {priceKey:'mu',ccy:'USD',mkt:'NASDAQ',qk:['micron']}],
+  ['레버리지셰어즈 메모리DRAM3배','—','L3',['pDram3x'],{}],
   ['글로벌HBM반도체','442580','L3',['irpHBM','dcHBM'],{priceKey:'k_hbm',ccy:'KRW',mkt:'KOSPI',qk:['dcHBM'],irp:[['irpHBM','dcHBM']]}],
   ['삼성전자','005930','L3',['samsung'],           {priceKey:'sec',ccy:'KRW',mkt:'KOSPI',qk:['samsung']}],
   ['삼성·SK 채권혼합','0162Z0','L3',['irpSSK','dcSSK'],{priceKey:'k_ssk',ccy:'KRW',mkt:'KOSPI',qk:['dcSSK'],irp:[['irpSSK','dcSSK']]}],
   ['코스피50','122090','L3',['irpKospi'],        {priceKey:'k_kospi50',ccy:'KRW',mkt:'KOSPI',pxRow:'kospi50px',irpEval:'irpKospi'}],
   ['코스피200 채권혼합','183700','L3',['irpBond','dcBond'],{priceKey:'k_kbbond',ccy:'KRW',mkt:'KOSPI',qk:['dcBond'],irp:[['irpBond','dcBond']]}],
-  ['KODEX AI반도체핵심장비','471990','L4',['dcEquip'],{priceKey:'kodexeq',ccy:'KRW',mkt:'KOSPI',qk:['dcEquip']}],
+  ['한미반도체','042700','L4',['pHanmi'],{priceKey:'hanmi',ccy:'KRW',mkt:'KOSPI',qk:['pHanmi']}],
+  ['KODEX AI반도체핵심장비','471990','L4',['pEquip','dcEquip'],{priceKey:'kodexeq',ccy:'KRW',mkt:'KOSPI',qk:['pEquip','dcEquip']}],
   ['루멘텀','LITE','L6',['lumentum'],              {priceKey:'lite',ccy:'USD',mkt:'NASDAQ',qk:['lumentum']}],
   ['KODEX 미국AI광통신네트워크','0173Y0','L6',['dcOptic'],{priceKey:'optetf',ccy:'KRW',mkt:'KOSPI',qk:['dcOptic']}],
   ['버티브','VRT','L7',['vertiv'],                 {priceKey:'vrt',ccy:'USD',mkt:'NYSE',qk:['vertiv']}],
@@ -85,11 +92,37 @@ async function downloadXlsx() {
   return Buffer.from(res.data);
 }
 
-function parse(buf) {
+export function resolveRows(grid) {
+  const sectionRows = [];
+  for (let i = 0; i < grid.length; i++) {
+    const b = String((grid[i] || [])[1] || '').trim();
+    if (['개인투자','IRP','퇴직연금'].includes(b)) sectionRows.push([b, i]);
+  }
+  const row = {};
+  for (const [key, [section, label]] of Object.entries(ROW_SPEC)) {
+    const hits = [];
+    for (let i = 0; i < grid.length; i++) {
+      const values = (grid[i] || []).slice(0, 3).map(v => String(v || '').trim());
+      if (!values.includes(label)) continue;
+      if (section) {
+        const active = [...sectionRows].reverse().find(([, start]) => start <= i)?.[0];
+        if (active !== section) continue;
+      }
+      hits.push(i);
+    }
+    if (hits.length !== 1)
+      throw new Error(`행 라벨 드리프트: ${key}=${section ? section + '/' : ''}${label}, 발견 ${hits.length}개`);
+    row[key] = hits[0];
+  }
+  return row;
+}
+
+export function parse(buf) {
   const wb = XLSX.read(buf, { type: 'buffer' });
   const ws = wb.Sheets[SHEET];
   if (!ws) throw new Error(`시트 '${SHEET}' 없음`);
   const grid = XLSX.utils.sheet_to_json(ws, { header: 1, raw: true, defval: '' });
+  const row = resolveRows(grid);
 
   // 날짜 헤더 행(상단 6행 내 'M.D' 패턴) → 가장 오른쪽 날짜 열 = 최신 데이터 열
   let hdrRow = -1;
@@ -103,8 +136,8 @@ function parse(buf) {
   });
   const [mm, dd] = label.split('.').map(Number);
   const asOf = `${YEAR}-${String(mm).padStart(2, '0')}-${String(dd).padStart(2, '0')}`;
-  const cell = key => num((grid[ROW[key]] || [])[col]);
-  const cellAt = (key, off) => num((grid[ROW[key] + off] || [])[col]);   // 0=평가 1=수량 2=매입가 3=현재가
+  const cell = key => num((grid[row[key]] || [])[col]);
+  const cellAt = (key, off) => num((grid[row[key] + off] || [])[col]);   // 0=평가 1=수량 2=매입가 3=현재가
   return { asOf, cell, cellAt };
 }
 
@@ -125,8 +158,8 @@ function qtyOf(m, cell, cellAt) {
   return q > 0 ? q : null;
 }
 
-function build({ asOf, cell, cellAt }) {
-  const totalNH = cell('total');                            // NH합계(73) = 권위값
+export function build({ asOf, cell, cellAt }) {
+  const totalNH = cell('total');                            // B열 '합계' = NH 총자산 권위값
   let layerSum = 0;
   const holdings = LAYERS.map(([layer, label, keys, members]) => {
     const amt = keys.reduce((a, k) => a + cell(k), 0);
@@ -182,6 +215,7 @@ function build({ asOf, cell, cellAt }) {
   return { asOf, total: Math.round(totalNH / 1e6), holdings, detail, avg, fx, totalNH, closedPositions };
 }
 
+async function main() {
 const next = build(parse(await downloadXlsx()));
 
 let prev = {};
@@ -209,3 +243,6 @@ console.log(`holdings.json 갱신: asOf=${out.asOf} total=${out.total}M fx=${nex
             `drift=${Math.round(Math.abs(next.totalNH - next.holdings.reduce((s,h)=>s+h.amt*1e6,0))).toLocaleString()}원` +
             (missing.length ? ` · 수량 역산 실패(플랫 유지): ${missing.join(', ')}` : '') +
             (next.closedPositions.length ? ` · 평단 미보유 처리: ${next.closedPositions.join(', ')}` : ''));
+}
+
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) await main();
