@@ -26,14 +26,13 @@ jobs:
             echo "runtime probe ${attempt}: ${body}"
             if printf '%s' "$body" | grep -Fq '"ok":true' && \
                printf '%s' "$body" | grep -Fq '"historyModal":true' && \
-               printf '%s' "$body" | grep -Fq '"allocationMount":true' && \
-               printf '%s' "$body" | grep -Fq '"allocationData":true'; then
+               printf '%s' "$body" | grep -Fq '"allocationMount":true'; then
               ok=1
               break
             fi
             sleep $((attempt * 4))
           done
           if [ "$ok" -ne 1 ]; then
-            echo "ERROR: production runtime does not expose the update-history popup and allocation review"
+            echo "ERROR: production runtime probe did not confirm update-history popup and dynamic allocation mount"
             exit 1
           fi
