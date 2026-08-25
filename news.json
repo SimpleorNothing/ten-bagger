@@ -1,5 +1,5 @@
 {
-  "asOf": "2026-08-25T09:47:47.676Z",
+  "asOf": "2026-08-25T21:39:26.280Z",
   "source": "Google News RSS · 종목축 + 시그널축 + 병목축 (기사별 한 줄 요약 + 물질성 스크리닝)",
   "note": "사이트 종목 카드의 \"일자 + 요약\" 행 소스. 최근 95일 창 · 종목당 최신 5건(첫 로딩 페이로드 상한) · **투자 논제 스크리닝 통과분만**(items[].m>=2 — 2=향후 실적·수주·투자·전략에 영향을 주는 펀더멘털 사실. 1=목표가·수급 이벤트, 0=사후 등락 서술·홍보·추측·콘텐츠팜으로 사이트에서 제외). 탈락 기사는 삭제가 아니라 news_archive.json 에 전건 보존. 나머지 3개월치는 archive/{티커}.json 을 '더 보기'로 온디맨드 로드. 신호/소음 판단과 SIGNAL_LOG 반영은 사람/LLM의 몫 — 채점·차트에는 쓰이지 않는다.",
   "count": 195,
@@ -112,7 +112,7 @@
     }
   ],
   "archive": "news_archive.json",
-  "archiveCount": 3755,
+  "archiveCount": 3778,
   "shardDir": "archive",
   "winCounts": {
     "353200": 17,
@@ -1908,6 +1908,61 @@
       "mv": 3
     },
     {
+      "id": "macro_물가_금리_불확실성_1",
+      "ticker": "MACRO",
+      "name": "美 물가·금리 불확실성",
+      "ax": "rates",
+      "title": "Tomorrow is the Turning Point - Money & Markets",
+      "link": "https://news.google.com/rss/articles/CBMiswNBVV95cUxPT3NPM3FFZzh6UGg0bVFFUXozRlJzVmR5VXg2ZDB5LXdWSDdMSzhFTGJDcDJYNFJMSDdXalRiYnJQYXBVMElVRDNQd2syVlE1eHkzZDA2UmhzWW1zTHgxSzB6WGdaV25XRUJIM0RTSnM3SHlwdE5EQi1jYURfaGdDZlhxSnZUanRQeW1CVUNDNGRUVXZaT3RVaDhqTHlSc3JvdjZCUDV5OFNzck8tOHV5elh1NWtMM2c1VElnUmNBRTdrT2FzdlFqNzJ4ZS1aaGZ2cE9ESFpnVkdtVnBMbks1cFF4dlN1bkJvMjJxVl9JakRFRmVfejZpdzBiZWFKMG9mdHg3Yk5pcU84T0xaWEJCZXBKQUR3WGhXeHp0SG5WM3JiYTZuMTBNakpGdFMzN3RiTldLczFBazIxeHloeVNiZ0UwTE5qSm9ad0xPbGl4YUJISlIzdEpmRnJZb3NKb0NUTUZ1UVdrRkdPX1pPZXVGTjkwTllPSFVBYllwVDRCOElsUFJzTHhrTFlOVVRxazVGc0ZabHl2aGxERGxCT3pobkFnZ3FXRTI0Y0p5YXpoaEliaHfSAbMDQVVfeXFMT09zTzNxRWc4elBoNG1RRVF6M0ZSc1ZkeVV4NmQweS13Vkg3TEs4RUxiQ3AyWDRSTEg3V2pUYmJyUGFwVTBJVUQzUHdrMlZRNXh5M2QwNlJoc1ltc0x4MUswelhnWlduV0VCSDNEU0pzN0h5cHROREItY2FEX2hnQ2ZYcUp2VGp0UHltQlVDQzRkVFV2Wk90VWg4akx5UnNyb3Y2QlA1eThTc3JPLTh1eXpYdTVrTDNnNVRJZ1JjQUU3a09hc3ZRajcyeGUtWmhmdnBPREhaZ1ZHbVZwTG5LNXBReHZTdW5CbzIycVZfSWpERUZlX3o2aXcwYmVhSjBvZnR4N2JOaXFPOE9MWlhCQmVwSkFEd1hoV3h6dEhuVjNyYmE2bjEwTWpKRnRTMzd0Yk5XS3MxQWsyMXh5aHlTYmdFMExOakpvWndMT2xpeGFCSEpSM3RKZkZyWW9zSm9DVE1GdVFXa0ZHT19aT2V1Rk45ME5ZT0hVQWJZcFQ0QjhJbFBSc0x4a0xZTlVUcWs1RnNGWmx5dmhsRERsQk96aG5BZ2dxV0UyNGNKeWF6aGhJYmh3?oc=5",
+      "published": "2026-08-25T16:00:28.000Z",
+      "source": "Money & Markets",
+      "st": 3
+    },
+    {
+      "id": "bneck_l8_pwr",
+      "ticker": "MACRO",
+      "name": "L7·L8 · 전력 병목",
+      "ax": "bn_l8_pwr",
+      "title": "The Interconnection Fast Pass: Can a $17M Battery Really Replace 5 Years in the Queue? - Substack",
+      "link": "https://news.google.com/rss/articles/CBMi0wFBVV95cUxQWDM5cFM1REdRRjRCLWF5VWNpcm5GS2NmTnVzQ1d5WXVzdzNnSzBwaUh4RlB6NVc5VTZDaW9XYUtONzZYcVRjZFBEWGU3NWM2SEpnVFlnaUxYX2ZrX3hKRkk0UHBVWExpTHY1V2o1VHh4Tl96VXJUSGpTMHhLTi11QjlKWml4ekJhOHlYVUE0R002a0s3TFJ2NFlTOTh4bmltc185QmdJcld2MWd2SVMtNWFJeDBTNU14XzBETHFqX2pFRHozc0NmU1pSZGZRMVJBVzlv?oc=5",
+      "published": "2026-08-25T14:30:42.000Z",
+      "source": "Substack",
+      "st": 3
+    },
+    {
+      "id": "bneck_capex",
+      "ticker": "MACRO",
+      "name": "상류 · 하이퍼스케일러 capex",
+      "ax": "capex",
+      "title": "Astera Labs: Massive AI Growth Is Still Underpriced (NASDAQ:ALAB) - Seeking Alpha",
+      "link": "https://news.google.com/rss/articles/CBMilgFBVV95cUxOdkU1N2k1cVFtSFhQUmhzVXdrUl9ELXk3SlotMi1haENoMXMtTDR2VW1JbUZCSkxnb0xBVktDZVA2eXJDdEFPMUppeHpFYkpDNzY2WlRmajVwUzZHdl9xeFo2T3FVa2I2cGdoeGM4SnV2cFRxQnh3UTlBMzV0eGtHZzFDNWdpR3RhcHlzYklhZ0s3ZnJnOWc?oc=5",
+      "published": "2026-08-25T13:10:00.000Z",
+      "source": "Seeking Alpha",
+      "st": 3
+    },
+    {
+      "id": "macro_글로벌_공급망_지정학_리스크_2",
+      "ticker": "MACRO",
+      "name": "글로벌 공급망 지정학 리스크",
+      "ax": "chip",
+      "title": "Nvidia faces growth test as Rubin debut meets AI financing scrutiny - WKZO",
+      "link": "https://news.google.com/rss/articles/CBMinAFBVV95cUxQeHNZWGEybkQzVklBMUpyOE1TQ0JtZmdwUGJuS0JtcVFnVnR1QWt0MXNNUFoxTURjaFBkN3cyTkZqenFHaC16Z2U4TjZyZ2hKWWNLUkcyQmlNbTE5eEJEYVRTbHdGWlE3LTgwWWFLQWZSS0RNVTh4LXRMdTBlbzFFNlBlUHhQSlUtVUx0SkQ3TnZCUUsyQ0wxOXhhdXo?oc=5",
+      "published": "2026-08-25T13:07:52.000Z",
+      "source": "WKZO",
+      "st": 3
+    },
+    {
+      "id": "macro_물가_금리_불확실성_1",
+      "ticker": "MACRO",
+      "name": "美 물가·금리 불확실성",
+      "ax": "rates",
+      "title": "What Is the PCE Price Index and Why Does It Matter? - Schaeffer's Investment Research",
+      "link": "https://news.google.com/rss/articles/CBMitAFBVV95cUxQdk9XQmJ2T094a3kyYl9XeW45bkRESzhEbmpBY0hhaFJ4WjRjVGVKUVQ3cDd5Njd0NVc4eHozcHY2TDh5dU85WFZaQ3ZDbGs4ci1DSmdtZXFYeUVOUzVuMEdqOWJzcGg0SXlCS0NZNkxGa1pDMURia3pQVlI4OHdXdmdxZ09rdzJfdjRVR1dabEJ0WDhoOFotTmh4c01pdFgyZXlmbGRWa1FVby1aMDR4N21hZlo?oc=5",
+      "published": "2026-08-25T05:27:57.000Z",
+      "source": "Schaeffer's Investment Research",
+      "st": 3
+    },
+    {
       "id": "macro_지정학적_에너지_리스크_0",
       "ticker": "MACRO",
       "name": "지정학적 에너지 리스크",
@@ -1927,6 +1982,17 @@
       "link": "https://news.google.com/rss/articles/CBMiygFBVV95cUxNZnhGNW1nUTNpbVBkYXM1NkxHV2pmUmhVck1YYmllQzBkeEhwSUhucjQtQk8ydU9hVy1iM2ZWZnFrV2lURlhETHlvNUsyajBBYzNOTUFTNUJmWVc3SmhObjFNbUNrN3A4SVpjLU9XYlhtQ3NucUtNOHhuMVZibGMxY2wwLVdNczRWYl9GX2NWcjBVbjB1MThiWGktUHhnTkE0V0szV1RjS0YzNGc2MlI2S1l6bFNLMjl6M2k5cFJ6cXFlRHNsQ3ZkMTd3?oc=5",
       "published": "2026-08-24T21:37:01.000Z",
       "source": "Metal Tech News",
+      "st": 3
+    },
+    {
+      "id": "macro_글로벌_공급망_지정학_리스크_2",
+      "ticker": "MACRO",
+      "name": "글로벌 공급망 지정학 리스크",
+      "ax": "chip",
+      "title": "Nvidia Faces Price Hikes Amid AI Chip Demand Surge - StartupHub.ai",
+      "link": "https://news.google.com/rss/articles/CBMilAFBVV95cUxNdFJyMXcwZnZjSjg3WHFEd0VzSW94TklhY2NCM2EzcDJDbk1LaWVzV1pyUWpDam5Md21JSkF1czE3RXRHWWpwdGpoaXhNRFptdk1PQzFHOGJYQjRWSG1KcURpbXZveU8wcnFkbEFSMGh4UmIxWWhaMll3RDB5bk5FU3ItWkNJVkJ5UWEtMjJJNUxFYlpW?oc=5",
+      "published": "2026-08-24T21:07:56.000Z",
+      "source": "StartupHub.ai",
       "st": 3
     },
     {
@@ -2095,14 +2161,25 @@
       "st": 3
     },
     {
-      "id": "bneck_l8_pwr",
+      "id": "macro_지정학적_에너지_리스크_0",
       "ticker": "MACRO",
-      "name": "L7·L8 · 전력 병목",
-      "ax": "bn_l8_pwr",
-      "title": "Battery buildouts nearly match solar in 2026 US additions - MarketScale",
-      "link": "https://news.google.com/rss/articles/CBMilAJBVV95cUxNZGxlbnFVNHliUEJXWk5WTjFWR2hGSEZNS0xKUWJRYU85eExIUzltc0Y2alZRRjZjdWY0Zlg2WGtkalRZVjZzTlJQbnk4eFZwbDNITk4tYWJvaFZjYmZ3NE1hemxVdnk0TzQ0MEtWTzd4OTlGSWtnYlZlM0JoYmo4LTVKcG9tUkFmZS1PTWZ1YTZPSXE4SEZjMmxmb0pyTFhTRDY0NnlGTGdKbGgtZ2dsZHZLdjNnVjctVVJfNjB2bkFlWGpMOGs5cEsyT09UR05xMklROGVrTlRfRjlkZ1BrTFJ4alZtc19GZFF2UUJqcWxvN1F0dnFHNlRyYXQ1cFVCSVhSYW0zQkVjQzk3eURtaDQxWWs?oc=5",
-      "published": "2026-08-23T11:25:24.000Z",
-      "source": "MarketScale",
+      "name": "지정학적 에너지 리스크",
+      "ax": "energy",
+      "title": "US-Iran War Update: How the Strait of Hormuz Could Move Oil Prices and Global Stock Markets - India Infoline",
+      "link": "https://news.google.com/rss/articles/CBMiwwFBVV95cUxQTlZUZXk5QjBmRlJpcS01T3VUbEp1bXMtSDRVQUE3NXdib3Z4VUVYamM3eW1vRUdGSVhrTk54VnAyMkZfT0NwbUwzZ2tQTXlfcnpjSGxQRUlEbFFkbUl6d3U3LXUyVkdjSTJHQ1FsOGV2VnNKUWJja3RWNkV5c2hJVGxnbGRVUmJwbWxtdm9ZTVRTXzF5VzlPeUo5bklaVU0wenFOaTNpVTlPSWo3YkZ3RkRQNzNnVmxYR1hMSHZlMm83U1E?oc=5",
+      "published": "2026-08-23T08:35:10.000Z",
+      "source": "India Infoline",
+      "st": 3
+    },
+    {
+      "id": "macro_지정학적_에너지_리스크_0",
+      "ticker": "MACRO",
+      "name": "지정학적 에너지 리스크",
+      "ax": "energy",
+      "title": "Oil prices rise due to refinery demand in US - Inspenet",
+      "link": "https://news.google.com/rss/articles/CBMibEFVX3lxTFByV1Vhc3lLQTVBeGpKbUxHa045XzBIMkVYTXhTVUFGLXNXWFdOOHlrcDFfaktSVnk4Sk1zX21RaURuZm9hdm1KNFpBUG4tbWVRWGQ5ZDZzb0hUUXF4UkR1aHlUSGJFeXl0d3dYOQ?oc=5",
+      "published": "2026-08-22T19:00:00.000Z",
+      "source": "Inspenet",
       "st": 3
     },
     {
@@ -2117,6 +2194,17 @@
       "st": 3
     },
     {
+      "id": "macro_물가_금리_불확실성_1",
+      "ticker": "MACRO",
+      "name": "美 물가·금리 불확실성",
+      "ax": "rates",
+      "title": "Watch for consumer stress as inflation remains top concern - rbc.com",
+      "link": "https://news.google.com/rss/articles/CBMiqgFBVV95cUxPOWxSRkhjX2hwRGxBVlUwc2I4QWx4cjdmcU1uQXJwMTNwUGNobHFMYTM4QnFCN09OWXZVY21XeVV3YTdVaTBnQUJtVk1iX3JpckdLSkZlbmp4ckJJTl9QRWNkRFBtdXNNOWdXN3ZxbDNVQVlDOHZ0ZEt1NXZzVjZ6aTQ0ekpYSW9sUWVIZjR0XzRsUUE0TnJiX1dsMHFQN2pwT0o1bFdGWE8yQQ?oc=5",
+      "published": "2026-08-21T17:23:11.000Z",
+      "source": "rbc.com",
+      "st": 3
+    },
+    {
       "id": "macro_ai_infra_financing",
       "ticker": "MACRO",
       "name": "AI 인프라 금융화·GPU 담보",
@@ -2125,28 +2213,6 @@
       "link": "https://news.google.com/rss/articles/CBMiW0FVX3lxTE9FaEpuc2pHemJLX2w1TnhxdGI4djNDcEVhZXlxS3lmc0FKbGd5eVZiampLZUt0c2QxZUFhMjFBZ0U1SWJuU1JISnQzOHgyTi1VZnBZR09rNzV1ZzQ?oc=5",
       "published": "2026-08-21T17:08:00.000Z",
       "source": "finance.biggo.com",
-      "st": 3
-    },
-    {
-      "id": "macro_지정학적_에너지_리스크_0",
-      "ticker": "MACRO",
-      "name": "지정학적 에너지 리스크",
-      "ax": "energy",
-      "title": "Maritime Traffic in the Strait of Hormuz: 1 Sharp Drop - Inspenet",
-      "link": "https://news.google.com/rss/articles/CBMiekFVX3lxTE9VX2QyWUdPVDhiamVSOGVtb3dZMDZENzFSYjdBS0N3cGVhbFRLeVFuSklKRjQ1Qk85SllLX1BsMjVhb0tHcWtHbnUwSXoxS2xVT1I3TnlPMmJwMHE4VkJxU3ZWUllxMGwzTFEzZVJDd292RWJPZlg2c293?oc=5",
-      "published": "2026-08-21T15:12:45.000Z",
-      "source": "Inspenet",
-      "st": 3
-    },
-    {
-      "id": "macro_지정학적_에너지_리스크_0",
-      "ticker": "MACRO",
-      "name": "지정학적 에너지 리스크",
-      "ax": "energy",
-      "title": "Oil Nears $100 as Trump's 'Economic D-Day' Raises the Stakes - Crude Oil Prices Today | OilPrice.com",
-      "link": "https://news.google.com/rss/articles/CBMioAFBVV95cUxQQldGTGJMc2FyQTZBb2dNbV9xdngxbUFLZENpaUVEZVp1aVNFMnIwNHJteGhYOUZKV1pNWGljQzM4M19EaGY4U2JfTXhxTmtPWEVfSVVGUmJROHhMMHdIbVBhV1pWNGowUi00VmJYSFNrcDE5VW9GN0xpeG8wamRqTWlPUUtsZ09TakJFeFZaRjQ1MlE5eHV0WjJseXJiaGdU0gGmAUFVX3lxTE5EbGFUZ1NrZ2ljRDZtRnIzaGhoZDd2UEhXVzRtZGozWlBtVGR3OEFLUHVId2wtRUZ5dl8tWVFnaWVETWRMMjM3OUk2ZEI3NkxVNk9ybU9zdHdCYm1ESDdSNzlFY01ZYUVtWGQ3cWRNT052Zm95Q1F3Y09SdmJOSi04Y0JwT29QVzhtVFRUUjVYVWRwWXdzeTBlRThkcFB4eE5XYlJQWEE?oc=5",
-      "published": "2026-08-21T15:01:15.000Z",
-      "source": "Crude Oil Prices Today | OilPrice.com",
       "st": 3
     },
     {
@@ -2202,17 +2268,6 @@
       "link": "https://news.google.com/rss/articles/CBMiwAFBVV95cUxQNTg3TVdyaGNuZFVZTUdudl9yRG45UlVfLWNGd3hHODdOd3FBVVVma0FMd2ZRcHFTUXlSUDhFLTNKSWpjbS1JUVZBRGRUSWQyQWo1aXY0RGJvVU12S2dDLTVhcXh6TkRxcF9oLUkyM19xRGN2Vkg0VmZKeGpCWUt2RnpOQWRMREFUU09FNEFlZnFvZEZYNmdDWVZraWtEUjBkLWoxcm9UNzdiVGRUWFRaZHRVdnBubmFjVVZQOFZkN0w?oc=5",
       "published": "2026-08-21T08:04:40.000Z",
       "source": "MacroMicro",
-      "st": 3
-    },
-    {
-      "id": "macro_물가_금리_불확실성_1",
-      "ticker": "MACRO",
-      "name": "美 물가·금리 불확실성",
-      "ax": "rates",
-      "title": "Analysis: Assessing Inflation’s Impact - U.S. Bank",
-      "link": "https://news.google.com/rss/articles/CBMiuAFBVV95cUxOdkl3MzBneUF6ODJVQmRHaFBaa0ZGMVpTUkZxejM4OEdlUFRsSy11Njh2WGVHdFpHTnV1aFpZazk0VmpUb2J0YXR5S0tmQlJuU3NlejFVa0tRT1lUTl9hY2lZdEt6RHI2RnBnUEtBTEJqUXB5elRlQmdDSGhuSFpJQnFWWkJvaE54WWEyeVU4X0tHLWVuRmYzRzJ0WEtYZzl5WmxLRkJleG0tZElqc2dyNDFldllhci1M?oc=5",
-      "published": "2026-08-21T07:00:00.000Z",
-      "source": "U.S. Bank",
       "st": 3
     },
     {
@@ -2293,17 +2348,6 @@
       "st": 3
     },
     {
-      "id": "macro_물가_금리_불확실성_1",
-      "ticker": "MACRO",
-      "name": "美 물가·금리 불확실성",
-      "ax": "rates",
-      "title": "Fed minutes show September rate hike still on the table - Reuters",
-      "link": "https://news.google.com/rss/articles/CBMiuAFBVV95cUxPSVRUSV8yamU0TV9KS0l6VjdObHdFelZjd2QxY2ZhWXBJTjN5b3hRbzZGekxuNWVQUHFVSXNHdFFscG1LTTVMX2xKZkx2Nk1GNzRBY3E4RGlGcXpUSkVxUnRaQllXeFlrT2lFd0UycUpVV1Q2MHpYQzU2TFBaM3JYTW50dHFKTlJtd2Y3QzViUWpRRklDSU13VzlHUjRHMmRrSlFibHM3Rzlsa0NNcHh1Tm9XdG1qRTdZ?oc=5",
-      "published": "2026-08-20T13:04:07.000Z",
-      "source": "Reuters",
-      "st": 1
-    },
-    {
       "id": "bneck_silicon",
       "ticker": "MACRO",
       "name": "상류 · 빅테크 자체 실리콘",
@@ -2323,6 +2367,17 @@
       "link": "https://news.google.com/rss/articles/CBMifkFVX3lxTE9vakZKa0ZYV1FMZ01lRzFOLVc1WW54ODBPSllYY2hRSjJLSzBvTXQ1SVl1cmdfaklrR2ZmblM4MVY4NC14dGlPZEx3MEdCeWhza09vNzhsTU9SeUU1blRzc2JfUXBtVjA3WXBsOUlnazgxcHRISFZIWXpCWnlBZw?oc=5",
       "published": "2026-08-20T08:23:00.000Z",
       "source": "AOL.ca",
+      "st": 3
+    },
+    {
+      "id": "bneck_l3_dram",
+      "ticker": "MACRO",
+      "name": "L3 · DRAM/HBM 가격·공급",
+      "ax": "bn_l3_dram",
+      "title": "HBM 만들수록 귀해지는 구형 D램…DDR4 가격 더 오른다 - 네이트",
+      "link": "https://news.google.com/rss/articles/CBMiYEFVX3lxTE9mclk1ZWo3V3pCYXRiYjBGMTBkWWk5MHFpQXRmdkhDRVo3M2dkc2dDVzhaQzkxT21IazMwRk5FLWVYLWNRT1NJR2ExS2ZxSGJFMkk3UXNfbXZ3c3FCbFhWSg?oc=5",
+      "published": "2026-08-20T08:01:00.000Z",
+      "source": "네이트",
       "st": 3
     },
     {
@@ -2370,14 +2425,14 @@
       "st": 3
     },
     {
-      "id": "macro_물가_금리_불확실성_1",
+      "id": "bneck_l6_opt",
       "ticker": "MACRO",
-      "name": "美 물가·금리 불확실성",
-      "ax": "rates",
-      "title": "'Many' Fed officials think higher rates will be needed if inflation stays high - PBS",
-      "link": "https://news.google.com/rss/articles/CBMiswFBVV95cUxQX0hhVDlqaTItMnN5c1RjYVJTYnJNUkNJVmNvUXRqYk95bUtsYVNNanFTVl9jbjNWYWtGRjFGM213RHpBVHE5SDNMdjhDTGNMRkx6Y1FWQ2JoRUxqZGFuQjRDRkNCbGk2a0QtSG81TlRHSHN6aV9SU0xtNkxuVURCcUtJajZQbnlOMlV2a2NRM1VwZ1pLYmpEckZaQS0wYjhGLURSeVVkM0lxU05GaFNqWUZDZ9IBuAFBVV95cUxOcFFEcWZYcVdLMDVPSUFQMFdfaEU4cHB4SnBOY01LQnRub1U2N19rWG1SVGljdTdudVlaRENrT3pEbjNES0F4QzVGa1ZxQWduUDJEckhoY245VVlQdmhhRW0zdWVVYmR1ZFZSQ0cxVl9OaUJlelZzQ2pleTRqRzBBSEhKVmlJTFR6dE1WeXpmZzBtcDUwWkhOVFpVS2htNXIweWVLd0ZBbzlMQ0NzNDc0SkFwOUJLTlY0?oc=5",
-      "published": "2026-08-19T21:19:43.000Z",
-      "source": "PBS",
+      "name": "L6 · 옵티컬 리드타임",
+      "ax": "bn_l6_opt",
+      "title": "Coherent (COHR) Q4 2026 Earnings Call Transcript - The Globe and Mail",
+      "link": "https://news.google.com/rss/articles/CBMiywFBVV95cUxPY1E3dUI0Qk4tT1NYclZfOU9mdDVfYVJ6RHNaZ3M2ay1vUFlTa2RHbS1adUs0eFJJdkFMODV0N0hMSkpkMFpfTXZBaVdYVzFXUkR0cmRMNGVkV2FMS2tfbUd0RTlyOUp6VHFtQTZmVUNhUVFpUDhXekVNc183WFJ2bkI2VHdhNExDWjNSeVJYa1NLaHZYalNfUDdHa3AxWDgyQmJoQi0wR3QxWldUTFd0ZGd0Smw0UkVmNkt3bGMyX1VDSjlVbU1Ndzh6OA?oc=5",
+      "published": "2026-08-19T23:31:00.000Z",
+      "source": "The Globe and Mail",
       "st": 3
     },
     {
@@ -2403,39 +2458,6 @@
       "st": 3
     },
     {
-      "id": "macro_글로벌_공급망_지정학_리스크_2",
-      "ticker": "MACRO",
-      "name": "글로벌 공급망 지정학 리스크",
-      "ax": "chip",
-      "title": "Bet on Smart Money With These Stocks & ETFs - TradingView",
-      "link": "https://news.google.com/rss/articles/CBMingFBVV95cUxNNnVtMlhOcmxwYXd0dTVYQVd3bzBCc0RGX2JGU2dkRFlnckQxYjd2VFRUbm1OUzV3RWctamRZV0NleEZSZG15aC1xS3RVMV96c293eFMtR0dBMzR2ODVhZmQ2VFVIbFFVOTJ5dWMxcXl4ak1hQlVhei1WNDJHRl8zeG5NMi1pYmRfcjNKaHlqai0xR0t1QjRBbXpLVlp2QQ?oc=5",
-      "published": "2026-08-19T12:00:00.000Z",
-      "source": "TradingView",
-      "st": 3
-    },
-    {
-      "id": "bneck_capex",
-      "ticker": "MACRO",
-      "name": "상류 · 하이퍼스케일러 capex",
-      "ax": "capex",
-      "title": "Storage News Ticker - 19 August - Blocks & Files",
-      "link": "https://news.google.com/rss/articles/CBMimwFBVV95cUxPUDRRQ0VwWXZoYzFUOExxdU9kcmxpamY5dGxqTVFNSW9RZ3FMUjVYTkRMalJJd0Uzd3c5amRXR3NGeDFOaUU1R1FQTWtJWG5HeXRaTEVIaWV1THE1N2VjZ3AzLWg1MVpaTG54OV9YOHlCMDVLd1lQV25pU2dFX0U0UklUR0JmdnNqcTJsQU04SmpCTkp3ZDdsVUFRMA?oc=5",
-      "published": "2026-08-19T10:49:00.000Z",
-      "source": "Blocks & Files",
-      "st": 3
-    },
-    {
-      "id": "macro_글로벌_공급망_지정학_리스크_2",
-      "ticker": "MACRO",
-      "name": "글로벌 공급망 지정학 리스크",
-      "ax": "chip",
-      "title": "The Future Of AI Compute Won’t Run On Just One Kind Of Chip - Semiconductor Engineering",
-      "link": "https://news.google.com/rss/articles/CBMikAFBVV95cUxOZ190YWI5SEVHd2d4Y0hJUzQ1RE9IS2E3RkhYbGVBWDVMN2ZCR2tBVUhHZG5hbkx5MHFOck1yazUxZDJ0TU80UWJwc1hqM2hFZkJ0VlFSbEtTb1FKbXp0OXB6dGswSUItdkVyUjhaNjEyV1FKTUE5U0NGdUJSM1QwNFlRd2dEaGpHbFdkOEhvaUw?oc=5",
-      "published": "2026-08-19T07:35:35.000Z",
-      "source": "Semiconductor Engineering",
-      "st": 3
-    },
-    {
       "id": "bneck_l6_opt",
       "ticker": "MACRO",
       "name": "L6 · 옵티컬 리드타임",
@@ -2447,17 +2469,6 @@
       "st": 3
     },
     {
-      "id": "bneck_l6_opt",
-      "ticker": "MACRO",
-      "name": "L6 · 옵티컬 리드타임",
-      "ax": "bn_l6_opt",
-      "title": "Lumentum and AXT Ripped Higher. Investors Looking for Broad Optics Exposure Should Consider This Brand-New ETF - AOL.ca",
-      "link": "https://news.google.com/rss/articles/CBMihgFBVV95cUxQbTFiZGFoa2FBSWVJeS0yQXoyX2pYZ09zNGsyVklFNEVDTHdCTkdKZjZBRUlSM1lrVXFqMXU3RTdQY3FBbW1XZm93cnB4dVlrSlZjRTRyaGp0WWpIVTMzQmJRcm9LRVhqUFY3OTBMRWNibnpuN25wRWdBT0ZyUWhzdlZsbFFpUQ?oc=5",
-      "published": "2026-08-18T19:30:20.000Z",
-      "source": "AOL.ca",
-      "st": 3
-    },
-    {
       "id": "bneck_l3_dram",
       "ticker": "MACRO",
       "name": "L3 · DRAM/HBM 가격·공급",
@@ -2466,17 +2477,6 @@
       "link": "https://news.google.com/rss/articles/CBMiiAFBVV95cUxONU9hR3RjZUgwNUc5Z05QY0Y2aThsNXoyajlodllVX2lmOUR5dkpQbFduLWlMSkhyQjJVQVgwV1Y5VVRlVkNOT3U1eEliNE5vMGxGVHFDWVB0NXZ3VUxRM0owWmFHbno2SUxYelJnLVRxU0pVdl9aZmF5TkZEbHQ5TDFjN3NjUncw?oc=5",
       "published": "2026-08-18T18:45:00.000Z",
       "source": "글로벌이코노믹",
-      "st": 3
-    },
-    {
-      "id": "bneck_l3_dram",
-      "ticker": "MACRO",
-      "name": "L3 · DRAM/HBM 가격·공급",
-      "ax": "bn_l3_dram",
-      "title": "\"쉴 틈 없는 반도체 라인\"… 메모리·부품사 상반기 美·中 매출 날았다 - ER 이코노믹리뷰",
-      "link": "https://news.google.com/rss/articles/CBMibEFVX3lxTFAybWZ3T2tlamFuNU53X0hIenczcXEzdl9BOHhGQXJZTEJrNFhWU2lXY3g2Q3MtYjFnanR4S2luc2QyQWRVaWQzVUJkMDRmeE9sWUcyNmlyNlFoZ25kcHpBTVduNi1IWWN3S05qLQ?oc=5",
-      "published": "2026-08-18T09:40:09.000Z",
-      "source": "ER 이코노믹리뷰",
       "st": 3
     },
     {
