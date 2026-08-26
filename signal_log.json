@@ -1,5 +1,5 @@
 {
-  "asOf": "2026-08-23",
+  "asOf": "2026-08-26",
   "note": "인라인 SIGNAL_LOG(히스토리, ~5/30까지) 뒤에 concat되는 신규 시그널 누적 파일. 새 엔트리는 log[] 끝에 시간순으로 append. 형식은 인라인 SIGNAL_LOG 엔트리와 동일: {date,at,source,srcs:[{label,url}],items:[{tag,layer,col,html}]}.",
   "article_consolidation_rules": {
     "note": "기사 정리 규칙 (2026-07-16 확정)",
@@ -311,6 +311,22 @@
         {"tag": "매크로·바이백 실체", "layer": "macro", "col": "#7048e8", "html": "<b>재무부의 장기채 바이백 확대는 QE가 아니라 시장 유동성 지원과 만기구조 관리에 가깝다.</b> 9월 9일부터 10~30년 구간 회당 상한을 $2B에서 최소 $4B로 늘리지만, 재무부는 연준처럼 준비금을 새로 만들지 않고 다른 국채 발행으로 재원을 조달한다. 따라서 직접 효과는 off-the-run 거래여건·유동성 프리미엄 개선이며, 장기금리 추세를 단독으로 뒤집는 정책으로 보기는 어렵다. <b>바이백 확대=비트코인 상승</b>의 단선 인과는 기각한다. narrative≠numbers — 금리·판단 숫자 파일 불변."},
         {"tag": "매크로·단기채 유동성 경로", "layer": "macro", "col": "#1c7ed6", "html": "<b>위험자산에 중요한 것은 바이백보다 신규 발행의 만기구조다.</b> T-bill 공급이 늘어 MMF가 ON RRP 자금을 빼서 매수하면 은행 준비금 감소 없이 재무부 자금조달을 흡수할 수 있어 2023년에는 유동성에 우호적이었다. 그러나 7월 말 T-bill 비중은 22.2%로 과거 TBAC 권고 15~20%를 이미 상회했고 ON RRP 완충도 당시보다 크게 줄었다. 지금 추가 단기채가 은행 예금·준비금을 흡수하면 레포금리 상승과 위험자산 변동성 확대로 반전될 수 있다. <b>단기채=스텔스 QE도 조건부 가설</b>이며, 매수 주체가 핵심이다."},
         {"tag": "매크로·11월 분기점", "layer": "macro", "col": "#e8590c", "html": "<b>다음 핵심 이벤트는 11월 4일 22:30 KST 재무부 Quarterly Refunding이다.</b> 확인 순서는 ①장기물 바이백의 11/4 이후 규모 ②T-bill 비중 추가 상승 여부 ③쿠폰물 순발행 변화 ④ON RRP 잔액·은행 준비금 ⑤SOFR·레포 스프레드다. 상승 시나리오는 T-bill 증가가 MMF 자금으로 원활히 흡수되고 장기물 유동성 프리미엄이 낮아지는 경우, 반대 시나리오는 준비금이 빠르게 줄고 레포 스트레스가 커지는 경우다. 비트코인·금·고베타 AI의 반응은 정책 발표 자체보다 이 유동성 경로가 확인된 뒤 판단한다."}
+      ]
+    },
+    {
+      "date": "2026-08-26",
+      "at": "2026-08-26T21:19+09:00",
+      "source": "AI에선 꼴찌인 메타가 메모리 대란에선 혼자 웃는 세계관에 대하여 · 미국주식 사관학교(카레라, 네이버 프리미엄콘텐츠) · 2026-08-26 — CXL Consortium·Marvell 공식자료 교차검증. narrative≠numbers",
+      "srcs": [
+        {"label": "AI에선 꼴찌인 메타가 메모리 대란에선 혼자 웃는 세계관에 대하여 · 미국주식 사관학교 · 2026-08-26 (첨부 PDF)"},
+        {"label": "CXL Consortium — Scaling CXL to Millions of Servers: Vistara for Hyperscale Efficiency · 2026-07-21", "url": "https://computeexpresslink.org/event/scaling-cxl-to-millions-of-servers-vistara-for-hyperscale-efficiency/"},
+        {"label": "Marvell — Structera X, A and S: A Comprehensive CXL Portfolio Powering AI Memory Innovation · 2026-08-04", "url": "https://www.marvell.com/blogs/marvell-structera-cxl-portfolio.html"},
+        {"label": "Marvell — CXL Near-Memory Compute and Expansion · DDR4 DIMM recycling", "url": "https://www.marvell.com/products/cxl.html"}
+      ],
+      "items": [
+        {"tag": "L3·메모리 효율화 카운터시그널", "layer": "L3", "col": "#e8590c", "html": "<b>Meta Vistara가 CXL을 ‘메모리 증설’에서 ‘기존 DDR4 재활용·계층화’ 도구로 대규모 실전화했다.</b> CXL Consortium 자료는 Meta 서버의 약 40%가 메모리 용량에 묶여 있었고, Vistara가 수백만대 production server에 배포돼 일부 분리형 ML 추론에서 서버 수를 최대 25% 줄이고 분산 캐시 평균 지연을 29% 낮췄다고 제시한다. 이는 <b>메모리 병목 자체는 강한 수요 신호</b>이지만 동시에 CXL·tiering이 범용 DRAM의 ‘유효 공급’을 늘려 신규 비트 수요를 일부 절감할 수 있다는 양면 신호다. <b>HBM은 GPU 인접 고대역폭 층이라 DDR4 재활용과 직접 대체관계가 약함</b> — L3 강세 논제는 유지하되 ‘부족=신규 DRAM 물량 1:1 증가’ 가정은 낮춘다. narrative≠numbers — gamma·earnings·holdings·judgment 불변."},
+        {"tag": "L2·MRVL CXL 실수요", "layer": "L2", "col": "#1c7ed6", "html": "<b>Marvell Structera X 2404/2504가 실제 hyperscale deployment로 넘어가며 DDR4 재활용이 CXL의 초기 상용 유스케이스로 확인되고 있다.</b> Marvell은 8/4 공식 블로그에서 CXL이 평가 단계에서 real-world hyperscale deployment로 넘어가는 inflection point라고 설명했고 Structera X가 기존 DDR4 투자 수명을 연장한다고 밝혔다. 현재 보유 MRVL에는 커스텀 ASIC·광·네트워크 외 <b>메모리 확장/풀링의 추가 수익축</b> 가능성이다. 반대편 리스크는 Meta Vistara처럼 대형 CSP가 자체 ASIC으로 내재화할 수 있다는 점 — <b>8/27 실적과 10/6 Investor Day에서 Structera 매출기여·고객/디자인윈·출하 확대를 확인하기 전 투자매력도 숫자는 올리지 않는다.</b> narrative≠numbers."},
+        {"tag": "L1·CSP ROIC 경쟁", "layer": "L1", "col": "#7048e8", "html": "<b>AI 경쟁축이 모델 성능만이 아니라 ‘동일 AI를 얼마나 싸게 운영하는가’로 이동하는 초기 실증.</b> Meta의 강점은 프런티어 모델 우위가 아니라 15년+ hyperscale 운영 경험을 칩·OS·메모리 tiering으로 연결해 서버·메모리 CAPEX 효율을 높이는 데 있다. 이는 메모리 가격 상승이 CSP 마진을 압박할수록 가치가 커지는 방어축이지만, Vistara 하나로 Meta의 모델 실행·막대한 CAPEX 리스크가 해소되는 것은 아니다. 알파맵 관점에서는 <b>‘메모리 가격(P)’뿐 아니라 ‘메모리 효율(GB/워크로드·서버수/추론)’을 L3 수요 해석의 보조축으로 추가</b>한다. 다음 확인 = CXL attach 확대, conventional DRAM bit growth, MRVL Structera 출하/매출, Meta capex 대비 AI workload·FCF 개선."}
       ]
     }
   ]
