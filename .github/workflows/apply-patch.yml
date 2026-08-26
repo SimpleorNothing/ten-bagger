@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
 
 concurrency:
   group: apply-patch
@@ -56,8 +57,12 @@ jobs:
         run: |
           node -e 'const fs=require("fs");const s=fs.readFileSync("index.html","utf8");const m=[...s.matchAll(/<script>([\s\S]*?)<\/script>/g)];m.forEach((x,i)=>fs.writeFileSync("/tmp/s"+i+".js",x[1]));console.log("script blocks:",m.length);'
           for f in /tmp/s*.js; do node --check "$f"; done
-      - name: Commit to automation branch
+      - name: Commit and open protected-main PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
         run: |
+          set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
@@ -65,3 +70,11 @@ jobs:
           git commit -m "chore: apply index.html patch via patches/*.b64"
           BRANCH="claude/automation-apply-patch-${GITHUB_RUN_ID}"
           git push origin "HEAD:$BRANCH"
+          EXISTING=$(gh pr list --state open --head "$BRANCH" --base main --json number --jq '.[0].number // empty')
+          if [ -n "$EXISTING" ]; then
+            echo "PR #$EXISTING already open for $BRANCH"
+            exit 0
+          fi
+          gh pr create --base main --head "$BRANCH" \
+            --title "chore: automated data update" \
+            --body "Automated patch update routed through the protected-main PR path. Claude PR Gate validates and auto-merges this branch."
