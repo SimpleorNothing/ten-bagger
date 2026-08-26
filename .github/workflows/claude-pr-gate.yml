@@ -11,6 +11,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: index.html / JSON 무결성
         run: |
           SIZE=$(stat -c%s index.html); echo "index.html size: $SIZE"
@@ -20,6 +22,34 @@ jobs:
           for f in alpha.json earnings.json judgment.json news.json prices.json calendar.json company_news.json marvell/data.json lumentum/data.json; do
             if [ -f "$f" ]; then python3 -c "import json;json.load(open('$f'))" \
               || { echo "::error::$f JSON 깨짐"; exit 1; }; fi
+          done
+      - name: patches/*.b64 페이로드 사전 검증
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE="origin/${{ github.event.pull_request.base.ref }}"
+          CHANGED=$(git diff --name-only "$BASE...HEAD" -- 'patches/*.b64' ':(exclude)patches/applied/*' || true)
+          if [ -z "$CHANGED" ]; then
+            echo "변경된 활성 patch 없음"
+            exit 0
+          fi
+          for B in $CHANGED; do
+            [ -f "$B" ] || continue
+            echo "validating $B"
+            if ! base64 -d "$B" > /tmp/pr-gate.patch; then
+              echo "::error::$B base64 깨짐"
+              exit 1
+            fi
+            if git apply --check /tmp/pr-gate.patch 2>/dev/null; then
+              echo "$B 적용 가능"
+              continue
+            fi
+            if git apply --reverse --check /tmp/pr-gate.patch 2>/dev/null; then
+              echo "$B 이미 적용된 payload"
+              continue
+            fi
+            echo "::error::$B patch가 현재 base에 적용되지 않고 이미 적용된 상태도 아님"
+            exit 1
           done
       - name: 기업분석 회귀 가드
         run: |
