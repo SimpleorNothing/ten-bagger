@@ -1,8 +1,8 @@
 {
-  "asOf": "2026-08-27T12:30",
+  "asOf": "2026-08-28T07:30",
   "gen": 1787524140000,
   "model": "ChatGPT automation · official sources + trusted original reporting",
-  "headline": "한국 8월 1~20일 수출·반도체 수출 강도는 유지되지만, 미국 7월 PCE 물가가 전년비 3.7%·근원 3.3%로 높은 수준을 보이고 2Q GDP는 +1.5%로 둔화해 성장 둔화와 인플레이션 지속이 동시에 확인됐다.",
+  "headline": "한국은행이 기준금리를 3.00%로 25bp 인상한 가운데, 미국 7월 PCE 물가의 높은 수준과 NVIDIA·Marvell의 강한 AI 데이터센터 실적·가이던스가 할인율 리스크와 AI 실수요 강세를 동시에 확인했다.",
   "drivers": [
     {
       "ax": "geopolitics",
@@ -44,21 +44,21 @@
     {
       "ax": "rates",
       "name": "금리/Fed",
-      "dir": "neutral",
+      "dir": "risk",
       "layer": "할인율·AI CAPEX 금융화",
-      "l1": "7월 CPI는 둔화했지만 최근 PPI의 기조 생산단 물가 압력은 병존",
-      "l2": "헤드라인 CPI 전월비 +0.1%·전년비 +3.4%, 근원 CPI 전월비 +0.2%·전년비 +2.5%로 소비자물가는 둔화했다. 다만 최근 공식 PPI에서 확인된 기조 생산단 물가 압력도 함께 보존해 금리경로를 혼재로 판단한다.",
-      "verdict": "CPI 둔화 vs 기조 PPI 압력 · 혼재",
+      "l1": "미국 PCE 물가가 높은 가운데 한국은행도 25bp 인상해 글로벌 할인율 부담이 다시 높아졌다.",
+      "l2": "미국 7월 PCE는 전년비 +3.7%, 근원 PCE +3.3%로 높은 수준을 유지했다. 한국은행은 8월 27일 수출 호조·내수 회복과 물가 상방 위험을 근거로 기준금리를 2.75%에서 3.00%로 25bp 인상했다. CPI 둔화만으로 금리 부담 완화를 판단하기보다 PPI·PCE·한국 금리 인상까지 함께 보는 것이 적절하다.",
+      "verdict": "물가 지속성 + 한국 금리 인상 · 할인율 리스크 상향",
       "srcs": [
         {
-          "t": "BLS Consumer Price Index - July 2026",
-          "u": "https://www.bls.gov/news.release/cpi.nr0.htm",
-          "d": "2026-08-12"
+          "t": "BEA Personal Income and Outlays - July 2026",
+          "u": "https://www.bea.gov/news/2026/personal-income-and-outlays-july-2026",
+          "d": "2026-08-26"
         },
         {
-          "t": "BLS Producer Price Index - July 2026",
-          "u": "https://www.bls.gov/news.release/ppi.htm",
-          "d": "2026-08-13"
+          "t": "한국은행 통화정책방향 2026.8.27",
+          "u": "https://www.bok.or.kr/portal/bbs/P0000559/view.do?menuNo=200690&nttId=11064191",
+          "d": "2026-08-27"
         }
       ]
     },
@@ -112,16 +112,21 @@
     {
       "ax": "sentiment",
       "name": "심리/센티먼트",
-      "dir": "risk",
+      "dir": "neutral",
       "layer": "고멀티플 AI·금융화",
-      "l1": "S&P 500·Nasdaq가 3주 연속 상승을 끝내고 반도체 지수가 주간 약세를 보이며 금리 민감도가 다시 커졌다.",
-      "l2": "Reuters는 8월 21일 미국 증시가 당일 반등했지만 주간 하락했고, 필라델피아 반도체 지수도 주간 약 5% 밀렸다고 전했다. 다음 핵심 검증은 8월 26일 Nvidia 실적과 8월 26일 PCE다.",
-      "verdict": "실적 기대는 유지되나 할인율 충격에 민감한 위험회피 국면",
+      "l1": "NVIDIA와 Marvell의 공식 실적이 AI 데이터센터 수요의 절대 강도를 재확인했지만 금리 상승 환경이 멀티플 확장을 제한한다.",
+      "l2": "NVIDIA FY27 Q2 매출은 $96.2B(+106% YoY), 데이터센터 $89.0B(+117% YoY)였고 Q3 매출 가이던스는 $108.0B±2%다. Marvell FY27 Q2 매출은 $2.739B(+37% YoY), 데이터센터는 +46% YoY였으며 AI bookings 강세를 근거로 FY27·FY28 전망을 재차 상향했다. 실수요는 강하지만 할인율 상승과 밸류에이션 민감도는 별도 리스크다.",
+      "verdict": "AI 실수요 강세 확인 vs 할인율 부담 · 펀더멘털 우위",
       "srcs": [
         {
-          "t": "Reuters · Wall St Week Ahead",
-          "u": "https://www.reuters.com/business/wall-st-week-ahead-nvidia-earnings-jackson-hole-test-pillars-stock-rally-2026-08-21/",
-          "d": "2026-08-21"
+          "t": "NVIDIA FY27 Q2 official results",
+          "u": "https://investor.nvidia.com/news/press-release-details/2026/NVIDIA-Announces-Financial-Results-for-Second-Quarter-Fiscal-2027/default.aspx",
+          "d": "2026-08-26"
+        },
+        {
+          "t": "Marvell FY27 Q2 official results",
+          "u": "https://investor.marvell.com/news-events/press-releases/detail/1031/marvell-technology-inc-reports-second-quarter-of-fiscal-year-2027-financial-results",
+          "d": "2026-08-27"
         }
       ]
     }
