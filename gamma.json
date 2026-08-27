@@ -1,5 +1,5 @@
 {
-  "asOf": "2026-08-27T00:39:10.480Z",
+  "asOf": "2026-08-27T01:01:32.297Z",
   "source": "auto(price-vs-target+revisions)+judgment",
   "note": "γ 단일 소스. index.html D배열 g·judgment.json g는 이 파일이 대체(인라인 g는 폴백). stage도 이 파일이 단일소스(인라인 폴백). stage는 판단값이라 cron은 g만 자동, stage는 수동. 룰: pct=(target-price)/price. pct>=+10% → open / pct<=-5% AND trend in(flat,falling) → spent / 그 외(모호밴드·trend rising·unknown) → flagged+직전값 hold. lock=true는 운영자 수동 고정(auto 미적용). US는 Yahoo quoteSummary 자동, KR(005930·000660)·EU(BESI)는 커버리지 갭으로 수기 보정 가능. checkedAt이 N일 초과면 스테일.",
   "rules": {
@@ -15,9 +15,9 @@
       "mkt": "KR",
       "lock": false,
       "why": "Value Chain 전체 투자매력도 커버리지 추가 · 원자료 수집 대기",
-      "price": 111500,
+      "price": 110150,
       "target": 176200,
-      "pct": 58,
+      "pct": 60,
       "targetHist": [
         {
           "d": "2026-08-16",
@@ -115,7 +115,7 @@
         },
         {
           "d": "2026-08-27",
-          "p": 111500
+          "p": 110150
         }
       ],
       "trend": "flat",
@@ -132,7 +132,7 @@
           "c90": null
         },
         "px": {
-          "c7": -1.7,
+          "c7": -2.9,
           "c30": null,
           "c90": null
         },
@@ -224,19 +224,21 @@
         "provenance": {
           "provider": "Yahoo Finance",
           "sourceUrl": "https://query1.finance.yahoo.com/v10/finance/quoteSummary/353200.KS?modules=financialData,earningsTrend,recommendationTrend,upgradeDowngradeHistory&crumb=<redacted>",
-          "retrievedAt": "2026-08-27T00:39:39.960Z",
-          "rawRef": "raw/revisions/2026-08-27/2026-08-27T00-39-39-578Z/353200.json",
+          "retrievedAt": "2026-08-27T01:02:03.270Z",
+          "rawRef": "raw/revisions/2026-08-27/2026-08-27T01-02-02-978Z/353200.json",
           "schema": "revision-source-v1"
         },
         "quality": {
-          "status": "verified",
-          "checkedAt": "2026-08-27T00:39:50.834Z",
+          "status": "warning",
+          "checkedAt": "2026-08-27T01:02:13.504Z",
           "fields": {
-            "price": "verified",
+            "price": "warning",
             "tp": "verified",
             "eps": "verified"
           },
-          "warnings": [],
+          "warnings": [
+            "currentPrice divergence 1.52%"
+          ],
           "blocking": []
         },
         "epsSemantics": {
@@ -816,13 +818,13 @@
         "provenance": {
           "provider": "Yahoo Finance",
           "sourceUrl": "https://query1.finance.yahoo.com/v10/finance/quoteSummary/MRVL?modules=financialData,earningsTrend,recommendationTrend,upgradeDowngradeHistory&crumb=<redacted>",
-          "retrievedAt": "2026-08-27T00:39:40.747Z",
-          "rawRef": "raw/revisions/2026-08-27/2026-08-27T00-39-39-578Z/MRVL.json",
+          "retrievedAt": "2026-08-27T01:02:03.961Z",
+          "rawRef": "raw/revisions/2026-08-27/2026-08-27T01-02-02-978Z/MRVL.json",
           "schema": "revision-source-v1"
         },
         "quality": {
           "status": "verified",
-          "checkedAt": "2026-08-27T00:39:50.834Z",
+          "checkedAt": "2026-08-27T01:02:13.505Z",
           "fields": {
             "price": "verified",
             "tp": "verified",
@@ -848,9 +850,9 @@
       "mkt": "KR",
       "lock": false,
       "why": "HBM4 점유 회복 미반영",
-      "price": 268000,
+      "price": 266250,
       "target": 470155.62,
-      "pct": 75.4,
+      "pct": 76.6,
       "trend": "flat",
       "targetHist": [
         {
@@ -1247,7 +1249,7 @@
         },
         {
           "d": "2026-08-27",
-          "p": 268000
+          "p": 266250
         }
       ],
       "rev": {
@@ -1261,9 +1263,9 @@
           "c90": null
         },
         "px": {
-          "c7": -1.7,
-          "c30": 21.1,
-          "c90": -15.9
+          "c7": -2.6,
+          "c30": 20,
+          "c90": -16.7
         },
         "eps": {
           "fy1": {
@@ -1355,19 +1357,19 @@
         },
         "actions": null,
         "gate": {
-          "d30": 16,
-          "d90": -44.5
+          "d30": 14.9,
+          "d90": -45.3
         },
         "provenance": {
           "provider": "Yahoo Finance",
           "sourceUrl": "https://query1.finance.yahoo.com/v10/finance/quoteSummary/005930.KS?modules=financialData,earningsTrend,recommendationTrend,upgradeDowngradeHistory&crumb=<redacted>",
-          "retrievedAt": "2026-08-27T00:39:41.108Z",
-          "rawRef": "raw/revisions/2026-08-27/2026-08-27T00-39-39-578Z/005930.json",
+          "retrievedAt": "2026-08-27T01:02:04.298Z",
+          "rawRef": "raw/revisions/2026-08-27/2026-08-27T01-02-02-978Z/005930.json",
           "schema": "revision-source-v1"
         },
         "quality": {
           "status": "verified",
-          "checkedAt": "2026-08-27T00:39:50.834Z",
+          "checkedAt": "2026-08-27T01:02:13.505Z",
           "fields": {
             "price": "verified",
             "tp": "verified",
@@ -1942,13 +1944,13 @@
         "provenance": {
           "provider": "Yahoo Finance",
           "sourceUrl": "https://query1.finance.yahoo.com/v10/finance/quoteSummary/MU?modules=financialData,earningsTrend,recommendationTrend,upgradeDowngradeHistory&crumb=<redacted>",
-          "retrievedAt": "2026-08-27T00:39:41.469Z",
-          "rawRef": "raw/revisions/2026-08-27/2026-08-27T00-39-39-578Z/MU.json",
+          "retrievedAt": "2026-08-27T01:02:04.699Z",
+          "rawRef": "raw/revisions/2026-08-27/2026-08-27T01-02-02-978Z/MU.json",
           "schema": "revision-source-v1"
         },
         "quality": {
           "status": "verified",
-          "checkedAt": "2026-08-27T00:39:50.834Z",
+          "checkedAt": "2026-08-27T01:02:13.505Z",
           "fields": {
             "price": "verified",
             "tp": "verified",
@@ -2474,13 +2476,13 @@
         "provenance": {
           "provider": "Yahoo Finance",
           "sourceUrl": "https://query1.finance.yahoo.com/v10/finance/quoteSummary/LITE?modules=financialData,earningsTrend,recommendationTrend,upgradeDowngradeHistory&crumb=<redacted>",
-          "retrievedAt": "2026-08-27T00:39:41.890Z",
-          "rawRef": "raw/revisions/2026-08-27/2026-08-27T00-39-39-578Z/LITE.json",
+          "retrievedAt": "2026-08-27T01:02:05.070Z",
+          "rawRef": "raw/revisions/2026-08-27/2026-08-27T01-02-02-978Z/LITE.json",
           "schema": "revision-source-v1"
         },
         "quality": {
           "status": "blocked",
-          "checkedAt": "2026-08-27T00:39:50.834Z",
+          "checkedAt": "2026-08-27T01:02:13.505Z",
           "fields": {
             "price": "verified",
             "tp": "verified",
@@ -3107,13 +3109,13 @@
         "provenance": {
           "provider": "Yahoo Finance",
           "sourceUrl": "https://query1.finance.yahoo.com/v10/finance/quoteSummary/VRT?modules=financialData,earningsTrend,recommendationTrend,upgradeDowngradeHistory&crumb=<redacted>",
-          "retrievedAt": "2026-08-27T00:39:42.252Z",
-          "rawRef": "raw/revisions/2026-08-27/2026-08-27T00-39-39-578Z/VRT.json",
+          "retrievedAt": "2026-08-27T01:02:05.400Z",
+          "rawRef": "raw/revisions/2026-08-27/2026-08-27T01-02-02-978Z/VRT.json",
           "schema": "revision-source-v1"
         },
         "quality": {
           "status": "verified",
-          "checkedAt": "2026-08-27T00:39:50.834Z",
+          "checkedAt": "2026-08-27T01:02:13.505Z",
           "fields": {
             "price": "verified",
             "tp": "verified",
@@ -3688,13 +3690,13 @@
         "provenance": {
           "provider": "Yahoo Finance",
           "sourceUrl": "https://query1.finance.yahoo.com/v10/finance/quoteSummary/BE?modules=financialData,earningsTrend,recommendationTrend,upgradeDowngradeHistory&crumb=<redacted>",
-          "retrievedAt": "2026-08-27T00:39:42.611Z",
-          "rawRef": "raw/revisions/2026-08-27/2026-08-27T00-39-39-578Z/BE.json",
+          "retrievedAt": "2026-08-27T01:02:05.736Z",
+          "rawRef": "raw/revisions/2026-08-27/2026-08-27T01-02-02-978Z/BE.json",
           "schema": "revision-source-v1"
         },
         "quality": {
           "status": "verified",
-          "checkedAt": "2026-08-27T00:39:50.834Z",
+          "checkedAt": "2026-08-27T01:02:13.505Z",
           "fields": {
             "price": "verified",
             "tp": "verified",
@@ -4269,13 +4271,13 @@
         "provenance": {
           "provider": "Yahoo Finance",
           "sourceUrl": "https://query1.finance.yahoo.com/v10/finance/quoteSummary/AMD?modules=financialData,earningsTrend,recommendationTrend,upgradeDowngradeHistory&crumb=<redacted>",
-          "retrievedAt": "2026-08-27T00:39:42.975Z",
-          "rawRef": "raw/revisions/2026-08-27/2026-08-27T00-39-39-578Z/AMD.json",
+          "retrievedAt": "2026-08-27T01:02:06.131Z",
+          "rawRef": "raw/revisions/2026-08-27/2026-08-27T01-02-02-978Z/AMD.json",
           "schema": "revision-source-v1"
         },
         "quality": {
           "status": "verified",
-          "checkedAt": "2026-08-27T00:39:50.834Z",
+          "checkedAt": "2026-08-27T01:02:13.505Z",
           "fields": {
             "price": "verified",
             "tp": "verified",
@@ -4842,13 +4844,13 @@
         "provenance": {
           "provider": "Yahoo Finance",
           "sourceUrl": "https://query1.finance.yahoo.com/v10/finance/quoteSummary/RMBS?modules=financialData,earningsTrend,recommendationTrend,upgradeDowngradeHistory&crumb=<redacted>",
-          "retrievedAt": "2026-08-27T00:39:43.372Z",
-          "rawRef": "raw/revisions/2026-08-27/2026-08-27T00-39-39-578Z/RMBS.json",
+          "retrievedAt": "2026-08-27T01:02:06.490Z",
+          "rawRef": "raw/revisions/2026-08-27/2026-08-27T01-02-02-978Z/RMBS.json",
           "schema": "revision-source-v1"
         },
         "quality": {
           "status": "verified",
-          "checkedAt": "2026-08-27T00:39:50.834Z",
+          "checkedAt": "2026-08-27T01:02:13.505Z",
           "fields": {
             "price": "verified",
             "tp": "verified",
@@ -5423,13 +5425,13 @@
         "provenance": {
           "provider": "Yahoo Finance",
           "sourceUrl": "https://query1.finance.yahoo.com/v10/finance/quoteSummary/CEG?modules=financialData,earningsTrend,recommendationTrend,upgradeDowngradeHistory&crumb=<redacted>",
-          "retrievedAt": "2026-08-27T00:39:43.733Z",
-          "rawRef": "raw/revisions/2026-08-27/2026-08-27T00-39-39-578Z/CEG.json",
+          "retrievedAt": "2026-08-27T01:02:06.830Z",
+          "rawRef": "raw/revisions/2026-08-27/2026-08-27T01-02-02-978Z/CEG.json",
           "schema": "revision-source-v1"
         },
         "quality": {
           "status": "verified",
-          "checkedAt": "2026-08-27T00:39:50.834Z",
+          "checkedAt": "2026-08-27T01:02:13.505Z",
           "fields": {
             "price": "verified",
             "tp": "verified",
@@ -6004,13 +6006,13 @@
         "provenance": {
           "provider": "Yahoo Finance",
           "sourceUrl": "https://query1.finance.yahoo.com/v10/finance/quoteSummary/QCOM?modules=financialData,earningsTrend,recommendationTrend,upgradeDowngradeHistory&crumb=<redacted>",
-          "retrievedAt": "2026-08-27T00:39:44.098Z",
-          "rawRef": "raw/revisions/2026-08-27/2026-08-27T00-39-39-578Z/QCOM.json",
+          "retrievedAt": "2026-08-27T01:02:07.158Z",
+          "rawRef": "raw/revisions/2026-08-27/2026-08-27T01-02-02-978Z/QCOM.json",
           "schema": "revision-source-v1"
         },
         "quality": {
           "status": "verified",
-          "checkedAt": "2026-08-27T00:39:50.834Z",
+          "checkedAt": "2026-08-27T01:02:13.505Z",
           "fields": {
             "price": "verified",
             "tp": "verified",
@@ -6585,13 +6587,13 @@
         "provenance": {
           "provider": "Yahoo Finance",
           "sourceUrl": "https://query1.finance.yahoo.com/v10/finance/quoteSummary/APH?modules=financialData,earningsTrend,recommendationTrend,upgradeDowngradeHistory&crumb=<redacted>",
-          "retrievedAt": "2026-08-27T00:39:44.461Z",
-          "rawRef": "raw/revisions/2026-08-27/2026-08-27T00-39-39-578Z/APH.json",
+          "retrievedAt": "2026-08-27T01:02:07.553Z",
+          "rawRef": "raw/revisions/2026-08-27/2026-08-27T01-02-02-978Z/APH.json",
           "schema": "revision-source-v1"
         },
         "quality": {
           "status": "verified",
-          "checkedAt": "2026-08-27T00:39:50.835Z",
+          "checkedAt": "2026-08-27T01:02:13.505Z",
           "fields": {
             "price": "verified",
             "tp": "verified",
@@ -7130,13 +7132,13 @@
         "provenance": {
           "provider": "Yahoo Finance",
           "sourceUrl": "https://query1.finance.yahoo.com/v10/finance/quoteSummary/BESI.AS?modules=financialData,earningsTrend,recommendationTrend,upgradeDowngradeHistory&crumb=<redacted>",
-          "retrievedAt": "2026-08-27T00:39:44.824Z",
-          "rawRef": "raw/revisions/2026-08-27/2026-08-27T00-39-39-578Z/BESI.json",
+          "retrievedAt": "2026-08-27T01:02:07.890Z",
+          "rawRef": "raw/revisions/2026-08-27/2026-08-27T01-02-02-978Z/BESI.json",
           "schema": "revision-source-v1"
         },
         "quality": {
           "status": "verified",
-          "checkedAt": "2026-08-27T00:39:50.835Z",
+          "checkedAt": "2026-08-27T01:02:13.505Z",
           "fields": {
             "price": "verified",
             "tp": "verified",
@@ -7163,9 +7165,9 @@
       "lock": false,
       "why": "E군집 자동화 시드 — cron Yahoo 000660.KS 자동충전 대기(005930과 동일 경로)",
       "flagged": false,
-      "price": 1755000,
+      "price": 1741000,
       "target": 3164331.8,
-      "pct": 80.3,
+      "pct": 81.8,
       "targetHist": [
         {
           "d": "2026-07-06",
@@ -7561,7 +7563,7 @@
         },
         {
           "d": "2026-08-27",
-          "p": 1755000
+          "p": 1741000
         }
       ],
       "rev": {
@@ -7575,8 +7577,8 @@
           "c90": null
         },
         "px": {
-          "c7": 3.8,
-          "c30": 13.2,
+          "c7": 3,
+          "c30": 12.3,
           "c90": null
         },
         "eps": {
@@ -7669,26 +7671,26 @@
         },
         "actions": null,
         "gate": {
-          "d30": 10.6,
+          "d30": 9.7,
           "d90": null
         },
         "provenance": {
           "provider": "Yahoo Finance",
           "sourceUrl": "https://query1.finance.yahoo.com/v10/finance/quoteSummary/000660.KS?modules=financialData,earningsTrend,recommendationTrend,upgradeDowngradeHistory&crumb=<redacted>",
-          "retrievedAt": "2026-08-27T00:39:45.184Z",
-          "rawRef": "raw/revisions/2026-08-27/2026-08-27T00-39-39-578Z/000660.json",
+          "retrievedAt": "2026-08-27T01:02:08.221Z",
+          "rawRef": "raw/revisions/2026-08-27/2026-08-27T01-02-02-978Z/000660.json",
           "schema": "revision-source-v1"
         },
         "quality": {
           "status": "warning",
-          "checkedAt": "2026-08-27T00:39:50.835Z",
+          "checkedAt": "2026-08-27T01:02:13.505Z",
           "fields": {
             "price": "warning",
             "tp": "verified",
             "eps": "verified"
           },
           "warnings": [
-            "currentPrice divergence 1.38%"
+            "currentPrice divergence 1.16%"
           ],
           "blocking": []
         },
@@ -8106,13 +8108,13 @@
         "provenance": {
           "provider": "Yahoo Finance",
           "sourceUrl": "https://query1.finance.yahoo.com/v10/finance/quoteSummary/TSLA?modules=financialData,earningsTrend,recommendationTrend,upgradeDowngradeHistory&crumb=<redacted>",
-          "retrievedAt": "2026-08-27T00:39:45.541Z",
-          "rawRef": "raw/revisions/2026-08-27/2026-08-27T00-39-39-578Z/TSLA.json",
+          "retrievedAt": "2026-08-27T01:02:08.550Z",
+          "rawRef": "raw/revisions/2026-08-27/2026-08-27T01-02-02-978Z/TSLA.json",
           "schema": "revision-source-v1"
         },
         "quality": {
           "status": "verified",
-          "checkedAt": "2026-08-27T00:39:50.835Z",
+          "checkedAt": "2026-08-27T01:02:13.505Z",
           "fields": {
             "price": "verified",
             "tp": "verified",
@@ -8392,13 +8394,13 @@
         "provenance": {
           "provider": "Yahoo Finance",
           "sourceUrl": "https://query1.finance.yahoo.com/v10/finance/quoteSummary/PLTR?modules=financialData,earningsTrend,recommendationTrend,upgradeDowngradeHistory&crumb=<redacted>",
-          "retrievedAt": "2026-08-27T00:39:45.942Z",
-          "rawRef": "raw/revisions/2026-08-27/2026-08-27T00-39-39-578Z/PLTR.json",
+          "retrievedAt": "2026-08-27T01:02:08.920Z",
+          "rawRef": "raw/revisions/2026-08-27/2026-08-27T01-02-02-978Z/PLTR.json",
           "schema": "revision-source-v1"
         },
         "quality": {
           "status": "verified",
-          "checkedAt": "2026-08-27T00:39:50.835Z",
+          "checkedAt": "2026-08-27T01:02:13.505Z",
           "fields": {
             "price": "verified",
             "tp": "verified",
@@ -8532,7 +8534,7 @@
       "checkedAt": "2026-08-27",
       "flagged": false,
       "revInvalid": {
-        "at": "2026-08-27T00:39:50.795Z",
+        "at": "2026-08-27T01:02:13.468Z",
         "reason": "EPS 90d recompute mismatch"
       }
     },
@@ -8650,7 +8652,7 @@
       "checkedAt": "2026-08-27",
       "flagged": false,
       "revInvalid": {
-        "at": "2026-08-27T00:39:50.795Z",
+        "at": "2026-08-27T01:02:13.468Z",
         "reason": "EPS 30d recompute mismatch"
       }
     },
@@ -8914,13 +8916,13 @@
         "provenance": {
           "provider": "Yahoo Finance",
           "sourceUrl": "https://query1.finance.yahoo.com/v10/finance/quoteSummary/SNDK?modules=financialData,earningsTrend,recommendationTrend,upgradeDowngradeHistory&crumb=<redacted>",
-          "retrievedAt": "2026-08-27T00:39:47.035Z",
-          "rawRef": "raw/revisions/2026-08-27/2026-08-27T00-39-39-578Z/SNDK.json",
+          "retrievedAt": "2026-08-27T01:02:09.974Z",
+          "rawRef": "raw/revisions/2026-08-27/2026-08-27T01-02-02-978Z/SNDK.json",
           "schema": "revision-source-v1"
         },
         "quality": {
           "status": "verified",
-          "checkedAt": "2026-08-27T00:39:50.835Z",
+          "checkedAt": "2026-08-27T01:02:13.505Z",
           "fields": {
             "price": "verified",
             "tp": "verified",
@@ -8947,9 +8949,9 @@
       "mkt": "KR",
       "lock": false,
       "why": "Value Chain 전체 투자매력도 커버리지 추가 · 원자료 수집 대기",
-      "price": 1368000,
+      "price": 1360000,
       "target": 2338148.2,
-      "pct": 70.9,
+      "pct": 71.9,
       "targetHist": [
         {
           "d": "2026-08-16",
@@ -9047,7 +9049,7 @@
         },
         {
           "d": "2026-08-27",
-          "p": 1368000
+          "p": 1360000
         }
       ],
       "trend": "flat",
@@ -9064,7 +9066,7 @@
           "c90": null
         },
         "px": {
-          "c7": -2,
+          "c7": -2.6,
           "c30": null,
           "c90": null
         },
@@ -9164,21 +9166,19 @@
         "provenance": {
           "provider": "Yahoo Finance",
           "sourceUrl": "https://query1.finance.yahoo.com/v10/finance/quoteSummary/009150.KS?modules=financialData,earningsTrend,recommendationTrend,upgradeDowngradeHistory&crumb=<redacted>",
-          "retrievedAt": "2026-08-27T00:39:47.503Z",
-          "rawRef": "raw/revisions/2026-08-27/2026-08-27T00-39-39-578Z/009150.json",
+          "retrievedAt": "2026-08-27T01:02:10.307Z",
+          "rawRef": "raw/revisions/2026-08-27/2026-08-27T01-02-02-978Z/009150.json",
           "schema": "revision-source-v1"
         },
         "quality": {
-          "status": "warning",
-          "checkedAt": "2026-08-27T00:39:50.835Z",
+          "status": "verified",
+          "checkedAt": "2026-08-27T01:02:13.506Z",
           "fields": {
-            "price": "warning",
+            "price": "verified",
             "tp": "verified",
             "eps": "verified"
           },
-          "warnings": [
-            "currentPrice divergence 1.03%"
-          ],
+          "warnings": [],
           "blocking": []
         },
         "epsSemantics": {
@@ -9199,9 +9199,9 @@
       "mkt": "KOSDAQ",
       "lock": false,
       "why": "Value Chain 전체 투자매력도 커버리지 추가 · 원자료 수집 대기",
-      "price": 49300,
+      "price": 49100,
       "target": 80000,
-      "pct": 62.3,
+      "pct": 62.9,
       "targetHist": [
         {
           "d": "2026-08-16",
@@ -9299,7 +9299,7 @@
         },
         {
           "d": "2026-08-27",
-          "p": 49300
+          "p": 49100
         }
       ],
       "trend": "flat",
@@ -9316,7 +9316,7 @@
           "c90": null
         },
         "px": {
-          "c7": -3.5,
+          "c7": -3.9,
           "c30": null,
           "c90": null
         },
@@ -9400,13 +9400,13 @@
         "provenance": {
           "provider": "Yahoo Finance",
           "sourceUrl": "https://query1.finance.yahoo.com/v10/finance/quoteSummary/089030.KQ?modules=financialData,earningsTrend,recommendationTrend,upgradeDowngradeHistory&crumb=<redacted>",
-          "retrievedAt": "2026-08-27T00:39:47.857Z",
-          "rawRef": "raw/revisions/2026-08-27/2026-08-27T00-39-39-578Z/089030.json",
+          "retrievedAt": "2026-08-27T01:02:10.641Z",
+          "rawRef": "raw/revisions/2026-08-27/2026-08-27T01-02-02-978Z/089030.json",
           "schema": "revision-source-v1"
         },
         "quality": {
           "status": "warning",
-          "checkedAt": "2026-08-27T00:39:50.835Z",
+          "checkedAt": "2026-08-27T01:02:13.506Z",
           "fields": {
             "price": "verified",
             "tp": "warning",
@@ -9542,7 +9542,7 @@
       "checkedAt": "2026-08-27",
       "flagged": false,
       "revInvalid": {
-        "at": "2026-08-27T00:39:50.795Z",
+        "at": "2026-08-27T01:02:13.468Z",
         "reason": "missing provenance"
       }
     },
@@ -9757,13 +9757,13 @@
         "provenance": {
           "provider": "Yahoo Finance",
           "sourceUrl": "https://query1.finance.yahoo.com/v10/finance/quoteSummary/SMCI?modules=financialData,earningsTrend,recommendationTrend,upgradeDowngradeHistory&crumb=<redacted>",
-          "retrievedAt": "2026-08-27T00:39:48.569Z",
-          "rawRef": "raw/revisions/2026-08-27/2026-08-27T00-39-39-578Z/SMCI.json",
+          "retrievedAt": "2026-08-27T01:02:11.415Z",
+          "rawRef": "raw/revisions/2026-08-27/2026-08-27T01-02-02-978Z/SMCI.json",
           "schema": "revision-source-v1"
         },
         "quality": {
           "status": "blocked",
-          "checkedAt": "2026-08-27T00:39:50.835Z",
+          "checkedAt": "2026-08-27T01:02:13.506Z",
           "fields": {
             "price": "verified",
             "tp": "verified",
@@ -10095,13 +10095,13 @@
         "provenance": {
           "provider": "Yahoo Finance",
           "sourceUrl": "https://query1.finance.yahoo.com/v10/finance/quoteSummary/COHR?modules=financialData,earningsTrend,recommendationTrend,upgradeDowngradeHistory&crumb=<redacted>",
-          "retrievedAt": "2026-08-27T00:39:48.930Z",
-          "rawRef": "raw/revisions/2026-08-27/2026-08-27T00-39-39-578Z/COHR.json",
+          "retrievedAt": "2026-08-27T01:02:11.744Z",
+          "rawRef": "raw/revisions/2026-08-27/2026-08-27T01-02-02-978Z/COHR.json",
           "schema": "revision-source-v1"
         },
         "quality": {
           "status": "verified",
-          "checkedAt": "2026-08-27T00:39:50.835Z",
+          "checkedAt": "2026-08-27T01:02:13.506Z",
           "fields": {
             "price": "verified",
             "tp": "verified",
@@ -10384,13 +10384,13 @@
         "provenance": {
           "provider": "Yahoo Finance",
           "sourceUrl": "https://query1.finance.yahoo.com/v10/finance/quoteSummary/VICR?modules=financialData,earningsTrend,recommendationTrend,upgradeDowngradeHistory&crumb=<redacted>",
-          "retrievedAt": "2026-08-27T00:39:49.642Z",
-          "rawRef": "raw/revisions/2026-08-27/2026-08-27T00-39-39-578Z/VICR.json",
+          "retrievedAt": "2026-08-27T01:02:12.411Z",
+          "rawRef": "raw/revisions/2026-08-27/2026-08-27T01-02-02-978Z/VICR.json",
           "schema": "revision-source-v1"
         },
         "quality": {
           "status": "verified",
-          "checkedAt": "2026-08-27T00:39:50.835Z",
+          "checkedAt": "2026-08-27T01:02:13.506Z",
           "fields": {
             "price": "verified",
             "tp": "verified",
@@ -10621,13 +10621,13 @@
         "provenance": {
           "provider": "Yahoo Finance",
           "sourceUrl": "https://query1.finance.yahoo.com/v10/finance/quoteSummary/OKLO?modules=financialData,earningsTrend,recommendationTrend,upgradeDowngradeHistory&crumb=<redacted>",
-          "retrievedAt": "2026-08-27T00:39:49.997Z",
-          "rawRef": "raw/revisions/2026-08-27/2026-08-27T00-39-39-578Z/OKLO.json",
+          "retrievedAt": "2026-08-27T01:02:12.741Z",
+          "rawRef": "raw/revisions/2026-08-27/2026-08-27T01-02-02-978Z/OKLO.json",
           "schema": "revision-source-v1"
         },
         "quality": {
           "status": "blocked",
-          "checkedAt": "2026-08-27T00:39:50.836Z",
+          "checkedAt": "2026-08-27T01:02:13.506Z",
           "fields": {
             "price": "verified",
             "tp": "verified",
@@ -10959,13 +10959,13 @@
         "provenance": {
           "provider": "Yahoo Finance",
           "sourceUrl": "https://query1.finance.yahoo.com/v10/finance/quoteSummary/TER?modules=financialData,earningsTrend,recommendationTrend,upgradeDowngradeHistory&crumb=<redacted>",
-          "retrievedAt": "2026-08-27T00:39:50.369Z",
-          "rawRef": "raw/revisions/2026-08-27/2026-08-27T00-39-39-578Z/TER.json",
+          "retrievedAt": "2026-08-27T01:02:13.072Z",
+          "rawRef": "raw/revisions/2026-08-27/2026-08-27T01-02-02-978Z/TER.json",
           "schema": "revision-source-v1"
         },
         "quality": {
           "status": "verified",
-          "checkedAt": "2026-08-27T00:39:50.836Z",
+          "checkedAt": "2026-08-27T01:02:13.506Z",
           "fields": {
             "price": "verified",
             "tp": "verified",
@@ -10987,13 +10987,13 @@
     }
   },
   "revisionAudit": {
-    "at": "2026-08-27T00:39:50.796Z",
+    "at": "2026-08-27T01:02:13.469Z",
     "policy": "use-only-when-provider-source-and-raw-snapshot-are-present-and-reproducible",
     "valid": 24,
     "invalid": 3
   },
   "revisionIntegrity": {
-    "at": "2026-08-27T00:39:50.836Z",
+    "at": "2026-08-27T01:02:13.506Z",
     "policy": "field-level semantic validation; raw retained, ambiguous values excluded from scoring",
     "verified": 18,
     "warning": 3,
