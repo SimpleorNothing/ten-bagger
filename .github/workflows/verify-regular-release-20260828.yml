@@ -1,0 +1,48 @@
+name: Verify 2026-08-28 official releases on production
+on:
+  push:
+    branches: [claude/verify-regular-release-20260828]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify production JSON values
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE='https://simpleornothing.com'
+          curl -fsS -H 'Cache-Control: no-cache' "$BASE/calendar.json?t=$(date +%s%N)" -o /tmp/calendar.json
+          curl -fsS -H 'Cache-Control: no-cache' "$BASE/pulse.json?t=$(date +%s%N)" -o /tmp/pulse.json
+          curl -fsS -H 'Cache-Control: no-cache' "$BASE/earnings.json?t=$(date +%s%N)" -o /tmp/earnings.json
+          curl -fsS -H 'Cache-Control: no-cache' "$BASE/company_news.json?t=$(date +%s%N)" -o /tmp/company_news.json
+          node <<'NODE'
+          const fs=require('fs');
+          const cal=JSON.parse(fs.readFileSync('/tmp/calendar.json','utf8'));
+          const pulse=JSON.parse(fs.readFileSync('/tmp/pulse.json','utf8'));
+          const earn=JSON.parse(fs.readFileSync('/tmp/earnings.json','utf8'));
+          const news=JSON.parse(fs.readFileSync('/tmp/company_news.json','utf8'));
+          const byLabel=Object.fromEntries((cal.events||[]).map(e=>[e.lbl,e]));
+          const nv=byLabel['엔비디아 FY27 Q2 실적'];
+          const bok=(cal.events||[]).find(e=>e.lbl==='한국 금통위'&&e.d==='2026-08-27');
+          const mr=byLabel['Marvell FY27 Q2 실적'];
+          if(!nv?.meta?.includes('$96.221B') || !nv?.meta?.includes('$89.0B')) throw new Error('production calendar NVDA stale');
+          if(!bok?.meta?.includes('3.00%') || !bok?.meta?.includes('0.25%p')) throw new Error('production calendar BOK stale');
+          if(!mr?.meta?.includes('$2.739B') || !mr?.meta?.includes('+46% YoY')) throw new Error('production calendar MRVL stale');
+          const rates=(pulse.drivers||[]).find(x=>x.ax==='rates');
+          const sent=(pulse.drivers||[]).find(x=>x.ax==='sentiment');
+          if(!rates?.l2?.includes('3.00%') || rates?.dir!=='risk') throw new Error('production pulse rates stale');
+          if(!sent?.l2?.includes('$96.2B') || !sent?.l2?.includes('$2.739B')) throw new Error('production pulse sentiment stale');
+          if(Object.keys(earn.moves||{}).length!==0) throw new Error('production earnings event not closed');
+          const mrvl=(news.companies?.MRVL?.items||[]).find(x=>x.id==='mrvl-20260827-q2fy27');
+          if(!mrvl?.factualSummary?.includes('27.39억달러') || !mrvl?.factualSummary?.includes('46% YoY')) throw new Error('production MRVL company news stale');
+          console.log('PRODUCTION_OK');
+          console.log('NVDA',nv.when);
+          console.log('BOK',bok.when);
+          console.log('MRVL',mr.when);
+          console.log('RATES',rates.verdict);
+          console.log('SENTIMENT',sent.verdict);
+          console.log('EARNINGS_MOVES',Object.keys(earn.moves||{}).length);
+          console.log('MRVL_NEWS',mrvl.factualSummary);
+          NODE
