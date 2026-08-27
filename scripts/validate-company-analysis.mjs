@@ -58,7 +58,12 @@ if(lumentum.sources.some(s=>String(s.url||'').includes('marketwatch.com')))fail(
 const mrvlCal=calendar.events.find(x=>x.tk==='MRVL'&&x.lbl.includes('FY27 Q2'));
 if(!mrvlCal||mrvlCal.d!=='2026-08-28')fail('MRVL Q2 KST calendar event missing');
 if(!calendar.events.some(x=>x.tk==='MRVL'&&x.d==='2026-10-06'&&x.lbl.includes('Investor Day')))fail('MRVL Investor Day missing');
-if(!earnings.moves?.MRVL||earnings.moves.MRVL.date!=='2026-08-27'||earnings.moves.MRVL.basis!=='event-iv')fail('MRVL earnings gate missing');
+const mrvlCompleted=String(mrvlCal.meta||'').includes('발표 확인');
+if(mrvlCompleted){
+  if(earnings.moves?.MRVL)fail('expired MRVL earnings gate remains after completed event');
+}else if(!earnings.moves?.MRVL||earnings.moves.MRVL.date!=='2026-08-27'||earnings.moves.MRVL.basis!=='event-iv'){
+  fail('MRVL earnings gate missing');
+}
 if(Object.keys(earnings.moves).some(k=>k!=='MRVL'))fail('expired earnings events remain');
 
 const clock=fs.readFileSync('company-clock.js','utf8');
