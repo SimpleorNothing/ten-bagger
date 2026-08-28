@@ -111,36 +111,16 @@ jobs:
             local pr="$1"
             local sha="$2"
 
+            # Always execute the canonical validator from protected main, not a PR-modified copy.
+            git show origin/main:scripts/validate-pr-gate.sh > /tmp/validate-pr-gate.sh || return 1
             git fetch origin "pull/$pr/head:refs/remotes/origin/pr-$pr" --force || return 1
             git reset --hard "origin/pr-$pr" || return 1
-
-            local size
-            size=$(stat -c%s index.html) || return 1
-            [ "$size" -gt 150000 ] || return 1
-            grep -q "const D=" index.html || return 1
-            grep -q "HOLDINGS" index.html || return 1
-
-            for f in alpha.json earnings.json judgment.json news.json prices.json; do
-              if [ -f "$f" ]; then
-                python3 -c "import json; json.load(open('$f'))" || return 1
-              fi
-            done
-
-            node --check worker.js || return 1
-            grep -Fq 'const SITE_APPLY_FILES = new Set(["gates.json", "risk.json", "signal_log.json", "calendar.json"]);' worker.js || return 1
-            grep -Fq 'if (file === "signal_log.json")' worker.js || return 1
-            grep -Fq 'if (file === "calendar.json")' worker.js || return 1
-            grep -Fq 'function normalizeInsightFiscalJSON' worker.js || return 1
-            grep -Fq 'disableThinking: true' worker.js || return 1
-            grep -Fq 'function mergeGaugeUpdates' worker.js || return 1
-            grep -Fq 'gauge_updates' worker.js || return 1
-            if grep -Fq 'gauge shape mismatch' worker.js; then return 1; fi
-            if grep -Fq 'claude response not json' worker.js; then return 1; fi
+            bash /tmp/validate-pr-gate.sh origin/main || return 1
 
             gh api --method POST "repos/$GH_REPO/statuses/$sha" \
               -f state=success \
               -f context='Claude PR Gate / validate' \
-              -f description='Validated by automation PR sweeper' >/dev/null || return 1
+              -f description='Full canonical validation passed via automation PR sweeper' >/dev/null || return 1
           }
 
           stale_holdings_pr() {
@@ -171,7 +151,7 @@ jobs:
 
             if ! validate_pr "$pr" "$sha"; then
               echo "Validation/status failed for PR #$pr; leaving it open for inspection"
-              gh pr comment "$pr" --body "Automation PR Sweeper가 검증 또는 상태 기록에 실패해 자동 병합을 건너뛰었습니다. 다음 실행에서 다시 시도합니다." || true
+              gh pr comment "$pr" --body "Automation PR Sweeper의 전체 canonical 검증 또는 상태 기록에 실패해 자동 병합을 건너뛰었습니다. 다음 실행에서 다시 시도합니다." || true
               failures=$((failures + 1))
               continue
             fi
