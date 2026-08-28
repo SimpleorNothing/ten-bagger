@@ -13,94 +13,19 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: index.html / JSON 무결성
-        run: |
-          SIZE=$(stat -c%s index.html); echo "index.html size: $SIZE"
-          [ "$SIZE" -gt 150000 ] || { echo "::error::index.html 비정상 축소($SIZE) - 잘림 의심"; exit 1; }
-          grep -q "const D=" index.html  || { echo "::error::const D= 앵커 소실"; exit 1; }
-          grep -q "HOLDINGS" index.html  || { echo "::error::HOLDINGS 앵커 소실"; exit 1; }
-          for f in alpha.json earnings.json judgment.json news.json prices.json calendar.json company_news.json marvell/data.json lumentum/data.json; do
-            if [ -f "$f" ]; then python3 -c "import json;json.load(open('$f'))" \
-              || { echo "::error::$f JSON 깨짐"; exit 1; }; fi
-          done
-      - name: patches/*.b64 페이로드 사전 검증
+      - name: Full PR gate validation
         shell: bash
         run: |
           set -euo pipefail
-          BASE="origin/${{ github.event.pull_request.base.ref }}"
-          CHANGED=$(git diff --name-only "$BASE...HEAD" -- 'patches/*.b64' ':(exclude)patches/applied/*' || true)
-          if [ -z "$CHANGED" ]; then
-            echo "변경된 활성 patch 없음"
-            exit 0
+          BASE_REF="origin/${{ github.event.pull_request.base.ref }}"
+          git fetch origin "${{ github.event.pull_request.base.ref }}" --depth=1
+          if git cat-file -e "$BASE_REF:scripts/validate-pr-gate.sh" 2>/dev/null; then
+            git show "$BASE_REF:scripts/validate-pr-gate.sh" > /tmp/validate-pr-gate.sh
+          else
+            echo "Bootstrapping shared validator from this PR; future PRs use main's copy."
+            cp scripts/validate-pr-gate.sh /tmp/validate-pr-gate.sh
           fi
-          for B in $CHANGED; do
-            [ -f "$B" ] || continue
-            echo "validating $B"
-            if ! base64 -d "$B" > /tmp/pr-gate.patch; then
-              echo "::error::$B base64 깨짐"
-              exit 1
-            fi
-            if git apply --check /tmp/pr-gate.patch 2>/dev/null; then
-              echo "$B 적용 가능"
-              continue
-            fi
-            if git apply --reverse --check /tmp/pr-gate.patch 2>/dev/null; then
-              echo "$B 이미 적용된 payload"
-              continue
-            fi
-            echo "::error::$B patch가 현재 base에 적용되지 않고 이미 적용된 상태도 아님"
-            exit 1
-          done
-      - name: 기업분석 회귀 가드
-        run: |
-          node --check company.js
-          node --check company-clock.js
-          node --check company-news.js
-          node --check site-change-live.js
-          node --check allocation-dynamic.js
-          if [ -f scripts/validate-company-analysis.mjs ]; then
-            node scripts/validate-company-analysis.mjs
-          fi
-          if [ -f scripts/validate-company-news.mjs ]; then
-            node scripts/validate-company-news.mjs
-          fi
-      - name: 렌더러 안전 회귀 가드
-        run: |
-          grep -Fq "if(n.innerHTML!==html)n.innerHTML=html" site-change-live.js \
-            || { echo "::error::업데이트 이력 배지 idempotent guard 소실"; exit 1; }
-          grep -Fq "badgePatchQueued" site-change-live.js \
-            || { echo "::error::업데이트 이력 mutation coalescing 소실"; exit 1; }
-          if grep -Fq "new MutationObserver" allocation-dynamic.js; then
-            echo "::error::06 비중조절 자체 DOM MutationObserver 재유입"
-            exit 1
-          fi
-          grep -Fq "setInterval(function(){if(!document.getElementById('dynamicAllocHurdle')" allocation-dynamic.js \
-            || { echo "::error::06 비중조절 저빈도 복구 경로 소실"; exit 1; }
-      - name: worker.js 회귀 가드
-        run: |
-          node --check worker.js
-          grep -Fq 'const SITE_APPLY_FILES = new Set(["gates.json", "risk.json", "signal_log.json", "calendar.json"]);' worker.js \
-            || { echo "::error::사이트 반영 대상 SoT 소실"; exit 1; }
-          grep -Fq 'if (file === "signal_log.json")' worker.js \
-            || { echo "::error::signal_log 반영 경로 소실"; exit 1; }
-          grep -Fq 'if (file === "calendar.json")' worker.js \
-            || { echo "::error::calendar 반영 경로 소실"; exit 1; }
-          grep -Fq 'function normalizeInsightFiscalJSON' worker.js \
-            || { echo "::error::인사이트 FY/FQ 정규화 소실"; exit 1; }
-          grep -Fq 'disableThinking: true' worker.js \
-            || { echo "::error::Claude JSON 재시도 경로 소실"; exit 1; }
-          grep -Fq 'function mergeGaugeUpdates' worker.js \
-            || { echo "::error::게이지 부분 병합 보호 경로 소실"; exit 1; }
-          grep -Fq 'gauge_updates' worker.js \
-            || { echo "::error::게이지 부분 갱신 프롬프트 소실"; exit 1; }
-          if grep -Fq 'gauge shape mismatch' worker.js; then
-            echo "::error::구형 전체 배열 일치 검증 재유입"
-            exit 1
-          fi
-          if grep -Fq 'claude response not json' worker.js; then
-            echo "::error::구형 단발 JSON 파싱 경로 재유입"
-            exit 1
-          fi
+          bash /tmp/validate-pr-gate.sh "$BASE_REF"
   auto-merge:
     needs: validate
     runs-on: ubuntu-latest
