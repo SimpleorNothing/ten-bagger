@@ -1,5 +1,5 @@
 {
-  "asOf": "2026-08-28T05:20:51.323Z",
+  "asOf": "2026-08-28T20:49:14.113Z",
   "source": "Google News RSS · 종목축 + 시그널축 + 병목축 (기사별 한 줄 요약 + 물질성 스크리닝)",
   "note": "사이트 종목 카드의 \"일자 + 요약\" 행 소스. 최근 95일 창 · 종목당 최신 5건(첫 로딩 페이로드 상한) · **투자 논제 스크리닝 통과분만**(items[].m>=2 — 2=향후 실적·수주·투자·전략에 영향을 주는 펀더멘털 사실. 1=목표가·수급 이벤트, 0=사후 등락 서술·홍보·추측·콘텐츠팜으로 사이트에서 제외). 탈락 기사는 삭제가 아니라 news_archive.json 에 전건 보존. 나머지 3개월치는 archive/{티커}.json 을 '더 보기'로 온디맨드 로드. 신호/소음 판단과 SIGNAL_LOG 반영은 사람/LLM의 몫 — 채점·차트에는 쓰이지 않는다.",
   "count": 195,
@@ -112,7 +112,7 @@
     }
   ],
   "archive": "news_archive.json",
-  "archiveCount": 3880,
+  "archiveCount": 3903,
   "shardDir": "archive",
   "winCounts": {
     "353200": 17,
@@ -1908,6 +1908,50 @@
       "mv": 3
     },
     {
+      "id": "macro_물가_금리_불확실성_1",
+      "ticker": "MACRO",
+      "name": "美 물가·금리 불확실성",
+      "ax": "rates",
+      "title": "Fed's Warsh Says 'Work To Do' if Underlying Inflation Fails to Meet Objective - Sahi",
+      "link": "https://news.google.com/rss/articles/CBMitAFBVV95cUxOUE51S1lDTmtoZGNGSG1xM0xYR0dnNUJ4M1h4alB1bTBUdHJKYVdBYVJWbkxXVWs5blAySjVPRTFIRFNEQUNTWWFVQk1QVlF2SXRRWWxXRU5FTFNTZlR1ZG44WWpGMDVGWHlNdEM0UGh4Q3VXaWxpR1VMcElOWHZOaEtOYzdnbk5NVExVaDBNQ3FIcmZZYmgzbFZlTFM1LVRuYXg3ZjV6OEdzNU5CUkQ1QlBlWlM?oc=5",
+      "published": "2026-08-28T15:45:26.000Z",
+      "source": "Sahi",
+      "st": 3
+    },
+    {
+      "id": "bneck_silicon",
+      "ticker": "MACRO",
+      "name": "상류 · 빅테크 자체 실리콘",
+      "ax": "bn_silicon",
+      "title": "Nvidia’s Biggest Customers Become Rivals: Custom Chip Race [2026] - tech-insider.org",
+      "link": "https://news.google.com/rss/articles/CBMif0FVX3lxTE94WnJwMU1Id18yRTNWdm13dHlPN1V4aTFseDhYa0ZEUzV1U3B5WEw2V0RWTi0wSmdzM0xoRDNSZ1JQSk1sR1B4Q2FPVW8wVGl3LTZWQ1pYVDBEd2lmdjJHbmFXSEVSV2pXR1ZIbXFwVzNQenlra0syYlJvNWRmeE0?oc=5",
+      "published": "2026-08-28T10:58:02.000Z",
+      "source": "tech-insider.org",
+      "st": 3
+    },
+    {
+      "id": "bneck_l4_pkg",
+      "ticker": "MACRO",
+      "name": "L4 · 패키징 캐파",
+      "ax": "bn_l4_pkg",
+      "title": "Micron vs SK Hynix: Which AI Memory Stock Has the Stronger HBM4 Position? - MEXC",
+      "link": "https://news.google.com/rss/articles/CBMidkFVX3lxTE0xMlNxTk5pUXdMN01aMUR5bFgzSjBJejVIXzRSQWxuR3lRRk8teE9VLU5udU4tOThwV1RqeXN3MHZXWnJzSE5hUEhoeHh2UWJNd1BFOG9PT0ZyOF9FeWI4dDRXVmh5MWpTVG1jQW82NVdESW5ncVE?oc=5",
+      "published": "2026-08-28T08:07:48.000Z",
+      "source": "MEXC",
+      "st": 3
+    },
+    {
+      "id": "bneck_silicon",
+      "ticker": "MACRO",
+      "name": "상류 · 빅테크 자체 실리콘",
+      "ax": "bn_silicon",
+      "title": "Meta Expands Its Custom Silicon Strategy From Compute Into Networking - infoq.com",
+      "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTE1fTDd6SE9ReThjUzdGNGhyRUwyeWRBOVFCZmUwOUh6UFVhNnc5TUZkbHUzQW1xemFHNExtMk01aDk0WDY5bmlTeVgwdjdZVlVkcE9QNDdlWHU?oc=5",
+      "published": "2026-08-28T07:44:27.000Z",
+      "source": "infoq.com",
+      "st": 3
+    },
+    {
       "id": "bneck_l4_pkg",
       "ticker": "MACRO",
       "name": "L4 · 패키징 캐파",
@@ -1916,6 +1960,17 @@
       "link": "https://news.google.com/rss/articles/CBMifkFVX3lxTFBuUVAzRVk3aEVINWtUQXAzVkVYOWx0cGxXQU1FNWdNSl9nWWhxZ2hYcHR3RklzbElOOHZ6cDR4UXVRUmFqZlNfeURITm5LTWxRQU5uM3dDOU5vcUhfcHVkYVJJejdNcXJwTlhnRTI3YnNUdm1iSTdoNFJsaS04QQ?oc=5",
       "published": "2026-08-28T02:08:26.000Z",
       "source": "semivision",
+      "st": 3
+    },
+    {
+      "id": "bneck_l6_opt",
+      "ticker": "MACRO",
+      "name": "L6 · 옵티컬 리드타임",
+      "ax": "bn_l6_opt",
+      "title": "Lumentum at Deutsche Bank 2026 Technology Conference: optics gains pace By Investing.com - Investing.com Nigeria",
+      "link": "https://news.google.com/rss/articles/CBMiywFBVV95cUxNYXdzbU5la3ZId2pTOTFDS1NHUGMyV0FZbEQxaXp2b3pZTW5LekwwQ0dTRHBVbEpUWlVqclh4U21HX0dRcm5Ob2U2aWJkQ2Z6aXdMRTUwXzJDTlNtZFE0ck1aX2RDMzhPNENBRlpiUHZFaUVmTlZ1UWJXWnRwazlCczdzSHB5RFBPSVBRX1hHSjJ5ZHFYQ3BwUHVIRmFCRG55bVZFSDYwdmhubFhZWHBDYU1VYUJicFB2dEhRX3pEVmZoZmhGSlRaY0d6TQ?oc=5",
+      "published": "2026-08-27T22:38:14.000Z",
+      "source": "Investing.com Nigeria",
       "st": 3
     },
     {
@@ -1960,6 +2015,17 @@
       "link": "https://news.google.com/rss/articles/CBMirwFBVV95cUxQTkNqc3YyRWJnbWp5b0c3c3NuR0lMS2FtY0Q2LWs1ck4wdjJjU25iZHVkYzNTSGlQWXdRX2tQVFJWYXdzc0NjWk5UT0cwY0JuT3gySGNHUlB3MGZrY3NxNHNBTzRYLTlfc2VjRVI5dVlmdGluTFhZZ1hlN19FZktIeWFPemtUMmNVMGQxRWxhdVlMUE1QUjA0TVZtWXVQdWpHV0lvTW5EeHlTbTU5akJF?oc=5",
       "published": "2026-08-27T15:55:00.000Z",
       "source": "TheStreet Pro",
+      "st": 3
+    },
+    {
+      "id": "bneck_capex",
+      "ticker": "MACRO",
+      "name": "상류 · 하이퍼스케일러 capex",
+      "ax": "capex",
+      "title": "TeraWulf Jumps 6% as NVIDIA’s Guidance Reignites the Compute Trade, Applied Digital Gains 5% - Yahoo Finance",
+      "link": "https://news.google.com/rss/articles/CBMingFBVV95cUxNM0ttVjAyMFBZTnB2S0x4Q2xpNjRWNm4ydzdZT2c4NTZkWHd5V080cVNTbnhkd0xjQ2h5QktwU2JqbUdIZl80TWtRNXB3Qnd1eVQyS2NhWmNjQWxPa3RzNXlpSVBoaWxIeUFjYTNrdUZIa3hOYW5vaFY1NWtJZ2xyejBZVkxKUmItaFA3YnhySjRSMl9vZVo2NzYteUhYUQ?oc=5",
+      "published": "2026-08-27T15:12:32.000Z",
+      "source": "Yahoo Finance",
       "st": 3
     },
     {
@@ -2029,6 +2095,17 @@
       "st": 3
     },
     {
+      "id": "bneck_l8_pwr",
+      "ticker": "MACRO",
+      "name": "L7·L8 · 전력 병목",
+      "ax": "bn_l8_pwr",
+      "title": "FingerMotion Takes 9.9% of AI Compute Company Without Paying Cash - Stock Titan",
+      "link": "https://news.google.com/rss/articles/CBMiuwFBVV95cUxPckp6OEU4UktpX1ByXzlENjJqMjdZWmxhVXNWSlpnUUFjd0VlbDlwY21feXRUTHpIQlpZQUl5cjYyaHdzcVViSDdPTW05Mkl1cktLNlhXMFIwaFZOV1hGaEM5TGVwTE94VUV2eWFXUjNYbmhqT0NlQ3hPaHRwd1BzSVZPLTM3d01Kb2FKVDI3RXZQYXRwek1Oal9tY01aSk1PdHZ2MFo0akV3bzI3aGJFQjlGbHpGVkVZSUh3?oc=5",
+      "published": "2026-08-27T12:45:00.000Z",
+      "source": "Stock Titan",
+      "st": 1
+    },
+    {
       "id": "bneck_l4_pkg",
       "ticker": "MACRO",
       "name": "L4 · 패키징 캐파",
@@ -2037,6 +2114,17 @@
       "link": "https://news.google.com/rss/articles/CBMibEFVX3lxTE0tM0tWOWxjQjRDdVduMy1KT0dOSGhwZW4zU1hDdk5wV0RRckhjMW01OGJsNUpwTHN0X2piazVzRjhJUVRmNWxMZEJXcnRNSUo0SGtRTG1wVjhrTS02SF9DRDJieW03SENOc09qUg?oc=5",
       "published": "2026-08-27T12:23:10.000Z",
       "source": "Fact.MR",
+      "st": 3
+    },
+    {
+      "id": "macro_물가_금리_불확실성_1",
+      "ticker": "MACRO",
+      "name": "美 물가·금리 불확실성",
+      "ax": "rates",
+      "title": "Why the latest PCE reading leaves the Fed with a harder choice? - FXStreet",
+      "link": "https://news.google.com/rss/articles/CBMirgFBVV95cUxNVmZCWWpZWXFLRFlJRWcxV2NUTEdQRXp4UmtWaFVndHdJREl0X2F2VEFhQW5ocm9JbDNMU3JyeG12dDRscTJzRjZsMTBZOHlJZjB2c2ZxdGZvWDVtNFpCaGY0TzYyRHhQSkVyNkxqNjhRWGJ5SGotN3czakxxTTVHUHdXVzhnSVBOOXVnNWx3NWg3bkNYSDFsMGpQR2x6bTRDR05DX2J3SGNRcVo0N1E?oc=5",
+      "published": "2026-08-27T12:22:35.000Z",
+      "source": "FXStreet",
       "st": 3
     },
     {
@@ -2128,28 +2216,6 @@
       "st": 3
     },
     {
-      "id": "macro_물가_금리_불확실성_1",
-      "ticker": "MACRO",
-      "name": "美 물가·금리 불확실성",
-      "ax": "rates",
-      "title": "Gold Pulls Back From Record $4,700 High as Markets Eye Key US Inflation Data - CryptoRank",
-      "link": "https://news.google.com/rss/articles/CBMiggFBVV95cUxQTVM0Y1BHNkJIc1MxYkZuX3ZwQU04Y2ZlWGVTQWhkWF83OGp2YXRxVHlxVzd1THNLSDY4R09aSFFNcUs0MGdmR05JZTNyblpuajBRNUhVbjhPWTNpRUZWYjRfbzFMazQ5Y1NZc3p6dDhsT1NEa1ZmUkd6RHZyZnQ4WndB?oc=5",
-      "published": "2026-08-26T14:22:30.000Z",
-      "source": "CryptoRank",
-      "st": 3
-    },
-    {
-      "id": "macro_물가_금리_불확실성_1",
-      "ticker": "MACRO",
-      "name": "美 물가·금리 불확실성",
-      "ax": "rates",
-      "title": "PCE Inflation Stayed at 3.7% in July as Core Prices Came In Hotter Than Expected - North American Community Hub - NCHStats",
-      "link": "https://news.google.com/rss/articles/CBMibEFVX3lxTE02NVRydEVzS0Z1LUZqenBNbXRhOS1HRzJNd1hxS1pLb0JnY25Ka05SOXkzazFqcXppbXY5TXc0VkNWRktIOFI1Wko3cVNsTDlILWVtZm1QSGJMcGVEZGVfWWx0UU5lN3lCWUc0Tg?oc=5",
-      "published": "2026-08-26T13:04:07.000Z",
-      "source": "NCHStats",
-      "st": 3
-    },
-    {
       "id": "bneck_capex",
       "ticker": "MACRO",
       "name": "상류 · 하이퍼스케일러 capex",
@@ -2169,17 +2235,6 @@
       "link": "https://news.google.com/rss/articles/CBMijAFBVV95cUxQcXNVTG94d3o4Vlo2dEdHVXA2U01qWmFLcnVzSHlfZlMtaVFHdkFTVVFERTY4RG51dkUwM04tbzRBb2Z6bUV5a0wzOG9STDAzTkxYVDk0ZjlSY3paanhwdlZVVmdqbUZaeVBGQ3l5di03Nmc5VFFfR2RQUjZaODFodG1hQUtwSllWZUkzSA?oc=5",
       "published": "2026-08-26T11:27:00.000Z",
       "source": "TUN - The University Network",
-      "st": 3
-    },
-    {
-      "id": "bneck_capex",
-      "ticker": "MACRO",
-      "name": "상류 · 하이퍼스케일러 capex",
-      "ax": "capex",
-      "title": "Nebius: Riding At The Front Of The AI Buildout (NASDAQ:NBIS) - Seeking Alpha",
-      "link": "https://news.google.com/rss/articles/CBMijwFBVV95cUxOVjZuNzdMSjFockxDM3JiMC1uUnpfY1EyMVdEMnhPMUZpcmsyZjVQWUI0T0N3elA2azVibmloU3ZBZF9IUnBqZ2NIX09ELTNvdHJhYUpmbG9WZkVjSm5YOExvT25pa3hhaTNXZkdPUE94bS13eFhUNGd3aXRKdVZGTUFDalpJd25JQkpENjBPVQ?oc=5",
-      "published": "2026-08-26T10:18:27.000Z",
-      "source": "Seeking Alpha",
       "st": 3
     },
     {
@@ -2249,6 +2304,17 @@
       "st": 3
     },
     {
+      "id": "macro_글로벌_공급망_지정학_리스크_2",
+      "ticker": "MACRO",
+      "name": "글로벌 공급망 지정학 리스크",
+      "ax": "chip",
+      "title": "Best AI chip stocks to watch: SMCI and AMD surge ahead of Nvidia earnings, August 25, 2026 - StartupHub.ai",
+      "link": "https://news.google.com/rss/articles/CBMigAFBVV95cUxOVURkc2dGQnI5SHpmVXdUdU9vYUpOeXRTVEwwU0ZZdHhla1hYQTNrU0VTcXhOVnlPYnowWHE0eTFJU3VGUVJCUUxGV0c4dWdUOHhKUTJaNjhhWjRTWTNOOUZUNGQxOFRpd01wWC1xN3pseUppbnVQeUNvVmpHNS1fZA?oc=5",
+      "published": "2026-08-25T22:48:00.000Z",
+      "source": "StartupHub.ai",
+      "st": 3
+    },
+    {
       "id": "macro_지정학적_에너지_리스크_0",
       "ticker": "MACRO",
       "name": "지정학적 에너지 리스크",
@@ -2260,14 +2326,14 @@
       "st": 3
     },
     {
-      "id": "macro_글로벌_공급망_지정학_리스크_2",
+      "id": "macro_지정학적_에너지_리스크_0",
       "ticker": "MACRO",
-      "name": "글로벌 공급망 지정학 리스크",
-      "ax": "chip",
-      "title": "Nvidia is the engine of the AI revolution - Washington Examiner",
-      "link": "https://news.google.com/rss/articles/CBMijwFBVV95cUxPY1VFS19pOVZFWDJNYTY5a0hGT25XNUhZbHJRd0dHT29EajFiTkZMdUhwZ0xMcV9RSXZUVVNmNkV6bVF5NW95VW1fTVpENGlPUDVjWExwZkw0ZnplbC1NS1pjOWNZVFNMT2xieklReU1Ha0dyeVdsdGxmTGwzc3BTUF9VdHZYRTlDcUwtS1lkbw?oc=5",
-      "published": "2026-08-25T18:14:00.000Z",
-      "source": "Washington Examiner",
+      "name": "지정학적 에너지 리스크",
+      "ax": "energy",
+      "title": "Crude Oil Forecast: WTI Prices Come Under Pressure as Middle East Risks Ease - FOREX.com",
+      "link": "https://news.google.com/rss/articles/CBMiuwFBVV95cUxQc2o3RUs3WFNzTkp2YUJrSWlGRGFSMGhBUGVUbTVVRWlJTnp3dFItRlU1ZXozaDM4V0pNUEZwX1IxcVdNR3V5UURVOTNMNl8xbm9pQ2dfRmdkM1RCTHdZSmxzUmR3Ym9EcTlNTlAxOXpRT0VNSVA4QllKYU45SHU3a3JOWE5SLUpKX2tYVU5FVjRuRXZQRjlaSFZVMndvWXY5NUNzaVVLZE45eWJMT3RKd2JqUFd6VG5LUzhz?oc=5",
+      "published": "2026-08-25T20:04:00.000Z",
+      "source": "FOREX.com",
       "st": 3
     },
     {
@@ -2348,28 +2414,6 @@
       "st": 1
     },
     {
-      "id": "macro_지정학적_에너지_리스크_0",
-      "ticker": "MACRO",
-      "name": "지정학적 에너지 리스크",
-      "ax": "energy",
-      "title": "Is the World’s Oil Supply Becoming Too Dependent on War Zones? - Modern Diplomacy",
-      "link": "https://news.google.com/rss/articles/CBMioAFBVV95cUxNck45dlIyQXRZYmxmSi1yemtlWVc1QjF2SHlYMndUZnVlYUpMZXZOZDQ0UmU0cjBTNGVSelgxSlhhZWxQSHBoX3lVVTM5dHZZWHZCZnVmU2RVeENkTHdkMFRGNGk0VlZ2Y1hHR2N2bnJUS1F2bFB5SGhGa0tYWHRHNDhKRTV0R29iVlhYNXpwVTRyTjIwdWtzLUQ1d2JmZURj?oc=5",
-      "published": "2026-08-25T06:06:27.000Z",
-      "source": "Modern Diplomacy",
-      "st": 3
-    },
-    {
-      "id": "bneck_l8_pwr",
-      "ticker": "MACRO",
-      "name": "L7·L8 · 전력 병목",
-      "ax": "bn_l8_pwr",
-      "title": "The hidden mineral bill behind the cloud - Metal Tech News",
-      "link": "https://news.google.com/rss/articles/CBMiygFBVV95cUxNZnhGNW1nUTNpbVBkYXM1NkxHV2pmUmhVck1YYmllQzBkeEhwSUhucjQtQk8ydU9hVy1iM2ZWZnFrV2lURlhETHlvNUsyajBBYzNOTUFTNUJmWVc3SmhObjFNbUNrN3A4SVpjLU9XYlhtQ3NucUtNOHhuMVZibGMxY2wwLVdNczRWYl9GX2NWcjBVbjB1MThiWGktUHhnTkE0V0szV1RjS0YzNGc2MlI2S1l6bFNLMjl6M2k5cFJ6cXFlRHNsQ3ZkMTd3?oc=5",
-      "published": "2026-08-24T21:37:01.000Z",
-      "source": "Metal Tech News",
-      "st": 3
-    },
-    {
       "id": "bneck_l6_opt",
       "ticker": "MACRO",
       "name": "L6 · 옵티컬 리드타임",
@@ -2378,17 +2422,6 @@
       "link": "https://news.google.com/rss/articles/CBMidkFVX3lxTFBXc1B4NnhkdTBDLWU3bXZ4YUtBU0k5Q2l0VTBJWnAzNEczc0dYc2xTSlhRT0dLOFlzc1NNOEhGdXJnMW5pUzZzREFieFR5Wi1LRnR3Rm40SVV1eE55OHFIN3JxblVBRWxHU3o5bnhyUm5rejlrVkE?oc=5",
       "published": "2026-08-24T18:31:00.000Z",
       "source": "finance.biggo.com",
-      "st": 3
-    },
-    {
-      "id": "bneck_l4_pkg",
-      "ticker": "MACRO",
-      "name": "L4 · 패키징 캐파",
-      "ax": "bn_l4_pkg",
-      "title": "China 3D IC and 2.5d IC Packaging - Market Analysis, Forecast, Size, Trends and Insights - IndexBox",
-      "link": "https://news.google.com/rss/articles/CBMiswFBVV95cUxONDJDNzFmZ2cteWhQT1BYczVjMVBIRnl6dFB5RFBlbF8wc0FOVzhqZjhPeDJBNmIxUmZ2YnlXSTMyRzJCUkNXbkhBYlNaZ2pvSk9LM25ZZnhYQU9qQUZ1bEJtbUZzRmFzODlZLU55STBZclpST0xPLUlVc05IMXpRbWFjQ2dWRW50UjdDZ2tUVlViTVlBYWFtalpnX2ZiVXd4LW5QMnpPSEhOQkJBTTlPX0hYcw?oc=5",
-      "published": "2026-08-24T09:57:38.000Z",
-      "source": "IndexBox",
       "st": 3
     },
     {
@@ -2412,17 +2445,6 @@
       "published": "2026-08-21T14:57:15.000Z",
       "source": "머니투데이",
       "st": 1
-    },
-    {
-      "id": "bneck_silicon",
-      "ticker": "MACRO",
-      "name": "상류 · 빅테크 자체 실리콘",
-      "ax": "bn_silicon",
-      "title": "Nvidia Earnings August 2026: AI Chip Leader's Q2 Preview & Investment Outlook - Intellectia AI",
-      "link": "https://news.google.com/rss/articles/CBMicEFVX3lxTE9QWlVCSFdjczRYZFFaU0hMZWtkNTdUcm0wUHRsWXRYWWc3Z2RIQjJxeFBqdXh1TzR0MklxRERYQUlmcmNPNENtVDNCdjFEVTNTaEpGTmNhS3NsYmRTeFp2MGsxY1F0eE9zeGtQWFRIMEY?oc=5",
-      "published": "2026-08-21T12:15:48.000Z",
-      "source": "Intellectia AI",
-      "st": 3
     },
     {
       "id": "macro_ai_infra_financing",
@@ -2455,28 +2477,6 @@
       "link": "https://news.google.com/rss/articles/CBMiqAFBVV95cUxQY1JPSVA0ZnVDOEtwQkk3RTRaTC0wNlVlZlIxcm9raGhUZTN6ejV0OUc4Z0RxSm94U1F3NFNLTTdQMmR0bVNvT2NNR1owa0tzSDB3TENHWjF4d3lBNWtlTm5Jb29vbTQ5aFFXN2V3R3NVSW1KV0NOSGNDaEc2U29HZ2dmLU44bkpBLTh2NW5jd0MtU3FZT3hTT0t4TU5ZektJQ1lYTlUyS3M?oc=5",
       "published": "2026-08-21T05:22:40.000Z",
       "source": "KuCoin",
-      "st": 3
-    },
-    {
-      "id": "bneck_silicon",
-      "ticker": "MACRO",
-      "name": "상류 · 빅테크 자체 실리콘",
-      "ax": "bn_silicon",
-      "title": "Nvidia Rubin vs Google TPU 8: AI Chip Race Heats Up - tech-insider.org",
-      "link": "https://news.google.com/rss/articles/CBMifEFVX3lxTE91UVNFZ2F6NkZCbmVoeDZyRjJsTlQ2bHE5V3pHSmJVVUo4d3pKYWVBajk5Z3ROdTZSN2NaRk0zWVBWdHpBZ0VLTV9vaWk3MzYwXzk1RE1jM0MzSGRDRUhxTk1iS09leWpEMVpaanpPRjdVSXUzNEQ0eEZHYmY?oc=5",
-      "published": "2026-08-21T01:23:28.000Z",
-      "source": "tech-insider.org",
-      "st": 3
-    },
-    {
-      "id": "bneck_l6_opt",
-      "ticker": "MACRO",
-      "name": "L6 · 옵티컬 리드타임",
-      "ax": "bn_l6_opt",
-      "title": "Indium Phosphide Prices Surge Over 200% in a Year as China Tightens Grip on Three Critical Chokepoints of the CPO Supply Chain - finance.biggo.com",
-      "link": "https://news.google.com/rss/articles/CBMidkFVX3lxTE4ycW42aVhSLWFHYXQ0RmFaUzhPNjNhWmxubE1CMHVyc0xrZnRuRXowa0JJSnlCdzR4V2QyWkV2czM0akF6OWZVeFk0MzM5RDJzaE5SUC1kdDRPOUR4WFdVRl9ZYWg0ejFqWnU5UW8tay1aRC1OS0E?oc=5",
-      "published": "2026-08-20T23:25:00.000Z",
-      "source": "finance.biggo.com",
       "st": 3
     },
     {
