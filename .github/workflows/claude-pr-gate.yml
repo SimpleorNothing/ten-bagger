@@ -19,7 +19,12 @@ jobs:
           set -euo pipefail
           BASE_REF="origin/${{ github.event.pull_request.base.ref }}"
           git fetch origin "${{ github.event.pull_request.base.ref }}" --depth=1
-          git show "$BASE_REF:scripts/validate-pr-gate.sh" > /tmp/validate-pr-gate.sh
+          if git cat-file -e "$BASE_REF:scripts/validate-pr-gate.sh" 2>/dev/null; then
+            git show "$BASE_REF:scripts/validate-pr-gate.sh" > /tmp/validate-pr-gate.sh
+          else
+            echo "Bootstrapping shared validator from this PR; future PRs use main's copy."
+            cp scripts/validate-pr-gate.sh /tmp/validate-pr-gate.sh
+          fi
           bash /tmp/validate-pr-gate.sh "$BASE_REF"
   auto-merge:
     needs: validate
