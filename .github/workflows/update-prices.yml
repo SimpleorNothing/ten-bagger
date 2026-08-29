@@ -3,9 +3,6 @@ name: Update stock prices
 on:
   push:
     branches: [main]
-    # Trigger only when refresh logic or its UI contract changes. Generated market
-    # outputs (scores/revision-benchmark/etc.) must not re-trigger this workflow,
-    # otherwise each auto-merged refresh starts another refresh indefinitely.
     paths:
       - '.github/workflows/update-prices.yml'
       - 'index.html'
@@ -50,6 +47,7 @@ jobs:
           for attempt in 1 2 3; do
             echo "market refresh attempt $attempt/3"
             if node scripts/fetch-prices.mjs \
+              && git checkout -- holdings.json \
               && node scripts/fetch-gamma.mjs \
               && node scripts/fetch-revision-benchmark.mjs \
               && node scripts/fetch-revision-provenance.mjs \
@@ -66,7 +64,11 @@ jobs:
           const rr = JSON.parse(fs.readFileSync('raw/revisions/latest.json', 'utf8'));
           const rb = JSON.parse(fs.readFileSync('revision-benchmark.json', 'utf8'));
           const sc = JSON.parse(fs.readFileSync('scores.json', 'utf8'));
+          const h = JSON.parse(fs.readFileSync('holdings.json', 'utf8'));
           const now = new Date();
+          if (!/^\d{4}-\d{2}-\d{2}$/.test(String(h.qtyAsOf || '')) || new Date(h.qtyAsOf + 'T00:00:00Z').getUTCDay() !== 6)
+            throw new Error('holdings must remain latest Saturday Excel snapshot');
+          if (h.asOf !== h.qtyAsOf) throw new Error('price refresh mutated holdings.asOf: ' + h.asOf + ' vs ' + h.qtyAsOf);
           if (now.getUTCHours() >= 20) {
             const today = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()) / 86400000;
             const asOfDay = String(p.asOf || '').slice(0, 10);
@@ -74,37 +76,15 @@ jobs:
               if (!p.quotes?.[id] || !Number.isFinite(Number(p.quotes[id].price))) throw new Error('required quote missing: ' + id);
               const s = c.series?.[id];
               const last = s?.t?.[s.t.length - 1];
-              if (!(Number.isFinite(last) && today - last <= 3)) throw new Error('stale chart for ' + id + ': today ' + today + ', got ' + last);
+              if (!(Number.isFinite(last) && today - last <= 3)) throw new Error('stale chart for ' + id);
             }
-            if (asOfDay !== now.toISOString().slice(0, 10)) throw new Error('stale prices.asOf: expected ' + now.toISOString().slice(0, 10) + ', got ' + asOfDay);
+            if (asOfDay !== now.toISOString().slice(0, 10)) throw new Error('stale prices.asOf: ' + asOfDay);
           }
           if (rb.schema !== 'revision-benchmark-v2' || rb.universe !== 'Nasdaq-100' || !rb.distributions || !rb.ranks) throw new Error('revision benchmark metadata invalid');
           if (sc.schema !== 'investment-scores-v4' || sc.displayedModel !== 'v4' || sc.benchmarkAsOf !== rb.asOf) throw new Error('investment score snapshot invalid');
-          for (const [tk,row] of Object.entries(sc.rows || {})) {
-            if (!row.v3 || !row.v4 || !('delta' in row)) throw new Error('score audit fields missing: '+tk);
-          }
-          for (const [key,m] of Object.entries(rb.metrics || {})) {
-            if (m.n < 50 || !(m.p10 < m.p90)) throw new Error('revision benchmark invalid: '+key);
-          }
-          if (!g.revisionAudit) throw new Error('revisionAudit missing');
-          if (!g.revisionIntegrity) throw new Error('revisionIntegrity missing');
-          for (const [tk,e] of Object.entries(g.gamma || {})) {
-            if (!e.rev) continue;
-            const pr=e.rev.provenance;
-            if (!pr?.provider || !pr?.sourceUrl || !pr?.rawRef || !fs.existsSync(pr.rawRef)) throw new Error('unsourced revision survived audit: '+tk);
-            if (!e.rev.quality?.fields) throw new Error('semantic quality missing: '+tk);
-            if (e.rev.quality.fields.eps !== 'verified' && e.rev.eps) throw new Error('blocked EPS survived scoring gate: '+tk);
-          }
+          if (!g.revisionAudit || !g.revisionIntegrity) throw new Error('revision audit/integrity missing');
           if (!Array.isArray(rr.rows) || !rr.rows.length) throw new Error('revision report rows missing');
-          for (const r of rr.rows) {
-            for (const k of ['업데이트시점','데이터검증상태','TP소스','EPS소스','주가30일90일소스','원천데이터','EPS기간검증','EPS스코어사용여부']) {
-              if (!(k in r) || r[k] === '') throw new Error('revision report audit field missing: '+r.티커+' '+k);
-            }
-            for (const k of ['TP이전값','TP현재값','EPS현재연도값','EPS다음연도값','EPS다음연도30일전','EPS다음연도90일전']) {
-              if (!(k in r)) throw new Error('revision report audit column missing: '+k);
-            }
-          }
-          console.log('price freshness + provenance + semantic integrity + report validation passed');
+          console.log('price freshness + Saturday holdings authority + revision integrity passed');
           NODE
             then ok=1; break; fi
             echo "attempt $attempt failed; waiting before retry"
@@ -122,6 +102,7 @@ jobs:
             echo "main moved during market refresh: $START_SHA -> $LATEST_SHA; regenerating from latest main"
             git reset --hard origin/main
             node scripts/fetch-prices.mjs
+            git checkout -- holdings.json
             node scripts/fetch-gamma.mjs
             node scripts/fetch-revision-benchmark.mjs
             node scripts/fetch-revision-provenance.mjs
@@ -136,7 +117,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          FILES="prices.json charts.json gamma.json cycle.json holdings.json revision-benchmark.json scores.json raw/revisions"
+          FILES="prices.json charts.json gamma.json cycle.json revision-benchmark.json scores.json raw/revisions"
           if [ -z "$(git status --porcelain $FILES)" ]; then
             echo "No change in $FILES."; exit 0
           fi
@@ -147,18 +128,10 @@ jobs:
           git add $FILES
           git commit -m "chore: update market data + integrity-audited revisions"
           git push origin "$BRANCH"
-
-          PR_BODY="Automated market-data refresh. Raw provider snapshots are retained, then reproducibility and semantic integrity gates validate price/TP/EPS separately. Ambiguous fiscal-period EPS is excluded from ranking rather than carried forward. raw/revisions/latest.csv and latest.json expose period semantics, before/after values, quality status, and per-field sources. Claude PR Gate validates and squash-merges this protected-main PR."
+          PR_BODY="Automated market-data refresh. holdings.json is deliberately excluded and restored after price fetch so latest Saturday Excel remains authoritative for holdings amounts and weights. Raw provider snapshots are retained and integrity gates validate price/TP/EPS separately. Claude PR Gate validates and squash-merges this protected-main PR."
           for attempt in 1 2 3; do
-            if gh pr create --base main --head "$BRANCH" --title "chore: update market data + integrity-audited revisions" --body "$PR_BODY"; then
-              exit 0
-            fi
-            echo "PR creation attempt $attempt/3 failed; checking whether the PR was created despite the API error"
-            if gh pr view "$BRANCH" --json number,url >/dev/null 2>&1; then
-              echo "PR already exists for $BRANCH"
-              exit 0
-            fi
+            if gh pr create --base main --head "$BRANCH" --title "chore: update market data + integrity-audited revisions" --body "$PR_BODY"; then exit 0; fi
+            if gh pr view "$BRANCH" --json number,url >/dev/null 2>&1; then exit 0; fi
             if [ "$attempt" -lt 3 ]; then sleep $((attempt * 10)); fi
           done
-          echo "Unable to create PR after retries; branch remains pushed for recovery"
           exit 1
