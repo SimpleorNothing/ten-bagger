@@ -6788,14 +6788,14 @@ function renderInstantAnswer(){
    if(ZB.error){el.style.cssText='margin:0 0 8px;padding:7px 10px;border:1px solid var(--st-hot);border-radius:7px;color:var(--st-hot);font-size:10.5px';el.textContent='투자매력도 산출 실패 · '+ZB.error;return;}
    const b=ZB.benchmark||{},m=b.metrics||{},ns=Object.values(m).map(x=>Number(x&&x.n)).filter(Number.isFinite);
    el.style.cssText='margin:0 0 8px;padding:7px 10px;border:1px solid var(--line);border-radius:7px;background:var(--panel);font-size:10.5px;color:var(--dim);line-height:1.45';
-   el.innerHTML='<b style="color:var(--txt)">V4 투자매력도</b> · Nasdaq-100 순위 백분위(P50=50) · 외생 데이터 점수와 내부 판단 보정 분리 · 기준 '+String(b.asOf||'').slice(0,10)+' · 유효표본 '+(ns.length?Math.min(...ns)+'~'+Math.max(...ns):'—')+'개';
+   el.innerHTML='<b style="color:var(--txt)">V4.1 투자매력도</b> · Nasdaq-100 순위 백분위(P50=50) · 외생 데이터 점수와 내부 판단 보정 분리 · 기준 '+String(b.asOf||'').slice(0,10)+' · 유효표본 '+(ns.length?Math.min(...ns)+'~'+Math.max(...ns):'—')+'개';
  }
  function render(){
    const table=tracker();if(!table)return false;note(table);
    const head=table.querySelector('thead tr')||table.querySelector('tr'),body=table.querySelector('tbody');if(!head||!body)return false;
    table.querySelectorAll('[data-zb-score]').forEach(e=>e.remove());
    const stockIdx=Array.from(head.children).findIndex(x=>/종목/.test(x.textContent||''));if(stockIdx<0)return false;
-   const th=document.createElement('th');th.dataset.zbScore='1';th.innerHTML='투자매력도<br><small style="font-weight:400;color:var(--faint)">V4 데이터+판단 · 100</small>';head.insertBefore(th,head.children[stockIdx+1]||null);
+   const th=document.createElement('th');th.dataset.zbScore='1';th.innerHTML='투자매력도<br><small style="font-weight:400;color:var(--faint)">V4.1 데이터+판단 · 100</small>';head.insertBefore(th,head.children[stockIdx+1]||null);
    const held=heldSet(),rows=[];
    Array.from(body.querySelectorAll('tr')).forEach((tr,order)=>{
      const ticker=tickerOf(tr),snap=ticker&&ZB.scores&&ZB.scores.rows&&ZB.scores.rows[ticker],v=snap&&snap.v4,old=snap&&snap.v3;
