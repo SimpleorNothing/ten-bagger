@@ -1,0 +1,54 @@
+name: Close audited overdue calendar events 2026-08-30
+
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/audit-calendar-20260830.yml']
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  close-events:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Close officially completed events
+        run: |
+          node <<'NODE'
+          const fs=require('fs');
+          const p='calendar.json';
+          const j=JSON.parse(fs.readFileSync(p,'utf8'));
+          j.asOf='2026-08-30T08:24:00+09:00';
+          j.source=(j.source||'')+' · U.S. Treasury Operation Economic Outcast 2026-08-24 · Federal Reserve Chairman Kevin Warsh Jackson Hole remarks 2026-08-28';
+          for(const e of j.events||[]){
+            if(e.lbl==='베센트 이란 제재 발표'){
+              e.meta='발표 확인 · 미 재무부는 2026-08-24(미국 현지일) Operation Economic Outcast를 공식 개시하고 이란 정권 및 조력자의 글로벌 금융·경제 연결을 차단하는 전정부 경제 압박 캠페인을 발표. Scott Bessent 재무장관 공식 발언도 같은 날 공개됐다. 기존 발표 예정 상태를 공식 원문 확인 후 종료. · 원문: https://home.treasury.gov/news/press-releases/sb0613 · 발언: https://home.treasury.gov/news/press-releases/sb0614 · 등록일: 2026-08-24 · 확인: 2026-08-30 08:24 KST';
+              e.when='08-25 KST (발표 완료 · Operation Economic Outcast 개시)';
+            }
+            if(e.lbl==='연준의장 Kevin Warsh · 잭슨홀 기조연설'){
+              e.meta='발표 확인 · Federal Reserve Chairman Kevin Warsh는 2026-08-28 Jackson Hole Economic Policy Symposium에서 「In Our Time」 연설을 공개. 2% 물가목표 복귀 의지를 재확인하고 인플레이션이 충분히 둔화하지 않으면 추가 금리인상이 필요할 수 있음을 시사했으며, 금리 선행안내 축소와 데이터 중심 정책운영을 강조. 기존 연설 예정 상태를 공식 원문 확인 후 종료. · 원문: https://www.federalreserve.gov/newsevents/speech/warsh20260828a.htm · 등록일: 2026-08-28 · 확인: 2026-08-30 08:24 KST';
+              e.when='08-28 23:00 KST (발표 완료 · 2% 물가목표·추가 긴축 가능성 재확인)';
+            }
+          }
+          fs.writeFileSync(p,JSON.stringify(j,null,2)+'\n');
+          NODE
+      - name: Remove one-shot workflow from downstream change
+        run: git rm .github/workflows/audit-calendar-20260830.yml
+      - name: Create protected-main PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          BRANCH="claude/calendar-close-20260830-${GITHUB_RUN_ID}"
+          git switch -c "$BRANCH"
+          git add calendar.json .github/workflows/audit-calendar-20260830.yml
+          git commit -m 'data: close Bessent sanctions and Warsh Jackson Hole events'
+          git push origin "$BRANCH"
+          gh pr create --base main --head "$BRANCH" --title 'data: close completed Bessent and Warsh calendar events' --body 'Official-source closeout for two overdue scheduled events. Treasury Operation Economic Outcast and Federal Reserve Chairman Warsh Jackson Hole remarks are marked completed with source URLs, registration dates and 2026-08-30 KST verification. The one-shot workflow deletes itself in this downstream PR.'
