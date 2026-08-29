@@ -1,4 +1,6 @@
-**최종 갱신: 2026-08-26 21:25 (KST)**
+**최종 갱신: 2026-08-30 08:18 (KST)**
+
+> 2026-08-30 08:18 · **01 시장 맥박 근거 기사 최신순 정렬.** 축별 `srcs`를 화면 렌더 시 `d`/`date`의 `YYYY-MM-DD` 기준 내림차순으로 안정 정렬한 뒤 최신 3건을 표시한다. 같은 날짜는 원래 순서를 보존하고 날짜 누락·형식 오류 항목은 아래로 보낸다. `pulse.json` 원자료·수집 주기·판정은 변경하지 않았다.
 
 > 2026-08-26 21:25 · **골드만삭스 2Q26 기관 수급 인사이트 반영.** 첨부 PDF의 헤지펀드·뮤추얼펀드 포지션을 Goldman Sachs 공개 Prime Insights와 2차 보도로 교차검증해 `signal_log.json`에 ①6월 30일 13F 스냅샷의 시점 지연 ②L3 빠른돈→느린돈 손바뀜 ③L7·L8 인프라 공통매수 ④금융 로테이션 ⑤MRVL shared favorites 이탈을 추가했다. holdings 2026-08-26 기준 L3 59.4%·L8 10.1%·L2 10.3%의 집중도와 연결하되, 수급은 실적·가이던스가 아니므로 단계·비중·판단 파일은 변경하지 않았다. 공개 원문으로 확인되지 않은 2차 기사 개별 종목은 후보군에 자동 편입하지 않는다. `changelog.js`의 01 변경 이력도 동반 갱신했다. narrative≠numbers — gamma·cycle·holdings·earnings·judgment 불변.
 
@@ -148,7 +150,7 @@
 
 | 정보명 | 자동/수동 | 주기 | 소스 |
 |---|---|---|---|
-| **시장 맥박**(동인 6축) | 자동(LLM) | `update-pulse.yml` | `pulse.json`(`fetch-pulse.mjs`). **근거 링크는 LLM 이 만들지 않는다** — 모델은 기사 번호(`si`)로 지목만, URL 은 `resolveSrcs()` 가 `news.json` 원본에서 채운다. 실패분 렌더 제외 |
+| **시장 맥박**(동인 6축) | 자동(LLM) | `update-pulse.yml` | `pulse.json`(`fetch-pulse.mjs`). **근거 링크는 LLM 이 만들지 않는다** — 모델은 기사 번호(`si`)로 지목만, URL 은 `resolveSrcs()` 가 `news.json` 원본에서 채운다. 실패분 렌더 제외. 화면은 `srcs[].d/date`의 `YYYY-MM-DD` 기준 최신순으로 안정 정렬해 상위 3건을 표시하며, 같은 날짜는 원래 순서를 유지하고 날짜 누락·오류 항목은 아래로 보낸다. |
 | **FedWatch 2026년 12월 전망** (목표금리 구간·확률가중 예상 정책금리 추이) | 자동 | 평일 07:15 KST | `scripts/fetch-fedwatch.py` → `fedwatch.json` · `.github/workflows/update-fedwatch.yml`. 소스는 **CME FedWatch** 공개 XLSX이며, 해당일 스냅샷만 저장·같은 날짜는 교체한다. 수집·검증 실패 시 파일을 변경하지 않아 화면은 `자료 대기`로 표시한다. |
 | **다가오는 일정** (거시·실적 게이트 D-N 카드+범례 · 2026-07-17 06서 흡수) | 혼합 | 데일리 프루닝·asOf / 큐레이션 수시 | `calendar.json` `events`(수기+`derive-calendar.mjs` 프루닝) + `earnings.json` moves(`CAL_EARN_MOVES`). `renderCalNow()`가 오늘 기준 경과 제거·D-N·임박 `CAL_NOW_MAX`(8) 렌더. **02 연동**: 채택·고신뢰 매크로 관점 중 FOMC·물가·고용·중앙은행처럼 기존 이벤트와 날짜·종류가 일치하는 확정 결과는 R2 일괄 동기화와 화면 자동 동기화가 해당 카드 `meta`에도 반영한다(원문 날짜 ±10일, 가장 가까운 1개만). **운영자 오버레이(2026-07-26)**: 카드 **롱프레스(마우스·터치 600ms) → 삭제**, 그리드 끝 **「＋ 이벤트 추가」** 모달 — 텍스트 붙여넣기 → `/api/calevent-parse`(Claude, 오늘 KST 기준 상대날짜 환산·cat 6분류·렌즈 meta 초안)로 필드 자동 추출(뽑기≠반영·사람이 저장) → `/api/calevents` R2 `calevents.json` `{added,removed:["d|lbl"키]}` 전 기기 공유·`renderCalNow()` 병합(added 추가·removed 필터 — earnings moves 카드도 키 일치 시 숨김). `calendar.json`(리포 SoT)·숫자 파일 불변 — 표시 큐레이션(narrative≠numbers). `#calNow`·`--cat-*` `#v-market` 스코프. 크론 `update-calendar.yml`(운영자 수동) |
 | 업데이트 이력(변경 로그) | 수동(인라인) **정본** + 자동 보충(커밋 이력) | 사이트 변경 시 | `changelog.js` 인라인 `MKT_CHANGELOG`(`{d,t}` 최신순·자가 마운트=insight.js 패턴). `mountHead()`가 **01 시장 모니터링(`#v-market`) + 전문가 원탁(`#v-council`) 헤더(`.vhead`) 우상단**에 각각 `.mkt-upd` 배지를 마운트 → 클릭 시 `.cyc-pop` 모달(`.cyc-upd`/`.cyc-pop` 재사용 · 신규 토큰 0). **사용자 향 변경만** 기록 · 신규 항목은 배열 맨 위. **자동 보충**=`loadAutoHistory()`가 main 커밋 100건을 읽어 **`CURATED_MAX`(수기 정본 최신 날짜) 이후**만 채운다 — `chore|ci|build|docs|test|style|refactor|perf|revert`·머지·리버트는 배제하고 conventional 프리픽스는 떼어 표시. 수기 등록한 날짜는 자동분이 겹치지 않는다. 실패 시 `console.warn`(무음 금지·§8) |
@@ -498,6 +500,8 @@ node -e "const s=require('./scores.json'); if(s.schema!=='investment-scores-v4')
 - 2026-07-27 23:40 · **02 aisd ③ 4사 재무 숫자·성장률 재산정.** 오류가 있던 입력표를 그대로 사용하지 않고 2023~25 공시 실적, 26E 컨센서스/가이던스, 27~28E 저신뢰 전망으로 층위를 분리. 매출 성장률 24A +14%·25A +15%·26E +19%·27E +17%·28E +13%; CAPEX·FCF·영업이익·회사별 상세·설명·출처 동기화. narrative≠numbers 규율에 따라 과거 signal_log 캡처는 불변. STYLE_GUIDE 동반.
 
 ## 9. 갱신 이력
+
+- 2026-08-30 08:18 · **01 시장 맥박 근거 기사 최신순 정렬.** `index.html` 렌더 단계에 날짜 파서와 안정 정렬을 추가해 축별 링크를 `YYYY-MM-DD` 내림차순으로 정렬한 뒤 최신 3건만 표시한다. 같은 날짜의 원래 순서는 유지하고 날짜 없음·오류 항목은 마지막으로 보낸다. `pulse.json` 원자료와 시장 판정은 불변이며 인라인 JavaScript 구문·대표 정렬 회귀·문서 검사를 통과했다.
 
 - 2026-08-17 · **01 「오늘의 투자 명언」 스트립 F&G 연속 색상화.** 배너 전체 배경·테두리를 CNN F&G 50 중립 기준으로 0 방향 청(공포)·100 방향 적(탐욕)으로 나누고, 중립에서 멀어질수록 색 농도가 연속 증가하도록 `quote.js`에 적용. 명언 선곡용 종합 레짐(VIX·나스닥 DD 포함)은 불변이며 색상은 F&G 단일값만 사용. F&G 미수집 시 기존 panel/line 폴백. `node --check quote.js`·문서 규율 검사 통과 확인.
 

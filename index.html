@@ -4144,6 +4144,8 @@ var HIDDEN_KEY='am_topic_radar_hidden_v1',hiddenTopics=[];
  function topicRefsHTML(keys){var hits=topicHits(keys,2);if(!hits.length)return '';return '<div class="topic-ref"><b>토픽 레이더 연관</b> '+hits.map(function(t){return esc(t.name||'관련 토픽');}).join(' · ')+'</div>';}
  function pulsePoint(s,max){s=String(s||'').replace(/\s*·\s*02 인사이트 확인:[\s\S]*/,'').replace(/\s*narrative≠numbers[^.]*[.]?/g,'').trim();if(!s)return '';var cut=s.search(/[.!?](?:\s|$)/);if(cut>=0)s=s.slice(0,cut+1);return s.length>max?s.slice(0,max-1).replace(/[\s,·]+$/,'')+'…':s;}
  function pulseSummary(d){var out=[],a=pulsePoint(d.l1,72),b=pulsePoint(d.l2,100),v=pulsePoint(d.verdict,50);if(a)out.push(a);if(b&&b!==a)out.push(b);if(v)out.push('<span class="p-verdict">판정: '+esc(v)+'</span>');return '<ul class="p-sum">'+out.slice(0,3).map(function(x){return '<li>'+((x.indexOf('<span')===0)?x:esc(x))+'</li>';}).join('')+'</ul>';}
+ function pulseSourceDay(s){var dt=String((s&&s.d)||(s&&s.date)||'').match(/\d{4}-\d{2}-\d{2}/);return dt?Date.parse(dt[0]+'T00:00:00Z'):Number.NEGATIVE_INFINITY;}
+ function pulseSources(srcs){return (srcs||[]).filter(function(s){return s&&(s.u||s.url);}).map(function(s,i){return {s:s,i:i,day:pulseSourceDay(s)};}).sort(function(a,b){return (b.day-a.day)||(a.i-b.i);}).map(function(x){return x.s;});}
  async function loadPulse(){
   var host=document.getElementById('mktPulse');if(!host)return;
   try{
@@ -4157,7 +4159,7 @@ var HIDDEN_KEY='am_topic_radar_hidden_v1',hiddenTopics=[];
     var dkeys=[d.name,d.layer,d.l1,d.l2,d.verdict].concat((d.keys||[]));
     html+='<div class="stk-blk"><div class="stk-hd"><span class="nm">'+esc(d.name||'')+'</span>'+badge+'</div>'
      +pulseSummary(d)+topicRefsHTML(dkeys);
-    var srcs=(d.srcs||d.src||[]).filter(function(s){return s&&(s.u||s.url);});
+    var srcs=pulseSources(d.srcs||d.src||[]);
     if(srcs.length){html+='<div class="nlist">';
      srcs.slice(0,3).forEach(function(s){var dt=String(s.d||s.date||'').match(/\d{4}-\d{2}-\d{2}/);var dateLabel=dt?dt[0].replace(/-/g,'.'):'날짜 미상';html+='<a class="nrow" href="'+esc(s.u||s.url)+'" target="_blank" rel="noopener"><span class="ntt">'+esc(dateLabel)+' · '+esc(s.t||s.title||s.u||s.url)+'</span></a>';});
      html+='</div>';}
