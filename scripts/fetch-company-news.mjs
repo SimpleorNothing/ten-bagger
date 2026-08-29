@@ -158,7 +158,9 @@ async function collectCompany(company,prevItems){
     const t=it.published?new Date(it.published).getTime():0;
     if(t&&t<cutoff)continue;
     const n=normalize(it,company,prevItems);
-    const dedup=`${n.title}|${String(n.published||'').slice(0,10)}`;
+    // Google News can surface the same article URL with slightly different title/time metadata.
+    // URL is the primary identity; title+date is only a fallback when URL is absent.
+    const dedup=n.url||`${n.title}|${String(n.published||'').slice(0,10)}`;
     const cur=map.get(dedup);
     if(!cur || n.sourceTier<cur.sourceTier)map.set(dedup,n);
   }
@@ -166,12 +168,11 @@ async function collectCompany(company,prevItems){
   for(const p of (prevItems||[])){
     const t=p.published?new Date(p.published).getTime():0;
     if(t&&t<cutoff)continue;
-    const dedup=`${p.title}|${String(p.published||'').slice(0,10)}`;
+    const dedup=p.url||`${p.title}|${String(p.published||'').slice(0,10)}`;
     if(!map.has(dedup))map.set(dedup,p);
   }
-  // Google News가 동일 article URL을 서로 다른 헤드라인/시각으로 재노출할 수 있다.
-  // 이전 항목의 id를 URL 기준으로 재사용하면 서로 다른 dedup 항목이 같은 id를 갖게 되므로
-  // 최종 산출 직전에 id 유일성을 보장한다. 기존의 고유 id는 그대로 보존한다.
+  // 이전 항목의 id를 URL 기준으로 재사용하면 서로 다른 dedup 항목이 같은 id를 갖게 될 수 있으므로
+  // 최종 산출 직전에 id 유일성도 별도로 보장한다. 기존의 고유 id는 그대로 보존한다.
   const used=new Set();
   for(const item of map.values()){
     if(!item.id || used.has(item.id))item.id=uniqueIdOf(company.ticker,item,used);
