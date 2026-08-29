@@ -24,6 +24,30 @@ const breadth = (up, down) => {
   return u + d ? 100 * u / (u + d) : null;
 };
 
+function recentPriceShock(G, lookbackDays = 7) {
+  const rows = (Array.isArray(G.priceHist) ? G.priceHist : [])
+    .filter((x) => x && /^\d{4}-\d{2}-\d{2}$/.test(String(x.d || '')) && Number(x.p) > 0)
+    .map((x) => ({ d: String(x.d), p: Number(x.p) }))
+    .sort((a, b) => a.d.localeCompare(b.d));
+  if (rows.length < 2) return { worst1d: null, shockDate: null, preShockPrice: null, residualFromPreShock: null };
+
+  const last = rows[rows.length - 1];
+  const lastMs = Date.parse(last.d + 'T00:00:00Z');
+  const cutoffMs = lastMs - lookbackDays * 864e5;
+  let worst = null;
+  for (let i = 1; i < rows.length; i++) {
+    const prev = rows[i - 1], cur = rows[i];
+    const curMs = Date.parse(cur.d + 'T00:00:00Z');
+    if (!Number.isFinite(curMs) || curMs < cutoffMs || !(prev.p > 0)) continue;
+    const ret = (cur.p / prev.p - 1) * 100;
+    if (!worst || ret < worst.ret) worst = { ret, d: cur.d, prev: prev.p };
+  }
+  if (!worst) return { worst1d: null, shockDate: null, preShockPrice: null, residualFromPreShock: null };
+  const current = Number(G.price) > 0 ? Number(G.price) : last.p;
+  const residual = worst.prev > 0 ? (current / worst.prev - 1) * 100 : null;
+  return { worst1d: worst.ret, shockDate: worst.d, preShockPrice: worst.prev, residualFromPreShock: residual };
+}
+
 function percentile(value, key) {
   const xs = benchmark.distributions?.[key];
   if (value == null || !Array.isArray(xs) || xs.length < benchmark.minimumSample) return null;
@@ -73,22 +97,59 @@ function v3(G) {
 
 function v4(G) {
   const x = common(G);
+  const growthPercentile = percentile(x.epsGrowth, 'eps_growth');
+  const fy1RevisionPercentile = percentile(x.fy1.c30, 'fy1_c30');
+  const shock = recentPriceShock(G, 7);
+  const fundamentalPreserved =
+    growthPercentile != null && growthPercentile >= 60 &&
+    shock.worst1d != null && shock.worst1d <= -8 &&
+    shock.residualFromPreShock != null && shock.residualFromPreShock <= -5 &&
+    x.fy1.c30 != null && x.fy1.c30 >= 0 &&
+    (x.fy1.c7 == null || x.fy1.c7 >= -1) &&
+    (x.q1.c30 == null || x.q1.c30 >= -1) &&
+    (x.tp.c7 == null || x.tp.c7 >= -3) &&
+    (x.br == null || x.br >= 50) &&
+    G.g !== 'spent';
+
+  const dislocationSeverity = fundamentalPreserved ? weighted([
+    [range(-shock.worst1d, 8, 18), 60],
+    [range(-shock.residualFromPreShock, 5, 18), 40],
+  ]).score : null;
+  const fundamentalStrength = fundamentalPreserved ? weighted([
+    [growthPercentile, 35],
+    [fy1RevisionPercentile, 25],
+    [x.br, 20],
+    [x.tp.c7 == null ? null : range(x.tp.c7, -3, 5), 20],
+  ]).score : null;
+  const dislocationBonus = fundamentalPreserved && dislocationSeverity != null
+    ? clamp((dislocationSeverity / 100) * (0.6 + 0.4 * ((fundamentalStrength ?? 50) / 100)) * 10, 0, 10)
+    : 0;
+
   const revision = weighted([
     [percentile(x.q1.c30, 'q1_c30'), 30], [percentile(x.q1.c90, 'q1_c90'), 15],
     [percentile(x.fy1.c30, 'fy1_c30'), 35], [percentile(x.fy1.c90, 'fy1_c90'), 20],
   ]);
-  const growth = weighted([[percentile(x.epsGrowth, 'eps_growth'), 100]]);
+  const growth = weighted([[growthPercentile, 100]]);
   const valuation = weighted([[x.fwdPE == null ? null : 100 - percentile(x.fwdPE, 'fwd_pe'), 60], [percentile(x.garp, 'garp'), 40]]);
   const consensus = weighted([[x.br, 60], [x.rating.mean == null ? null : 100 - percentile(x.rating.mean, 'rating'), 40]]);
   const gap30 = x.px.c30 == null || x.fy1.c30 == null ? null : x.px.c30 - x.fy1.c30;
-  const estimateLead = weighted([[gap30 == null ? null : clamp(100 - Math.max(0, gap30) / 30 * 100, 0, 100), 100]]);
+  // 최근 급락이 있었지만 EPS/목표가/컨센서스가 유지되는 성장주는 30일 누적 과열 신호를
+  // 그대로 적용하지 않는다. 아직 회복되지 않은 급락폭만큼 과거 30일 가격 선행분을 상쇄한다.
+  const resetCredit = fundamentalPreserved && shock.residualFromPreShock != null
+    ? clamp(-shock.residualFromPreShock, 0, 15)
+    : 0;
+  const resetAdjustedGap30 = gap30 == null ? null : Math.max(0, gap30 - resetCredit);
+  const estimateLead = weighted([[resetAdjustedGap30 == null ? null : clamp(100 - resetAdjustedGap30 / 30 * 100, 0, 100), 100]]);
   const dims = [['revisionMomentum', revision, 35], ['growth', growth, 20], ['valuation', valuation, 20], ['consensus', consensus, 10], ['estimateLead', estimateLead, 15]];
   let available = 0, value = 0, coverageWeight = 0;
   for (const [, d, w] of dims) {
     coverageWeight += w * d.coverage;
     if (d.score != null) { available += w; value += d.score * w; }
   }
-  const dataScore = available ? value / available : null, coverage = coverageWeight / 100;
+  const baseDataScore = available ? value / available : null, coverage = coverageWeight / 100;
+  // dislocationBonus는 가격 하락 그 자체가 아니라 '성장성 + 실적추정 유지 + 목표가/컨센서스 비훼손'
+  // 조건을 모두 통과한 경우에만 외생 데이터 점수에 더한다. Falling knife에는 0점이다.
+  const dataScore = baseDataScore == null ? null : clamp(baseDataScore + dislocationBonus, 0, 100);
   const gammaAdjustment = ({ open: 2, flagged: -2, spent: -6 })[G.g] ?? 0;
   const stageAdjustment = ({ '태동': 0, '초입': 2, '가속': 1, '성숙': -2, '과열': -5 })[G.stage] ?? 0;
   const adjustment = gammaAdjustment + stageAdjustment;
@@ -96,9 +157,35 @@ function v4(G) {
   const absoluteRevision = x.fy1.c30 == null ? '자료없음' : x.fy1.c30 > 0 ? '상향' : x.fy1.c30 < 0 ? '하향' : '보합';
   const label = score == null ? '자료부족' : score >= 80 && x.fy1.c30 > 0 && x.q1.c30 >= 0 ? '최우선' : score >= 68 && x.fy1.c30 > 0 ? '우선' : score >= 55 ? '중립' : score >= 45 ? '관찰' : '후순위';
   return {
-    score, label, dataScore, adjustment, adjustmentDetail: { gamma: gammaAdjustment, stage: stageAdjustment }, coverage,
+    score, label, dataScore, baseDataScore, opportunityAdjustment: dislocationBonus,
+    adjustment, adjustmentDetail: { gamma: gammaAdjustment, stage: stageAdjustment }, coverage,
     dimensions: Object.fromEntries(dims.map(([k, d]) => [k, d.score])),
-    inputs: { epsGrowth: x.epsGrowth, fwdPE: x.fwdPE, garp: x.garp, breadth: x.br, gap30, fy1c30: x.fy1.c30, absoluteRevision },
+    inputs: {
+      epsGrowth: x.epsGrowth, fwdPE: x.fwdPE, garp: x.garp, breadth: x.br,
+      gap30, resetAdjustedGap30, resetCredit, fy1c30: x.fy1.c30, absoluteRevision,
+      fundamentalDislocation: {
+        qualified: fundamentalPreserved,
+        shock7dWorst1d: shock.worst1d,
+        shockDate: shock.shockDate,
+        preShockPrice: shock.preShockPrice,
+        residualFromPreShock: shock.residualFromPreShock,
+        growthPercentile,
+        fy1RevisionPercentile,
+        severity: dislocationSeverity,
+        fundamentalStrength,
+        bonus: dislocationBonus,
+        gates: {
+          growth: growthPercentile != null && growthPercentile >= 60,
+          priceShock: shock.worst1d != null && shock.worst1d <= -8,
+          stillDislocated: shock.residualFromPreShock != null && shock.residualFromPreShock <= -5,
+          fy1Revision: x.fy1.c30 != null && x.fy1.c30 >= 0 && (x.fy1.c7 == null || x.fy1.c7 >= -1),
+          nearTermRevision: x.q1.c30 == null || x.q1.c30 >= -1,
+          targetPreserved: x.tp.c7 == null || x.tp.c7 >= -3,
+          consensusPreserved: x.br == null || x.br >= 50,
+          gammaNotSpent: G.g !== 'spent',
+        },
+      },
+    },
   };
 }
 
@@ -110,9 +197,9 @@ for (const [ticker, G] of Object.entries(gammaDoc.gamma || {})) {
   rows[ticker] = { ticker, held: held.has(ticker), v3: oldScore, v4: nextScore, delta: oldScore.score == null || nextScore.score == null ? null : nextScore.score - oldScore.score };
 }
 const output = {
-  schema: 'investment-scores-v4', modelVersion: '4.0.0', asOf: new Date().toISOString(),
+  schema: 'investment-scores-v4', modelVersion: '4.1.0', asOf: new Date().toISOString(),
   gammaAsOf: gammaDoc.asOf || null, benchmarkAsOf: benchmark.asOf,
-  displayedModel: 'v4', methodology: 'external data score + explicit internal judgment adjustment; no duplicate downside penalties', rows,
+  displayedModel: 'v4', methodology: 'external data score + fundamental-preserving growth-stock dislocation bonus + explicit internal judgment adjustment; no duplicate downside penalties', rows,
 };
 fs.writeFileSync('scores.json', JSON.stringify(output, null, 2) + '\n');
 console.log(`wrote scores.json for ${Object.keys(rows).length} tickers`);
