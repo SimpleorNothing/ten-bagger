@@ -48,7 +48,7 @@ jobs:
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
           BRANCH="claude/calendar-close-20260830-${GITHUB_RUN_ID}"
           git switch -c "$BRANCH"
-          git add calendar.json .github/workflows/audit-calendar-20260830.yml
+          git add -A
           git commit -m 'data: close Bessent sanctions and Warsh Jackson Hole events'
           git push origin "$BRANCH"
           gh pr create --base main --head "$BRANCH" --title 'data: close completed Bessent and Warsh calendar events' --body 'Official-source closeout for two overdue scheduled events. Treasury Operation Economic Outcast and Federal Reserve Chairman Warsh Jackson Hole remarks are marked completed with source URLs, registration dates and 2026-08-30 KST verification. The one-shot workflow deletes itself in this downstream PR.'
