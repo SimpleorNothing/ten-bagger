@@ -44,6 +44,28 @@ node --check company-clock.js
 node --check company-news.js
 node --check site-change-live.js
 node --check allocation-dynamic.js
+node --check scripts/build-investment-scores.mjs
+node scripts/build-investment-scores.mjs
+node - <<'NODE'
+const fs = require('fs');
+const s = JSON.parse(fs.readFileSync('scores.json','utf8'));
+if (s.schema !== 'investment-scores-v4') throw new Error('investment score schema mismatch');
+for (const [ticker,row] of Object.entries(s.rows || {})) {
+  const v = row && row.v4;
+  if (!v) continue;
+  const bonus = Number(v.opportunityAdjustment || 0);
+  if (!(bonus >= 0 && bonus <= 10)) throw new Error(ticker + ': dislocation bonus out of range');
+  const fd = v.inputs && v.inputs.fundamentalDislocation;
+  if (bonus > 0 && !fd?.qualified) throw new Error(ticker + ': bonus without qualification');
+  if (fd?.qualified) {
+    if (!(fd.shock7dWorst1d <= -8)) throw new Error(ticker + ': qualified without sharp drop');
+    if (!(fd.residualFromPreShock <= -5)) throw new Error(ticker + ': qualified after recovery');
+    if (!(v.inputs.fy1c30 >= 0)) throw new Error(ticker + ': qualified despite FY+1 estimate deterioration');
+  }
+}
+console.log('V4.1 growth-dislocation invariants passed');
+NODE
+git checkout -- scores.json
 if [ -f scripts/validate-company-analysis.mjs ]; then
   node scripts/validate-company-analysis.mjs
 fi
