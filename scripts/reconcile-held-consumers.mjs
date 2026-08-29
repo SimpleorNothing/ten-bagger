@@ -3,6 +3,9 @@ import fs from 'node:fs';
 const HOLDINGS = 'holdings.json';
 const HTML = 'index.html';
 const DIGEST = 'news_digest.json';
+// 종목 뉴스는 개별 실적·수주 촉매를 추적하는 화면이다. 아래 상품은 보유 현황에는
+// 유지하되 빈 종목 뉴스 카드로 만들지 않는다.
+const STOCK_NEWS_EXCLUDED = new Set(['442580', '0162Z0']);
 
 const h = JSON.parse(fs.readFileSync(HOLDINGS, 'utf8'));
 const activeDetail = (h.detail || []).filter((d) => d && Number(d.amt) > 0);
@@ -117,7 +120,9 @@ fs.writeFileSync(HTML, html);
 if (fs.existsSync(DIGEST)) {
   const d = JSON.parse(fs.readFileSync(DIGEST, 'utf8'));
   d.holdingsAsOf = h.qtyAsOf || h.asOf || null;
-  const items = [...active.values()].map((x) => ({ tk: x.ticker, nm: x.name }));
+  const items = [...active.values()]
+    .filter((x) => !STOCK_NEWS_EXCLUDED.has(String(x.ticker).toUpperCase()))
+    .map((x) => ({ tk: x.ticker, nm: x.name }));
   const groups = Array.isArray(d.groups) ? d.groups : [];
   let g = groups.find((x) => x && x.title === '보유 종목');
   if (!g) { g = { title: '보유 종목', items: [] }; groups.unshift(g); }
