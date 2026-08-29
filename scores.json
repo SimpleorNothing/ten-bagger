@@ -1,11 +1,11 @@
 {
   "schema": "investment-scores-v4",
-  "modelVersion": "4.0.0",
-  "asOf": "2026-08-29T03:19:49.392Z",
-  "gammaAsOf": "2026-08-29T03:19:08.072Z",
-  "benchmarkAsOf": "2026-08-29T03:19:38.805Z",
+  "modelVersion": "4.1.0",
+  "asOf": "2026-08-29T10:30:04.397Z",
+  "gammaAsOf": "2026-08-29T10:29:27.191Z",
+  "benchmarkAsOf": "2026-08-29T10:29:54.691Z",
   "displayedModel": "v4",
-  "methodology": "external data score + explicit internal judgment adjustment; no duplicate downside penalties",
+  "methodology": "external data score + fundamental-preserving growth-stock dislocation bonus + explicit internal judgment adjustment; no duplicate downside penalties",
   "rows": {
     "353200": {
       "ticker": "353200",
@@ -27,6 +27,8 @@
         "score": 85,
         "label": "최우선",
         "dataScore": 85.13033787777601,
+        "baseDataScore": 85.13033787777601,
+        "opportunityAdjustment": 0,
         "adjustment": 0,
         "adjustmentDetail": {
           "gamma": 2,
@@ -46,8 +48,32 @@
           "garp": 1.9640791121177197,
           "breadth": 100,
           "gap30": null,
+          "resetAdjustedGap30": null,
+          "resetCredit": 0,
           "fy1c30": 12.5,
-          "absoluteRevision": "상향"
+          "absoluteRevision": "상향",
+          "fundamentalDislocation": {
+            "qualified": false,
+            "shock7dWorst1d": -3.429602888086647,
+            "shockDate": "2026-08-26",
+            "preShockPrice": 110800,
+            "residualFromPreShock": -2.8880866425992746,
+            "growthPercentile": 77.12765957446808,
+            "fy1RevisionPercentile": 89.28571428571429,
+            "severity": null,
+            "fundamentalStrength": null,
+            "bonus": 0,
+            "gates": {
+              "growth": true,
+              "priceShock": false,
+              "stillDislocated": false,
+              "fy1Revision": true,
+              "nearTermRevision": true,
+              "targetPreserved": true,
+              "consensusPreserved": true,
+              "gammaNotSpent": true
+            }
+          }
         }
       },
       "delta": -3
@@ -69,9 +95,11 @@
         }
       },
       "v4": {
-        "score": 58,
+        "score": 67,
         "label": "중립",
-        "dataScore": 55.406530320776795,
+        "dataScore": 63.83642333638837,
+        "baseDataScore": 60.395275564813936,
+        "opportunityAdjustment": 3.441147771574437,
         "adjustment": 3,
         "adjustmentDetail": {
           "gamma": 2,
@@ -83,7 +111,7 @@
           "growth": 90.95744680851062,
           "valuation": 46.33131887664415,
           "consensus": 94.08163265306122,
-          "estimateLead": 0
+          "estimateLead": 33.25830162691432
         },
         "inputs": {
           "epsGrowth": 56.0493827160494,
@@ -91,11 +119,35 @@
           "garp": 1.6352695908292505,
           "breadth": 100,
           "gap30": 31.400000000000002,
+          "resetAdjustedGap30": 20.02250951192571,
+          "resetCredit": 11.377490488074294,
           "fy1c30": 1.2,
-          "absoluteRevision": "상향"
+          "absoluteRevision": "상향",
+          "fundamentalDislocation": {
+            "qualified": true,
+            "shock7dWorst1d": -11.025651515771395,
+            "shockDate": "2026-08-28",
+            "preShockPrice": 244.43,
+            "residualFromPreShock": -11.377490488074294,
+            "growthPercentile": 90.95744680851064,
+            "fy1RevisionPercentile": 53.57142857142857,
+            "severity": 37.77695675024158,
+            "fundamentalStrength": 77.72796352583586,
+            "bonus": 3.441147771574437,
+            "gates": {
+              "growth": true,
+              "priceShock": true,
+              "stillDislocated": true,
+              "fy1Revision": true,
+              "nearTermRevision": true,
+              "targetPreserved": true,
+              "consensusPreserved": true,
+              "gammaNotSpent": true
+            }
+          }
         }
       },
-      "delta": 8
+      "delta": 17
     },
     "005930": {
       "ticker": "005930",
@@ -114,9 +166,11 @@
         }
       },
       "v4": {
-        "score": 76,
-        "label": "우선",
-        "dataScore": 75.65766993173847,
+        "score": 81,
+        "label": "최우선",
+        "dataScore": 81.38975275316386,
+        "baseDataScore": 80.00935732072604,
+        "opportunityAdjustment": 1.3803954324378165,
         "adjustment": 0,
         "adjustmentDetail": {
           "gamma": 2,
@@ -128,7 +182,7 @@
           "growth": 82.4468085106383,
           "valuation": 98.5412963621282,
           "consensus": 83.09262166405024,
-          "estimateLead": 38.66666666666667
+          "estimateLead": 67.6779159265838
         },
         "inputs": {
           "epsGrowth": 40.59738110684985,
@@ -136,11 +190,35 @@
           "garp": 10.817797743115408,
           "breadth": 76.92307692307692,
           "gap30": 18.4,
+          "resetAdjustedGap30": 9.696625222024862,
+          "resetCredit": 8.703374777975137,
           "fy1c30": 4.9,
-          "absoluteRevision": "상향"
+          "absoluteRevision": "상향",
+          "fundamentalDislocation": {
+            "qualified": true,
+            "shock7dWorst1d": -8.703374777975137,
+            "shockDate": "2026-08-24",
+            "preShockPrice": 281500,
+            "residualFromPreShock": -8.703374777975137,
+            "growthPercentile": 82.4468085106383,
+            "fy1RevisionPercentile": 77.04081632653062,
+            "severity": 15.615247984697396,
+            "fundamentalStrength": 71.00120244497145,
+            "bonus": 1.3803954324378165,
+            "gates": {
+              "growth": true,
+              "priceShock": true,
+              "stillDislocated": true,
+              "fy1Revision": true,
+              "nearTermRevision": true,
+              "targetPreserved": true,
+              "consensusPreserved": true,
+              "gammaNotSpent": true
+            }
+          }
         }
       },
-      "delta": 18
+      "delta": 23
     },
     "MU": {
       "ticker": "MU",
@@ -162,6 +240,8 @@
         "score": 72,
         "label": "우선",
         "dataScore": 72.27036178041098,
+        "baseDataScore": 72.27036178041098,
+        "opportunityAdjustment": 0,
         "adjustment": 0,
         "adjustmentDetail": {
           "gamma": 2,
@@ -181,8 +261,32 @@
           "garp": 18.48217219659258,
           "breadth": 83.33333333333333,
           "gap30": 25.099999999999998,
+          "resetAdjustedGap30": 25.099999999999998,
+          "resetCredit": 0,
           "fy1c30": 1.1,
-          "absoluteRevision": "상향"
+          "absoluteRevision": "상향",
+          "fundamentalDislocation": {
+            "qualified": false,
+            "shock7dWorst1d": -5.828626988559959,
+            "shockDate": "2026-08-24",
+            "preShockPrice": 966.78,
+            "residualFromPreShock": -3.5085541695111577,
+            "growthPercentile": 98.40425531914893,
+            "fy1RevisionPercentile": 51.53061224489795,
+            "severity": null,
+            "fundamentalStrength": null,
+            "bonus": 0,
+            "gates": {
+              "growth": true,
+              "priceShock": false,
+              "stillDislocated": false,
+              "fy1Revision": true,
+              "nearTermRevision": true,
+              "targetPreserved": true,
+              "consensusPreserved": true,
+              "gammaNotSpent": true
+            }
+          }
         }
       },
       "delta": 10
@@ -207,6 +311,8 @@
         "score": null,
         "label": "자료부족",
         "dataScore": 71.93877551020408,
+        "baseDataScore": 71.93877551020408,
+        "opportunityAdjustment": 0,
         "adjustment": 3,
         "adjustmentDetail": {
           "gamma": 2,
@@ -226,7 +332,31 @@
           "garp": null,
           "breadth": null,
           "gap30": null,
-          "absoluteRevision": "자료없음"
+          "resetAdjustedGap30": null,
+          "resetCredit": 0,
+          "absoluteRevision": "자료없음",
+          "fundamentalDislocation": {
+            "qualified": false,
+            "shock7dWorst1d": -4.932433144096981,
+            "shockDate": "2026-08-28",
+            "preShockPrice": 949.43,
+            "residualFromPreShock": -5.732913432269882,
+            "growthPercentile": null,
+            "fy1RevisionPercentile": null,
+            "severity": null,
+            "fundamentalStrength": null,
+            "bonus": 0,
+            "gates": {
+              "growth": false,
+              "priceShock": false,
+              "stillDislocated": true,
+              "fy1Revision": false,
+              "nearTermRevision": true,
+              "targetPreserved": true,
+              "consensusPreserved": true,
+              "gammaNotSpent": true
+            }
+          }
         }
       },
       "delta": null
@@ -251,6 +381,8 @@
         "score": 72,
         "label": "우선",
         "dataScore": 68.75691845885994,
+        "baseDataScore": 68.75691845885994,
+        "opportunityAdjustment": 0,
         "adjustment": 3,
         "adjustmentDetail": {
           "gamma": 2,
@@ -270,8 +402,32 @@
           "garp": 1.2608066240666411,
           "breadth": 82.6086956521739,
           "gap30": 12.200000000000001,
+          "resetAdjustedGap30": 12.200000000000001,
+          "resetCredit": 0,
           "fy1c30": 3.1,
-          "absoluteRevision": "상향"
+          "absoluteRevision": "상향",
+          "fundamentalDislocation": {
+            "qualified": false,
+            "shock7dWorst1d": -3.2905870407280657,
+            "shockDate": "2026-08-28",
+            "preShockPrice": 265.91,
+            "residualFromPreShock": -3.320672407957592,
+            "growthPercentile": 80.31914893617021,
+            "fy1RevisionPercentile": 71.93877551020408,
+            "severity": null,
+            "fundamentalStrength": null,
+            "bonus": 0,
+            "gates": {
+              "growth": true,
+              "priceShock": false,
+              "stillDislocated": false,
+              "fy1Revision": true,
+              "nearTermRevision": true,
+              "targetPreserved": true,
+              "consensusPreserved": true,
+              "gammaNotSpent": true
+            }
+          }
         }
       },
       "delta": 18
@@ -296,6 +452,8 @@
         "score": 65,
         "label": "중립",
         "dataScore": 67.5625085728797,
+        "baseDataScore": 67.5625085728797,
+        "opportunityAdjustment": 0,
         "adjustment": -3,
         "adjustmentDetail": {
           "gamma": 2,
@@ -315,8 +473,32 @@
           "garp": 1.916116044018532,
           "breadth": 90.47619047619048,
           "gap30": 20.299999999999997,
+          "resetAdjustedGap30": 20.299999999999997,
+          "resetCredit": 0,
           "fy1c30": 8.4,
-          "absoluteRevision": "상향"
+          "absoluteRevision": "상향",
+          "fundamentalDislocation": {
+            "qualified": false,
+            "shock7dWorst1d": -3.3433817484242234,
+            "shockDate": "2026-08-28",
+            "preShockPrice": 218.94,
+            "residualFromPreShock": -3.73161596784507,
+            "growthPercentile": 95.2127659574468,
+            "fy1RevisionPercentile": 84.18367346938776,
+            "severity": null,
+            "fundamentalStrength": null,
+            "bonus": 0,
+            "gates": {
+              "growth": true,
+              "priceShock": false,
+              "stillDislocated": false,
+              "fy1Revision": true,
+              "nearTermRevision": true,
+              "targetPreserved": true,
+              "consensusPreserved": true,
+              "gammaNotSpent": true
+            }
+          }
         }
       },
       "delta": 4
@@ -341,6 +523,8 @@
         "score": 83,
         "label": "최우선",
         "dataScore": 80.03379721598327,
+        "baseDataScore": 80.03379721598327,
+        "opportunityAdjustment": 0,
         "adjustment": 3,
         "adjustmentDetail": {
           "gamma": 2,
@@ -360,8 +544,32 @@
           "garp": 3.454335419924512,
           "breadth": 94.28571428571429,
           "gap30": -4.299999999999999,
+          "resetAdjustedGap30": 0,
+          "resetCredit": 0,
           "fy1c30": 12.7,
-          "absoluteRevision": "상향"
+          "absoluteRevision": "상향",
+          "fundamentalDislocation": {
+            "qualified": false,
+            "shock7dWorst1d": -3.4865293185419977,
+            "shockDate": "2026-08-24",
+            "preShockPrice": 473.25,
+            "residualFromPreShock": -1.6207078711040657,
+            "growthPercentile": 96.27659574468085,
+            "fy1RevisionPercentile": 90.3061224489796,
+            "severity": null,
+            "fundamentalStrength": null,
+            "bonus": 0,
+            "gates": {
+              "growth": true,
+              "priceShock": false,
+              "stillDislocated": false,
+              "fy1Revision": true,
+              "nearTermRevision": true,
+              "targetPreserved": true,
+              "consensusPreserved": true,
+              "gammaNotSpent": true
+            }
+          }
         }
       },
       "delta": 9
@@ -386,6 +594,8 @@
         "score": 63,
         "label": "중립",
         "dataScore": 59.74140825318998,
+        "baseDataScore": 59.74140825318998,
+        "opportunityAdjustment": 0,
         "adjustment": 3,
         "adjustmentDetail": {
           "gamma": 2,
@@ -405,8 +615,32 @@
           "garp": 0.9540016501650169,
           "breadth": 80,
           "gap30": 2.8,
+          "resetAdjustedGap30": 2.8,
+          "resetCredit": 0,
           "fy1c30": 0.8,
-          "absoluteRevision": "상향"
+          "absoluteRevision": "상향",
+          "fundamentalDislocation": {
+            "qualified": false,
+            "shock7dWorst1d": -4.691495275152857,
+            "shockDate": "2026-08-28",
+            "preShockPrice": 89.95,
+            "residualFromPreShock": -4.65814341300722,
+            "growthPercentile": 65.42553191489363,
+            "fy1RevisionPercentile": 47.44897959183674,
+            "severity": null,
+            "fundamentalStrength": null,
+            "bonus": 0,
+            "gates": {
+              "growth": true,
+              "priceShock": false,
+              "stillDislocated": false,
+              "fy1Revision": true,
+              "nearTermRevision": true,
+              "targetPreserved": true,
+              "consensusPreserved": true,
+              "gammaNotSpent": true
+            }
+          }
         }
       },
       "delta": 22
@@ -431,6 +665,8 @@
         "score": 46,
         "label": "관찰",
         "dataScore": 45.76476302228408,
+        "baseDataScore": 45.76476302228408,
+        "opportunityAdjustment": 0,
         "adjustment": 0,
         "adjustmentDetail": {
           "gamma": 2,
@@ -450,8 +686,32 @@
           "garp": 0.48520516008240466,
           "breadth": 33.333333333333336,
           "gap30": 9.2,
+          "resetAdjustedGap30": 9.2,
+          "resetCredit": 0,
           "fy1c30": -1.9,
-          "absoluteRevision": "하향"
+          "absoluteRevision": "하향",
+          "fundamentalDislocation": {
+            "qualified": false,
+            "shock7dWorst1d": -1.6999182047725658,
+            "shockDate": "2026-08-28",
+            "preShockPrice": 281.19,
+            "residualFromPreShock": -1.5790035207510877,
+            "growthPercentile": 27.127659574468083,
+            "fy1RevisionPercentile": 11.73469387755102,
+            "severity": null,
+            "fundamentalStrength": null,
+            "bonus": 0,
+            "gates": {
+              "growth": false,
+              "priceShock": false,
+              "stillDislocated": false,
+              "fy1Revision": false,
+              "nearTermRevision": true,
+              "targetPreserved": true,
+              "consensusPreserved": false,
+              "gammaNotSpent": true
+            }
+          }
         }
       },
       "delta": 10
@@ -476,6 +736,8 @@
         "score": 28,
         "label": "후순위",
         "dataScore": 27.928699907282695,
+        "baseDataScore": 27.928699907282695,
+        "opportunityAdjustment": 0,
         "adjustment": 0,
         "adjustmentDetail": {
           "gamma": 2,
@@ -495,8 +757,32 @@
           "garp": null,
           "breadth": 10.344827586206897,
           "gap30": 13.1,
+          "resetAdjustedGap30": 13.1,
+          "resetCredit": 0,
           "fy1c30": -7.6,
-          "absoluteRevision": "하향"
+          "absoluteRevision": "하향",
+          "fundamentalDislocation": {
+            "qualified": false,
+            "shock7dWorst1d": -1.3810264385692106,
+            "shockDate": "2026-08-24",
+            "preShockPrice": 160.75,
+            "residualFromPreShock": 2.1399688958009255,
+            "growthPercentile": 6.914893617021277,
+            "fy1RevisionPercentile": 4.591836734693878,
+            "severity": null,
+            "fundamentalStrength": null,
+            "bonus": 0,
+            "gates": {
+              "growth": false,
+              "priceShock": false,
+              "stillDislocated": false,
+              "fy1Revision": false,
+              "nearTermRevision": false,
+              "targetPreserved": true,
+              "consensusPreserved": false,
+              "gammaNotSpent": true
+            }
+          }
         }
       },
       "delta": 26
@@ -521,6 +807,8 @@
         "score": 81,
         "label": "최우선",
         "dataScore": 77.94359992512163,
+        "baseDataScore": 77.94359992512163,
+        "opportunityAdjustment": 0,
         "adjustment": 3,
         "adjustmentDetail": {
           "gamma": 2,
@@ -540,8 +828,32 @@
           "garp": 0.8957349631210015,
           "breadth": 100,
           "gap30": -6,
+          "resetAdjustedGap30": 0,
+          "resetCredit": 0,
           "fy1c30": 10.9,
-          "absoluteRevision": "상향"
+          "absoluteRevision": "상향",
+          "fundamentalDislocation": {
+            "qualified": false,
+            "shock7dWorst1d": -1.9345238095238138,
+            "shockDate": "2026-08-28",
+            "preShockPrice": 161.28,
+            "residualFromPreShock": -2.1949404761904767,
+            "growthPercentile": 65.42553191489363,
+            "fy1RevisionPercentile": 89.28571428571429,
+            "severity": null,
+            "fundamentalStrength": null,
+            "bonus": 0,
+            "gates": {
+              "growth": true,
+              "priceShock": false,
+              "stillDislocated": false,
+              "fy1Revision": true,
+              "nearTermRevision": true,
+              "targetPreserved": true,
+              "consensusPreserved": true,
+              "gammaNotSpent": true
+            }
+          }
         }
       },
       "delta": 15
@@ -566,6 +878,8 @@
         "score": 75,
         "label": "우선",
         "dataScore": 71.78696426653177,
+        "baseDataScore": 71.78696426653177,
+        "opportunityAdjustment": 0,
         "adjustment": 3,
         "adjustmentDetail": {
           "gamma": 2,
@@ -585,8 +899,32 @@
           "garp": 1.5929715045373103,
           "breadth": 81.25,
           "gap30": 3.5,
+          "resetAdjustedGap30": 3.5,
+          "resetCredit": 0,
           "fy1c30": 0.7,
-          "absoluteRevision": "상향"
+          "absoluteRevision": "상향",
+          "fundamentalDislocation": {
+            "qualified": false,
+            "shock7dWorst1d": -4.230769230769238,
+            "shockDate": "2026-08-25",
+            "preShockPrice": 208,
+            "residualFromPreShock": -5.048076923076927,
+            "growthPercentile": 87.7659574468085,
+            "fy1RevisionPercentile": 46.42857142857143,
+            "severity": null,
+            "fundamentalStrength": null,
+            "bonus": 0,
+            "gates": {
+              "growth": true,
+              "priceShock": false,
+              "stillDislocated": true,
+              "fy1Revision": true,
+              "nearTermRevision": true,
+              "targetPreserved": true,
+              "consensusPreserved": true,
+              "gammaNotSpent": true
+            }
+          }
         }
       },
       "delta": 6
@@ -611,6 +949,8 @@
         "score": 66,
         "label": "중립",
         "dataScore": 66.36841563550279,
+        "baseDataScore": 66.36841563550279,
+        "opportunityAdjustment": 0,
         "adjustment": 0,
         "adjustmentDetail": {
           "gamma": 2,
@@ -630,8 +970,32 @@
           "garp": 8.952619213860947,
           "breadth": 50,
           "gap30": 22.4,
+          "resetAdjustedGap30": 22.4,
+          "resetCredit": 0,
           "fy1c30": 2.6,
-          "absoluteRevision": "상향"
+          "absoluteRevision": "상향",
+          "fundamentalDislocation": {
+            "qualified": false,
+            "shock7dWorst1d": -4.450867052023122,
+            "shockDate": "2026-08-28",
+            "preShockPrice": 1730000,
+            "residualFromPreShock": -4.450867052023122,
+            "growthPercentile": 77.12765957446808,
+            "fy1RevisionPercentile": 69.89795918367348,
+            "severity": null,
+            "fundamentalStrength": null,
+            "bonus": 0,
+            "gates": {
+              "growth": true,
+              "priceShock": false,
+              "stillDislocated": false,
+              "fy1Revision": true,
+              "nearTermRevision": false,
+              "targetPreserved": true,
+              "consensusPreserved": true,
+              "gammaNotSpent": true
+            }
+          }
         }
       },
       "delta": 26
@@ -656,6 +1020,8 @@
         "score": 19,
         "label": "후순위",
         "dataScore": 15.758572950280563,
+        "baseDataScore": 15.758572950280563,
+        "opportunityAdjustment": 0,
         "adjustment": 3,
         "adjustmentDetail": {
           "gamma": 2,
@@ -675,8 +1041,32 @@
           "garp": 0.13646801530891203,
           "breadth": 17.391304347826086,
           "gap30": 32.2,
+          "resetAdjustedGap30": 32.2,
+          "resetCredit": 0,
           "fy1c30": -15.3,
-          "absoluteRevision": "하향"
+          "absoluteRevision": "하향",
+          "fundamentalDislocation": {
+            "qualified": false,
+            "shock7dWorst1d": -3.833434382406442,
+            "shockDate": "2026-08-24",
+            "preShockPrice": 362.86,
+            "residualFromPreShock": -3.8885520586452116,
+            "growthPercentile": 65.42553191489363,
+            "fy1RevisionPercentile": 1.530612244897959,
+            "severity": null,
+            "fundamentalStrength": null,
+            "bonus": 0,
+            "gates": {
+              "growth": true,
+              "priceShock": false,
+              "stillDislocated": false,
+              "fy1Revision": false,
+              "nearTermRevision": false,
+              "targetPreserved": true,
+              "consensusPreserved": false,
+              "gammaNotSpent": true
+            }
+          }
         }
       },
       "delta": 15
@@ -701,6 +1091,8 @@
         "score": 58,
         "label": "중립",
         "dataScore": 57.54865108741287,
+        "baseDataScore": 57.54865108741287,
+        "opportunityAdjustment": 0,
         "adjustment": 0,
         "adjustmentDetail": {
           "gamma": 2,
@@ -720,8 +1112,32 @@
           "garp": 0.5502509528155025,
           "breadth": 100,
           "gap30": 41,
+          "resetAdjustedGap30": 41,
+          "resetCredit": 0,
           "fy1c30": 10.5,
-          "absoluteRevision": "상향"
+          "absoluteRevision": "상향",
+          "fundamentalDislocation": {
+            "qualified": false,
+            "shock7dWorst1d": -2.2507502500833665,
+            "shockDate": "2026-08-24",
+            "preShockPrice": 179.94,
+            "residualFromPreShock": 3.528954095809711,
+            "growthPercentile": 84.57446808510637,
+            "fy1RevisionPercentile": 89.28571428571429,
+            "severity": null,
+            "fundamentalStrength": null,
+            "bonus": 0,
+            "gates": {
+              "growth": true,
+              "priceShock": false,
+              "stillDislocated": false,
+              "fy1Revision": true,
+              "nearTermRevision": true,
+              "targetPreserved": true,
+              "consensusPreserved": true,
+              "gammaNotSpent": true
+            }
+          }
         }
       },
       "delta": -1
@@ -746,6 +1162,8 @@
         "score": null,
         "label": "자료부족",
         "dataScore": null,
+        "baseDataScore": null,
+        "opportunityAdjustment": 0,
         "adjustment": 3,
         "adjustmentDetail": {
           "gamma": 2,
@@ -765,7 +1183,31 @@
           "garp": null,
           "breadth": null,
           "gap30": null,
-          "absoluteRevision": "자료없음"
+          "resetAdjustedGap30": null,
+          "resetCredit": 0,
+          "absoluteRevision": "자료없음",
+          "fundamentalDislocation": {
+            "qualified": false,
+            "shock7dWorst1d": -2.6108011369618045,
+            "shockDate": "2026-08-24",
+            "preShockPrice": 284.97,
+            "residualFromPreShock": 1.579113590904302,
+            "growthPercentile": null,
+            "fy1RevisionPercentile": null,
+            "severity": null,
+            "fundamentalStrength": null,
+            "bonus": 0,
+            "gates": {
+              "growth": false,
+              "priceShock": false,
+              "stillDislocated": false,
+              "fy1Revision": false,
+              "nearTermRevision": true,
+              "targetPreserved": true,
+              "consensusPreserved": true,
+              "gammaNotSpent": true
+            }
+          }
         }
       },
       "delta": null
@@ -790,6 +1232,8 @@
         "score": null,
         "label": "자료부족",
         "dataScore": null,
+        "baseDataScore": null,
+        "opportunityAdjustment": 0,
         "adjustment": -3,
         "adjustmentDetail": {
           "gamma": 2,
@@ -809,7 +1253,31 @@
           "garp": null,
           "breadth": null,
           "gap30": null,
-          "absoluteRevision": "자료없음"
+          "resetAdjustedGap30": null,
+          "resetCredit": 0,
+          "absoluteRevision": "자료없음",
+          "fundamentalDislocation": {
+            "qualified": false,
+            "shock7dWorst1d": -5.455565186355981,
+            "shockDate": "2026-08-24",
+            "preShockPrice": 196.13,
+            "residualFromPreShock": -8.693213684800893,
+            "growthPercentile": null,
+            "fy1RevisionPercentile": null,
+            "severity": null,
+            "fundamentalStrength": null,
+            "bonus": 0,
+            "gates": {
+              "growth": false,
+              "priceShock": false,
+              "stillDislocated": true,
+              "fy1Revision": false,
+              "nearTermRevision": true,
+              "targetPreserved": true,
+              "consensusPreserved": true,
+              "gammaNotSpent": true
+            }
+          }
         }
       },
       "delta": null
@@ -834,6 +1302,8 @@
         "score": 65,
         "label": "중립",
         "dataScore": 67.83043969914266,
+        "baseDataScore": 67.83043969914266,
+        "opportunityAdjustment": 0,
         "adjustment": -3,
         "adjustmentDetail": {
           "gamma": 2,
@@ -853,8 +1323,32 @@
           "garp": 4.214748096098298,
           "breadth": 80,
           "gap30": 39.6,
+          "resetAdjustedGap30": 39.6,
+          "resetCredit": 0,
           "fy1c30": 6.6,
-          "absoluteRevision": "상향"
+          "absoluteRevision": "상향",
+          "fundamentalDislocation": {
+            "qualified": false,
+            "shock7dWorst1d": -6.450804470953841,
+            "shockDate": "2026-08-24",
+            "preShockPrice": 1596.08,
+            "residualFromPreShock": -6.960803969725826,
+            "growthPercentile": 67.5531914893617,
+            "fy1RevisionPercentile": 84.18367346938776,
+            "severity": null,
+            "fundamentalStrength": null,
+            "bonus": 0,
+            "gates": {
+              "growth": true,
+              "priceShock": false,
+              "stillDislocated": true,
+              "fy1Revision": true,
+              "nearTermRevision": true,
+              "targetPreserved": true,
+              "consensusPreserved": true,
+              "gammaNotSpent": true
+            }
+          }
         }
       },
       "delta": 17
@@ -879,6 +1373,8 @@
         "score": 78,
         "label": "우선",
         "dataScore": 81.05375620373555,
+        "baseDataScore": 81.05375620373555,
+        "opportunityAdjustment": 0,
         "adjustment": -3,
         "adjustmentDetail": {
           "gamma": 2,
@@ -898,8 +1394,32 @@
           "garp": 3.1130635067726824,
           "breadth": 85.71428571428571,
           "gap30": null,
+          "resetAdjustedGap30": null,
+          "resetCredit": 0,
           "fy1c30": 9.6,
-          "absoluteRevision": "상향"
+          "absoluteRevision": "상향",
+          "fundamentalDislocation": {
+            "qualified": false,
+            "shock7dWorst1d": -2.3494860499265746,
+            "shockDate": "2026-08-26",
+            "preShockPrice": 1362000,
+            "residualFromPreShock": 4.33186490455213,
+            "growthPercentile": 97.3404255319149,
+            "fy1RevisionPercentile": 87.24489795918367,
+            "severity": null,
+            "fundamentalStrength": null,
+            "bonus": 0,
+            "gates": {
+              "growth": true,
+              "priceShock": false,
+              "stillDislocated": false,
+              "fy1Revision": true,
+              "nearTermRevision": true,
+              "targetPreserved": true,
+              "consensusPreserved": true,
+              "gammaNotSpent": true
+            }
+          }
         }
       },
       "delta": 0
@@ -924,6 +1444,8 @@
         "score": 90,
         "label": "최우선",
         "dataScore": 86.33560389147448,
+        "baseDataScore": 86.33560389147448,
+        "opportunityAdjustment": 0,
         "adjustment": 4,
         "adjustmentDetail": {
           "gamma": 2,
@@ -943,8 +1465,32 @@
           "garp": 13.940733990741103,
           "breadth": 100,
           "gap30": null,
+          "resetAdjustedGap30": null,
+          "resetCredit": 0,
           "fy1c30": 9.4,
-          "absoluteRevision": "상향"
+          "absoluteRevision": "상향",
+          "fundamentalDislocation": {
+            "qualified": false,
+            "shock7dWorst1d": -3.615702479338845,
+            "shockDate": "2026-08-24",
+            "preShockPrice": 48400,
+            "residualFromPreShock": 3.0991735537190035,
+            "growthPercentile": 98.40425531914893,
+            "fy1RevisionPercentile": 87.24489795918367,
+            "severity": null,
+            "fundamentalStrength": null,
+            "bonus": 0,
+            "gates": {
+              "growth": true,
+              "priceShock": false,
+              "stillDislocated": false,
+              "fy1Revision": true,
+              "nearTermRevision": true,
+              "targetPreserved": true,
+              "consensusPreserved": true,
+              "gammaNotSpent": true
+            }
+          }
         }
       },
       "delta": 1
@@ -969,6 +1515,8 @@
         "score": null,
         "label": "자료부족",
         "dataScore": null,
+        "baseDataScore": null,
+        "opportunityAdjustment": 0,
         "adjustment": 3,
         "adjustmentDetail": {
           "gamma": 2,
@@ -988,7 +1536,31 @@
           "garp": null,
           "breadth": null,
           "gap30": null,
-          "absoluteRevision": "자료없음"
+          "resetAdjustedGap30": null,
+          "resetCredit": 0,
+          "absoluteRevision": "자료없음",
+          "fundamentalDislocation": {
+            "qualified": false,
+            "shock7dWorst1d": -2.89680144840071,
+            "shockDate": "2026-08-28",
+            "preShockPrice": 165.7,
+            "residualFromPreShock": -2.89680144840071,
+            "growthPercentile": null,
+            "fy1RevisionPercentile": null,
+            "severity": null,
+            "fundamentalStrength": null,
+            "bonus": 0,
+            "gates": {
+              "growth": false,
+              "priceShock": false,
+              "stillDislocated": false,
+              "fy1Revision": false,
+              "nearTermRevision": true,
+              "targetPreserved": true,
+              "consensusPreserved": true,
+              "gammaNotSpent": true
+            }
+          }
         }
       },
       "delta": null
@@ -1013,6 +1585,8 @@
         "score": null,
         "label": "자료부족",
         "dataScore": 2.551020408163268,
+        "baseDataScore": 2.551020408163268,
+        "opportunityAdjustment": 0,
         "adjustment": 3,
         "adjustmentDetail": {
           "gamma": 2,
@@ -1032,7 +1606,31 @@
           "garp": null,
           "breadth": null,
           "gap30": null,
-          "absoluteRevision": "자료없음"
+          "resetAdjustedGap30": null,
+          "resetCredit": 0,
+          "absoluteRevision": "자료없음",
+          "fundamentalDislocation": {
+            "qualified": false,
+            "shock7dWorst1d": -5.558539205155744,
+            "shockDate": "2026-08-24",
+            "preShockPrice": 37.24,
+            "residualFromPreShock": -0.42964554242750363,
+            "growthPercentile": null,
+            "fy1RevisionPercentile": null,
+            "severity": null,
+            "fundamentalStrength": null,
+            "bonus": 0,
+            "gates": {
+              "growth": false,
+              "priceShock": false,
+              "stillDislocated": false,
+              "fy1Revision": false,
+              "nearTermRevision": true,
+              "targetPreserved": true,
+              "consensusPreserved": true,
+              "gammaNotSpent": true
+            }
+          }
         }
       },
       "delta": null
@@ -1057,6 +1655,8 @@
         "score": 75,
         "label": "우선",
         "dataScore": 75.4403143382091,
+        "baseDataScore": 75.4403143382091,
+        "opportunityAdjustment": 0,
         "adjustment": 0,
         "adjustmentDetail": {
           "gamma": 2,
@@ -1076,8 +1676,32 @@
           "garp": 2.4105992832108742,
           "breadth": 100,
           "gap30": 18.5,
+          "resetAdjustedGap30": 18.5,
+          "resetCredit": 0,
           "fy1c30": 7.2,
-          "absoluteRevision": "상향"
+          "absoluteRevision": "상향",
+          "fundamentalDislocation": {
+            "qualified": false,
+            "shock7dWorst1d": -4.845951920419999,
+            "shockDate": "2026-08-24",
+            "preShockPrice": 289.52,
+            "residualFromPreShock": -3.564520585797182,
+            "growthPercentile": 87.7659574468085,
+            "fy1RevisionPercentile": 84.18367346938776,
+            "severity": null,
+            "fundamentalStrength": null,
+            "bonus": 0,
+            "gates": {
+              "growth": true,
+              "priceShock": false,
+              "stillDislocated": false,
+              "fy1Revision": true,
+              "nearTermRevision": true,
+              "targetPreserved": true,
+              "consensusPreserved": true,
+              "gammaNotSpent": true
+            }
+          }
         }
       },
       "delta": -2
@@ -1102,6 +1726,8 @@
         "score": 63,
         "label": "중립",
         "dataScore": 65.81882361575435,
+        "baseDataScore": 65.81882361575435,
+        "opportunityAdjustment": 0,
         "adjustment": -3,
         "adjustmentDetail": {
           "gamma": 2,
@@ -1121,8 +1747,32 @@
           "garp": 1.7448368746160798,
           "breadth": 50,
           "gap30": 2.6,
+          "resetAdjustedGap30": 2.6,
+          "resetCredit": 0,
           "fy1c30": 0.1,
-          "absoluteRevision": "상향"
+          "absoluteRevision": "상향",
+          "fundamentalDislocation": {
+            "qualified": false,
+            "shock7dWorst1d": -7.608481262327416,
+            "shockDate": "2026-08-28",
+            "preShockPrice": 202.8,
+            "residualFromPreShock": -7.421104536489153,
+            "growthPercentile": 93.08510638297872,
+            "fy1RevisionPercentile": 31.122448979591837,
+            "severity": null,
+            "fundamentalStrength": null,
+            "bonus": 0,
+            "gates": {
+              "growth": true,
+              "priceShock": false,
+              "stillDislocated": true,
+              "fy1Revision": false,
+              "nearTermRevision": true,
+              "targetPreserved": true,
+              "consensusPreserved": true,
+              "gammaNotSpent": true
+            }
+          }
         }
       },
       "delta": 19
@@ -1147,6 +1797,8 @@
         "score": null,
         "label": "자료부족",
         "dataScore": null,
+        "baseDataScore": null,
+        "opportunityAdjustment": 0,
         "adjustment": -3,
         "adjustmentDetail": {
           "gamma": 2,
@@ -1166,7 +1818,31 @@
           "garp": null,
           "breadth": null,
           "gap30": null,
-          "absoluteRevision": "자료없음"
+          "resetAdjustedGap30": null,
+          "resetCredit": 0,
+          "absoluteRevision": "자료없음",
+          "fundamentalDislocation": {
+            "qualified": false,
+            "shock7dWorst1d": -5.886524822695027,
+            "shockDate": "2026-08-28",
+            "preShockPrice": 42.3,
+            "residualFromPreShock": -5.106382978723401,
+            "growthPercentile": null,
+            "fy1RevisionPercentile": null,
+            "severity": null,
+            "fundamentalStrength": null,
+            "bonus": 0,
+            "gates": {
+              "growth": false,
+              "priceShock": false,
+              "stillDislocated": true,
+              "fy1Revision": false,
+              "nearTermRevision": true,
+              "targetPreserved": true,
+              "consensusPreserved": true,
+              "gammaNotSpent": true
+            }
+          }
         }
       },
       "delta": null
@@ -1191,6 +1867,8 @@
         "score": 83,
         "label": "최우선",
         "dataScore": 79.64833789483242,
+        "baseDataScore": 79.64833789483242,
+        "opportunityAdjustment": 0,
         "adjustment": 3,
         "adjustmentDetail": {
           "gamma": 2,
@@ -1210,8 +1888,32 @@
           "garp": 0.9242944746907295,
           "breadth": 93.75,
           "gap30": -2.200000000000001,
+          "resetAdjustedGap30": 0,
+          "resetCredit": 0,
           "fy1c30": 13.3,
-          "absoluteRevision": "상향"
+          "absoluteRevision": "상향",
+          "fundamentalDislocation": {
+            "qualified": false,
+            "shock7dWorst1d": -2.8849736519934055,
+            "shockDate": "2026-08-24",
+            "preShockPrice": 375.74,
+            "residualFromPreShock": -5.527758556448603,
+            "growthPercentile": 73.93617021276596,
+            "fy1RevisionPercentile": 90.3061224489796,
+            "severity": null,
+            "fundamentalStrength": null,
+            "bonus": 0,
+            "gates": {
+              "growth": true,
+              "priceShock": false,
+              "stillDislocated": true,
+              "fy1Revision": true,
+              "nearTermRevision": true,
+              "targetPreserved": true,
+              "consensusPreserved": true,
+              "gammaNotSpent": true
+            }
+          }
         }
       },
       "delta": 1
