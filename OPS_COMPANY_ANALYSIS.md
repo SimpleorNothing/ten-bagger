@@ -1,6 +1,6 @@
 # 02 기업분석 운영 규칙
 
-기준일: 2026-08-17
+기준일: 2026-08-29
 
 이 문서는 Alpha Map `02 기업분석`의 운영 부록이다. 대용량 `OPS.md`를 반복 전체교체하지 않고 기업분석 전용 규칙을 독립 관리하며, 내용 충돌 시 `OPS.md`의 전역 데이터 무결성 원칙을 우선한다.
 
@@ -37,6 +37,7 @@
 - `visibility.headline`: 현재 수주·가시성 요약
 - `visibility.facts[]`: 확인된 주문·계약·backlog 사실
 - `visibility.next`: 다음 확인 포인트
+- `quarterly.rows[]`: `period`, `cy`, `revenue`, `operatingIncome`, `kind`로 구성한 분기 GAAP 실적·전망. 실제는 `actual`, 회사 가이던스는 `guidance`, 연간 전망에서 차감한 산술값은 `derived`로 구분한다.
 - `visibility.disclosed`, `visibility.caveat` 같은 기업별 별칭 금지
 - 회사 전체 `stage`는 정적 data.json에 고정하지 않는다. 화면 표시와 후보군 판정은 `gamma.json`을 SoT로 사용한다.
 
@@ -51,6 +52,7 @@
 - 분기말 이후 발생사건은 실제 거래일을 회사가 공개하지 않으면 10-Q 제출일을 `공시일`로만 표시하고 거래일처럼 쓰지 않는다.
 - 경쟁 제품은 `발표`, `샘플링`, `qualification`, `production shipment`, `revenue ramp`를 구분한다. 제품 공개만으로 매출 기여를 확정하지 않는다.
 - 재무표 매출은 최소 소수 1자리, 최대 3자리까지 표시해 `3.014 → 3`처럼 정밀도가 사라지는 것을 방지한다.
+- 분기 전망의 파생값은 원자료와 산식을 같은 화면에 남긴다. Marvell FY27 Q3E GAAP 영업이익 중간값은 `$3.150B × 53.4% − $1.015B = $0.667B`; FY27 Q4E 매출은 `$12.0B − $2.418B − $2.739B − $3.150B = $3.693B`다. 회사가 Q4 GAAP 영업이익을 제시하지 않았으므로 `미공시`로 표시한다.
 
 ## 5. 업데이트 트리거
 
@@ -102,8 +104,8 @@ Marvell의 현재 확정 이벤트:
 
 ## 9. Marvell 다음 재검증 포인트
 
-- 2026-08-27 FY27 Q2: $2.70B 매출 중간값, data center/interconnect 성장, non-GAAP GM, custom XPU·1.6T·51.2T ramp, bookings 지속성
 - 2026-10-06 Investor Day: FY28~FY29 custom silicon·networking 장기 로드맵, 장기 margin/FCF/ROIC, NVIDIA·Celestial/XConn/Polariton 상용화 일정, 공급 capacity 회수기간
+- FY27 Q3: 매출 $3.150B±5%, GAAP GM 52.9~53.9%, GAAP Opex 약 $1.015B 달성 여부와 Custom 가속, Q4 GAAP 수익성 가이던스 공개 여부
 
 ## 10. Lumentum 다음 재검증 포인트
 
