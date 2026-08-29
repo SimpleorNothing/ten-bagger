@@ -39,6 +39,19 @@ jobs:
         run: node scripts/sync-holdings.mjs
         env:
           GDRIVE_SA_KEY: ${{ secrets.GDRIVE_SA_KEY }}
+      - name: Normalize Saturday authority metadata
+        run: |
+          node - <<'NODE'
+          const fs = require('fs');
+          const p = 'holdings.json';
+          const h = JSON.parse(fs.readFileSync(p, 'utf8'));
+          const wow = String(h.note || '').match(/\(WoW [^)]+\)/)?.[0] || '';
+          h.asOf = h.qtyAsOf || h.asOf;
+          h.note = `자산현황 ${h.qtyAsOf} 자동 동기화 · 주간 원장 total ${h.total}M${wow ? ' ' + wow : ''}. ` +
+            `보유종목·평가금액·보유비중은 최신 토요일 엑셀 고정 권위값이며 평일 시세 갱신은 holdings.json을 변경하지 않는다. ` +
+            `레이어=holdings[].w·종목=detail[].w·수량=detail[].qty·평단=avg{}·환율=fx.usdkrw. ※ 괴리율·이벤트 등 편집성 메모는 수동 보강.`;
+          fs.writeFileSync(p, JSON.stringify(h, null, 1) + '\n');
+          NODE
       - name: Validate latest Saturday Excel authority
         run: |
           node - <<'NODE'
@@ -47,8 +60,10 @@ jobs:
           const d = String(h.qtyAsOf || '');
           if (!/^\d{4}-\d{2}-\d{2}$/.test(d)) throw new Error('holdings.qtyAsOf missing/invalid: ' + d);
           if (new Date(d + 'T00:00:00Z').getUTCDay() !== 6) throw new Error('holdings source is not Saturday Excel: ' + d);
+          if (h.asOf !== d) throw new Error('holdings.asOf must equal Saturday qtyAsOf: ' + h.asOf + ' vs ' + d);
           if (!(Number(h.total) > 0)) throw new Error('holdings.total invalid');
           if (!Array.isArray(h.detail) || !h.detail.length) throw new Error('holdings.detail empty');
+          if (/하루 2회 시가 파생|시가평가/.test(String(h.note || ''))) throw new Error('holdings note still claims intraday revaluation authority');
           console.log('Saturday holdings authority verified:', d, 'total=', h.total);
           NODE
       - name: Reconcile all holdings consumers
