@@ -10,7 +10,7 @@
   function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
   function num(v){return v==null?'없음':Number(v).toLocaleString('en-US',{maximumFractionDigits:1});}
   function pct(v){return v==null?'없음':(v>0?'+':'')+num(v)+'%';}
-  function qMoney(v){if(v==null)return '미공시';var n=Number(v);if(!isFinite(n))return '미공시';return (n<0?'-':'')+'
+  function qMoney(v){if(v==null)return '미공시';var n=Number(v);if(!isFinite(n))return '미공시';return (n<0?'-':'')+'$'+Math.abs(n).toLocaleString('en-US',{minimumFractionDigits:3,maximumFractionDigits:3});}
   function marginClass(v){return v==null?'':Number(v)<0?' ca-neg':' ca-pos';}
   function kindLabel(k){return k==='actual'?'실적':k==='management'?'경영진 전망':k==='guidance'?'가이던스':k==='strategic'?'전략':' ';}
 
