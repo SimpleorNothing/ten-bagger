@@ -41,6 +41,28 @@ const q3fy27=mrvlQuarters.find(x=>x.period==='FY27 Q3E');
 if(!q3fy27||q3fy27.kind!=='guidance'||q3fy27.revenue!==3.150||q3fy27.operatingIncome!==0.667)fail('MRVL FY27 Q3 guidance midpoint calculation missing');
 const q4fy27=mrvlQuarters.find(x=>x.period==='FY27 Q4E');
 if(!q4fy27||q4fy27.kind!=='derived'||q4fy27.revenue!==3.693||q4fy27.operatingIncome!==null)fail('MRVL FY27 Q4 implied revenue / undisclosed GAAP operating income missing');
+const liteQuarters=lumentum.quarterly?.rows;
+if(!Array.isArray(liteQuarters)||liteQuarters.length!==8)fail('LITE CY25.1Q through CY26.4Q quarterly series missing');
+const liteExpectedCy=['CY25.1Q 대응','CY25.2Q 대응','CY25.3Q 대응','CY25.4Q 대응','CY26.1Q 대응','CY26.2Q 대응','CY26.3Q 대응','CY26.4Q 대응'];
+if(liteQuarters.map(x=>x.cy).join('|')!==liteExpectedCy.join('|'))fail('LITE quarterly CY ordering missing');
+const liteQuarterMap=Object.fromEntries(liteQuarters.map(x=>[x.cy,x]));
+const liteActuals=[
+  ['CY25.1Q 대응',0.4252,-0.0377],
+  ['CY25.2Q 대응',0.4807,-0.0084],
+  ['CY25.3Q 대응',0.5338,0.0067],
+  ['CY25.4Q 대응',0.6655,0.0643],
+  ['CY26.1Q 대응',0.8084,0.1745],
+  ['CY26.2Q 대응',1.0063,0.2793]
+];
+for(const [cy,revenue,operatingIncome] of liteActuals){
+  const row=liteQuarterMap[cy];
+  if(!row||row.kind!=='actual'||row.revenue!==revenue||row.operatingIncome!==operatingIncome)fail('LITE '+cy+' GAAP actuals missing');
+}
+const liteQ1e=liteQuarterMap['CY26.3Q 대응'];
+if(!liteQ1e||liteQ1e.period!=='FY27 Q1E'||liteQ1e.kind!=='guidance'||liteQ1e.revenue!==1.25||liteQ1e.operatingIncome!==null)fail('LITE FY27 Q1 guidance midpoint / undisclosed GAAP operating income missing');
+const liteQ2e=liteQuarterMap['CY26.4Q 대응'];
+if(!liteQ2e||liteQ2e.period!=='FY27 Q2E'||liteQ2e.kind!=='guidance'||liteQ2e.revenue!==null||liteQ2e.operatingIncome!==null)fail('LITE FY27 Q2 undisclosed guidance slot missing');
+if(!Array.isArray(lumentum.quarterly?.notes)||!lumentum.quarterly.notes.some(x=>x.includes('FY27 Q2E')&&x.includes('미공시')))fail('LITE quarterly undisclosed-guidance note missing');
 if(!marvell.axes.some(a=>(a.facts||[]).some(x=>x.includes('1.4nm(A14)'))))fail('A14 roadmap missing');
 if(!marvell.axes.some(a=>(a.facts||[]).some(x=>x.includes('20억달러'))))fail('NVIDIA $2B investment missing');
 if(!marvell.risks.some(r=>r.title==='고객 집중'&&r.detail.includes('37%')&&r.detail.includes('82%')))fail('customer concentration metrics missing');
