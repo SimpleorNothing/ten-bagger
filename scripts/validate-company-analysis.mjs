@@ -79,7 +79,7 @@ if(!clock.includes("fetch('/gamma.json?t='")||!clock.includes("cache:'no-store'"
 if(!clock.includes('fy1.c30')||!clock.includes('fy1.c90')||!clock.includes('px.c30')||!clock.includes('px.c90'))fail('30/90 day clocks missing');
 const company=fs.readFileSync('company.js','utf8');
 if(company.includes('<iframe')||/createElement\(['"]iframe['"]\)/.test(company))fail('iframe regression in company analysis');
-if(!company.includes('quarterlyHtml(d.quarterly)')||!company.includes('ca-qchart')||!company.includes('ca-q-bar-rev')||!company.includes('ca-q-bar-op')||!company.includes('분기 실적·전망')||!company.includes('GAAP · $B'))fail('quarterly bar-chart renderer missing');
+if(!company.includes('quarterlyHtml(d.quarterly)')||!company.includes('ca-qchart')||!company.includes('ca-q-plot')||!company.includes('ca-q-yaxis')||!company.includes('ca-q-columns')||!company.includes('분기별')||!company.includes('ca-q-bar-rev')||!company.includes('ca-q-bar-op')||!company.includes('분기 실적·전망')||!company.includes('GAAP · $B'))fail('quarterly grouped bar-chart renderer missing');
 const patch=fs.readFileSync('company-patch.js','utf8');
 if(!patch.includes("fetchJson('/gamma.json')")||!patch.includes("cache:'no-store'"))fail('company patch must read gamma.json no-store');
 if(!patch.includes("typeof CANDIDATES!=='undefined'")||!patch.includes("typeof CASCADES!=='undefined'"))fail('company stage SoT runtime sync missing');
