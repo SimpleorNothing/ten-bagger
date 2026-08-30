@@ -4,7 +4,10 @@
 
   var META={
     marvell:{ticker:'MRVL',name:'Marvell'},
-    lumentum:{ticker:'LITE',name:'Lumentum'}
+    lumentum:{ticker:'LITE',name:'Lumentum'},
+    micron:{ticker:'MU',name:'Micron'},
+    vertiv:{ticker:'VRT',name:'Vertiv'},
+    nvidia:{ticker:'NVDA',name:'NVIDIA'}
   };
   var timer=null;
   var gammaCache=null;
@@ -64,15 +67,14 @@
   }
 
   function patchStage(meta,g){
-    if(!g)return;
-    var stage=g.stage||'자료 없음';
+    var stage=g&&g.stage||'자료 없음';
     var el=document.querySelector('#v-company .ca-frame-side .ca-big');
     if(el){
       el.textContent=stage;
-      el.setAttribute('title','SoT: gamma.json · '+String(g.checkedAt||'기준일 없음'));
+      el.setAttribute('title','SoT: gamma.json · '+String(g&&g.checkedAt||'기준일 없음'));
       el.setAttribute('data-stage-sot','gamma.json');
     }
-    syncGlobalStage(meta,stage);
+    if(g)syncGlobalStage(meta,stage);
   }
 
   function fetchJson(url){

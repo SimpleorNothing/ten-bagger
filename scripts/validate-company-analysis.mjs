@@ -6,8 +6,12 @@ const fail=m=>{throw new Error(m)};
 
 const marvell=readJson('marvell/data.json');
 const lumentum=readJson('lumentum/data.json');
+const micron=readJson('micron/data.json');
+const vertiv=readJson('vertiv/data.json');
+const nvidia=readJson('nvidia/data.json');
 const calendar=readJson('calendar.json');
 const earnings=readJson('earnings.json');
+const companyTabs=fs.readFileSync('company.js','utf8');
 
 function validateCompanySchema(name,d){
   if(!d||!d.company||!Array.isArray(d.financials)||!Array.isArray(d.risks)||!Array.isArray(d.sources))fail(name+': base schema missing');
@@ -30,6 +34,24 @@ function validateCompanySchema(name,d){
 
 validateCompanySchema('MRVL',marvell);
 validateCompanySchema('LITE',lumentum);
+validateCompanySchema('MU',micron);
+validateCompanySchema('VRT',vertiv);
+validateCompanySchema('NVDA',nvidia);
+
+for(const [name,id,d] of [['MU','micron',micron],['VRT','vertiv',vertiv],['NVDA','nvidia',nvidia]]){
+  if(d.company.ticker!==name)fail(name+': ticker mismatch');
+  if(!Array.isArray(d.headlineKpis)||d.headlineKpis.length<4)fail(name+': headline KPI set missing');
+  if(!Array.isArray(d.axes)||d.axes.length<4)fail(name+': strategy axes missing');
+  if(!Array.isArray(d.quarterly?.rows)||d.quarterly.rows.length<5)fail(name+': quarterly series missing');
+  for(const [i,r] of d.quarterly.rows.entries()){
+    if(typeof r.period!=='string'||typeof r.cy!=='string')fail(name+': quarterly['+i+'] period/cy missing');
+    if(!['actual','guidance','derived'].includes(r.kind))fail(name+': quarterly['+i+'] kind invalid');
+    if(r.revenue!==null&&typeof r.revenue!=='number')fail(name+': quarterly['+i+'] revenue must be number/null');
+    if(r.operatingIncome!==null&&typeof r.operatingIncome!=='number')fail(name+': quarterly['+i+'] operatingIncome must be number/null');
+  }
+  if(!d.sources.some(s=>String(s.url||'').startsWith('https://')))fail(name+': official source URL missing');
+  if(!companyTabs.includes("id:'"+id+"'")||!companyTabs.includes("data:'/"+id+"/data.json'"))fail(name+': company tab registration missing');
+}
 
 const fy28=marvell.financials.find(x=>x.fy==='FY2028E');
 if(!fy28||fy28.revenue!==18.0||fy28.growth!==50.0)fail('FY2028E raised outlook must be $18.0B / 50.0%');
