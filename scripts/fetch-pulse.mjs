@@ -51,12 +51,29 @@ function resolveSrcs(srcs, items) {
     const src = items.find((it) => it.link === link);
     const published = String((src && src.published) || '').match(/\d{4}-\d{2}-\d{2}/);
     out.push({
-      t: String(s.t || (src && src.title) || '').slice(0, 120),
+      t: normalizeSourceTitle(String(s.t || (src && src.title) || '').slice(0, 120)),
       u: link,
       d: published ? published[0] : null,
     });
   });
   return out;
+}
+
+function normalizeSourceTitle(title) {
+  const raw = String(title || '').trim();
+  const known = {
+    'Reuters · Wall Street week close': '로이터 · 월스트리트 주간 마감',
+    'EIA Weekly Petroleum Status Report · week ending Aug. 21, 2026': 'EIA · 주간 석유 현황 보고서(2026년 8월 21일 종료 주간)',
+    'EIA WPSR Revision Notice': 'EIA · 주간 석유 현황 보고서 정정 공지',
+    'EIA Short-Term Energy Outlook · August 2026': 'EIA · 단기 에너지 전망(2026년 8월)',
+    'BLS Consumer Price Index - July 2026': '미 노동통계국 · 2026년 7월 소비자물가지수',
+    'U.S. Treasury · Long-end liquidity support buybacks': '미 재무부 · 장기국채 유동성 지원 바이백',
+    'U.S. Treasury · Q3 2026 TBAC presentation': '미 재무부 · 2026년 3분기 TBAC 발표자료',
+    'Reuters · Dollar falls to three-month low': '로이터 · 달러, 3개월 만의 최저치로 하락',
+    'NVIDIA FY27 Q2 official results': 'NVIDIA · FY27 2분기 공식 실적',
+    'Marvell FY27 Q2 official results': 'Marvell · FY27 2분기 공식 실적',
+  };
+  return known[raw] || raw;
 }
 
 function textOnly(v) { return String(v || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim(); }
@@ -107,7 +124,7 @@ function buildPrompt(ctx) {
 - narrative ≠ numbers: 관측·판정만 한다. 매수/매도 권유·목표가·비중 변경은 절대 쓰지 않는다.
 - 사실만. 아래 데이터·헤드라인에 없는 수치를 지어내지 않는다.
 - 주가는 심리게임 요소가 있다 → 지정학·수급·센티먼트처럼 '물질성 필터'에 걸리는 축도 반드시 포함한다.
-- 한국어. verdict 종결은 명사형/'~리스크'/'~국면' 등 간결하게. HTML 태그 금지(순수 텍스트).
+- 한국어. verdict 종결은 명사형/'~리스크'/'~국면' 등 간결하게. HTML 태그 금지(순수 텍스트).\n- srcs의 t(기사 제목)는 반드시 한글로 작성한다. 기관명·티커·고유명사는 원문 표기를 유지해도 되지만 영문 설명 문구는 번역한다.
 
 [6축 — 고정]
 1 지정학  2 유가/에너지  3 금리/Fed  4 환율/달러  5 수급/플로우(반도체·외국인)  6 심리/센티먼트
