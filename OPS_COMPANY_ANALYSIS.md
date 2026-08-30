@@ -38,7 +38,7 @@
 - `visibility.facts[]`: 확인된 주문·계약·backlog 사실
 - `visibility.next`: 다음 확인 포인트
 - `quarterly.rows[]`: `period`, `cy`, `revenue`, `operatingIncome`, `kind`로 구성한 분기 GAAP 실적·전망. 실제는 `actual`, 회사 가이던스는 `guidance`, 연간 전망에서 차감한 산술값은 `derived`로 구분한다.
-- `quarterly.rows[]`는 `company.js`의 우측 분기 막대그래프로 렌더링하며 매출·영업이익은 공통 `$B` 축, 실적·전망은 막대 질감과 채도로 구분한다. 숫자와 `미공시` 표기는 막대 옆에 함께 남긴다.
+- `quarterly.rows[]`는 `company.js`의 우측 분기 세로 묶음 막대그래프로 렌더링하며 매출·영업이익은 공통 `$B` 축, 실적·전망은 막대 높이·질감과 채도로 구분한다. 숫자와 `미공시` 표기는 막대의 접근성 라벨·주석으로 함께 남긴다.
 - `visibility.disclosed`, `visibility.caveat` 같은 기업별 별칭 금지
 - 회사 전체 `stage`는 정적 data.json에 고정하지 않는다. 화면 표시와 후보군 판정은 `gamma.json`을 SoT로 사용한다.
 
