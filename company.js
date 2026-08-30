@@ -40,14 +40,33 @@
       +'#v-company .ca-quarterly{min-width:0}'
       +'#v-company .ca-quarterly-head{display:flex;align-items:end;justify-content:space-between;gap:10px;margin:2px 0 7px}'
       +'#v-company .ca-quarterly-unit{font-size:12px;color:var(--faint);white-space:nowrap}'
-      +'#v-company .ca-qtable{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}'
-      +'#v-company .ca-qtable th,#v-company .ca-qtable td{padding:5px 4px;border-bottom:1px solid var(--line);font-size:12px;text-align:right;white-space:nowrap}'
-      +'#v-company .ca-qtable th{color:var(--faint);font-weight:700}'
-      +'#v-company .ca-qtable th:first-child,#v-company .ca-qtable td:first-child{text-align:left}'
-      +'#v-company .ca-qtable tr.ca-q-est td{background:rgba(184,121,30,.055)}'
-      +'#v-company .ca-q-period{font-weight:700;color:var(--txt)}'
-      +'#v-company .ca-q-cy{display:block;color:var(--faint);font-weight:500;margin-top:1px}'
-      +'#v-company .ca-q-est .ca-q-period{color:var(--dawn)}'
+      +'#v-company .ca-q-legend{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:4px;color:var(--faint);font-size:12px}'
+      +'#v-company .ca-q-legend-item{display:inline-flex;align-items:center;gap:3px;white-space:nowrap}'
+      +'#v-company .ca-q-swatch{width:8px;height:8px;display:inline-block;border-radius:2px}'
+      +'#v-company .ca-q-swatch-rev{background:var(--st-accel)}'
+      +'#v-company .ca-q-swatch-op{background:var(--st-dawn)}'
+      +'#v-company .ca-q-swatch-est{border:1px dashed var(--st-mature);background:rgba(154,123,47,.28)}'
+      +'#v-company .ca-q-legend-note{white-space:nowrap}'
+      +'#v-company .ca-q-axis{display:flex;justify-content:space-between;margin:0 0 2px 94px;color:var(--faint);font-size:12px;font-variant-numeric:tabular-nums}'
+      +'#v-company .ca-qchart{display:grid;gap:5px}'
+      +'#v-company .ca-q-row{display:grid;grid-template-columns:88px minmax(0,1fr);gap:6px;padding:4px 0;border-bottom:1px solid var(--line)}'
+      +'#v-company .ca-q-row:last-child{border-bottom:0}'
+      +'#v-company .ca-q-row.ca-q-est{background:rgba(184,121,30,.055)}'
+      +'#v-company .ca-q-label{min-width:0;line-height:1.2}'
+      +'#v-company .ca-q-period{display:block;font-size:12px;font-weight:700;color:var(--txt);white-space:nowrap}'
+      +'#v-company .ca-q-cy{display:block;font-size:12px;color:var(--faint);font-weight:500;margin-top:2px;white-space:nowrap}'
+      +'#v-company .ca-q-est .ca-q-period{color:var(--st-mature)}'
+      +'#v-company .ca-q-bars{display:grid;gap:3px;min-width:0}'
+      +'#v-company .ca-q-barline{display:grid;grid-template-columns:38px minmax(0,1fr) 51px;gap:4px;align-items:center;min-width:0}'
+      +'#v-company .ca-q-series{font-size:12px;color:var(--faint);font-weight:700;white-space:nowrap}'
+      +'#v-company .ca-q-track{height:8px;min-width:0;background:var(--panel2,var(--line));border-radius:2px;overflow:hidden}'
+      +'#v-company .ca-q-track-empty{display:flex;align-items:center}'
+      +'#v-company .ca-q-bar{display:block;height:100%;min-width:3px;border-radius:2px}'
+      +'#v-company .ca-q-bar-rev{background:var(--st-accel)}'
+      +'#v-company .ca-q-bar-op{background:var(--st-dawn)}'
+      +'#v-company .ca-q-est .ca-q-bar{opacity:.68;outline:1px dashed var(--st-mature);outline-offset:-1px}'
+      +'#v-company .ca-q-value{font-size:12px;color:var(--dim);font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}'
+      +'#v-company .ca-q-missing{font-size:12px;color:var(--faint);padding-left:4px}'
       +'#v-company .ca-q-notes{margin-top:7px;color:var(--faint);font-size:12px;line-height:1.45}'
       +'#v-company .ca-q-notes div+div{margin-top:3px}'
       +'#v-company .ca-pill{display:inline-flex;align-items:center;border:1px solid rgba(42,111,151,.35);border-radius:20px;padding:3px 8px;color:var(--st-accel);background:rgba(42,111,151,.06);font-size:12px;font-weight:700;white-space:nowrap}'
@@ -115,7 +134,8 @@
       +'#v-company .ca-error{color:var(--st-hot)}'
       +'#v-company .ca-footnote{margin-top:18px;padding-top:12px;border-top:1px solid var(--line);color:var(--faint);font-size:11px}'
       +'@media(max-width:900px){#v-company .ca-frame{grid-template-columns:1fr}#v-company .ca-frame-side{border-left:0;border-top:1px solid var(--line);padding-left:0;padding-top:15px}#v-company .ca-kpis{grid-template-columns:repeat(2,1fr)}#v-company .ca-axes{grid-template-columns:1fr}#v-company .ca-risks{grid-template-columns:repeat(2,1fr)}#v-company .ca-visibility{grid-template-columns:1fr}#v-company .ca-sources{grid-template-columns:1fr}}'
-      +'@media(max-width:620px){#v-company .ca-switch{position:sticky;top:0;z-index:8;border-radius:0;margin-left:-14px;margin-right:-14px;padding-left:14px;padding-right:14px}#v-company .ca-statement{font-size:20px}#v-company .ca-kpis{grid-template-columns:1fr 1fr;gap:7px}#v-company .ca-kpi{padding:11px}#v-company .ca-kpi-value{font-size:17px}#v-company .ca-kpi-note{font-size:11px}#v-company .ca-kpi-list{grid-template-columns:1fr}#v-company .ca-risks{grid-template-columns:1fr}#v-company .ca-event{grid-template-columns:76px 42px 1fr;gap:6px}}';
+      +'@media(max-width:620px){#v-company .ca-switch{position:sticky;top:0;z-index:8;border-radius:0;margin-left:-14px;margin-right:-14px;padding-left:14px;padding-right:14px}#v-company .ca-statement{font-size:20px}#v-company .ca-kpis{grid-template-columns:1fr 1fr;gap:7px}#v-company .ca-kpi{padding:11px}#v-company .ca-kpi-value{font-size:17px}#v-company .ca-kpi-note{font-size:11px}#v-company .ca-kpi-list{grid-template-columns:1fr}#v-company .ca-risks{grid-template-columns:1fr}#v-company .ca-event{grid-template-columns:76px 42px 1fr;gap:6px}}'
+      +'@media(max-width:620px){#v-company .ca-q-row{grid-template-columns:80px minmax(0,1fr);gap:4px}#v-company .ca-q-axis{margin-left:84px}#v-company .ca-q-barline{grid-template-columns:34px minmax(0,1fr) 49px;gap:3px}}';
     document.head.appendChild(st);
   }
 
@@ -145,14 +165,22 @@
       +'</tbody></table></div>'+(notes?'<div class="ca-fin-notes">'+notes+'</div>':'')+'</div>';
   }
 
+  function qBar(v,max,cls){
+    var n=v==null?null:Number(v);if(n==null||!isFinite(n))return '<span class="ca-q-track ca-q-track-empty"><span class="ca-q-missing">—</span></span><span class="ca-q-value">'+qMoney(v)+'</span>';
+    var width=Math.max(3,Math.min(100,n/max*100));
+    return '<span class="ca-q-track"><span class="ca-q-bar '+cls+'" style="width:'+width.toFixed(1)+'%"></span></span><span class="ca-q-value">'+qMoney(n)+'</span>';
+  }
+
   function quarterlyHtml(q){
     var rows=q&&q.rows||[];if(!rows.length)return '';
+    var max=rows.reduce(function(m,r){var n=Number(r.revenue);return isFinite(n)&&n>m?n:m;},0)||1;
     var body=rows.map(function(r){
       var est=r.kind!=='actual';
-      return '<tr class="'+(est?'ca-q-est':'')+'"><td><span class="ca-q-period">'+esc(r.period)+'</span><span class="ca-q-cy">'+esc(r.cy)+'</span></td><td>'+qMoney(r.revenue)+'</td><td>'+qMoney(r.operatingIncome)+'</td></tr>';
+      var label=r.period+' '+r.cy+' · 매출 '+qMoney(r.revenue)+' · 영업이익 '+qMoney(r.operatingIncome);
+      return '<div class="ca-q-row '+(est?'ca-q-est':'')+'" role="listitem" aria-label="'+esc(label)+'"><div class="ca-q-label"><span class="ca-q-period">'+esc(r.period)+'</span><span class="ca-q-cy">'+esc(r.cy)+'</span></div><div class="ca-q-bars"><div class="ca-q-barline"><span class="ca-q-series">매출</span>'+qBar(r.revenue,max,'ca-q-bar-rev')+'</div><div class="ca-q-barline"><span class="ca-q-series">영업이익</span>'+qBar(r.operatingIncome,max,'ca-q-bar-op')+'</div></div></div>';
     }).join('');
     var notes=(q.notes||[]).map(function(n){return '<div>'+esc(n)+'</div>';}).join('');
-    return '<div class="ca-quarterly"><div class="ca-quarterly-head"><div class="ca-section-label">분기 실적·전망</div><div class="ca-quarterly-unit">GAAP · $B</div></div><table class="ca-qtable"><thead><tr><th>분기</th><th>매출</th><th>영업이익</th></tr></thead><tbody>'+body+'</tbody></table>'+(notes?'<div class="ca-q-notes">'+notes+'</div>':'')+'</div>';
+    return '<div class="ca-quarterly"><div class="ca-quarterly-head"><div class="ca-section-label">분기 실적·전망</div><div class="ca-quarterly-unit">GAAP · $B</div></div><div class="ca-q-legend" aria-label="그래프 범례"><span class="ca-q-legend-item"><i class="ca-q-swatch ca-q-swatch-rev" aria-hidden="true"></i>매출</span><span class="ca-q-legend-item"><i class="ca-q-swatch ca-q-swatch-op" aria-hidden="true"></i>영업이익</span><span class="ca-q-legend-item"><i class="ca-q-swatch ca-q-swatch-est" aria-hidden="true"></i>전망(점선)</span></div><div class="ca-q-axis" aria-hidden="true"><span>$0</span><span>$'+max.toFixed(3)+'B</span></div><div class="ca-qchart" role="list" aria-label="Marvell Technology 분기 GAAP 매출과 영업이익 막대그래프">'+body+'</div>'+(notes?'<div class="ca-q-notes">'+notes+'</div>':'')+'</div>';
   }
 
   function renderCompany(d){
