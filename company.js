@@ -14,6 +14,8 @@
   function num(v){return v==null?'없음':Number(v).toLocaleString('en-US',{maximumFractionDigits:1});}
   function pct(v){return v==null?'없음':(v>0?'+':'')+num(v)+'%';}
   function qMoney(v){if(v==null)return '미공시';var n=Number(v);if(!isFinite(n))return '미공시';return (n<0?'-':'')+'$'+Math.abs(n).toLocaleString('en-US',{minimumFractionDigits:3,maximumFractionDigits:3});}
+  function qAxisMoney(v){var n=Number(v);if(!isFinite(n)||Math.abs(n)<0.000001)return '$0';return (n<0?'-':'')+'$'+Math.abs(n).toLocaleString('en-US',{maximumFractionDigits:2})+'B';}
+  function qNiceStep(raw){var n=Math.max(0.1,Number(raw)||0.1);var power=Math.pow(10,Math.floor(Math.log(n)/Math.LN10));var normalized=n/power;var multiple=normalized<=1?1:normalized<=2?2:normalized<=2.5?2.5:normalized<=5?5:10;return multiple*power;}
   function marginClass(v){return v==null?'':Number(v)<0?' ca-neg':' ca-pos';}
   function kindLabel(k){return k==='actual'?'실적':k==='management'?'경영진 전망':k==='guidance'?'가이던스':k==='strategic'?'전략':' ';}
 
@@ -192,16 +194,19 @@
       if(isFinite(op)&&Math.abs(op)>m)m=Math.abs(op);
       return m;
     },0)||1;
-    var scale=Math.max(1,Math.ceil(maxAbs));
     var hasNegative=rows.some(function(r){var rv=Number(r.revenue),op=Number(r.operatingIncome);return (isFinite(rv)&&rv<0)||(isFinite(op)&&op<0);});
+    var domainRange=hasNegative?maxAbs*2:maxAbs;
+    var step=qNiceStep(domainRange/5);
+    var scale=Math.max(step,Math.ceil(maxAbs/step)*step);
     var domainMin=hasNegative?-scale:0;
     var span=scale-domainMin;
     var baseline=(-domainMin)/span*100;
     var grid=[],axis=[];
-    for(var i=scale;i>=domainMin;i--){
-      var top=(scale-i)/span*100;
+    for(var value=scale,guard=0;value>=domainMin-step*0.01&&guard<51;value-=step,guard++){
+      var tick=Math.abs(value)<step*0.0001?0:Number(value.toFixed(6));
+      var top=(scale-tick)/span*100;
       grid.push('<span class="ca-q-gridline" style="top:'+top.toFixed(2)+'%"></span>');
-      axis.push('<span style="top:'+top.toFixed(2)+'%">'+(i<0?'-$'+Math.abs(i)+'B':i?'$'+i+'B':'$0')+'</span>');
+      axis.push('<span style="top:'+top.toFixed(2)+'%">'+qAxisMoney(tick)+'</span>');
     }
     var zero='<span class="ca-q-zero" style="bottom:'+baseline.toFixed(2)+'%"></span>';
     var body=rows.map(function(r){
