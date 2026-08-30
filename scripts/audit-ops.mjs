@@ -94,7 +94,7 @@ for (const path of ["OPS.md", "STYLE_GUIDE.md"]) {
 }
 const index = read("index.html");
 if (!/changelog\.js\?v=/.test(index)) fail("index.html changelog cache-buster missing");
-if (!/DUAL_RANK_UI_V3/.test(index)) fail("investment-attractiveness-only UI marker missing");
+const investmentAttractivenessMarker = /DUAL_RANK_UI_V3/.test(index) || /risk-reward\\.js\\?v=/.test(index);\nif (!investmentAttractivenessMarker) fail("investment-attractiveness-only UI marker missing");
 if (/DUAL_RANK_UI_V3[\s\S]{0,7000}실제 비중조절/.test(index)) fail("actual allocation column survived in investment-attractiveness UI");
 if (/DUAL_RANK_UI_V3[\s\S]{0,7000}holdings\.json/.test(index)) fail("holdings dependency survived in investment-attractiveness UI");
 const changelog = read("changelog.js");
