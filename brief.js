@@ -626,7 +626,13 @@ window.BRIEF = (function () {
 
   /* ── 마운트 ───────────────────────────────────────────── */
   var booted = false;
-  function renderAll() { if (!booted) { booted = true; loadText(false); loadArch(); } }
+  function renderAll() {
+    // 본문은 첫 진입 때만 만들고, 저장본 목록은 탭을 다시 열 때마다 새로 확인한다.
+    // R2 지연 뒤 "메뉴를 다시 열어주세요" 안내가 실제 복구 동작으로 이어지게 한다.
+    if (!booted) { booted = true; loadText(false); }
+    archiveRetry = 0;
+    loadArch();
+  }
 
   function mount() {
     if (!document.getElementById('brief-css')) {
@@ -643,6 +649,12 @@ window.BRIEF = (function () {
       Array.prototype.forEach.call(nav.querySelectorAll('.tab'), function (t, i) {
         var n = t.querySelector('.n'); if (n) n.textContent = (i + 1 < 10 ? '0' : '') + (i + 1);
       });
+    }
+    // index.html 에 06 탭이 정적으로 존재하는 배포에서도 반드시 바인딩한다.
+    // 과거에는 탭을 새로 만든 경우에만 이 리스너가 붙어, 정적 탭 클릭 시 SECTION의
+    // 초기 문구("불러오는 중 …")만 보이고 API 호출이 전혀 시작되지 않았다.
+    if (nav && !nav.__briefBound) {
+      nav.__briefBound = true;
       nav.addEventListener('click', function (e) {
         var t = e.target.closest ? e.target.closest('.tab') : null;
         if (t && t.getAttribute('data-v') === 'brief') renderAll();
