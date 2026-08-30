@@ -1,6 +1,6 @@
 # 02 기업분석 운영 규칙
 
-기준일: 2026-08-29
+기준일: 2026-08-30
 
 이 문서는 Alpha Map `02 기업분석`의 운영 부록이다. 대용량 `OPS.md`를 반복 전체교체하지 않고 기업분석 전용 규칙을 독립 관리하며, 내용 충돌 시 `OPS.md`의 전역 데이터 무결성 원칙을 우선한다.
 
@@ -38,6 +38,7 @@
 - `visibility.facts[]`: 확인된 주문·계약·backlog 사실
 - `visibility.next`: 다음 확인 포인트
 - `quarterly.rows[]`: `period`, `cy`, `revenue`, `operatingIncome`, `kind`로 구성한 분기 GAAP 실적·전망. 실제는 `actual`, 회사 가이던스는 `guidance`, 연간 전망에서 차감한 산술값은 `derived`로 구분한다.
+- `quarterly.rows[]`는 `company.js`의 우측 분기 막대그래프로 렌더링하며 매출·영업이익은 공통 `$B` 축, 실적·전망은 막대 질감과 채도로 구분한다. 숫자와 `미공시` 표기는 막대 옆에 함께 남긴다.
 - `visibility.disclosed`, `visibility.caveat` 같은 기업별 별칭 금지
 - 회사 전체 `stage`는 정적 data.json에 고정하지 않는다. 화면 표시와 후보군 판정은 `gamma.json`을 SoT로 사용한다.
 
@@ -99,7 +100,7 @@ Marvell의 현재 확정 이벤트:
 - `02 기업분석`은 iframe을 사용하지 않음
 - 두 시계와 stage는 `gamma.json`을 no-store로 직접 읽고 정적 기업 JSON에 동적 값을 복제하지 않음
 - Marvell/Lumentum 기업 전환 버튼 정상 유지
-- 모바일에서 기업 본문 이중 스크롤 없음; 재무표만 필요 시 가로 스크롤 허용
+- 모바일에서 기업 본문 이중 스크롤 없음; 연간 재무표는 가로 스크롤, 분기 막대그래프는 620px 이하에서 축·라벨을 축소한다.
 - PR Gate 통과 후 병합, Cloudflare 배포 성공 및 custom domain이 merge SHA를 서비스하는지 확인
 
 ## 9. Marvell 다음 재검증 포인트
