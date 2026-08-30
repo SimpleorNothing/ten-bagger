@@ -144,7 +144,7 @@
 
 ### 현행 메뉴 (7탭 · 런타임 렌더 순)
 `01 시장 모니터링(v-market)` · `02 인사이트 찾기(v-insight · insight.js 자가 마운트)` · `03 전문가 원탁(v-council)` · `04 알파 찾기(v-thread · v-cycle·v-alpha 2026-07-18 렌더 제외)` · `05 리밸런싱(v-decision)` · **`06 모닝 브리핑(v-brief · brief.js 자가 마운트 · 2026-07-19 신설)`** · `07 메모(v-memo)`
-※ 위는 **런타임 렌더 순**(§3 내부번호 = 이 순서). `nav` 정적 버튼은 5개(market·cycle·port·council·memo · **index.html 무편집**)이고, `insight.js` `mount()`가 런타임에 ①`insight` 탭을 `market` 뒤 주입 ②`council`을 `cycle` 앞으로 이동 ③`cycle` 라벨 「궁금한 것」→「알파 찾기」 개명 ④전 탭 index 순 재번호 → 위 순서 확정(정적 폴백은 마운트 전 구 5탭 · `insight.js` 로드 전 잠깐). **이 「잠깐」이 새로고침 플래시(FOUC)였고 `</head>` 앞 `#nav-fouc-guard`(`#nav{visibility:hidden}`→하이드레이션 후 `.rdy`)로 억제(2026-07-25·STYLE_GUIDE §4·§9).** **`data-v`·뷰 id·데이터 소스는 불변 — 라벨·순서만 재구성**(2026-07-18). ※ 04 뷰 제목은 #424가 옛 `#instantAnswer` vhead(「지금 궁금한 것」)를 삭제해 별도 개명 불필요 — v-thread 최상단은 `#dsAisd`(AI 수요·공급 로드맵). `v-port`·`v-tracker`·`v-macro`·`v-cal`은 **뷰서 제외·코드 잔존**(v-cal은 2026-07-17 06 캘린더 삭제로 합류 — 임박 이벤트는 01로 흡수, `#v-cal` CSS는 비활성 잔존).
+※ 위는 **런타임 렌더 순**(§3 내부번호 = 이 순서). 현재 `nav`는 7개 탭을 정적으로 보유하며, `insight.js`·`brief.js`의 `mount()`는 누락된 탭·뷰만 보완하고 전 탭을 index 순으로 재번호한다. 특히 `brief.js`는 정적 `data-v="brief"` 탭의 존재 여부와 무관하게 진입 리스너를 멱등 연결해야 한다(2026-08-30) — 탭 생성 분기 안에 리스너를 두면 정적 탭 클릭 시 브리핑·저장본 API가 시작되지 않는다. **새로고침 플래시(FOUC)는 `</head>` 앞 `#nav-fouc-guard`(`#nav{visibility:hidden}`→하이드레이션 후 `.rdy`)로 억제한다(2026-07-25·STYLE_GUIDE §4·§9).** **`data-v`·뷰 id·데이터 소스는 불변 — 라벨·순서만 재구성**(2026-07-18). ※ 04 뷰 제목은 #424가 옛 `#instantAnswer` vhead(「지금 궁금한 것」)를 삭제해 별도 개명 불필요 — v-thread 최상단은 `#dsAisd`(AI 수요·공급 로드맵). `v-port`·`v-tracker`·`v-macro`·`v-cal`은 **뷰서 제외·코드 잔존**(v-cal은 2026-07-17 06 캘린더 삭제로 합류 — 임박 이벤트는 01로 흡수, `#v-cal` CSS는 비활성 잔존).
 
 ### 01 시장 모니터링 (`v-market`)
 
@@ -482,6 +482,7 @@ node -e "const s=require('./scores.json'); if(s.schema!=='investment-scores-v4')
 - **DXI 자동 피드 없음(2026-07-17)**: DXI 지수는 포털 게이트라 무료 피드 없음 → 매주 금요일 스케줄이 TrendForce 현물가로 `dxi.json` append.
 - **브리핑 팟캐스트 오디오판(A안) 대기(2026-07-19)**: MP3를 슬랙에 직접 첨부하려면 ①슬랙 봇 **`files:write`** 스코프 추가 후 재설치 ②리포 시크릿 **`SITE_PASSWORD`** ③리포 시크릿 **`GEMINI_API_KEY`** ④`.github/workflows/` 배치 — **전부 운영자 수동**(App workflows write 403). 제안본은 `scripts/proposed-workflows/daily-brief-podcast-audio.md` 체크리스트. 그 전까지는 링크형(B안)만 가동.
 - **모닝 브리핑 크론 워밍 — 가동(2026-07-20 해소)**: `daily-brief-slack.mjs` `warmBrief()`(게이트 `/__auth` 로그인 → `/api/brief?part=0` 선호출) 배선 + 리포 시크릿 `SITE_PASSWORD` + `daily-brief-slack.yml` run 스텝 `env:` 전달까지 **3건 모두 완료** → 07:45 KST 크론이 오늘 회차를 미리 굽는다(「지난 호」 결번 방지). 워크플로에 `BRIEF_WARM_PODCAST: "1"` 도 들어가 **팟캐스트 p1·p2 대본까지 사전 생성**된다(첫 재생 지연 제거·생성비는 매일 발생하나 5분 압축분). 로그인 실패·타임아웃이면 `warmBrief()`는 조용히 건너뛰고 슬랙 본문·링크는 그대로 나간다.
+- 2026-08-30 · **06 모닝 브리핑 정적 탭 진입 복구.** `index.html`에 `data-v="brief"` 탭이 이미 존재하면 `brief.js mount()`의 탭 생성 분기가 건너뛰어져 진입 리스너도 붙지 않던 것이 원인 — 화면에는 자가 마운트된 뷰의 초기 「불러오는 중 …」만 남고 `/api/brief`·`/api/briefs` 호출이 시작되지 않았다. 리스너를 탭 생성 분기 밖에서 멱등 연결하고, 재진입마다 저장본 목록을 다시 조회해 R2 지연 안내의 「메뉴 다시 열기」가 실제 복구로 이어지게 했다. 정적 탭 DOM 회귀 테스트를 PR 게이트에 추가했다. `node --check brief.js`·정적 탭 스모크·문서 정합 검사 통과 예정. 숫자·판단 파일 불변.
 - **브리핑 링크는 비밀번호 게이트 뒤**: 슬랙에서 처음 열면 워커 로그인 화면이 뜬다(기기·인앱 브라우저별 1회). 쿠키 `Max-Age` 만료 시 재로그인.
 - `prices.json.warn = lazr chart 43.47 vs quote 41.35` — LAZR 비보유·무시 가능
 
