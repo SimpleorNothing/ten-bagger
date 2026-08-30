@@ -196,7 +196,7 @@
     });
     var domainMin=hasNegative?-scale:0;
     var span=scale-domainMin;
-    var baseline=scale/span*100;
+    var baseline=(-domainMin)/span*100;
     var grid=[],axis=[];
     for(var i=scale;i>=domainMin;i--){
       var top=(scale-i)/span*100;
