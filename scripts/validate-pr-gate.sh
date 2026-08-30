@@ -42,6 +42,8 @@ fi
 node --check company.js
 node --check company-clock.js
 node --check company-news.js
+node --check brief.js
+node scripts/test-brief-static-nav.mjs
 node --check site-change-live.js
 node --check allocation-dynamic.js
 node --check scripts/build-investment-scores.mjs
