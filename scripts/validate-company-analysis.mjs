@@ -32,7 +32,15 @@ validateCompanySchema('MRVL',marvell);
 validateCompanySchema('LITE',lumentum);
 
 const fy28=marvell.financials.find(x=>x.fy==='FY2028E');
-if(!fy28||fy28.growth!==43.5)fail('FY2028E growth must be 43.5');
+if(!fy28||fy28.revenue!==18.0||fy28.growth!==50.0)fail('FY2028E raised outlook must be $18.0B / 50.0%');
+const mrvlQuarters=marvell.quarterly?.rows;
+if(!Array.isArray(mrvlQuarters)||mrvlQuarters.length!==8)fail('MRVL FY26 Q1 through FY27 Q4 quarterly series missing');
+const q2fy27=mrvlQuarters.find(x=>x.period==='FY27 Q2');
+if(!q2fy27||q2fy27.kind!=='actual'||q2fy27.revenue!==2.739||q2fy27.operatingIncome!==0.460)fail('MRVL FY27 Q2 GAAP actuals missing');
+const q3fy27=mrvlQuarters.find(x=>x.period==='FY27 Q3E');
+if(!q3fy27||q3fy27.kind!=='guidance'||q3fy27.revenue!==3.150||q3fy27.operatingIncome!==0.667)fail('MRVL FY27 Q3 guidance midpoint calculation missing');
+const q4fy27=mrvlQuarters.find(x=>x.period==='FY27 Q4E');
+if(!q4fy27||q4fy27.kind!=='derived'||q4fy27.revenue!==3.693||q4fy27.operatingIncome!==null)fail('MRVL FY27 Q4 implied revenue / undisclosed GAAP operating income missing');
 if(!marvell.axes.some(a=>(a.facts||[]).some(x=>x.includes('1.4nm(A14)'))))fail('A14 roadmap missing');
 if(!marvell.axes.some(a=>(a.facts||[]).some(x=>x.includes('20억달러'))))fail('NVIDIA $2B investment missing');
 if(!marvell.risks.some(r=>r.title==='고객 집중'&&r.detail.includes('37%')&&r.detail.includes('82%')))fail('customer concentration metrics missing');
@@ -71,6 +79,7 @@ if(!clock.includes("fetch('/gamma.json?t='")||!clock.includes("cache:'no-store'"
 if(!clock.includes('fy1.c30')||!clock.includes('fy1.c90')||!clock.includes('px.c30')||!clock.includes('px.c90'))fail('30/90 day clocks missing');
 const company=fs.readFileSync('company.js','utf8');
 if(company.includes('<iframe')||/createElement\(['"]iframe['"]\)/.test(company))fail('iframe regression in company analysis');
+if(!company.includes('quarterlyHtml(d.quarterly)')||!company.includes('분기 실적·전망')||!company.includes('GAAP · $B'))fail('quarterly financial renderer missing');
 const patch=fs.readFileSync('company-patch.js','utf8');
 if(!patch.includes("fetchJson('/gamma.json')")||!patch.includes("cache:'no-store'"))fail('company patch must read gamma.json no-store');
 if(!patch.includes("typeof CANDIDATES!=='undefined'")||!patch.includes("typeof CASCADES!=='undefined'"))fail('company stage SoT runtime sync missing');
