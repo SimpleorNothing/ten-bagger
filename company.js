@@ -3,7 +3,10 @@
   'use strict';
   var COMPANIES=[
     {id:'marvell',label:'Marvell Technology · MRVL',data:'/marvell/data.json'},
-    {id:'lumentum',label:'Lumentum · LITE',data:'/lumentum/data.json'}
+    {id:'lumentum',label:'Lumentum · LITE',data:'/lumentum/data.json'},
+    {id:'micron',label:'Micron Technology · MU',data:'/micron/data.json'},
+    {id:'vertiv',label:'Vertiv · VRT',data:'/vertiv/data.json'},
+    {id:'nvidia',label:'NVIDIA · NVDA',data:'/nvidia/data.json'}
   ];
   var CACHE={};
 
@@ -190,10 +193,7 @@
       return m;
     },0)||1;
     var scale=Math.max(1,Math.ceil(maxAbs));
-    var hasNegative=rows.some(function(r){
-      var rv=Number(r.revenue),op=Number(r.operatingIncome);
-      return (isFinite(rv)&&rv<0)||(isFinite(op)&&op<0);
-    });
+    var hasNegative=rows.some(function(r){var rv=Number(r.revenue),op=Number(r.operatingIncome);return (isFinite(rv)&&rv<0)||(isFinite(op)&&op<0);});
     var domainMin=hasNegative?-scale:0;
     var span=scale-domainMin;
     var baseline=(-domainMin)/span*100;

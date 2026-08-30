@@ -6,7 +6,7 @@
 
 ## 1. 단일 소스와 역할
 
-- 기업별 정적·저빈도 사실: `marvell/data.json`, `lumentum/data.json`
+- 기업별 정적·저빈도 사실: `marvell/data.json`, `lumentum/data.json`, `micron/data.json`, `vertiv/data.json`, `nvidia/data.json`
 - 가격·목표가·EPS 리비전·γ·stage: `gamma.json`만 단일 소스(SoT)
 - 02 화면의 두 시계: `company-clock.js`가 `gamma.json`을 `cache:no-store`로 직접 읽는다. 두 시계 값을 기업별 data.json에 복사·고정하지 않는다.
 - `company-patch.js`는 `gamma.json`의 stage를 기업분석 헤더와 런타임 `CANDIDATES`/`CASCADES`에 동기화한다. `index.html`의 하드코딩 stage는 fallback일 뿐 최종 판정값으로 사용하지 않는다.
