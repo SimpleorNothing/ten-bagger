@@ -2,7 +2,7 @@
   "asOf": "2026-08-30T08:24:00+09:00",
   "timezone": "Asia/Seoul",
   "timezoneLabel": "KST",
-  "source": "수기 큐레이션 + derive-calendar.mjs 데일리 refresh · Federal Reserve G.17 7월 산업생산 및 7/28~29 FOMC 의사록 · 관세청 7월 월간 확정치 및 8월 1~20일 잠정치 · NVIDIA 공식 IR · Marvell 공식 IR Calendar · Reuters 2026-08-21 베센트 기자회견 일정 · U.S. Treasury 2026년 4분기 Quarterly Refunding 일정 · Federal Reserve 2026년 8월 공식 캘린더 · Kansas City Fed Jackson Hole 2026 공식 일정 · U.S. Treasury Operation Economic Outcast 2026-08-24 · Federal Reserve Chairman Kevin Warsh Jackson Hole remarks 2026-08-28",
+  "source": "수기 큐레이션 + derive-calendar.mjs 데일리 refresh · BLS JOLTS 공식 발표 일정 · Federal Reserve G.17 7월 산업생산 및 7/28~29 FOMC 의사록 · 관세청 7월 월간 확정치 및 8월 1~20일 잠정치 · NVIDIA 공식 IR · Marvell 공식 IR Calendar · Reuters 2026-08-21 베센트 기자회견 일정 · U.S. Treasury 2026년 4분기 Quarterly Refunding 일정 · Federal Reserve 2026년 8월 공식 캘린더 · Kansas City Fed Jackson Hole 2026 공식 일정 · U.S. Treasury Operation Economic Outcast 2026-08-24 · Federal Reserve Chairman Kevin Warsh Jackson Hole remarks 2026-08-28",
   "note": "01 시장 모니터링 「다가오는 일정」 임박 이벤트 소스. 모든 사용자 표시 일정의 날짜·시각은 한국시간(KST, Asia/Seoul, UTC+9) 기준으로 저장·표시한다. d는 KST 기준 실제 공개·행사일, when은 KST 기준 표시 문자열이다. 해외 원문이 ET/PT/JST 등 현지시간으로 공지돼도 사용자 표시값은 반드시 KST로 환산한다. index.html 런타임 fetch → CAL_NOW → renderCalNow()가 #v-market #calNow에 D-N 카드 렌더. 국내 상장사 실적 이벤트는 DART·KRX·회사 공식 IR 등 구조화된 공식 검증 정보가 없는 경우 자동 제외한다.",
   "grace": 0,
   "events": [
@@ -72,6 +72,13 @@
       "when": "08-28 KST (발표 완료 · 매출 $2.739B / DC +46% YoY)"
     },
     {
+      "d": "2026-09-01",
+      "cat": "macro",
+      "lbl": "미국 JOLTS 구인·이직 보고서 · 2026년 7월",
+      "meta": "미국 노동통계국(BLS) 공식 발표 일정. 확인 포인트=구인건수, 채용, 자발적 퇴직률 및 노동수요 둔화 여부. 발표 시각은 미국 동부시간에서 한국시간으로 변환. · 원문: https://www.bls.gov/schedule/news_release/jolts.htm · 확인: 2026-08-31 KST",
+      "when": "09-01 23:00 KST (발표)"
+    },
+    {
       "d": "2026-09-17",
       "cat": "macro",
       "lbl": "미국 FOMC 금리결정",
@@ -91,6 +98,13 @@
       "lbl": "미·중 정상회담",
       "meta": "미국·중국 정상 간 회담 일정 · 핵심 확인: 관세·수출통제·AI 반도체 및 공급망 협상 결과, 후속 공동성명. · 사용자 지정 일정 2026-09-24, 표시 기준=KST. 개최지·정확한 시각 확정 시 KST 기준으로 갱신.",
       "when": "09-24 KST (시간 미확정)"
+    },
+    {
+      "d": "2026-09-29",
+      "cat": "macro",
+      "lbl": "미국 JOLTS 구인·이직 보고서 · 2026년 8월",
+      "meta": "미국 노동통계국(BLS) 공식 발표 일정. 확인 포인트=구인건수, 채용, 자발적 퇴직률 및 노동수요 둔화 여부. 발표 시각은 미국 동부시간에서 한국시간으로 변환. · 원문: https://www.bls.gov/schedule/news_release/jolts.htm · 확인: 2026-08-31 KST",
+      "when": "09-29 23:00 KST (발표)"
     },
     {
       "d": "2026-10-06",
@@ -125,6 +139,13 @@
     {
       "d": "2026-11-04",
       "cat": "macro",
+      "lbl": "미국 JOLTS 구인·이직 보고서 · 2026년 9월",
+      "meta": "미국 노동통계국(BLS) 공식 발표 일정. 확인 포인트=구인건수, 채용, 자발적 퇴직률 및 노동수요 둔화 여부. 발표 시각은 미국 동부시간에서 한국시간으로 변환. · 원문: https://www.bls.gov/schedule/news_release/jolts.htm · 확인: 2026-08-31 KST",
+      "when": "11-04 00:00 KST (발표)"
+    },
+    {
+      "d": "2026-11-04",
+      "cat": "macro",
       "lbl": "美 재무부 4분기 분기발행계획(QRA)",
       "meta": "확정 · U.S. Treasury 공식 Quarterly Refunding 일정. 11/2 KST에는 차입 추정·경제정책 자료가 선행되고, 11/4 22:30 KST에는 정책성명·TBAC 자료·발행 및 바이백 일정이 공개된다. 핵심 확인=10~30년 장기물 바이백의 11/4 이후 규모, T-bill 비중(7/31/26 22.2%)의 추가 상승 여부, 쿠폰물 발행 변화, TGA·민간순차입 전망. 단기채 확대를 곧바로 QE로 해석하지 않고 ON RRP·은행 준비금·레포금리를 함께 확인한다. · 공식 일정: https://home.treasury.gov/policy-issues/financing-the-government/quarterly-refunding/most-recent-quarterly-refunding-documents · 바이백 발표: https://home.treasury.gov/news/press-releases/sb0607 · 확인: 2026-08-23 KST",
       "when": "11-04 22:30 KST (정책성명·발행/바이백 계획)"
@@ -142,6 +163,13 @@
       "lbl": "한국 금통위",
       "meta": "2026 제8회 통화정책방향 결정회의 · 연내 마지막 통방. 사용자 표시 기준=KST.",
       "when": "11-26 KST (기준금리 결정 · 정확한 발표시각은 일정 확정 시 갱신)"
+    },
+    {
+      "d": "2026-12-02",
+      "cat": "macro",
+      "lbl": "미국 JOLTS 구인·이직 보고서 · 2026년 10월",
+      "meta": "미국 노동통계국(BLS) 공식 발표 일정. 확인 포인트=구인건수, 채용, 자발적 퇴직률 및 노동수요 둔화 여부. 발표 시각은 미국 동부시간에서 한국시간으로 변환. · 원문: https://www.bls.gov/schedule/news_release/jolts.htm · 확인: 2026-08-31 KST",
+      "when": "12-02 00:00 KST (발표)"
     },
     {
       "d": "2026-12-10",
