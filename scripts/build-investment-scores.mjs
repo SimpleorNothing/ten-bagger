@@ -24,6 +24,18 @@ const breadth = (up, down) => {
   return u + d ? 100 * u / (u + d) : null;
 };
 
+// 성장률과 Forward PER/GARP는 같은 FY+1 EPS 컨센서스를 동시에 사용한다.
+// 커버리지가 1~2명뿐인 종목에서 한 명의 낙관적 추정치가 성장·밸류를 동시에 끌어올리는
+// 이중 과대평가를 막기 위해 두 차원만 중립값(50) 쪽으로 축소한다.
+// 5명 이상은 원점수를 유지하고, 1명은 55%, 2명은 70%, 3명은 80%, 4명은 90%만 신뢰한다.
+function analystCoverage(G) {
+  const raw = Number(G?.rev?.rating?.n);
+  const count = Number.isFinite(raw) && raw > 0 ? Math.round(raw) : null;
+  const confidence = count == null ? 1 : count >= 5 ? 1 : ({ 1: 0.55, 2: 0.70, 3: 0.80, 4: 0.90 }[count] ?? 1);
+  return { count, confidence, lowCoverage: count != null && count < 5 };
+}
+const shrinkToNeutral = (score, confidence) => score == null ? null : 50 + (score - 50) * confidence;
+
 function recentPriceShock(G, lookbackDays = 7) {
   const rows = (Array.isArray(G.priceHist) ? G.priceHist : [])
     .filter((x) => x && /^\d{4}-\d{2}-\d{2}$/.test(String(x.d || '')) && Number(x.p) > 0)
@@ -99,6 +111,7 @@ function v4(G) {
   const x = common(G);
   const growthPercentile = percentile(x.epsGrowth, 'eps_growth');
   const fy1RevisionPercentile = percentile(x.fy1.c30, 'fy1_c30');
+  const coverageInfo = analystCoverage(G);
   const shock = recentPriceShock(G, 7);
   const fundamentalPreserved =
     growthPercentile != null && growthPercentile >= 60 &&
@@ -129,8 +142,10 @@ function v4(G) {
     [percentile(x.q1.c30, 'q1_c30'), 30], [percentile(x.q1.c90, 'q1_c90'), 15],
     [percentile(x.fy1.c30, 'fy1_c30'), 35], [percentile(x.fy1.c90, 'fy1_c90'), 20],
   ]);
-  const growth = weighted([[growthPercentile, 100]]);
-  const valuation = weighted([[x.fwdPE == null ? null : 100 - percentile(x.fwdPE, 'fwd_pe'), 60], [percentile(x.garp, 'garp'), 40]]);
+  const rawGrowthScore = growthPercentile;
+  const rawValuationScore = weighted([[x.fwdPE == null ? null : 100 - percentile(x.fwdPE, 'fwd_pe'), 60], [percentile(x.garp, 'garp'), 40]]).score;
+  const growth = weighted([[shrinkToNeutral(rawGrowthScore, coverageInfo.confidence), 100]]);
+  const valuation = weighted([[shrinkToNeutral(rawValuationScore, coverageInfo.confidence), 100]]);
   const consensus = weighted([[x.br, 60], [x.rating.mean == null ? null : 100 - percentile(x.rating.mean, 'rating'), 40]]);
   const gap30 = x.px.c30 == null || x.fy1.c30 == null ? null : x.px.c30 - x.fy1.c30;
   // 최근 급락이 있었지만 EPS/목표가/컨센서스가 유지되는 성장주는 30일 누적 과열 신호를
@@ -163,6 +178,14 @@ function v4(G) {
     inputs: {
       epsGrowth: x.epsGrowth, fwdPE: x.fwdPE, garp: x.garp, breadth: x.br,
       gap30, resetAdjustedGap30, resetCredit, fy1c30: x.fy1.c30, absoluteRevision,
+      analystCoverage: {
+        analystCount: coverageInfo.count,
+        confidence: coverageInfo.confidence,
+        lowCoverage: coverageInfo.lowCoverage,
+        adjustedDimensions: coverageInfo.lowCoverage ? ['growth', 'valuation'] : [],
+        rawGrowthScore,
+        rawValuationScore,
+      },
       fundamentalDislocation: {
         qualified: fundamentalPreserved,
         shock7dWorst1d: shock.worst1d,
@@ -197,9 +220,9 @@ for (const [ticker, G] of Object.entries(gammaDoc.gamma || {})) {
   rows[ticker] = { ticker, held: held.has(ticker), v3: oldScore, v4: nextScore, delta: oldScore.score == null || nextScore.score == null ? null : nextScore.score - oldScore.score };
 }
 const output = {
-  schema: 'investment-scores-v4', modelVersion: '4.1.0', asOf: new Date().toISOString(),
+  schema: 'investment-scores-v4', modelVersion: '4.2.0', asOf: new Date().toISOString(),
   gammaAsOf: gammaDoc.asOf || null, benchmarkAsOf: benchmark.asOf,
-  displayedModel: 'v4', methodology: 'external data score + fundamental-preserving growth-stock dislocation bonus + explicit internal judgment adjustment; no duplicate downside penalties', rows,
+  displayedModel: 'v4', methodology: 'external data score + low-analyst-coverage shrinkage for growth/valuation + fundamental-preserving growth-stock dislocation bonus + explicit internal judgment adjustment; no duplicate downside penalties', rows,
 };
 fs.writeFileSync('scores.json', JSON.stringify(output, null, 2) + '\n');
 console.log(`wrote scores.json for ${Object.keys(rows).length} tickers`);
