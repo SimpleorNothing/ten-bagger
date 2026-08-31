@@ -257,6 +257,12 @@
     var s=document.createElement('script');s.id='marketSyncJs';s.src='/market-sync.js?v=20260803';s.defer=true;
     (document.body||document.documentElement).appendChild(s);
   }
+  // 08 투자일지 로더(journal.js 자가 마운트) — 탭·뷰·컴포저·타임라인을 전부 런타임에 만든다(index.html 무편집).
+  function loadJournal(){
+    if(document.getElementById('journalJs'))return;
+    var s=document.createElement('script');s.id='journalJs';s.src='/journal.js?v=20260831';s.defer=true;
+    (document.body||document.documentElement).appendChild(s);
+  }
   function mountAll(){
     mountHead('#v-market .vhead','mktUpdMarket','market');
     mountHead('#v-insight .vhead','mktUpdInsight','insight');
@@ -277,6 +283,7 @@
     loadQuote();                                    // 01 상단 투자 명언 스트립
     loadFedwatch();                                // 01 CME FedWatch 26년 12월 일별 전망
     loadMarketSync();                               // 02 고신뢰 매크로 관점 → 01 자동 동기화
+    loadJournal();                                  // 08 투자일지 탭·뷰(신설)
   }
   document.addEventListener('keydown',function(e){if(e.key==='Escape')hide();});
   function watchDynamicViews(){
