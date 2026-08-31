@@ -1,0 +1,46 @@
+name: Update monthly JOLTS calendar
+
+on:
+  schedule:
+    - cron: '15 0 15 * *' # 매월 15일 09:15 KST
+  workflow_dispatch: {}
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/update-jolts-calendar.yml'
+      - 'scripts/sync-jolts-calendar.mjs'
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: update-jolts-calendar
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { ref: main, fetch-depth: 0 }
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - name: Sync official BLS JOLTS release schedule
+        run: node scripts/sync-jolts-calendar.mjs
+      - name: Validate calendar
+        run: node -e "const c=require('./calendar.json'); if(!c.events.some(e=>String(e.lbl).startsWith('미국 JOLTS'))) process.exit(1)"
+      - name: Create protected-main PR if changed
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- calendar.json; then echo "No JOLTS schedule changes."; exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          BRANCH="claude/automation-update-jolts-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          git checkout -b "$BRANCH"
+          git add calendar.json
+          git commit -m "chore: sync official JOLTS schedule"
+          git push -u origin "$BRANCH"
+          gh pr create --base main --head "$BRANCH" --title "chore: sync official JOLTS schedule" --body "BLS 공식 JOLTS 발표 일정을 한국시간으로 변환해 01 시장 모니터링 캘린더에 동기화합니다. Claude PR Gate가 검증 후 squash merge합니다."
