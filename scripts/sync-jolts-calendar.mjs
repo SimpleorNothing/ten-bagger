@@ -10,7 +10,9 @@ const FULL_MONTH = { January:1, February:2, March:3, April:4, May:5, June:6, Jul
 
 function text(html) {
   return html.replace(/<script[\s\S]*?<\/script>/gi, ' ').replace(/<style[\s\S]*?<\/style>/gi, ' ')
-    .replace(/<[^>]+>/g, ' ').replace(/&nbsp;|&#160;/gi, ' ').replace(/&amp;/gi, '&').replace(/\s+/g, ' ').trim();
+    .replace(/<[^>]+>/g, ' ').replace(/&nbsp;|&#160;/gi, ' ').replace(/&amp;/gi, '&')
+    .replace(/\|/g, ' ') // 보조 읽기 경로의 Markdown 표 구분자
+    .replace(/\s+/g, ' ').trim();
 }
 
 export function parseSchedule(html) {
