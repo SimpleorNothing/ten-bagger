@@ -52,6 +52,7 @@ node - <<'NODE'
 const fs = require('fs');
 const s = JSON.parse(fs.readFileSync('scores.json','utf8'));
 if (s.schema !== 'investment-scores-v4') throw new Error('investment score schema mismatch');
+if (s.modelVersion !== '4.2.0') throw new Error('investment score modelVersion mismatch');
 for (const [ticker,row] of Object.entries(s.rows || {})) {
   const v = row && row.v4;
   if (!v) continue;
@@ -64,8 +65,24 @@ for (const [ticker,row] of Object.entries(s.rows || {})) {
     if (!(fd.residualFromPreShock <= -5)) throw new Error(ticker + ': qualified after recovery');
     if (!(v.inputs.fy1c30 >= 0)) throw new Error(ticker + ': qualified despite FY+1 estimate deterioration');
   }
+
+  const ac = v.inputs && v.inputs.analystCoverage;
+  if (ac?.lowCoverage) {
+    if (!(ac.analystCount >= 1 && ac.analystCount <= 4)) throw new Error(ticker + ': invalid low analyst count');
+    if (!(ac.confidence >= 0.55 && ac.confidence < 1)) throw new Error(ticker + ': invalid low-coverage confidence');
+    const expectedGrowth = ac.rawGrowthScore == null ? null : 50 + (ac.rawGrowthScore - 50) * ac.confidence;
+    const expectedValuation = ac.rawValuationScore == null ? null : 50 + (ac.rawValuationScore - 50) * ac.confidence;
+    if (expectedGrowth != null && Math.abs(v.dimensions.growth - expectedGrowth) > 1e-9) throw new Error(ticker + ': growth coverage shrinkage mismatch');
+    if (expectedValuation != null && Math.abs(v.dimensions.valuation - expectedValuation) > 1e-9) throw new Error(ticker + ': valuation coverage shrinkage mismatch');
+  }
 }
-console.log('V4.1 growth-dislocation invariants passed');
+const techwing = s.rows?.['089030']?.v4;
+if (techwing?.inputs?.analystCoverage?.analystCount === 1) {
+  if (!(techwing.dimensions.growth < techwing.inputs.analystCoverage.rawGrowthScore)) throw new Error('089030: growth score not discounted');
+  if (!(techwing.dimensions.valuation < techwing.inputs.analystCoverage.rawValuationScore)) throw new Error('089030: valuation score not discounted');
+  console.log(`089030 low-coverage adjusted score=${techwing.score}, growth=${techwing.dimensions.growth.toFixed(1)}, valuation=${techwing.dimensions.valuation.toFixed(1)}`);
+}
+console.log('V4.2 growth-dislocation + analyst-coverage invariants passed');
 NODE
 git checkout -- scores.json
 if [ -f scripts/validate-company-analysis.mjs ]; then
