@@ -3,6 +3,7 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 
 const BLS_URL = 'https://www.bls.gov/schedule/news_release/jolts.htm';
+const BLS_READER_URL = `https://r.jina.ai/http://${BLS_URL.replace(/^https?:\/\//, '')}`;
 const CAL_PATH = process.env.CALENDAR_PATH || 'calendar.json';
 const MONTH = { Jan:0, Feb:1, Mar:2, Apr:3, May:4, Jun:5, Jul:6, Aug:7, Sep:8, Oct:9, Nov:10, Dec:11 };
 const FULL_MONTH = { January:1, February:2, March:3, April:4, May:5, June:6, July:7, August:8, September:9, October:10, November:11, December:12 };
@@ -49,8 +50,22 @@ export function toEvent(row, checkedAt) {
 }
 
 async function main() {
-  const html = process.env.BLS_JOLTS_HTML ? readFileSync(process.env.BLS_JOLTS_HTML, 'utf8')
-    : await fetch(BLS_URL, { headers:{ 'user-agent':'AlphaMap calendar sync (official BLS schedule)' } }).then(r => { if (!r.ok) throw new Error(`BLS 응답 오류: ${r.status}`); return r.text(); });
+  let html;
+  if (process.env.BLS_JOLTS_HTML) html = readFileSync(process.env.BLS_JOLTS_HTML, 'utf8');
+  else {
+    const errors = [];
+    for (const url of [BLS_URL, BLS_READER_URL]) {
+      try {
+        const r = await fetch(url, { headers:{ 'user-agent':'Mozilla/5.0 (compatible; AlphaMap JOLTS calendar sync)' } });
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        const candidate = await r.text();
+        parseSchedule(candidate); // 접근 차단 안내문을 정상 응답으로 오인하지 않는다.
+        html = candidate;
+        break;
+      } catch (e) { errors.push(`${url}: ${e.message}`); }
+    }
+    if (!html) throw new Error(`BLS 공식 일정 조회 실패 · ${errors.join(' · ')}`);
+  }
   const checkedAt = new Intl.DateTimeFormat('en-CA', { timeZone:'Asia/Seoul', year:'numeric', month:'2-digit', day:'2-digit' }).format(new Date());
   const official = parseSchedule(html).map(r => toEvent(r, checkedAt)).filter(e => e.d >= checkedAt);
   const cal = JSON.parse(readFileSync(CAL_PATH, 'utf8'));
