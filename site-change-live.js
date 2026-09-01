@@ -136,7 +136,7 @@
 (function(){
   if(document.querySelector('script[data-company-analysis-loader]'))return;
   var s=document.createElement('script');
-  s.src='/company.js?v=20260830-company-portfolio';
+  s.src='/company.js?v=20260901-broadcom';
   s.defer=true;
   s.setAttribute('data-company-analysis-loader','1');
   document.body.appendChild(s);
@@ -156,7 +156,7 @@
 (function(){
   if(document.querySelector('script[data-company-patch-loader]'))return;
   var s=document.createElement('script');
-  s.src='/company-patch.js?v=20260830-company-portfolio';
+  s.src='/company-patch.js?v=20260901-broadcom';
   s.defer=true;
   s.setAttribute('data-company-patch-loader','1');
   document.body.appendChild(s);
