@@ -9,6 +9,7 @@ const lumentum=readJson('lumentum/data.json');
 const micron=readJson('micron/data.json');
 const vertiv=readJson('vertiv/data.json');
 const nvidia=readJson('nvidia/data.json');
+const broadcom=readJson('broadcom/data.json');
 const calendar=readJson('calendar.json');
 const earnings=readJson('earnings.json');
 const companyTabs=fs.readFileSync('company.js','utf8');
@@ -37,8 +38,9 @@ validateCompanySchema('LITE',lumentum);
 validateCompanySchema('MU',micron);
 validateCompanySchema('VRT',vertiv);
 validateCompanySchema('NVDA',nvidia);
+validateCompanySchema('AVGO',broadcom);
 
-for(const [name,id,d] of [['MU','micron',micron],['VRT','vertiv',vertiv],['NVDA','nvidia',nvidia]]){
+for(const [name,id,d] of [['MU','micron',micron],['VRT','vertiv',vertiv],['NVDA','nvidia',nvidia],['AVGO','broadcom',broadcom]]){
   if(d.company.ticker!==name)fail(name+': ticker mismatch');
   if(!Array.isArray(d.headlineKpis)||d.headlineKpis.length<4)fail(name+': headline KPI set missing');
   if(!Array.isArray(d.axes)||d.axes.length<4)fail(name+': strategy axes missing');
@@ -50,8 +52,16 @@ for(const [name,id,d] of [['MU','micron',micron],['VRT','vertiv',vertiv],['NVDA'
     if(r.operatingIncome!==null&&typeof r.operatingIncome!=='number')fail(name+': quarterly['+i+'] operatingIncome must be number/null');
   }
   if(!d.sources.some(s=>String(s.url||'').startsWith('https://')))fail(name+': official source URL missing');
-  if(!companyTabs.includes("id:'"+id+"'")||!companyTabs.includes("data:'/"+id+"/data.json'"))fail(name+': company tab registration missing');
+if(!companyTabs.includes("id:'"+id+"'")||!companyTabs.includes("data:'/"+id+"/data.json'"))fail(name+': company tab registration missing');
 }
+
+const avgoQ2=broadcom.quarterly.rows.find(x=>x.period==='FY26 Q2');
+if(!avgoQ2||avgoQ2.revenue!==22.187||avgoQ2.operatingIncome!==10.788||avgoQ2.kind!=='actual')fail('AVGO FY26 Q2 GAAP actuals missing');
+const avgoQ3=broadcom.quarterly.rows.find(x=>x.period==='FY26 Q3E');
+if(!avgoQ3||avgoQ3.revenue!==29.4||avgoQ3.operatingIncome!==null||avgoQ3.kind!=='guidance')fail('AVGO FY26 Q3 guidance missing');
+if(!broadcom.headlineKpis.some(k=>k.label.includes('AI 반도체')&&k.value==='$10.8B'))fail('AVGO AI semiconductor KPI missing');
+if(!broadcom.axes.some(a=>a.code==='A5'&&(a.facts||[]).some(x=>x.includes('42%'))))fail('AVGO customer concentration missing');
+if(!broadcom.sources.some(s=>s.type==='SEC 10-Q'))fail('AVGO SEC source missing');
 
 const fy28=marvell.financials.find(x=>x.fy==='FY2028E');
 if(!fy28||fy28.revenue!==18.0||fy28.growth!==50.0)fail('FY2028E raised outlook must be $18.0B / 50.0%');

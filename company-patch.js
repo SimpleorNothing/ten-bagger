@@ -7,7 +7,8 @@
     lumentum:{ticker:'LITE',name:'Lumentum'},
     micron:{ticker:'MU',name:'Micron'},
     vertiv:{ticker:'VRT',name:'Vertiv'},
-    nvidia:{ticker:'NVDA',name:'NVIDIA'}
+    nvidia:{ticker:'NVDA',name:'NVIDIA'},
+    broadcom:{ticker:'AVGO',name:'Broadcom'}
   };
   var timer=null;
   var gammaCache=null;
@@ -67,13 +68,14 @@
   }
 
   function patchStage(meta,g){
-    var stage=g&&g.stage||'자료 없음';
+    if(!g||!g.stage)return;
+    var stage=g.stage;
     var el=document.querySelector('#v-company .ca-frame-side .ca-big');
     if(el){
       el.textContent=stage;
       el.setAttribute('title','SoT: gamma.json · '+String(g&&g.checkedAt||'기준일 없음'));
       el.setAttribute('data-stage-sot','gamma.json');
-    }
+}
     if(g)syncGlobalStage(meta,stage);
   }
 

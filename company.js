@@ -6,7 +6,8 @@
     {id:'lumentum',label:'Lumentum · LITE',data:'/lumentum/data.json'},
     {id:'micron',label:'Micron Technology · MU',data:'/micron/data.json'},
     {id:'vertiv',label:'Vertiv · VRT',data:'/vertiv/data.json'},
-    {id:'nvidia',label:'NVIDIA · NVDA',data:'/nvidia/data.json'}
+    {id:'nvidia',label:'NVIDIA · NVDA',data:'/nvidia/data.json'},
+    {id:'broadcom',label:'Broadcom · AVGO',data:'/broadcom/data.json'}
   ];
   var CACHE={};
 
