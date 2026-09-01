@@ -54,11 +54,30 @@ function disabledResponse(path) {
   });
 }
 
-function versionResponse(env) {
+async function versionResponse(request, env) {
+  let sha = env.DEPLOY_SHA || "";
+  let deployedAt = env.DEPLOYED_AT || "";
+
+  // Wrangler --var가 배포 로그에는 표시되지만 런타임에서 누락되는 사례가 반복돼,
+  // 같은 배포에 포함된 정적 asset을 독립적인 버전 소스로 사용한다.
+  if ((!sha || !deployedAt) && env.ASSETS) {
+    try {
+      const u = new URL(request.url);
+      u.pathname = "/deploy-version.json";
+      u.search = "";
+      const r = await env.ASSETS.fetch(new Request(u.toString(), { method: "GET" }));
+      if (r.ok) {
+        const j = await r.json();
+        if (!sha && j && typeof j.sha === "string") sha = j.sha;
+        if (!deployedAt && j && typeof j.deployedAt === "string") deployedAt = j.deployedAt;
+      }
+    } catch {}
+  }
+
   return new Response(JSON.stringify({
     service: "ten-bagger",
-    sha: env.DEPLOY_SHA || "unknown",
-    deployedAt: env.DEPLOYED_AT || "unknown",
+    sha: sha || "unknown",
+    deployedAt: deployedAt || "unknown",
   }), {
     status: 200,
     headers: {
@@ -222,7 +241,7 @@ async function changelogProbeResponse(request, env) {
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
-    if (url.pathname === "/__version") return versionResponse(env);
+    if (url.pathname === "/__version") return versionResponse(request, env);
     if (url.pathname === "/__site_changes") return siteChangesResponse(request, env);
     if (url.pathname === "/__runtime_probe") return runtimeProbeResponse(request, env);
     if (url.pathname === "/__changelog_probe") return changelogProbeResponse(request, env);

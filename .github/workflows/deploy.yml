@@ -64,10 +64,6 @@ jobs:
           const sha = process.env.GITHUB_SHA;
           const date = new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
 
-          // 사이트 변경의 기준:
-          // 1) simpleornothing.com에 배포되는 사용자 화면·기능·표시 콘텐츠 파일이 실제 변경되고,
-          // 2) 단순 크론/빌드/문서/테스트/리팩터링 같은 내부 작업이 아니며,
-          // 3) 이후 단계에서 custom domain이 해당 SHA를 실제 서비스하는지 검증돼야 한다.
           const internalPrefix = /^(chore|ci|build|docs|test|style|refactor|perf|revert)(\([^)]*\))?!?:/i;
           const excluded = /^(\.github\/|scripts\/|raw\/|history\/|archive\/|patches\/|node_modules\/)/;
           const configOnly = /^(package(-lock)?\.json|wrangler\.jsonc|\.assetsignore|\.gitignore|.*\.md)$/i;
@@ -116,8 +112,13 @@ jobs:
         run: |
           set -euo pipefail
           DEPLOYED_AT=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+
+          # 런타임 env var가 간헐적으로 누락돼도 배포 버전을 검증할 수 있도록
+          # 같은 asset bundle 안에 immutable 버전 메타데이터를 함께 넣는다.
+          GITHUB_SHA="$GITHUB_SHA" DEPLOYED_AT="$DEPLOYED_AT" \
+            node -e 'const fs=require("fs");fs.writeFileSync("deploy-version.json",JSON.stringify({sha:process.env.GITHUB_SHA,deployedAt:process.env.DEPLOYED_AT})+"\n")'
+
           for attempt in 1 2 3; do
-            # Wrangler 공식 형식은 각 --var를 하나의 "KEY:VALUE" 인자로 전달한다.
             if wrangler deploy --var "DEPLOY_SHA:${GITHUB_SHA}" --var "DEPLOYED_AT:${DEPLOYED_AT}"; then
               exit 0
             fi
@@ -135,8 +136,6 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          # workers.dev에는 먼저 반영되고 custom domain은 수십 초 늦게 전파되는 경우가 반복됐다.
-          # 배포 자체가 성공했는데 전파 지연만으로 실패 처리하지 않도록 약 2분까지 재검증한다.
           verify() {
             local base="$1"
             local body=""
