@@ -115,8 +115,8 @@ jobs:
 
           # 런타임 env var가 간헐적으로 누락돼도 배포 버전을 검증할 수 있도록
           # 같은 asset bundle 안에 immutable 버전 메타데이터를 함께 넣는다.
-          node -e 'const fs=require("fs");fs.writeFileSync("deploy-version.json",JSON.stringify({sha:process.env.GITHUB_SHA,deployedAt:process.env.DEPLOYED_AT})+"\n")' \
-            GITHUB_SHA="$GITHUB_SHA" DEPLOYED_AT="$DEPLOYED_AT"
+          GITHUB_SHA="$GITHUB_SHA" DEPLOYED_AT="$DEPLOYED_AT" \
+            node -e 'const fs=require("fs");fs.writeFileSync("deploy-version.json",JSON.stringify({sha:process.env.GITHUB_SHA,deployedAt:process.env.DEPLOYED_AT})+"\n")'
 
           for attempt in 1 2 3; do
             if wrangler deploy --var "DEPLOY_SHA:${GITHUB_SHA}" --var "DEPLOYED_AT:${DEPLOYED_AT}"; then
