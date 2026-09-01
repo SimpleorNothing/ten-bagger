@@ -1,23 +1,19 @@
 {
-  "asOf": "2026-09-01T10:22",
-  "gen": 1788042600000,
-  "model": "ChatGPT automation · official sources + trusted original reporting",
-  "headline": "한국은행 기준금리 3.00%와 미국 7월 PCE의 높은 물가 수준이 할인율 리스크를 유지하는 가운데, NVIDIA·Marvell의 강한 AI 데이터센터 실적과 한국 반도체 수출 강세가 AI 실수요를 확인했다.",
+  "asOf": "2026-09-01T17:00:00+09:00",
+  "gen": 1788259200000,
+  "model": "ChatGPT automation · web search + own reasoning · no paid external LLM API",
+  "headline": "한국 8월 수출·반도체 수출이 사상급 강세를 이어가 AI 실수요를 확인했지만, 중동 긴장과 유가 상승·미 연준의 인상 기대 확대가 할인율 부담을 높이고 있다.",
   "drivers": [
     {
       "ax": "geopolitics",
       "name": "지정학",
       "dir": "risk",
       "layer": "공급망·에너지",
-      "l1": "이란 관련 긴장과 호르무즈 공급 차질 우려가 유가·운송비·인플레이션 리스크를 다시 높이고 있다.",
-      "l2": "Reuters는 8월 21일 유가가 6거래일 연속 상승했고 이란 제재·공급 차질 우려가 핵심 배경이라고 보도했다. AI 인프라에는 전력·운송비뿐 아니라 장기금리 경로를 통해 간접 부담이 된다.",
-      "verdict": "에너지발 인플레 재점화 위험 유지",
+      "l1": "미·이란 긴장 고조와 호르무즈 리스크가 유가와 인플레이션 기대를 다시 밀어 올리고 있다.",
+      "l2": "9월 1일 로이터는 중동 긴장 속 브렌트유가 배럴당 91달러를 넘고 미국 장기금리도 상승했다고 보도했다. AI 인프라에는 전력비·운송비와 할인율을 동시에 높이는 부정적 입력이다.",
+      "verdict": "지정학발 유가·금리 동반 리스크 확대",
       "srcs": [
-        {
-          "t": "로이터 · 월스트리트 주간 마감",
-          "u": "https://www.reuters.com/business/us-stock-futures-rise-after-sharp-losses-prior-session-2026-08-21/",
-          "d": "2026-08-21"
-        }
+        {"t":"Reuters · 중동 긴장·유가·금리","u":"https://www.reuters.com/world/india/gold-muted-traders-await-us-jobs-data-monitor-mideast-tensions-2026-09-01/","d":"2026-09-01"}
       ]
     },
     {
@@ -25,25 +21,11 @@
       "name": "유가/에너지",
       "dir": "risk",
       "layer": "L8 전력·에너지",
-      "l1": "8월 26일 EIA 주간보고에서 원유재고는 단기 완충을 보였지만, 8월 STEO의 연말 재고 타이트 전망이 중기 유가 상방 위험을 유지한다.",
-      "l2": "EIA WPSR는 8월 21일 종료 주간 데이터를 8월 26일 공개했다. 상업 원유재고는 전주 대비 사실상 보합 수준이었고 Cushing 재고는 증가했다. 다만 8월 STEO는 2026년 미국 원유재고 전망을 396백만 배럴로 직전 433백만 배럴보다 8.6% 낮췄으며, 상업 원유재고가 2026년 말까지 2021~2025년 범위의 저점 아래에 머물 것으로 전망한다. 8월 28일 EIA 정정 공지에서는 8월 26일 요약문에 중간유분 재고가 2.2백만 배럴 증가했다고 잘못 적혔으며 실제 데이터표대로 2.2백만 배럴 감소가 맞다고 확인했다. 단기 주간재고와 중기 구조적 타이트를 분리해 본다.",
-      "verdict": "주간 재고 완충 vs STEO 중기 타이트 · 유가 상방 리스크 유지",
+      "l1": "유가가 90달러대를 상향 돌파하며 전력·운송·냉각비의 인플레이션 압력이 재확대됐다.",
+      "l2": "중동 공급차질 우려가 단기 재고 완충보다 우세해졌다. L8 전력 인프라의 명목 매출에는 우호적일 수 있으나 전체 AI 밸류체인에는 조달비용과 할인율 상승을 통해 부담이 더 크다.",
+      "verdict": "에너지 가격 상방 위험 우세",
       "srcs": [
-        {
-          "t": "EIA · 주간 석유 현황 보고서(2026년 8월 21일 종료 주간)",
-          "u": "https://www.eia.gov/petroleum/supply/weekly/",
-          "d": "2026-08-26"
-        },
-        {
-          "t": "EIA · 주간 석유 현황 보고서 정정 공지",
-          "u": "https://www.eia.gov/petroleum/supply/weekly/includes/revision-notice.php",
-          "d": "2026-08-28"
-        },
-        {
-          "t": "EIA · 단기 에너지 전망(2026년 8월)",
-          "u": "https://www.eia.gov/outlooks/steo/",
-          "d": "2026-08-11"
-        }
+        {"t":"Reuters · 9월 1일 유가 동향","u":"https://www.reuters.com/world/india/gold-muted-traders-await-us-jobs-data-monitor-mideast-tensions-2026-09-01/","d":"2026-09-01"}
       ]
     },
     {
@@ -51,15 +33,11 @@
       "name": "금리/Fed",
       "dir": "risk",
       "layer": "할인율·AI CAPEX 금융화",
-      "l1": "7월 CPI 전년비 3.4%, 근원 CPI 2.5%로 직전월보다 둔화",
-      "l2": "헤드라인 CPI 전월비 +0.1%, 근원 +0.2%로 물가 재가속 우려가 완화됐다. Fed의 금리경로에는 완화적 입력이며 고밸류 AI 인프라의 할인율·조달비용 부담을 일부 낮추는 방향.",
-      "verdict": "물가 둔화 · 금리 부담 완화",
+      "l1": "12월 FOMC 확률분포의 중심이 4.00% 안팎으로 올라가며 금리 인상 경계가 유지되고 있다.",
+      "l2": "CME 공식 End-of-Day API의 직접 인증값은 확보하지 못해 Investing.com Fed Rate Monitor를 2순위로 교차검증했다. 9월 1일 03:25 EDT 기준 12월 9일 FOMC 확률은 3.50~3.75% 10.4%, 3.75~4.00% 38.8%, 4.00~4.25% 40.9%, 4.25~4.50% 9.8%로 확률가중 중간값은 약 4.00%다.",
+      "verdict": "인하 기대보다 동결·인상 경계 우세",
       "srcs": [
-        {
-          "t": "BLS Consumer Price Index - July 2026",
-          "u": "https://www.bls.gov/news.release/cpi.nr0.htm",
-          "d": "2026-08-12"
-        }
+        {"t":"Investing.com Fed Rate Monitor · Updated 2026-09-01 03:25AM EDT","u":"https://www.investing.com/central-banks/fed-rate-monitor","d":"2026-09-01"}
       ]
     },
     {
@@ -67,25 +45,11 @@
       "name": "환율/달러",
       "dir": "risk",
       "layer": "달러·재정 신뢰",
-      "l1": "장기채 바이백 확대는 시장기능 보강책이지 QE가 아니며, 11월 분기발행계획의 단기채 비중이 달러 유동성의 핵심 분기점이다.",
-      "l2": "재무부는 9월 9일부터 10~30년 구간 유동성 지원 바이백의 회당 상한을 $2B에서 최소 $4B로 높인다. 그러나 이는 보유자산을 늘리는 연준 QE가 아니라 재무부가 새 국채 발행으로 재원을 조달해 구채를 교환하는 시장조성에 가깝다. 7월 말 T-bill 비중은 22.2%로 과거 TBAC 권고 범위 15~20%를 이미 웃돈다. 2023년처럼 T-bill 증가가 ON RRP 자금으로 흡수되면 준비금 충격이 작지만, RRP 완충이 소진된 국면에서는 은행 준비금·레포금리 압박으로 이어질 수 있다.",
-      "verdict": "바이백은 심리·유동성 보강, 위험자산 방향은 11월 발행구조와 준비금이 결정",
+      "l1": "연준 인상 기대와 지정학적 안전자산 수요가 달러를 지지하고 있다.",
+      "l2": "9월 1일 로이터는 연준 인상 기대 확대와 중동 불확실성이 달러 강세 요인으로 작용한다고 보도했다. 원화자산에는 환율 변동성 확대, 달러표시 자산에는 원화 환산 방어 효과가 동시에 발생한다.",
+      "verdict": "달러 강세 압력 재확대",
       "srcs": [
-        {
-          "t": "미 재무부 · 장기국채 유동성 지원 바이백",
-          "u": "https://home.treasury.gov/news/press-releases/sb0607",
-          "d": "2026-08-19"
-        },
-        {
-          "t": "미 재무부 · 2026년 3분기 TBAC 발표자료",
-          "u": "https://home.treasury.gov/system/files/221/TreasuryPresentationToTBACQ32026.pdf",
-          "d": "2026-08-05"
-        },
-        {
-          "t": "로이터 · 달러, 3개월 만의 최저치로 하락",
-          "u": "https://www.reuters.com/business/dollar-wobbles-investors-balk-us-treasurys-rescue-efforts-2026-08-21/",
-          "d": "2026-08-21"
-        }
+        {"t":"Reuters · 달러·엔·금리 동향","u":"https://www.reuters.com/world/asia-pacific/yen-hangs-near-160-amid-boj-rate-hike-bets-dollar-wobbles-2026-09-01/","d":"2026-09-01"}
       ]
     },
     {
@@ -93,20 +57,11 @@
       "name": "수급/플로우",
       "dir": "opp",
       "layer": "L2 custom silicon·L3 메모리·L6 광통신",
-      "l1": "금리 충격에도 한국 8월 1~20일 수출과 반도체 수출이 동기간 역대 최대를 기록해 AI 상류 실수요의 강도가 이어지고 있다.",
-      "l2": "관세청 8월 21일 잠정치에서 8월 1~20일 수출은 552.07억달러로 전년동기 대비 56.0%, 조업일수 보정 일평균 수출은 61.5% 증가했다. 반도체 수출은 260억달러로 동기간 역대 최대였다. 7월 월간 확정치도 수출 989.59억달러(+63.0%), 반도체 412억달러로 높은 레벨을 유지했다. 이는 AI·메모리 상류 수요가 아직 꺾이지 않았다는 실물 확인 신호다.",
-      "verdict": "할인율 부담과 별개로 AI·메모리 상류 실수요는 강함",
+      "l1": "한국 8월 수출 982.5억달러, 반도체 466.5억달러로 AI 상류 실수요가 계속 강화되고 있다.",
+      "l2": "산업통상부 9월 1일 발표 기준 8월 수출은 전년비 68.7% 증가한 982.5억달러, 반도체 수출은 209% 증가한 466.5억달러로 월간 사상 최대, 무역수지는 347.5억달러 흑자다. 기존 8월 1~20일 잠정치 대신 월간 공식 발표로 교체한다.",
+      "verdict": "AI·메모리 상류 실수요 강세 재확인",
       "srcs": [
-        {
-          "t": "관세청 · 2026년 8월 1~20일 수출입 잠정치",
-          "u": "https://www.customs.go.kr/kcs/na/ntt/selectNttInfo.do?bbsId=1362&mi=2891&nttSn=10173983&nttSnUrl=88748d91848cefc847351b9e9a2b4e1c",
-          "d": "2026-08-21"
-        },
-        {
-          "t": "관세청 · 2026년 7월 월간 수출입 확정치",
-          "u": "https://www.customs.go.kr/kcs/na/ntt/selectNttInfo.do?bbsId=1362&mi=2891&nttSn=10173584&nttSnUrl=4fee7b9502f263377346349001e33a66",
-          "d": "2026-08-18"
-        }
+        {"t":"산업통상부 · 2026년 8월 수출입 동향","u":"https://go.seoul.co.kr/news/prnewsView.php?id=445040","d":"2026-09-01"}
       ]
     },
     {
@@ -114,20 +69,12 @@
       "name": "심리/센티먼트",
       "dir": "neutral",
       "layer": "고멀티플 AI·금융화",
-      "l1": "NVIDIA와 Marvell의 공식 실적이 AI 데이터센터 수요의 절대 강도를 재확인했지만 금리 상승 환경이 멀티플 확장을 제한한다.",
-      "l2": "NVIDIA FY27 Q2 매출은 $96.2B(+106% YoY), 데이터센터 $89.0B(+117% YoY)였고 Q3 매출 가이던스는 $108.0B±2%다. Marvell FY27 Q2 매출은 $2.739B(+37% YoY), 데이터센터는 +46% YoY였으며 AI bookings 강세를 근거로 FY27·FY28 전망을 재차 상향했다. 실수요는 강하지만 할인율 상승과 밸류에이션 민감도는 별도 리스크다.",
-      "verdict": "AI 실수요 강세 확인 vs 할인율 부담 · 펀더멘털 우위",
+      "l1": "AI 펀더멘털은 강하지만 금리와 지정학이 멀티플 확장을 제한하는 구간이다.",
+      "l2": "Marvell의 FY27 Q2 데이터센터 성장과 한국 반도체 수출은 실수요를 확인한다. 반면 연준 인상 확률 확대와 유가 상승이 고밸류 AI 종목의 할인율을 높인다. 펀더멘털과 멀티플 방향이 엇갈리는 상태다.",
+      "verdict": "펀더멘털 우위·멀티플 제약 공존",
       "srcs": [
-        {
-          "t": "NVIDIA · FY27 2분기 공식 실적",
-          "u": "https://investor.nvidia.com/news/press-release-details/2026/NVIDIA-Announces-Financial-Results-for-Second-Quarter-Fiscal-2027/default.aspx",
-          "d": "2026-08-26"
-        },
-        {
-          "t": "Marvell · FY27 2분기 공식 실적",
-          "u": "https://investor.marvell.com/news-events/press-releases/detail/1031/marvell-technology-inc-reports-second-quarter-of-fiscal-year-2027-financial-results",
-          "d": "2026-08-27"
-        }
+        {"t":"Marvell · FY27 Q2 공식 실적","u":"https://investor.marvell.com/news-events/press-releases/detail/1031/marvell-technology-inc-reports-second-quarter-of-fiscal-year-2027-financial-results","d":"2026-08-27"},
+        {"t":"산업통상부 · 2026년 8월 수출입 동향","u":"https://go.seoul.co.kr/news/prnewsView.php?id=445040","d":"2026-09-01"}
       ]
     }
   ]
