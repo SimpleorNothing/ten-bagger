@@ -45,7 +45,8 @@
       +'#v-company .ca-note{color:var(--dim);font-size:13px}'
       +'#v-company .ca-quarterly{min-width:0}'
       +'#v-company .ca-quarterly-head{display:flex;align-items:end;justify-content:space-between;gap:10px;margin:2px 0 7px}'
-      +'#v-company .ca-quarterly-control{display:inline-flex;align-items:center;gap:6px;color:var(--st-accel);font-size:12px;font-weight:700;white-space:nowrap}'
+      +'#v-company .ca-quarterly-control{display:inline-flex;align-items:center;gap:6px;color:var(--st-accel);font:inherit;font-size:12px;font-weight:700;white-space:nowrap;cursor:pointer;border:0;background:transparent;padding:4px;border-radius:3px}'
+      +'#v-company .ca-quarterly-control:hover,#v-company .ca-quarterly-control:focus-visible{background:rgba(42,111,151,.10);outline:2px solid transparent}'
       +'#v-company .ca-q-calendar{position:relative;display:inline-block;width:12px;height:12px;border:1.5px solid var(--st-accel);border-radius:2px;box-sizing:border-box}'
       +'#v-company .ca-q-calendar:before{content:"";position:absolute;left:1px;right:1px;top:3px;border-top:1px solid var(--st-accel)}'
       +'#v-company .ca-q-calendar:after{content:"";position:absolute;left:2px;top:-3px;width:1px;height:4px;background:var(--st-accel);box-shadow:5px 0 0 var(--st-accel)}'
@@ -187,8 +188,23 @@
     return cy||String(r.period||'').replace(/^FY/,'');
   }
 
-  function quarterlyHtml(q,companyName){
-    var rows=q&&q.rows||[];if(!rows.length)return '';
+  function annualRows(financials){
+    return (financials||[]).map(function(r){
+      var revenue=Number(r.revenue),margin=Number(r.opMargin);
+      return {
+        period:r.fy,
+        cy:r.fy,
+        revenue:isFinite(revenue)?revenue:null,
+        // 공개된 연간 매출과 GAAP 영업이익률만으로 계산한다. 전망의 미공개 마진은 비워 둔다.
+        operatingIncome:isFinite(revenue)&&isFinite(margin)?revenue*margin/100:null,
+        kind:r.kind==='actual'?'actual':'derived'
+      };
+    });
+  }
+
+  function quarterlyHtml(q,financials,companyName,period){
+    var annual=period==='annual';
+    var rows=annual?annualRows(financials):(q&&q.rows||[]);if(!rows.length)return '';
     var maxAbs=rows.reduce(function(m,r){
       var rv=Number(r.revenue),op=Number(r.operatingIncome);
       if(isFinite(rv)&&Math.abs(rv)>m)m=Math.abs(rv);
@@ -216,9 +232,12 @@
       return '<div class="ca-q-group '+(est?'ca-q-est':'')+'" role="listitem" aria-label="'+esc(label)+'">'+qBar(r.revenue,span,baseline,'ca-q-bar-rev','매출')+qBar(r.operatingIncome,span,baseline,'ca-q-bar-op','영업이익')+'</div>';
     }).join('');
     var labels=rows.map(function(r){var est=r.kind!=='actual';return '<div class="ca-q-xlabel '+(est?'ca-q-est':'')+'" title="'+esc(r.period+' · '+r.cy)+'">'+esc(qShortLabel(r)+(est?'E':''))+'</div>';}).join('');
-    var notes=(q.notes||[]).map(function(n){return '<div>'+esc(n)+'</div>';}).join('');
-    var chartLabel=(companyName||'기업')+' 분기 GAAP 매출과 영업이익 막대그래프';
-    return '<div class="ca-quarterly"><div class="ca-quarterly-head"><div class="ca-section-label">분기 실적·전망</div><div class="ca-quarterly-control" aria-label="분기별"><span class="ca-q-calendar" aria-hidden="true"></span><span>분기별</span><span class="ca-q-chevron" aria-hidden="true"></span></div></div><div class="ca-q-legend" aria-label="그래프 범례"><span class="ca-q-legend-item"><i class="ca-q-swatch ca-q-swatch-rev" aria-hidden="true"></i>매출</span><span class="ca-q-legend-item"><i class="ca-q-swatch ca-q-swatch-op" aria-hidden="true"></i>영업이익</span><span class="ca-q-legend-item"><i class="ca-q-swatch ca-q-swatch-est" aria-hidden="true"></i>전망</span><span class="ca-q-unit">GAAP · $B</span></div><div class="ca-qchart" role="list" aria-label="'+esc(chartLabel)+'"><div class="ca-q-plot"><div class="ca-q-grid" aria-hidden="true">'+grid.join('')+zero+'</div><div class="ca-q-yaxis" aria-hidden="true">'+axis.join('')+'</div><div class="ca-q-columns" style="grid-template-columns:repeat('+rows.length+',minmax(0,1fr))">'+body+'</div></div><div class="ca-q-xlabels" style="grid-template-columns:repeat('+rows.length+',minmax(0,1fr))">'+labels+'</div></div>'+(notes?'<div class="ca-q-notes">'+notes+'</div>':'')+'</div>';
+    var notes=annual
+      ?'<div>연간 영업이익 = 해당 연도 매출 × 공개된 GAAP 영업이익률. 전망 연도의 영업이익률이 미공개이면 막대를 표시하지 않습니다.</div>'
+      :(q.notes||[]).map(function(n){return '<div>'+esc(n)+'</div>';}).join('');
+    var periodLabel=annual?'연간별':'분기별';
+    var chartLabel=(companyName||'기업')+' '+(annual?'연간':'분기')+' GAAP 매출과 영업이익 막대그래프';
+    return '<div class="ca-quarterly"><div class="ca-quarterly-head"><div class="ca-section-label">'+(annual?'연간 실적·전망':'분기 실적·전망')+'</div><button type="button" class="ca-quarterly-control" data-ca-period-toggle aria-label="'+periodLabel+' 보기" aria-pressed="'+(annual?'true':'false')+'"><span class="ca-q-calendar" aria-hidden="true"></span><span>'+periodLabel+'</span><span class="ca-q-chevron" aria-hidden="true"></span></button></div><div class="ca-q-legend" aria-label="그래프 범례"><span class="ca-q-legend-item"><i class="ca-q-swatch ca-q-swatch-rev" aria-hidden="true"></i>매출</span><span class="ca-q-legend-item"><i class="ca-q-swatch ca-q-swatch-op" aria-hidden="true"></i>영업이익</span><span class="ca-q-legend-item"><i class="ca-q-swatch ca-q-swatch-est" aria-hidden="true"></i>전망</span><span class="ca-q-unit">GAAP · $B</span></div><div class="ca-qchart" role="list" aria-label="'+esc(chartLabel)+'"><div class="ca-q-plot"><div class="ca-q-grid" aria-hidden="true">'+grid.join('')+zero+'</div><div class="ca-q-yaxis" aria-hidden="true">'+axis.join('')+'</div><div class="ca-q-columns" style="grid-template-columns:repeat('+rows.length+',minmax(0,1fr))">'+body+'</div></div><div class="ca-q-xlabels" style="grid-template-columns:repeat('+rows.length+',minmax(0,1fr))">'+labels+'</div></div>'+(notes?'<div class="ca-q-notes">'+notes+'</div>':'')+'</div>';
   }
 
   function renderCompany(d){
@@ -228,7 +247,8 @@
     var risks=(d.risks||[]).map(function(r){return '<div class="ca-risk"><h3>'+esc(r.title)+'</h3><p>'+esc(r.detail)+'</p></div>';}).join('');
     var sources=(d.sources||[]).map(function(s){return '<a class="ca-src" href="'+esc(s.url)+'" target="_blank" rel="noopener"><span class="ca-src-name">'+esc(s.label)+'</span><span class="ca-src-type">'+esc(s.type)+'</span></a>';}).join('');
     var vis=d.visibility||{};
-    var quarterly=quarterlyHtml(d.quarterly,d.company&&d.company.name);
+    var period='quarterly';try{period=sessionStorage.getItem('alpha_company_period')==='annual'?'annual':'quarterly';}catch(e){}
+    var quarterly=quarterlyHtml(d.quarterly,d.financials,d.company&&d.company.name,period);
     app.innerHTML=''
       +'<section class="ca-card ca-frame"><div><div class="ca-section-label">전략 프레임</div><h2 class="ca-company-title">'+esc(d.company.name)+' <span>'+esc(d.company.ticker)+'</span></h2><div class="ca-statement">'+esc(frame.statement)+'</div><div class="ca-redef">'+esc(frame.redefinition)+'</div><ul>'+(frame.evidence||[]).map(function(x){return '<li>'+esc(x)+'</li>';}).join('')+'</ul></div>'
       +'<div class="ca-frame-side"><div><div class="ca-section-label">현재 상태</div><div class="ca-big">'+esc(frame.status)+'</div></div>'+quarterly+'<div class="ca-note">확인된 사실과 경영진 전망, 투자 해석을 구분해 표시합니다.</div></div></section>'
@@ -244,6 +264,10 @@
 
   function setButtons(sec,id){
     Array.prototype.forEach.call(sec.querySelectorAll('[data-company]'),function(b){var on=b.getAttribute('data-company')===id;b.classList.toggle('on',on);b.setAttribute('aria-pressed',on?'true':'false');});
+  }
+  function selectedCompany(sec){
+    var on=sec.querySelector('[data-company].on');
+    return on?on.getAttribute('data-company'):'marvell';
   }
   function getCompany(id){for(var i=0;i<COMPANIES.length;i++)if(COMPANIES[i].id===id)return COMPANIES[i];return null;}
   function selectCompany(sec,id){
@@ -291,15 +315,25 @@
       try{window.scrollTo({top:0,behavior:'auto'});}catch(e){window.scrollTo(0,0);}
     }
 
+    /* index.html의 정적 기본값(01 시장 모니터링)이 먼저 페인트되는 경로를 없앤다.
+       기존 탭 초기화 타이머보다 뒤에 실행해, 첫 표시 화면을 02 기업분석으로 확정한다. */
+    function activateDefault(){
+      activate();
+      document.body.classList.remove('company-default-pending');
+      document.body.classList.add('company-default-ready');
+    }
+
     btn.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();activate();});
     nav.addEventListener('click',function(e){var t=e.target.closest&&e.target.closest('.tab');if(!t||t===btn)return;sec.classList.remove('on');var ab=document.getElementById('asofBox');if(ab)ab.style.display='';});
     sec.addEventListener('click',function(e){
       var b=e.target.closest&&e.target.closest('[data-company]');if(b){selectCompany(sec,b.getAttribute('data-company'));return;}
+      var period=e.target.closest&&e.target.closest('[data-ca-period-toggle]');if(period){try{sessionStorage.setItem('alpha_company_period',period.getAttribute('aria-pressed')==='true'?'quarterly':'annual');}catch(err){}var id=selectedCompany(sec);if(CACHE[id])renderCompany(CACHE[id]);return;}
       var tlb=e.target.closest&&e.target.closest('[data-ca-timeline]');if(tlb){var id=tlb.getAttribute('data-ca-timeline'),tl=document.getElementById(id);if(!tl)return;var on=tl.classList.toggle('on');tlb.setAttribute('aria-expanded',on?'true':'false');tlb.textContent=on?'타임라인 닫기':'타임라인 보기';}
     });
     renumber();
     var initial='marvell';try{var saved=sessionStorage.getItem('alpha_company');if(getCompany(saved))initial=saved;}catch(e){}
     selectCompany(sec,initial);
+    setTimeout(activateDefault,0);
   }
 
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount);else mount();
