@@ -5,6 +5,8 @@
 (function(){
   'use strict';
   var rows=[];
+  /* 배포 커밋 수집 지연과 무관하게 사용자에게 보이는 변경은 즉시 이력에 남긴다. */
+  var REQUIRED_VISIBLE_ROWS=[{d:'2026-09-02',t:'02 기업분석을 페이지 초기 화면으로 변경 — 01 시장 모니터링이 먼저 보였다가 전환되는 현상 제거',sha:'company-initial-view-20260902'}];
   var ready=false;
   var modal=null;
   var badgePatchQueued=false;
@@ -90,7 +92,7 @@
     badgePatchQueued=true;
     (window.requestAnimationFrame||function(cb){return setTimeout(cb,16);})(patchBadges);
   }
-  function finish(data){rows=data;ready=true;queueBadgePatch();if(modal&&modal.style.display==='flex')renderModal();}
+  function finish(data){rows=REQUIRED_VISIBLE_ROWS.concat(Array.isArray(data)?data:[]);ready=true;queueBadgePatch();if(modal&&modal.style.display==='flex')renderModal();}
   function fetchCurated(){
     return fetch('/changelog.js?t='+Date.now(),{cache:'no-store',credentials:'same-origin'})
       .then(function(r){if(!r.ok)throw new Error('changelog HTTP '+r.status);return r.text();})
