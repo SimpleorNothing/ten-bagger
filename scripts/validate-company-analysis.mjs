@@ -59,9 +59,9 @@ if(!companyTabs.includes("id:'"+id+"'")||!companyTabs.includes("data:'/"+id+"/da
 
 const avgoQ2=broadcom.quarterly.rows.find(x=>x.period==='FY26 Q2');
 if(!avgoQ2||avgoQ2.revenue!==22.187||avgoQ2.operatingIncome!==10.788||avgoQ2.kind!=='actual')fail('AVGO FY26 Q2 GAAP actuals missing');
-const avgoQ3=broadcom.quarterly.rows.find(x=>x.period==='FY26 Q3E');
-if(!avgoQ3||avgoQ3.revenue!==29.4||avgoQ3.operatingIncome!==null||avgoQ3.kind!=='guidance')fail('AVGO FY26 Q3 guidance missing');
-if(!broadcom.headlineKpis.some(k=>k.label.includes('AI 반도체')&&k.value==='$10.8B'))fail('AVGO AI semiconductor KPI missing');
+const avgoQ3=broadcom.quarterly.rows.find(x=>x.period==='FY26 Q3');
+if(!avgoQ3||avgoQ3.revenue!==29.591||avgoQ3.operatingIncome!==15.955||avgoQ3.kind!=='actual')fail('AVGO FY26 Q3 GAAP actuals missing');
+if(!broadcom.headlineKpis.some(k=>k.label.includes('AI 반도체')&&k.value==='$16.7B'))fail('AVGO AI semiconductor KPI missing');
 if(!broadcom.axes.some(a=>a.code==='A5'&&(a.facts||[]).some(x=>x.includes('42%'))))fail('AVGO customer concentration missing');
 if(!broadcom.sources.some(s=>s.type==='SEC 10-Q'))fail('AVGO SEC source missing');
 
