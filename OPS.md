@@ -1,5 +1,9 @@
 **최종 갱신: 2026-09-02 (KST)**
 
+> 2026-09-02 23:44 · **04 알파 찾기 Value Chain에 Credo(CRDO) 추가.** `index.html` 후보 배열에 CRDO(L6·가속)와 초입 5신호(S1~S5), `VC_ALIAS`의 CRDO·크레도 매핑을 추가했다. `gamma.json`에는 가격·목표가·EPS 리비전 수치를 임의 입력하지 않고 최소 커버리지 스켈레톤만 등록했으며, 후속 자동 수집에서 실데이터로 보강한다.
+
+**최종 갱신: 2026-09-02 (KST)**
+
 > 2026-09-02 23:00 · **02 기업분석에 Credo Technology(CRDO) 추가.** `company.js`에 CRDO 탭과 데이터 경로를 등록하고, `credo/data.json`에 FY26 Q1~FY27 Q1 공식 GAAP 분기 실적과 FY27 Q2 회사 가이던스, AEC·광 DSP·PIC·ZeroFlap·AI 네트워크 수요·GAAP 마진·운전자본을 포함한 전략 축을 추가했다. `company_news.json`에는 FY27 Q1 공식 실적을 연결했으며, 가격·목표가·γ·stage는 기존대로 `gamma.json`을 단일 소스로 유지한다.
 
 **최종 갱신: 2026-08-30 (KST)**
