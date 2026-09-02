@@ -9,7 +9,7 @@ echo "index.html size: $SIZE"
 grep -q "const D=" index.html || { echo "::error::const D= 앵커 소실"; exit 1; }
 grep -q "HOLDINGS" index.html || { echo "::error::HOLDINGS 앵커 소실"; exit 1; }
 
-for f in alpha.json earnings.json judgment.json news.json prices.json calendar.json company_news.json marvell/data.json lumentum/data.json micron/data.json vertiv/data.json nvidia/data.json; do
+for f in alpha.json earnings.json judgment.json news.json prices.json calendar.json company_news.json marvell/data.json lumentum/data.json micron/data.json vertiv/data.json nvidia/data.json credo/data.json; do
   if [ -f "$f" ]; then
     python3 -c "import json;json.load(open('$f'))" || { echo "::error::$f JSON 깨짐"; exit 1; }
   fi
