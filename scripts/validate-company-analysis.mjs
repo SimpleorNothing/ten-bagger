@@ -10,6 +10,7 @@ const micron=readJson('micron/data.json');
 const vertiv=readJson('vertiv/data.json');
 const nvidia=readJson('nvidia/data.json');
 const broadcom=readJson('broadcom/data.json');
+const credo=readJson('credo/data.json');
 const calendar=readJson('calendar.json');
 const earnings=readJson('earnings.json');
 const companyTabs=fs.readFileSync('company.js','utf8');
@@ -39,8 +40,9 @@ validateCompanySchema('MU',micron);
 validateCompanySchema('VRT',vertiv);
 validateCompanySchema('NVDA',nvidia);
 validateCompanySchema('AVGO',broadcom);
+validateCompanySchema('CRDO',credo);
 
-for(const [name,id,d] of [['MU','micron',micron],['VRT','vertiv',vertiv],['NVDA','nvidia',nvidia],['AVGO','broadcom',broadcom]]){
+for(const [name,id,d] of [['MU','micron',micron],['VRT','vertiv',vertiv],['NVDA','nvidia',nvidia],['AVGO','broadcom',broadcom],['CRDO','credo',credo]]){
   if(d.company.ticker!==name)fail(name+': ticker mismatch');
   if(!Array.isArray(d.headlineKpis)||d.headlineKpis.length<4)fail(name+': headline KPI set missing');
   if(!Array.isArray(d.axes)||d.axes.length<4)fail(name+': strategy axes missing');
