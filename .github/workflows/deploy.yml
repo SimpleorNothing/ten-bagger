@@ -154,7 +154,8 @@ jobs:
             echo "ERROR: ${base} is not serving deployed SHA ${GITHUB_SHA} after propagation retries"
             return 1
           }
-          verify "https://ten-bagger.cw120-park.workers.dev"
+          # wrangler.jsonc는 custom domain만 구성한다. workers.dev 서브도메인은 배포 대상이 아니므로
+          # 실제 프로덕션 엔드포인트인 custom domain만 최신 SHA를 서비스하는지 검증한다.
           verify "https://simpleornothing.com"
 
           probe_ok=0
