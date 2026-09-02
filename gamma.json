@@ -1,5 +1,5 @@
 {
-  "asOf": "2026-09-01T23:34:09.414Z",
+  "asOf": "2026-09-02T12:18:45.026Z",
   "source": "auto(price-vs-target+revisions)+judgment",
   "note": "γ 단일 소스. index.html D배열 g·judgment.json g는 이 파일이 대체(인라인 g는 폴백). stage도 이 파일이 단일소스(인라인 폴백). stage는 판단값이라 cron은 g만 자동, stage는 수동. 룰: pct=(target-price)/price. pct>=+10% → open / pct<=-5% AND trend in(flat,falling) → spent / 그 외(모호밴드·trend rising·unknown) → flagged+직전값 hold. lock=true는 운영자 수동 고정(auto 미적용). US는 Yahoo quoteSummary 자동, KR(005930·000660)·EU(BESI)는 커버리지 갭으로 수기 보정 가능. checkedAt이 N일 초과면 스테일.",
   "rules": {
@@ -15,9 +15,9 @@
       "mkt": "KR",
       "lock": false,
       "why": "Value Chain 전체 투자매력도 커버리지 추가 · 원자료 수집 대기",
-      "price": 111500,
+      "price": 108900,
       "target": 176200,
-      "pct": 58,
+      "pct": 61.8,
       "targetHist": [
         {
           "d": "2026-08-16",
@@ -85,6 +85,10 @@
         },
         {
           "d": "2026-09-01",
+          "t": 176200
+        },
+        {
+          "d": "2026-09-02",
           "t": 176200
         }
       ],
@@ -156,13 +160,17 @@
         {
           "d": "2026-09-01",
           "p": 111500
+        },
+        {
+          "d": "2026-09-02",
+          "p": 108900
         }
       ],
       "trend": "flat",
-      "checkedAt": "2026-09-01",
+      "checkedAt": "2026-09-02",
       "flagged": false,
       "rev": {
-        "at": "2026-09-01",
+        "at": "2026-09-02",
         "tp": {
           "now": 176200,
           "hi": 230000,
@@ -172,7 +180,7 @@
           "c90": null
         },
         "px": {
-          "c7": 0.6,
+          "c7": 1.8,
           "c30": null,
           "c90": null
         },
@@ -256,13 +264,13 @@
         "provenance": {
           "provider": "Yahoo Finance",
           "sourceUrl": "https://query1.finance.yahoo.com/v10/finance/quoteSummary/353200.KS?modules=financialData,earningsTrend,recommendationTrend,upgradeDowngradeHistory&crumb=<redacted>",
-          "retrievedAt": "2026-09-01T23:34:38.582Z",
-          "rawRef": "raw/revisions/2026-09-01/2026-09-01T23-34-38-334Z/353200.json",
+          "retrievedAt": "2026-09-02T12:19:13.673Z",
+          "rawRef": "raw/revisions/2026-09-02/2026-09-02T12-19-13-416Z/353200.json",
           "schema": "revision-source-v1"
         },
         "quality": {
           "status": "verified",
-          "checkedAt": "2026-09-01T23:34:48.830Z",
+          "checkedAt": "2026-09-02T12:19:23.130Z",
           "fields": {
             "price": "verified",
             "tp": "verified",
@@ -531,9 +539,13 @@
         {
           "d": "2026-09-01",
           "t": 279.62
+        },
+        {
+          "d": "2026-09-02",
+          "t": 279.62
         }
       ],
-      "checkedAt": "2026-09-01",
+      "checkedAt": "2026-09-02",
       "flagged": false,
       "priceHist": [
         {
@@ -739,10 +751,14 @@
         {
           "d": "2026-09-01",
           "p": 210.39
+        },
+        {
+          "d": "2026-09-02",
+          "p": 210.39
         }
       ],
       "revInvalid": {
-        "at": "2026-09-01T23:34:48.796Z",
+        "at": "2026-09-02T12:19:23.083Z",
         "reason": "EPS 90d recompute mismatch"
       }
     },
@@ -752,9 +768,9 @@
       "mkt": "KR",
       "lock": false,
       "why": "HBM4 점유 회복 미반영",
-      "price": 261000,
+      "price": 250500,
       "target": 471544.53,
-      "pct": 80.7,
+      "pct": 88.2,
       "trend": "flat",
       "targetHist": [
         {
@@ -984,9 +1000,13 @@
         {
           "d": "2026-09-01",
           "t": 471544.53
+        },
+        {
+          "d": "2026-09-02",
+          "t": 471544.53
         }
       ],
-      "checkedAt": "2026-09-01",
+      "checkedAt": "2026-09-02",
       "flagged": false,
       "priceHist": [
         {
@@ -1192,10 +1212,14 @@
         {
           "d": "2026-09-01",
           "p": 261000
+        },
+        {
+          "d": "2026-09-02",
+          "p": 250500
         }
       ],
       "rev": {
-        "at": "2026-09-01",
+        "at": "2026-09-02",
         "tp": {
           "now": 471544.53,
           "hi": 725000,
@@ -1205,9 +1229,9 @@
           "c90": null
         },
         "px": {
-          "c7": 1.6,
-          "c30": -0.6,
-          "c90": -27.6
+          "c7": -4.2,
+          "c30": 4.6,
+          "c90": -28.7
         },
         "eps": {
           "fy1": {
@@ -1299,19 +1323,19 @@
         },
         "actions": null,
         "gate": {
-          "d30": -6.6,
-          "d90": -52
+          "d30": -1.4,
+          "d90": -53.1
         },
         "provenance": {
           "provider": "Yahoo Finance",
           "sourceUrl": "https://query1.finance.yahoo.com/v10/finance/quoteSummary/005930.KS?modules=financialData,earningsTrend,recommendationTrend,upgradeDowngradeHistory&crumb=<redacted>",
-          "retrievedAt": "2026-09-01T23:34:39.602Z",
-          "rawRef": "raw/revisions/2026-09-01/2026-09-01T23-34-38-334Z/005930.json",
+          "retrievedAt": "2026-09-02T12:19:14.651Z",
+          "rawRef": "raw/revisions/2026-09-02/2026-09-02T12-19-13-416Z/005930.json",
           "schema": "revision-source-v1"
         },
         "quality": {
           "status": "verified",
-          "checkedAt": "2026-09-01T23:34:48.830Z",
+          "checkedAt": "2026-09-02T12:19:23.130Z",
           "fields": {
             "price": "verified",
             "tp": "verified",
@@ -1338,7 +1362,7 @@
       "lock": false,
       "why": "주가<상향중 목표(6/19 감사 spent→open)·stage는 6/24 실적 후 재평가",
       "price": 933.44,
-      "target": 1513.41,
+      "target": 1513.11,
       "pct": 62.1,
       "trend": "flat",
       "targetHist": [
@@ -1569,9 +1593,13 @@
         {
           "d": "2026-09-01",
           "t": 1513.41
+        },
+        {
+          "d": "2026-09-02",
+          "t": 1513.11
         }
       ],
-      "checkedAt": "2026-09-01",
+      "checkedAt": "2026-09-02",
       "flagged": false,
       "priceHist": [
         {
@@ -1777,12 +1805,16 @@
         {
           "d": "2026-09-01",
           "p": 933.44
+        },
+        {
+          "d": "2026-09-02",
+          "p": 933.44
         }
       ],
       "rev": {
-        "at": "2026-09-01",
+        "at": "2026-09-02",
         "tp": {
-          "now": 1513.41,
+          "now": 1513.11,
           "hi": 2200,
           "lo": 361,
           "c7": -0.1,
@@ -1809,7 +1841,7 @@
             "dn7": null,
             "up30": 5,
             "dn30": 1,
-            "revEst": 240323154000
+            "revEst": 241081059590
           },
           "fy0": {
             "end": "2026-08-31",
@@ -1825,7 +1857,7 @@
             "dn7": null,
             "up30": 29,
             "dn30": 1,
-            "revEst": 129715361400
+            "revEst": 129736157460
           },
           "q1": {
             "end": "2026-11-30",
@@ -1845,13 +1877,13 @@
           }
         },
         "rating": {
-          "mean": 1.36,
-          "n": 44,
+          "mean": 1.35,
+          "n": 45,
           "hist": [
             {
               "m": "0m",
               "sb": 9,
-              "b": 34,
+              "b": 35,
               "h": 4,
               "u": 0,
               "s": 0
@@ -1859,8 +1891,8 @@
             {
               "m": "-1m",
               "sb": 9,
-              "b": 31,
-              "h": 5,
+              "b": 35,
+              "h": 4,
               "u": 0,
               "s": 0
             },
@@ -1868,17 +1900,17 @@
               "m": "-2m",
               "sb": 9,
               "b": 31,
-              "h": 4,
+              "h": 5,
               "u": 0,
-              "s": 1
+              "s": 0
             },
             {
               "m": "-3m",
               "sb": 9,
-              "b": 30,
+              "b": 31,
               "h": 4,
-              "u": 1,
-              "s": 0
+              "u": 0,
+              "s": 1
             }
           ]
         },
@@ -1926,13 +1958,13 @@
         "provenance": {
           "provider": "Yahoo Finance",
           "sourceUrl": "https://query1.finance.yahoo.com/v10/finance/quoteSummary/MU?modules=financialData,earningsTrend,recommendationTrend,upgradeDowngradeHistory&crumb=<redacted>",
-          "retrievedAt": "2026-09-01T23:34:39.924Z",
-          "rawRef": "raw/revisions/2026-09-01/2026-09-01T23-34-38-334Z/MU.json",
+          "retrievedAt": "2026-09-02T12:19:14.962Z",
+          "rawRef": "raw/revisions/2026-09-02/2026-09-02T12-19-13-416Z/MU.json",
           "schema": "revision-source-v1"
         },
         "quality": {
           "status": "verified",
-          "checkedAt": "2026-09-01T23:34:48.830Z",
+          "checkedAt": "2026-09-02T12:19:23.130Z",
           "fields": {
             "price": "verified",
             "tp": "verified",
@@ -2190,9 +2222,13 @@
         {
           "d": "2026-09-01",
           "t": 1148.3
+        },
+        {
+          "d": "2026-09-02",
+          "t": 1148.3
         }
       ],
-      "checkedAt": "2026-09-01",
+      "checkedAt": "2026-09-02",
       "flagged": false,
       "priceHist": [
         {
@@ -2398,10 +2434,14 @@
         {
           "d": "2026-09-01",
           "p": 868.95
+        },
+        {
+          "d": "2026-09-02",
+          "p": 868.95
         }
       ],
       "rev": {
-        "at": "2026-09-01",
+        "at": "2026-09-02",
         "tp": {
           "now": 1148.3,
           "hi": 1400,
@@ -2456,6 +2496,20 @@
         },
         "actions": [
           {
+            "d": "2026-09-01",
+            "firm": "Deutsche Bank",
+            "to": "Buy",
+            "from": null,
+            "act": "init"
+          },
+          {
+            "d": "2026-08-31",
+            "firm": "Evercore ISI Group",
+            "to": "Outperform",
+            "from": null,
+            "act": "init"
+          },
+          {
             "d": "2026-08-12",
             "firm": "B of A Securities",
             "to": "Neutral",
@@ -2475,20 +2529,6 @@
             "to": "Outperform",
             "from": "Outperform",
             "act": "main"
-          },
-          {
-            "d": "2026-08-12",
-            "firm": "JP Morgan",
-            "to": "Overweight",
-            "from": "Overweight",
-            "act": "main"
-          },
-          {
-            "d": "2026-08-12",
-            "firm": "TD Cowen",
-            "to": "Hold",
-            "from": "Hold",
-            "act": "main"
           }
         ],
         "gate": {
@@ -2498,13 +2538,13 @@
         "provenance": {
           "provider": "Yahoo Finance",
           "sourceUrl": "https://query1.finance.yahoo.com/v10/finance/quoteSummary/LITE?modules=financialData,earningsTrend,recommendationTrend,upgradeDowngradeHistory&crumb=<redacted>",
-          "retrievedAt": "2026-09-01T23:34:40.277Z",
-          "rawRef": "raw/revisions/2026-09-01/2026-09-01T23-34-38-334Z/LITE.json",
+          "retrievedAt": "2026-09-02T12:19:15.329Z",
+          "rawRef": "raw/revisions/2026-09-02/2026-09-02T12-19-13-416Z/LITE.json",
           "schema": "revision-source-v1"
         },
         "quality": {
           "status": "blocked",
-          "checkedAt": "2026-09-01T23:34:48.830Z",
+          "checkedAt": "2026-09-02T12:19:23.130Z",
           "fields": {
             "price": "verified",
             "tp": "verified",
@@ -2512,7 +2552,7 @@
           },
           "warnings": [],
           "blocking": [
-            "Yahoo annual period rollover stale: 0y ended 63d ago (2026-06-30)"
+            "Yahoo annual period rollover stale: 0y ended 64d ago (2026-06-30)"
           ]
         },
         "epsSemantics": {
@@ -2814,9 +2854,13 @@
         {
           "d": "2026-09-01",
           "t": 338.15
+        },
+        {
+          "d": "2026-09-02",
+          "t": 338.15
         }
       ],
-      "checkedAt": "2026-09-01",
+      "checkedAt": "2026-09-02",
       "flagged": false,
       "priceHist": [
         {
@@ -3022,10 +3066,14 @@
         {
           "d": "2026-09-01",
           "p": 255.97
+        },
+        {
+          "d": "2026-09-02",
+          "p": 255.97
         }
       ],
       "rev": {
-        "at": "2026-09-01",
+        "at": "2026-09-02",
         "tp": {
           "now": 338.15,
           "hi": 427,
@@ -3171,13 +3219,13 @@
         "provenance": {
           "provider": "Yahoo Finance",
           "sourceUrl": "https://query1.finance.yahoo.com/v10/finance/quoteSummary/VRT?modules=financialData,earningsTrend,recommendationTrend,upgradeDowngradeHistory&crumb=<redacted>",
-          "retrievedAt": "2026-09-01T23:34:40.604Z",
-          "rawRef": "raw/revisions/2026-09-01/2026-09-01T23-34-38-334Z/VRT.json",
+          "retrievedAt": "2026-09-02T12:19:15.649Z",
+          "rawRef": "raw/revisions/2026-09-02/2026-09-02T12-19-13-416Z/VRT.json",
           "schema": "revision-source-v1"
         },
         "quality": {
           "status": "verified",
-          "checkedAt": "2026-09-01T23:34:48.830Z",
+          "checkedAt": "2026-09-02T12:19:23.131Z",
           "fields": {
             "price": "verified",
             "tp": "verified",
@@ -3435,9 +3483,13 @@
         {
           "d": "2026-09-01",
           "t": 275.08
+        },
+        {
+          "d": "2026-09-02",
+          "t": 275.08
         }
       ],
-      "checkedAt": "2026-09-01",
+      "checkedAt": "2026-09-02",
       "flagged": false,
       "priceHist": [
         {
@@ -3643,10 +3695,14 @@
         {
           "d": "2026-09-01",
           "p": 213.63
+        },
+        {
+          "d": "2026-09-02",
+          "p": 213.63
         }
       ],
       "rev": {
-        "at": "2026-09-01",
+        "at": "2026-09-02",
         "tp": {
           "now": 275.08,
           "hi": 390,
@@ -3750,6 +3806,13 @@
         },
         "actions": [
           {
+            "d": "2026-08-27",
+            "firm": "Bernstein",
+            "to": "Market Perform",
+            "from": "Market Perform",
+            "act": "reit"
+          },
+          {
             "d": "2026-08-14",
             "firm": "Jefferies",
             "to": "Hold",
@@ -3776,13 +3839,6 @@
             "to": "Equal-Weight",
             "from": "Equal-Weight",
             "act": "main"
-          },
-          {
-            "d": "2026-07-29",
-            "firm": "Bernstein",
-            "to": "Market Perform",
-            "from": "Market Perform",
-            "act": "main"
           }
         ],
         "gate": {
@@ -3792,13 +3848,13 @@
         "provenance": {
           "provider": "Yahoo Finance",
           "sourceUrl": "https://query1.finance.yahoo.com/v10/finance/quoteSummary/BE?modules=financialData,earningsTrend,recommendationTrend,upgradeDowngradeHistory&crumb=<redacted>",
-          "retrievedAt": "2026-09-01T23:34:40.949Z",
-          "rawRef": "raw/revisions/2026-09-01/2026-09-01T23-34-38-334Z/BE.json",
+          "retrievedAt": "2026-09-02T12:19:15.987Z",
+          "rawRef": "raw/revisions/2026-09-02/2026-09-02T12-19-13-416Z/BE.json",
           "schema": "revision-source-v1"
         },
         "quality": {
           "status": "verified",
-          "checkedAt": "2026-09-01T23:34:48.830Z",
+          "checkedAt": "2026-09-02T12:19:23.131Z",
           "fields": {
             "price": "verified",
             "tp": "verified",
@@ -4056,9 +4112,13 @@
         {
           "d": "2026-09-01",
           "t": 613.84
+        },
+        {
+          "d": "2026-09-02",
+          "t": 613.84
         }
       ],
-      "checkedAt": "2026-09-01",
+      "checkedAt": "2026-09-02",
       "flagged": false,
       "priceHist": [
         {
@@ -4264,10 +4324,14 @@
         {
           "d": "2026-09-01",
           "p": 459.61
+        },
+        {
+          "d": "2026-09-02",
+          "p": 459.61
         }
       ],
       "rev": {
-        "at": "2026-09-01",
+        "at": "2026-09-02",
         "tp": {
           "now": 613.84,
           "hi": 1250,
@@ -4358,14 +4422,6 @@
               "h": 9,
               "u": 0,
               "s": 0
-            },
-            {
-              "m": "-3m",
-              "sb": 5,
-              "b": 36,
-              "h": 10,
-              "u": 0,
-              "s": 0
             }
           ]
         },
@@ -4413,13 +4469,13 @@
         "provenance": {
           "provider": "Yahoo Finance",
           "sourceUrl": "https://query1.finance.yahoo.com/v10/finance/quoteSummary/AMD?modules=financialData,earningsTrend,recommendationTrend,upgradeDowngradeHistory&crumb=<redacted>",
-          "retrievedAt": "2026-09-01T23:34:41.285Z",
-          "rawRef": "raw/revisions/2026-09-01/2026-09-01T23-34-38-334Z/AMD.json",
+          "retrievedAt": "2026-09-02T12:19:16.304Z",
+          "rawRef": "raw/revisions/2026-09-02/2026-09-02T12-19-13-416Z/AMD.json",
           "schema": "revision-source-v1"
         },
         "quality": {
           "status": "verified",
-          "checkedAt": "2026-09-01T23:34:48.831Z",
+          "checkedAt": "2026-09-02T12:19:23.131Z",
           "fields": {
             "price": "verified",
             "tp": "verified",
@@ -4677,9 +4733,13 @@
         {
           "d": "2026-09-01",
           "t": 147.5
+        },
+        {
+          "d": "2026-09-02",
+          "t": 147.5
         }
       ],
-      "checkedAt": "2026-09-01",
+      "checkedAt": "2026-09-02",
       "flagged": false,
       "priceHist": [
         {
@@ -4885,10 +4945,14 @@
         {
           "d": "2026-09-01",
           "p": 84.4
+        },
+        {
+          "d": "2026-09-02",
+          "p": 84.4
         }
       ],
       "rev": {
-        "at": "2026-09-01",
+        "at": "2026-09-02",
         "tp": {
           "now": 147.5,
           "hi": 180,
@@ -5034,13 +5098,13 @@
         "provenance": {
           "provider": "Yahoo Finance",
           "sourceUrl": "https://query1.finance.yahoo.com/v10/finance/quoteSummary/RMBS?modules=financialData,earningsTrend,recommendationTrend,upgradeDowngradeHistory&crumb=<redacted>",
-          "retrievedAt": "2026-09-01T23:34:41.692Z",
-          "rawRef": "raw/revisions/2026-09-01/2026-09-01T23-34-38-334Z/RMBS.json",
+          "retrievedAt": "2026-09-02T12:19:16.664Z",
+          "rawRef": "raw/revisions/2026-09-02/2026-09-02T12-19-13-416Z/RMBS.json",
           "schema": "revision-source-v1"
         },
         "quality": {
           "status": "verified",
-          "checkedAt": "2026-09-01T23:34:48.831Z",
+          "checkedAt": "2026-09-02T12:19:23.131Z",
           "fields": {
             "price": "verified",
             "tp": "verified",
@@ -5298,9 +5362,13 @@
         {
           "d": "2026-09-01",
           "t": 348.3
+        },
+        {
+          "d": "2026-09-02",
+          "t": 348.3
         }
       ],
-      "checkedAt": "2026-09-01",
+      "checkedAt": "2026-09-02",
       "flagged": false,
       "priceHist": [
         {
@@ -5506,10 +5574,14 @@
         {
           "d": "2026-09-01",
           "p": 280.31
+        },
+        {
+          "d": "2026-09-02",
+          "p": 280.31
         }
       ],
       "rev": {
-        "at": "2026-09-01",
+        "at": "2026-09-02",
         "tp": {
           "now": 348.3,
           "hi": 441,
@@ -5655,13 +5727,13 @@
         "provenance": {
           "provider": "Yahoo Finance",
           "sourceUrl": "https://query1.finance.yahoo.com/v10/finance/quoteSummary/CEG?modules=financialData,earningsTrend,recommendationTrend,upgradeDowngradeHistory&crumb=<redacted>",
-          "retrievedAt": "2026-09-01T23:34:42.031Z",
-          "rawRef": "raw/revisions/2026-09-01/2026-09-01T23-34-38-334Z/CEG.json",
+          "retrievedAt": "2026-09-02T12:19:16.974Z",
+          "rawRef": "raw/revisions/2026-09-02/2026-09-02T12-19-13-416Z/CEG.json",
           "schema": "revision-source-v1"
         },
         "quality": {
           "status": "verified",
-          "checkedAt": "2026-09-01T23:34:48.831Z",
+          "checkedAt": "2026-09-02T12:19:23.131Z",
           "fields": {
             "price": "verified",
             "tp": "verified",
@@ -5919,9 +5991,13 @@
         {
           "d": "2026-09-01",
           "t": 193.1
+        },
+        {
+          "d": "2026-09-02",
+          "t": 193.1
         }
       ],
-      "checkedAt": "2026-09-01",
+      "checkedAt": "2026-09-02",
       "flagged": false,
       "priceHist": [
         {
@@ -6127,10 +6203,14 @@
         {
           "d": "2026-09-01",
           "p": 166.61
+        },
+        {
+          "d": "2026-09-02",
+          "p": 166.61
         }
       ],
       "rev": {
-        "at": "2026-09-01",
+        "at": "2026-09-02",
         "tp": {
           "now": 193.1,
           "hi": 400,
@@ -6221,14 +6301,6 @@
               "h": 23,
               "u": 1,
               "s": 2
-            },
-            {
-              "m": "-3m",
-              "sb": 2,
-              "b": 10,
-              "h": 22,
-              "u": 3,
-              "s": 2
             }
           ]
         },
@@ -6276,13 +6348,13 @@
         "provenance": {
           "provider": "Yahoo Finance",
           "sourceUrl": "https://query1.finance.yahoo.com/v10/finance/quoteSummary/QCOM?modules=financialData,earningsTrend,recommendationTrend,upgradeDowngradeHistory&crumb=<redacted>",
-          "retrievedAt": "2026-09-01T23:34:42.360Z",
-          "rawRef": "raw/revisions/2026-09-01/2026-09-01T23-34-38-334Z/QCOM.json",
+          "retrievedAt": "2026-09-02T12:19:17.289Z",
+          "rawRef": "raw/revisions/2026-09-02/2026-09-02T12-19-13-416Z/QCOM.json",
           "schema": "revision-source-v1"
         },
         "quality": {
           "status": "verified",
-          "checkedAt": "2026-09-01T23:34:48.831Z",
+          "checkedAt": "2026-09-02T12:19:23.131Z",
           "fields": {
             "price": "verified",
             "tp": "verified",
@@ -6540,9 +6612,13 @@
         {
           "d": "2026-09-01",
           "t": 192.12
+        },
+        {
+          "d": "2026-09-02",
+          "t": 192.12
         }
       ],
-      "checkedAt": "2026-09-01",
+      "checkedAt": "2026-09-02",
       "flagged": false,
       "priceHist": [
         {
@@ -6748,10 +6824,14 @@
         {
           "d": "2026-09-01",
           "p": 163.18
+        },
+        {
+          "d": "2026-09-02",
+          "p": 163.18
         }
       ],
       "rev": {
-        "at": "2026-09-01",
+        "at": "2026-09-02",
         "tp": {
           "now": 192.12,
           "hi": 230,
@@ -6897,13 +6977,13 @@
         "provenance": {
           "provider": "Yahoo Finance",
           "sourceUrl": "https://query1.finance.yahoo.com/v10/finance/quoteSummary/APH?modules=financialData,earningsTrend,recommendationTrend,upgradeDowngradeHistory&crumb=<redacted>",
-          "retrievedAt": "2026-09-01T23:34:42.698Z",
-          "rawRef": "raw/revisions/2026-09-01/2026-09-01T23-34-38-334Z/APH.json",
+          "retrievedAt": "2026-09-02T12:19:17.601Z",
+          "rawRef": "raw/revisions/2026-09-02/2026-09-02T12-19-13-416Z/APH.json",
           "schema": "revision-source-v1"
         },
         "quality": {
           "status": "verified",
-          "checkedAt": "2026-09-01T23:34:48.831Z",
+          "checkedAt": "2026-09-02T12:19:23.131Z",
           "fields": {
             "price": "verified",
             "tp": "verified",
@@ -6929,9 +7009,9 @@
       "mkt": "EU",
       "lock": false,
       "why": "6/18 인베스터데이 LT매출 €1.7-2.2B 상향·수주+104%·beat-and-raise = 테제입증 → 초입→가속. 현가€311>평균목표€278(상향중) = γ narrowing flag",
-      "price": 189.15,
+      "price": 190.85,
       "target": 296.57,
-      "pct": 56.8,
+      "pct": 55.4,
       "trend": "flat",
       "targetHist": [
         {
@@ -7161,9 +7241,13 @@
         {
           "d": "2026-09-01",
           "t": 296.57
+        },
+        {
+          "d": "2026-09-02",
+          "t": 296.57
         }
       ],
-      "checkedAt": "2026-09-01",
+      "checkedAt": "2026-09-02",
       "flagged": false,
       "priceHist": [
         {
@@ -7369,10 +7453,14 @@
         {
           "d": "2026-09-01",
           "p": 189.15
+        },
+        {
+          "d": "2026-09-02",
+          "p": 190.85
         }
       ],
       "rev": {
-        "at": "2026-09-01",
+        "at": "2026-09-02",
         "tp": {
           "now": 296.57,
           "hi": 401,
@@ -7382,9 +7470,9 @@
           "c90": null
         },
         "px": {
-          "c7": -5,
-          "c30": -4.6,
-          "c90": -34.4
+          "c7": -0.6,
+          "c30": -5.2,
+          "c90": -32.7
         },
         "eps": {
           "fy1": {
@@ -7463,32 +7551,24 @@
               "h": 7,
               "u": 0,
               "s": 2
-            },
-            {
-              "m": "-3m",
-              "sb": 5,
-              "b": 9,
-              "h": 7,
-              "u": 0,
-              "s": 2
             }
           ]
         },
         "actions": null,
         "gate": {
-          "d30": -5.3,
-          "d90": -43.9
+          "d30": -5.9,
+          "d90": -42.2
         },
         "provenance": {
           "provider": "Yahoo Finance",
           "sourceUrl": "https://query1.finance.yahoo.com/v10/finance/quoteSummary/BESI.AS?modules=financialData,earningsTrend,recommendationTrend,upgradeDowngradeHistory&crumb=<redacted>",
-          "retrievedAt": "2026-09-01T23:34:43.096Z",
-          "rawRef": "raw/revisions/2026-09-01/2026-09-01T23-34-38-334Z/BESI.json",
+          "retrievedAt": "2026-09-02T12:19:17.941Z",
+          "rawRef": "raw/revisions/2026-09-02/2026-09-02T12-19-13-416Z/BESI.json",
           "schema": "revision-source-v1"
         },
         "quality": {
           "status": "verified",
-          "checkedAt": "2026-09-01T23:34:48.831Z",
+          "checkedAt": "2026-09-02T12:19:23.131Z",
           "fields": {
             "price": "verified",
             "tp": "verified",
@@ -7515,9 +7595,9 @@
       "lock": false,
       "why": "E군집 자동화 시드 — cron Yahoo 000660.KS 자동충전 대기(005930과 동일 경로)",
       "flagged": false,
-      "price": 1693000,
+      "price": 1613000,
       "target": 3216024.8,
-      "pct": 90,
+      "pct": 99.4,
       "targetHist": [
         {
           "d": "2026-07-06",
@@ -7746,10 +7826,14 @@
         {
           "d": "2026-09-01",
           "t": 3216024.8
+        },
+        {
+          "d": "2026-09-02",
+          "t": 3216024.8
         }
       ],
       "trend": "flat",
-      "checkedAt": "2026-09-01",
+      "checkedAt": "2026-09-02",
       "priceHist": [
         {
           "d": "2026-07-12",
@@ -7954,10 +8038,14 @@
         {
           "d": "2026-09-01",
           "p": 1693000
+        },
+        {
+          "d": "2026-09-02",
+          "p": 1613000
         }
       ],
       "rev": {
-        "at": "2026-09-01",
+        "at": "2026-09-02",
         "tp": {
           "now": 3216024.8,
           "hi": 5300000,
@@ -7967,8 +8055,8 @@
           "c90": null
         },
         "px": {
-          "c7": 0.9,
-          "c30": -1.5,
+          "c7": -4.4,
+          "c30": 2.9,
           "c90": null
         },
         "eps": {
@@ -8061,19 +8149,19 @@
         },
         "actions": null,
         "gate": {
-          "d30": -5.8,
+          "d30": -1.4,
           "d90": null
         },
         "provenance": {
           "provider": "Yahoo Finance",
           "sourceUrl": "https://query1.finance.yahoo.com/v10/finance/quoteSummary/000660.KS?modules=financialData,earningsTrend,recommendationTrend,upgradeDowngradeHistory&crumb=<redacted>",
-          "retrievedAt": "2026-09-01T23:34:43.427Z",
-          "rawRef": "raw/revisions/2026-09-01/2026-09-01T23-34-38-334Z/000660.json",
+          "retrievedAt": "2026-09-02T12:19:18.284Z",
+          "rawRef": "raw/revisions/2026-09-02/2026-09-02T12-19-13-416Z/000660.json",
           "schema": "revision-source-v1"
         },
         "quality": {
           "status": "verified",
-          "checkedAt": "2026-09-01T23:34:48.831Z",
+          "checkedAt": "2026-09-02T12:19:23.131Z",
           "fields": {
             "price": "verified",
             "tp": "verified",
@@ -8242,6 +8330,10 @@
         {
           "d": "2026-09-01",
           "t": 390.09
+        },
+        {
+          "d": "2026-09-02",
+          "t": 390.09
         }
       ],
       "priceHist": [
@@ -8384,13 +8476,17 @@
         {
           "d": "2026-09-01",
           "p": 356.09
+        },
+        {
+          "d": "2026-09-02",
+          "p": 356.09
         }
       ],
       "trend": "flat",
-      "checkedAt": "2026-09-01",
+      "checkedAt": "2026-09-02",
       "flagged": true,
       "rev": {
-        "at": "2026-09-01",
+        "at": "2026-09-02",
         "tp": {
           "now": 390.09,
           "hi": 600,
@@ -8469,16 +8565,16 @@
             {
               "m": "-1m",
               "sb": 6,
-              "b": 17,
-              "h": 18,
-              "u": 4,
+              "b": 16,
+              "h": 19,
+              "u": 3,
               "s": 2
             },
             {
               "m": "-2m",
-              "sb": 5,
-              "b": 18,
-              "h": 19,
+              "sb": 6,
+              "b": 17,
+              "h": 18,
               "u": 4,
               "s": 2
             },
@@ -8486,9 +8582,9 @@
               "m": "-3m",
               "sb": 5,
               "b": 18,
-              "h": 18,
+              "h": 19,
               "u": 4,
-              "s": 3
+              "s": 2
             }
           ]
         },
@@ -8536,13 +8632,13 @@
         "provenance": {
           "provider": "Yahoo Finance",
           "sourceUrl": "https://query1.finance.yahoo.com/v10/finance/quoteSummary/TSLA?modules=financialData,earningsTrend,recommendationTrend,upgradeDowngradeHistory&crumb=<redacted>",
-          "retrievedAt": "2026-09-01T23:34:43.766Z",
-          "rawRef": "raw/revisions/2026-09-01/2026-09-01T23-34-38-334Z/TSLA.json",
+          "retrievedAt": "2026-09-02T12:19:18.583Z",
+          "rawRef": "raw/revisions/2026-09-02/2026-09-02T12-19-13-416Z/TSLA.json",
           "schema": "revision-source-v1"
         },
         "quality": {
           "status": "verified",
-          "checkedAt": "2026-09-01T23:34:48.831Z",
+          "checkedAt": "2026-09-02T12:19:23.131Z",
           "fields": {
             "price": "verified",
             "tp": "verified",
@@ -8640,6 +8736,10 @@
         {
           "d": "2026-09-01",
           "t": 191.68
+        },
+        {
+          "d": "2026-09-02",
+          "t": 191.68
         }
       ],
       "priceHist": [
@@ -8710,13 +8810,17 @@
         {
           "d": "2026-09-01",
           "p": 179.92
+        },
+        {
+          "d": "2026-09-02",
+          "p": 179.92
         }
       ],
       "trend": "flat",
-      "checkedAt": "2026-09-01",
+      "checkedAt": "2026-09-02",
       "flagged": true,
       "rev": {
-        "at": "2026-09-01",
+        "at": "2026-09-02",
         "tp": {
           "now": 191.68,
           "hi": 255,
@@ -8862,13 +8966,13 @@
         "provenance": {
           "provider": "Yahoo Finance",
           "sourceUrl": "https://query1.finance.yahoo.com/v10/finance/quoteSummary/PLTR?modules=financialData,earningsTrend,recommendationTrend,upgradeDowngradeHistory&crumb=<redacted>",
-          "retrievedAt": "2026-09-01T23:34:44.157Z",
-          "rawRef": "raw/revisions/2026-09-01/2026-09-01T23-34-38-334Z/PLTR.json",
+          "retrievedAt": "2026-09-02T12:19:18.931Z",
+          "rawRef": "raw/revisions/2026-09-02/2026-09-02T12-19-13-416Z/PLTR.json",
           "schema": "revision-source-v1"
         },
         "quality": {
           "status": "verified",
-          "checkedAt": "2026-09-01T23:34:48.831Z",
+          "checkedAt": "2026-09-02T12:19:23.131Z",
           "fields": {
             "price": "verified",
             "tp": "verified",
@@ -8966,6 +9070,10 @@
         {
           "d": "2026-09-01",
           "t": 389.95
+        },
+        {
+          "d": "2026-09-02",
+          "t": 389.95
         }
       ],
       "priceHist": [
@@ -9036,13 +9144,17 @@
         {
           "d": "2026-09-01",
           "p": 279.91
+        },
+        {
+          "d": "2026-09-02",
+          "p": 279.91
         }
       ],
       "trend": "flat",
-      "checkedAt": "2026-09-01",
+      "checkedAt": "2026-09-02",
       "flagged": false,
       "revInvalid": {
-        "at": "2026-09-01T23:34:48.797Z",
+        "at": "2026-09-02T12:19:23.085Z",
         "reason": "EPS 90d recompute mismatch"
       }
     },
@@ -9124,6 +9236,10 @@
         {
           "d": "2026-09-01",
           "t": 291.64
+        },
+        {
+          "d": "2026-09-02",
+          "t": 291.64
         }
       ],
       "priceHist": [
@@ -9194,13 +9310,17 @@
         {
           "d": "2026-09-01",
           "p": 172.62
+        },
+        {
+          "d": "2026-09-02",
+          "p": 172.62
         }
       ],
       "trend": "flat",
-      "checkedAt": "2026-09-01",
+      "checkedAt": "2026-09-02",
       "flagged": false,
       "revInvalid": {
-        "at": "2026-09-01T23:34:48.797Z",
+        "at": "2026-09-02T12:19:23.085Z",
         "reason": "EPS 30d recompute mismatch"
       }
     },
@@ -9282,6 +9402,10 @@
         {
           "d": "2026-09-01",
           "t": 2125.09
+        },
+        {
+          "d": "2026-09-02",
+          "t": 2125.09
         }
       ],
       "priceHist": [
@@ -9352,13 +9476,17 @@
         {
           "d": "2026-09-01",
           "p": 1536.87
+        },
+        {
+          "d": "2026-09-02",
+          "p": 1536.87
         }
       ],
       "trend": "flat",
-      "checkedAt": "2026-09-01",
+      "checkedAt": "2026-09-02",
       "flagged": false,
       "rev": {
-        "at": "2026-09-01",
+        "at": "2026-09-02",
         "tp": {
           "now": 2125.09,
           "hi": 3600,
@@ -9449,14 +9577,6 @@
               "h": 3,
               "u": 1,
               "s": 0
-            },
-            {
-              "m": "-3m",
-              "sb": 3,
-              "b": 15,
-              "h": 3,
-              "u": 0,
-              "s": 1
             }
           ]
         },
@@ -9504,13 +9624,13 @@
         "provenance": {
           "provider": "Yahoo Finance",
           "sourceUrl": "https://query1.finance.yahoo.com/v10/finance/quoteSummary/SNDK?modules=financialData,earningsTrend,recommendationTrend,upgradeDowngradeHistory&crumb=<redacted>",
-          "retrievedAt": "2026-09-01T23:34:45.352Z",
-          "rawRef": "raw/revisions/2026-09-01/2026-09-01T23-34-38-334Z/SNDK.json",
+          "retrievedAt": "2026-09-02T12:19:19.875Z",
+          "rawRef": "raw/revisions/2026-09-02/2026-09-02T12-19-13-416Z/SNDK.json",
           "schema": "revision-source-v1"
         },
         "quality": {
           "status": "verified",
-          "checkedAt": "2026-09-01T23:34:48.831Z",
+          "checkedAt": "2026-09-02T12:19:23.131Z",
           "fields": {
             "price": "verified",
             "tp": "verified",
@@ -9537,9 +9657,9 @@
       "mkt": "KR",
       "lock": false,
       "why": "Value Chain 전체 투자매력도 커버리지 추가 · 원자료 수집 대기",
-      "price": 1430000,
+      "price": 1400000,
       "target": 2345555.5,
-      "pct": 64,
+      "pct": 67.5,
       "targetHist": [
         {
           "d": "2026-08-16",
@@ -9607,6 +9727,10 @@
         },
         {
           "d": "2026-09-01",
+          "t": 2345555.5
+        },
+        {
+          "d": "2026-09-02",
           "t": 2345555.5
         }
       ],
@@ -9678,13 +9802,17 @@
         {
           "d": "2026-09-01",
           "p": 1430000
+        },
+        {
+          "d": "2026-09-02",
+          "p": 1400000
         }
       ],
       "trend": "flat",
-      "checkedAt": "2026-09-01",
+      "checkedAt": "2026-09-02",
       "flagged": false,
       "rev": {
-        "at": "2026-09-01",
+        "at": "2026-09-02",
         "tp": {
           "now": 2345555.5,
           "hi": 3300000,
@@ -9694,7 +9822,7 @@
           "c90": null
         },
         "px": {
-          "c7": 5,
+          "c7": 5.3,
           "c30": null,
           "c90": null
         },
@@ -9786,13 +9914,13 @@
         "provenance": {
           "provider": "Yahoo Finance",
           "sourceUrl": "https://query1.finance.yahoo.com/v10/finance/quoteSummary/009150.KS?modules=financialData,earningsTrend,recommendationTrend,upgradeDowngradeHistory&crumb=<redacted>",
-          "retrievedAt": "2026-09-01T23:34:45.680Z",
-          "rawRef": "raw/revisions/2026-09-01/2026-09-01T23-34-38-334Z/009150.json",
+          "retrievedAt": "2026-09-02T12:19:20.178Z",
+          "rawRef": "raw/revisions/2026-09-02/2026-09-02T12-19-13-416Z/009150.json",
           "schema": "revision-source-v1"
         },
         "quality": {
           "status": "verified",
-          "checkedAt": "2026-09-01T23:34:48.831Z",
+          "checkedAt": "2026-09-02T12:19:23.131Z",
           "fields": {
             "price": "verified",
             "tp": "verified",
@@ -9819,9 +9947,9 @@
       "mkt": "KOSDAQ",
       "lock": false,
       "why": "Value Chain 전체 투자매력도 커버리지 추가 · 원자료 수집 대기",
-      "price": 48050,
+      "price": 47350,
       "target": 80000,
-      "pct": 66.5,
+      "pct": 69,
       "targetHist": [
         {
           "d": "2026-08-16",
@@ -9889,6 +10017,10 @@
         },
         {
           "d": "2026-09-01",
+          "t": 80000
+        },
+        {
+          "d": "2026-09-02",
           "t": 80000
         }
       ],
@@ -9960,13 +10092,17 @@
         {
           "d": "2026-09-01",
           "p": 48050
+        },
+        {
+          "d": "2026-09-02",
+          "p": 47350
         }
       ],
       "trend": "flat",
-      "checkedAt": "2026-09-01",
+      "checkedAt": "2026-09-02",
       "flagged": false,
       "rev": {
-        "at": "2026-09-01",
+        "at": "2026-09-02",
         "tp": {
           "now": null,
           "hi": 80000,
@@ -9976,7 +10112,7 @@
           "c90": null
         },
         "px": {
-          "c7": -5,
+          "c7": -3.8,
           "c30": null,
           "c90": null
         },
@@ -10052,13 +10188,13 @@
         "provenance": {
           "provider": "Yahoo Finance",
           "sourceUrl": "https://query1.finance.yahoo.com/v10/finance/quoteSummary/089030.KQ?modules=financialData,earningsTrend,recommendationTrend,upgradeDowngradeHistory&crumb=<redacted>",
-          "retrievedAt": "2026-09-01T23:34:46.015Z",
-          "rawRef": "raw/revisions/2026-09-01/2026-09-01T23-34-38-334Z/089030.json",
+          "retrievedAt": "2026-09-02T12:19:20.510Z",
+          "rawRef": "raw/revisions/2026-09-02/2026-09-02T12-19-13-416Z/089030.json",
           "schema": "revision-source-v1"
         },
         "quality": {
           "status": "warning",
-          "checkedAt": "2026-09-01T23:34:48.831Z",
+          "checkedAt": "2026-09-02T12:19:23.132Z",
           "fields": {
             "price": "verified",
             "tp": "warning",
@@ -10087,9 +10223,9 @@
       "mkt": "HKEX",
       "lock": false,
       "why": "Value Chain 전체 투자매력도 커버리지 추가 · 원자료 수집 대기",
-      "price": 159.7,
+      "price": 157.4,
       "target": 196.99,
-      "pct": 23.4,
+      "pct": 25.2,
       "targetHist": [
         {
           "d": "2026-08-16",
@@ -10157,6 +10293,10 @@
         },
         {
           "d": "2026-09-01",
+          "t": 196.99
+        },
+        {
+          "d": "2026-09-02",
           "t": 196.99
         }
       ],
@@ -10228,13 +10368,17 @@
         {
           "d": "2026-09-01",
           "p": 159.7
+        },
+        {
+          "d": "2026-09-02",
+          "p": 157.4
         }
       ],
       "trend": "flat",
-      "checkedAt": "2026-09-01",
+      "checkedAt": "2026-09-02",
       "flagged": false,
       "revInvalid": {
-        "at": "2026-09-01T23:34:48.797Z",
+        "at": "2026-09-02T12:19:23.086Z",
         "reason": "missing provenance"
       }
     },
@@ -10316,6 +10460,10 @@
         {
           "d": "2026-09-01",
           "t": 42.38
+        },
+        {
+          "d": "2026-09-02",
+          "t": 42.38
         }
       ],
       "priceHist": [
@@ -10386,13 +10534,17 @@
         {
           "d": "2026-09-01",
           "p": 36.71
+        },
+        {
+          "d": "2026-09-02",
+          "p": 36.71
         }
       ],
       "trend": "flat",
-      "checkedAt": "2026-09-01",
+      "checkedAt": "2026-09-02",
       "flagged": false,
       "rev": {
-        "at": "2026-09-01",
+        "at": "2026-09-02",
         "tp": {
           "now": 42.38,
           "hi": 60,
@@ -10489,13 +10641,13 @@
         "provenance": {
           "provider": "Yahoo Finance",
           "sourceUrl": "https://query1.finance.yahoo.com/v10/finance/quoteSummary/SMCI?modules=financialData,earningsTrend,recommendationTrend,upgradeDowngradeHistory&crumb=<redacted>",
-          "retrievedAt": "2026-09-01T23:34:46.719Z",
-          "rawRef": "raw/revisions/2026-09-01/2026-09-01T23-34-38-334Z/SMCI.json",
+          "retrievedAt": "2026-09-02T12:19:21.142Z",
+          "rawRef": "raw/revisions/2026-09-02/2026-09-02T12-19-13-416Z/SMCI.json",
           "schema": "revision-source-v1"
         },
         "quality": {
           "status": "blocked",
-          "checkedAt": "2026-09-01T23:34:48.831Z",
+          "checkedAt": "2026-09-02T12:19:23.132Z",
           "fields": {
             "price": "verified",
             "tp": "verified",
@@ -10503,7 +10655,7 @@
           },
           "warnings": [],
           "blocking": [
-            "Yahoo annual period rollover stale: 0y ended 63d ago (2026-06-30)"
+            "Yahoo annual period rollover stale: 0y ended 64d ago (2026-06-30)"
           ]
         },
         "epsSemantics": {
@@ -10575,8 +10727,8 @@
       "lock": false,
       "why": "Value Chain 전체 투자매력도 커버리지 추가 · 원자료 수집 대기",
       "price": 272.03,
-      "target": 416.09,
-      "pct": 53,
+      "target": 415.36,
+      "pct": 52.7,
       "targetHist": [
         {
           "d": "2026-08-16",
@@ -10645,6 +10797,10 @@
         {
           "d": "2026-09-01",
           "t": 416.09
+        },
+        {
+          "d": "2026-09-02",
+          "t": 415.36
         }
       ],
       "priceHist": [
@@ -10715,18 +10871,22 @@
         {
           "d": "2026-09-01",
           "p": 272.03
+        },
+        {
+          "d": "2026-09-02",
+          "p": 272.03
         }
       ],
       "trend": "flat",
-      "checkedAt": "2026-09-01",
+      "checkedAt": "2026-09-02",
       "flagged": false,
       "rev": {
-        "at": "2026-09-01",
+        "at": "2026-09-02",
         "tp": {
-          "now": 416.09,
+          "now": 415.36,
           "hi": 500,
           "lo": 280,
-          "c7": 0,
+          "c7": -0.2,
           "c30": null,
           "c90": null
         },
@@ -10738,61 +10898,61 @@
         "eps": {
           "fy1": {
             "end": "2028-06-30",
-            "now": 13.95,
-            "d7": 13.21,
-            "d30": 13.01,
-            "d60": 12.52,
+            "now": 13.96,
+            "d7": 13.95,
+            "d30": 13.21,
+            "d60": 12.7,
             "d90": 12.24,
-            "c7": 5.6,
-            "c30": 7.2,
+            "c7": 0,
+            "c30": 5.6,
             "c90": 14,
             "up7": 3,
             "dn7": null,
             "up30": 6,
             "dn30": 0,
-            "revEst": 14688221450
+            "revEst": 14674707350
           },
           "fy0": {
             "end": "2027-06-30",
-            "now": 9.41,
+            "now": 9.42,
             "d7": 9.41,
             "d30": 8.29,
-            "d60": 8.17,
+            "d60": 8.21,
             "d90": 8.09,
             "c7": 0.1,
-            "c30": 13.5,
+            "c30": 13.6,
             "c90": 16.4,
             "up7": 3,
             "dn7": null,
             "up30": 5,
             "dn30": 1,
-            "revEst": 10616508860
+            "revEst": 10618193080
           },
           "q1": {
             "end": "2026-12-31",
             "now": 2.19,
             "d7": 2.19,
             "d30": 1.96,
-            "d60": 1.95,
+            "d60": 1.96,
             "d90": 1.95,
-            "c7": 0,
-            "c30": 11.5,
-            "c90": 12.1,
+            "c7": 0.2,
+            "c30": 11.8,
+            "c90": 12.4,
             "up7": 2,
             "dn7": null,
             "up30": 3,
             "dn30": 1,
-            "revEst": 2527837490
+            "revEst": 2528632980
           }
         },
         "rating": {
-          "mean": 1.64,
-          "n": 21,
+          "mean": 1.61,
+          "n": 22,
           "hist": [
             {
               "m": "0m",
               "sb": 4,
-              "b": 13,
+              "b": 14,
               "h": 5,
               "u": 0,
               "s": 0
@@ -10812,18 +10972,17 @@
               "h": 5,
               "u": 0,
               "s": 0
-            },
-            {
-              "m": "-3m",
-              "sb": 4,
-              "b": 13,
-              "h": 5,
-              "u": 0,
-              "s": 0
             }
           ]
         },
         "actions": [
+          {
+            "d": "2026-09-01",
+            "firm": "Deutsche Bank",
+            "to": "Buy",
+            "from": "Buy",
+            "act": "init"
+          },
           {
             "d": "2026-08-13",
             "firm": "Needham",
@@ -10851,29 +11010,22 @@
             "to": "Equal-Weight",
             "from": "Equal-Weight",
             "act": "main"
-          },
-          {
-            "d": "2026-08-13",
-            "firm": "Jefferies",
-            "to": "Buy",
-            "from": "Buy",
-            "act": "main"
           }
         ],
         "gate": {
-          "d30": -3.7,
+          "d30": -2.1,
           "d90": -48.8
         },
         "provenance": {
           "provider": "Yahoo Finance",
           "sourceUrl": "https://query1.finance.yahoo.com/v10/finance/quoteSummary/COHR?modules=financialData,earningsTrend,recommendationTrend,upgradeDowngradeHistory&crumb=<redacted>",
-          "retrievedAt": "2026-09-01T23:34:47.059Z",
-          "rawRef": "raw/revisions/2026-09-01/2026-09-01T23-34-38-334Z/COHR.json",
+          "retrievedAt": "2026-09-02T12:19:21.479Z",
+          "rawRef": "raw/revisions/2026-09-02/2026-09-02T12-19-13-416Z/COHR.json",
           "schema": "revision-source-v1"
         },
         "quality": {
           "status": "verified",
-          "checkedAt": "2026-09-01T23:34:48.832Z",
+          "checkedAt": "2026-09-02T12:19:23.132Z",
           "fields": {
             "price": "verified",
             "tp": "verified",
@@ -10982,6 +11134,10 @@
         {
           "d": "2026-09-01",
           "t": 386.25
+        },
+        {
+          "d": "2026-09-02",
+          "t": 386.25
         }
       ],
       "priceHist": [
@@ -11052,13 +11208,17 @@
         {
           "d": "2026-09-01",
           "p": 175.99
+        },
+        {
+          "d": "2026-09-02",
+          "p": 175.99
         }
       ],
       "trend": "flat",
-      "checkedAt": "2026-09-01",
+      "checkedAt": "2026-09-02",
       "flagged": false,
       "rev": {
-        "at": "2026-09-01",
+        "at": "2026-09-02",
         "tp": {
           "now": 386.25,
           "hi": 450,
@@ -11141,14 +11301,6 @@
               "h": 0,
               "u": 0,
               "s": 0
-            },
-            {
-              "m": "-2m",
-              "sb": 2,
-              "b": 2,
-              "h": 0,
-              "u": 0,
-              "s": 0
             }
           ]
         },
@@ -11196,13 +11348,13 @@
         "provenance": {
           "provider": "Yahoo Finance",
           "sourceUrl": "https://query1.finance.yahoo.com/v10/finance/quoteSummary/VICR?modules=financialData,earningsTrend,recommendationTrend,upgradeDowngradeHistory&crumb=<redacted>",
-          "retrievedAt": "2026-09-01T23:34:47.755Z",
-          "rawRef": "raw/revisions/2026-09-01/2026-09-01T23-34-38-334Z/VICR.json",
+          "retrievedAt": "2026-09-02T12:19:22.089Z",
+          "rawRef": "raw/revisions/2026-09-02/2026-09-02T12-19-13-416Z/VICR.json",
           "schema": "revision-source-v1"
         },
         "quality": {
           "status": "verified",
-          "checkedAt": "2026-09-01T23:34:48.832Z",
+          "checkedAt": "2026-09-02T12:19:23.132Z",
           "fields": {
             "price": "verified",
             "tp": "verified",
@@ -11300,6 +11452,10 @@
         {
           "d": "2026-09-01",
           "t": 79.88
+        },
+        {
+          "d": "2026-09-02",
+          "t": 79.88
         }
       ],
       "priceHist": [
@@ -11370,13 +11526,17 @@
         {
           "d": "2026-09-01",
           "p": 38.53
+        },
+        {
+          "d": "2026-09-02",
+          "p": 38.53
         }
       ],
       "trend": "flat",
-      "checkedAt": "2026-09-01",
+      "checkedAt": "2026-09-02",
       "flagged": false,
       "rev": {
-        "at": "2026-09-01",
+        "at": "2026-09-02",
         "tp": {
           "now": 79.88,
           "hi": 130,
@@ -11473,13 +11633,13 @@
         "provenance": {
           "provider": "Yahoo Finance",
           "sourceUrl": "https://query1.finance.yahoo.com/v10/finance/quoteSummary/OKLO?modules=financialData,earningsTrend,recommendationTrend,upgradeDowngradeHistory&crumb=<redacted>",
-          "retrievedAt": "2026-09-01T23:34:48.076Z",
-          "rawRef": "raw/revisions/2026-09-01/2026-09-01T23-34-38-334Z/OKLO.json",
+          "retrievedAt": "2026-09-02T12:19:22.395Z",
+          "rawRef": "raw/revisions/2026-09-02/2026-09-02T12-19-13-416Z/OKLO.json",
           "schema": "revision-source-v1"
         },
         "quality": {
           "status": "blocked",
-          "checkedAt": "2026-09-01T23:34:48.832Z",
+          "checkedAt": "2026-09-02T12:19:23.133Z",
           "fields": {
             "price": "verified",
             "tp": "verified",
@@ -11629,6 +11789,10 @@
         {
           "d": "2026-09-01",
           "t": 446.47
+        },
+        {
+          "d": "2026-09-02",
+          "t": 446.47
         }
       ],
       "priceHist": [
@@ -11699,13 +11863,17 @@
         {
           "d": "2026-09-01",
           "p": 335.46
+        },
+        {
+          "d": "2026-09-02",
+          "p": 335.46
         }
       ],
       "trend": "flat",
-      "checkedAt": "2026-09-01",
+      "checkedAt": "2026-09-02",
       "flagged": false,
       "rev": {
-        "at": "2026-09-01",
+        "at": "2026-09-02",
         "tp": {
           "now": 446.47,
           "hi": 550,
@@ -11851,13 +12019,13 @@
         "provenance": {
           "provider": "Yahoo Finance",
           "sourceUrl": "https://query1.finance.yahoo.com/v10/finance/quoteSummary/TER?modules=financialData,earningsTrend,recommendationTrend,upgradeDowngradeHistory&crumb=<redacted>",
-          "retrievedAt": "2026-09-01T23:34:48.415Z",
-          "rawRef": "raw/revisions/2026-09-01/2026-09-01T23-34-38-334Z/TER.json",
+          "retrievedAt": "2026-09-02T12:19:22.705Z",
+          "rawRef": "raw/revisions/2026-09-02/2026-09-02T12-19-13-416Z/TER.json",
           "schema": "revision-source-v1"
         },
         "quality": {
           "status": "verified",
-          "checkedAt": "2026-09-01T23:34:48.832Z",
+          "checkedAt": "2026-09-02T12:19:23.133Z",
           "fields": {
             "price": "verified",
             "tp": "verified",
@@ -11879,20 +12047,20 @@
     }
   },
   "revisionAudit": {
-    "at": "2026-09-01T23:34:48.797Z",
+    "at": "2026-09-02T12:19:23.087Z",
     "policy": "use-only-when-provider-source-and-raw-snapshot-are-present-and-reproducible",
     "valid": 23,
     "invalid": 4
   },
   "revisionIntegrity": {
-    "at": "2026-09-01T23:34:48.832Z",
+    "at": "2026-09-02T12:19:23.133Z",
     "policy": "field-level semantic validation; raw retained, ambiguous values excluded from scoring",
     "verified": 19,
     "warning": 1,
     "blocked": 3,
     "issues": [
-      "LITE: Yahoo annual period rollover stale: 0y ended 63d ago (2026-06-30)",
-      "SMCI: Yahoo annual period rollover stale: 0y ended 63d ago (2026-06-30)",
+      "LITE: Yahoo annual period rollover stale: 0y ended 64d ago (2026-06-30)",
+      "SMCI: Yahoo annual period rollover stale: 0y ended 64d ago (2026-06-30)",
       "OKLO: next-year EPS current missing/non-positive"
     ]
   }
