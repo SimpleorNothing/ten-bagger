@@ -1,3 +1,7 @@
+**최종 갱신: 2026-09-02 (KST)**
+
+> 2026-09-02 23:00 · **02 기업분석에 Credo Technology(CRDO) 추가.** `company.js`에 CRDO 탭과 데이터 경로를 등록하고, `credo/data.json`에 FY26 Q1~FY27 Q1 공식 GAAP 분기 실적과 FY27 Q2 회사 가이던스, AEC·광 DSP·PIC·ZeroFlap·AI 네트워크 수요·GAAP 마진·운전자본을 포함한 전략 축을 추가했다. `company_news.json`에는 FY27 Q1 공식 실적을 연결했으며, 가격·목표가·γ·stage는 기존대로 `gamma.json`을 단일 소스로 유지한다.
+
 **최종 갱신: 2026-08-30 (KST)**
 
 > 2026-08-30 22:32 · **02 기업분석에 Micron·Vertiv·NVIDIA 추가.** `company.js`에 MU·VRT·NVDA 탭과 데이터 경로를 등록하고, 각 기업의 공식 실적·제품·수주 가시성·위험·분기 GAAP 시계열을 공통 `*/data.json` 스키마로 추가했다. `company_news.json`에는 최근 공식 원문을 연결했으며, 가격·목표가·γ·stage는 기존대로 `gamma.json`을 단일 소스로 유지한다. `company-patch.js`와 PR 게이트가 5개 기업 경로를 검증한다.
