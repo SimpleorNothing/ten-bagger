@@ -1,19 +1,19 @@
 {
-  "asOf": "2026-09-03T17:00",
-  "gen": 1788422400000,
-  "model": "ChatGPT automation · web search + own reasoning · no paid external LLM API",
-  "headline": "한국 8월 수출·반도체 수출이 사상급 강세를 이어가고 중국 제조업도 수축 완화 조짐을 보였지만, 미국 노동수요 냉각·Micron 대만 노사 리스크·삼성전자의 전력망 선납 제안·중동 및 금리 부담이 함께 남아 있다. Tesla Cybercab 공개는 자율주행 상용화의 신규 검증점이다.",
+  "asOf": "2026-09-04T07:31",
+  "gen": 1788474660000,
+  "model": "ChatGPT automation · official releases first · no paid external LLM API",
+  "headline": "9월 4일 07:31 KST 현재 미국 8월 고용은 아직 발표 전이다. 전일 소비처 회귀를 복구해 한국 8월 CPI 재상승, EIA 최신 원유재고 감소, Broadcom FY26 Q3 AI 반도체 급성장을 공식 발표 기준 시장 맥락에 다시 반영한다.",
   "drivers": [
     {
       "ax": "geopolitics",
       "name": "지정학",
       "dir": "risk",
       "layer": "공급망·에너지",
-      "l1": "미·이란 긴장 고조와 호르무즈 리스크가 유가와 인플레이션 기대를 다시 밀어 올리고 있다.",
-      "l2": "9월 1일 로이터는 중동 긴장 속 브렌트유가 배럴당 91달러를 넘고 미국 장기금리도 상승했다고 보도했다. AI 인프라에는 전력비·운송비와 할인율을 동시에 높이는 부정적 입력이다.",
-      "verdict": "지정학발 유가·금리 동반 리스크 확대",
+      "l1": "미·이란 긴장과 호르무즈 리스크가 에너지·운송비와 인플레이션 기대의 상방 변수로 남아 있다.",
+      "l2": "지정학발 공급 차질 가능성은 AI 인프라의 전력비·운송비와 장기금리 경로에 동시에 부담이다. 다만 확인되지 않은 공급 차질 규모는 숫자로 반영하지 않는다.",
+      "verdict": "지정학발 에너지·금리 리스크 유지",
       "srcs": [
-        {"t":"Reuters · 중동 긴장·유가·금리","u":"https://www.reuters.com/world/india/gold-muted-traders-await-us-jobs-data-monitor-mideast-tensions-2026-09-01/","d":"2026-09-01"}
+        {"t":"U.S. Treasury · Operation Economic Outcast","u":"https://home.treasury.gov/news/press-releases/sb0613","d":"2026-08-24"}
       ]
     },
     {
@@ -21,12 +21,12 @@
       "name": "유가/에너지",
       "dir": "risk",
       "layer": "L8 전력·에너지",
-      "l1": "유가가 90달러대를 상향 돌파한 가운데 한국 반도체 전력망 투자비용의 분담 가능성까지 새 변수로 등장했다.",
-      "l2": "중동 공급차질 우려가 단기 재고 완충보다 우세한 상황에서 한국전력이 삼성전자에 2031년까지 전기요금 20조원 선납을 제안했다는 보도가 나왔다. 확정안은 아니지만 전력망 확보 비용이 반도체 생산능력 확대와 현금흐름에 동시에 영향을 줄 수 있다.",
-      "verdict": "에너지 가격·전력망 조달비용 상방 위험",
+      "l1": "EIA 8월 28일 종료 주간 미국 상업 원유재고는 424.5백만 배럴로 전주 대비 4.5백만 배럴 감소했다.",
+      "l2": "최신 공식 WPSR은 상업 원유재고 감소를 확인했다. 단기 재고 완충이 약해진 만큼 공급 차질 발생 시 유가 민감도가 커질 수 있어 L8 전력·에너지와 AI 전력비 리스크를 유지한다.",
+      "verdict": "주간 원유재고 -4.5Mb · 단기 타이트닝",
       "srcs": [
-        {"t":"Reuters · 9월 1일 유가 동향","u":"https://www.reuters.com/world/india/gold-muted-traders-await-us-jobs-data-monitor-mideast-tensions-2026-09-01/","d":"2026-09-01"},
-        {"t":"Reuters · 한전의 삼성전자 전력요금 선납 제안","u":"https://www.reuters.com/world/asia-pacific/south-korea-utility-proposes-samsung-pays-15-billion-advance-power-paper-says-2026-09-03/","d":"2026-09-03"}
+        {"t":"EIA Weekly Petroleum Status Report · week ending 2026-08-28","u":"https://www.eia.gov/petroleum/supply/weekly/","d":"2026-09-02"},
+        {"t":"EIA Short-Term Energy Outlook · August 2026","u":"https://www.eia.gov/outlooks/steo/","d":"2026-08-11"}
       ]
     },
     {
@@ -34,12 +34,13 @@
       "name": "금리/Fed",
       "dir": "risk",
       "layer": "할인율·AI CAPEX 금융화",
-      "l1": "7월 CPI 전년비 3.4%, 근원 CPI 2.5%로 직전월보다 둔화",
-      "l2": "헤드라인 CPI 전월비 +0.1%, 근원 +0.2%로 물가 재가속 우려가 완화됐다. Fed의 금리경로에는 완화적 입력이며 고밸류 AI 인프라의 할인율·조달비용 부담을 일부 낮추는 방향이다. FedWatch의 9월 3일 최신 확률은 이번 점검에서 검증 가능한 원문 표시값을 확보하지 못해 이전 9월 2일 수치를 최신값으로 재사용하지 않는다.",
-      "verdict": "물가 둔화 · FedWatch 최신값은 확인 필요",
+      "l1": "미국 7월 CPI는 +3.4% YoY·근원 +2.5%로 둔화했지만 한국 8월 CPI는 +3.1% YoY로 7월 +2.8%에서 재상승했다.",
+      "l2": "미국 헤드라인 CPI는 +0.1% MoM, 근원 +0.2% MoM로 완화 방향이지만 한국은 8월 CPI +0.2% MoM/+3.1% YoY, 식료품·에너지 제외 근원 +3.4% YoY로 물가 압력이 재확대됐다. 미국 8월 고용은 9월 4일 08:30 ET 발표 전이므로 NFP·실업률·임금 수치는 갱신하지 않는다.",
+      "verdict": "미국 물가 둔화 vs 한국 물가 재상승 · 고용 발표 대기",
       "srcs": [
         {"t":"BLS Consumer Price Index - July 2026","u":"https://www.bls.gov/news.release/cpi.nr0.htm","d":"2026-08-12"},
-        {"t":"CME FedWatch Tool","u":"https://www.cmegroup.com/markets/interest-rates/cme-fedwatch-tool.html","d":"2026-09-03"}
+        {"t":"국가데이터처 · 2026년 8월 소비자물가동향","u":"https://kostat.go.kr/","d":"2026-09-02"},
+        {"t":"BLS Employment Situation release schedule","u":"https://www.bls.gov/schedule/news_release/empsit.htm","d":"2026-09-04"}
       ]
     },
     {
@@ -47,11 +48,11 @@
       "name": "환율/달러",
       "dir": "risk",
       "layer": "달러·재정 신뢰",
-      "l1": "연준 인상 기대와 지정학적 안전자산 수요가 달러를 지지하고 있다.",
-      "l2": "9월 1일 로이터는 연준 인상 기대 확대와 중동 불확실성이 달러 강세 요인으로 작용한다고 보도했다. 원화자산에는 환율 변동성 확대, 달러표시 자산에는 원화 환산 방어 효과가 동시에 발생한다.",
-      "verdict": "달러 강세 압력 재확대",
+      "l1": "미국 고용 발표 전까지 달러·장기금리 방향성은 데이터 확인 대기 구간이다.",
+      "l2": "8월 고용 공식 발표 전에는 민간 추정치를 NFP로 대체하지 않는다. 달러 및 장기금리의 다음 주요 방향성 입력은 BLS의 NFP·실업률·시간당임금과 이전 두 달 수정치다.",
+      "verdict": "미국 고용 공식 발표 대기",
       "srcs": [
-        {"t":"Reuters · 달러·엔·금리 동향","u":"https://www.reuters.com/world/asia-pacific/yen-hangs-near-160-amid-boj-rate-hike-bets-dollar-wobbles-2026-09-01/","d":"2026-09-01"}
+        {"t":"BLS Employment Situation release schedule","u":"https://www.bls.gov/schedule/news_release/empsit.htm","d":"2026-09-04"}
       ]
     },
     {
@@ -59,26 +60,25 @@
       "name": "수급/플로우",
       "dir": "opp",
       "layer": "L2 custom silicon·L3 메모리·L6 광통신",
-      "l1": "한국 8월 수출·반도체 수출이 사상급 강세를 유지하고 중국 제조업도 수축 완화 신호를 보였다.",
-      "l2": "산업통상부 9월 1일 발표 기준 8월 수출은 전년비 68.7% 증가한 982.5억달러, 반도체 수출은 209% 증가한 466.5억달러로 월간 사상 최대, 무역수지는 347.5억달러 흑자다. 중국 8월 제조업 PMI는 49.8로 7월 49.2에서 개선됐고 생산 50.4·신규주문 50.6으로 확장권에 복귀했지만, 헤드라인 50 미만이어서 중국 제조업 전체는 아직 수축 완화로 해석한다.",
+      "l1": "한국 8월 수출·반도체 수출 강세와 중국 제조업 수축 완화가 AI 상류 실수요를 지지한다.",
+      "l2": "8월 한국 수출은 982.5억달러(+68.7% YoY), 반도체 수출은 466.5억달러(+209%)로 월간 사상 최대, 무역수지는 347.5억달러 흑자다. 중국 8월 제조업 PMI는 49.8로 7월 49.2에서 개선됐지만 헤드라인은 50 미만이므로 수축 완화로 해석한다.",
       "verdict": "AI 상류 실수요 강세 + 중국 제조업 수축 완화",
       "srcs": [
-        {"t":"산업통상부 · 2026년 8월 수출입 동향","u":"https://go.seoul.co.kr/news/prnewsView.php?id=445040","d":"2026-09-01"},
-        {"t":"중국 국가통계국 · 2026년 8월 PMI","u":"https://www.stats.gov.cn/sj/zxfbhjd/202608/t20260831_1965154.html","d":"2026-08-31"}
+        {"t":"산업통상자원부 · 2026년 8월 수출입 동향","u":"https://www.motie.go.kr/","d":"2026-09-01"},
+        {"t":"중국 국가통계국 · 2026년 8월 PMI","u":"https://www.stats.gov.cn/sj/zxfb/202608/t20260831_1965154.html","d":"2026-08-31"}
       ]
     },
     {
       "ax": "sentiment",
       "name": "심리/센티먼트",
-      "dir": "neutral",
+      "dir": "opp",
       "layer": "고멀티플 AI·금융화",
-      "l1": "AI 실수요는 강하지만 금리·지정학·Micron 생산 노사 리스크가 멀티플 확장을 제한하고, Tesla Cybercab은 자율주행 상용화의 신규 검증점을 제공한다.",
-      "l2": "Marvell의 FY27 Q2 데이터센터 성장과 한국 반도체 수출은 실수요를 확인한다. 반면 Micron 대만 노조 파업 가능성과 삼성전자의 대규모 전력망 선납 제안은 공급·CAPEX 리스크다. Tesla Cybercab 공개는 긍정적 옵션가치가 있지만 실제 생산 일정과 규제 승인 전에는 상용화 가치를 확정하지 않는다.",
-      "verdict": "펀더멘털 우위·생산/금융 리스크 공존",
+      "l1": "Broadcom FY26 Q3가 커스텀 AI 가속기·네트워킹 수요의 재가속을 공식 실적으로 확인했다.",
+      "l2": "Broadcom FY26 Q3 매출은 $29.591B(+86% YoY), AI 반도체 매출은 $16.7B(+221% YoY, +54% QoQ)였다. Q4 매출 가이던스는 약 $34.8B, AI 반도체 매출 전망은 $21.7B(+236% YoY)로 L2 custom silicon/networking 수요 강도가 추가 확인됐다.",
+      "verdict": "AI 실수요 재가속 확인 · 금리 리스크와 병존",
       "srcs": [
-        {"t":"Marvell · FY27 Q2 공식 실적","u":"https://investor.marvell.com/news-events/press-releases/detail/1031/marvell-technology-inc-reports-second-quarter-of-fiscal-year-2027-financial-results","d":"2026-08-27"},
-        {"t":"Reuters · Micron Taiwan unions threaten strike over bonus dispute","u":"https://www.reuters.com/business/world-at-work/microns-taiwan-unions-threaten-strike-over-bonus-dispute-2026-09-01/","d":"2026-09-01"},
-        {"t":"Reuters · Tesla Cybercab Austin event","u":"https://www.reuters.com/business/autos-transportation/tesla-set-hold-cybercab-event-austin-texas-2026-09-02/","d":"2026-09-03"}
+        {"t":"Broadcom · FY26 Q3 공식 실적","u":"https://investors.broadcom.com/news-releases/news-release-details/broadcom-inc-announces-third-quarter-fiscal-year-2026-financial","d":"2026-09-02"},
+        {"t":"Marvell · FY27 Q2 공식 실적","u":"https://investor.marvell.com/news-events/press-releases/detail/1031/marvell-technology-inc-reports-second-quarter-of-fiscal-year-2027-financial-results","d":"2026-08-27"}
       ]
     }
   ]
