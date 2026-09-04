@@ -36,3 +36,39 @@ jobs:
             echo "ERROR: production runtime probe did not confirm update-history popup and dynamic allocation mount"
             exit 1
           fi
+
+          radar_ok=0
+          for attempt in 1 2 3 4 5 6 7 8; do
+            radar=$(curl -fsS --connect-timeout 10 --max-time 20 \
+              -H 'Cache-Control: no-cache' \
+              "https://simpleornothing.com/momentum-radar.js?t=$(date +%s%N)" || true)
+            if printf '%s' "$radar" | grep -Fq "querySelector('.wm-note')" && \
+               printf '%s' "$radar" | grep -Fq 'host.appendChild(panel)' && \
+               ! printf '%s' "$radar" | grep -Fq "querySelector('.wm-foot')"; then
+              radar_ok=1
+              break
+            fi
+            echo "momentum radar production asset attempt ${attempt}: fixed mount code not visible yet"
+            sleep $((attempt * 4))
+          done
+          if [ "$radar_ok" -ne 1 ]; then
+            echo "ERROR: production momentum-radar.js is not serving the fixed mount implementation"
+            exit 1
+          fi
+
+          loader_ok=0
+          for attempt in 1 2 3 4 5 6 7 8; do
+            loader=$(curl -fsS --connect-timeout 10 --max-time 20 \
+              -H 'Cache-Control: no-cache' \
+              "https://simpleornothing.com/site-change-live.js?t=$(date +%s%N)" || true)
+            if printf '%s' "$loader" | grep -Fq '/momentum-radar.js?v=20260904-mountfix'; then
+              loader_ok=1
+              break
+            fi
+            echo "momentum radar loader attempt ${attempt}: cache-busted loader not visible yet"
+            sleep $((attempt * 4))
+          done
+          if [ "$loader_ok" -ne 1 ]; then
+            echo "ERROR: production site-change-live.js is not serving the cache-busted momentum radar loader"
+            exit 1
+          fi

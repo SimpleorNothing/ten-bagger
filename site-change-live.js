@@ -153,7 +153,7 @@
 (function(){
   if(document.querySelector('script[data-momentum-radar-loader]'))return;
   var s=document.createElement('script');
-  s.src='/momentum-radar.js?v=20260904';
+  s.src='/momentum-radar.js?v=20260904-mountfix';
   s.defer=true;
   s.setAttribute('data-momentum-radar-loader','1');
   document.body.appendChild(s);
