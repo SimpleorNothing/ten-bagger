@@ -1,50 +1,192 @@
 {
   "schema": "momentum-radar-v1",
-  "asOf": "2026-09-04T06:45:00+09:00",
-  "status": "verified-bootstrap",
+  "asOf": "2026-09-04T11:43:54.854+09:00",
+  "status": "auto-verified",
   "maxScore": 12,
-  "coveredMaxScore": 8,
+  "coveredMaxScore": 9,
   "theme": {
     "id": "stablecoin-payment",
     "name": "스테이블코인·전자결제",
-    "signalSummary": "해외 선행신호 강함 — 국내 직접 연계주 우선 관찰"
+    "signalSummary": "해외 선행신호 확인 — 국내 후보 관찰"
   },
   "leaders": [
-    {"id":"crcl","symbol":"CRCL","name":"Circle","kind":"equity","changePct":16.0,"session":"미국 정규장","source":"https://www.barrons.com/articles/robinhood-coinbase-stocks-bitcoin-crypto-0a6ea98d"},
-    {"id":"coin","symbol":"COIN","name":"Coinbase","kind":"equity","changePct":10.0,"session":"미국 정규장","source":"https://www.barrons.com/articles/robinhood-coinbase-stocks-bitcoin-crypto-0a6ea98d"},
-    {"id":"hood","symbol":"HOOD","name":"Robinhood","kind":"equity","changePct":16.0,"session":"미국 정규장","source":"https://www.barrons.com/articles/robinhood-coinbase-stocks-bitcoin-crypto-0a6ea98d"},
-    {"id":"btc","symbol":"BTC-USD","name":"Bitcoin","kind":"crypto","changePct":4.4,"session":"24h 근사","source":"https://www.barrons.com/articles/robinhood-coinbase-stocks-bitcoin-crypto-0a6ea98d"}
+    {
+      "id": "crcl",
+      "symbol": "CRCL",
+      "name": "Circle",
+      "kind": "equity",
+      "price": 103.23,
+      "changePct": 23.39,
+      "source": "https://query1.finance.yahoo.com/v8/finance/chart/CRCL?interval=1d&range=10d",
+      "session": "미국 정규장"
+    },
+    {
+      "id": "coin",
+      "symbol": "COIN",
+      "name": "Coinbase",
+      "kind": "equity",
+      "price": 192.7,
+      "changePct": 11.81,
+      "source": "https://query1.finance.yahoo.com/v8/finance/chart/COIN?interval=1d&range=10d",
+      "session": "미국 정규장"
+    },
+    {
+      "id": "hood",
+      "symbol": "HOOD",
+      "name": "Robinhood",
+      "kind": "equity",
+      "price": 124.72,
+      "changePct": 31.15,
+      "source": "https://query1.finance.yahoo.com/v8/finance/chart/HOOD?interval=1d&range=10d",
+      "session": "미국 정규장"
+    },
+    {
+      "id": "btc",
+      "symbol": "BTC-USD",
+      "name": "Bitcoin",
+      "kind": "crypto",
+      "price": 80797.49,
+      "changePct": 2.24,
+      "source": "https://query1.finance.yahoo.com/v8/finance/chart/BTC-USD?interval=1d&range=10d",
+      "session": "24h 근사"
+    }
   ],
   "candidates": [
     {
-      "code":"234340","name":"헥토파이낸셜","score":8,"maxScore":12,"coveredMaxScore":8,"recent5dPct":null,
-      "linkage":"Circle CPN 한국 유일 파트너 · USDC 크로스보더 결제/정산",
-      "components":{
-        "core":{"label":"CRCL 핵심선행","available":true,"points":3,"max":3},
-        "btc":{"label":"BTC +4%","available":true,"points":1,"max":1},
-        "peers":{"label":"동종 2개 +7%","available":true,"points":1,"max":1},
-        "linkage":{"label":"직접 사업연계","available":true,"points":2,"max":2},
-        "catalyst":{"label":"최근 사업촉매","available":true,"points":1,"max":1,"date":"2026-08-28","detail":"CPN 한국 유일 파트너·스테이블코인 성장축 재확인","source":"https://hectofinancial.co.kr/company/news"},
-        "pullback":{"label":"최근 5D 눌림","available":false,"points":0,"max":1},
-        "policy":{"label":"정책 촉매","available":false,"points":0,"max":1},
-        "sensitivity":{"label":"과거 동일재료 민감도","available":false,"points":0,"max":2}
+      "code": "234340",
+      "name": "헥토파이낸셜",
+      "score": 7,
+      "maxScore": 12,
+      "coveredMaxScore": 9,
+      "recent5dPct": 10.47,
+      "lastPrice": 25850,
+      "linkage": "Circle CPN 한국 유일 파트너 · USDC 크로스보더 결제/정산",
+      "components": {
+        "core": {
+          "label": "CRCL 핵심선행",
+          "available": true,
+          "points": 3,
+          "max": 3
+        },
+        "btc": {
+          "label": "BTC +4%",
+          "available": true,
+          "points": 0,
+          "max": 1
+        },
+        "peers": {
+          "label": "동종 2개 +7%",
+          "available": true,
+          "points": 1,
+          "max": 1
+        },
+        "linkage": {
+          "label": "직접 사업연계",
+          "available": true,
+          "points": 2,
+          "max": 2
+        },
+        "catalyst": {
+          "label": "최근 사업촉매",
+          "available": true,
+          "points": 1,
+          "max": 1,
+          "date": "2026-08-28",
+          "detail": "CPN 한국 유일 파트너·스테이블코인 성장축 재확인",
+          "source": "https://hectofinancial.co.kr/company/news"
+        },
+        "pullback": {
+          "label": "최근 5D 눌림",
+          "available": true,
+          "points": 0,
+          "max": 1,
+          "valuePct": 10.47
+        },
+        "policy": {
+          "label": "정책 촉매",
+          "available": false,
+          "points": 0,
+          "max": 1
+        },
+        "sensitivity": {
+          "label": "과거 동일재료 민감도",
+          "available": false,
+          "points": 0,
+          "max": 2
+        }
       },
-      "sources":["https://hectofinancial.co.kr/company/news"]
+      "sources": [
+        "https://api.finance.naver.com/siseJson.naver?symbol=234340&requestType=1&startTime=20260721&endTime=20260904&timeframe=day",
+        "https://hectofinancial.co.kr/company/news"
+      ]
     },
     {
-      "code":"060250","name":"NHN KCP","score":8,"maxScore":12,"coveredMaxScore":8,"recent5dPct":null,
-      "linkage":"LINE NEXT와 스테이블코인 결제 확대 MOU · 결제창 연동",
-      "components":{
-        "core":{"label":"CRCL 핵심선행","available":true,"points":3,"max":3},
-        "btc":{"label":"BTC +4%","available":true,"points":1,"max":1},
-        "peers":{"label":"동종 2개 +7%","available":true,"points":1,"max":1},
-        "linkage":{"label":"직접 사업연계","available":true,"points":2,"max":2},
-        "catalyst":{"label":"최근 사업촉매","available":true,"points":1,"max":1,"date":"2026-08-20","detail":"LINE NEXT 스테이블코인 결제 확대 MOU","source":"https://www.newsis.com/view/NISX20260820_0003755370"},
-        "pullback":{"label":"최근 5D 눌림","available":false,"points":0,"max":1},
-        "policy":{"label":"정책 촉매","available":false,"points":0,"max":1},
-        "sensitivity":{"label":"과거 동일재료 민감도","available":false,"points":0,"max":2}
+      "code": "060250",
+      "name": "NHN KCP",
+      "score": 7,
+      "maxScore": 12,
+      "coveredMaxScore": 9,
+      "recent5dPct": -0.25,
+      "lastPrice": 16110,
+      "linkage": "LINE NEXT와 스테이블코인 결제 확대 MOU · 결제창 연동",
+      "components": {
+        "core": {
+          "label": "CRCL 핵심선행",
+          "available": true,
+          "points": 3,
+          "max": 3
+        },
+        "btc": {
+          "label": "BTC +4%",
+          "available": true,
+          "points": 0,
+          "max": 1
+        },
+        "peers": {
+          "label": "동종 2개 +7%",
+          "available": true,
+          "points": 1,
+          "max": 1
+        },
+        "linkage": {
+          "label": "직접 사업연계",
+          "available": true,
+          "points": 2,
+          "max": 2
+        },
+        "catalyst": {
+          "label": "최근 사업촉매",
+          "available": true,
+          "points": 1,
+          "max": 1,
+          "date": "2026-08-20",
+          "detail": "LINE NEXT 스테이블코인 결제 확대 MOU",
+          "source": "https://www.newsis.com/view/NISX20260820_0003755370"
+        },
+        "pullback": {
+          "label": "최근 5D 눌림",
+          "available": true,
+          "points": 0,
+          "max": 1,
+          "valuePct": -0.25
+        },
+        "policy": {
+          "label": "정책 촉매",
+          "available": false,
+          "points": 0,
+          "max": 1
+        },
+        "sensitivity": {
+          "label": "과거 동일재료 민감도",
+          "available": false,
+          "points": 0,
+          "max": 2
+        }
       },
-      "sources":["https://www.newsis.com/view/NISX20260820_0003755370"]
+      "sources": [
+        "https://api.finance.naver.com/siseJson.naver?symbol=060250&requestType=1&startTime=20260721&endTime=20260904&timeframe=day",
+        "https://www.newsis.com/view/NISX20260820_0003755370"
+      ]
     }
   ],
   "rules": {
