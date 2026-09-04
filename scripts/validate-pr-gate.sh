@@ -39,6 +39,7 @@ else
   done
 fi
 
+node --check world-overview.js
 node --check company.js
 node --check company-clock.js
 node --check company-news.js

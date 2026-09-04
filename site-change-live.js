@@ -6,7 +6,10 @@
   'use strict';
   var rows=[];
   /* 배포 커밋 수집 지연과 무관하게 사용자에게 보이는 변경은 즉시 이력에 남긴다. */
-  var REQUIRED_VISIBLE_ROWS=[{d:'2026-09-02',t:'02 기업분석을 페이지 초기 화면으로 변경 — 01 시장 모니터링이 먼저 보였다가 전환되는 현상 제거',sha:'company-initial-view-20260902'}];
+  var REQUIRED_VISIBLE_ROWS=[
+    {d:'2026-09-04',t:'00 시장 지도 신설 — 기존 메뉴를 유지한 채 시장 레짐·자금 이동·전력·달러/금융·차세대 성장축을 한 화면에서 확인',sha:'world-overview-20260904'},
+    {d:'2026-09-02',t:'02 기업분석을 페이지 초기 화면으로 변경 — 01 시장 모니터링이 먼저 보였다가 전환되는 현상 제거',sha:'company-initial-view-20260902'}
+  ];
   var ready=false;
   var modal=null;
   var badgePatchQueued=false;
@@ -132,6 +135,16 @@
     }).observe(document.body,{childList:true,subtree:true});
   }
   fetchRows();
+})();
+
+/* 00 시장 지도 자가 마운트 로더. 기존 메뉴를 건드리지 않고 첫 번째 탭 앞에 00을 삽입한다. */
+(function(){
+  if(document.querySelector('script[data-world-overview-loader]'))return;
+  var s=document.createElement('script');
+  s.src='/world-overview.js?v=20260904';
+  s.defer=true;
+  s.setAttribute('data-world-overview-loader','1');
+  document.body.appendChild(s);
 })();
 
 /* 02 기업분석 자가 마운트 로더. index.html 대용량 파일을 직접 패치하지 않는다. */
