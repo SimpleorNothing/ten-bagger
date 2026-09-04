@@ -1,0 +1,85 @@
+name: Update market flow proxies
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/update-market-flow.yml'
+      - 'scripts/fetch-market-flow.mjs'
+  schedule:
+    - cron: '45 21 * * 1-5'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: update-market-flow
+  cancel-in-progress: false
+
+jobs:
+  flow:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Fetch and validate market flow proxies
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/fetch-market-flow.mjs
+          node - <<'NODE'
+          const fs = require('fs');
+          const j = JSON.parse(fs.readFileSync('market-flow.json','utf8'));
+          if (j.schema !== 'market-flow-v1') throw new Error('market flow schema mismatch');
+          const ids = ['spy','qqq','rsp','iwm','soxx','xlu','xli','xlf','xlv','ita','dxy'];
+          for (const id of ids) {
+            const s = j.series?.[id];
+            if (!s || !Array.isArray(s.t) || !Array.isArray(s.c) || s.t.length < 120 || s.t.length !== s.c.length)
+              throw new Error('invalid market flow series: ' + id);
+            if (![s.latest,s.perf5d,s.perf20d,s.perf60d].every(Number.isFinite))
+              throw new Error('invalid market flow metric: ' + id);
+          }
+          console.log('market flow proxy integrity passed: ' + j.asOf);
+          NODE
+      - name: Rebase generation onto latest main
+        shell: bash
+        run: |
+          set -euo pipefail
+          START_SHA=$(git rev-parse HEAD)
+          git fetch origin main
+          LATEST_SHA=$(git rev-parse origin/main)
+          if [ "$START_SHA" != "$LATEST_SHA" ]; then
+            echo "main moved during market-flow refresh: $START_SHA -> $LATEST_SHA; regenerating"
+            git reset --hard origin/main
+            node scripts/fetch-market-flow.mjs
+          fi
+      - name: Create protected-main PR when changed
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -z "$(git status --porcelain market-flow.json)" ]; then
+            echo "No market-flow change."; exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          BRANCH="automation/update-market-flow-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          git switch -c "$BRANCH"
+          git add market-flow.json
+          git commit -m "data: refresh market flow proxies"
+          git push origin "$BRANCH"
+          BODY="Daily 00 Market Map proxy refresh. Values are price-relative-strength observations from the documented Yahoo chart feed, not ETF fund-flow amounts. All 11 required series must pass integrity checks before this PR is opened."
+          for attempt in 1 2 3; do
+            if gh pr create --base main --head "$BRANCH" --title "data: refresh market flow proxies" --body "$BODY"; then exit 0; fi
+            if gh pr view "$BRANCH" --json number,url >/dev/null 2>&1; then exit 0; fi
+            if [ "$attempt" -lt 3 ]; then sleep $((attempt * 10)); fi
+          done
+          exit 1
