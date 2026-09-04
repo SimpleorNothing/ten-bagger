@@ -86,7 +86,9 @@ async function main() {
   for (const s of SYMBOLS) {
     const row = series[s.id];
     if (!row || row.t.length !== row.c.length || row.c.length < 120) throw new Error(`invalid ${s.id} series`);
-    if (![row.latest, row.perf5d, row.perf20d, row.perf60d].every(Number.isFinite)) throw new Error(`invalid ${s.id} metrics`);
+    // 00 화면과 판정은 20D·60D만 사용한다. 공급자 단기 캔들 결측으로 5D만 계산 불가한 경우는
+    // 원자료를 null로 보존하되, 표시·판정에 쓰는 latest/20D/60D가 유효하면 전체 갱신을 막지 않는다.
+    if (![row.latest, row.perf20d, row.perf60d].every(Number.isFinite)) throw new Error(`invalid ${s.id} required metrics`);
   }
 
   const out = {

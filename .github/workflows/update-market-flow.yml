@@ -43,8 +43,9 @@ jobs:
             const s = j.series?.[id];
             if (!s || !Array.isArray(s.t) || !Array.isArray(s.c) || s.t.length < 120 || s.t.length !== s.c.length)
               throw new Error('invalid market flow series: ' + id);
-            if (![s.latest,s.perf5d,s.perf20d,s.perf60d].every(Number.isFinite))
-              throw new Error('invalid market flow metric: ' + id);
+            // 00 화면은 latest/20D/60D를 사용한다. 5D는 보조 원자료라 공급자 단기 결측 시 null을 허용한다.
+            if (![s.latest,s.perf20d,s.perf60d].every(Number.isFinite))
+              throw new Error('invalid market flow required metric: ' + id);
           }
           console.log('market flow proxy integrity passed: ' + j.asOf);
           NODE
@@ -76,7 +77,7 @@ jobs:
           git add market-flow.json
           git commit -m "data: refresh market flow proxies"
           git push origin "$BRANCH"
-          BODY="Daily 00 Market Map proxy refresh. Values are price-relative-strength observations from the documented Yahoo chart feed, not ETF fund-flow amounts. All 11 required series must pass integrity checks before this PR is opened."
+          BODY="Daily 00 Market Map proxy refresh. Values are price-relative-strength observations from the documented Yahoo chart feed, not ETF fund-flow amounts. All 11 required series and the displayed 20D/60D horizons must pass integrity checks before this PR is opened."
           for attempt in 1 2 3; do
             if gh pr create --base main --head "$BRANCH" --title "data: refresh market flow proxies" --body "$BODY"; then exit 0; fi
             if gh pr view "$BRANCH" --json number,url >/dev/null 2>&1; then exit 0; fi
