@@ -45,10 +45,20 @@
   function candidateHTML(row,i){return '<tr><td class="rank">'+(i+1)+'</td><td><div class="name">'+esc(row.name||row.code)+'</div><div>'+esc(row.code||'')+'</div></td><td><span class="pts">'+esc(row.score)+'/'+esc(row.maxScore||12)+'</span><div>'+esc(grade(Number(row.score)||0))+'</div></td><td>'+esc(row.linkage||'—')+'</td><td>'+pct(row.recent5dPct)+'</td><td>'+componentChips(row)+'</td></tr>';}
   function ensurePanel(){
     var host=document.getElementById('wmBody');if(!host)return null;
-    var foot=host.querySelector('.wm-foot');if(!foot)return null;
+    if(!host.__mrObserved&&window.MutationObserver){
+      host.__mrObserved=true;
+      new MutationObserver(function(){
+        if(!document.getElementById('wmMomentumRadar')){
+          var p=ensurePanel();
+          if(p)render(cached);
+        }
+      }).observe(host,{childList:true});
+    }
     var panel=document.getElementById('wmMomentumRadar');
-    if(!panel){panel=document.createElement('section');panel.id='wmMomentumRadar';panel.className='wm-card mr-panel';foot.parentNode.insertBefore(panel,foot);}
-    if(!host.__mrObserved&&window.MutationObserver){host.__mrObserved=true;new MutationObserver(function(){if(!document.getElementById('wmMomentumRadar')&&host.querySelector('.wm-foot')){ensurePanel();render(cached);}}).observe(host,{childList:true});}
+    if(panel)return panel;
+    panel=document.createElement('section');panel.id='wmMomentumRadar';panel.className='wm-card mr-panel';
+    var anchor=host.querySelector('.wm-note');
+    if(anchor)host.insertBefore(panel,anchor);else host.appendChild(panel);
     return panel;
   }
   function render(data){
