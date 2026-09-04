@@ -1,0 +1,79 @@
+name: Verify momentum radar live browser
+
+on:
+  workflow_run:
+    workflows: ["Deploy to Cloudflare Workers"]
+    types: [completed]
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    env:
+      SITE_PASSWORD: ${{ secrets.SITE_PASSWORD }}
+    steps:
+      - name: Verify authenticated rendered momentum radar
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -z "${SITE_PASSWORD:-}" ]; then
+            echo "ERROR: SITE_PASSWORD secret is required for authenticated browser smoke test"
+            exit 1
+          fi
+          mkdir -p /tmp/momentum-radar-live && cd /tmp/momentum-radar-live
+          npm init -y >/dev/null 2>&1
+          npm install playwright@1.55.0 >/dev/null 2>&1
+          npx playwright install chromium >/dev/null 2>&1
+          cat > check.js <<'NODE'
+          const { chromium } = require('playwright');
+          const BASE='https://simpleornothing.com';
+          const pw=process.env.SITE_PASSWORD;
+          (async()=>{
+            const browser=await chromium.launch({headless:true});
+            const context=await browser.newContext({viewport:{width:1440,height:1600}});
+            const auth=await context.request.post(BASE+'/__auth',{
+              form:{password:pw},
+              timeout:30000
+            });
+            if(!auth.ok()) throw new Error('site auth failed: HTTP '+auth.status());
+            const page=await context.newPage();
+            const errors=[];
+            page.on('pageerror',e=>errors.push(String(e)));
+            await page.goto(BASE+'/?radar-smoke='+Date.now(),{waitUntil:'domcontentloaded',timeout:90000});
+            await page.waitForSelector('#nav .tab[data-v="world"]',{state:'visible',timeout:30000});
+            await page.click('#nav .tab[data-v="world"]');
+            await page.waitForSelector('#wmMomentumRadar',{state:'visible',timeout:45000});
+            await page.waitForFunction(()=>{
+              const p=document.getElementById('wmMomentumRadar');
+              const t=p?.innerText||'';
+              return t.includes('해외 선행자산 → 국내 급등 후보') && t.includes('헥토파이낸셜') && t.includes('NHN KCP');
+            },{timeout:45000});
+            const result=await page.evaluate(()=>{
+              const host=document.getElementById('wmBody');
+              const panel=document.getElementById('wmMomentumRadar');
+              const note=host?.querySelector('.wm-note');
+              const rect=panel?.getBoundingClientRect();
+              return {
+                panelExists:!!panel,
+                panelVisible:!!panel && !!rect && rect.width>0 && rect.height>0,
+                underHost:!!host && !!panel && panel.parentElement===host,
+                beforeNote:!!panel && !!note && panel.nextElementSibling===note,
+                title:(panel?.querySelector('.mr-title')?.textContent||'').trim(),
+                text:(panel?.innerText||'').slice(0,2000),
+                worldActive:document.getElementById('v-world')?.classList.contains('on')||false
+              };
+            });
+            console.log('LIVE MOMENTUM RADAR:',JSON.stringify(result,null,2));
+            if(!result.panelExists||!result.panelVisible||!result.underHost||!result.worldActive) throw new Error('momentum radar is not visibly mounted in live 00 market map');
+            if(!result.beforeNote) throw new Error('momentum radar is not mounted before the 00 market map note');
+            if(result.title!=='해외 선행자산 → 국내 급등 후보') throw new Error('momentum radar title mismatch');
+            if(!result.text.includes('헥토파이낸셜')||!result.text.includes('NHN KCP')) throw new Error('live radar candidates missing');
+            if(errors.length) console.log('PAGE ERRORS:',JSON.stringify(errors));
+            await browser.close();
+          })().catch(e=>{console.error(e);process.exit(1)});
+          NODE
+          node check.js
