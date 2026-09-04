@@ -1,0 +1,28 @@
+name: Market Flow UI Check
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'world-overview.js'
+      - 'site-change-live.js'
+      - 'scripts/fetch-market-flow.mjs'
+      - 'scripts/test-world-overview-static.mjs'
+      - '.github/workflows/update-market-flow.yml'
+      - '.github/workflows/market-flow-pr-check.yml'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Validate market flow UI and collector syntax
+        run: |
+          set -euo pipefail
+          node --check world-overview.js
+          node --check site-change-live.js
+          node --check scripts/fetch-market-flow.mjs
+          node scripts/test-world-overview-static.mjs
