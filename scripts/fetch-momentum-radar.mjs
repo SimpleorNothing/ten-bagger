@@ -17,8 +17,11 @@ const CANDIDATES=[
 ];
 
 const sleep=(ms)=>new Promise(r=>setTimeout(r,ms));
-const kstNow=()=>new Date(Date.now()+9*3600e3);
-const kstIso=()=>kstNow().toISOString().replace('Z','+09:00');
+const kstIso=()=>{
+  const parts=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'}).formatToParts(new Date());
+  const p=Object.fromEntries(parts.map(x=>[x.type,x.value]));
+  return `${p.year}-${p.month}-${p.day}T${p.hour}:${p.minute}:${p.second}+09:00`;
+};
 const ymd=(d)=>d.toISOString().slice(0,10).replace(/-/g,'');
 const finite=(v)=>v!==null&&v!==undefined&&v!==''&&Number.isFinite(Number(v));
 
@@ -76,7 +79,7 @@ for(const x of LEADERS){
   catch(e){leaderMap[x.id]={...x,changePct:null,error:String(e.message||e),session:x.kind==='crypto'?'24h 근사':'미국 정규장'};}
   await sleep(250);
 }
-const common=leaderPoints(leaderMap),commonScore=sumPoints(common),now=kstNow();
+const common=leaderPoints(leaderMap),commonScore=sumPoints(common),now=new Date();
 const candidates=[];
 for(const c of CANDIDATES){
   let hist={recent5dPct:null,lastPrice:null,source:null};
