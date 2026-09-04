@@ -1,7 +1,7 @@
 /* momentum-radar.js — 00 시장 지도: 해외 선행자산 → 국내 다음 거래일 급등 후보 레이더. */
 (function(){
   'use strict';
-  var DATA_URL='/momentum-radar.json', cached=null, loading=false;
+  var DATA_URL='/momentum-radar.json', cached=null, loading=false, selectedTheme='';
   var CSS=[
     '#v-world .mr-panel{margin:0 0 14px;padding:16px 18px}',
     '#v-world .mr-head{display:flex;gap:16px;align-items:flex-start;justify-content:space-between;margin-bottom:13px}',
@@ -9,6 +9,14 @@
     '#v-world .mr-title{font-size:19px;font-weight:800;color:var(--txt);margin:4px 0 4px;letter-spacing:-.02em}',
     '#v-world .mr-desc{font-size:13px;line-height:1.55;color:var(--dim);margin:0}',
     '#v-world .mr-refresh{flex:0 0 auto;border:1px solid var(--line2);background:var(--panel2);color:var(--dim);padding:7px 10px;font:inherit;font-size:12px;cursor:pointer}',
+    '#v-world .mr-themegrid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:7px;margin:0 0 12px}',
+    '#v-world .mr-theme{border:1px solid var(--line);background:var(--panel2);padding:10px 11px;text-align:left;cursor:pointer;min-width:0;font:inherit;color:var(--txt)}',
+    '#v-world .mr-theme.on{border-color:var(--dawn);background:color-mix(in srgb,var(--dawn) 8%,var(--panel))}',
+    '#v-world .mr-theme .tn{display:block;font-size:11px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}',
+    '#v-world .mr-theme .ts{display:flex;align-items:baseline;gap:5px;margin-top:5px}',
+    '#v-world .mr-theme .ts strong{font-size:18px;font-variant-numeric:tabular-nums}',
+    '#v-world .mr-theme .ts span{font-size:10px;color:var(--faint)}',
+    '#v-world .mr-theme .tc{display:block;font-size:10px;color:var(--dim);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}',
     '#v-world .mr-summary{display:grid;grid-template-columns:minmax(230px,.8fr) minmax(0,1.2fr);gap:10px;margin-bottom:12px}',
     '#v-world .mr-signal{border:1px solid var(--line);background:var(--panel2);padding:13px 14px}',
     '#v-world .mr-signal .lab{font-size:11px;color:var(--faint);font-weight:700;letter-spacing:.06em}',
@@ -16,6 +24,7 @@
     '#v-world .mr-signal .score{font-size:30px;line-height:1;font-weight:850;color:var(--txt);font-variant-numeric:tabular-nums}',
     '#v-world .mr-signal .grade{font-size:12px;font-weight:800;color:var(--dawn)}',
     '#v-world .mr-signal .why{font-size:12px;line-height:1.5;color:var(--dim);margin-top:8px}',
+    '#v-world .mr-signal .theme-desc{font-size:11px;line-height:1.5;color:var(--faint);margin-top:7px}',
     '#v-world .mr-leaders{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}',
     '#v-world .mr-lead{border:1px solid var(--line);background:var(--panel);padding:10px 11px}',
     '#v-world .mr-lead b{display:block;font-size:12px;color:var(--txt)}',
@@ -23,7 +32,7 @@
     '#v-world .mr-lead span{display:block;font-size:10px;color:var(--faint);margin-top:2px}',
     '#v-world .mr-up{color:var(--st-dawn)}#v-world .mr-down{color:var(--st-hot)}',
     '#v-world .mr-tablewrap{overflow:auto;border:1px solid var(--line)}',
-    '#v-world .mr-table{width:100%;border-collapse:collapse;min-width:720px}',
+    '#v-world .mr-table{width:100%;border-collapse:collapse;min-width:760px}',
     '#v-world .mr-table th{font-size:11px;color:var(--faint);font-weight:700;text-align:left;padding:8px 10px;background:var(--panel2);border-bottom:1px solid var(--line)}',
     '#v-world .mr-table td{font-size:12px;color:var(--dim);padding:10px;border-bottom:1px solid var(--line);vertical-align:top;line-height:1.45}',
     '#v-world .mr-table tr:last-child td{border-bottom:0}',
@@ -34,15 +43,29 @@
     '#v-world .mr-meta{display:flex;gap:10px;flex-wrap:wrap;margin-top:9px;font-size:11px;color:var(--faint);line-height:1.5}',
     '#v-world .mr-note{margin-top:10px;padding-top:10px;border-top:1px solid var(--line);font-size:11px;line-height:1.55;color:var(--faint)}',
     '#v-world .mr-empty{padding:14px;border:1px solid var(--line);background:var(--panel2);font-size:12px;color:var(--dim)}',
-    '@media(max-width:760px){#v-world .mr-summary{grid-template-columns:1fr}#v-world .mr-leaders{grid-template-columns:1fr 1fr}#v-world .mr-head{flex-direction:column}#v-world .mr-refresh{align-self:flex-start}}'
+    '@media(max-width:1180px){#v-world .mr-themegrid{grid-template-columns:repeat(3,minmax(0,1fr))}}',
+    '@media(max-width:760px){#v-world .mr-summary{grid-template-columns:1fr}#v-world .mr-leaders{grid-template-columns:1fr 1fr}#v-world .mr-themegrid{grid-template-columns:repeat(2,minmax(0,1fr))}#v-world .mr-head{flex-direction:column}#v-world .mr-refresh{align-self:flex-start}}'
   ].join('');
 
   function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
   function pct(v){if(v===null||v===undefined||v==='')return '—';var n=Number(v);return Number.isFinite(n)?(n>0?'+':'')+n.toFixed(1)+'%':'—';}
-  function grade(score){return score>=10?'매우 강함':score>=8?'강한 후보':score>=6?'관찰':'낮음';}
+  function grade(score){return score>=10?'매우 강함':score>=8?'강한 후보':score>=6?'관찰':score>=4?'초기 신호':'낮음';}
   function componentChips(row){var c=row&&row.components||{};return Object.keys(c).map(function(k){var x=c[k]||{};var txt=(x.label||k)+' '+(x.available===false?'자료없음':('+'+(Number(x.points)||0)));return '<span class="mr-chip">'+esc(txt)+'</span>';}).join('');}
   function leaderHTML(x){var raw=x&&x.changePct,n=(raw===null||raw===undefined||raw==='')?NaN:Number(raw),cls=Number.isFinite(n)?(n>=0?'mr-up':'mr-down'):'';return '<div class="mr-lead"><b>'+esc(x&&x.name||x&&x.symbol||'—')+'</b><strong class="'+cls+'">'+pct(raw)+'</strong><span>'+esc(x&&x.session||'미국장 종가/24h')+'</span></div>';}
   function candidateHTML(row,i){return '<tr><td class="rank">'+(i+1)+'</td><td><div class="name">'+esc(row.name||row.code)+'</div><div>'+esc(row.code||'')+'</div></td><td><span class="pts">'+esc(row.score)+'/'+esc(row.maxScore||12)+'</span><div>'+esc(grade(Number(row.score)||0))+'</div></td><td>'+esc(row.linkage||'—')+'</td><td>'+pct(row.recent5dPct)+'</td><td>'+componentChips(row)+'</td></tr>';}
+  function normalizeThemes(data){
+    if(Array.isArray(data&&data.themes))return data.themes;
+    if(data&&data.theme)return [{id:data.theme.id||'legacy',name:data.theme.name||'기존 테마',short:data.theme.name||'기존',description:'',signalScore:Math.max.apply(null,(data.candidates||[]).map(function(x){return Number(x.score)||0;}).concat([0])),maxScore:data.maxScore||12,coveredMaxScore:data.coveredMaxScore||0,signalSummary:data.theme.signalSummary||'',leaders:data.leaders||[],candidates:data.candidates||[]}];
+    return [];
+  }
+  function themeTop(t){var rows=Array.isArray(t&&t.candidates)?t.candidates:[];return rows.slice().sort(function(a,b){return Number(b.score||0)-Number(a.score||0);})[0]||null;}
+  function themeButtonHTML(t){var top=themeTop(t),score=Number(t&&t.signalScore)||0,on=t.id===selectedTheme?' on':'';return '<button type="button" class="mr-theme'+on+'" data-mr-theme="'+esc(t.id)+'"><span class="tn">'+esc(t.short||t.name||t.id)+'</span><span class="ts"><strong>'+esc(score)+'</strong><span>/'+esc(t.maxScore||12)+' · '+esc(grade(score))+'</span></span><span class="tc">'+esc(top?top.name:'후보 대기')+'</span></button>';}
+  function selectDefault(themes){
+    if(!themes.length)return '';
+    if(selectedTheme&&themes.some(function(t){return t.id===selectedTheme;}))return selectedTheme;
+    var sorted=themes.slice().sort(function(a,b){return Number(b.signalScore||0)-Number(a.signalScore||0);});
+    return sorted[0].id;
+  }
   function ensurePanel(){
     var host=document.getElementById('wmBody');if(!host)return null;
     if(!host.__mrObserved&&window.MutationObserver){
@@ -61,19 +84,25 @@
     if(anchor)host.insertBefore(panel,anchor);else host.appendChild(panel);
     return panel;
   }
+  function bind(panel){
+    var refresh=panel.querySelector('[data-mr-refresh]');if(refresh)refresh.addEventListener('click',function(){load(true);});
+    Array.prototype.forEach.call(panel.querySelectorAll('[data-mr-theme]'),function(btn){btn.addEventListener('click',function(){selectedTheme=btn.getAttribute('data-mr-theme')||'';render(cached);});});
+  }
   function render(data){
     var panel=ensurePanel();if(!panel)return;
     if(!data){panel.innerHTML='<div class="mr-empty">해외 선행자산 레이더 데이터를 불러오는 중입니다.</div>';return;}
-    var leaders=Array.isArray(data.leaders)?data.leaders:[],rows=Array.isArray(data.candidates)?data.candidates:[];
-    var top=rows.slice().sort(function(a,b){return Number(b.score||0)-Number(a.score||0);})[0]||null;
-    var covered=Number(data.coveredMaxScore)||0,max=Number(data.maxScore)||12;
-    var common=(data.theme&&data.theme.signalSummary)||'미국 선행자산 움직임을 국내 직접 연계주에 매핑';
-    panel.innerHTML='<div class="mr-head"><div><div class="mr-kicker">LEAD-LAG RADAR · 다음 거래일</div><h3 class="mr-title">해외 선행자산 → 국내 급등 후보</h3><p class="mr-desc">미국장 마감 후 선행주·Bitcoin 움직임과 국내 사업연결도·최근 눌림을 결합한다. 사전확률 탐지이며 매수 신호가 아니다.</p></div><button type="button" class="mr-refresh" data-mr-refresh>새로고침</button></div>'+
-      '<div class="mr-summary"><div class="mr-signal"><div class="lab">현재 최상위 후보</div><div class="row"><div class="score">'+esc(top?top.score:'—')+(top?'/'+esc(top.maxScore||max):'')+'</div><div class="grade">'+esc(top?grade(Number(top.score)||0):'자료 대기')+'</div></div><div class="why">'+esc(top?(top.name+' · '+(top.linkage||common)):common)+'</div></div><div class="mr-leaders">'+leaders.map(leaderHTML).join('')+'</div></div>'+
-      (rows.length?'<div class="mr-tablewrap"><table class="mr-table"><thead><tr><th>순위</th><th>국내 후보</th><th>점수</th><th>사업 연결</th><th>최근 5D</th><th>점수 근거</th></tr></thead><tbody>'+rows.slice().sort(function(a,b){return Number(b.score||0)-Number(a.score||0);}).map(candidateHTML).join('')+'</tbody></table></div>':'<div class="mr-empty">현재 임계치를 넘은 국내 후보가 없습니다.</div>')+
-      '<div class="mr-meta"><span>기준 '+esc(data.asOf||'—')+'</span><span>테마 '+esc(data.theme&&data.theme.name||'—')+'</span><span>현재 점수 커버리지 '+esc(covered)+'/'+esc(max)+'</span><span>상태 '+esc(data.status||'—')+'</span></div>'+
-      '<div class="mr-note">현재 v1은 스테이블코인·결제 테마부터 적용한다. 정책 촉매와 과거 동일 재료 민감도는 검증 가능한 원자료가 연결될 때만 점수에 포함한다. 미연결 항목은 임의 추정하지 않는다.</div>';
-    var b=panel.querySelector('[data-mr-refresh]');if(b)b.addEventListener('click',function(){load(true);});
+    var themes=normalizeThemes(data);selectedTheme=selectDefault(themes);
+    var theme=themes.find(function(t){return t.id===selectedTheme;})||themes[0]||null;
+    if(!theme){panel.innerHTML='<div class="mr-empty">레이더 테마 데이터가 없습니다.</div>';return;}
+    var leaders=Array.isArray(theme.leaders)?theme.leaders:[],rows=Array.isArray(theme.candidates)?theme.candidates:[];
+    var top=themeTop(theme),covered=Number(theme.coveredMaxScore)||0,max=Number(theme.maxScore||data.maxScore)||12;
+    panel.innerHTML='<div class="mr-head"><div><div class="mr-kicker">LEAD-LAG RADAR · 다음 거래일</div><h3 class="mr-title">해외 선행자산 → 국내 급등 후보</h3><p class="mr-desc">미국장 마감 후 산업별 선행주 움직임과 국내 직접 연계도·최근 눌림을 결합한다. 산업 6개를 동시에 스캔하며 사전확률 탐지이지 매수 신호는 아니다.</p></div><button type="button" class="mr-refresh" data-mr-refresh>새로고침</button></div>'+
+      '<div class="mr-themegrid">'+themes.map(themeButtonHTML).join('')+'</div>'+
+      '<div class="mr-summary"><div class="mr-signal"><div class="lab">'+esc(theme.name)+' · 현재 최상위 후보</div><div class="row"><div class="score">'+esc(top?top.score:'—')+(top?'/'+esc(top.maxScore||max):'')+'</div><div class="grade">'+esc(top?grade(Number(top.score)||0):'자료 대기')+'</div></div><div class="why">'+esc(top?(top.name+' · '+(top.linkage||theme.signalSummary)):theme.signalSummary||'선행신호 대기')+'</div><div class="theme-desc">'+esc(theme.description||'')+'</div></div><div class="mr-leaders">'+leaders.map(leaderHTML).join('')+'</div></div>'+
+      (rows.length?'<div class="mr-tablewrap"><table class="mr-table"><thead><tr><th>순위</th><th>국내 후보</th><th>점수</th><th>산업 연결</th><th>최근 5D</th><th>점수 근거</th></tr></thead><tbody>'+rows.slice().sort(function(a,b){return Number(b.score||0)-Number(a.score||0);}).slice(0,5).map(candidateHTML).join('')+'</tbody></table></div>':'<div class="mr-empty">현재 국내 후보 데이터가 없습니다.</div>')+
+      '<div class="mr-meta"><span>기준 '+esc(data.asOf||'—')+'</span><span>선택 산업 '+esc(theme.name||'—')+'</span><span>산업 '+esc(themes.length)+'개</span><span>현재 점수 커버리지 '+esc(covered)+'/'+esc(max)+'</span><span>상태 '+esc(data.status||'—')+'</span></div>'+
+      '<div class="mr-note">현재 v2는 스테이블코인·전력/Grid·AI/반도체·원전·방산·ESS를 함께 본다. 정책·수주 촉매와 과거 동일 재료 민감도는 검증 가능한 원자료가 연결될 때만 점수화하며, 미연결 항목은 임의로 0점 처리하지 않고 커버리지에서 제외한다.</div>';
+    bind(panel);
   }
   function load(force){
     if(loading)return;if(cached&&!force){render(cached);return;}loading=true;render(cached);

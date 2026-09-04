@@ -37,15 +37,24 @@ jobs:
           node - <<'NODE'
           const fs=require('fs');
           const j=JSON.parse(fs.readFileSync('momentum-radar.json','utf8'));
-          if(j.schema!=='momentum-radar-v1') throw new Error('schema mismatch');
-          if(!Array.isArray(j.leaders)||j.leaders.length<4) throw new Error('leader coverage missing');
-          if(!Array.isArray(j.candidates)||j.candidates.length<2) throw new Error('candidate coverage missing');
-          for(const c of j.candidates){
-            if(!(Number(c.score)>=0&&Number(c.score)<=12)) throw new Error(c.code+': score out of range');
-            if(Number(c.score)>Number(c.coveredMaxScore)) throw new Error(c.code+': score exceeds row coverage');
+          if(j.schema!=='momentum-radar-v2') throw new Error('schema mismatch');
+          if(!Array.isArray(j.themes)||j.themes.length<6) throw new Error('theme coverage missing');
+          const required=['stablecoin-payment','power-grid','ai-semiconductor','nuclear','defense','ess-battery'];
+          for(const id of required){ if(!j.themes.some(t=>t.id===id)) throw new Error('missing theme '+id); }
+          for(const t of j.themes){
+            if(!Array.isArray(t.leaders)||t.leaders.length<4) throw new Error(t.id+': leader coverage missing');
+            if(!Array.isArray(t.candidates)||t.candidates.length<2) throw new Error(t.id+': candidate coverage missing');
+            if(!(Number(t.signalScore)>=0&&Number(t.signalScore)<=12)) throw new Error(t.id+': signal score out of range');
+            for(const c of t.candidates){
+              if(!(Number(c.score)>=0&&Number(c.score)<=12)) throw new Error(c.code+': score out of range');
+              if(Number(c.score)>Number(c.coveredMaxScore)) throw new Error(c.code+': score exceeds row coverage');
+            }
+            const expected=Math.max(0,...t.candidates.map(c=>Number(c.score)||0));
+            if(Number(t.signalScore)!==expected) throw new Error(t.id+': signal score mismatch');
+            const cov=Math.min(...t.candidates.map(c=>Number(c.coveredMaxScore)));
+            if(Number(t.coveredMaxScore)!==cov) throw new Error(t.id+': coverage mismatch');
           }
-          if(Number(j.coveredMaxScore)!==Math.min(...j.candidates.map(c=>Number(c.coveredMaxScore)))) throw new Error('global coverage mismatch');
-          console.log('momentum radar schema + score invariants passed');
+          console.log('momentum radar v2 schema + six-theme score invariants passed');
           NODE
       - name: Create protected-main PR when changed
         env:
@@ -61,6 +70,6 @@ jobs:
           BRANCH="claude/automation-momentum-radar-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
           git switch -c "$BRANCH"
           git add $FILES
-          git commit -m "chore: update next-session momentum radar"
+          git commit -m "chore: update multisector momentum radar"
           git push origin "$BRANCH"
-          gh pr create --base main --head "$BRANCH" --title "chore: update next-session momentum radar" --body "Automated U.S.-close lead-lag refresh for the 00 market map. Scores use only sourced price data, explicit business-link weights and reproducible rules; unavailable policy/sensitivity inputs remain excluded."
+          gh pr create --base main --head "$BRANCH" --title "chore: update multisector momentum radar" --body "Automated U.S.-close lead-lag refresh for the 00 market map across stablecoin, power/grid, AI semiconductor, nuclear, defense and ESS. Scores use sourced price data, explicit industry-link weights and reproducible rules; unavailable policy/sensitivity inputs remain excluded."
