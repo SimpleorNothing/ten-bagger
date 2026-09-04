@@ -36,7 +36,10 @@ async function fetchYahoo(ticker) {
       const t = [], c = [];
       for (let i = 0; i < ts.length; i++) {
         const v = Number(close[i]);
-        if (!Number.isFinite(v)) continue;
+        // Yahoo chart feed can occasionally emit a zero placeholder for an otherwise
+        // valid symbol/day. Treat non-positive closes as missing observations instead
+        // of letting them poison short-horizon return calculations.
+        if (!(v > 0)) continue;
         t.push(Math.floor(Number(ts[i]) / 86400));
         c.push(+v.toFixed(v >= 1000 ? 0 : 2));
       }
