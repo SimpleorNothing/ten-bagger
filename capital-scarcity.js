@@ -16,7 +16,7 @@
   if(!table)return;
   table.querySelectorAll('span,b,[data-actual-action]').forEach(function(el){
    var txt=(el.textContent||'').trim();
-   if(/(^|\s|[·(])−?\-\d+(?:\.\d+)?(?:%|점|p)?(?:\s|$|[·)])/u.test(txt)||/\-\d+(?:\.\d+)?(?:%|점|p)/u.test(txt))el.style.color='#b42318';
+   if(/(^|\s|[·(])[-−]\d+(?:\.\d+)?(?:%|점|p)?(?:\s|$|[·)])/u.test(txt)||/-\d+(?:\.\d+)?(?:%|점|p)/u.test(txt))el.style.color='#b42318';
   });
  }
  function watchNegativeTrackerValues(){
