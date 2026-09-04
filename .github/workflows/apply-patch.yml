@@ -59,7 +59,7 @@ jobs:
           for f in /tmp/s*.js; do node --check "$f"; done
       - name: Commit and open protected-main PR
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.AUTO_MERGE_TOKEN }}
           GH_REPO: ${{ github.repository }}
         run: |
           set -euo pipefail
