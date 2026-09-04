@@ -1,0 +1,82 @@
+/* world-overview.js — 00 시장 지도: AI 인프라 밖의 시장 체제 변화를 한 화면에 요약한다.
+ * 기존 SoT를 읽기만 한다: signals.json + pulse.json. 숫자를 새로 추정하거나 저장하지 않는다.
+ */
+(function(){
+  'use strict';
+  var VIEW='v-world', TAB='world', loaded=false, loading=false;
+  var CSS=[
+    '#v-world{--wm-gap:12px}',
+    '#v-world .wm-headrow{display:flex;align-items:flex-start;gap:18px;justify-content:space-between}',
+    '#v-world .wm-upd{flex:0 0 auto;margin-top:4px}',
+    '#v-world .wm-hero{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(270px,.75fr);gap:var(--wm-gap);margin:0 0 14px}',
+    '#v-world .wm-card{background:var(--panel);border:1px solid var(--line);border-radius:3px;padding:16px 18px;min-width:0}',
+    '#v-world .wm-regime{display:flex;align-items:center;gap:14px;padding:17px 18px;border:1px solid var(--line2);background:var(--panel2)}',
+    '#v-world .wm-regime .lab{font-size:12px;font-weight:700;letter-spacing:.08em;color:var(--dim)}',
+    '#v-world .wm-regime .val{font-size:28px;font-weight:800;letter-spacing:-.03em;color:var(--txt)}',
+    '#v-world .wm-regime .why{font-size:14px;line-height:1.55;color:var(--dim);margin-left:auto;max-width:56%}',
+    '#v-world .wm-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:10px}',
+    '#v-world .wm-kpi{background:var(--panel);border:1px solid var(--line);padding:11px 12px}',
+    '#v-world .wm-kpi .k{font-size:12px;color:var(--dim);font-weight:600}',
+    '#v-world .wm-kpi .v{font-size:17px;color:var(--txt);font-weight:750;margin-top:4px;font-variant-numeric:tabular-nums}',
+    '#v-world .wm-kpi .s{font-size:12px;color:var(--faint);margin-top:3px}',
+    '#v-world .wm-focus{height:100%;display:flex;flex-direction:column}',
+    '#v-world .wm-eyebrow{font-size:12px;font-weight:700;letter-spacing:.08em;color:var(--faint);margin-bottom:8px}',
+    '#v-world .wm-focus h2{font-size:20px;line-height:1.38;margin:0 0 8px;color:var(--txt);letter-spacing:-.02em}',
+    '#v-world .wm-focus p{font-size:14px;line-height:1.62;color:var(--dim);margin:0}',
+    '#v-world .wm-asof{margin-top:auto;padding-top:12px;font-size:12px;color:var(--faint);font-variant-numeric:tabular-nums}',
+    '#v-world .wm-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:var(--wm-gap);margin:0 0 14px}',
+    '#v-world .wm-axis{position:relative;min-height:282px;display:flex;flex-direction:column}',
+    '#v-world .wm-axis .num{font-size:12px;font-weight:800;color:var(--dawn);letter-spacing:.08em}',
+    '#v-world .wm-axis h3{font-size:17px;line-height:1.35;margin:5px 0 4px;color:var(--txt);letter-spacing:-.02em}',
+    '#v-world .wm-axis .q{font-size:12px;line-height:1.45;color:var(--faint);min-height:34px}',
+    '#v-world .wm-state{display:inline-flex;align-items:center;width:max-content;max-width:100%;font-size:12px;font-weight:700;border:1px solid var(--line2);border-radius:20px;padding:4px 9px;margin:12px 0 10px;color:var(--dim);background:var(--panel2)}',
+    '#v-world .wm-state.risk{color:var(--st-hot);border-color:var(--st-hot);background:var(--panel)}',
+    '#v-world .wm-state.opp{color:var(--st-dawn);border-color:var(--st-dawn);background:var(--panel)}',
+    '#v-world .wm-axis .main{font-size:14px;line-height:1.56;color:var(--txt);font-weight:600;margin:0 0 8px}',
+    '#v-world .wm-axis .sub{font-size:13px;line-height:1.58;color:var(--dim);margin:0 0 11px}',
+    '#v-world .wm-axis .source{font-size:12px;line-height:1.45;color:var(--faint);margin-top:auto;border-top:1px solid var(--line);padding-top:9px}',
+    '#v-world .wm-lower{display:grid;grid-template-columns:1.1fr 1fr .9fr;gap:var(--wm-gap);margin-bottom:14px}',
+    '#v-world .wm-title{font-size:17px;font-weight:750;color:var(--txt);margin:0 0 5px;letter-spacing:-.02em}',
+    '#v-world .wm-desc{font-size:13px;color:var(--dim);line-height:1.55;margin:0 0 13px}',
+    '#v-world .wm-chain{display:flex;gap:6px;align-items:stretch;overflow:auto;padding-bottom:4px}',
+    '#v-world .wm-node{flex:1 0 82px;min-width:82px;border:1px solid var(--line);background:var(--panel2);padding:10px 8px;text-align:center}',
+    '#v-world .wm-node b{display:block;font-size:13px;color:var(--txt);line-height:1.35}',
+    '#v-world .wm-node span{display:block;font-size:12px;color:var(--faint);line-height:1.35;margin-top:3px}',
+    '#v-world .wm-list{display:flex;flex-direction:column;gap:7px}',
+    '#v-world .wm-row{display:grid;grid-template-columns:104px 1fr auto;gap:9px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}',
+    '#v-world .wm-row:last-child{border-bottom:0}',
+    '#v-world .wm-row b{font-size:13px;color:var(--txt)}',
+    '#v-world .wm-row span{font-size:12px;color:var(--dim);line-height:1.4}',
+    '#v-world .wm-row i{font-style:normal;font-size:12px;font-weight:700;color:var(--dawn);white-space:nowrap}',
+    '#v-world .wm-cadence{display:grid;grid-template-columns:1fr;gap:7px}',
+    '#v-world .wm-cad{display:grid;grid-template-columns:68px 1fr;gap:8px;padding:8px 9px;background:var(--panel2);border:1px solid var(--line)}',
+    '#v-world .wm-cad b{font-size:12px;color:var(--txt)}#v-world .wm-cad span{font-size:12px;line-height:1.45;color:var(--dim)}',
+    '#v-world .wm-foot{font-size:12px;line-height:1.55;color:var(--faint);padding-top:2px}',
+    '#v-world .wm-error{border:1px solid var(--line2);background:var(--panel);padding:14px 16px;font-size:14px;color:var(--txt)}',
+    '@media(max-width:1120px){#v-world .wm-grid{grid-template-columns:repeat(2,minmax(0,1fr))}#v-world .wm-axis:last-child{grid-column:1/-1;min-height:auto}#v-world .wm-lower{grid-template-columns:1fr 1fr}#v-world .wm-lower .wm-card:last-child{grid-column:1/-1}}',
+    '@media(max-width:760px){#v-world .wm-hero{grid-template-columns:1fr}#v-world .wm-kpis{grid-template-columns:1fr 1fr}#v-world .wm-grid{grid-template-columns:1fr}#v-world .wm-axis:last-child{grid-column:auto}#v-world .wm-lower{grid-template-columns:1fr}#v-world .wm-lower .wm-card:last-child{grid-column:auto}#v-world .wm-regime{align-items:flex-start;flex-wrap:wrap}#v-world .wm-regime .why{margin-left:0;max-width:none;width:100%}#v-world .wm-row{grid-template-columns:94px 1fr}#v-world .wm-row i{grid-column:2}}'
+  ].join('');
+
+  function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c];});}
+  function num(v,d){var n=Number(v);return Number.isFinite(n)?n.toFixed(d==null?1:d):'—';}
+  function pct(v,d){var n=Number(v);return Number.isFinite(n)?(n>0?'+':'')+n.toFixed(d==null?1:d)+'%':'—';}
+  function getDriver(pulse, ax){var a=(pulse&&pulse.drivers)||[];for(var i=0;i<a.length;i++)if(a[i]&&a[i].ax===ax)return a[i];return null;}
+  function stateClass(d){return d&&d.dir==='opp'?'opp':d&&d.dir==='risk'?'risk':'';}
+  function stateLabel(d){return d&&d.dir==='opp'?'기회 우세':d&&d.dir==='risk'?'리스크 우세':'중립/관찰';}
+  function regime(s){var score=0,reasons=[];if(Number(s.vix)<20){score++;reasons.push('VIX 안정');}else reasons.push('VIX 부담');if(Number(s.fearGreed)>=30){score++;reasons.push('심리 극단 공포 아님');}else reasons.push('심리 위축');if(Number(s.spDailyPct)>-1){score++;reasons.push('지수 급락 아님');}else reasons.push('지수 충격');if(s.wma40SlopeUp===true){score++;reasons.push('40주선 상승');}else reasons.push('중기 추세 약화');if(Number(s.nasdaqDrawdownPct)>-8){score++;reasons.push('낙폭 제한');}else reasons.push('나스닥 조정 확대');var label=score>=4?'RISK-ON':score>=2?'NEUTRAL':'RISK-OFF';return {label:label,why:reasons.slice(0,4).join(' · '),score:score};}
+  function srcText(d){var s=d&&d.srcs&&d.srcs[0];return s?(esc(s.t||'원문')+(s.d?' · '+esc(s.d):'')):'연결된 공식 원문 없음';}
+  function axisCard(n,title,q,d,override){var main=override&&override.main!=null?override.main:(d&&d.l1)||'자료 연결 대기';var sub=override&&override.sub!=null?override.sub:(d&&d.verdict)||'현재는 기존 SoT 범위만 표시';var cls=override&&override.cls!=null?override.cls:stateClass(d);var lab=override&&override.label!=null?override.label:stateLabel(d);var source=override&&override.source!=null?override.source:srcText(d);return '<article class="wm-card wm-axis"><div class="num">'+esc(n)+'</div><h3>'+esc(title)+'</h3><div class="q">'+esc(q)+'</div><div class="wm-state '+esc(cls)+'">'+esc(lab)+'</div><p class="main">'+esc(main)+'</p><p class="sub">'+esc(sub)+'</p><div class="source">'+source+'</div></article>';}
+  function render(s,p){
+    var host=document.getElementById('wmBody');if(!host)return;var r=regime(s||{}),rates=getDriver(p,'rates'),fx=getDriver(p,'fx'),flow=getDriver(p,'flow'),energy=getDriver(p,'energy'),sent=getDriver(p,'sentiment');var focus=(p&&p.headline)||'시장 맥락 데이터를 불러왔습니다.';
+    var flowOverride=flow?{main:flow.l1,sub:'시장 Breadth·Equal Weight·섹터 EPS 확산도는 다음 데이터 연결 단계. 현재는 기존 수급/플로우 SoT를 대체지표로 사용.',cls:stateClass(flow),label:'대체지표 · '+stateLabel(flow),source:srcText(flow)}:{main:'시장 확산도 전용 원자료 연결 대기',sub:'향후 NASDAQ 100·S&P 500 Equal Weight·Russell 2000 상대강도와 섹터 EPS 리비전 확산도를 일간 자동 계산한다.',cls:'',label:'설계 완료 · 데이터 연결 전',source:'추정값을 넣지 않고 자료 미연결 상태를 표시'};
+    var financial={main:[rates&&rates.l1,fx&&fx.l1].filter(Boolean).join(' / ')||'금리·달러 원자료 연결 대기',sub:[rates&&rates.verdict,fx&&fx.verdict].filter(Boolean).join(' · ')||'기존 금리/Fed·환율/달러 축을 통합 표시',cls:(rates&&rates.dir==='risk')||(fx&&fx.dir==='risk')?'risk':(rates&&rates.dir==='opp')&&(fx&&fx.dir==='opp')?'opp':'',label:(rates&&rates.dir==='risk')||(fx&&fx.dir==='risk')?'리스크 우세':'혼합/관찰',source:[rates?srcText(rates):'',fx?srcText(fx):''].filter(Boolean).join('<br>')};
+    host.innerHTML='<div class="wm-hero"><div class="wm-card"><div class="wm-regime"><div><div class="lab">현재 시장 레짐</div><div class="val">'+esc(r.label)+'</div></div><div class="why">'+esc(r.why)+'</div></div><div class="wm-kpis"><div class="wm-kpi"><div class="k">VIX</div><div class="v">'+num(s.vix,2)+'</div><div class="s">매일 미 증시 마감 후</div></div><div class="wm-kpi"><div class="k">Fear & Greed</div><div class="v">'+num(s.fearGreed,0)+'</div><div class="s">0 공포 · 100 탐욕</div></div><div class="wm-kpi"><div class="k">NASDAQ 낙폭</div><div class="v">'+pct(s.nasdaqDrawdownPct,1)+'</div><div class="s">5년 창 기준</div></div><div class="wm-kpi"><div class="k">S&P 1D</div><div class="v">'+pct(s.spDailyPct,2)+'</div><div class="s">전일 종가 기준</div></div></div></div><div class="wm-card wm-focus"><div class="wm-eyebrow">오늘의 큰 그림</div><h2>'+esc(focus)+'</h2><p>AI 인프라만 보지 않고 금리·자금 이동·전력·금융 시스템·차세대 CAPEX 축을 함께 확인한다. 연결되지 않은 수치는 임의 보정하지 않는다.</p><div class="wm-asof">signals '+esc(s.asOf||'—')+' · pulse '+esc((p&&p.asOf)||'—')+'</div></div></div><div class="wm-grid">'+axisCard('01','시장 레짐','지금은 위험자산을 살 환경인가?',rates,{main:(rates&&rates.l1)||'금리/Fed 맥락 연결 대기',sub:(rates&&rates.verdict)||'VIX·심리·추세와 함께 레짐 판정',cls:r.label==='RISK-ON'?'opp':r.label==='RISK-OFF'?'risk':'',label:r.label,source:rates?srcText(rates):'signals.json + pulse.json'})+axisCard('02','자금 이동·시장 확산','AI에서 다른 업종으로 돈이 퍼지는가?',flow,flowOverride)+axisCard('03','전력·에너지','AI 다음 병목과 비용 압력은 어디인가?',energy)+axisCard('04','달러·국채·금융','금리와 달러가 밸류에이션을 돕는가?',rates,financial)+axisCard('05','구조적 성장산업','AI 다음 CAPEX 후보가 확인되는가?',sent,{main:(sent&&sent.l1)||'차세대 테마 전용 수주·CAPEX 데이터 연결 대기',sub:'Physical AI·방산·Grid·결제 인프라·헬스케어는 주간 검증 대상으로 분리한다. 숫자 근거가 없는 테마는 순위화하지 않는다.',cls:sent?stateClass(sent):'',label:sent?'현재 성장축 · '+stateLabel(sent):'주간 검증 예정',source:sent?srcText(sent):'공식 수주·CAPEX·정책 원문 우선'})+'</div><div class="wm-lower"><section class="wm-card"><h3 class="wm-title">AI 인프라 가치사슬</h3><p class="wm-desc">기존 핵심 축은 그대로 유지하고, 위의 시장 체제 변화가 각 레이어의 EPS로 언제 전달되는지 연결한다.</p><div class="wm-chain"><div class="wm-node"><b>GPU</b><span>Compute</span></div><div class="wm-node"><b>메모리</b><span>HBM·DRAM</span></div><div class="wm-node"><b>네트워크</b><span>Scale-up/out</span></div><div class="wm-node"><b>광통신</b><span>Optical</span></div><div class="wm-node"><b>서버</b><span>Rack</span></div><div class="wm-node"><b>전력·냉각</b><span>Power</span></div></div></section><section class="wm-card"><h3 class="wm-title">다음에 연결할 시장 확산 지표</h3><p class="wm-desc">현재 값이 없는 항목은 ‘없음’으로 두고, 원자료 연결 후에만 자동 판정한다.</p><div class="wm-list"><div class="wm-row"><b>Equal Weight</b><span>S&P500 동일가중 대비 NASDAQ 상대강도</span><i>일간</i></div><div class="wm-row"><b>Small Cap</b><span>Russell 2000 상대강도와 신용 민감도</span><i>일간</i></div><div class="wm-row"><b>EPS 확산도</b><span>상향 리비전 업종 수 / 전체 업종 수</span><i>일간</i></div><div class="wm-row"><b>차세대 CAPEX</b><span>방산·Grid·Robotics·결제·헬스케어 수주/투자</span><i>주간</i></div></div></section><section class="wm-card"><h3 class="wm-title">업데이트 규율</h3><p class="wm-desc">데이터 성격에 따라 주기를 분리한다. 모든 카드는 기준일을 노출한다.</p><div class="wm-cadence"><div class="wm-cad"><b>장중</b><span>가격·금리·달러·VIX</span></div><div class="wm-cad"><b>Daily</b><span>시장 레짐·Breadth·Rotation·EPS 리비전</span></div><div class="wm-cad"><b>Event</b><span>실적·가이던스·수주·CAPEX·정책</span></div><div class="wm-cad"><b>Weekly</b><span>구조적 성장산업·Value Chain 재평가</span></div><div class="wm-cad"><b>Monthly</b><span>전력·메모리·재정·산업생산</span></div></div></section></div><div class="wm-foot">00 시장 지도는 기존 숫자 SoT를 읽는 요약 레이어다. 현재는 signals.json·pulse.json만 직접 사용하며, 미연결 지표는 추정하지 않는다.</div>';
+  }
+  function load(){if(loading)return;loading=true;var host=document.getElementById('wmBody');if(host)host.innerHTML='<div class="wm-error">시장 지도를 불러오는 중입니다.</div>';Promise.all([fetch('/signals.json?t='+Date.now(),{cache:'no-store',credentials:'same-origin'}).then(function(r){if(!r.ok)throw new Error('signals '+r.status);return r.json();}),fetch('/pulse.json?t='+Date.now(),{cache:'no-store',credentials:'same-origin'}).then(function(r){if(!r.ok)throw new Error('pulse '+r.status);return r.json();})]).then(function(x){loaded=true;render(x[0]||{},x[1]||{});}).catch(function(e){if(host)host.innerHTML='<div class="wm-error">시장 지도 데이터를 불러오지 못했습니다. '+esc(e&&e.message||e)+'</div>';}).finally(function(){loading=false;});}
+  function renumber(){var nav=document.getElementById('nav');if(!nav)return;var world=nav.querySelector('.tab[data-v="'+TAB+'"]');if(world&&nav.firstElementChild!==world)nav.insertBefore(world,nav.firstElementChild);var tabs=Array.prototype.slice.call(nav.querySelectorAll('.tab')),idx=1;tabs.forEach(function(t){var n=t.querySelector('.n');if(!n)return;if(t.getAttribute('data-v')===TAB)n.textContent='00';else{n.textContent=(idx<10?'0':'')+idx;idx++;}});}
+  function activate(){var nav=document.getElementById('nav');if(nav)Array.prototype.forEach.call(nav.querySelectorAll('.tab'),function(t){t.classList.toggle('on',t.getAttribute('data-v')===TAB);});Array.prototype.forEach.call(document.querySelectorAll('main.wrap .view'),function(v){v.classList.toggle('on',v.id===VIEW);});try{history.replaceState(null,'','#'+VIEW);}catch(e){}if(!loaded)load();try{window.scrollTo({top:0,behavior:'auto'});}catch(e){window.scrollTo(0,0);}}
+  function mount(){if(!document.getElementById('world-overview-css')){var st=document.createElement('style');st.id='world-overview-css';st.textContent=CSS;document.head.appendChild(st);}var nav=document.getElementById('nav'),main=document.querySelector('main.wrap');if(!nav||!main)return false;if(!nav.querySelector('.tab[data-v="'+TAB+'"]')){var b=document.createElement('button');b.className='tab';b.setAttribute('data-v',TAB);b.innerHTML='<span class="n">00</span>시장 지도';nav.insertBefore(b,nav.firstElementChild);}if(!document.getElementById(VIEW)){var sec=document.createElement('section');sec.className='view';sec.id=VIEW;sec.innerHTML='<div class="vhead"><div class="wm-headrow"><div><div class="vkick">Big Picture · 시장 체제 지도</div><h1 class="vtitle">큰 흐름부터 보고, <em>다음 성장축</em>을 찾는다</h1><p class="vsub">AI 인프라 중심 분석은 유지하되, 금리·자금 이동·전력·달러·차세대 CAPEX를 한 화면에서 먼저 확인한다.</p></div><div class="mkt-upd wm-upd" role="button" tabindex="0">update : —</div></div></div><div id="wmBody"><div class="wm-error">00 시장 지도는 처음 열 때 최신 데이터를 불러옵니다.</div></div>';var mv=document.getElementById('v-market');if(mv)main.insertBefore(sec,mv);else main.insertBefore(sec,main.firstChild);}renumber();if(!nav.__worldBound){nav.__worldBound=true;nav.addEventListener('click',function(e){var t=e.target&&e.target.closest?e.target.closest('.tab'):null;if(t&&t.getAttribute('data-v')===TAB){e.preventDefault();activate();}});}if(window.MutationObserver&&!nav.__worldObs){nav.__worldObs=true;new MutationObserver(function(){renumber();}).observe(nav,{childList:true,subtree:true});}return true;}
+  function init(){if(!mount())setTimeout(init,120);}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+  window.WORLD_OVERVIEW={mount:mount,load:load,activate:activate};
+})();
