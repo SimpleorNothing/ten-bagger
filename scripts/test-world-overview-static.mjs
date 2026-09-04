@@ -24,11 +24,19 @@ if (radar.includes("querySelector('.wm-foot')")) throw new Error('급등 후보 
 if (!radar.includes("querySelector('.wm-note')") || !radar.includes('host.appendChild(panel)')) {
   throw new Error('급등 후보 레이더의 실제 00 시장 지도 마운트 fallback이 없습니다.');
 }
-if (!radar.includes("new MutationObserver")) throw new Error('00 시장 지도 재렌더 후 레이더 재마운트 보호가 없습니다.');
+if (!radar.includes('new MutationObserver')) throw new Error('00 시장 지도 재렌더 후 레이더 재마운트 보호가 없습니다.');
+for (const token of ['mr-themegrid','data-mr-theme','산업 6개','전력/Grid','AI/반도체','원전','방산','ESS']) {
+  if (!radar.includes(token)) throw new Error('멀티산업 급등 후보 레이더 UI 소실: ' + token);
+}
+
+const collector = fs.readFileSync('scripts/fetch-momentum-radar.mjs','utf8');
+for (const token of ["schema:'momentum-radar-v2'","id:'power-grid'","id:'ai-semiconductor'","id:'nuclear'","id:'defense'","id:'ess-battery'"]) {
+  if (!collector.includes(token)) throw new Error('멀티산업 레이더 수집기 정의 소실: ' + token);
+}
 
 const loader = fs.readFileSync('site-change-live.js','utf8');
 if (!loader.includes('/momentum-radar.js?v=20260904-mountfix')) {
-  throw new Error('급등 후보 레이더 수정본의 캐시 버스터가 로더에 연결되지 않았습니다.');
+  throw new Error('급등 후보 레이더 캐시 버스터 로더가 연결되지 않았습니다.');
 }
 
 const capitalScarcity = fs.readFileSync('capital-scarcity.js','utf8');
@@ -36,4 +44,4 @@ new Function(capitalScarcity);
 if (/−\?\\-\\d/.test(capitalScarcity) || /\/\\-\\d/.test(capitalScarcity)) {
   throw new Error('capital-scarcity 음수 표시 정규식에 Unicode mode에서 무효한 하이픈 escape가 재유입됐습니다.');
 }
-console.log('00 money-flow static invariants passed');
+console.log('00 money-flow + multisector momentum radar static invariants passed');
