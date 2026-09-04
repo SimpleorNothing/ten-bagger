@@ -115,13 +115,19 @@ jobs:
           validate_pr() {
             local pr="$1"
 
-            # Execute the canonical validator from protected main, but never synthesize
-            # the required Claude PR Gate status. Required checks must be produced by
-            # their own workflows and satisfied by branch protection.
             git show origin/main:scripts/validate-pr-gate.sh > /tmp/validate-pr-gate.sh || return 1
             git fetch origin "pull/$pr/head:refs/remotes/origin/pr-$pr" --force || return 1
             git reset --hard "origin/pr-$pr" || return 1
             bash /tmp/validate-pr-gate.sh origin/main || return 1
+          }
+
+          real_gate_succeeded() {
+            local sha="$1"
+            local gate
+            gate=$(gh api "repos/$GH_REPO/actions/workflows/claude-pr-gate.yml/runs?event=pull_request&head_sha=$sha&per_page=20" \
+              --jq '[.workflow_runs[] | select(.head_sha == "'"$sha"'")] | sort_by(.created_at) | last | if . == null then "missing" else (.status + ":" + (.conclusion // "")) end' 2>/dev/null || echo "missing")
+            echo "Claude PR Gate for $sha: $gate"
+            [ "$gate" = "completed:success" ]
           }
 
           stale_holdings_pr() {
@@ -157,6 +163,12 @@ jobs:
               continue
             fi
 
+            if ! real_gate_succeeded "$sha"; then
+              echo "Real Claude PR Gate has not completed successfully for PR #$pr; leaving it open"
+              gh pr comment "$pr" --body "Canonical 검증은 통과했지만 실제 Claude PR Gate가 아직 success가 아니므로 자동 병합을 활성화하지 않습니다. 다음 sweep에서 다시 확인합니다." || true
+              continue
+            fi
+
             mergeable=$(gh pr view "$pr" --json mergeable --jq '.mergeable' 2>/dev/null || echo UNKNOWN)
             if [ "$mergeable" = "CONFLICTING" ]; then
               if [ "$title" = "chore: sync holdings and reconcile consumers" ] && stale_holdings_pr "$branch"; then
@@ -170,14 +182,11 @@ jobs:
               continue
             fi
 
-            # Never use a privileged token for a direct merge here. Auto-merge lets
-            # GitHub merge only after the repository's own required checks and branch
-            # protection are satisfied.
             if gh pr merge "$pr" --squash --auto --delete-branch; then
-              echo "Enabled auto-merge for PR #$pr after canonical validation"
+              echo "Enabled auto-merge for PR #$pr after canonical validation and real Claude PR Gate success"
             else
               echo "Could not enable auto-merge for PR #$pr; leaving it open without bypassing required checks"
-              gh pr comment "$pr" --body "Canonical 검증은 통과했지만 필수 GitHub 검증/보호규칙이 아직 충족되지 않았거나 auto-merge를 활성화할 수 없어 열어 둡니다. 보호규칙은 우회하지 않습니다." || true
+              gh pr comment "$pr" --body "Canonical 검증과 실제 Claude PR Gate는 통과했지만 GitHub 보호규칙/auto-merge 조건이 아직 충족되지 않아 열어 둡니다. 보호규칙은 우회하지 않습니다." || true
             fi
           done
 
