@@ -118,3 +118,38 @@
 
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount);else mount();
 })();
+
+/* 01 다가오는 일정 보정 — BLS 2026년 8월분 PPI/CPI 공식 발표 일정 즉시 반영. */
+(function(){
+  'use strict';
+  var EXTRA_CAL=[
+    {
+      d:'2026-09-10',cat:'macro',lbl:'미국 PPI · 2026년 8월',
+      meta:'BLS 공식 발표 일정. 2026-09-10 08:30 ET 공개, 한국시간 09-10 21:30 KST. 확인 포인트=헤드라인·근원 PPI 전월비/전년비와 관세·서비스 가격의 생산단계 전가 여부. · 원문: https://www.bls.gov/schedule/news_release/ppi.htm · 확인: 2026-09-04 KST',
+      when:'09-10 21:30 KST (발표)'
+    },
+    {
+      d:'2026-09-11',cat:'macro',lbl:'미국 CPI · 2026년 8월',
+      meta:'BLS 공식 발표 일정. 2026-09-11 08:30 ET 공개, 한국시간 09-11 21:30 KST. 확인 포인트=헤드라인·근원 CPI 전월비/전년비, 주거비·서비스 물가와 9월 FOMC 금리경로 영향. · 원문: https://www.bls.gov/schedule/news_release/cpi.htm · 확인: 2026-09-04 KST',
+      when:'09-11 21:30 KST (발표)'
+    }
+  ];
+  var tries=0;
+  function add(){
+    tries++;
+    try{
+      if(typeof CAL_NOW==='undefined'||!Array.isArray(CAL_NOW))throw new Error('calendar not ready');
+      EXTRA_CAL.forEach(function(x){
+        var exists=CAL_NOW.some(function(e){return e&&e.d===x.d&&e.lbl===x.lbl;});
+        if(!exists)CAL_NOW.push(x);
+      });
+      if(typeof renderCalNow==='function')renderCalNow();
+      if(typeof renderCalFull==='function')renderCalFull();
+      return;
+    }catch(e){
+      if(tries<80)setTimeout(add,125);
+      else if(window.console&&console.warn)console.warn('[calendar-patch]',e&&e.message||e);
+    }
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',add);else add();
+})();
