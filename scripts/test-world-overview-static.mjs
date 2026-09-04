@@ -24,4 +24,9 @@ if (!radar.includes("querySelector('.wm-note')") || !radar.includes('host.append
   throw new Error('급등 후보 레이더의 실제 00 시장 지도 마운트 fallback이 없습니다.');
 }
 if (!radar.includes("new MutationObserver")) throw new Error('00 시장 지도 재렌더 후 레이더 재마운트 보호가 없습니다.');
+
+const loader = fs.readFileSync('site-change-live.js','utf8');
+if (!loader.includes('/momentum-radar.js?v=20260904-mountfix')) {
+  throw new Error('급등 후보 레이더 수정본의 캐시 버스터가 로더에 연결되지 않았습니다.');
+}
 console.log('00 money-flow static invariants passed');
