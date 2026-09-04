@@ -23,6 +23,8 @@ const FRESH_PATHS = new Set([
   "/revision-tracker-fix.js",
   "/site-change-commits.json",
   "/site-change-live.js",
+  "/momentum-radar.js",
+  "/momentum-radar.json",
   "/allocation-dynamic.js",
   "/allocation-review.json",
   "/topic-radar-sync.js",
@@ -188,12 +190,14 @@ async function runtimeProbeResponse(request, env) {
     const r = await env.ASSETS.fetch(new Request(u.toString(),{method:"GET"}));
     return {ok:r.ok,text:r.ok?await r.text():"",status:r.status};
   }
-  const [history,alloc] = await Promise.all([
-    asset('/site-change-live.js'),asset('/allocation-dynamic.js')
+  const [history,alloc,radar] = await Promise.all([
+    asset('/site-change-live.js'),asset('/allocation-dynamic.js'),asset('/momentum-radar.js')
   ]);
   const checks={
     historyModal:history.ok&&history.text.includes('siteChangeHistoryModal'),
     allocationMount:alloc.ok&&alloc.text.includes('dynamicAllocHurdle')&&!alloc.text.includes('weeklyAllocationReview'),
+    radarMount:radar.ok&&radar.text.includes("querySelector('.wm-note')")&&radar.text.includes('host.appendChild(panel)')&&!radar.text.includes("querySelector('.wm-foot')"),
+    radarLoader:history.ok&&history.text.includes('/momentum-radar.js?v=20260904-mountfix'),
   };
   return jsonResponse({ok:Object.values(checks).every(Boolean),checks});
 }
