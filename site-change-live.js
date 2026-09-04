@@ -7,6 +7,7 @@
   var rows=[];
   /* 배포 커밋 수집 지연과 무관하게 사용자에게 보이는 변경은 즉시 이력에 남긴다. */
   var REQUIRED_VISIBLE_ROWS=[
+    {d:'2026-09-04',t:'00 시장 지도를 돈의 흐름 중심으로 전면 시각화 — 시장 레짐 게이지·주요 시장 스파크라인·금리/달러→AI/시장확산/실물 CAPEX 흐름도·60일 Rotation 차트·20일 Heatmap 추가',sha:'world-money-flow-20260904'},
     {d:'2026-09-04',t:'00 시장 지도 신설 — 기존 메뉴를 유지한 채 시장 레짐·자금 이동·전력·달러/금융·차세대 성장축을 한 화면에서 확인',sha:'world-overview-20260904'},
     {d:'2026-09-02',t:'02 기업분석을 페이지 초기 화면으로 변경 — 01 시장 모니터링이 먼저 보였다가 전환되는 현상 제거',sha:'company-initial-view-20260902'}
   ];
@@ -141,7 +142,7 @@
 (function(){
   if(document.querySelector('script[data-world-overview-loader]'))return;
   var s=document.createElement('script');
-  s.src='/world-overview.js?v=20260904';
+  s.src='/world-overview.js?v=20260904-money-flow';
   s.defer=true;
   s.setAttribute('data-world-overview-loader','1');
   document.body.appendChild(s);
