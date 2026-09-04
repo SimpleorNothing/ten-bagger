@@ -1,0 +1,59 @@
+{
+  "schema": "momentum-radar-v1",
+  "asOf": "2026-09-04T06:45:00+09:00",
+  "status": "verified-bootstrap",
+  "maxScore": 12,
+  "coveredMaxScore": 8,
+  "theme": {
+    "id": "stablecoin-payment",
+    "name": "스테이블코인·전자결제",
+    "signalSummary": "해외 선행신호 강함 — 국내 직접 연계주 우선 관찰"
+  },
+  "leaders": [
+    {"id":"crcl","symbol":"CRCL","name":"Circle","kind":"equity","changePct":16.0,"session":"미국 정규장","source":"https://www.barrons.com/articles/robinhood-coinbase-stocks-bitcoin-crypto-0a6ea98d"},
+    {"id":"coin","symbol":"COIN","name":"Coinbase","kind":"equity","changePct":10.0,"session":"미국 정규장","source":"https://www.barrons.com/articles/robinhood-coinbase-stocks-bitcoin-crypto-0a6ea98d"},
+    {"id":"hood","symbol":"HOOD","name":"Robinhood","kind":"equity","changePct":16.0,"session":"미국 정규장","source":"https://www.barrons.com/articles/robinhood-coinbase-stocks-bitcoin-crypto-0a6ea98d"},
+    {"id":"btc","symbol":"BTC-USD","name":"Bitcoin","kind":"crypto","changePct":4.4,"session":"24h 근사","source":"https://www.barrons.com/articles/robinhood-coinbase-stocks-bitcoin-crypto-0a6ea98d"}
+  ],
+  "candidates": [
+    {
+      "code":"234340","name":"헥토파이낸셜","score":8,"maxScore":12,"coveredMaxScore":8,"recent5dPct":null,
+      "linkage":"Circle CPN 한국 유일 파트너 · USDC 크로스보더 결제/정산",
+      "components":{
+        "core":{"label":"CRCL 핵심선행","available":true,"points":3,"max":3},
+        "btc":{"label":"BTC +4%","available":true,"points":1,"max":1},
+        "peers":{"label":"동종 2개 +7%","available":true,"points":1,"max":1},
+        "linkage":{"label":"직접 사업연계","available":true,"points":2,"max":2},
+        "catalyst":{"label":"최근 사업촉매","available":true,"points":1,"max":1,"date":"2026-08-28","detail":"CPN 한국 유일 파트너·스테이블코인 성장축 재확인","source":"https://hectofinancial.co.kr/company/news"},
+        "pullback":{"label":"최근 5D 눌림","available":false,"points":0,"max":1},
+        "policy":{"label":"정책 촉매","available":false,"points":0,"max":1},
+        "sensitivity":{"label":"과거 동일재료 민감도","available":false,"points":0,"max":2}
+      },
+      "sources":["https://hectofinancial.co.kr/company/news"]
+    },
+    {
+      "code":"060250","name":"NHN KCP","score":8,"maxScore":12,"coveredMaxScore":8,"recent5dPct":null,
+      "linkage":"LINE NEXT와 스테이블코인 결제 확대 MOU · 결제창 연동",
+      "components":{
+        "core":{"label":"CRCL 핵심선행","available":true,"points":3,"max":3},
+        "btc":{"label":"BTC +4%","available":true,"points":1,"max":1},
+        "peers":{"label":"동종 2개 +7%","available":true,"points":1,"max":1},
+        "linkage":{"label":"직접 사업연계","available":true,"points":2,"max":2},
+        "catalyst":{"label":"최근 사업촉매","available":true,"points":1,"max":1,"date":"2026-08-20","detail":"LINE NEXT 스테이블코인 결제 확대 MOU","source":"https://www.newsis.com/view/NISX20260820_0003755370"},
+        "pullback":{"label":"최근 5D 눌림","available":false,"points":0,"max":1},
+        "policy":{"label":"정책 촉매","available":false,"points":0,"max":1},
+        "sensitivity":{"label":"과거 동일재료 민감도","available":false,"points":0,"max":2}
+      },
+      "sources":["https://www.newsis.com/view/NISX20260820_0003755370"]
+    }
+  ],
+  "rules": {
+    "high": 8,
+    "watch": 6,
+    "coreLeader": "+10% = 3점, +7% = 2점, +4% = 1점",
+    "btc": "+4% = 1점",
+    "peerConfirm": "CRCL·COIN·HOOD 중 2개 이상 +7% = 1점",
+    "pullback": "최근 5거래일 -3% 이하 = 1점"
+  },
+  "note": "정책 촉매와 과거 동일 재료 민감도는 검증 가능한 원자료 연결 전까지 점수에서 제외한다."
+}

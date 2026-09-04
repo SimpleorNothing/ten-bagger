@@ -1,0 +1,67 @@
+name: Update lead-lag momentum radar
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/update-momentum-radar.yml'
+      - 'scripts/fetch-momentum-radar.mjs'
+      - 'momentum-radar.json'
+  schedule:
+    - cron: '35 21 * * 1-5'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: update-momentum-radar
+  cancel-in-progress: false
+
+jobs:
+  radar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Fetch next-session lead-lag signals
+        run: |
+          set -euo pipefail
+          node --check scripts/fetch-momentum-radar.mjs
+          node scripts/fetch-momentum-radar.mjs
+          node - <<'NODE'
+          const fs=require('fs');
+          const j=JSON.parse(fs.readFileSync('momentum-radar.json','utf8'));
+          if(j.schema!=='momentum-radar-v1') throw new Error('schema mismatch');
+          if(!Array.isArray(j.leaders)||j.leaders.length<4) throw new Error('leader coverage missing');
+          if(!Array.isArray(j.candidates)||j.candidates.length<2) throw new Error('candidate coverage missing');
+          for(const c of j.candidates){
+            if(!(Number(c.score)>=0&&Number(c.score)<=12)) throw new Error(c.code+': score out of range');
+            if(Number(c.score)>Number(c.coveredMaxScore)) throw new Error(c.code+': score exceeds row coverage');
+          }
+          if(Number(j.coveredMaxScore)!==Math.min(...j.candidates.map(c=>Number(c.coveredMaxScore)))) throw new Error('global coverage mismatch');
+          console.log('momentum radar schema + score invariants passed');
+          NODE
+      - name: Create protected-main PR when changed
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          FILES="momentum-radar.json"
+          if [ -z "$(git status --porcelain $FILES)" ]; then
+            echo "No momentum-radar change."; exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          BRANCH="claude/automation-momentum-radar-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          git switch -c "$BRANCH"
+          git add $FILES
+          git commit -m "chore: update next-session momentum radar"
+          git push origin "$BRANCH"
+          gh pr create --base main --head "$BRANCH" --title "chore: update next-session momentum radar" --body "Automated U.S.-close lead-lag refresh for the 00 market map. Scores use only sourced price data, explicit business-link weights and reproducible rules; unavailable policy/sensitivity inputs remain excluded."
