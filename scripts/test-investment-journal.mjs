@@ -13,9 +13,10 @@ const checks = [
   [js.includes('r.returnPct-r.benchmarkPct'), '초과수익 계산'],
   [js.includes("API='/api/investment-journal'"), '저장 API 연결'],
   [js.includes("if(e.textContent!==next)e.textContent=next"), '메뉴 번호 멱등 갱신'],
+  [js.includes('margin-bottom:calc(var(--am-ticker-h) + 16px)'), '모바일 하단 티커 안전 여백'],
   [worker.includes('const JOURNAL_KEY = "investment-journal.json";'), 'R2 저장 키'],
   [worker.includes('url.pathname === "/api/investment-journal"'), '인증 API 라우트'],
-  [worker.includes('<script src="/journal.js?v=20260905-01" defer>'), 'HTML 모듈 주입'],
+  [worker.includes('<script src="/journal.js?v=20260905-02" defer>'), 'HTML 모듈 주입'],
   [ops.includes('종목보다 포트폴리오 구조를 먼저 본다.'), '구조 우선 운영 규율'],
   [ops.includes('승자 보유와 비중 축소를 동시에 운용한다.'), '승자 관리 운영 규율'],
 ];
