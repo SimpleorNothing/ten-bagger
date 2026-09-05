@@ -664,6 +664,7 @@ async function handleCouncilRosterPost(request, env) {
 // 메모 노트 JSON 을 R2 오브젝트("notes.json")로 보관. KV 의 25MiB 단일값 한도가 없어
 // 이미지(캡쳐) 누적에도 여유가 크다. 클라이언트(/api/memo)는 백엔드를 모른 채 그대로 동작.
 const MEMO_KEY = "notes.json";
+const JOURNAL_KEY = "investment-journal.json";
 
 function memoJson(obj, status) {
   return new Response(JSON.stringify(obj), {
@@ -697,6 +698,38 @@ async function handleMemoPut(request, env) {
     httpMetadata: { contentType: "application/json" },
   });
   return memoJson({ ok: true, count: arr.length }, 200);
+}
+
+async function handleJournalGet(env) {
+  if (!env.MEMO_BUCKET) return memoJson({ error: "MEMO_BUCKET not configured" }, 503);
+  const obj = await env.MEMO_BUCKET.get(JOURNAL_KEY);
+  const v = obj ? await obj.text() : "";
+  return new Response(v && v.trim() ? v : "[]", {
+    status: 200,
+    headers: { "content-type": "application/json", "cache-control": "no-store" },
+  });
+}
+
+async function handleJournalPut(request, env) {
+  if (!env.MEMO_BUCKET) return memoJson({ error: "MEMO_BUCKET not configured" }, 503);
+  let raw; let arr;
+  try { raw = await request.text(); arr = JSON.parse(raw); }
+  catch { return memoJson({ error: "invalid json" }, 400); }
+  if (!Array.isArray(arr)) return memoJson({ error: "expected array" }, 400);
+  if (raw.length > 2 * 1024 * 1024) return memoJson({ error: "too large", bytes: raw.length }, 413);
+  const clean = arr.slice(0, 1000).map((x) => {
+    const out = {};
+    for (const k of ["id","date","ticker","action","status","thesis","catalyst","epsMetric","epsNow","epsTrigger","epsDirection","epsAsOf","epsSource","invalid","expected","actual","lesson","createdAt","updatedAt"]) {
+      if (x && x[k] != null) out[k] = String(x[k]).slice(0, k === "thesis" || k === "actual" || k === "lesson" ? 2000 : 500);
+    }
+    for (const k of ["price","weightBefore","weightAfter","returnPct","benchmarkPct","thesisScore","timingScore","sizingScore"]) {
+      if (!x || x[k] == null || x[k] === "") continue;
+      const n = Number(x[k]); if (Number.isFinite(n)) out[k] = n;
+    }
+    return out;
+  }).filter((x) => x.id && x.date && x.ticker);
+  await env.MEMO_BUCKET.put(JOURNAL_KEY, JSON.stringify(clean), { httpMetadata: { contentType: "application/json" } });
+  return memoJson({ ok: true, count: clean.length }, 200);
 }
 
 // ===== 캘린더 플래그 저장 — R2(MEMO_BUCKET) 재사용 · 키 calflags.json =====
@@ -2654,6 +2687,11 @@ export default {
         if (request.method === "PUT") return handleMemoPut(request, env);
         return memoJson({ error: "method not allowed" }, 405);
       }
+      if (url.pathname === "/api/investment-journal") {
+        if (request.method === "GET") return handleJournalGet(env);
+        if (request.method === "PUT") return handleJournalPut(request, env);
+        return memoJson({ error: "method not allowed" }, 405);
+      }
       // 03 관점과 정보 — 관점 추출(Claude) · 인사이트 저장(R2) — 인증된 디바이스만 도달
       if (request.method === "POST" && url.pathname === "/api/insight") {
         return handleInsight(request, env);
@@ -2765,6 +2803,7 @@ export default {
             el.append('<script src="/council-audio.js" defer></scr' + 'ipt>', { html: true });
             el.append('<script src="/council-roster.js" defer></scr' + 'ipt>', { html: true });
             el.append('<script src="/brief.js" defer></scr' + 'ipt>', { html: true });
+            el.append('<script src="/journal.js?v=20260905-01" defer></scr' + 'ipt>', { html: true });
           } })
           .transform(res);
         // 대시보드 HTML 은 캐시 금지 — Workers Assets 기본 캐시 헤더 때문에 새 배포가
