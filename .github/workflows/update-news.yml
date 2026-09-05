@@ -49,7 +49,7 @@ jobs:
       - name: Create protected-main PR when changed
         if: steps.guard.outputs.skip != 'true'
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.AUTO_MERGE_TOKEN }}
         run: |
           set -euo pipefail
           FILES="news.json news_archive.json archive"
