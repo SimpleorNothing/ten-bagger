@@ -1,0 +1,46 @@
+name: Fix periodic release sync API v4 2026-09-05
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/fix-periodic-sync-api-v4-20260905.yml'
+  workflow_dispatch: {}
+permissions:
+  contents: write
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Build remaining deterministic changes
+        run: python3 scripts/fix-periodic-sync-20260905.py
+      - name: Validate remaining changes
+        run: |
+          node --check worker-core.js
+          node --check changelog.js
+          grep -Fq '美 CPI · 8월분' worker-core.js
+          grep -Fq '美 고용보고서 (실업률·NFP) · 8월분' worker-core.js
+          grep -Fq 'KR_OFFICIAL_YOY' scripts/fetch-cpi.mjs
+          grep -Fq "scripts/fetch-cpi.mjs" .github/workflows/update-cpi.yml
+          git diff --check
+      - name: Write remaining files to automation branch via API
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          TARGET_BRANCH: automation/final-periodic-sync-remaining-20260905
+        shell: bash
+        run: |
+          set -euo pipefail
+          for f in worker-core.js changelog.js scripts/fetch-cpi.mjs .github/workflows/update-cpi.yml; do
+            sha=$(gh api "repos/$GH_REPO/contents/$f?ref=$TARGET_BRANCH" --jq .sha)
+            python3 - "$f" "$sha" "$TARGET_BRANCH" <<'PY' > /tmp/payload.json
+          import sys,json,base64
+          f,sha,branch=sys.argv[1:]
+          data=base64.b64encode(open(f,'rb').read()).decode()
+          print(json.dumps({'message':'fix: sync '+f+' from official periodic releases','content':data,'sha':sha,'branch':branch}))
+          PY
+            gh api -X PUT "repos/$GH_REPO/contents/$f" --input /tmp/payload.json >/dev/null
+          done
