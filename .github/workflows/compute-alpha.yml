@@ -31,7 +31,7 @@ jobs:
           GIST_ID: ${{ secrets.GIST_ID }}
       - name: Open protected-main PR if changed
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.AUTO_MERGE_TOKEN }}
         run: |
           set -euo pipefail
           FILE="alpha.json"
