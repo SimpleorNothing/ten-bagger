@@ -12,6 +12,7 @@ const checks = [
   [js.includes('가설 점수') && js.includes('타이밍 점수') && js.includes('비중 점수'), '3축 사후평가'],
   [js.includes('r.returnPct-r.benchmarkPct'), '초과수익 계산'],
   [js.includes("API='/api/investment-journal'"), '저장 API 연결'],
+  [js.includes("if(e.textContent!==next)e.textContent=next"), '메뉴 번호 멱등 갱신'],
   [worker.includes('const JOURNAL_KEY = "investment-journal.json";'), 'R2 저장 키'],
   [worker.includes('url.pathname === "/api/investment-journal"'), '인증 API 라우트'],
   [worker.includes('<script src="/journal.js?v=20260905-01" defer>'), 'HTML 모듈 주입'],

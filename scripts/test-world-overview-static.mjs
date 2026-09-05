@@ -17,6 +17,9 @@ for (const token of required) {
 if (/Math\.random\s*\(/.test(src)) throw new Error('00 시장 지도에 임의 난수 기반 판단이 들어가면 안 됩니다.');
 if (/#[0-9a-fA-F]{3,8}\b/.test(src)) throw new Error('00 시장 지도는 디자인 토큰 대신 하드코딩 색상을 쓰면 안 됩니다.');
 if (!/실제 펀드 순유입/.test(src)) throw new Error('자금 흐름 프록시 정의/한계 문구 소실');
+if (!src.includes("if(z.textContent!==next)z.textContent=next")) {
+  throw new Error('00 시장 지도 메뉴 번호 갱신은 MutationObserver 자기호출을 막도록 멱등이어야 합니다.');
+}
 
 const radar = fs.readFileSync('momentum-radar.js','utf8');
 new Function(radar);
