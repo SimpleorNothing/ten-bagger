@@ -106,6 +106,7 @@
       +'#v-company .ca-kpi-line{font-size:13px;border-top:1px solid var(--line);padding-top:7px;overflow-wrap:anywhere}'
       +'#v-company .ca-axis-foot{margin-top:14px;display:flex;gap:8px;align-items:center;justify-content:space-between}'
       +'#v-company .ca-axis-foot button{font:inherit;font-size:13px;font-weight:700;padding:7px 10px;border-radius:3px;border:1px solid var(--line2,var(--line));background:var(--panel2,var(--panel));color:var(--txt);cursor:pointer}'
+      +'#v-company .ca-timeline-link{font:inherit;font-size:13px;font-weight:700;padding:7px 10px;border-radius:3px;border:1px solid var(--line2,var(--line));background:var(--panel2,var(--panel));color:var(--txt);text-decoration:none}'
       +'#v-company .ca-risk-inline{font-size:11px;color:var(--faint);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:65%}'
       +'#v-company .ca-timeline{display:none;margin-top:10px;padding:13px;background:var(--panel);border:1px solid var(--line);border-radius:3px}'
       +'#v-company .ca-timeline.on{display:block}'
@@ -195,16 +196,20 @@
 
   function axisHtml(a,i){
     var events=(a.events||[]).map(function(e){return '<div class="ca-event"><div class="ca-event-date">'+esc(e.date)+'</div><div class="ca-event-type">'+esc(e.type)+'</div><div><div class="ca-event-title">'+esc(e.title)+'</div><div class="ca-event-detail">'+esc(e.detail)+'</div></div></div>';}).join('');
+    var standalone=a.timelineView==='yearly-table'&&a.timelineHref;
     var timeline=a.timelineView==='yearly-table'?yearlyTimelineHtml(a):events;
     var timelineLabel=a.timelineView==='yearly-table'?'연도별 타임라인 보기':'타임라인 보기';
+    var timelineFoot=standalone
+      ?'<a class="ca-timeline-link" href="'+esc(a.timelineHref)+'" target="_blank" rel="noopener">'+esc(timelineLabel)+' ↗</a>'
+      :'<button type="button" data-ca-timeline="ca-tl-'+i+'" data-ca-label="'+esc(timelineLabel)+'" aria-expanded="false">'+esc(timelineLabel)+'</button>';
     return '<article class="ca-axis">'
       +'<div class="ca-axis-top"><div><div class="ca-axis-code">'+esc(a.code)+' · '+esc(a.basis)+'</div><h3>'+esc(a.title)+'</h3><div class="ca-org">'+esc(a.org)+'</div></div><span class="ca-pill">'+esc(a.status)+'</span></div>'
       +'<div class="ca-summary">'+esc(a.summary)+'</div>'
       +'<div class="ca-fact"><b>확인된 사실</b><ul>'+(a.facts||[]).map(function(x){return '<li>'+esc(x)+'</li>';}).join('')+'</ul></div>'
       +'<div class="ca-interp"><b>투자 해석</b>'+esc(a.interpretation)+'</div>'
       +'<div class="ca-kpi-list">'+(a.kpis||[]).map(function(k){return '<div class="ca-kpi-line">'+esc(k)+'</div>';}).join('')+'</div>'
-      +'<div class="ca-axis-foot"><button type="button" data-ca-timeline="ca-tl-'+i+'" data-ca-label="'+esc(timelineLabel)+'" aria-expanded="false">'+esc(timelineLabel)+'</button><div class="ca-risk-inline" title="'+esc((a.risks||[]).join(' · '))+'">주요 위험: '+esc((a.risks||[]).join(' · '))+'</div></div>'
-      +'<div class="ca-timeline" id="ca-tl-'+i+'">'+timeline+'</div></article>';
+      +'<div class="ca-axis-foot">'+timelineFoot+'<div class="ca-risk-inline" title="'+esc((a.risks||[]).join(' · '))+'">주요 위험: '+esc((a.risks||[]).join(' · '))+'</div></div>'
+      +(standalone?'':'<div class="ca-timeline" id="ca-tl-'+i+'">'+timeline+'</div>')+'</article>';
   }
 
   function financialHtml(rows){
