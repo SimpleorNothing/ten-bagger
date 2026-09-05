@@ -1,0 +1,200 @@
+name: Fix holdings audit 2026-09-05
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/fix-holdings-audit-20260905.yml'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+          token: ${{ secrets.AUTO_MERGE_TOKEN }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install holdings sync dependencies
+        run: npm i googleapis xlsx --no-save
+
+      - name: Extend Saturday holdings parser for AVGO and CRDO
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('scripts/sync-holdings.mjs')
+          s=p.read_text(encoding='utf-8')
+          reps=[
+            ("tesla:['개인투자','테슬라'], marvell:['개인투자','마벨'], micron:['개인투자','마이크론'],",
+             "tesla:['개인투자','테슬라'], marvell:['개인투자','마벨'], broadcom:['개인투자','브로드컴'], micron:['개인투자','마이크론'],"),
+            ("lumentum:['개인투자','루멘텀'], vertiv:['개인투자','버티브'], bloom:['개인투자','블룸에너지'],",
+             "lumentum:['개인투자','루멘텀'], credo:['개인투자','크레도 테크놀로지'], vertiv:['개인투자','버티브'], bloom:['개인투자','블룸에너지'],"),
+            ("['L2','연산칩 (마벨·KODEX 미국AI반도체TOP3+)',              ['marvell','dcTop3'],                                  ['마벨','KODEX 미국AI반도체TOP3+']],",
+             "['L2','연산칩 (마벨·브로드컴·KODEX 미국AI반도체TOP3+)',     ['marvell','broadcom','dcTop3'],                       ['마벨','브로드컴','KODEX 미국AI반도체TOP3+']],"),
+            ("['L6','연결 (루멘텀·KODEX 미국AI광통신네트워크)',            ['lumentum','dcOptic'],                                ['루멘텀','KODEX 미국AI광통신네트워크']],",
+             "['L6','연결 (루멘텀·크레도·KODEX 미국AI광통신네트워크)',     ['lumentum','credo','dcOptic'],                        ['루멘텀','크레도 테크놀로지','KODEX 미국AI광통신네트워크']],"),
+            ("['마벨','MRVL','L2',['marvell'],                 {priceKey:'mrvl',ccy:'USD',mkt:'NASDAQ',qk:['marvell']}],",
+             "['마벨','MRVL','L2',['marvell'],                 {priceKey:'mrvl',ccy:'USD',mkt:'NASDAQ',qk:['marvell']}],\n  ['브로드컴','AVGO','L2',['broadcom'],              {priceKey:'avgo',ccy:'USD',mkt:'NASDAQ',qk:['broadcom']}],"),
+            ("['루멘텀','LITE','L6',['lumentum'],              {priceKey:'lite',ccy:'USD',mkt:'NASDAQ',qk:['lumentum']}],",
+             "['루멘텀','LITE','L6',['lumentum'],              {priceKey:'lite',ccy:'USD',mkt:'NASDAQ',qk:['lumentum']}],\n  ['크레도 테크놀로지','CRDO','L6',['credo'],          {priceKey:'crdo',ccy:'USD',mkt:'NASDAQ',qk:['credo']}],"),
+            ("['mrvl','marvell'], ['mu','micron'], ['lite','lumentum'],",
+             "['mrvl','marvell'], ['avgo','broadcom'], ['mu','micron'], ['lite','lumentum'], ['crdo','credo'],"),
+          ]
+          for old,new in reps:
+              if new in s: continue
+              if old not in s: raise SystemExit('sync-holdings patch anchor missing: '+old[:80])
+              s=s.replace(old,new,1)
+          p.write_text(s,encoding='utf-8')
+          PY
+          node --check scripts/sync-holdings.mjs
+
+      - name: Build holdings from latest Saturday Excel
+        run: node scripts/sync-holdings.mjs
+        env:
+          GDRIVE_SA_KEY: ${{ secrets.GDRIVE_SA_KEY }}
+
+      - name: Normalize Saturday authority and reconcile consumers
+        shell: bash
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const fs=require('fs');
+          const p='holdings.json';
+          const h=JSON.parse(fs.readFileSync(p,'utf8'));
+          const wow=String(h.note||'').match(/\(WoW [^)]+\)/)?.[0]||'';
+          h.asOf=h.qtyAsOf||h.asOf;
+          h.note=`자산현황 ${h.qtyAsOf} 자동 동기화 · 주간 원장 total ${h.total}M${wow?' '+wow:''}. `+
+            `보유종목·평가금액·보유비중은 최신 토요일 엑셀 고정 권위값이며 평일 시세 갱신은 holdings.json을 변경하지 않는다. `+
+            `레이어=holdings[].w·종목=detail[].w·수량=detail[].qty·평단=avg{}·환율=fx.usdkrw. ※ 괴리율·이벤트 등 편집성 메모는 수동 보강.`;
+          fs.writeFileSync(p,JSON.stringify(h,null,1)+'\n');
+          NODE
+          node scripts/reconcile-held-consumers.mjs
+
+      - name: Refresh FedWatch, held-news digest and ChatGPT market pulse
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, time
+          from pathlib import Path
+          checked='2026-09-05T16:51:00+09:00'
+
+          # FedWatch: CME EOD direct API requires paid/self-service access; Investing.com is the allowed fallback.
+          p=Path('fedwatch.json'); f=json.loads(p.read_text(encoding='utf-8'))
+          ranges=[
+            {'label':'3.50%–3.75%','low':3.5,'high':3.75,'probability':15.5,'previousDay':17.3,'previousWeek':11.6},
+            {'label':'3.75%–4.00%','low':3.75,'high':4.0,'probability':41.7,'previousDay':42.8,'previousWeek':38.5},
+            {'label':'4.00%–4.25%','low':4.0,'high':4.25,'probability':34.5,'previousDay':32.7,'previousWeek':38.9},
+            {'label':'4.25%–4.50%','low':4.25,'high':4.5,'probability':8.3,'previousDay':7.2,'previousWeek':11.0},
+          ]
+          exp=sum(((r['low']+r['high'])/2)*r['probability']/100 for r in ranges)
+          f.update({
+            'source':'Investing.com Fed Rate Monitor (CME 30-Day Fed Fund futures 기반 · 2순위 교차검증)',
+            'sourceUrl':'https://kr.investing.com/central-banks/fed-rate-monitor/',
+            'primarySourceUrl':'https://www.cmegroup.com/markets/interest-rates/cme-fedwatch-tool.html',
+            'apiInfoUrl':'https://www.cmegroup.com/market-data/market-data-api/fedwatch-api.html',
+            'asOf':'2026-09-05T05:55:00+09:00','checkedAt':checked,'status':'확인됨(2순위)',
+            'statusReason':'CME 공식 FedWatch End-of-Day API는 유료 self-service 접근이 필요해 이 실행 환경에서 인증 가능한 직접값을 확보하지 못했다. 규칙에 따라 Investing.com 한국 페이지의 업데이트 2026-09-05 05:55 KST를 2순위 검증값으로 사용했다. 2026-12-10 FOMC 확률 15.5/41.7/34.5/8.3%, 선물가격 96.065.',
+            'futurePrice':96.065,
+          })
+          snap={'date':'2026-09-05','expectedRate':round(exp,4),'futurePrice':96.065,'updated':'2026-09-05 05:55 KST','ranges':ranges}
+          hist=[x for x in f.get('history',[]) if x.get('date')!='2026-09-05']; hist.append(snap); f['history']=hist
+          checks=[x for x in f.get('checks',[]) if x.get('date')!='2026-09-05']
+          checks.append({'date':'2026-09-05','checkedAt':checked,'status':'확인됨(2순위)','reason':'CME 공식 End-of-Day API 직접 인증값 미확보(유료 self-service). Investing.com 한국 페이지 업데이트 2026-09-05 05:55 KST, Future Price 96.065, 확률 15.5/41.7/34.5/8.3% 사용.'})
+          f['checks']=checks
+          p.write_text(json.dumps(f,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+
+          # Holdings-only, enterprise-value-relevant digest. No paid LLM is called here.
+          p=Path('news_digest.json'); d=json.loads(p.read_text(encoding='utf-8'))
+          h=json.loads(Path('holdings.json').read_text(encoding='utf-8'))
+          d['asOf']=checked; d['holdingsAsOf']=h.get('qtyAsOf') or h.get('asOf')
+          d['model']='ChatGPT daily audit · web search + own reasoning · no paid external LLM API'
+          d['headline']='9/5 토요일 원장에 Broadcom(AVGO)·Credo(CRDO)가 신규 보유로 편입되고 DRAM3배는 전량 청산됐다. 신규 보유 두 종목의 최신 공식 실적은 AI custom silicon·고속 연결 수요를 확인했고, Tesla Cybercab는 NHTSA의 정식 자기인증 조사로 규제 리스크가 한 단계 높아졌다.'
+          news=[x for x in d.get('news',[]) if x.get('tk') not in {'AVGO','CRDO','TSLA'}]
+          newitems=[
+            {'tk':'TSLA','nm':'테슬라','date':'2026-09-04','fact':'미국 NHTSA가 조향휠·브레이크 페달·사이드미러가 없는 Tesla Cybercab 약 1,000대의 연방 안전기준 자기인증 절차에 대해 공식 조사를 시작했다. Tesla는 별도 면제를 신청하지 않은 상태다.','meaning':'Cybercab가 실제 제한 상용운행으로 넘어간 직후 규제 상태가 단순 평가에서 공식 조사로 강화됐다. 자율주행 옵션가치는 유지되지만 연방 기준 적합성·면제 여부가 전국 확대 속도의 직접 게이트다.','impact':'부정-관찰','next':'NHTSA 조사 결과·면제/시정조치 여부, 오스틴 운행 확대, 실제 차량수·가동률·서비스 경제성','response':'관찰','source':'Reuters · 2026-09-04','url':'https://www.reuters.com/business/autos-transportation/us-auto-safety-regulator-opens-probe-into-nearly-1000-tesla-cybercabs-2026-09-04/'},
+            {'tk':'AVGO','nm':'브로드컴','date':'2026-09-02','fact':'Broadcom FY26 Q3 매출은 $29.591B(+86% YoY), AI 반도체 매출은 $16.7B(+221% YoY, +54% QoQ)였다. FY26 Q4 매출 가이던스는 약 $34.8B, AI 반도체 매출 전망은 $21.7B다.','meaning':'신규 보유 편입 시점의 공식 펀더멘털은 custom AI accelerator·네트워킹 수요가 실적과 다음 분기 가이던스로 이어지는 가속 구간이다. 다만 고객 집중과 HBM/첨단공정 공급 제약을 함께 추적한다.','impact':'긍정','next':'Q4 AI 반도체 $21.7B 달성, FY27 AI 매출 램프, 고객별 custom XPU 비중·공급 제약','response':'유지','source':'Broadcom IR · 2026-09-02','url':'https://investors.broadcom.com/news-releases/news-release-details/broadcom-inc-announces-third-quarter-fiscal-year-2026-financial'},
+            {'tk':'CRDO','nm':'크레도 테크놀로지','date':'2026-09-01','fact':'Credo FY27 Q1 매출은 $479.0M(+114.7% YoY, +9.6% QoQ), GAAP gross margin 64.5%, GAAP 영업이익 $120.7M이었다. FY27 Q2 매출 가이던스는 $525M~$535M, non-GAAP gross margin 67~69%다.','meaning':'신규 보유 편입의 근거인 AEC·광 DSP·SiPho PIC 등 AI 데이터센터 연결 수요가 세 자릿수 성장과 다음 분기 가이던스로 확인됐다. 고객 다변화·AEC 의존도와 광 제품 믹스가 다음 검증점이다.','impact':'긍정','next':'Q2 매출 $525~535M, hyperscaler 고객 다변화, 1.6T/광 제품 매출 비중, gross margin','response':'유지','source':'Credo IR · 2026-09-01','url':'https://investors.credosemi.com/news-events/news/news-details/2026/Credo-Technology-Group-Holding-Ltd-Reports-First-Quarter-of-Fiscal-Year-2027-Financial-Results/default.aspx'},
+          ]
+          d['news']=newitems+news
+          p.write_text(json.dumps(d,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+
+          # Six-axis market pulse, reasoned from official releases + latest holdings/news/signals/gamma.
+          p=Path('pulse.json'); q=json.loads(p.read_text(encoding='utf-8'))
+          q['asOf']='2026-09-05T16:51'; q['gen']=int(time.time()*1000)
+          q['model']='ChatGPT automation · official releases first · holdings 2026-09-05 · no paid external LLM API'
+          q['headline']='8월 NFP +162K로 미국 고용 급랭은 피했지만, FedWatch의 12월 3.75~4.00% 이하 확률은 57.2%로 금리 경로 불확실성이 남아 있다. 한편 신규 보유 AVGO·CRDO의 공식 실적은 AI custom silicon과 연결 수요의 실적화를 재확인했다. Tesla Cybercab의 NHTSA 정식 조사는 자율주행 확장의 규제 게이트다.'
+          for x in q.get('drivers',[]):
+              if x.get('ax')=='rates':
+                  x.update({'dir':'risk','l1':'미국 8월 NFP +162K·실업률 4.1%로 고용 급랭은 피했다. 9/5 Fed Rate Monitor의 12월 분포는 3.50~3.75% 15.5%, 3.75~4.00% 41.7%, 4.00~4.25% 34.5%, 4.25~4.50% 8.3%다.','l2':'CME 공식 EOD API 직접값은 유료 self-service 접근 제한으로 확보하지 못해 Investing.com 05:55 KST 표시값을 2순위로 사용했다. 이전 9/4 확률을 최신값처럼 재사용하지 않았다. 다음 공식 게이트는 9/10 PPI, 9/11 CPI와 9월 FOMC다.','verdict':'고용 급랭 아님 · 12월 완화 가능성 우세하나 물가/FOMC 확인 필요','srcs':[{'t':'BLS Employment Situation · August 2026','u':'https://www.bls.gov/news.release/archives/empsit_09042026.htm','d':'2026-09-04'},{'t':'Investing.com Fed Rate Monitor · Updated 2026-09-05 05:55 KST','u':'https://kr.investing.com/central-banks/fed-rate-monitor/','d':'2026-09-05'}]})
+              elif x.get('ax')=='flow':
+                  x.update({'dir':'opp','layer':'L2 custom silicon·L3 메모리·L4 패키징·L6 연결','l1':'한국 8월 반도체 수출 강세에 더해 신규 보유 Broadcom·Credo의 최신 공식 실적이 AI custom silicon과 고속 연결 수요의 실적화를 확인했다.','l2':'8월 한국 수출 982.5억달러(+68.7% YoY), 반도체 466.5억달러(+209%)에 Broadcom AI 반도체 매출 $16.7B(+221% YoY)와 Credo 매출 $479M(+115% YoY)가 겹친다. 보유 포트폴리오의 L2·L3·L6 실수요 신호가 동시에 강하지만, 높은 집중도 자체는 별도 리스크로 관리한다.','verdict':'AI 상류·연결 실수요 동시 확인 · 신규 보유 펀더멘털 양호','srcs':[{'t':'Broadcom FY26 Q3 공식 실적','u':'https://investors.broadcom.com/news-releases/news-release-details/broadcom-inc-announces-third-quarter-fiscal-year-2026-financial','d':'2026-09-02'},{'t':'Credo FY27 Q1 공식 실적','u':'https://investors.credosemi.com/news-events/news/news-details/2026/Credo-Technology-Group-Holding-Ltd-Reports-First-Quarter-of-Fiscal-Year-2027-Financial-Results/default.aspx','d':'2026-09-01'},{'t':'산업통상자원부 · 2026년 8월 수출입 동향','u':'https://www.motie.go.kr/','d':'2026-09-01'}]})
+              elif x.get('ax')=='sentiment':
+                  x.update({'dir':'risk','layer':'고멀티플 AI·자율주행·금융화','l1':'signals는 VIX 14.53·Fear&Greed 42로 극단적 공포/과열은 아니지만, Tesla Cybercab의 NHTSA 자기인증 정식 조사가 신규 규제 리스크로 부상했다.','l2':'AI 인프라 실적은 Broadcom·Marvell·Credo가 지지하지만 자율주행은 NHTSA가 최대 1,000대 Cybercab의 연방 안전기준 자기인증을 조사하기 시작했다. 상용화 진전과 규제 리스크를 분리해 해석한다.','verdict':'AI 실수요 견조 · Tesla 규제 게이트 강화','srcs':[{'t':'Reuters · NHTSA opens Tesla Cybercab probe','u':'https://www.reuters.com/business/autos-transportation/us-auto-safety-regulator-opens-probe-into-nearly-1000-tesla-cybercabs-2026-09-04/','d':'2026-09-04'},{'t':'Broadcom FY26 Q3 공식 실적','u':'https://investors.broadcom.com/news-releases/news-release-details/broadcom-inc-announces-third-quarter-fiscal-year-2026-financial','d':'2026-09-02'}]})
+          p.write_text(json.dumps(q,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+
+          # Change history: source/date/reason recorded once.
+          p=Path('changelog.js'); s=p.read_text(encoding='utf-8')
+          entry="    {d:'2026-09-05',t:'05 토요일 원장 정합성 — 자산현황_260905.xlsx를 권위값으로 동기화하고 신규 AVGO·CRDO/DRAM3배 청산을 holdings·held·news 필터에 반영. 01 FedWatch는 Investing.com 05:55 KST 2순위값(15.5/41.7/34.5/8.3%, 선물 96.065)으로 갱신하고 보유뉴스·시장맥박 6축을 ChatGPT 자체 추론으로 재생성'},\n"
+          marker='  var MKT_CHANGELOG=[\n'
+          if entry not in s:
+              if marker not in s: raise SystemExit('changelog marker missing')
+              s=s.replace(marker,marker+entry,1)
+              p.write_text(s,encoding='utf-8')
+          PY
+
+      - name: Validate audit repair
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check scripts/sync-holdings.mjs
+          node --check changelog.js
+          node scripts/reconcile-held-consumers.mjs
+          node - <<'NODE'
+          const fs=require('fs');
+          const h=JSON.parse(fs.readFileSync('holdings.json','utf8'));
+          if(h.asOf!=='2026-09-05'||h.qtyAsOf!=='2026-09-05') throw new Error('Saturday authority not 2026-09-05');
+          const by=Object.fromEntries((h.detail||[]).map(x=>[x.ticker,x]));
+          for(const t of ['AVGO','CRDO']) if(!(by[t]&&Number(by[t].amt)>0)) throw new Error(t+' not active');
+          if(Number((h.detail||[]).find(x=>x.name==='레버리지셰어즈 메모리DRAM3배')?.amt||0)!==0) throw new Error('DRAM3x should be closed');
+          const d=JSON.parse(fs.readFileSync('news_digest.json','utf8'));
+          if(d.holdingsAsOf!=='2026-09-05') throw new Error('digest holdingsAsOf stale');
+          const held=new Set((d.groups.find(x=>x.title==='보유 종목')?.items||[]).map(x=>String(x.tk).toUpperCase()));
+          for(const t of ['AVGO','CRDO']) if(!held.has(t)) throw new Error('digest missing '+t);
+          const f=JSON.parse(fs.readFileSync('fedwatch.json','utf8'));
+          if(!String(f.asOf).startsWith('2026-09-05')||f.futurePrice!==96.065) throw new Error('FedWatch stale');
+          const q=JSON.parse(fs.readFileSync('pulse.json','utf8'));
+          if(!String(q.model).includes('no paid external LLM API')) throw new Error('pulse LLM policy marker missing');
+          console.log('audit repair validated',h.total,h.fx?.usdkrw);
+          NODE
+          git diff --check
+
+      - name: Commit, push and open protected-main PR
+        env:
+          GH_TOKEN: ${{ secrets.AUTO_MERGE_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          FILES="scripts/sync-holdings.mjs holdings.json index.html news_digest.json fedwatch.json pulse.json changelog.js"
+          if [ -z "$(git status --porcelain $FILES)" ]; then echo 'nothing to change'; exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          BRANCH="claude/automation-holdings-audit-${GITHUB_RUN_ID}"
+          git switch -c "$BRANCH"
+          git add $FILES
+          git commit -m "fix: sync Sep 5 holdings and daily market data"
+          git push -u origin "$BRANCH"
+          gh pr create --base main --head "$BRANCH" \
+            --title "fix: sync Sep 5 holdings and daily market data" \
+            --body "Latest Saturday Excel (2026-09-05) is the sole holdings authority. Adds AVGO/CRDO parser coverage, closes DRAM3x, reconciles index held/news filters, refreshes FedWatch fallback, holdings-only news and ChatGPT market pulse. No paid external LLM is used for 01/04/05 collection or pulse generation."
