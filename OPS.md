@@ -1,9 +1,4 @@
-Warning: truncated output (original token count: 56938)
-Total output lines: 688
-
 **최종 갱신: 2026-09-05 20:23 (KST)**
-
-> 2026-09-05 22:00 · **투자일지 모바일 하단 겹침 방지.** 850px 이하 화면에서 `07 투자일지` 목록 마지막 카드 뒤에 고정 시세 티커 높이와 16px의 안전 여백을 확보해 마지막 행의 행동·상태가 티커에 가려지지 않게 했다. `journal.js` 자산 버전을 갱신하고 정적 회귀 게이트로 여백을 고정한다.
 
 > 2026-09-05 20:23 · **초기 무한 로딩 복구.** `07 투자일지` 탭 삽입을 감지한 `world-overview.js`의 메뉴 번호 `MutationObserver`가 자기 자신의 `textContent` 변경을 다시 감지하던 순환을 차단했다. `world-overview.js`와 `journal.js` 모두 번호가 실제로 달라질 때만 DOM을 갱신하며, 두 정적 회귀 게이트가 이 멱등 조건을 강제한다.
 
@@ -242,7 +237,388 @@ Total output lines: 688
 | 관점 추출 (인테이크) | 수동(운영자 입력) | 인테이크 시 | 「관점 뽑기」 → `/api/insight`(worker→Claude). 본문(스크립트/기사) 있으면 그대로, URL만 있으면 web_search로 시도. 8레이어·단계 프레임으로 claims 후보 정렬(뽑기≠반영 · 채택은 사람이 체크). **형식별 전용 클라 추출기(2026-07-30)**: PDF(pdf.js 텍스트→필요 시 OCR) · 이미지(Tesseract OCR) · DOCX(OOXML `word/document.xml` 단일패스) · PPTX(슬라이드/발표자 노트, 네이티브 글자 없으면 슬라이드 media OCR) · XLSX/XLS/XLSM/XLSB/ODS(SheetJS, 시트별 CSV) · RTF/HTML/XML/ODT/ODP/HWPX/EML · TXT/MD/CSV/TSV/JSON/SRT/VTT/YAML. ZIP 기반 Office를 `file.text()`로 읽는 폴백을 제거해 `PK`·`word/document.xml` 바이너리 노출을 차단한다. 파일당 25MB·분석 입력 120,000자 상한이며 초과 시 전체 글자수와 컷을 명시한다. 구형 DOC/PPT/HWP·암호화/손상 문서는 깨진 내용을 넣지 않고 최신 Office/HWPX/PDF 변환 안내를 표시한다. **PDF는 `getDocument`에 `cMapUrl`(cdnjs `/pdf.js/{PDFJS_VER}/cmaps/`)+`cMapPacked` 지정 → 한글 CID 폰트(Adobe-Korea1·ToUnicode 없음) 정상 디코드**(2026-07-20). OCR 폴백은 진짜 스캔본·ToUnicode 파손 PDF만 `realLetters` 컷으로 걸러 발동. **Sonnet 5 adaptive thinking 기본 활성화 대응(2026-07-31)**: 첫 호출은 추론·web_search를 유지하고 출력 예산 12,000, 최종 JSON이 없을 때만 thinking-off 8,000으로 1회 자동 복구. 재시도 후에도 비면 502 원인 메시지로 반환해 클라의 모호한 파싱 실패를 제거 |
 | ↳ **캡처 이미지 붙여넣기 수신**(2026-08-09 재구성) | 런타임(입력 보조) | 인테이크 시 | 붙여넣기가 「안 먹는」 원인은 세 갈래다 — ①`clipboardData.items`/`files` 중 한쪽만 채워짐 ②**포커스가 입력칸 밖이라 `paste` 이벤트 자체가 안 옴** ③이미지가 없는데 화면이 침묵해 실패로 보임. 세 경로를 전부 막는다: **수신 4중화**(`window`→`document` capture + `#insText`·`#insDrop` 엘리먼트 리스너 · 중복은 `e.__insPaste` 가드) · **Ctrl/⌘+V 키 폴백**(400ms 안에 `paste` 가 안 오면 클립보드 직접 읽기) · **「캡처 붙여넣기」 버튼**(`#insPaste` → `navigator.clipboard.read()` · 버튼 클릭 = 확실한 사용자 제스처라 포커스와 무관하게 동작). **항상 상태를 말한다** — 이미지 없음·권한 차단·미지원을 `.ins-msg` 에 한국어로 구분 표시(침묵 금지). 02 뷰(`#v-insight.on`)일 때만 가로채고 **텍스트 붙여넣기는 그대로 통과**. `insight.js` 만 편집(index.html·insight.css 무편집) · 표시 변경은 캐시 규칙(§6-7)과 한 벌 |
 | ↳ **유튜브 링크 스크립트 추출**(2026-07-18 신설) | 자동(입력 보조) | 인테이크 시 | URL 칸에 **유튜브 링크만** 넣고 본문이 비면 클라(`ytExtract`)가 먼저 `/api/yt-view`(**`mode:'insight'`** · Gemini 영상 인식)로 영상을 **상세 전사**→`insText` textarea 채움(원문 raw 저장)→그 스크립트로 `/api/insight` 관점 추출로 이어감. **03 전문가 원탁과 동일 엔드포인트**(03=발화자 관점 압축 요약 / 02=`mode:'insight'` 상세 전사 분기·`maxOutputTokens` 상향). 실패·`GEMINI_API_KEY` 부재(503)면 **URL web_search로 폴백**(구 동작). narrative≠numbers — 스크립트는 인테이크 입력일 뿐 숫자 파일 불변. 신규 CSS·토큰 0(index.html 무패치·insight.js/worker.js만) |
-| **표시 레벨(뎁스) 접기**(2026-07-18 신설) | 런타임(표시 전용) | 상시 · 기본 L1 | 「채택한 관점」 목록을 3단계 아웃라인으로: **L1 자료**(소스 카드만·접힌 관점·시그널 건수 힌트) · **L2 관점**(+claims, 시그널은 건수 힌트) · **L3 시그널**(+관련 시그널 로그·미연결 시그널 펼침). 상단 `.ins-lv` 버튼군(기본 L1). `insight.js` `renderLevel()`·`lvl` 상태·`renderList` 뎁스 분기·`claimLine(…,showSig)`·`sigSection(c,open)`·`renderSigRest` lvl 게이트. **힌트 클릭 = 그 자리 펼침(전체 lvl 독립)** — L1 자료 힌트(`.ins-lvhint`) 클릭→그 자료 관점을 `.ins-recwrap`로 펼침, 관점 시그널 힌트(`.ins-sighint`) 클릭→로그를 `.ins-sigwrap`로 펼침(자료→관점→시그널 중첩 드릴·CTA 펼치기↔접기·`data-rec`/`data-sig`, 2026-07-18~19). **검색·라우트 필터·등급 보드와 직교**(무엇을 펼칠지만 · 데이터 무변). narrative≠numbers — 표시 방식일 뿐 숫자·판단 파일 불변. 신규 CSS만(`:root` 토…26938 tokens truncated…·SK 전남광주 ₩800조 HBM D램, SK 웨이퍼 캐파 2배↑, 마이크론 미국 $250B(₩370조)·일본 히로시마 HBM ₩14조, 인텔 아일랜드 팹34 $57B(sumrow 각주). 기존 구성요소별 메모리 L3 행 2027E 셀에도 전남광주·SK 2배 병기. **발표·로드맵 = narrative** — `signal_log` 포함 숫자 파일(gamma·holdings·earnings·judgment) 전부 불변(캐파 증설 발표는 목표가 리비전이 아님). `aisd.js`만 편집(index.html·pantone.css 무편집) — 기존 컴포넌트(ds-sec·ds-lens·ds-card·ds-mtx.plan·ds-co·ds-lb.sem·ds-rev·ds-fn) 전면 재사용, **신규 CSS 클래스·:root 토큰 0** → `node --check` 통과·`check-docs` 통과(토큰 24종 무변)·jsdom 스모크(회사 4행+sumrow·역할 배지·셀 수) 통과. §3 로드맵 인벤토리 행 갱신 · STYLE_GUIDE §9 동반.
+| **표시 레벨(뎁스) 접기**(2026-07-18 신설) | 런타임(표시 전용) | 상시 · 기본 L1 | 「채택한 관점」 목록을 3단계 아웃라인으로: **L1 자료**(소스 카드만·접힌 관점·시그널 건수 힌트) · **L2 관점**(+claims, 시그널은 건수 힌트) · **L3 시그널**(+관련 시그널 로그·미연결 시그널 펼침). 상단 `.ins-lv` 버튼군(기본 L1). `insight.js` `renderLevel()`·`lvl` 상태·`renderList` 뎁스 분기·`claimLine(…,showSig)`·`sigSection(c,open)`·`renderSigRest` lvl 게이트. **힌트 클릭 = 그 자리 펼침(전체 lvl 독립)** — L1 자료 힌트(`.ins-lvhint`) 클릭→그 자료 관점을 `.ins-recwrap`로 펼침, 관점 시그널 힌트(`.ins-sighint`) 클릭→로그를 `.ins-sigwrap`로 펼침(자료→관점→시그널 중첩 드릴·CTA 펼치기↔접기·`data-rec`/`data-sig`, 2026-07-18~19). **검색·라우트 필터·등급 보드와 직교**(무엇을 펼칠지만 · 데이터 무변). narrative≠numbers — 표시 방식일 뿐 숫자·판단 파일 불변. 신규 CSS만(`:root` 토큰 0 · index.html 무패치) |
+| 인사이트 자가 마운트 | 자동(런타임) | 페이지 로딩 시 | `insight.js`의 `mount()` 함수가 `#v-insight` 탭(**01 시장 모니터링 뒤·03 전문가 원탁 앞에 주입** · 정적 nav 무편집 런타임 재구성 · 2026-07-18) + 헤더 배지 + `signal_log` 섹션을 런타임에 주입. **채택 관점 반영 스트립(`insStripMarket`/`insStripCal`→01 · `insStripDec`→**04** · 2026-07-18 05→04 이동, 로드맵 `#dsAisd` 아래·강물 탐색 `.vhead` 위)도 `mount()`가 각 뷰에 앵커링**(`insStripThread`는 2026-07-18 #424 「02 박스1 삭제」로 앵커 제거 — `strip()`은 `#insStripThread` 부재 시 no-op) — 매크로 관점 스트립은 01 「관련 기사」 섹션(`#mktMacroNews` 앞)에 붙는다(2026-07-18 상단→이동, §01 관련 기사 행). **`insStripCal` 일정 관점은 항목별 `삭제` 버튼 제공(2026-07-28): 해당 claim만 제거·다른 관점 보존, 마지막 claim 삭제 시 빈 자료 정리, `persist()`가 localStorage+R2에 동시 저장** |
+| **사이트 반영(「반영하기」)**(2026-07-28 신설 · 2026-07-29 완전자동 · 2026-07-31 교차메뉴 확장) | 런타임 감지 + **완전 자동 직접 커밋** | 관점 추출·저장목록 렌더 시 | `SITE_SRC`가 사이클 판별 `gates.json`·리스크 `risk.json`뿐 아니라 **01 시장 맥락 `signal_log.json`·다가오는 일정 `calendar.json`**도 읽는다. 숫자 보드는 기존 `keys`/`xkeys`와 수치 게이트를 유지하고, `macro`/`calendar` narrative는 확정 정책 결과·판정 맥락이므로 수치 필터 예외로 관련 보드에 매칭한다. 시장 맥락은 route(`macro`·`calendar`·`signal_log`), 일정은 이벤트명·티커 토큰으로 연결한다. 「🚀 지금 반영」은 `POST /api/site-apply`를 대상별 호출해 ① `gates`/`risk`: Claude가 gauge/verdict/srcs/asOf 패치 계산(게이지 길이·순서·`k` 불변, 근거 없는 수치 변경 거부) ② `signal_log`: 기존 스키마로 append·정규화 중복 차단 ③ `calendar`: 동일 이벤트의 `meta`에 결과 업데이트·중복 차단 후 저장소 `default_branch`에 직접 커밋한다. FOMC처럼 수치 없는 narrative도 확정 회의 결과면 보드 verdict·시장 맥락·해당 D-day 카드 설명을 함께 갱신할 수 있지만 숫자 파일은 변경하지 않는다. 카드별 결과(반영됨/변경 없음/실패), 수동 「반영 지시 복사」, `siteDone` 영속은 유지. `handleSiteApply`는 `ANTHROPIC_API_KEY`·`GITHUB_TOKEN` 필요. 허용 대상은 worker 전역 `SITE_APPLY_FILES`(`gates`·`risk`·`signal_log`·`calendar`)가 단일 SoT이며 프런트 `SITE_SRC`와 동일하게 유지. **Sonnet 5 빈 JSON 복구(2026-07-31)**: 보드 패치 첫 호출은 adaptive thinking 유지+4,000, JSON 부재 시 thinking-off 2,400으로 1회 자동 재시도하며 재실패는 한국어 502 원인으로 표시 |
+
+> **관점은 채택으로 끝나지 않는다.** `review`(점검일)가 강제 부여돼 도래 시 「점검 필요」로 재부상하고, §0-5 트리아지에서 발동/만료/유지로 처리된다. narrative는 여전히 숫자 파일을 못 바꾼다 — **발동 = 05 리밸런싱 후보로 올릴 뿐**이고, 숫자 변경은 §1 트리거(실적 비트·가이던스 상향·확정 수주) 별도.
+
+> **02 헤더·인테이크 표시 정리(2026-07-20):** 전 페이지 공통 `#asofBox`(시세/정보 스탬프)는 **02에서만 숨긴다** — `insight.js mount()`의 nav 클릭 리스너가 insight 탭일 때 `#asofBox`를 `display:none`으로 덮어쓴다(자가 마운트라 index.html 탭 핸들러보다 **뒤에 등록** → 나중 값이 이김 · **index.html 무편집** · `#asofBox`가 DOM에서 `#v-insight`보다 **앞**이라 CSS `~`도 불가). 우상단 `updIns`(인사이트 전용 update 스탬프)는 유지. 뷰 설명(`.vsub`)은 `.vhead`에서 빼 **뷰 맨 아래**(`#insSigRest` 뒤·`.ins-wrap` 막내)로 이동(`GUIDE_HTML` 분리·`border-top var(--line)` 구분). 인테이크 3입력(`insUrl`·`insText`·`insDrop`)의 예시·힌트 placeholder는 최소 라벨만 남기고 삭제. `insight.js`만 편집(index.html·insight.css 무편집) · 신규 :root 토큰 0. SimpleorNothing 지시.
+
+### 03 전문가 원탁 (`v-council`)
+
+참고할 자료는 파일 업로드 외에도 텍스트·캡처 이미지를 붙여넣을 수 있다. 붙여넣은 이미지는 Gemini Vision이 표·그래프·문구를 전사해 토론 자료로만 첨부하고 원본은 저장하지 않는다.
+
+| 정보명 | 자동/수동 | 주기 | 소스 |
+|---|---|---|---|
+| 원탁 토론 | 수동 | 필요 시 | 전문가 2인+ → 「토론 시작」 → `/api/council`(Claude). **토론 주제(`#clTopic`) 선택 입력**(2026-07-17) — 비우면 현 상황 종합, 채우면 그 논제 중심. `narrative≠numbers` |
+| **1인 심층 자문**(2026-07-19 신설) | 수동 | 필요 시 | 전문가 **1인만** 선택 → 하단 바에 뜨는 「심층 자문」 → `/api/council-ask`(Claude opus-4-8·`max_tokens` 3500). 다인 토론과 별개 — **그 전문가 렌즈만 순수하게**(좌장 오버레이 없음, 운영자 결정) 깊은 진단·**직접 실행 조언**·자기 반증(`watch`)을 낸다. 출력 스키마 `{diagnosis, basis[], advice[], watch[], answer, stance}`. 좌장 스틸맨 대신 **그 렌즈 자체의 리스크 규율을 `watch`(자기 반증)로 강제**해 편향 진단 방지. `#clTopic`=질문(비우면 현 상황 심층 진단)·`#clCtx`=라이브 situation 재사용. 결과는 토론 이력(`/api/council-discussions`)에 `[심층 자문]` 접두로 누적(advice→actions·watch→steelman 매핑). **자가 마운트 `council-ask.js`**(worker `<script defer>` 주입·index.html 무편집·카드 선택 상태는 `.cl-card.on` DOM으로 감지·전문가 데이터는 선택 카드 DOM에서 읽어 라이브 오버라이드 자동 반영). 신규 CSS·:root 토큰 0(기존 `.cl-*` 재사용). narrative≠numbers — 관점 텍스트일 뿐 숫자 파일 불변. 음성 재생은 `window.COUNCIL.playReport` 재사용(diagnosis 비우고 board를 그 전문가 목소리로 몰아 순수 렌즈 유지) |
+| **패널 관리 (로스터 추가·삭제·편집)**(2026-07-19 신설) | 수동(운영자 입력) | 필요 시 | vhead 「패널 관리」 버튼 → 모달에서 전문가 카드 **추가·삭제·편집**(기본 6인 포함 전체 CRUD·「기본 6인 복원」). 편집 필드=이름·전문·레이어 태그·시계(논제/가격/좌장)·스탠스·관점·아바타(프리셋 6종). **서버 저장** = R2 `council_roster.json`(`/api/council-roster` GET/POST · 존재 시 인라인 기본 6인을 대체 · 모든 기기 공유). 뷰·스탠스 편집은 **council_log 채널에도 흘려**(`/api/council-log`) council-sot 덮어쓰기를 피하고 관점 SoT를 일원화. **자가 마운트 `council-roster.js`** — 인라인 COUNCIL이 노출한 훅(`getExperts`/`setExperts`/`reRender`)으로 로스터를 주입해 **토론·1인 자문 양쪽이 커스텀/편집 명단으로 동작**(index.html은 훅 3개만 추가). 상한: 최대 24인·필드 길이 제한(worker `sanitizeRosterExpert`). 신규 :root 토큰 0(기존 `.cl-*`·`.cl-modal` 재사용). narrative≠numbers — 명단·관점 텍스트일 뿐 숫자 파일 불변. 실존 인물 렌즈 시뮬레이션 가드레일 유지 |
+| 전문가 관점 갱신 | 수동(운영자 입력) | 필요 시 | 각 전문가 카드 「관점 갱신」 모달 4탭 — **텍스트**(`/api/council-summary` Claude) · **유튜브 링크**(`/api/yt-view` Gemini 영상 인식 · 기본 모드=발화자 관점 압축 요약, 02는 `mode:'insight'` 상세 전사 분기 공유) · **여러 링크**(신설) · **파일**(txt·md·srt·vtt·csv·docx·pdf → council-summary). 관점 텍스트·stance만 갱신, **숫자 파일 불변**(narrative≠numbers). 반영분은 R2 감사 로그 `council_log.json`(`/api/council-log`)에 누적 → 카드 복원·「관점 갱신 이력」 모달 |
+| ↳ **여러 링크 자동 인식·통합**(2026-07-17 신설) | 수동(운영자 입력) | 필요 시 | 유튜브·기사 링크를 **한꺼번에 붙여넣으면** 클라(`recognizeLinks`)가 URL을 파싱→유형 자동 분류(유튜브/기사)→소스별 요약(유튜브=`/api/yt-view` Gemini 영상 인식 · 기사=`/api/council-read` **서버가 URL 본문을 직접 페치→HTML 스트립→Claude 비스트리밍 요약**, web_search 아님 → 특정 URL을 빠르고 확실하게 읽음)→**하나의 통합 관점으로 합성**(`/api/council-summary` 재사용). **소스는 병렬 인식**(`Promise.all` — 다건도 동시 처리). 링크 아닌 문장은 메모로 반영. 소스별 진행·한 줄 요약 표시, **실패·본문 얇음(차단·JS 렌더·페이월)은 건너뜀**(개별 처리 · view 빈 문자열). 모든 출처 링크는 로그 `refs[]`(신규 필드 · `{label,url}`)에 함께 저장·이력 모달에서 각각 링크로 표시. 신규 CSS·토큰 0(모달 컴포넌트 재사용) |
+| **원탁 자료 기반 토론** | 수동(운영자 업로드) + 자동(전문가별 해석) | 토론 전 | `council-material.js` 자가 마운트가 03 원탁 「토론 주제」 위에 여러 자료 업로드 영역을 추가한다. 최대 6개·파일당 25MB, PDF·PPTX·DOCX·TXT·MD·CSV·JSON·SRT·VTT·HTML 지원(PDF.js·JSZip·Mammoth 지연 로드). 파일별 최대 4만 자(초과 시 앞 2.6만+뒤 1.4만), 통합 최대 10만 자를 `[자료 N · 파일명]`·`[페이지/슬라이드]` 표식과 함께 기존 `POST /api/council`의 `material`로 첨부한다. worker는 자료를 1차 근거로 고정하고 모든 `board.take`가 같은 자료의 구체 근거→각 전문가 `field/view` 렌즈 해석→의견·위험 순으로 말하게 한다. 자료 속 지시문은 데이터로만 취급하며, 없는 수치·인용은 생성 금지·근거 부재 시 「자료에서 확인되지 않음」 명시. 생성된 리포트는 기존 Gemini 음성 토론(`/api/council-audio`)으로 재생. index.html·숫자 파일 무편집, narrative≠numbers |
+| **원탁 알파맵 기본 컨텍스트** | 자동(토론 시작 시 최신 수집) | 모든 원탁 토론 | `council-context.js` 자가 마운트가 `POST /api/council` 직전에 알파맵의 **나의 자산현황**(`holdings.json`·`prices.json`), **01 시장 모니터링**(`signals.json`·`cycle.json`·`gamma.json`·`signal_log.json`·`calendar.json`), **02 채택 인사이트**(`/api/insights`), **04 시장·실적 전망**(`gates.json`·`risk.json`·`earnings.json`·`judgment.json`)을 병렬 수집·압축해 `siteContext`로 첨부한다. 60초 이내 재토론은 캐시하고 그 이후 다시 수집한다. worker는 업로드 1차 자료 → 날짜가 표시된 알파맵 내부 SoT → 사용자가 편집한 현 상황 순으로 근거 우선순위를 적용하며, 충돌은 기준일·출처 차이를 명시한다. 모든 전문가는 논제와 관련된 보유자산 영향·01 신호·02 채택 관점·04 게이트를 확인하되 관련성이 낮으면 억지 연결하지 않는다. 자산·내부 판단의 Anthropic Claude API 처리에 대한 운영자 명시 승인(2026-07-29). index.html·숫자 파일 무편집, narrative≠numbers |
+| 원탁 음성 토론 재생 | **고품질 Gemini(Google AI Studio) 우선** · 실패 시 브라우저 TTS 폴백 | 재생 시 | 원탁 진단 리포트(diagnosis·board·consensus·tension·steelman)를 화자별 음성으로 메신저형 극화 재생. `council-audio.js` 자가 마운트가 `window.COUNCIL.playReport`와 원탁 재생 버튼을 가로채 리포트 DOM을 발언 목록으로 구성하고, worker `POST /api/council-audio`에 `{turns:[{say,voice}]}`를 전송한다. worker는 발언별 단일 화자 Gemini TTS를 병렬 생성해 RMS 정규화·간격 삽입 후 단일 WAV로 연결하고, R2 `cnclaud_{sha256}.wav`에 내용 해시 캐시한다. `X-Council-Starts` 시작 시각으로 말풍선 하이라이트를 동기화한다. 좌장=Kore, 나머지는 `VOICE_POOL` 순환 배정. Gemini 호출·R2·WAV 생성 실패 시 기존 브라우저 TTS(`_orig`)로 자동 폴백. index.html 무편집·신규 `:root` 토큰 0·기존 `.cl-*` 플레이어 재사용. narrative≠numbers |
+| 원탁 업데이트 배지 | 자동(런타임) | 로딩 시 | `changelog.js` `mountHead()` — 01 시장 모니터링과 동일 `.mkt-upd` 배지 재사용 |
+
+### 04 알파 찾기 (`v-thread`만 렌더 · `v-cycle`·`v-alpha` 2026-07-18 렌더 제외)
+
+| 정보명 | 자동/수동 | 주기 | 소스 |
+|---|---|---|---|
+| **AI 수요·공급 로드맵** (04 맨위 · 판정 보드 + 밸류체인 구조도(①~④·돈의 흐름·티어별 손익 스트립·관측 위치) + **이익률 추이 매트릭스(병목의 온도계 — ②랩·③클라우드·④NVDA·④메모리·④통신/전력 연도별 영업이익률 + 행 클릭=요인·구조성·**선행 시그널**[가격·리드타임·캐파·경쟁 진입 4종 — 마진 후행 보정] 판정)** + ①진화 · ②AI 판매자 매트릭스 · ③컴퓨팅 통합(CAPEX 리비전 트랙+**매출·FCF·영업이익 4사 합산 라인 오버레이**(SVG · 막대·매출·FCF·영업이익 전부 동일 $축[상한 ~$2.55T · ③ 차트 높이 510px] — 2024 교차 후 26E FCF ~0 붕괴 · 값 트랙 2줄)+**CAPEX 실현 검증 3종 동행 지표 막대**(2023~2028 연도별)[가속기 L2 NVDA DC매출·메모리 L3 HBM 시장규모·전력 L8 글로벌 DC전력 — 명목$/물량+가격/커밋 실물 3시계 · 공백=빈칸(—)]+4사) · ④Factory 구성요소별 · **④칩 제조사별 Capex(삼성·SK·마이크론·TSMC·인텔 · 메모리 L3/파운드리 L2·L4 구분)** · ④중국) | 수동 | 분기(실적 시즌 캡처) | `aisd.js` 자가 마운트(#dsAisd · flags.js 패턴 — worker.js `<script defer>` 주입 · v-thread 최상단). 전역 토큰만·`ds-*` 스코프·신규 :root 토큰 0. 수치=컨센서스·공개 실적 방향성, **리비전 트랙·손익·이익률은 캡처 축적 전 예시 표시**. narrative 층 — 숫자 파일 무관. 재판정 트리거: ①추정 ▼하향 ②DDR5 현물<계약 롤오버 ③가격>리비전 속도 · **이익률 서열 역전 = 레이어 회전 신호** |
+| 즉답 요약 (전선·단계분포·상대가치·트림게이트γ·다음재채점·오늘시그널) | 혼합 | 런타임 파생 | `gamma`·`holdings`+`TARGETS`·`signal_log` (`renderInstantAnswer`) / 전선·다음재채점만 `IA_CFG` 수동 |
+| 반도체 사이클 3차트 (D CAPEX · D₂ 메모리매출 · C DDR5) + 종합 판정 1줄 | 혼합 (E 자동) | E: 런타임 / 나머지: 판단 시 | `cycle.json` + worker `/api/fred` (E군집 = `derive-cycle-e.mjs` 파생). ※ 「현재값·임계값 신호 요약」 표는 2026-07-12 제거 — E·B·A는 차트 없이 `cycVerdict` 램프 집계로만 반영 |
+| 주도주 4사분면 | 혼합 | alpha 주1회 + 판단 시 | `alpha` → `earnings` → `judgment` · 상단 렌즈 2줄(사분면 분포+`MACRO_GRADE`) · 크기 토글(비중↔적정밴드 갭 `TARGETS`) · **가로축 토글(예상 ↔ 실현 3M `charts.json` 63거래일 초과수익)** · **무게중심 토글(L1~L8 비중가중 평균 좌표 + 오버→언더 한계자본 회전 화살표)** · **궤적 토글(스냅샷들→현재 위치 점선 꼬리, 예상 좌표·라이브 뷰만 — ①↔③ 강등/회복 가시화)** · 각주 기준일 = `alpha.asOf` 자동연동 |
+| ↳ 판단 캘리브레이션 패널 | 자동(런타임 파생) | 로드 시 | `snapshots.json`(과거 예상 3M `aN[1]`) × `charts.json`(스냅샷일 이후 실현 경과) → 부호 적중률·편향(예상 과대/과소). 단일종목 시계열 보유분만 매핑(ETF·바스켓 제외) · 경과 <63거래일이면 부분 실현(방향 위주). OPS §1 「침묵하는 오류」 감시 |
+| 레이어 파이 (비중) | 혼합 | holdings 주간에 편승 | `holdings.json` |
+| γ 테이블 | 자동(cron) + 수동(판단) | 일별 (자동) + 실적/리비전 시 (수동) | `gamma.json` (g 자동 / stage·flagged·override 수동). gamma 테이블은 `renderGamma()` 함수가 `gamma.json`을 직접 소비 |
+| signal_log | 수동 | narrative 유입 시 | `signal_log.json` EOF append. 포맷: `{date, at, source, srcs:[{label,url}], items:[{tag,layer,col,html}]}`. 인라인 SIGNAL_LOG(~5/30)는 불변·신규만 외부 파일에 쌓인다 |
+| 관통 강물 (RIVERS) | 수동 | 논제 시계 변화 시 | `gamma.json` `RIVERS` 배열. 번호·순서는 라이브 SoT — 하드코딩 금지. Value Chain 종목 칩(`RV_PX`) 주가는 `hover-chart.js`가 **1Y 일봉**으로 표시하며 01 시장 모니터링의 기간 상태(`RG`)와 분리 |
+
+### 05 리밸런싱 (`v-decision`)
+
+| 정보명 | 자동/수동 | 주기 | 소스 |
+|---|---|---|---|
+| 결정 보드 | 혼합 | 리밸런싱 실행 시 | `judgment.json` (`decisions` 배열). 매매 방향·게이트·근거·사후 추적 |
+| 포트폴리오 테이블 | 자동 + 수동 | holdings 주간 + prices 일별 | `holdings.json` × `prices.json` |
+| **종목 채점 라이브 참고(01~04 접속)** — 드로어 「01~04 라이브 참고」 박스(02 스택→종목 클릭 시) + 트래커 행 칩(v-tracker 잔존 뷰) | 자동(런타임) | 드로어 열 때 | `gamma.json`(γ갭·g·stage·override why·**EPS 리비전30d vs 가격30d → 두 시계 판정**·애널 컨센서스·최근 액션) + `signals`(매크로 게이트 G) + `council.json`(종목 레이어 매치 전문가 스탠스·상/하방) + `/api/insights`(티커 매치 채택 관점 수·최신). **초입 5신호 채점은 수동 유지(불변 규율)** — 라이브는 「채점 전 확인」 참고용. GAMMA 로드 후 `renderTracker` 재렌더 훅 |
+| 시장 모멘텀 전망 + 추정 리비전 트래커 (`#momOutlook`·`#probEst`) | 자동(런타임) | gamma·signals·charts 일별 | index.html 인라인 IIFE. `renderMom`=signals+삼성 프록시 레짐 · `renderRev`=`gamma.json` `rev`(TP·EPS·주가 리비전·애널·강등 게이트 d30). **강등 게이트 = 30d 주가 − 30d EPS(FY+1) 리비전율**(양수=가격 추월·성숙 강등 후보 / 음수=추정 앞섬·γ open). 관측치·예측 아님 |
+| ↳ **제로베이스 투자매력도·실제 비중조절 우선순위** (`DUAL_RANK_UI_V2`) | 자동(런타임 파생) | **페이지 로드 시 최신 `gamma.json`+`holdings.json`으로 재계산** | 두 파일을 `cache:no-store`로 읽고 제로베이스 점수에서 레이어 집중도·동일 레이어 중복노출 감점을 적용해 실제 점수와 순위를 다시 계산한다. **자체 크론 없음.** 원천 데이터는 `update-prices.yml` 06:05·06:35·16:52 KST 예약 실행 → gamma/리비전 출처 검증 → 보호 main 자동 PR → 병합 순서로 갱신되며, 병합 후 다음 페이지 로드부터 새 순위가 반영된다. 예약시각과 실제 반영시각은 Actions 큐·검증·PR 병합 시간만큼 차이날 수 있다. |
+
+> **σ·μ 추정(`#v-prob` 「AI로 σ·μ 추정」 · 비렌더 뷰).** 2026-07-20부터 **LLM·웹검색을 쓰지 않는다** — `POST /api/estimate` 가 Yahoo 일봉 1년치로 로그수익률 표준편차×√252 를 직접 계산한다(드리프트는 실현 CAGR 을 시장 8%로 수축·−10~+20% 클램프). 심볼 해석 실패(회사명 입력·비상장) 시에만 Sonnet+검색 3회 상한 폴백. 응답 스키마 불변(§6-6).
+
+### 07 투자일지 (`v-journal` · `journal.js` 자가 마운트)
+
+| 정보명 | 자동/수동 | 주기 | 소스 |
+|---|---|---|---|
+| 매매 전 판단 기록 | 수동 | 매수·매도·유지·관찰 판단 시 | 가설·촉매·EPS 선행지표·현재 방향·실행 트리거·기준일·출처·무효화 조건·기대 결과. 수익률만으로 매매하지 않도록 EPS 지표와 기준일을 같은 레코드에 고정한다. |
+| 사후 성과평가 | 수동 + 자동 계산 | 실적 발표·청산·정기 리뷰 후 | 실현수익률−벤치마크로 초과수익을 계산하고 가설·타이밍·비중을 각각 1~5점으로 평가한다. 좋은 결과와 좋은 판단을 분리하며 배운 점을 다음 규칙으로 기록한다. |
+| 저장·동기화 | 자동 | 작성·수정·삭제 시 | worker `/api/investment-journal` → R2 `investment-journal.json`, localStorage `alphamap_investment_journal_v1` 오프라인 폴백. 최대 1,000건·2MiB, 인증된 기기에서 공용 저장. |
+
+### 08 모닝 브리핑 (`v-brief` · `brief.js` 자가 마운트)
+
+| 정보명 | 자동/수동 | 주기 | 소스 |
+|---|---|---|---|
+| **텍스트 브리핑** — **9섹션 고정 순서**: ①결론(+근거 불릿) → ②**시장 맥박 리스크 보드** → ③매크로 게이트 3중 AND → ④**한·미 종합지수** → ⑤**보유종목 마감(전체 요약 → 주요 종목만)** → ⑥레이어 갭 표 → ⑦**보유종목 주요 뉴스** → ⑧**다가오는 일정** → ⑨**오늘 리밸런싱 한다면** → 오늘 볼 것 · 액션 아이템 · **스틸맨 반론** | 자동(열 때 생성·R2 날짜 캐시) | 하루 1회분 | `GET /api/brief?part=0` (worker `handleBrief` · `BRIEF_TEXT_SYS`). 입력은 `signals`·`gamma`·`holdings`·`calendar`·`signal_log`·`judgment` **+ `pulse.json`(맥박 축·방향·귀결) · `charts.json`(지수·보유 종가→전일·5거래일 파생) · `earnings.json`(보유 실적 D-N) · `index.html` `TARGETS`(적정밴드)**. `gate[].s`는 충족/미충족만 · `layers[].state`는 오버/언더/적정 · `rebalance.verdict`는 **오늘 실행 가능 여부를 먼저 못박고** rows는 언더웨이트 우선(유한자본 규율) · `actions`는 전부 조건부 AND |
+| ↳ 파생 규칙 | 자동 | 매 생성 | **밴드는 브리핑에 다시 정의하지 않는다** — `briefBands()`가 `index.html` `let TARGETS` 를 **정규식으로** 읽는다(Workers 는 `new Function` 이 막혀 슬랙 러너의 `new Function` 경로를 못 쓴다 · §1 임계 중복 정의 금지). 등락은 `briefSeries()`가 `charts.json` 시계열 끝 2점·6점으로 파생 → **입력에 없으면 빈 칸**(지어내지 않는다). **美 10년물은 지수 표에서 제외** — 수준값(%)만 `us10yPct` 로 넘긴다(등락률의 % 표기가 bp 오독을 부름). 텍스트 회차만 `max_tokens` 6500(대담 파트는 4000 유지 — 100s 한도 여유) |
+| **오늘 브리핑 듣기** (2인 대담 · 약 5분 · **01 시장 모니터링 정리 회차** · 2026-07-27 개편) | 자동(열 때 생성·R2 캐시) | 하루 1회분 | 전반부 = 결론(매크로 게이트 몇/3 한 문장) → ①다가오는 일정(`upcoming`+`upcomingEarnings` D-N 3~5) → ②지표(한·미 지수 종가·전일대비 · 美10Y 수준값 · DXI 메모리 현물 주간) → ③시장 맥박(위험 축 수 먼저·무거운 2~3축) / 후반부 = ④리스크 보드(3축 상태·판정) → ⑤사이클 판별 보드(AI capex 4지표 — 점등·황색만 짚음) → ⑥관련 기사(매크로 축 요약 2~3) → ⑦종목 뉴스(**주요 보유종목만 2~3건·종목당 한 문장 간략** + 움직임 큰 1~2종목 전일대비 한 문장 · 숫자 파일 불변 명시) → **스틸맨**. 입력 확장(`briefSituation`) = `risk.json`·`gates.json`·`dxi.json`·`news.json`·`news_digest.json` → `riskBoard`·`cycleBoard`·`dxi`·`macroTopics`(축명은 `news.json` `macroTopics` 매핑)·`stockNews`(보유 비중 상위·m≥1·최근 10일·종목당 1건·최대 6건). 보유종목 마감 전 종목 낭독·리밸런싱 가이드는 듣기에서 제외(운영자 지시) — **텍스트 회차(p0) 9섹션은 불변**. 「▶ 오늘 브리핑 듣기」 → `part=1` 먼저 재생 · `part=2`는 재생 중 수신·이어붙임(§ 외부 채널 동일 엔드포인트 재사용). 낭독 = **① 고품질 Gemini 오디오 우선**(`GET /api/brief-audio` · 워커가 대본을 「The Energetic Co-Host」 톤 WAV 로 구움 · R2 캐시 · 말풍선 하이라이트는 글자수 비례 근사) **② 실패 시 브라우저 TTS 2보이스로 자동 폴백**. 말풍선 클릭 = 그 대목부터 재생 · 배속·음소거 |
+| ↳ 오디오 굽기 방식(2026-07-20 수정) | 자동 | 최초 재생 시 | `handleBriefAudio` 는 한 파트를 **단발 TTS 로 굽지 않는다** — `BRIEF_TTS_CHUNK_CHARS`(420자·각 청크에 두 화자 포함) 단위로 쪼개 청크마다 스타일 지시를 다시 실어 `Promise.all` 병렬 생성 → 청크별 RMS 를 최대 청크에 맞춰 정규화(피크 리미팅) → `BRIEF_TTS_GAP_MS`(140ms) 무음으로 이어붙여 WAV 서빙. **뒤로 갈수록 성량이 줄고 속도가 빨라지던 프로소디 드리프트 대응**(§9). 총 문자 수 동일 → TTS 과금 변동 없음 |
+| **지난 호 (저장분 · 회차)** | 자동 | 상시 | `GET /api/briefs` → R2 `brief_` 키에서 날짜 추출 + 각 날짜 `p0`의 `headline`·`no` 를 읽어 **「제N호 · 날짜 · 제목」 한 줄씩**(뉴스레터 「지난 호」 형식 · 최신순 · 최근 60호까지 제목 조회). **회차 번호 `no`는 p0 생성 시점에 박아 저장**(기존 텍스트 회차 수 +1)하므로 이후 목록이 바뀌어도 불변이고, 옛 회차는 날짜 오름차순 순번으로 폴백한다. 행 클릭 = 그 호 열람(`?d=YYYY-MM-DD`). **보관 자체가 캐시** — 따로 커밋하지 않는다 |
+| ↳ **매일성 규칙(2026-07-27)** | 자동 | 매 생성 | 브리핑은 매일 나간다 — ①뉴스·신호는 **최근 1~2일 발생분만**(`recentSignals` 2일 필터 · `stockNews` 컷 10→2일 · `macroNews`=토픽 레이더 MACRO 기사 2일 신규 신설) ②직전 회차 반복 금지 — `prevBrief`(어제~3일 전 p0 캐시 최대 2회분 요지) 입력 신설, LLM은 변화분만 ③신규 없으면 '새 소식 없음' 한 문장 ④지표 확장 — F&G 수치 명시 + `oilWti`·`gasolineRb`(`fetch-prices.mjs` 후보에 `wti` CL=F·`gasoline` RB=F 합류 — 다음 가격 크론부터 채워지며 그 전엔 빈 칸 규율) ⑤대담 ⑥ = '관련 기사'→'토픽 레이더' |
+| ↳ 「다시 만들기」 | 수동 | 필요 시 | `part=0&regen=1` — 그날치 **텍스트(p0)만** 새 라이브 값으로 덮어쓴다(대담·오디오는 안 건드림) |
+| ↳ 「대담 다시 굽기」 | 수동 | 필요 시 | 대담 대본(`part=1·2&regen=1`)과 오디오(`brief-audio?...&regen=1`)를 강제 재생성 후 재생. 대담·오디오는 그날 최초 열람 때 한 번만 구워져 캐시되고 이를 다시 굽는 UI 가 없었다 → **worker 프롬프트 변경 배포 후 그날 캐시를 새 순서로 다시 굽는 용도.** Claude 대담+Gemini TTS 비용이 들어 텍스트 「다시 만들기」와 분리(별도 버튼) |
+
+> **저장 시점 = 첫 열람 또는 크론 워밍(가동 중).** 06 회차는 첫 열람 때 워커가 생성해 저장하는데, 아침에 아무도 안 열면 그날 회차가 빈다(「지난 호」 결번). 이를 막으려고 **`daily-brief-slack.mjs`(07:45 KST 크론)가 직접 게이트에 로그인(`/__auth`)해 `/api/brief?part=0` 을 선호출**, 오늘 회차를 미리 굽는다(`warmBrief()`). 리포 시크릿 **`SITE_PASSWORD`** + `daily-brief-slack.yml` run 스텝 `env:` 전달 **완료(2026-07-20)** → 워밍 가동 중이다. 워크플로에 **`BRIEF_WARM_PODCAST: "1"`** 이 있어 텍스트 p0 뿐 아니라 **팟캐스트 p1·p2 대본까지 사전 생성**된다(첫 재생 지연 제거). 시크릿·env 가 없으면 워밍은 조용히 건너뛰고 슬랙 본문·링크는 그대로 나간다.
+> **narrative ≠ numbers** — 브리핑은 라이브 값을 읽어 말할 뿐 `gamma`·`judgment`·`holdings`·`earnings` 어느 것도 쓰지 않는다.
+
+### 09 메모 (`v-memo`)
+
+| 정보명 | 자동/수동 | 주기 | 소스 |
+|---|---|---|---|
+| 자유 메모 (순간 아이디어·캡처) | 수동(운영자 입력) | 필요 시 | worker `/api/memo`(**R2** · 비밀번호 게이트 뒤) + localStorage 오프라인 캐시(`alphamap_notes_v1`). 노트 스키마 `{id,t,title,body,tags,imgs,imgw,imgmeta,pinned}` — 07 뷰 composer에서 작성·디바운스 PUT. **세션(Claude)은 게이트 밖·네트워크 제한이라 직접 적재 불가 — 운영자 붙여넣기 경로만.** ※ 구 기재 `reviews.json`(주간 점검 기록)은 07 메모 소스가 아니라 비렌더 뷰 `#v-port`의 `#reviewLog` 잔존분(2026-07-27 정정) |
+
+### 외부 채널 — 슬랙 데일리 브리핑 (6탭 밖 · 사이트 미노출)
+
+| 정보명 | 자동/수동 | 주기 | 소스 |
+|---|---|---|---|
+| **슬랙 데일리 브리핑(뉴스레터 본문)** | 자동(cron) | **07:45 KST 월~금**(US 마감 후) | `daily-brief-slack.yml` · `scripts/daily-brief-slack.mjs` → `chat.postMessage`. 본문 = **①매크로 게이트 보드(3중 AND · 축별 현재값·트립 임계·점등)+등급 판정 한 줄 ②레이어 갭 상위 4(비중 vs 적정밴드·오버/언더 %p) ③지표(나스닥·美 10Y·WTI·코스피·F&G) ④가전 뉴스 5건 ⑤듣기·06 링크**. **임계·밴드·판정식은 러너가 `index.html` 에서 통째로 추출해 쓴다**(`const TH` · `function evalGate` · `let TARGETS` 정규식 → `new Function`) — 슬랙 스크립트에 임계를 **다시 정의하지 않는다**(§1). 파싱 실패 시 판정 블록만 조용히 생략하고 지표·뉴스·링크는 그대로 나간다. CNN F&G는 로컬 `signals.json`(라이브 엔드포인트가 러너 IP를 418 차단) |
+| **데일리 브리핑 팟캐스트 (2인 대담 · 약 5분)**(2026-07-19 신설) | 자동(열 때 생성·R2 날짜 캐시) | 하루 1회분(첫 접속 시 생성) | 단독 페이지 **`brief.html`** → `GET /api/brief?part=1\|2` (worker `handleBrief`). 라이브 `signals`·`gamma`·`holdings`·`calendar`·`signal_log`·`judgment`를 워커가 읽어 **진행자(`host`)+애널리스트(`ana`) 2인 대담 대본**(합 18~22발언·군더더기 제거·정보 밀도 유지)을 Claude(opus-4-8)로 생성 → R2 `brief_{YYYY-MM-DD}_p{1,2}.json` 캐시. **파트 분할 이유** = 비스트리밍 1회로 뽑으면 `api.anthropic.com` ~100s 한도에 근접 → part1(맥박·게이트·지수) 먼저 반환해 재생을 시작하고 part2(보유 마감·뉴스·리밸런싱·볼 것·**스틸맨**)는 재생 중 뒤에서 받아 이어붙인다. **대본 = 01 시장 모니터링 정리(2026-07-27 개편)** — 전반부(결론·일정·지표·맥박) / 후반부(리스크 보드·사이클 보드·관련 기사·종목 뉴스[주요 보유종목만 간략]·스틸맨). 텍스트 회차(`part=0`) 9섹션과는 별개 구성이다(§3 06 듣기 행). 낭독 = **① 고품질 Gemini 오디오**(`GET /api/brief-audio?part=1\|2` · worker `handleBriefAudio` — 대본 R2 캐시를 `gemini-3.1-flash-tts-preview` 멀티스피커 「The Energetic Co-Host」 톤·보이스 Puck/Kore 로 구워 **WAV** 로 서빙 · R2 `briefaud_{날짜}_p{n}.wav` 캐시 · 첫 재생 1회만 굽고 이후 즉시 · 모델·보이스는 워커 env `GEMINI_TTS_MODEL`·`GEMINI_VOICE_HOST/ANA` 오버라이드) **② 실패 시 브라우저 TTS 폴백**(ko-KR 품질 점수순 2인 · 진행자 rate 1.12·pitch 1.14 / 애널리스트 rate 1.06·pitch 1.0). `?d=YYYY-MM-DD` 과거분·`?regen=1` 재생성 |
+| ↳ **오디오(MP3) 슬랙 첨부판 = 미가동(제안본)** | — | — | `scripts/proposed-workflows/daily-brief-podcast-audio.{yml,md}` + `brief-tts.mjs`. **위 `/api/brief-audio` 는 사이트 안 재생용**(워커 키·R2, 선행 없음). 이 제안본은 그걸 **슬랙 DM 에 파일로 밀어넣는** 별도 경로 — 잠금화면 재생용이며 **선행 3건(슬랙 `files:write`·`SITE_PASSWORD`·Actions `GEMINI_API_KEY`) 전부 운영자 수동**(§8) |
+
+> **규율:** 브리핑 대본은 **narrative 층**이다 — 라이브 게이트 값을 *읽어서 말할* 뿐, `gamma`·`judgment`·`holdings`·`earnings` 어느 것도 쓰지 않는다. 대본 프롬프트에 §1 불변 규율(결론 먼저·AND 게이트·narrative≠numbers·두 시계 분리·강등 트리거=가격 vs EPS 리비전 속도)이 시스템 프롬프트로 박혀 있다.
+
+---
+
+## 4. 케이던스 — 언제 무엇을
+
+| 주기 | 자동 | 수동(운영자/Claude) |
+|---|---|---|
+| 일별 (06:12·18:12) | 뉴스 수집·스크리닝·요약·digest | signal_log 인테이크(narrative) |
+| 일별 (**06:05·06:35·16:52 KST 예약**) | 시세·차트·γ·E군집 업데이트 (`update-prices.yml`) → 검증·자동 PR·main 병합 후 라이브 | — |
+| 일별 (06:47) | 매크로 신호 업데이트 (`update-signals.yml`) | — |
+| 세션마다 | — | **관점 트리아지(§0-5)** — 지지↑ 관점 `until`·`review` 대조 → 발동/만료/유지 |
+| 주간 (금요일) | — | **DXI 현물가 갱신**(`dxi.json` · 스케줄 태스크) · holdings 동기화 · reviews.json 주간 리뷰 append |
+| 실적 시즌 | — | earnings.json 갱신 · γ·stage 재채점 |
+| 수시 | — | judgment override · signal_log 확정 사건 |
+
+---
+
+## 5. D-N 플레이북
+
+- **D-5 이전**: 실적 추정(컨센·가이던스 갭) 점검 · earnings.json 확인
+- **D-1**: `judgment` wk 중립화(신규 방향성 포지션 금지)
+- **D-Day 장 마감 후**: 실적 수치 반영 — 비트/미스 여부 → earnings.json 갱신 → γ·stage 재채점 판단
+- **D+1**: signal_log에 실적 인테이크(확정 사건이면 숫자 파일 변경 트리거 검토)
+
+---
+
+## 6. 파이프라인 상세
+
+### 6-1. 자동 워크플로 (`.github/workflows/`)
+
+| 워크플로 | 트리거 | 주요 출력 |
+|---|---|---|
+| `update-prices.yml` | cron **06:05·06:35·16:52 KST 예약**(UTC `5 21`·`35 21`·`52 7`; Actions 큐 지연 가능) → 데이터/리비전 출처 검증 → 변경 시 `claude/automation-update-prices-*` PR → PR Gate 병합 | `prices.json` · `charts.json` · `gamma.json` · `cycle.json`(E군집) · `holdings.json` · `raw/revisions` |
+| `update-signals.yml` | cron 06:47 KST (1일 1회 · 시세와 push 충돌 분산) | `signals.json` |
+| `update-news.yml` | cron 06:12·18:12 세션(각 +30분·+1h 백업 다중 트리거 + 6h 가드) | `news.json` · `news_digest.json` · `news_archive.json` |
+| `sync-holdings.yml` | `repository_dispatch` (Drive Apps Script) | `holdings.json` |
+| `apply-patch.yml` | push to main (`patches/*.b64`) + `workflow_dispatch` | `index.html`·JSON 패치 적용 — **⛔ 현재 main 룰셋에 막혀 미동작(§8)** |
+| `deploy.yml` | push to main (paths 필터) | Cloudflare Workers 배포 |
+| `claude-pr-gate.yml` | PR open/sync | 유효성 검사 · auto-merge |
+
+### 6-2. PR 워크플로 (코드 변경)
+
+1. `claude/*` 브랜치 생성
+2. 커밋 push
+3. `base: main` PR 생성
+4. `claude-pr-gate.yml` validate 통과
+5. **auto-merge (squash)** — 승인 대기 없이 한 턴에 머지까지
+6. 머지 여부·squash SHA 명시 보고 ('queued'로 종료 금지)
+
+### 6-3. index.html 수정 규칙
+
+- **전체 재작성 금지** — 앵커 기준 부분 치환
+- 4KB+ b64 페이로드 → `patches/*.b64` 파이프라인(미니파이 + `base64 -w0` + **커밋SHA핀 raw 디코드 md5 왕복**)
+- **크기 일치 ≠ 무결성 보증** — 반드시 md5 왕복 검증
+- `.github/workflows/` 편집 → 403 → 운영자 수동
+
+### 6-4. 관련 기사 정리 규칙 (signal_log 인테이크)
+
+기사 정리 시 아래 규칙을 항상 적용한다:
+1. **동일 이벤트** (예: 중앙은행 결정) → items[] 1개로 merge, srcs[]에 원본 기사 전부 나열
+2. **같은 테마 내 다른 각도** (예: capex 규모 vs capex 리스크) → 별도 items[] 엔트리
+3. **섹션 귀속 오류** (예: AI캐펙스 섹션에 메모리 기사) → 올바른 레이어 섹션으로 이관, items[] tag에 이관 출처 명기
+4. **섹션명-내용 불일치** (예: '미국 CPI' 섹션에 한은 기사 다수) → rename 플래그, 신규 섹션 분리 제안
+5. **모든 뉴스 기사 = narrative** → signal_log only, 숫자 파일(earnings/judgment/holdings) 불변
+6. **배치 로그 시** date = 배치 첫 기사 날짜, source에 날짜 범위 명기, at = 로그 시점
+
+### 6-5. signal_log 인테이크 포맷
+
+```json
+{
+  "date": "YYYY-MM-DD",
+  "at": "YYYY-MM-DDTHH:MM+09:00",
+  "source": "설명 — narrative≠numbers",
+  "srcs": [{"label": "기사 제목 (날짜)"}],
+  "items": [{"tag": "레이어·토픽", "layer": "L?", "col": "#색상", "html": "<b>요약</b> 내용"}]
+}
+```
+
+### 6-6. LLM 호출 비용 규율 (2026-07-20 신설)
+
+**원칙 — 결정론 우선 · 복잡 판단은 Opus · 고출력 생성은 Sonnet · 단순 추출은 Haiku · 검색은 상한.**
+
+| # | 규율 | 내용 |
+|---|---|---|
+| ① | 결정론 우선 | 시세·변동성·수익률·게이트 임계는 **무료 피드 직산**(Yahoo 일봉·네이버·CNN F&G). LLM 은 심볼 해석 실패 등 **폴백 경로에서만** |
+| ② | 모델 계층 | **복잡 판단·토론**(원탁 토론, 1인 심층 자문, 베어 케이스) = `claude-opus-4-8` · **고출력 생성·검색형 추론·요약·수치 회수**(브리핑 p0·p1·p2, 인사이트 추출·사이트 반영 패치, 관점 요약 2종, σ·μ 폴백) = `claude-sonnet-5` · **정형 필드 추출**(캘린더 이벤트 파서) = `claude-haiku-4-5-20251001` |
+| ③ | 검색 상한 | `web_search` 툴에는 **반드시 `max_uses: 3`**. 검색 턴마다 전체 컨텍스트가 재전송돼 입력이 2차식으로 증가한다 |
+| ④ | 출력 상한 | `max_tokens` 는 실제 필요분까지만 — 출력 토큰이 생성비의 대부분이다 |
+
+**실측 근거(2026-07-19 콘솔).** `da-market-insight` 3.72M 토큰 = $1.11(실효 **$0.30/M** · Sonnet+캐시 히트) vs `stock price` 0.25M 토큰 = $2.23(실효 **$8.93/M** · Opus+무제한 검색 7회). **30배 차이의 원인은 토큰량이 아니라 모델·검색 정책이었다.**
+
+**적용 지점(worker.js).** `handleEstimate` = `localVolDrift()` 결정론 경로 우선(비용 0·검색 0회) → 실패 시에만 Sonnet+`max_uses:3` 폴백 · `anthropicText()` = Sonnet+검색 3회 상한(인사이트 추출·사이트 반영 패치) · 브리핑 p0·p1·p2 = Sonnet · 관점 요약 2종(`handleCouncilIntake`·`handleCouncilSummary`) = Sonnet · 캘린더 이벤트 파서 = Haiku.
+
+**미적용(후속).** `cache_control` 프롬프트 캐싱 — 워커 시스템 프롬프트가 짧아 최소 캐시 단위(1024토큰) 미달. `BRIEF_SYS_BASE` 계열이 커지면 재검토.
+
+### 6-7. 정적 자산 캐시 규칙 (2026-08-09 신설)
+
+**배포 성공 ≠ 화면 반영.** Workers Assets 기본 캐시 헤더 탓에 새 배포가 엣지·브라우저에 안 잡히는 사고가 HTML → `.json` → `.js` 순으로 세 번 반복됐다. worker 의 `no-store` 덮개는 이제 **HTML · `.json` · `.js`/`.css` 전부**를 덮는다(`worker.js` ASSETS 폴스루 분기 · `content-type` 또는 확장자 매칭).
+
+- **`.js` 수정은 캐시 무효화까지가 한 벌이다.** 스크립트만 고치고 배포하면 옛 파일을 쥔 클라이언트는 강력 새로고침으로도 안 바뀔 수 있다(2026-08-09 02 캡처 붙여넣기 사례 — 같은 날 세 번 고쳤으나 화면 무변).
+- **`ASSET_VER`(worker 전역) = `insight.js` 버전 핀 단일 SoT.** HTMLRewriter 가 `script[src^="/insight.js"]` 의 `src` 를 `/insight.js?v=<ASSET_VER>` 로 갱신한다 → **`index.html` 무편집**(§6-3 대용량 패치 회피). `insight.js` 동작을 바꾸면 `ASSET_VER` 를 같이 올린다.
+- worker 가 주입하는 다른 스크립트(`aisd.js`·`council-material.js` 등)는 주입 문자열 자체에 `?v=` 를 달아 왔다 — 같은 규약을 `index.html` 에 정적으로 박힌 태그까지 넓힌 것.
+
+---
+
+### 6-8. 투자매력도 V4 운영 (2026-08-16 개정)
+
+상세 산식은 [투자매력도 V4 산출 기준](docs/INVESTMENT_ATTRACTIVENESS_SCORE.md)을 단일 기준 문서로 사용한다.
+
+**데이터 흐름**
+
+1. `fetch-revision-benchmark.mjs`: Nasdaq-100 전체의 EPS 리비전·EPS 성장·Forward P/E·GARP·평점 분포와 순위 백분위 생성
+2. `build-investment-scores.mjs`: `gamma.json`과 벤치마크로 V3·V4 전 종목 계산
+3. `scores.json`: V3·V4·점수차·외생 데이터 점수·내부 판단 보정·커버리지 저장
+4. 화면: 클라이언트 재계산 없이 `scores.json`의 V4 표시
+5. 실제 비중조절: 보유비중·집중도·중복 노출·매크로 게이트를 별도 적용
+
+**정상 판정**
+
+- 벤치마크 스키마 `revision-benchmark-v2`
+- 점수 스키마 `investment-scores-v4`, `displayedModel=v4`
+- 각 벤치마크 유효표본 50개 이상
+- `distributions`와 `ranks` 존재
+- 모든 점수 행에 V3·V4·delta 존재
+- V4 데이터 커버리지 55% 미만 종목은 점수 미표시
+- 화면·`scores.json`·배포 SHA 일치
+
+**수동 검증**
+
+```bash
+node scripts/fetch-revision-benchmark.mjs
+node scripts/build-investment-scores.mjs
+node --check scripts/fetch-revision-benchmark.mjs
+node --check scripts/build-investment-scores.mjs
+node -e "const s=require('./scores.json'); if(s.schema!=='investment-scores-v4') throw Error('schema'); console.table(Object.values(s.rows).map(x=>({ticker:x.ticker,v3:x.v3.score,v4:x.v4.score,delta:x.delta,coverage:x.v4.coverage})))"
+```
+
+**장애 대응**
+
+| 증상 | 처리 |
+|---|---|
+| 벤치마크 수집 실패·표본 미달 | 워크플로 실패. 이전 기준 조용한 재사용 금지 |
+| `scores.json` 누락·스키마 불일치 | 화면에 ‘산출 실패’ 표시, 점수 셀 부분 렌더 금지 |
+| V3·V4 차이 급증 | 원자료·벤치마크·모델 효과를 분리해 PR에 기록 |
+| 특정 업종 점수 편향 | Nasdaq-100 분포와 업종별 가격배수 적합성 검토 |
+| 화면과 스냅샷 불일치 | 캐시·배포 SHA·기준일 확인 |
+| 자동 PR 미병합 | Claude PR Gate 결과와 보호규칙 확인 후 원인 수정 |
+
+**변경 통제**
+
+- 가중치·순위법·보정·라벨 변경은 산출 코드, UI, 기준 문서, OPS, 변경 이력을 같은 PR에서 수정한다.
+- 기존 모델을 즉시 삭제하지 않고 `scores.json`에 비교 모델로 보존한다.
+- 외생 데이터와 내부 판단값을 한 항목에 혼합하지 않는다.
+- 실제 비중조절 우선순위를 제로베이스 투자매력도와 혼동하지 않는다.
+
+## 7. 자기갱신 매핑표 (무엇이 바뀌면 어디를 고치나)
+
+| 변경 내용 | STYLE_GUIDE | OPS |
+|---|---|---|
+| 디자인 토큰·컴포넌트·레이아웃 | ✅ `TOKENS:BEGIN~END` 자동 생성 구역 제외 | — |
+| 신규 메뉴·뷰 추가 | ✅ §6·§7 레퍼런스 구현 체크리스트 | ✅ §3 정보 인벤토리 |
+| 정보 소스·주기·자동/수동 변경 | — | ✅ §3 |
+| 워크플로·파이프라인·PR 규칙 | — | ✅ §6 |
+| 불변 규율 변경 | — | ✅ §1 |
+| 알려진 이슈·버그 | — | ✅ §8 |
+| AXIS_RULES 축 추가/수정 | — | ✅ §3 축 정규화 설명 갱신 |
+| 세션 도구 선택·데이터 출처(무엇을 JSON 에서 읽고 무엇만 검색하나) | — | ✅ §1 규율 + §3-0 표 |
+
+---
+
+## 8. 알려진 이슈 · 미완료 항목
+
+- **문서 절단이 CI에서 안 걸린다.** `claude-pr-gate.yml`은 `index.html`만 크기 하한(150KB)을 검사하고 `OPS.md`·`STYLE_GUIDE.md`에는 가드가 없다 → 2026-07-31~08-03 나흘간 SoT 소실이 침묵으로 통과했다. 두 문서 크기 하한(각 50KB) 검사 추가 필요 — 워크플로 편집은 403이라 운영자 수동.
+- ~~**변경 이력 자동 합산(`loadAutoHistory()`)이 0건 기여**~~ **해소(2026-08-13)**: `split('\n')` 정정 + `chore|ci|build|docs|test|style|refactor|perf|revert` 및 머지·리버트 커밋 배제(`AUTO_SKIP`/`AUTO_NOISE`) + conventional 프리픽스 제거(`autoTitle()`) + **`CURATED_MAX` 게이트**(수기 정본 최신 날짜 **이후**만 자동 보충 — 안 걸면 수기 1건과 그 변경의 커밋들이 같은 날짜에 중복 표시된다) + fetch 실패를 `console.warn` 으로 노출. 이제 **수기 등록이 정본, 자동 합산은 누락 안전망**이다. 아래는 해소 전 원인 기록.
+- **(해소 전 기록) 변경 이력 자동 합산 0건 기여의 원인.** §3 인벤토리와 아래 2026-08-02 이력은 "main 커밋 이력을 GitHub API로 자동 합산해 별도 수기 등록 없이 표시"한다고 적었으나, 실측(2026-08-13) 팝업 「총 56건」 = `MKT_CHANGELOG` 정적 배열 길이와 정확히 일치 → 자동 합산분 0. `fetch(...).then(r=>r.ok?r.json():[])`가 실패를 빈 배열로 삼켜 조용히 무시된다(`.catch()`도 무음). 이 때문에 #955·#959 같은 머지가 이력에 자동 등록되지 않았다. 추가로 `changelog.js:77`의 `split('\\n')`은 JS 문자열 리터럴상 **역슬래시+n 두 글자**라 실제 개행으로 쪼개지지 않는다 → 자동 합산이 되살아나면 커밋 **본문 전체**가 한 항목으로 렌더된다. 되살릴 경우 `chore: update stock prices` 류 크론 커밋까지 유입되어 §3의 "**사용자 향 변경만** 기록" 규율과 충돌하므로, 제목만 파싱(`split('\n')[0]`) + `chore:` 프리픽스 배제 필터가 함께 필요. **결정 전까지 신규 항목은 `MKT_CHANGELOG` 맨 위 수기 등록이 유일한 경로.**
+- **⛔ `apply-patch.yml` 이 main 룰셋에 막혀 미동작 — b64 파이프라인 정지(2026-08-13 실측).** main 룰셋의 `Changes must be made through a pull request` 로 워크플로의 `git push origin HEAD:main` 이 `GH013` 거부(런 31704911169 · 과거 동일 사유 31289908831). **트리거는 정상, push 에서 죽는다** → `patches/*.b64` 가 머지돼도 본문 미반영. 수동 `workflow_dispatch` 도 같은 지점에서 실패(런 31705794104 확인 후 취소)하므로 **재실행은 해법이 아니다.** 조치 선택지·적용 절차·검증 항목은 `scripts/proposed-workflows/apply-patch-pr.md`, 교체본은 같은 폴더 `apply-patch-pr.yml`(PR 경로 전환 · `wrangler deploy` 스텝 제거 — 머지 push 가 `deploy.yml` 을 트리거). **A안=룰셋 bypass 에 GitHub Actions 추가(워크플로 무수정 · main 직접 push 쓰는 다른 워크플로도 일괄 복구) / B안=워크플로 교체(룰셋 무약화 · 이 워크플로만 해소).** 둘 다 `.github/workflows/` 403 → 운영자 수동. ※ main 직접 push 의존 워크플로 전수 조사는 미실시.
+- **b64 패치 md5 왕복 검증 누락 시 본문 절단 위험.** #567처럼 문서에 b64 패치를 적용할 때 커밋SHA핀 raw 디코드 md5 대조를 건너뛰면 절단을 탐지하지 못한다. 문서 대상 패치도 `index.html`과 동일하게 왕복 검증 의무.
+- ~~E-군집 자동화~~ **해소(확인 2026-07-27)**: `update-prices.yml`에 `derive-cycle-e.mjs` 스텝 포함·크론 편승 — 수동 dispatch 불요
+- ~~Drive→holdings 동기화 3주째 무갱신~~ **해소(2026-08-08)**: `sync-holdings.mjs` 평단(avg) 추출 가드가 qty·px·cur 중 하나라도 0이면 무조건 throw하도록 짜여 있어, 매도(청산)된 종목(4칸 전부 0)도 스키마 드리프트로 오판했다. 버티브(VRT)가 xlsx 최신 열에서 전부 공란이 되며 `sync-holdings.yml` 24~27회 연속 실패(Actions 확인) → `holdings.json`이 7/18부터 `qtyAsOf`·`fx.asOf` 기준 7/11에 고정된 채 시가평가(`asOf`)만 매일 갱신되는 착시 스테일 상태였다. 4칸 전부 0=매도로 인정하고 avg 미기입+skip, 일부만 빈 경우(진짜 드리프트)는 throw 유지. SimpleorNothing 지시: "없으면 보유하지 않는 것이니 그에 맞춰 처리".
+- **`update-calendar.yml` 미등록(수동)**: `derive-calendar.mjs`(01 다가오는 일정 프루닝·asOf) 크론 미등록 — App workflow write 부재(403). 런타임 `renderCalNow()`가 오늘 기준 재계산하므로 표시는 신선(파일 `asOf`만 수동 refresh까지 스테일 가능). 일반 신규 이벤트는 `calendar.json` 수기. 단, 미국 JOLTS는 `.github/workflows/update-jolts-calendar.yml`이 매월 15일 BLS 공식 발표표를 읽어 ET→KST 변환 후 자동 동기화한다. BLS가 GitHub 호스티드 러너 IP에 403을 반환할 때는 동일 BLS 원문을 텍스트로 중계하는 읽기 전용 경로를 1회 사용하며, 어느 경로든 JOLTS 일정표 파싱에 성공해야만 파일을 변경한다.
+- **저녁 시세 크론 15:40 변경안은 미적용 상태.** 현행 라이브 예약은 `5 21`·`35 21`·`52 7` = **06:05·06:35·16:52 KST 3회**다. Actions 큐 지연 때문에 예약시각=실제 시작/반영시각은 아니며, 15:40 조기 예약안은 별도 운영 변경 후보로만 유지한다. 2026-07-27 지시로 저녁 예약을 `40 6`(15:40 KST·한국 장마감 15:30 직후)로 변경 → 완료 ~16:40~17:10 예상. `.github/workflows/` 403 → **운영자 수동 교체 필요**(적용 전까지 라이브는 16:52 예약). 지연 자체는 계속 모니터링.
+- **관점 라이프사이클 LLM 자동 제안 미구현(부분 완화)**: 03 「🕔 라이프사이클」 편집은 **모달 + 필드별 「보기 칩」 선택식**으로, 클라 템플릿(게이트 어휘·8레이어·관점 티커·thesis-break 패턴)이 `hyp`·`trig`·`until` 후보와 `review` 날짜 프리셋을 즉시 제시한다(수동 4연타 부담 해소·오프라인·기존 채택분 전부). 다만 이는 **템플릿**이라 관점 고유 맥락은 못 맞춘다 — `/api/insight`(worker) 추출 시 `hyp`·`until`을 LLM으로 관점별 맞춤 자동 채우는 건 여전히 후속 PR(③). 신규 채택은 `review`=+14d 자동 유지.
+- **DXI 자동 피드 없음(2026-07-17)**: DXI 지수는 포털 게이트라 무료 피드 없음 → 매주 금요일 스케줄이 TrendForce 현물가로 `dxi.json` append.
+- **브리핑 팟캐스트 오디오판(A안) 대기(2026-07-19)**: MP3를 슬랙에 직접 첨부하려면 ①슬랙 봇 **`files:write`** 스코프 추가 후 재설치 ②리포 시크릿 **`SITE_PASSWORD`** ③리포 시크릿 **`GEMINI_API_KEY`** ④`.github/workflows/` 배치 — **전부 운영자 수동**(App workflows write 403). 제안본은 `scripts/proposed-workflows/daily-brief-podcast-audio.md` 체크리스트. 그 전까지는 링크형(B안)만 가동.
+- **모닝 브리핑 크론 워밍 — 가동(2026-07-20 해소)**: `daily-brief-slack.mjs` `warmBrief()`(게이트 `/__auth` 로그인 → `/api/brief?part=0` 선호출) 배선 + 리포 시크릿 `SITE_PASSWORD` + `daily-brief-slack.yml` run 스텝 `env:` 전달까지 **3건 모두 완료** → 07:45 KST 크론이 오늘 회차를 미리 굽는다(「지난 호」 결번 방지). 워크플로에 `BRIEF_WARM_PODCAST: "1"` 도 들어가 **팟캐스트 p1·p2 대본까지 사전 생성**된다(첫 재생 지연 제거·생성비는 매일 발생하나 5분 압축분). 로그인 실패·타임아웃이면 `warmBrief()`는 조용히 건너뛰고 슬랙 본문·링크는 그대로 나간다.
+- 2026-08-30 · **06 모닝 브리핑 정적 탭 진입 복구.** `index.html`에 `data-v="brief"` 탭이 이미 존재하면 `brief.js mount()`의 탭 생성 분기가 건너뛰어져 진입 리스너도 붙지 않던 것이 원인 — 화면에는 자가 마운트된 뷰의 초기 「불러오는 중 …」만 남고 `/api/brief`·`/api/briefs` 호출이 시작되지 않았다. 리스너를 탭 생성 분기 밖에서 멱등 연결하고, 재진입마다 저장본 목록을 다시 조회해 R2 지연 안내의 「메뉴 다시 열기」가 실제 복구로 이어지게 했다. 정적 탭 DOM 회귀 테스트를 PR 게이트에 추가했다. `node --check brief.js`·정적 탭 스모크·문서 정합 검사 통과 예정. 숫자·판단 파일 불변.
+- **브리핑 링크는 비밀번호 게이트 뒤**: 슬랙에서 처음 열면 워커 로그인 화면이 뜬다(기기·인앱 브라우저별 1회). 쿠키 `Max-Age` 만료 시 재로그인.
+- `prices.json.warn = lazr chart 43.47 vs quote 41.35` — LAZR 비보유·무시 가능
+
+---
+
+- 2026-07-27 19:30 · **02 aisd ③ 컴퓨팅 4사 합산 차트 인터랙티브 재구현.** 스트레치 SVG 제거 → CSS 픽셀+DPR Canvas, ResizeObserver, 호버·탭 툴팁, CAPEX/매출/FCF/영업이익 토글. `worker.js` aisd 주입 URL 캐시 버전 갱신. 데이터·단일 $축·narrative≠numbers 불변. STYLE_GUIDE §7 체크리스트·§9 동반.
+- 2026-07-27 20:50 · **02 aisd ③ FCF·영업이익 수치·이익률 추가.** 온차트 및 툴팁에 FCF·영업이익 `$B (매출 대비 %)` 표시. 이익률은 같은 연도 4사 합산 매출로 계산·정수 반올림, 데이터·판정 불변. STYLE_GUIDE 동반.
+
+- 2026-07-27 21:00 · **02 aisd ③ 시리즈 토글 순서 변경.** `매출 → CAPEX → 영업이익 → FCF`; 렌더·계산·판정 불변. STYLE_GUIDE 동반.
+
+- 2026-07-28 15:28 · **전체 캘린더 동일 날짜 그룹 표시 간소화.** 같은 `d`의 이벤트가 연속될 때 `renderCalFull()`이 첫 행의 날짜·D-N만 노출하고 후속 행은 날짜 칸을 비워 반복을 제거. 고정 날짜 열 폭과 이벤트 본문·KST 시간·정렬·데이터는 유지. STYLE_GUIDE 동반.
+- 2026-07-28 13:47 · **전체 캘린더 2차 가독성 수정 — 동적 행 flex 전환.** #513 배포 성공·HTML/JSON no-store 상태에서도 실제 Chromium 화면에서 `.cal-body`가 1글자 폭으로 남는 것을 확인. `#calFull`에 한정해 grid 계산을 제거하고 날짜·분류점 고정 폭 + 본문 잔여 폭 flex로 전환, 760px/640px 분기 명시. 일정 데이터·정적 타임라인·판정 불변. STYLE_GUIDE 동반.
+- 2026-07-28 12:58 · **전체 캘린더 본문 열 붕괴 수정 + 빅테크 실적 일정 3건 추가.** `#calFull`·`.cal-row` 전체 폭과 grid 본문 `minmax(0,1fr)`·`.cal-body min-width:0`을 명시해 760px 전후 화면에서 제목·메타가 한 글자씩 꺾이던 문제 해결. Meta Q2 7/29 13:30 PT→7/30 05:30 KST, Amazon Q2·Apple FY26 Q3 7/30 14:00 PT→7/31 06:00 KST를 각사 IR 확정값으로 `calendar.json`·정적 타임라인에 동기화. narrative≠numbers·토큰 불변. STYLE_GUIDE 동반.
+- 2026-07-28 08:50 · **02 aisd ③ 차트 라벨 자동 충돌 방지.** 고정 오프셋을 연도별 충돌 해소 큐로 교체해 모든 표시 수치에 최소 22px 수직 간격을 보장하고, 이동 라벨에 연결선을 추가. 기본 420px·모바일 340px 전 연도 좌표 스모크 통과. `worker.js` 주입 캐시 버전 갱신. 재무 데이터·판정·Canvas 실제 크기·인터랙션 불변. STYLE_GUIDE 동반.
+- 2026-07-27 23:57 · **02 aisd ③ 온차트 수치 가독성 개선.** 모든 수치 라벨에 패널색 배경·굵은 글씨를 적용하고 영업이익/FCF 라벨을 상·하 전용 레인으로 분리해 2023~26 근접 값 겹침을 제거. 데이터·판정·Canvas 실제 크기·툴팁·토글·리사이즈 동작 불변. STYLE_GUIDE 동반.
+- 2026-07-27 23:40 · **02 aisd ③ 4사 재무 숫자·성장률 재산정.** 오류가 있던 입력표를 그대로 사용하지 않고 2023~25 공시 실적, 26E 컨센서스/가이던스, 27~28E 저신뢰 전망으로 층위를 분리. 매출 성장률 24A +14%·25A +15%·26E +19%·27E +17%·28E +13%; CAPEX·FCF·영업이익·회사별 상세·설명·출처 동기화. narrative≠numbers 규율에 따라 과거 signal_log 캡처는 불변. STYLE_GUIDE 동반.
+
+## 9. 갱신 이력
+
+- 2026-08-30 · **05 「점수 기여도」→「손익비(R/R)」 열 교체(외부 `risk-reward.js`).** 손익비 = `gamma.pct`(상방) ÷ 현재가→최근접 지지선(`charts.json`의 200일선·52주 저점 중 현재가 아래 최근접) 하락여지. 하방여지<2%=「지지선 근접」, 표시 9.9x 캡, ≥2 양호·1~2 중립·<1 불리. 지지선은 과거 실측이라 미래 하방 보장 아님 · narrative≠numbers(숫자 파일 불변) · 투자권유 아님. 정렬은 두 트래커 JS 일반 폴백(불변). SimpleorNothing 지시. (OPS §3)
+
+- 2026-08-30 08:18 · **01 시장 맥박 근거 기사 최신순 정렬.** `index.html` 렌더 단계에 날짜 파서와 안정 정렬을 추가해 축별 링크를 `YYYY-MM-DD` 내림차순으로 정렬한 뒤 최신 3건만 표시한다. 같은 날짜의 원래 순서는 유지하고 날짜 없음·오류 항목은 마지막으로 보낸다. `pulse.json` 원자료와 시장 판정은 불변이며 인라인 JavaScript 구문·대표 정렬 회귀·문서 검사를 통과했다.
+
+- 2026-08-17 · **01 「오늘의 투자 명언」 스트립 F&G 연속 색상화.** 배너 전체 배경·테두리를 CNN F&G 50 중립 기준으로 0 방향 청(공포)·100 방향 적(탐욕)으로 나누고, 중립에서 멀어질수록 색 농도가 연속 증가하도록 `quote.js`에 적용. 명언 선곡용 종합 레짐(VIX·나스닥 DD 포함)은 불변이며 색상은 F&G 단일값만 사용. F&G 미수집 시 기존 panel/line 폴백. `node --check quote.js`·문서 규율 검사 통과 확인.
+
+- 2026-08-16: 투자매력도 V4 전환 — 순위 백분위, 중복 감점 제거, 외생 데이터·내부 판단 분리, scores.json 감사 스냅샷 추가
+
+- 2026-08-16: Nasdaq-100 EPS 리비전 백분위 기반 투자매력도 산출·검증·장애 대응 절차와 상세 산식 문서 추가
+
+- 2026-08-16 13:30 · **추정 리비전 Raw data 다운로드·실행별 누적 보관.** 결정보드 우측 상단에 현재 표 CSV, 현재 gamma JSON, 누적 이력 JSON, 종목별 Yahoo Finance 원천 JSON 다운로드 메뉴를 추가했다. `fetch-revision-provenance.mjs`의 날짜별 동일 파일 덮어쓰기를 실행시각별 경로(`raw/revisions/YYYY-MM-DD/<ISO시각>/`)로 바꾸고 `raw/revisions/index.json`에 실행·종목·출처·수집시각·파일 경로를 append-only 누적한다. 기존 날짜별 스냅샷은 보존한다.\n
+- 2026-08-16 13:01 · **05 실제 비중조절 우선순위 갱신 주기 명문화·OPS 자동감사 강화.** `scripts/apply_dual_rank_ui.py` 실사 결과 실제 비중조절은 별도 배치값이 아니라 페이지 로드 때 `gamma.json`·`holdings.json`을 `no-store`로 읽어 재계산한다. `update-prices.yml` 라이브 cron은 06:05·06:35·16:52 KST 3회이며, 데이터 생성·리비전 원출처 검증 후 변경분을 보호 main PR로 올려 병합된 뒤 다음 로드부터 순위에 반영된다. 기존 OPS의 06:05·15:40 표기는 라이브 yml과 불일치해 정정했고, 15:40은 미적용 운영 후보로 분리했다. `audit-ops.mjs`에 gamma 신선도·3개 cron·`fetch-gamma`/provenance 검증·dual-rank `no-store`/점수 파생 배선 검사를 추가해 향후 문서/코드 드리프트를 실패로 노출한다.
+
+- 2026-08-14 · **01 사이클 판별 보드 8월 2주차 갱신 — ④모델 레이어 조달 미점등→황색(황색 2→3).** SimpleorNothing 지시(네비우스·네오클라우드 실적 + NVIDIA·월가 $500B 금융 플랫폼 반영). `gates.json`만 편집 — 코드·CSS·index.html·토큰 무변(check-docs 통과: 토큰 25종·폰트 v1.3.9). **①수주잔고(미점등 유지)**: 게이지 「네오클라우드 잔고 $169B」 신설(CRWV ~$129B 8/11·6/30 $104.2B +246% YoY + NBIS ~$40B), Nebius 2Q 신규 계약 ~70%가 선불로 관련 capex 50~60% 선수취('26 선불 $9B+)를 버리 '서명·미개시 백로그' 프레임의 직접 반증으로 명시. **②상각기간(황색 유지)**: 게이지 「GPU 내용연수 격차 6년 vs 4년」 신설(CRWV 6년 S-1 vs NBIS 4년 · CRWV 2Q D&A $1.393B = 매출의 54%), 관찰 항목에 격차 수렴 방향 추가. **③조달 가속(황색 유지·점등 근접)**: 게이지 「NVDA·월가 조달 플랫폼 $500B」 신설(08-10 · Apollo·BlackRock GIP·Blackstone·Brookfield·GS·KKR · 컴퓨트 담보 SPE 채권 → NVIDIA 고객 리스 · 젠슨 황 '기회당 최대 25% 지원' · 발표일 NVDA -3%). 원 트리거(하이퍼스케일러 2곳 이상 FCF 동시 마이너스)는 CRWV FCF -$5.74B 가 모집단 밖이라 **엄밀히 미충족 → 상태 유지**, 대신 관찰에 「capex 의 SPV 이전으로 보고 FCF 가 개선돼 보이는 착시」 등록. **④모델 레이어 조달(미점등→황색)**: 점등 조건 중 '벤더 파이낸싱 스프레드 확대'가 실제 발생 — CRWV 5Y CDS '25-12 881bp→'26-06 452bp→'26-07말 855bp(5년 부도확률 ~50% 내재)·AI 대출 코버넌트 요구(08-03 +125bp), NVIDIA→OpenAI 컴퓨트 리스 $250B 백스톱·칩 $350B 파이낸싱 논의 보도. Anthropic 10월 IPO 트랙은 유지(주주 측 $2T 거론)라 **완전 점등 아님 → 황색**. 트리거를 '지속' 확대 기준으로 재정의(2Q 실적 후에도 CRWV·ORCL CDS 800bp대 유지 = 완전 점등 / 500bp 이하 재수렴 = 해제). 뉴스 매칭 `keys` 확장 4카드(선불·prepayment·네오클라우드·계약 잔고 / 내용연수 격차·D&A / SPV·프로젝트 파이낸싱·조달 플랫폼 / CDS·스프레드·코버넌트·백스톱). **narrative ≠ numbers** — 표시 전용 보드만 갱신했고 `gamma`·`judgment`·`holdings`·`earnings`·`prices` 숫자 파일은 전부 불변. 미해소 1건: CRWV 2Q 실적(08-11) **이후** CDS 재수렴 여부 미확인 — ④ 완전 점등/해제 판정의 잔여 입력.
+- 2026-08-11 20:53 · **04 AI 수요·공급 로드맵 ④ 「칩 제조사별 Capex」에 인텔 행 신설(4사→5사).** 기존 sumrow 각주 1줄(「인텔 아일랜드 팹34 $57B 별도」)로만 처리하던 인텔을 정식 행으로 승격 — 역할 배지는 TSMC와 같은 파운드리 `L2·L4`. 연도별 셀: ~2025=18A 양산 준비·파운드리 외부고객 확보 미흡·아일랜드 팹34 $57B, 2026E=**설비투자 $18B→$20B+ 상향**(증분 ~$3B는 Intel 3·18A·18A-P 툴링)·**상장(1971) 후 첫 유상증자 $15B(₩21조)**, 2027E=CAPEX 「2026 대비 크게 상회」 가이던스·미국 중심 지출·CHIPS Act 투자세액공제, 2028E~=외부 파운드리 고객·수율 확정 전까지 실공급 기여 제한. **관통 판정 각주를 단서로 교체** — 인텔은 CAPEX 상향·유상증자로 실탄은 확보했으나 **파운드리 외부고객·수율이 확정되기 전까지 실공급 물량에 산입하지 않는다**(캐파 증설=병목 완화 신호로 세지 않음). 출처는 인텔 2Q26 실적발표(2026-07-23 · CFO David Zinsner 2026 CAPEX $18B→$20B+ 상향 · 2027 「significantly above」)와 유상증자 공시(2026-08-10 · $15B)로 ds-fn에 명시. 보도된 「수요 $1000억+·초과배정 시 $200억 상회 가능성」은 확정 사실이 아니라 관측이므로 **표에 수치로 넣지 않았다**(수치 검증 원칙). `aisd.js`만 편집(index.html·pantone.css 무편집) — 기존 컴포넌트(ds-mtx.plan·ds-co·ds-lb.sem·ds-rev.up·ds-fn) 전면 재사용, **신규 CSS 클래스·:root 토큰 0** → `node --check` 통과·`check-docs` 통과(토큰 25종·폰트 v1.3.9 무변)·파일 크기 102,704 B→103,784 B(+1,080). **narrative≠numbers** — 발표·조달 계획일 뿐이므로 숫자 파일(gamma·holdings·earnings·judgment·signal_log) 전부 불변. §3 로드맵 인벤토리 행 갱신 · STYLE_GUIDE §9 동반.
+- 2026-08-09 · **02 캡처 붙여넣기 — 수신 경로 다중화 + 정적 자산 캐시 규칙 확장.** 원인 2건을 분리해 잡았다. ① **표시가 안 바뀌던 쪽**: worker 의 `no-store` 덮개가 HTML·`.json` 에만 있고 `.js` 는 밖이라, 같은 날 `insight.js` 를 세 번 고쳐도 옛 배포본을 쥔 클라이언트가 그대로였다(강력 새로고침도 무효). `.js`/`.css` 를 덮개에 넣고, `ASSET_VER` 전역 + HTMLRewriter 로 `script[src^="/insight.js"]` 의 `src` 를 버전 핀하도록 해 `index.html` 무편집으로 무효화한다(§6-7 신설). ② **붙여넣기가 안 들어오던 쪽**: 수신이 `document` capture 하나뿐이라 포커스가 입력칸 밖이면 `paste` 이벤트가 아예 안 왔다. `window`→`document` capture + `#insText`·`#insDrop` 엘리먼트 리스너로 4중화(중복은 `e.__insPaste` 가드), Ctrl/⌘+V 키 폴백과 「캡처 붙여넣기」 버튼(`navigator.clipboard.read()`)을 추가하고, 이미지 없음·권한 차단·미지원을 `.ins-msg` 에 한국어로 구분 표시해 침묵을 없앴다. 02 뷰일 때만 가로채며 텍스트 붙여넣기는 통과. `node --check`(worker·insight)·`check-docs` 통과. 숫자·판단 파일 불변. **실사용 확인은 SimpleorNothing 화면 검증 필요**(사이트가 로그인 게이트 뒤라 세션에서 대신 눌러볼 수 없음). §3 02·§6-7 동반. (STYLE_GUIDE 동반)
+- 2026-08-08 14:05 · **sync-holdings.mjs 매도(청산) 종목 오탐 수정.** 평단 4칸(평가·수량·매입·현재) 전부 0을 스키마 드리프트로 오판해 매번 throw하던 가드를 "전부 0=매도"로 인정하도록 변경(일부만 빈 진짜 드리프트는 throw 유지). 버티브(VRT) 청산으로 7/18부터 3주째 `holdings.json` Drive 동기화가 전부 실패해 수량·환율이 7/11에 고정돼 있던 것을 원상복구 경로 확보. §8에 원인·해소 기록. SimpleorNothing 지시("없으면 보유하지 않는 것이니 그에 맞춰 처리") 반영.
+- 2026-08-03 21:30 · **OPS·STYLE_GUIDE 본문 복원.** 7/31 `3b0c9e1`(#567)의 b64 패치가 OPS 본문을 181,274 B→6,698 B로, 8/2 `6f6782a`가 STYLE_GUIDE를 111,759 B→540 B(셸 변수 `$(cat …)` 미확장)로 각각 소실시킨 회귀를 정상 커밋에서 복원했다. 파손 기간(7/31~8/2)에 추가된 갱신 이력 19건은 전부 보존했다. 내용 변경 없음 — 복원만. §8에 재발 방지 2건 등록.
+- 2026-07-31 14:04 · **Worker 스테일 전체파일 덮어쓰기 회귀 복구.** 이후 작업이 오래된 worker 원본을 전체 교체해 main에서 ① `signal_log/calendar` 사이트 반영 ② Sonnet 5 빈 JSON 복구 ③ FY/FQ→CY 정규화가 소실된 것을 라이브 오류(`gates.json|risk.json only`)로 확인. 최신 main의 신규 `handleTickerLive`는 보존하고, 마지막 정상 커밋 `ab63120`에서 위 세 구간만 함수 단위로 복원. 허용 파일은 `SITE_APPLY_FILES` 단일 SoT, 오류 응답은 `supported`+`api_version:site-apply-v2`. worker 구문·핵심 마커·유효/펜스/빈/절단 JSON 스모크 통과. 새 커밋으로 Cloudflare 배포 재트리거.
+
+- 2026-07-31 13:07 · **06 「대담 다시 굽기」 진행 상태 시각화.** 기존 대본 p1→p2·오디오 p1→p2 순차 생성과 R2 캐시·재생 흐름은 유지하고, 굽는 동안 실제 호출 순서에 맞춘 4단계(전반 대본·후반 대본·전반 음성·후반 음성), 1초 단위 전체 경과시간, 움직이는 진행 막대, `N/4` 현재 상태를 표시한다. 완료 시 자동으로 기존 플레이어를 열고 실패 시 재시도 안내를 표시한다. `node --check`·문서 정합 검사·DOM 타이머 스모크 통과. 신규 `:root` 토큰 0. narrative≠numbers. (STYLE_GUIDE 동반)
+
+- 2026-07-31 12:23 · **02 「사이트 반영」 Sonnet 5 빈 JSON 자동 복구.** `gates.json`·`risk.json` 보드 갱신 호출이 기존 1,200 출력 예산을 adaptive thinking에 소진해 `claude response not json`으로 실패. 첫 호출은 판단 품질을 위해 thinking 유지+4,000, 유효 객체 JSON이 없을 때만 thinking-off 2,400으로 1회 재시도. 최종 실패 문구를 한국어로 명료화. 유효 JSON·펜스 JSON·빈 응답·절단 JSON 파서 스모크와 worker 구문검사 통과. 숫자 구조 보호·게이지 순서 불변 규율 유지.
+
+- 2026-07-31 11:43 · **02 관점 뽑기 Sonnet 5 빈 응답 자동 복구.** 원인: Sonnet 5 adaptive thinking이 기본 활성화돼 기존 6,000 출력 예산을 사고 토큰이 모두 사용하면 HTTP 200이면서 최종 JSON 텍스트가 비어 클라가 `응답 파싱 실패` 표시. 첫 호출은 추론·web_search 유지+12,000으로 상향, JSON 부재 시에만 `thinking:{type:'disabled'}` 8,000으로 1회 재시도. 서버가 최종 JSON 유효성 검증 후 전달하고, 클라는 빈 본문/JSON 형식 오류를 구분. 구문검사·파서 스모크 통과. 숫자·판단 파일 불변.
+
+- 2026-07-31 09:59 · **Anthropic API 모델 비용 최적화 3건 완료.** 캘린더 이벤트 추출(`/api/calevent-parse`)은 `claude-haiku-4-5-20251001`, 데일리 브리핑 대본(`/api/brief` p0·p1·p2)은 `claude-sonnet-5` 반영 상태를 재검증하고, 남아 있던 공용 인사이트 프록시 `anthropicText()`를 `claude-opus-4-8`→`claude-sonnet-5`로 변경했다. `web_search_20260209`와 `max_uses:3`, 스트리밍, 출력 상한·응답 스키마는 유지해 추론·호환성 조건은 불변. 영향 범위는 `/api/insight`와 같은 프록시를 재사용하는 `/api/site-apply`의 패치 계산이며 원탁·1인 자문·베어 케이스 Opus 경로는 불변. `worker.js` 문법 검사·모델 호출부 정적 검증 통과. UI·CSS·숫자 파일·`:root` 토큰 불변.
+- 2026-07-30 15:27 · **02 인사이트 저장 원문 글자수 제한 해제.** `insight.js`의 `MAXRAW=20000` 절단을 제거해 인테이크에 입력된 원문 전체를 `raw`로 저장하고, `/api/insights`의 애플리케이션 단위 16MiB 거부도 제거했다. 분석 입력 120,000자 컷은 Claude 분석 비용·컨텍스트 보호용으로 그대로 유지되며 저장 원문에는 적용하지 않는다. 제한 해제 전에 이미 잘린 자료는 `/api/insights/raw`에서 과거 저장분임을 명시하고 재분석·저장 시 전체 원문이 보존됨을 안내한다. 신규 데이터 스키마·CSS·토큰·숫자 파일 불변. (STYLE_GUIDE 이력 동반)
+- 2026-07-31 · **02 인사이트 「사이트 반영」 교차메뉴 확장·FOMC 미반영 수정.** 원인: 프런트 `SITE_SRC`와 서버 화이트리스트가 `gates.json`·`risk.json`에만 묶이고, 수치 없는 narrative가 `siteMatch()` 초입에서 차단돼 FOMC 관점이 01 시장 맥락·D-day에 도달하지 못했다. 수정: `signal_log.json`·`calendar.json`을 반영 코퍼스에 추가하고 `macro`/`calendar` narrative를 관련 보드 판정·맥락 갱신 예외로 허용. 「지금 반영」은 보드 verdict, 시장 맥락 append(중복 차단), 동일 일정 `meta` 결과 업데이트(중복 차단)를 대상별 직접 커밋한다. 숫자 gauge는 확정 근거와 기존 구조 가드가 있을 때만 변경하고 gamma·holdings·earnings·judgment는 불변. FOMC 매칭·시장 맥락 append/중복·일정 갱신 스모크 10/10, `node --check`·`check-docs`·`git diff --check` 통과. (STYLE_GUIDE 동반)
+- 2026-07-30 14:40 · **02 인사이트 찾기 주요 문서 형식 전용 추출기.** DOCX·PPTX를 일반 `file.text()`로 읽어 `PK`·`word/document.xml` 압축 바이너리가 textarea에 노출되던 원인을 제거했다. `insight.js`가 확장자를 먼저 검증하고 PDF·이미지·DOCX·PPTX·스프레드시트·RTF·HTML/XML·OpenDocument·HWPX·텍스트/자막/EML을 형식별로 읽는다. DOCX 대형 10-K는 10MB+ XML DOM 구축 대신 OOXML run/문단 단일패스로 추출하고, 네이티브 글자가 없는 이미지형 PPTX는 media 관계를 따라 슬라이드별 OCR한다. 파일 선택 accept·드롭 안내를 주요 형식으로 확장하되 파일당 25MB·분석 입력 120,000자 컷을 명시하며, 구형 DOC/PPT/HWP·암호화/손상 파일은 변환 안내로 차단한다. 실제 `MSFT_FY26Q4_10K.docx` 393,165자 본문과 이미지형 `OutlookFY27Q1.pptx` 6장 OCR 경로, XLSX·HWPX·HTML·RTF 픽스처 스모크 통과. `node --check`·`check-docs` 통과, index.html·CSS·worker·숫자 파일·`:root` 토큰 불변. narrative≠numbers. (STYLE_GUIDE 갱신 이력 동반)
+- 2026-07-30 14:47 · **04 AI 수요·공급 로드맵 ③ Meta 26Q2 CAPEX 갱신.** 2026E 범위를 $125~145B→$130~145B, 리비전 표기를 ▲10→▲15로 상향하고 2027E 방향을 →→↑로 전환했다. 2026E 상세에 BlackRock·El Paso 1GW 벤처, 2028E에 Hyperion 5GW 공원 목표를 반영하고 로드맵 갱신일을 07-30으로 동기화했다. 숫자·설명만 갱신했으며 레이아웃·토큰·판정 구조는 불변. (STYLE_GUIDE 이력 동반)
+- 2026-07-29 23:35 · **화면별 주가그래프 기본 기간 분리.** 01 시장 모니터링의 지표·종목 뉴스 차트는 6M(126거래일) 기본값으로 복원하고, 04 시장과 실적 전망 Value Chain의 종목 칩은 기존 `hover-chart.js` 1Y 일봉을 유지했다. 01의 `RG`와 04 호버 차트가 독립 경로임을 문서화하고 변경 이력 팝업에 반영. 데이터·판정 파일은 불변. (STYLE_GUIDE §6·이력 동반)
+- 2026-07-29 23:16 · **주가그래프 기본 기간을 1Y로 변경.** 01 시장 모니터링의 공통 `RG` 초기값과 종목 뉴스 미니차트 초기 창을 각각 1Y·252거래일로 맞췄다. 사용자가 고른 기간과 Ctrl+휠 확대·축소는 기존대로 유지하며 데이터·판정 파일은 불변. 변경 이력 팝업에도 반영. (STYLE_GUIDE §6·이력 동반)
+- 2026-07-29 19:21 · **03 전문가 원탁에 알파맵 자산·01·02·04 최신 컨텍스트 자동 주입.** `council-context.js`가 모든 `/api/council` POST를 가로채 자산현황·시세, 01 신호/사이클/보유 γ/최근 신호/일정, 02 채택 인사이트, 04 CAPEX 게이트/리스크/실적 일정/보유 판단을 12개 소스에서 병렬 수집해 `siteContext`로 첨부한다. worker는 업로드 1차 자료→날짜 표시 알파맵 SoT→편집 현 상황의 근거 우선순위와 출처·기준일 충돌 표기를 강제하고, diagnosis/actions에 관련 보유자산 영향·게이트를 반영한다. 자산·내부 판단의 Anthropic Claude API 처리에 대한 운영자 명시 승인. 60초 캐시·실패 시 기존 현 상황으로 무해 폴백. index.html·숫자 파일·`:root` 토큰 무편집. 검증: `node --check`·jsdom 컨텍스트 결합 10/10. (STYLE_GUIDE 갱신 이력 동반)
+- 2026-07-29 18:54 · **03 전문가 원탁에 여러 자료 업로드→전문가별 근거 해석→Gemini 음성 토론 흐름 추가.** `council-material.js` 자가 마운트로 PDF·PPTX·DOCX·텍스트·CSV·자막을 브라우저에서 추출하고 기존 `/api/council` 요청에 `material`로 결합한다. worker는 업로드 자료를 1차 근거로 삼아 같은 자료를 각 패널의 `field/view` 렌즈로 독립 해석하며, 구체 근거·해석·의견·위험을 분리하고 자료에 없는 수치·인용은 금지한다. 결과는 기존 원탁 리포트·이력·Google AI Studio 음성 경로를 재사용한다. 최대 6개·파일당 25MB·통합 10만 자. `index.html`·숫자 파일·`:root` 토큰 무편집. 검증: `node --check`·jsdom 업로드/요청 스모크 8/8·최신 worker 모듈 문법 통과. (STYLE_GUIDE 갱신 이력 동반)
+- 2026-07-29 10:40 · **03 전문가 원탁 「음성 토론 재생」을 브라우저 TTS에서 고품질 Gemini(Google AI Studio) 음성으로 전환.** `council-audio.js` 자가 마운트 + worker `POST /api/council-audio`로 발언별 단일 화자 TTS를 생성하고 RMS 정규화·이어붙이기·R2 내용 해시 캐시·발언 시작 시각 동기화를 적용했다. 1인 심층 자문도 `window.COUNCIL.playReport` 오버라이드로 같은 HiFi 경로를 사용한다. 실패 시 기존 브라우저 TTS로 자동 폴백. index.html 무편집·신규 `:root` 토큰 0·narrative≠numbers. `node --check`(worker·client)·worker 순수 로직 7/7·jsdom 클라이언트 23/23·`check-docs` 통과. (STYLE_GUIDE 갱신 이력 동반)- 2026-07-29 09:20 · **알파벳 26Q2 실적(7/22 AMC) `signal_log` 보강 — 2각도만 추가(중복 회피).** 07-23 엔트리(capex $180~190B→$195~205B 상향·클라우드 +82%·Gemini 3.5 Pro 지연)와 `gates.json`(#530 — 백로그 $514B·capex $195–205B)이 이미 핵심 수치·04 로드맵 ③ 반영을 처리 → 여기선 그 엔트리에 없던 **①TPU 시스템 외부 DC 납품 매출 최초 인식(L2 외판 개시) ②스틸맨·가격시계 경고(FCF −$5.9B·영업마진 미스·시간외 −5% → 리비전 하향 방아쇠는 실적 아닌 조달·마진)** 2항목만 EOF append. **narrative≠numbers — 미보유 상류 종목이므로 gamma·holdings·judgment·earnings 전부 불변, aisd.js(이미 2026E ~$725B·Google 행 ~200 반영)도 무편집**(과거 캡처 기준 패치의 ~$715B/~$185B 수치는 현행 main보다 스테일이라 미반영). `signal_log.json` 유효 JSON 유지(`node -e` 파싱 통과) · UI·토큰 무편집.
+- 2026-07-29 08:05 · **02 관점 등급 옆 후속 상태 표시.** 등급(관찰→확신)과 실행 생명주기를 분리해 각 관점·다른 메뉴 스트립에 `승격 대기`/`발동 대기`/`발동`/`유지`/`만료` 배지를 표시한다. 기존 데이터는 g0~g1=`승격 대기`, g2↑=`발동 대기`로 무이전 파생하고, 「🕔 라이프사이클」 모달의 상태 칩 선택을 `lcState`로 R2/localStorage에 저장한다. 확신은 자동 실행이 아니며 발동은 05 리밸런싱 후보라는 §0-5 규율 유지. 신규 `:root` 토큰 0 · narrative≠numbers.
+- 2026-07-29 · **02 인사이트 「사이트 반영」을 완전 자동 직접 커밋으로 전환(1/2).** SimpleorNothing 지시("사이트에서 바로 반영되게 해줘" → "완전 자동 — 검증·PR 없이 바로 커밋" 선택) — narrative≠numbers 수기 검증 원칙에 대한 명시적 예외로 승인. **worker.js**: `handleSiteApply` 신설(`POST /api/site-apply`) — GitHub Contents API로 대상 항목을 읽고 Claude(claude-opus-4-8)에 패치 계산만 맡긴 뒤(`{changed,gauge,verdict,srcs_add,reason}`), **구조 가드레일**(gauge 길이·순서·`k` 완전 동일해야 반영·스키마 신설 금지·`changed:false`면 무변경) 통과 시에만 `default_branch`(라이브 해소)에 직접 PUT 커밋(PR 없음). `GITHUB_TOKEN`·`ANTHROPIC_API_KEY` 기설정 확인.
+- 2026-07-29 · **(2/2) insight.js/css.** `applyModal`에 「🚀 지금 반영」 버튼 추가 — 매칭 항목마다 `/api/site-apply` 호출, 카드별 결과(✅반영됨/—변경없음/❌실패) 즉시 표시, 성공 시 `siteDone` 자동 세팅. 「📋 반영 지시 복사」는 수동 폴백 유지. `.ins-ap-st` 상태줄(신규 토큰 0). §3 행 갱신. narrative≠numbers는 이 버튼 하나에 한해 예외 — 다른 숫자 파일 경로는 기존 규율(§1·§6) 그대로.
+
+- 2026-07-28 · **02 인사이트 「사이트 반영」 버튼 신설 + 사이클 판별 보드 Google Cloud 잔고 2Q26 반영.** SimpleorNothing 지시. **①이번 건**: `gates.json` ①수주잔고 Google Cloud 잔고 $460B+→$514B(Alphabet 2Q26 10-Q 확정·총 RPO $519.5B·QoQ +$54B·FY26 capex 가이던스 $195–205B 상향) — verdict 3사 합산 ~$1.5T(구글 2Q26 반영·MSFT/AWS 1Q26 기준 혼합분기 명시)·asOf/upd 07-28(#530 squash 7ddb0a0). **②로직**: 관점이 표시 전용 보드(`gates.json`·`risk.json`)의 `keys`와 겹치면(`xkeys` 배제·수치 게이트) 관점 행에 「🔗 반영하기」 — 모달이 대상 카드·현재 게이지·Claude 실행용 「반영 지시」를 제시(복사)하고, **반영은 확정 실적 검증 후 수기 PR**(자동 write 없음). `gates.json` ①keys에 「백로그」 추가(순한글 매칭 보강). `insight.js`(`siteLoad`/`siteMatch`/`applyBtn`/`applyModal` + 5배선)·`insight.css`(`.ins-apply`/`.ins-ap-*`)만 편집·index.html 무패치·신규 :root 토큰 0. §3 02 인사이트 「사이트 반영」 행 신설. narrative≠numbers — 감지·표면화 전용.
+
+- 2026-07-28 23:12 · **01 리스크·사이클 판별 카드 롱프레스 삭제.** 토픽 카드 패턴을 복제해 카드 빈 영역을 600ms 누르면 우상단 삭제 버튼을 표시하고, 4px 이상 이동 시 취소한다. 다른 카드나 조건·근거 버튼을 누르면 삭제 버튼을 숨기며 확인한 카드 id는 보드별 localStorage에 저장해 재접속에도 제외한다. 원본 risk/gates JSON·판정·뉴스 불변. STYLE_GUIDE §6 동기.
+
+- 2026-07-28 22:46 · **01 리스크·사이클 판별 카드 절반 축약.** 두 보드 카드의 상시 본문을 제목·상태·렌즈·게이지만 남기고 점등 조건·레이어 해석·최근 기사·출처 근거를 하단 「조건·근거 보기」 오버레이로 이동. 데스크톱 호버/키보드 포커스, 모바일 탭으로 열며 한 번에 한 카드만 펼친다. 원본 JSON·판정·뉴스 매칭 불변. STYLE_GUIDE §6 동기.
+
+- 2026-07-28 22:32 · **01 지표 카드 통합·NFP 추가·그리드 재정렬.** VIX~원/달러 4게이지와 반도체 수출을 「지표」 그리드로 이동하고 총수출·무역수지 카드를 제거. FRED PAYEMS의 월간 차분으로 미국 비농업고용 증감 그래프를 추가. 데스크톱 HTML5 드래그는 고정 CSS Grid 슬롯 순서를 교환하고 localStorage에 영속하며, 700px 이하 모바일은 드래그 비활성. 기존 토큰·렌즈 2줄·기간 버튼 규약 유지. STYLE_GUIDE §6 동기.
+
+- 2026-07-28 21:05 · **05 추정 리비전 트래커에 테슬라(TSLA) 추가.** gamma.json 추적 대상에 TSLA(가속·γ open)를 추가하고 Yahoo Finance 최신 TP·FY+1 EPS·애널 리비전·주가 변화·강등 게이트를 수집. `fetch-gamma.mjs`에 GAMMA_ONLY 단일 티커 갱신 옵션을 추가해 기존 13종목을 불필요하게 재수집하지 않고 TSLA만 초기화. 트래커·RAER 표시명 연결, 현금 포함 상대 점수 행 14→15. 관측치이며 예측·투자권유 아님. STYLE_GUIDE §9 동기.
+- 2026-07-28 20:58 · **01 삭제된 중국 AI 토픽 복구·내용 확대.** china 숨김 상태를 버전 마이그레이션으로 1회 해제해 「중국 AI 부상·반도체 수출통제」 카드를 복원. CXMT·창신메모리뿐 아니라 Kimi K3·Moonshot·DeepSeek·중국 AI 모델 관련 기사도 관세 유입축보다 china 우선. 중국 AI 축의 사이트·카드 보존 폭을 5→12건으로 늘리고 아카이브의 Kimi K3 1건 포함 7건을 즉시 복원. 이후 사용자가 다시 삭제하면 유지됨. 숫자·판단 파일 불변. STYLE_GUIDE §6-5 동기.
+- 2026-07-28 18:28 · **01 CXMT 기사를 「트럼프 관세 공급망」→「중국 AI 부상·반도체 수출통제」로 이동.** 검색 쿼리 유입축보다 기사 내용 우선 규칙 신설: `CXMT|창신메모리|창신반도체`가 제목·요약·함의에 있으면 `china`. `index.html axIt()`이 현재 `news.json` 기사 즉시 재분류하고 `isCxmt(m)`가 관세 카드의 스테일 CXMT 다이제스트 요약도 china로 환원. `fetch-news.mjs articleAxis()`가 누적·신규 MACRO `ax`를 저장 전 영구 보정. 숫자·판단 파일 불변. STYLE_GUIDE §6-5 동기.
+
+- 2026-07-28 18:22 · **01 토픽 레이더 롱프레스 삭제 기능.** 헤더 pointerdown 후 600ms 정지 시 `.show-delete`+`삭제` 버튼 표시, 4px 이동 시 타이머 취소. 확인 후 축 키를 `localStorage` `am_topic_radar_hidden_v1`에 추가하고 DOM·좌표 상태에서 제거해 새로고침 후에도 숨김. 뉴스 원본·수집축은 불변. 모바일은 이동 비활성 상태에서 롱프레스 삭제만 허용하고, 데스크톱 드래그·짧은 탭 토글은 유지. STYLE_GUIDE §6-5 동기.
+
+- 2026-07-28 18:15 · **01 「채택한 일정 관점」 수동 삭제 지원.** `strip()`에 일정 전용 `canDelete` 옵션과 `data-strip-rid/cid` 버튼을 추가. 확인 후 `deleteClaim()`이 해당 claim만 제거해 같은 자료의 매크로·레이어 등 다른 관점을 보존하고, claims 0 자료만 함께 제거. 기존 `persist()` 경로로 localStorage 즉시 갱신+R2 PUT 예약. `insight.js?v=20260728-cal-delete`·CSS 링크 버전 동기화. STYLE_GUIDE §6-1 동반.
+
+- 2026-07-28 18:08 · **01 토픽 레이더 모바일 드래그 비활성.** `mobileBoard()`(≤700px)에서 pointerdown 좌표 이동을 차단하고 일반 click으로 펼침·접힘만 실행. 모바일 CSS는 `touch-action:auto`로 스크롤을 복구하고 드래그 핸들 `↕`를 숨김. 데스크톱 자유 배치·좌표 영속·키보드 토글은 유지. STYLE_GUIDE §6-5 동기.
+
+- 2026-07-28 18:03 · **01 토픽 레이더 동일 CAPEX 토픽 병합.** 화면에 `상류·하이퍼스케일러 capex`·`빅테크 AI Capex 실적`·`AI 빅테크 캐팩스 부담`·`AI캐팩스 수익성 의구심`이 별도 카드로 중복된 원인은 영문/한글 표기 변형과 고정축 `bn_capex` 격리. 클라·수집 파이프라인의 CAPEX 정규식을 `캐[펙팩]스|케[펙팩]스|자본지출|AI지출`까지 확장하고, CAPEX 고정 병목축만 `capex` 대표키로 예외 병합. 나머지 병목축 독립성은 유지. 기존 `news.json`도 런타임에서 즉시 합쳐 데이터 재작성 없음. STYLE_GUIDE §6-5 동기.
+
+- 2026-07-28 17:45 · **01 토픽 레이더를 순서형 2열 목록에서 좌표형 자유 배치 보드로 전환.** `#mktMacroNews` 상대 좌표계+카드 절대 배치, Pointer Events 드래그, 축 키별 `x/y/bw/cw` `localStorage` 영속, 드래그 중 보드 높이 확장, 선택 카드 최상단, 화면 폭 변경 시 가로 비율·경계 보정. 빈 공간·카드 사이·겹침 위치를 허용하며 기본 접힘·클릭/키보드 펼침·기사 링크는 불변. STYLE_GUIDE §6-5 동기.
+
+- 2026-07-28 17:28 · **01 토픽 레이더 기본 접힘·개별 펼침·마우스 드래그 재정렬.** `loadMacroNews()` 카드 헤더에 클릭/Enter/Space 토글과 `aria-expanded`, HTML5 드래그를 연결. 축 키 순서를 `localStorage` `am_topic_radar_order_v1`에 저장·복원하고 신규 축은 라이브 기본 순서 뒤에 안정 추가. 기사 링크·자동 수집·narrative≠numbers 불변. STYLE_GUIDE §6-5 동기.
+- 2026-07-27 19:20 · **06 브리핑 매일성 개편(SimpleorNothing 지시 — 매일 갱신되는 브리핑답게).** 최근 1~2일 중심·직전 회차 반복 금지(`prevBrief`)·'새 소식 없음' 규약·지표에 F&G 수치와 유가·가솔린(`wti`·`gasoline` 티커 신설)·토픽 레이더 신규 기사(`macroNews`). worker `briefSituation`+프롬프트 3종, `scripts/fetch-prices.mjs` 후보 2종. `node --check` 2파일 통과 · UI·토큰 무변 · narrative≠numbers. 오늘치 캐시는 「다시 만들기」·「대담 다시 굽기」 필요. §3 06 ↳매일성 행 동기.
+- 2026-07-27 19:11 · **02 aisd ③ — 매출·CAPEX YoY% 라벨(운영자 지시).** 매출 온차트 5포인트(24~28E)·CAPEX 막대 값 5개(24~28E)에 전년비 증가율 병기(소수점 반올림 — 매출 전 구간 +14% · CAPEX +53/+100/+52/+43/+20% · 2023=기저 제외). 매출 YoY=신규 절대배치 span 라인 추가(순수 append)·CAPEX=ds-bv 내 윗줄 — 인라인(`--dim` 9/10px)만, 신규 클래스·토큰 0. node --check·jsdom 스모크·check-docs 통과 · patches/*.b64 3분할. 1차분(yoy-*)은 #505 OPS 타임스탬프 선변경으로 stale → yoy2-*로 현행 main 재베이스 재푸시(stale base 규칙 실사례). narrative 층 — 숫자 파일 불변.
+- 2026-07-27 18:49 · **저녁 시세 크론 예약 16:52→15:40 변경 지시 반영 + §3·§4·§6-1 크론 표기 스테일 정정.** 실측 라이브 yml 대조 — 시세=`update-prices.yml` cron `5 21`(06:05)·`52 7`(16:52 예약, 15:40으로 변경 대기)이며 gamma·E군집·holdings까지 한 크론(구 `fetch-prices.yml` 표기·구 06:37·18:37 삭제) · 신호=06:47 1일 1회 · 뉴스=`update-news.yml` 다중 트리거+6h 가드. §8 E-군집 수동 dispatch 이슈 해소 처리 · 저녁 지연 이슈를 「15:40 예약 변경 운영자 적용 대기」로 갱신. SimpleorNothing 지시.
+- 2026-07-27 16:25 · **06 「오늘 브리핑 듣기」 대담을 01 시장 모니터링 정리 회차로 개편(worker `BRIEF_PART[1·2]`·`briefSituation` 입력 확장).** SimpleorNothing 지시(듣기 = 01 내용 정리 · 개별종목은 주요한 것만 간략히). 전반부 = 결론(게이트 몇/3) → 다가오는 일정 → 지표(지수·美10Y·DXI) → 시장 맥박 / 후반부 = 리스크 보드(3축) → 사이클 판별 보드(4지표) → 관련 기사(매크로 축) → 종목 뉴스(주요 보유종목 2~3건·종목당 한 문장 + 움직임 큰 1~2종목) → 스틸맨. 보유종목 마감 전 종목 낭독·리밸런싱 가이드는 듣기에서 제외 — 텍스트 회차(p0)·분량(5분·18~22발언)·모델·파트 분할·TTS 경로는 불변. 입력 5종 추가(`risk`·`gates`·`dxi`·`news`·`news_digest` → `riskBoard`·`cycleBoard`·`dxi`·`macroTopics`·`stockNews` — 상태·판정·요약만 추려 토큰 절약, 게이지 상세 제외). 낭독 치환에 DXI 추가. `node --check` 통과 · index.html·brief.js·CSS·워크플로 무편집(신규 토큰 0 → check-docs 무관). narrative≠numbers — 대본은 라이브 값을 읽어 말할 뿐 숫자·판단 파일 불변. **오늘치 캐시는 06 「대담 다시 굽기」로 재생성 필요.** §3 06 듣기 행·외부 채널 행 동기.
+- 2026-07-27 15:45 · **02 aisd ③ — 차트 높이 2×(운영자 지시).** ds-bars ③ 인라인 height 255→510px(직전의 2배). viewBox 스트레치 구조라 좌표·%라벨 재계산 0, 타 차트 무영향. §3 상태값(510px) 동기화. 코드 1속성·문서 외 변경 없음.
+- 2026-07-27 15:35 · **리스크 보드 ①(사모 크레딧의 역습)에 「하이퍼스케일러 FCF/조달」 게이지 5행·점등 조건 ④·뉴스 keys 3종 추가(`risk.json`).** SimpleorNothing 지시(14:45 signal_log 「조달 전환」 엔트리의 상시 감시 승격). 게이지 = 26E FCF ~$0(25년 CAPEX $460B>영업익 첫 추월·외부 조달 전환·d=down 값방향) · 점등 조건 ④ = AI 회사채·SPV 발행 스프레드 급확대 or 조달발 capex 가이던스 하향 · keys += FCF·잉여현금흐름·SPV(라틴 단어경계 매칭) · read에 「스프레드=수요 리비전 선행 지표」 접속. state는 nt(연기) 유지 — 조건 미충족. risk.js 무편집(gauge 제네릭 `.map()` 렌더 확인) · 신규 토큰 0 → check-docs 무관. narrative≠numbers — 표시·감시선일 뿐 gamma·holdings·earnings·judgment 불변, 상태 전환은 trigger 실충족 시 수기.
+- 2026-07-27 14:45 · **§3 07 메모 소스 기재 정정(`reviews.json` → worker `/api/memo` R2) + signal_log 「조달 전환」 엔트리 append.** SimpleorNothing 지시(04 로드맵 ③ 해석의 조달 전환 관전 포인트 적재). 07 메모 적재 시도 중 라이브 index.html 대조로 스테일 발견 — 07 메모 실소스 = `/api/memo`(R2·게이트 뒤·노트 스키마 `{id,t,title,body,tags,…}`)이고 `reviews.json`은 비렌더 `#v-port` `#reviewLog`용 주간 점검 기록. 세션은 게이트 밖이라 메모 직접 적재 불가 → 운영자 붙여넣기 경로 명기. signal_log 엔트리 = 25년 CAPEX>영업이익 첫 추월·26E FCF ~0 → 외부 조달 전환(크레딧 스프레드=수요 리비전 선행 지표 승격, 리스크 보드 ①·주간 브리핑 ⑩ 접속) + 리비전 트랙 관측(먼 연도 상향 가속=γ open 유지). narrative≠numbers — gamma·holdings·earnings·judgment 불변. 코드·UI 무편집(신규 토큰 0 → check-docs 무관).
+- 2026-07-27 14:10 · **02 aisd ③ — 매출 값 라벨 온차트(운영자 지시).** 매출 라인 6포인트 상단에 수치 라벨($1.25T~$2.4T) 표시. SVG text는 preserveAspectRatio:none 스트레치로 왜곡 → ds-bv와 동일한 HTML 절대배치 span(left/top %, translate(-50%,-130%), mono 10px, st-dawn) 채택. 신규 클래스·토큰 0.
+- 2026-07-27 13:20 · **02 aisd ③ — 영업이익 라인 추가 + 차트 높이 1.5×(운영자 지시).** 4사 합산 영업이익(st-mature) 오버레이: ~$270B(23)→~$370B→~$440B(25 실적: MSFT 캘린더 ~$142B·GOOGL ~$141B·META ~$85B·AMZN ~$75B)→26E ~$500B→27E ~$560B(컨센 방향성). 동일 $축 y=163→142. 핵심 관측: **25년 CAPEX($460B)가 영업이익 첫 추월** — FCF ~0 붕괴의 근원 시각화(렌즈·트랙 rtv 명기). ds-bars ③만 인라인 height 170→255px(viewBox 스트레치, 타 차트 무영향). 트랙 ③행·fn 범례·§3 동기화. 신규 토큰 0(st-mature 기존).
+- 2026-07-27 12:20 · **02 aisd ③ — 차트 축 통일(운영자 지시).** 매출 독립 축 폐지 → 막대·매출·FCF 전부 동일 $축(1px=$14B · 상한 ~$2.55T). 막대 height 5.9~47.1%로 재계산(비율 정직성 우선 — CAPEX 시각 압축 수용) · 매출 y 93→11 · FCF y 167→181(2024 교차=막대 상단 접점 유지). ds-rtl 2줄·ds-fn·§3 인벤토리 축 표기 동기화. 신규 토큰·클래스 0 · check-docs·node --check·jsdom 통과.
+- 2026-07-27 12:55 · **01 「사이클 판별 보드」(AI capex 4지표 · `gates.js`+`gates.json`) 신설.** SimpleorNothing 지시. risk.js 패턴 복제 — 초기 ①수주잔고vs capex 🟢(RPO +93~99% > capex +77%) ②상각기간 🟡(AMZN 6→5년 첫 단축) ③조달·환원 🟡(META 바이백 중단·GOOGL $84.75B 증자) ④모델 조달 🟢(H1 VC $510B). 다음 관문 = 3분기 실적 + Anthropic 10월 IPO. 로더 = `changelog.js` `loadGates()`(index.html 무편집) · 신규 토큰 0 → check-docs·node --check·jsdom 통과. narrative≠numbers. §3 1행 · STYLE_GUIDE 동반. PR #498(모듈)+후속 patch 재적용 — #497~#500 경합으로 초회 b64 컨텍스트 표류, 경합 내성 hunk(선행 ctx 0)로 재배포.
+- 2026-07-27 12:16 · **05 결정판 자산 구성 재분류 — 「기타 지수·채권혼합」(코스피50 122090 + 코스피200채권혼합 183700, ~40M/4.9%) → L3 방어 서브슬리브 편입 · 「기타 테슬라」 리스트 맨 아래 고정.** SimpleorNothing 지시(스크린샷 ①기타 맨 아래 ②내용 파악해 해당 레이어로). 근거: 183700=코스피200 주식3:국고채7 혼합·주식레그 지배 종목=삼성전자+SK하이닉스(코스피200 내 합산 >50%, 26/5 첫 돌파) → 삼성SK채권혼합의 L3 「메모리 방어자산」 선례와 동일 규칙 적용. 반영 4점 세트: ①`holdings.json` detail 2행 layer L3 전환+삼성SK채권혼합 뒤 재배치·L3 버킷 401M/48.9% 흡수·테슬라 행 현금 뒤(맨 아래) ②`scripts/sync-holdings.mjs` LAYERS/DETAIL 동일 재배열(주간 동기 원복 방지) ③`index.html` 정적 HOLDINGS·HOLD_DETAIL 동순서 + TARGETS 밴드 리베이스: L3 30–32→**34–37**(舊기타 내 지수·채권 방어 4~5%p 이관), 기타 8–11→**4–6**(테슬라 단독) — 밴드 mid 합 불변(94.5), 시황 판단은 6/21 유지·TARGETS_ASOF=7/27 표기 ④본 이력. 갭 판독 영향: L3 48.9% vs 34–37(+13%p 오버, 재분류 전과 동일 크기) · 기타 4.3% 밴드 내 · 게이트·γ 로직 무변. index.html은 patches/*.b64(md5 왕복)·전 스크립트 블록 node --check·check-docs 통과. narrative≠numbers — 실측 재분류이며 체결·수량 무변.
+- 2026-07-27 11:51 · **02 aisd.js — ③ CAPEX 막대에 「①매출 · ②FCF」 4사 합산 라인 오버레이(실적+추정).** SimpleorNothing 지시(스케치). `ds-bars` 절대배치 SVG(실선=실적/점선=추정 · 점 채움/테두리 규약 계승) + `ds-rt` 값 트랙 2줄. **축 2원화**: 매출=독립 축($1.25T→~$2.4T · CAPEX/매출 12%→38%E) · FCF=CAPEX 동일 $축(~$210B→26E ~$0) — **2024 교차→26E 붕괴** 기하 노출. 색=기능색(매출 st-dawn·FCF st-hot·▼=st-accel). 소스: 실적=각사 공시 합산(AMZN 25 $716.9B)·26E FCF~0=MS/BofA/Epoch 컨센(AMZN -$17~28B·GOOGL ~$8.2B)·27E~=예시(캡처 축적 전). 렌즈 l2·섹션명 갱신. 신규 클래스·토큰 0 → check-docs·node --check·jsdom 스모크 통과. narrative≠numbers(숫자 파일 불변). §3 ③ 갱신·STYLE_GUIDE 동반.
+- 2026-07-26 20:05 · **#v-cal 모바일 칩 행 2차 픽스 — ≤640px grid·flex 폭 계산 제거(블록 플로).** 스크린샷 리포트: D-N 배지 하이픈 꺾임(「D-」/「31」)+분류점이 날짜 위 겹침. 원인=12:40 픽스의 `auto 12px 1fr`에서 auto 트랙<칩 폭이면 flex-shrink 개행+트랙 오버플로. 수정=`.cal-row` block(`:not(.cal-past)` 폴드 보존)·칩 inline·D-N `nowrap`·`.cat-dot` inline-block·본문 full-width. CSS 1줄·토큰 0·check-docs 통과·b64 md5 왕복. (STYLE_GUIDE 동반)
+
+- 2026-07-26 14:35 · **01 뷰 최상단(nav↔`.vhead` 사이) 「오늘의 투자 명언」 스트립 신설(`quote.js` 자가 마운트).** SimpleorNothing 지시(스크린샷 위치 · 증시 반영 랜덤 명언). `signals.json`(CNN F&G·VIX·나스닥 DD) 합산 스코어로 공포/중립/과열 레짐 판정 → 레짐별 내장 풀(각 8개 · 버핏·템플턴·멍거·린치·그레이엄·막스·월가 격언)에서 랜덤 1개, 스트립 클릭 시 같은 레짐 안 교체(직전 반복 배제). 우측 칩 = 레짐 라벨(공포=청 `--st-accel`·과열=적 `--st-hot`=등락색 규약·중립 무채) + F&G·VIX·나스닥 라이브 수치. 로더 = `changelog.js` `loadQuote()`(raer·lead·risk·trade 패턴) — **index.html·worker.js 무편집**. 레짐은 명언 「선곡」 전용으로 매크로 게이트(3중 AND)와 별개 렌즈 · narrative≠numbers(숫자·판단 파일 불변). signals 실패 시 중립 풀+「지표 수집 대기」 칩(§6-6). 신규 `:root` 토큰·전역 클래스 0(`<style id="quote-css">` `#mktQuote` 스코프) → TOKENS 무변·check-docs 통과·`node --check` 통과. §3 01 인벤토리 1행 · STYLE_GUIDE 동반.
+- 2026-07-26 12:40 · **#v-cal 모바일 판독성 픽스 — `.cal-row`를 ≤640px에서 스택 레이아웃으로.** SimpleorNothing 리포트(스크린샷 — `#calFull` 본문이 글자 단위 세로 줄바꿈). 원인 = 데스크톱 우선 3열 그리드(70px·12px·1fr)+작은 폰트(12.5px) → 모바일 확대·텍스트 리플로 시 본문 열이 최소폭으로 붕괴. 수정 = `@media(max-width:640px)`에서 날짜칩+분류점 1행·`.cal-body`는 `grid-column:1/-1` full-width 2행, 칩 좌정렬(D-N 인라인·`br` 숨김), 본문 폰트 상향(.ti 15.5·.mt 14), `word-break:keep-all`+`overflow-wrap:anywhere`(한글 어절 단위 줄바꿈). index.html CSS만·신규 토큰·클래스 0 → check-docs 통과. `patches/*.b64`(md5 왕복). 미반영이던 calFull docsync 동반 반영. (STYLE_GUIDE 동반)
+- 2026-07-26 12:15 · **01 「토픽 레이더」 제목 중복 표시 수정(레이스 픽스 3파일).** SimpleorNothing 리포트(스크린샷 — h2 2개). 원인 = 자가 마운트 레이스: insight.js가 `#insStripMarket`(div)을 `#mktMacroNews` 앞에 끼우면 lead.js 「직전 형제=H2」 앵커 판정이 깨져 「월간 선행지표」 h2가 host 직전에 꽂히고, news-dedup.js 리네임이 「역행 첫 .msec」를 잡아 그 h2를 「토픽 레이더」로 오인 리네임(관련 기사 h2는 기리네임 → 화면 2개 + 선행지표 제목 소실). 수정 ①lead.js 선행 H2까지 역행 삽입 ②risk.js 폴백 동일 ③news-dedup.js 리네임 대상 한정(data-radar or 「관련 기사/토픽 레이더」 시작). jsdom 시뮬레이션 구판 재현·신판 단일·선행지표 보존·순서 검증 · node --check 3파일 · check-docs 통과(토큰 무변). 런타임 상태라 배포 후 새로고침으로 해소(데이터·index.html 무변·신규 토큰 0). narrative≠numbers.
+- 2026-07-26 11:30 · **#v-cal에 동적 「다가오는 이벤트」 구역(`#calFull`·`renderCalFull()`) 신설 — 01 「다가오는 일정」 8칸 밖 먼 일정(9월+) 표시.** 진단: ①01 카드=근접 8칸(`CAL_NOW_MAX`·`.slice(0,8)`)이라 고정 D-N 아님 ②「전체 캘린더」는 정적 타임라인이라 `calendar.json`·`CAL_OVR` 미소비 → 8칸 밖은 어디에도 미표시. 수정: `#v-cal` 상단 `#calFull`+`renderCalFull()`(renderCalNow와 동일 소스, 8칸 컷 없이 월별). renderCalNow 말미 연쇄+`.cal-jump` 재호출. index.html만 앵커 치환·신규 토큰 0·check-docs·jsdom 9검사. narrative≠numbers. (STYLE_GUIDE §9 동반)
+- 2026-07-26 05:45 · **01 「다가오는 일정」 운영자 오버레이 — 카드 롱프레스 삭제 + 「＋ 이벤트 추가」 모달(AI 필드 추출).** SimpleorNothing 지시(①롱프레스 삭제 ②추가 버튼→이벤트 입력 ③생성 시 내용 파악해 추가). worker 신설 3종: `/api/calevents` GET/POST(R2 `calevents.json` `{added,removed}` · `calevClamp` 검증 — d 형식·lbl 필수·cat 화이트리스트·길이 캡·512KB 컷) · `/api/calevent-parse`(opus-4-8 · max_tokens 400 · JSON only). 프런트: `CAL_OVR` 병합(`calEvKey`=d|lbl) · pointer 이벤트 롱프레스(이동 10px·업 취소, contextmenu 억제) · `#calEvModal`(파싱→검토→저장 · 낙관적 렌더 후 저장 실패 alert). `calendar.json`·크론 프루닝 무편집 — 오버레이는 R2 별도 보관이라 프루닝과 충돌 없음(지난 이벤트는 렌더 필터가 자동 제거). `node --check`(worker·인라인 11블록) · check-docs 통과(토큰 무변) · jsdom 스모크 10검사 통과. 반영 = `patches/*.b64` PR(md5 왕복). narrative≠numbers — 표시 큐레이션일 뿐 숫자 파일 불변. (STYLE_GUIDE §6-1·§9 동반)
+- 2026-07-26 · **01 지표 7번째 카드 「미국 가솔린」 추가 (WTI 다음).** SimpleorNothing 지시. worker `/api/gasoline` = 기존 `handleWti` 를 `sym/stooqSym` 파라미터화해 재사용(RB=F RBOB 가솔린 선물 $/gal · Yahoo 우선·Stooq `rb.f` 폴백·출력 스키마 `points` 동일). 프런트는 §6 레퍼런스 복제 — `loadGas`/`lensGas` = `loadWti` 미러(소수 2자리 $/gal), 렌즈 2줄(l1=인플레·WTI 하류·CPI 에너지 / l2=기간% → 판정), `redrawCharts`·`render` 배선. 신규 토큰·CSS 0. narrative≠numbers — 숫자 파일 불변. (§3 인벤토리 1행 동반)
+- 2026-07-25 14:20 · **01 「보유 종목」 스파크라인 삭제 → 「리스크 보드」(3축) 신설(`risk.js` 자가 마운트 + `risk.json`).** SimpleorNothing 지시. 3축 = ①사모 크레딧의 역습 ②채권 자경단의 귀환 ③수출 바통 터치 — 축마다 상태 배지(점등/연기/완화·반전)·렌즈 2줄·게이지 4행·**점등(해제) 조건**·레이어 리드스루. **보드 위 인사이트 2줄** = l1 상태 집계 런타임 자동 파생 + l2 `risk.json.insight`. **뉴스 자동 반영** = `news.json`(크론 06:12·18:12)을 축별 `keys`로 매칭(라틴은 단어 경계 — 부분 일치면 `Ares`가 `shares`를 잡는다)·`xkeys`로 동형이의 배제(③ 「수출통제」)·최근 45일 축당 3건. 0건이면 대기 사유 표기(현재 ①=0건 = 급성 사모 크레딧 사건 미유입이라는 관측 결과 자체). **index.html·worker.js 무편집** — `changelog.js`에 `loadRisk()` 1개(raer·lead 패턴), 보유 섹션 제거도 `risk.js`가 런타임 수행. 신규 `:root` 토큰 0 → check-docs 통과(토큰 24종)·`node --check`·jsdom 스모크 통과. **narrative≠numbers** — 숫자·판단 파일 전부 불변. §3 01 인벤토리 2행 · STYLE_GUIDE 동반.
+- 2026-07-24 00:30 · **02 AI 수요·공급 로드맵 ③ 「CAPEX 실현 검증」 3종을 텍스트 트랙 → 2023~2028 연도별 막대차트로 시각화.** SimpleorNothing 지시(막대그래프로·가능한 데이터 채우고 없으면 빈칸). 기존 `ds-rt`(시계열 트랙) 3개를 CAPEX 막대와 같은 `ds-bars`/`ds-bar(.est)`/`ds-bc`/`ds-bv`/`ds-bx` 컴포넌트 3개(각 6막대 2023~2028E)로 교체 — ①가속기 L2 = NVDA DC매출(23 $47B·24 $115B·25 $194B[FY26 실적 $193.7B]·26E ~$285B·27E ~$360B·28E 빈칸, FY→캘린더 근사) ②메모리 L3 = HBM 시장규모(23 $5.5B·24 $18B·25 $35B·26E ~$55B[BofA $54.6B]·27E ~$70B·28E ~$100B) ③전력 L8 = 글로벌 DC전력 TWh(23 빈칸·24 415[IEA 실적]·25~28E ~480/550/630/720 IEA 2030=945 궤적 보간). 채운 막대=실적·테두리(.est)=추정/보간·`—`=데이터 공백. 소스: NVDA 실적·TrendForce/BofA·IEA Energy&AI. **막대 높이는 지표별 최대값 정규화(단위 상이 → 3개 독립 축)**. `aisd.js`만 편집 — `ds-bars` 높이만 인라인(118px)로 축소, **신규 CSS 클래스·:root 토큰 0**(빈칸은 `ds-bar` 없이 `ds-bv`만) → `node --check` 통과·`check-docs` 통과(토큰 24종)·소스 스모크(ds-bc 18·ds-bars 3·빈칸 2). **narrative≠numbers** — 시장규모·전력은 관측 방향성·컨센 추정, 숫자 파일 전부 불변. §3 로드맵 인벤토리 ③ 문구 갱신 · STYLE_GUIDE §9 동반.
+- 2026-07-24 00:10 · **02 AI 수요·공급 로드맵 ③에 「CAPEX 실현 검증 — 3종 동행 지표」 트랙 신설.** SimpleorNothing 지시(CAPEX에 더해 파악할 지표 — 가속기·메모리 시장규모 등). CAPEX 리비전 트랙 카드 바로 아래에 렌즈 2줄 + `ds-card` 1장 추가 — CAPEX(명목 달러 입력)가 실제로 무엇을 사는지 동행 검증하는 3종을 기존 `ds-rt`(리비전 트랙) 컴포넌트로: ①**가속기 L2 실현** = NVDA DC매출(FY26Q2 $41B→Q3 $51.2B ▲25%qoq·YoY+66%→Q4E ~$58B·가시성 ~$500B BW+Rubin — 명목$ 시계) ②**메모리 L3** = HBM 시장 25 $35B→26E ~$50B→28E $100B(40%+CAGR)·DRAM 비트 ~20%·계약가↑(물량+가격 시계 · **계약가 롤오버 = MU γ-닫힘 트리거③ 역감시선**) ③**전력 L8** = DC 신규계약 GW·PPA(US수요 2027 2배·26 +26%yoy·글로벌 +165% by30 — 커밋 실물 시계). **3종 = 서로 다른 3시계**(명목$/물량+가격/커밋 실물) — 셋이 동시 꺾여야 수요 피크 확증, 하나만으론 플래그. 트리거 승격은 MU γ 3트리거·매크로 게이트 AND에만(스틸맨: 지표 과결정·계약가 스팟/장기 혼재 오독·PPA 리드타임 둔감 → 동행 검증축으로만). **수치=컨센서스·공개 실적 방향성·캡처 축적 전 예시**(연동 시 분기 스냅샷 자동 파생). `aisd.js`만 편집(index.html·pantone.css 무편집) — 기존 컴포넌트(ds-lens·ds-card·ds-rt·ds-rtl·ds-rts·ds-rta·ds-rev.up·ds-rtv·ds-fn·ds-ok/nt/wn 기능색) 전면 재사용, **신규 CSS 클래스·:root 토큰 0** → `node --check` 통과·`check-docs` 통과(토큰 24종 무변)·소스 스모크(ds-rt 6개=리비전3+신규3·트랙 위치·문자열). **narrative≠numbers** — 숫자 파일(gamma·holdings·earnings·judgment·signal_log) 전부 불변(시장규모·실적은 관측 방향성일 뿐). §3 로드맵 인벤토리 행 갱신 · STYLE_GUIDE §9 동반.
+- 2026-07-21 22:29 · **02 AI 수요·공급 로드맵 ④에 「칩 제조사별 Capex」 표 신설 — 삼성전자·SK하이닉스·마이크론·TSMC 구분.** SimpleorNothing 지시(한경 2026-07-20 「TSMC도 증설 가세」 반영 + 「칩 부분을 4사로 구분, 컴퓨트 반도체·메모리는 적절히 구분」). 기존 ④ Factory 구성요소별 표(컴퓨트/메모리/통신/냉각/전력 = 병목 추적 프레임)는 **보존**하고, 그 아래에 `aisd.js` `HTML` 템플릿에 회사별 표(`ds-mtx.plan`)를 추가 — 각 사를 역할로 구분: 삼성전자(메모리 L3·파운드리 L2)·SK하이닉스(메모리 L3)·마이크론(메모리 L3)·TSMC(파운드리 L2·L4). 연도별(~2025/2026E/2027E/2028E~) 캐파 로드맵에 기사 확정 수치 반영 — TSMC 대만 5년 25팹·캐파 1.5배·애리조나 총 $265B(₩392조·+$100B)·설비투자 $60~64B 상향, 삼성·SK 전남광주 ₩800조 HBM D램, SK 웨이퍼 캐파 2배↑, 마이크론 미국 $250B(₩370조)·일본 히로시마 HBM ₩14조, 인텔 아일랜드 팹34 $57B(sumrow 각주). 기존 구성요소별 메모리 L3 행 2027E 셀에도 전남광주·SK 2배 병기. **발표·로드맵 = narrative** — `signal_log` 포함 숫자 파일(gamma·holdings·earnings·judgment) 전부 불변(캐파 증설 발표는 목표가 리비전이 아님). `aisd.js`만 편집(index.html·pantone.css 무편집) — 기존 컴포넌트(ds-sec·ds-lens·ds-card·ds-mtx.plan·ds-co·ds-lb.sem·ds-rev·ds-fn) 전면 재사용, **신규 CSS 클래스·:root 토큰 0** → `node --check` 통과·`check-docs` 통과(토큰 24종 무변)·jsdom 스모크(회사 4행+sumrow·역할 배지·셀 수) 통과. §3 로드맵 인벤토리 행 갱신 · STYLE_GUIDE §9 동반.
 - 2026-07-21 21:00 · **01 시장 맥박 근거 기사 링크 안 열림 수정 — LLM 에게 URL 을 받지 않는다(`fetch-pulse.mjs`).** 원인은 CSS 가 아니라 데이터 — 불투명 base64 구글뉴스 URL 을 모델이 옮겨 적다 망가뜨렸다(07:16 판 12건 전부 `?oc=5` 탈락 + 4건 1~2자 손상, 20:24 판 0/12 재현). 모델은 기사 번호(`si`)로 지목만 하고 `resolveSrcs()` 가 원본 링크를 채운다(구판 `u` 는 3단 복구, 실패분은 버림). `max_tokens` 8192→4096. `node --check`·단위 스모크 통과. 라이브 `pulse.json` 은 다음 크론(06:12)이 재생성하며 자동 정상화. narrative≠numbers. **교훈: 불투명 식별자를 LLM 출력으로 왕복시키지 않는다.**
 - 2026-07-21 · **전방 관측 ④ — 월간 선행지표(FRED) 신설.** 자동층이 전부 일간 시세라 앞을 보는 축이 없던 공백. `fetch-signals.mjs` `fetchLead()` → `signals.json.lead` (반도체 생산지수·가동률·비국방 자본재 신규수주, mom3+yoy). 01은 `lead.js` 자가 마운트 카드(`changelog.js` 주입 · index.html 무편집 · 신규 토큰 0). 워크플로 편집 불요. 미착수 후보: TSMC 월매출, 관세청 10일 수출, 전력 지표.
 
