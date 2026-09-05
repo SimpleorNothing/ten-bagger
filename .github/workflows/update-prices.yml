@@ -114,7 +114,7 @@ jobs:
           fi
       - name: Create protected-main PR when changed
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.AUTO_MERGE_TOKEN }}
         run: |
           set -euo pipefail
           FILES="prices.json charts.json gamma.json cycle.json revision-benchmark.json scores.json raw/revisions"
