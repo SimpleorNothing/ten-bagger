@@ -20,8 +20,8 @@ const YEAR    = 2026;
 
 // [B열 계좌 구간, C열 라벨]. null 구간은 시트 전체에서 정확히 한 번만 나오는 라벨이다.
 const ROW_SPEC = {
-  tesla:['개인투자','테슬라'], marvell:['개인투자','마벨'], micron:['개인투자','마이크론'],
-  lumentum:['개인투자','루멘텀'], vertiv:['개인투자','버티브'], bloom:['개인투자','블룸에너지'],
+  tesla:['개인투자','테슬라'], marvell:['개인투자','마벨'], broadcom:['개인투자','브로드컴'], micron:['개인투자','마이크론'],
+  lumentum:['개인투자','루멘텀'], credo:['개인투자','크레도 테크놀로지'], vertiv:['개인투자','버티브'], bloom:['개인투자','블룸에너지'],
   samsung:['개인투자','삼성전자'], pDram3x:['개인투자','레버리지셰어즈 메모리DRAM3배'],
   pHanmi:['개인투자','한미반도체'], pEquip:['개인투자','KODEX AI반도체핵심장비'],
   pCash:['개인투자','나머지(현금)'],
@@ -36,10 +36,10 @@ const ROW_SPEC = {
 
 // 레이어 집계 정의 (OPS §7 · 6/13 역산 검증) — [layer, label, [ROW 키…], [detail name…](members)]
 const LAYERS = [
-  ['L2','연산칩 (마벨·KODEX 미국AI반도체TOP3+)',              ['marvell','dcTop3'],                                  ['마벨','KODEX 미국AI반도체TOP3+']],
+  ['L2','연산칩 (마벨·브로드컴·KODEX 미국AI반도체TOP3+)',     ['marvell','broadcom','dcTop3'],                       ['마벨','브로드컴','KODEX 미국AI반도체TOP3+']],
   ['L3','메모리 (마이크론·삼성전자·DRAM3배·HBM ETF·삼성SK채권혼합·지수혼합)', ['micron','samsung','pDram3x','irpHBM','dcHBM','irpSSK','dcSSK','irpKospi','irpBond','dcBond'], ['마이크론','삼성전자','레버리지셰어즈 메모리DRAM3배','글로벌HBM반도체','삼성·SK 채권혼합','코스피50','코스피200 채권혼합']],
   ['L4','소부장 (한미반도체·KODEX AI반도체핵심장비)',          ['pHanmi','pEquip','dcEquip'],                           ['한미반도체','KODEX AI반도체핵심장비']],
-  ['L6','연결 (루멘텀·KODEX 미국AI광통신네트워크)',            ['lumentum','dcOptic'],                                ['루멘텀','KODEX 미국AI광통신네트워크']],
+  ['L6','연결 (루멘텀·크레도·KODEX 미국AI광통신네트워크)',     ['lumentum','credo','dcOptic'],                        ['루멘텀','크레도 테크놀로지','KODEX 미국AI광통신네트워크']],
   ['L7','전력·냉각 in-rack (버티브)',                         ['vertiv'],                                            ['버티브']],
   ['L8','그리드·송전·발전 (KODEX·SOL 전력ETF + 블룸)',        ['bloom','dcPower','dcSolPower'],                      ['블룸에너지','KODEX AI전력핵심설비','SOL 미국AI전력인프라']],
   ['현금','현금',                                            ['pCash','dcCash'],                                    ['현금']],
@@ -53,6 +53,7 @@ const LAYERS = [
 // meta.pxRow/irpEval = IRP 전용(코스피50)용 벤치마크 종가행으로 수량 역산.
 const DETAIL = [
   ['마벨','MRVL','L2',['marvell'],                 {priceKey:'mrvl',ccy:'USD',mkt:'NASDAQ',qk:['marvell']}],
+  ['브로드컴','AVGO','L2',['broadcom'],              {priceKey:'avgo',ccy:'USD',mkt:'NASDAQ',qk:['broadcom']}],
   ['KODEX 미국AI반도체TOP3+','0151S0','L2',['dcTop3'],{priceKey:'k_semitop3',ccy:'KRW',mkt:'KOSPI',qk:['dcTop3']}],
   ['마이크론','MU','L3',['micron'],                {priceKey:'mu',ccy:'USD',mkt:'NASDAQ',qk:['micron']}],
   ['레버리지셰어즈 메모리DRAM3배','—','L3',['pDram3x'],{}],
@@ -64,6 +65,7 @@ const DETAIL = [
   ['한미반도체','042700','L4',['pHanmi'],{priceKey:'hanmi',ccy:'KRW',mkt:'KOSPI',qk:['pHanmi']}],
   ['KODEX AI반도체핵심장비','471990','L4',['pEquip','dcEquip'],{priceKey:'kodexeq',ccy:'KRW',mkt:'KOSPI',qk:['pEquip','dcEquip']}],
   ['루멘텀','LITE','L6',['lumentum'],              {priceKey:'lite',ccy:'USD',mkt:'NASDAQ',qk:['lumentum']}],
+  ['크레도 테크놀로지','CRDO','L6',['credo'],          {priceKey:'crdo',ccy:'USD',mkt:'NASDAQ',qk:['credo']}],
   ['KODEX 미국AI광통신네트워크','0173Y0','L6',['dcOptic'],{priceKey:'optetf',ccy:'KRW',mkt:'KOSPI',qk:['dcOptic']}],
   ['버티브','VRT','L7',['vertiv'],                 {priceKey:'vrt',ccy:'USD',mkt:'NYSE',qk:['vertiv']}],
   ['KODEX AI전력핵심설비','487240','L8',['dcPower'],{priceKey:'k_power',ccy:'KRW',mkt:'KOSPI',qk:['dcPower']}],
@@ -143,7 +145,7 @@ export function parse(buf) {
 
 // 평단 추출 대상 (개별 종목만 — ETF·현금은 xlsx에 매입가 블록 없음). [프론트 차트 키, ROW 키]
 const AVG_KEYS = [
-  ['mrvl','marvell'], ['mu','micron'], ['lite','lumentum'],
+  ['mrvl','marvell'], ['avgo','broadcom'], ['mu','micron'], ['lite','lumentum'], ['crdo','credo'],
   ['vrt','vertiv'],   ['be','bloom'],  ['tsla','tesla'],
 ];
 
