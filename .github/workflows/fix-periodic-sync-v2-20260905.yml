@@ -1,0 +1,57 @@
+name: Fix periodic release sync v2 2026-09-05
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/fix-periodic-sync-v2-20260905.yml'
+  workflow_dispatch: {}
+permissions:
+  contents: write
+  pull-requests: write
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Apply deterministic sync
+        run: python3 scripts/fix-periodic-sync-20260905.py
+      - name: Validate
+        run: |
+          python3 - <<'PY'
+          import json
+          for f in ['calendar.json','pulse.json','cpi.json']:
+              json.load(open(f,encoding='utf-8'))
+          cal=json.load(open('calendar.json',encoding='utf-8'))
+          txt=json.dumps(cal,ensure_ascii=False)
+          assert 'NFP +162K' in txt and 'CPI +3.1% YoY' in txt and '$29.591B' in txt
+          c=json.load(open('cpi.json',encoding='utf-8')); kr=dict(c['series']['kr'])
+          assert kr['2026-06-01']==3.2 and kr['2026-07-01']==2.8 and kr['2026-08-01']==3.1
+          p=json.load(open('pulse.json',encoding='utf-8')); r=next(x for x in p['drivers'] if x['ax']=='rates')
+          assert 'NFP +162K' in r['l1'] and '한국 8월 CPI' in r['l1']
+          PY
+          node --check worker-core.js
+          node --check changelog.js
+          grep -Fq '美 CPI · 8월분' worker-core.js
+          grep -Fq '美 고용보고서 (실업률·NFP) · 8월분' worker-core.js
+          grep -Fq 'KR_OFFICIAL_YOY' scripts/fetch-cpi.mjs
+          git diff --check
+      - name: Commit and open PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          BRANCH="claude/automation-periodic-sync-v2-${GITHUB_RUN_ID}"
+          git checkout -b "$BRANCH"
+          git add calendar.json pulse.json cpi.json worker-core.js changelog.js scripts/fetch-cpi.mjs .github/workflows/update-cpi.yml patches
+          git commit -m 'fix: synchronize August employment and Korea CPI consumers'
+          git push -u origin "$BRANCH"
+          gh pr create --base main --head "$BRANCH" --title 'fix: synchronize August employment and Korea CPI consumers' --body 'BLS 8월 고용, 한국 8월 CPI, Broadcom FY26 Q3를 확인된 모든 소비처에 동기화하고 한국 CPI 시계열 재회귀를 방지합니다.'
