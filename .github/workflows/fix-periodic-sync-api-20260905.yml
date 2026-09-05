@@ -1,0 +1,49 @@
+name: Fix periodic release sync API 2026-09-05
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/fix-periodic-sync-api-20260905.yml'
+  workflow_dispatch: {}
+permissions:
+  contents: write
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Apply deterministic sync locally
+        run: python3 scripts/fix-periodic-sync-20260905.py
+      - name: Validate locally
+        run: |
+          python3 - <<'PY'
+          import json
+          for f in ['calendar.json','pulse.json','cpi.json']:
+              json.load(open(f,encoding='utf-8'))
+          c=json.load(open('cpi.json',encoding='utf-8')); kr=dict(c['series']['kr'])
+          assert kr['2026-06-01']==3.2 and kr['2026-07-01']==2.8 and kr['2026-08-01']==3.1
+          cal=json.load(open('calendar.json',encoding='utf-8')); txt=json.dumps(cal,ensure_ascii=False)
+          assert 'NFP +162K' in txt and 'CPI +3.1% YoY' in txt and '$29.591B' in txt
+          PY
+          node --check worker-core.js
+          node --check changelog.js
+          git diff --check
+      - name: Write changed files to pre-created automation branch via GitHub API
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          TARGET_BRANCH: automation/final-periodic-sync-20260905
+        shell: bash
+        run: |
+          set -euo pipefail
+          files=(calendar.json pulse.json cpi.json worker-core.js changelog.js scripts/fetch-cpi.mjs .github/workflows/update-cpi.yml)
+          for f in "${files[@]}"; do
+            sha=$(gh api "repos/$GH_REPO/contents/$f?ref=$TARGET_BRANCH" --jq .sha)
+            content=$(base64 -w0 "$f")
+            jq -n --arg message "fix: sync $f from official periodic releases" --arg content "$content" --arg sha "$sha" --arg branch "$TARGET_BRANCH" '{message:$message,content:$content,sha:$sha,branch:$branch}' > /tmp/payload.json
+            gh api -X PUT "repos/$GH_REPO/contents/$f" --input /tmp/payload.json >/dev/null
+          done
+          echo "updated $TARGET_BRANCH"
