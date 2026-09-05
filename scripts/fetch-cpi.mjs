@@ -68,6 +68,19 @@ function freshest(cands) {
   return cands.filter((a) => a && a.length).sort((a, b) => (lastDate(a) < lastDate(b) ? 1 : -1))[0] || [];
 }
 
+const KR_OFFICIAL_YOY = {
+  '2026-06-01': 3.2,
+  '2026-07-01': 2.8,
+  '2026-08-01': 3.1,
+};
+
+function applyOfficialOverrides(key, series) {
+  if (key !== 'kr') return series;
+  const m = new Map(series || []);
+  for (const [d, v] of Object.entries(KR_OFFICIAL_YOY)) m.set(d, v);
+  return [...m.entries()].sort((a, b) => a[0].localeCompare(b[0]));
+}
+
 async function main() {
   let prev = { asOf: null, series: {} };
   try { prev = JSON.parse(fs.readFileSync(OUT, 'utf8')); } catch (e) { /* first run */ }
@@ -97,7 +110,7 @@ async function main() {
     try { cands = await fn(); } catch (e) { console.log(`WARN ${k}: ${e.message}`); }
     // 직전 커밋(prev)을 후보 맨 앞에 둔다 → 자동 소스가 더 '최신 월'을 줄 때만 갱신하고,
     // 그렇지 않으면(특히 韓·日의 수기 공식치) 커밋된 값을 절대 staler 한 소스로 되돌리지 않는다.
-    const best = freshest([prev.series && prev.series[k], ...cands]);
+    const best = applyOfficialOverrides(k, freshest([prev.series && prev.series[k], ...cands]));
     if (best.length) {
       out.series[k] = best; ok++;
       console.log(`OK   ${k} ${best.length}pts → last ${best[best.length - 1].join('=')}`);
