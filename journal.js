@@ -32,7 +32,7 @@
   #v-journal .jr-up{color:var(--st-dawn);font-weight:800}#v-journal .jr-down{color:var(--st-hot);font-weight:800}#v-journal .jr-flat{color:var(--dim);font-weight:800}
   #v-journal .jr-open{color:var(--st-mature);font-weight:800}#v-journal .jr-done{color:var(--st-dawn);font-weight:800}
   #v-journal .jr-empty{padding:42px 0;text-align:center;color:var(--faint);font-size:14px}
-  @media(max-width:850px){#v-journal .jr-grid{grid-template-columns:1fr}#v-journal .jr-row{grid-template-columns:80px 80px 1fr}.jr-hide-sm{display:none}}
+  @media(max-width:850px){#v-journal .jr-grid{grid-template-columns:1fr}#v-journal .jr-row{grid-template-columns:80px 80px 1fr}.jr-hide-sm{display:none}#v-journal>.jr-card:last-child{margin-bottom:calc(var(--am-ticker-h) + 16px)}}
   @media(max-width:560px){#v-journal .jr-fields{grid-template-columns:1fr}#v-journal label.wide{grid-column:auto}#v-journal .jr-row{grid-template-columns:70px 72px 1fr;gap:7px}}
   `;
   var SECTION=`<div class="vhead"><div class="vkick">Investment Journal · 판단과 결과의 연결</div><h1 class="vtitle">수익률이 아니라 <em>EPS 선행지표</em>로 기록한다</h1><p class="vsub">매매 전 가설·촉매·EPS 트리거를 고정하고, 결과가 나온 뒤 분석·타이밍·비중을 따로 채점한다. 수익이 난 판단과 운이 좋았던 판단을 구분한다.</p></div>
