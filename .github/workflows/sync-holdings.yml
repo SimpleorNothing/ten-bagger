@@ -70,7 +70,7 @@ jobs:
         run: node scripts/reconcile-held-consumers.mjs
       - name: Create protected-main PR when changed
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.AUTO_MERGE_TOKEN }}
         run: |
           set -euo pipefail
           FILES="holdings.json index.html news_digest.json"
