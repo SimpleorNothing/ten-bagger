@@ -842,9 +842,9 @@ function marketEligible(c) {
 function macroCalendarTarget(c, rec) {
   const text = `${c && c.text || ""} ${c && c.why || ""} ${rec && rec.src && rec.src.title || ""}`.toLowerCase();
   if (/\bfomc\b|federal reserve|연방공개시장위원회|연준.{0,12}(금리|결정|통화정책)/i.test(text)) return "FOMC";
-  if (/\bcpi\b|소비자물가/i.test(text)) return "美 CPI · 6월분";
+  if (/\bcpi\b|소비자물가/i.test(text)) return "美 CPI · 8월분";
   if (/\bpce\b|개인소비지출물가/i.test(text)) return "美 PCE";
-  if (/\bnfp\b|고용보고서|실업률|비농업/i.test(text)) return "美 고용보고서 (실업률·NFP) · 7월분";
+  if (/\bnfp\b|고용보고서|실업률|비농업/i.test(text)) return "美 고용보고서 (실업률·NFP) · 8월분";
   if (/\becb\b|유럽중앙은행/i.test(text)) return "ECB";
   if (/\bboj\b|일본은행.*(금정|금리|통화정책)/i.test(text)) return "일본은행 금정위";
   if (/한국.*(금통위|기준금리)|한국은행.*(금통위|기준금리)/i.test(text)) return "한국 금통위";
