@@ -2803,7 +2803,7 @@ export default {
             el.append('<script src="/council-audio.js" defer></scr' + 'ipt>', { html: true });
             el.append('<script src="/council-roster.js" defer></scr' + 'ipt>', { html: true });
             el.append('<script src="/brief.js" defer></scr' + 'ipt>', { html: true });
-            el.append('<script src="/journal.js?v=20260905-01" defer></scr' + 'ipt>', { html: true });
+            el.append('<script src="/journal.js?v=20260905-02" defer></scr' + 'ipt>', { html: true });
           } })
           .transform(res);
         // 대시보드 HTML 은 캐시 금지 — Workers Assets 기본 캐시 헤더 때문에 새 배포가
