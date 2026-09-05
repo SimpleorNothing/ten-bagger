@@ -115,6 +115,28 @@
       +'#v-company .ca-event-type{font-weight:800;color:var(--dawn)}'
       +'#v-company .ca-event-title{font-weight:700}'
       +'#v-company .ca-event-detail{color:var(--dim);margin-top:2px;font-size:13px}'
+      +'#v-company .ca-roadmap-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--line);background:var(--panel)}'
+      +'#v-company .ca-roadmap{width:100%;min-width:940px;border-collapse:collapse;table-layout:fixed}'
+      +'#v-company .ca-roadmap th,#v-company .ca-roadmap td{border-right:1px solid var(--line);border-bottom:1px solid var(--line);vertical-align:top}'
+      +'#v-company .ca-roadmap th:last-child,#v-company .ca-roadmap td:last-child{border-right:0}'
+      +'#v-company .ca-roadmap thead th{padding:11px 9px;background:var(--ink);font-size:14px;text-align:center}'
+      +'#v-company .ca-roadmap thead th:first-child{width:190px;text-align:left;position:sticky;left:0;z-index:3}'
+      +'#v-company .ca-roadmap-company{padding:11px 10px;background:var(--panel);position:sticky;left:0;z-index:2}'
+      +'#v-company .ca-roadmap-company b{display:block;font-size:13px;line-height:1.25}'
+      +'#v-company .ca-roadmap-company span{display:block;margin-top:3px;color:var(--faint);font-size:11px}'
+      +'#v-company .ca-roadmap-sector td{padding:9px 10px;background:var(--ink);font-size:12px;font-weight:800;color:var(--txt);letter-spacing:.03em}'
+      +'#v-company .ca-roadmap-cell{padding:7px;min-height:54px}'
+      +'#v-company .ca-deal{padding:8px;border-left:3px solid var(--dawn);background:color-mix(in srgb,var(--dawn) 8%,var(--panel));font-size:12px;line-height:1.4}'
+      +'#v-company .ca-deal+.ca-deal{margin-top:6px}'
+      +'#v-company .ca-deal[data-status="인수"]{border-left-color:var(--st-hot)}'
+      +'#v-company .ca-deal[data-status="라이선스·인력"]{border-left-color:var(--st-accel)}'
+      +'#v-company .ca-deal[data-status="의향·협상"]{border:1px dashed var(--st-hot);background:transparent}'
+      +'#v-company .ca-deal-top{display:flex;justify-content:space-between;gap:6px;color:var(--faint);font-size:10px}'
+      +'#v-company .ca-deal-type{font-weight:800;color:var(--dawn)}'
+      +'#v-company .ca-deal b{display:block;margin:3px 0 2px;font-size:12px;color:var(--txt)}'
+      +'#v-company .ca-deal-detail{color:var(--dim)}'
+      +'#v-company .ca-roadmap-legend{display:flex;flex-wrap:wrap;gap:8px 14px;margin-bottom:9px;color:var(--faint);font-size:11px}'
+      +'#v-company .ca-roadmap-note{margin-top:9px;color:var(--faint);font-size:11px;line-height:1.45}'
       +'#v-company .ca-fin{overflow:hidden}'
       +'#v-company .ca-table-wrap{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}'
       +'#v-company .ca-table{width:100%;min-width:760px;border-collapse:collapse;table-layout:auto}'
@@ -150,16 +172,39 @@
     document.head.appendChild(st);
   }
 
+  function yearlyTimelineHtml(a){
+    var years=a.timelineYears||[];
+    var groups=a.timelineGroups||[];
+    var legend='<div class="ca-roadmap-legend"><span>전략투자·공동금융</span><span>인수</span><span>라이선스·핵심인력</span><span>의향·협상(점선)</span></div>';
+    var head='<thead><tr><th>업체 · 분야</th>'+years.map(function(y){return '<th>\''+esc(String(y).slice(-2))+'</th>';}).join('')+'</tr></thead>';
+    var body=groups.map(function(g){
+      var sector='<tr class="ca-roadmap-sector"><td colspan="'+(years.length+1)+'">'+esc(g.sector)+'</td></tr>';
+      var rows=(g.companies||[]).map(function(c){
+        var cells=years.map(function(y){
+          var deals=(c.deals||[]).filter(function(d){return String(d.date||'').slice(0,4)===String(y);});
+          return '<td class="ca-roadmap-cell">'+deals.map(function(d){
+            return '<div class="ca-deal" data-status="'+esc(d.status||'')+'"><div class="ca-deal-top"><span class="ca-deal-type">'+esc(d.status||'')+'</span><span>'+esc(String(d.date||'').slice(5))+'</span></div><b>'+esc(d.amount||'금액 미공시')+'</b><div class="ca-deal-detail">'+esc(d.detail||'')+'</div></div>';
+          }).join('')+'</td>';
+        }).join('');
+        return '<tr><td class="ca-roadmap-company"><b>'+esc(c.company)+'</b><span>'+esc(c.role||'')+'</span></td>'+cells+'</tr>';
+      }).join('');
+      return sector+rows;
+    }).join('');
+    return legend+'<div class="ca-roadmap-wrap"><table class="ca-roadmap">'+head+'<tbody>'+body+'</tbody></table></div><div class="ca-roadmap-note">'+esc(a.timelineNote||'')+'</div>';
+  }
+
   function axisHtml(a,i){
     var events=(a.events||[]).map(function(e){return '<div class="ca-event"><div class="ca-event-date">'+esc(e.date)+'</div><div class="ca-event-type">'+esc(e.type)+'</div><div><div class="ca-event-title">'+esc(e.title)+'</div><div class="ca-event-detail">'+esc(e.detail)+'</div></div></div>';}).join('');
+    var timeline=a.timelineView==='yearly-table'?yearlyTimelineHtml(a):events;
+    var timelineLabel=a.timelineView==='yearly-table'?'연도별 타임라인 보기':'타임라인 보기';
     return '<article class="ca-axis">'
       +'<div class="ca-axis-top"><div><div class="ca-axis-code">'+esc(a.code)+' · '+esc(a.basis)+'</div><h3>'+esc(a.title)+'</h3><div class="ca-org">'+esc(a.org)+'</div></div><span class="ca-pill">'+esc(a.status)+'</span></div>'
       +'<div class="ca-summary">'+esc(a.summary)+'</div>'
       +'<div class="ca-fact"><b>확인된 사실</b><ul>'+(a.facts||[]).map(function(x){return '<li>'+esc(x)+'</li>';}).join('')+'</ul></div>'
       +'<div class="ca-interp"><b>투자 해석</b>'+esc(a.interpretation)+'</div>'
       +'<div class="ca-kpi-list">'+(a.kpis||[]).map(function(k){return '<div class="ca-kpi-line">'+esc(k)+'</div>';}).join('')+'</div>'
-      +'<div class="ca-axis-foot"><button type="button" data-ca-timeline="ca-tl-'+i+'" aria-expanded="false">타임라인 보기</button><div class="ca-risk-inline" title="'+esc((a.risks||[]).join(' · '))+'">주요 위험: '+esc((a.risks||[]).join(' · '))+'</div></div>'
-      +'<div class="ca-timeline" id="ca-tl-'+i+'">'+events+'</div></article>';
+      +'<div class="ca-axis-foot"><button type="button" data-ca-timeline="ca-tl-'+i+'" data-ca-label="'+esc(timelineLabel)+'" aria-expanded="false">'+esc(timelineLabel)+'</button><div class="ca-risk-inline" title="'+esc((a.risks||[]).join(' · '))+'">주요 위험: '+esc((a.risks||[]).join(' · '))+'</div></div>'
+      +'<div class="ca-timeline" id="ca-tl-'+i+'">'+timeline+'</div></article>';
   }
 
   function financialHtml(rows){
@@ -329,7 +374,7 @@
     sec.addEventListener('click',function(e){
       var b=e.target.closest&&e.target.closest('[data-company]');if(b){selectCompany(sec,b.getAttribute('data-company'));return;}
       var period=e.target.closest&&e.target.closest('[data-ca-period-toggle]');if(period){try{sessionStorage.setItem('alpha_company_period',period.getAttribute('aria-pressed')==='true'?'quarterly':'annual');}catch(err){}var id=selectedCompany(sec);if(CACHE[id])renderCompany(CACHE[id]);return;}
-      var tlb=e.target.closest&&e.target.closest('[data-ca-timeline]');if(tlb){var id=tlb.getAttribute('data-ca-timeline'),tl=document.getElementById(id);if(!tl)return;var on=tl.classList.toggle('on');tlb.setAttribute('aria-expanded',on?'true':'false');tlb.textContent=on?'타임라인 닫기':'타임라인 보기';}
+      var tlb=e.target.closest&&e.target.closest('[data-ca-timeline]');if(tlb){var id=tlb.getAttribute('data-ca-timeline'),tl=document.getElementById(id);if(!tl)return;var on=tl.classList.toggle('on');tlb.setAttribute('aria-expanded',on?'true':'false');tlb.textContent=on?'타임라인 닫기':(tlb.getAttribute('data-ca-label')||'타임라인 보기');}
     });
     renumber();
     var initial='marvell';try{var saved=sessionStorage.getItem('alpha_company');if(getCompany(saved))initial=saved;}catch(e){}
