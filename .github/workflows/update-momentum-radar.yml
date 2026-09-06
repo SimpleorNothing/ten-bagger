@@ -58,7 +58,7 @@ jobs:
           NODE
       - name: Create protected-main PR when changed
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.AUTO_MERGE_TOKEN }}
         run: |
           set -euo pipefail
           FILES="momentum-radar.json"
