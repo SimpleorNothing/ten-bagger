@@ -32,7 +32,7 @@ jobs:
         run: node -e "const c=require('./calendar.json'); if(!c.events.some(e=>String(e.lbl).startsWith('미국 JOLTS'))) process.exit(1)"
       - name: Create protected-main PR if changed
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.AUTO_MERGE_TOKEN }}
         run: |
           set -euo pipefail
           if git diff --quiet -- calendar.json; then echo "No JOLTS schedule changes."; exit 0; fi

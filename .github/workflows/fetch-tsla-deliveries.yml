@@ -38,7 +38,7 @@ jobs:
 
       - name: Open protected-main PR when signal_log changes
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.AUTO_MERGE_TOKEN }}
         run: |
           set -euo pipefail
           if [ -z "$(git status --porcelain signal_log.json)" ]; then

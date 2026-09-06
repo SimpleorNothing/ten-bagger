@@ -28,7 +28,7 @@ jobs:
         run: node scripts/fetch-capital-scarcity.mjs
       - name: Create protected-main PR if changed
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.AUTO_MERGE_TOKEN }}
         run: |
           set -euo pipefail
           FILE="capital_scarcity.json"
