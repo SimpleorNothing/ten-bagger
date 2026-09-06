@@ -79,9 +79,30 @@
     return true;
   }
 
+  function mountGlobalSemi() {
+    var id = 'mkt_global_semi_sales';
+    if (document.getElementById(id)) return true;
+    var grid = document.getElementById('mktIndicators');
+    if (!grid) return false;
+    var card = document.createElement('div');
+    card.className = 'mkt-card'; card.id = id;
+    card.setAttribute('data-indicator-key', 'global-semi-sales');
+    card.innerHTML = '<div class="mkt-ph">글로벌 반도체 판매 로딩…</div>';
+    grid.appendChild(card);
+    fetch('semi_sales.json?t=' + Date.now(), { cache: 'no-store' }).then(function(r){ return r.ok ? r.json() : null; }).then(function(j){
+      if(!j || !j.latest || !j.series || !j.series.length){ card.innerHTML='<div class="mkt-ph">발표 대기 · SIA/WSTS 월간 판매</div>'; return; }
+      var z=j.latest, vals=j.series.map(function(x){return x.sales;});
+      card.innerHTML='<div class="mkt-nm">글로벌 반도체 판매</div><div class="mkt-val">$'+z.sales.toFixed(1)+'B</div>'+
+        '<div class="mkt-chg up">+'+z.mom.toFixed(1)+'% MoM <span style="font:600 12px var(--mono);margin-left:8px;color:var(--faint)">YoY +'+z.yoy.toFixed(1)+'%</span></div>'+
+        lensRow('<b>AI·인프라 수요</b> 확장 지속 <span class="ok">가속</span>','7월 $'+z.sales.toFixed(1)+'B · 6월 수정 $'+z.priorMonthSales.toFixed(1)+'B · 17개월 연속 MoM 증가 · WSTS 3개월 이동평균')+
+        '<div class="mkt-chart">'+spark(vals,true)+'</div><div class="mkt-span">'+esc(z.ym)+' · SIA/WSTS · 등록 2026-09-04</div>';
+    }).catch(function(){ card.innerHTML='<div class="mkt-ph">SIA/WSTS 데이터 로딩 실패</div>'; });
+    return true;
+  }
+
   function boot() {
-    if (mount()) return;
-    var n = 0, timer = setInterval(function () { if (mount() || ++n > 40) clearInterval(timer); }, 250);
+    mount(); mountGlobalSemi();
+    var n = 0, timer = setInterval(function () { var a=mount(), b=mountGlobalSemi(); if ((a && b) || ++n > 40) clearInterval(timer); }, 250);
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();
