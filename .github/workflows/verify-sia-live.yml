@@ -13,33 +13,39 @@ jobs:
   verify:
     if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
+    env:
+      SITE_PASSWORD: ${{ secrets.SITE_PASSWORD }}
     steps:
-      - name: Verify deployed SIA endpoint and rendered card
+      - name: Verify authenticated SIA data and rendered card on custom domain
         run: |
           set -euo pipefail
-          BASE='https://ten-bagger.cw120-park.workers.dev'
-          curl -fsSL --retry 3 --retry-delay 2 "$BASE/semi_sales.json" -o /tmp/semi_sales.json
-          node - <<'NODE'
-          const fs=require('fs');
-          const d=JSON.parse(fs.readFileSync('/tmp/semi_sales.json','utf8'));
-          const last=d.series[d.series.length-1];
-          const june=d.series.find(x=>x.ym==='2026-06');
-          console.log('LIVE SIA JSON:',{latest:d.latest,last,june});
-          if(d.latest?.ym!=='2026-07'||d.latest?.sales!==146.8||d.latest?.priorMonthSales!==137.9) throw new Error('latest mismatch');
-          if(last?.ym!=='2026-07'||last?.sales!==146.8||june?.sales!==137.9) throw new Error('series mismatch');
-          NODE
-
+          if [ -z "${SITE_PASSWORD:-}" ]; then echo 'ERROR: SITE_PASSWORD required'; exit 1; fi
           mkdir -p /tmp/sia-live && cd /tmp/sia-live
           npm init -y >/dev/null 2>&1
           npm install playwright@1.55.0 >/dev/null 2>&1
           npx playwright install chromium >/dev/null 2>&1
           cat > check.js <<'NODE'
           const { chromium } = require('playwright');
+          const BASE='https://simpleornothing.com';
+          const pw=process.env.SITE_PASSWORD;
           (async()=>{
             const browser=await chromium.launch({headless:true});
-            const page=await browser.newPage({viewport:{width:1440,height:1800}});
+            const context=await browser.newContext({viewport:{width:1440,height:1800}});
+            const auth=await context.request.post(BASE+'/__auth',{form:{password:pw},timeout:30000});
+            if(!auth.ok()) throw new Error('site auth failed: HTTP '+auth.status());
+
+            const dataResp=await context.request.get(BASE+'/semi_sales.json?t='+Date.now(),{timeout:30000,headers:{'Cache-Control':'no-cache'}});
+            if(!dataResp.ok()) throw new Error('live semi_sales.json HTTP '+dataResp.status());
+            const data=await dataResp.json();
+            const last=(data.series||[])[(data.series||[]).length-1];
+            const june=(data.series||[]).find(x=>x.ym==='2026-06');
+            console.log('LIVE SIA JSON:',JSON.stringify({latest:data.latest,last,june},null,2));
+            if(data.latest?.ym!=='2026-07'||data.latest?.sales!==146.8||data.latest?.mom!==6.4||data.latest?.yoy!==135.1||data.latest?.priorMonthSales!==137.9) throw new Error('live SIA latest mismatch');
+            if(last?.ym!=='2026-07'||last?.sales!==146.8||june?.sales!==137.9) throw new Error('live SIA series mismatch');
+
+            const page=await context.newPage();
             const errors=[]; page.on('pageerror',e=>errors.push(String(e)));
-            await page.goto('https://ten-bagger.cw120-park.workers.dev/?sia-smoke='+Date.now(),{waitUntil:'domcontentloaded',timeout:90000});
+            await page.goto(BASE+'/?sia-smoke='+Date.now(),{waitUntil:'domcontentloaded',timeout:90000});
             await page.waitForSelector('#nav .tab[data-v="market"]',{state:'visible',timeout:30000});
             await page.click('#nav .tab[data-v="market"]');
             await page.waitForSelector('#mkt_global_semi_sales',{state:'visible',timeout:45000});
@@ -52,9 +58,10 @@ jobs:
               return {visible:!!el&&!!r&&r.width>0&&r.height>0,text:(el?.innerText||'').trim(),hasSvg:!!el?.querySelector('svg')};
             });
             console.log('LIVE SIA CARD:',JSON.stringify(result,null,2));
-            for(const token of ['$146.8B','+6.4% MoM','YoY +135.1%','6월 수정 $137.9B','2026-07','SIA/WSTS']) if(!result.text.includes(token)) throw new Error('missing '+token);
-            if(!result.visible||!result.hasSvg) throw new Error('card/chart not visibly rendered');
-            const fatal=errors.filter(e=>/SyntaxError|semi_sales|global_semi/i.test(e)); if(fatal.length) throw new Error(JSON.stringify(fatal));
+            for(const token of ['$146.8B','+6.4% MoM','YoY +135.1%','6월 수정 $137.9B','2026-07','SIA/WSTS']) if(!result.text.includes(token)) throw new Error('live card missing '+token);
+            if(!result.visible||!result.hasSvg) throw new Error('live SIA card/chart not visibly rendered');
+            const fatal=errors.filter(e=>/SyntaxError|semi_sales|global_semi/i.test(e));
+            if(fatal.length) throw new Error('production browser errors: '+JSON.stringify(fatal));
             await browser.close();
           })().catch(e=>{console.error(e);process.exit(1)});
           NODE
