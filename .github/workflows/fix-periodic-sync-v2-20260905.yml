@@ -43,7 +43,7 @@ jobs:
           git diff --check
       - name: Commit and open PR
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.AUTO_MERGE_TOKEN }}
           GH_REPO: ${{ github.repository }}
         run: |
           set -euo pipefail
