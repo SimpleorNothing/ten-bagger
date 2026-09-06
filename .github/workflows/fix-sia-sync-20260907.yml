@@ -1,0 +1,178 @@
+name: Fix SIA periodic sync 2026-09-07
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/fix-sia-sync-20260907.yml'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+          token: ${{ secrets.AUTO_MERGE_TOKEN }}
+
+      - name: Synchronize all SIA consumers
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          URL='https://www.semiconductors.org/global-semiconductor-sales-increase-6-4-month-to-month-in-july/'
+          CHECK='2026-09-07 07:27 KST'
+
+          # Canonical time series already added by the source PR; verify it first.
+          semi=json.load(open('semi_sales.json',encoding='utf-8'))
+          assert semi['latest']['ym']=='2026-07'
+          assert semi['latest']['sales']==146.8 and semi['latest']['mom']==6.4 and semi['latest']['yoy']==135.1
+          assert semi['latest']['priorMonthSales']==137.9
+          assert next(x for x in semi['series'] if x['ym']=='2026-06')['sales']==137.9
+
+          # 01 calendar result.
+          p=Path('calendar.json'); cal=json.loads(p.read_text(encoding='utf-8'))
+          cal['asOf']='2026-09-07T07:27:00+09:00'
+          ev=cal.setdefault('events',[])
+          obj={
+            'd':'2026-09-05','cat':'macro','lbl':'SIA/WSTS 글로벌 반도체 판매 · 2026년 7월',
+            'meta':('발표 확인 · SIA 2026-09-04 17:00 ET 등록. WSTS 집계 글로벌 반도체 판매 7월 $146.8B, 전월비 +6.4%, 전년비 +135.1%. '
+                    '최신 발표의 6월 비교 기준은 $137.9B로, 2026-08-06 발표의 $134.5B에서 수정. 월간 판매는 3개월 이동평균. · 원문: '+URL+
+                    ' · 등록일: 2026-09-04 · 확인: '+CHECK),
+            'when':'09-05 06:00 KST (발표 완료 · $146.8B / +6.4% MoM)'
+          }
+          for i,e in enumerate(ev):
+              if e.get('lbl')==obj['lbl']: ev[i]=obj; break
+          else: ev.append(obj)
+          ev.sort(key=lambda x:(x.get('d','9999'),x.get('when',''),x.get('lbl','')))
+          p.write_text(json.dumps(cal,ensure_ascii=False,indent=1)+'\n',encoding='utf-8')
+
+          # 01 market context; also consumed by 04 council-context as marketPulse.
+          p=Path('pulse.json'); q=json.loads(p.read_text(encoding='utf-8')); q['asOf']='2026-09-07T07:27'
+          flow=next(x for x in q['drivers'] if x.get('ax')=='flow')
+          flow.update({
+            'dir':'opp',
+            'l1':'한국 8월 반도체 수출 강세와 SIA/WSTS 7월 글로벌 반도체 판매 $146.8B(+6.4% MoM, +135.1% YoY)가 Broadcom·Credo 최신 공식 실적과 함께 AI custom silicon·메모리·고속 연결 수요의 확장을 확인했다.',
+            'l2':'SIA 최신 발표는 6월 판매도 $134.5B에서 $137.9B로 수정했고 7월까지 17개월 연속 전월 증가를 확인했다. 월간 수치는 WSTS 3개월 이동평균이므로 단월 급등보다 추세 지표로 해석한다. 한국 반도체 수출·AVGO·CRDO 실적과 방향이 일치한다.',
+            'verdict':'글로벌 반도체 17개월 연속 MoM 증가 · AI 상류·연결 실수요 강화',
+            'srcs':[
+              {'t':'SIA/WSTS 글로벌 반도체 판매 · 2026년 7월','u':URL,'d':'2026-09-04'},
+              {'t':'Broadcom FY26 Q3 공식 실적','u':'https://investors.broadcom.com/news-releases/news-release-details/broadcom-inc-announces-third-quarter-fiscal-year-2026-financial','d':'2026-09-02'},
+              {'t':'Credo FY27 Q1 공식 실적','u':'https://investors.credosemi.com/news-events/news/news-details/2026/Credo-Technology-Group-Holding-Ltd-Reports-First-Quarter-of-Fiscal-Year-2027-Financial-Results/default.aspx','d':'2026-09-01'},
+              {'t':'산업통상자원부 · 2026년 8월 수출입 동향','u':'https://www.motie.go.kr/','d':'2026-09-01'}
+            ]
+          })
+          p.write_text(json.dumps(q,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+
+          # 04 semiconductor-cycle lens. council-context exposes cycle clusters.
+          p=Path('cycle.json'); cyc=json.loads(p.read_text(encoding='utf-8')); cyc['asOf']='2026-09-07'
+          cyc['industrySales']={
+            'name':'SIA/WSTS 글로벌 반도체 판매','unit':'$B','latest':'2026-07','value':146.8,'mom':6.4,'yoy':135.1,
+            'priorMonth':137.9,'priorMonthRevisedFrom':134.5,'movingAverageMonths':3,'source':URL,'registeredAt':'2026-09-04'
+          }
+          d=next((x for x in cyc.get('clusters',[]) if x.get('id')=='D'),None)
+          if d:
+              base=d.get('now','')
+              prefix='SIA/WSTS 7월 판매 $146.8B(+6.4% MoM·+135.1% YoY, 6월 $137.9B 수정) · '
+              if not base.startswith('SIA/WSTS 7월 판매'): d['now']=prefix+base
+              d['updated']='2026-09-07'
+              hist=d.setdefault('history',[])
+              note={'date':'2026-09-07','note':'SIA/WSTS 7월 글로벌 반도체 판매 $146.8B(+6.4% MoM, +135.1% YoY), 6월 $137.9B 수정 · 17개월 연속 MoM 증가 확인'}
+              hist[:]=[x for x in hist if x.get('date')!='2026-09-07']; hist.insert(0,note)
+          p.write_text(json.dumps(cyc,ensure_ascii=False,separators=(',',':'))+'\n',encoding='utf-8')
+
+          # Related risk board: preserve state/trigger; refresh evidence on export concentration axis only.
+          p=Path('risk.json'); risk=json.loads(p.read_text(encoding='utf-8')); risk['asOf']='2026-09-07'
+          exp=next((x for x in risk.get('items',[]) if x.get('id')=='export'),None)
+          if exp:
+              exp['upd']='2026-09-07'
+              srcs=exp.setdefault('srcs',[])
+              label='SIA/WSTS — 2026년 7월 글로벌 반도체 판매 $146.8B(+6.4% MoM, +135.1% YoY), 6월 $137.9B 수정 (2026-09-04)'
+              if not any((x.get('label') if isinstance(x,dict) else str(x))==label for x in srcs):
+                  srcs.append({'label':label,'url':URL})
+          p.write_text(json.dumps(risk,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+
+          # 02 insight consumer: confirmed event -> signal_log, narrative only.
+          p=Path('signal_log.json'); sig=json.loads(p.read_text(encoding='utf-8')); sig['asOf']='2026-09-07'
+          log=sig.setdefault('log',[])
+          source='SIA/WSTS 2026년 7월 글로벌 반도체 판매 공식 발표 — AI 상류 수요 확인'
+          if not any(x.get('source')==source for x in log):
+              log.append({
+                'date':'2026-09-04','at':'2026-09-07T07:27+09:00','source':source,
+                'srcs':[{'label':'SIA — Global Semiconductor Sales Increase 6.4% Month-to-Month in July','url':URL}],
+                'items':[{'tag':'L2·L3·L6 수요확인','layer':'L2','col':'#0ca678','html':'<b>SIA/WSTS 7월 글로벌 반도체 판매 $146.8B, +6.4% MoM·+135.1% YoY.</b> 6월 비교값도 $137.9B로 상향 수정됐고 17개월 연속 전월 증가. 한국 반도체 수출·AVGO custom silicon·CRDO 연결 실적과 방향이 일치해 AI 상류 실수요 확장을 재확인. 단 WSTS 월간 판매는 3개월 이동평균이므로 단월 급등이 아니라 추세 확인용 — <b>단계·투자점수 숫자 불변</b>.'}]
+              })
+          p.write_text(json.dumps(sig,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+
+          # 01 visible card and chart uses semi_sales.json as its single render source.
+          p=Path('trade.js'); s=p.read_text(encoding='utf-8')
+          if 'function mountGlobalSemi()' not in s:
+              anchor='  function boot() {'
+              block='''  function mountGlobalSemi() {\n    var id = 'mkt_global_semi_sales';\n    if (document.getElementById(id)) return true;\n    var grid = document.getElementById('mktIndicators');\n    if (!grid) return false;\n    var card = document.createElement('div');\n    card.className = 'mkt-card'; card.id = id;\n    card.setAttribute('data-indicator-key', 'global-semi-sales');\n    card.innerHTML = '<div class="mkt-ph">글로벌 반도체 판매 로딩…</div>';\n    grid.appendChild(card);\n    fetch('semi_sales.json?t=' + Date.now(), { cache: 'no-store' }).then(function(r){ return r.ok ? r.json() : null; }).then(function(j){\n      if(!j || !j.latest || !j.series || !j.series.length){ card.innerHTML='<div class="mkt-ph">발표 대기 · SIA/WSTS 월간 판매</div>'; return; }\n      var z=j.latest, vals=j.series.map(function(x){return x.sales;});\n      card.innerHTML='<div class="mkt-nm">글로벌 반도체 판매</div><div class="mkt-val">$'+z.sales.toFixed(1)+'B</div>'+\n        '<div class="mkt-chg up">+'+z.mom.toFixed(1)+'% MoM <span style="font:600 12px var(--mono);margin-left:8px;color:var(--faint)">YoY +'+z.yoy.toFixed(1)+'%</span></div>'+\n        lensRow('<b>AI·인프라 수요</b> 확장 지속 <span class="ok">가속</span>','7월 $'+z.sales.toFixed(1)+'B · 6월 수정 $'+z.priorMonthSales.toFixed(1)+'B · 17개월 연속 MoM 증가 · WSTS 3개월 이동평균')+\n        '<div class="mkt-chart">'+spark(vals,true)+'</div><div class="mkt-span">'+esc(z.ym)+' · SIA/WSTS · 등록 2026-09-04</div>';\n    }).catch(function(){ card.innerHTML='<div class="mkt-ph">SIA/WSTS 데이터 로딩 실패</div>'; });\n    return true;\n  }\n\n'''
+              if anchor not in s: raise SystemExit('trade boot anchor missing')
+              s=s.replace(anchor,block+anchor,1)
+          old="  function boot() {\n    if (mount()) return;\n    var n = 0, timer = setInterval(function () { if (mount() || ++n > 40) clearInterval(timer); }, 250);\n  }"
+          new="  function boot() {\n    mount(); mountGlobalSemi();\n    var n = 0, timer = setInterval(function () { var a=mount(), b=mountGlobalSemi(); if ((a && b) || ++n > 40) clearInterval(timer); }, 250);\n  }"
+          if old in s: s=s.replace(old,new,1)
+          p.write_text(s,encoding='utf-8')
+
+          # Change log + menu stamps for 01/02/04.
+          p=Path('changelog.js'); s=p.read_text(encoding='utf-8')
+          s=s.replace("market:'2026-09-06', insight:'2026-08-03', council:'2026-08-08'","market:'2026-09-07', insight:'2026-09-07', council:'2026-09-07'",1)
+          marker='  var MKT_CHANGELOG=[\n'
+          entry="    {d:'2026-09-07',t:'01·02·04 정기 발표 동기화 — SIA/WSTS 7월 글로벌 반도체 판매 $146.8B(+6.4% MoM, +135.1% YoY)·6월 수정 $137.9B를 카드·시계열·캘린더·시장맥락·사이클·리스크 근거·02 시그널로그에 교차 반영'},\n"
+          if entry not in s:
+              if marker not in s: raise SystemExit('changelog marker missing')
+              s=s.replace(marker,marker+entry,1)
+          p.write_text(s,encoding='utf-8')
+
+          # Archive failed carriers so apply-patch fallback cannot retry them.
+          ap=Path('patches/applied'); ap.mkdir(parents=True,exist_ok=True)
+          for name in ['2026-09-07-sia-sync.b64','2026-09-07-sia-pulse.b64']:
+              src=Path('patches')/name
+              if src.exists(): src.rename(ap/name)
+          PY
+
+      - name: Validate synchronized consumers
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          files=['semi_sales.json','calendar.json','pulse.json','cycle.json','risk.json','signal_log.json']
+          d={f:json.load(open(f,encoding='utf-8')) for f in files}
+          s=d['semi_sales.json']; assert s['latest']['sales']==146.8 and s['latest']['priorMonthSales']==137.9
+          assert any('SIA/WSTS 글로벌 반도체 판매' in x.get('lbl','') and '$146.8B' in x.get('meta','') for x in d['calendar.json']['events'])
+          flow=next(x for x in d['pulse.json']['drivers'] if x['ax']=='flow'); assert '$146.8B' in flow['l1'] and '$137.9B' in flow['l2']
+          assert d['cycle.json']['industrySales']['value']==146.8
+          exp=next(x for x in d['risk.json']['items'] if x['id']=='export'); assert exp['upd']=='2026-09-07'
+          assert any('SIA/WSTS 2026년 7월' in x.get('source','') for x in d['signal_log.json']['log'])
+          PY
+          node --check trade.js
+          node --check changelog.js
+          grep -Fq 'mkt_global_semi_sales' trade.js
+          grep -Fq 'semi_sales.json' trade.js
+          git diff --check
+
+      - name: Commit and open protected-main PR
+        env:
+          GH_TOKEN: ${{ secrets.AUTO_MERGE_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet; then echo 'nothing to change'; exit 0; fi
+          BRANCH="claude/automation-sia-sync-${GITHUB_RUN_ID}"
+          git checkout -b "$BRANCH"
+          git add semi_sales.json calendar.json pulse.json cycle.json risk.json signal_log.json trade.js changelog.js patches
+          git commit -m "data: synchronize SIA semiconductor sales consumers"
+          git push -u origin "$BRANCH"
+          gh pr create --base main --head "$BRANCH" --title "data: synchronize SIA semiconductor sales consumers" --body "SIA/WSTS 7월 글로벌 반도체 판매를 01 카드/시계열/캘린더/시장맥락, 02 signal_log, 04 cycle/council 입력과 관련 risk 근거에 동기화합니다. 공식값만 반영하고 6월 수정치도 함께 검증합니다."
