@@ -35,7 +35,7 @@ jobs:
         run: node scripts/sync-us-cpi-release.mjs
       - name: Create protected-main PR if changed
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.AUTO_MERGE_TOKEN }}
         run: |
           set -euo pipefail
           FILES="cpi.json calendar.json pulse.json changelog.js"
