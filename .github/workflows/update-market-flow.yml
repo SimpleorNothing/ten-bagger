@@ -43,6 +43,7 @@ jobs:
             const s = j.series?.[id];
             if (!s || !Array.isArray(s.t) || !Array.isArray(s.c) || s.t.length < 120 || s.t.length !== s.c.length)
               throw new Error('invalid market flow series: ' + id);
+            // 00 화면은 latest/20D/60D를 사용한다. 5D는 보조 원자료라 공급자 단기 결측 시 null을 허용한다.
             if (![s.latest,s.perf20d,s.perf60d].every(Number.isFinite))
               throw new Error('invalid market flow required metric: ' + id);
           }
