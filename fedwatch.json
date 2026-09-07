@@ -5,9 +5,9 @@
   "primarySourceUrl": "https://www.cmegroup.com/markets/interest-rates/cme-fedwatch-tool.html",
   "apiInfoUrl": "https://www.cmegroup.com/market-data/market-data-api/fedwatch-api.html",
   "asOf": "2026-09-05T05:55:00+09:00",
-  "checkedAt": "2026-09-05T16:51:00+09:00",
-  "status": "확인됨(2순위)",
-  "statusReason": "CME 공식 FedWatch End-of-Day API는 유료 self-service 접근이 필요해 이 실행 환경에서 인증 가능한 직접값을 확보하지 못했다. 규칙에 따라 Investing.com 한국 페이지의 업데이트 2026-09-05 05:55 KST를 2순위 검증값으로 사용했다. 2026-12-10 FOMC 확률 15.5/41.7/34.5/8.3%, 선물가격 96.065.",
+  "checkedAt": "2026-09-07T08:00:07.094405Z",
+  "status": "확인 필요",
+  "statusReason": "CME FedWatch End-of-Day API: RuntimeError: CME_FEDWATCH_TOKEN secret unavailable / Investing.com Fed Rate Monitor: RuntimeError: probability validation failed n=8 total=102.7 / PyFedWatch methodology: TimeoutError: The read operation timed out. 검증 가능한 최신 확률을 확보하지 못해 이전 값을 최신값으로 승격하지 않음.",
   "futurePrice": 96.065,
   "history": [
     {
@@ -317,6 +317,12 @@
       "checkedAt": "2026-09-05T16:51:00+09:00",
       "status": "확인됨(2순위)",
       "reason": "CME 공식 End-of-Day API 직접 인증값 미확보(유료 self-service). Investing.com 한국 페이지 업데이트 2026-09-05 05:55 KST, Future Price 96.065, 확률 15.5/41.7/34.5/8.3% 사용."
+    },
+    {
+      "date": "2026-09-07",
+      "checkedAt": "2026-09-07T08:00:07.094405Z",
+      "status": "확인 필요",
+      "reason": "CME FedWatch End-of-Day API: RuntimeError: CME_FEDWATCH_TOKEN secret unavailable / Investing.com Fed Rate Monitor: RuntimeError: probability validation failed n=8 total=102.7 / PyFedWatch methodology: TimeoutError: The read operation timed out. 검증 가능한 최신 확률을 확보하지 못해 이전 값을 최신값으로 승격하지 않음."
     }
   ]
 }
