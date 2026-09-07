@@ -1,0 +1,56 @@
+name: Fix NFP independent boot 20260908
+
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/fix-nfp-independent-boot-20260908.yml']
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Ensure NFP loads independently and verifier targets exact card
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('index.html'); s=p.read_text(encoding='utf-8')
+          anchor="  }catch(e){el.innerHTML=wait;}\n }\n\n var IND_ORDER_KEY='am_market_indicator_order_v1'"
+          repl="  }catch(e){console.error('loadNfp failed',e);el.innerHTML=wait;}\n }\n // NFP is an official-release card: load independently so other market loaders cannot suppress it.\n setTimeout(function(){try{loadNfp();}catch(e){console.error('loadNfp boot failed',e);}},0);\n\n var IND_ORDER_KEY='am_market_indicator_order_v1'"
+          if anchor not in s: raise SystemExit('NFP function end anchor not found')
+          s=s.replace(anchor,repl,1)
+          p.write_text(s,encoding='utf-8')
+
+          p=Path('.github/workflows/verify-nfp-live.yml'); s=p.read_text(encoding='utf-8')
+          start=s.index("            await page.waitForFunction(()=>{")
+          end=s.index("            console.log('LIVE NFP CARD:'", start)
+          new="""            await page.waitForFunction(()=>{\n              const box=document.querySelector('#mkt_nfp');\n              if(!box) return false;\n              const t=(box.innerText||'').trim();\n              return /\\+?162K/.test(t) && !!box.querySelector('svg') && !t.includes('FRED 고용 수집 대기');\n            },{timeout:45000});\n            const result=await page.evaluate(()=>{\n              const box=document.querySelector('#mkt_nfp');\n              if(!box) return {found:false};\n              const r=box.getBoundingClientRect(),t=(box.innerText||'').trim();\n              return {found:true,visible:r.width>0&&r.height>0,text:t,hasSvg:!!box.querySelector('svg'),rects:box.querySelectorAll('svg rect').length,svgCount:box.querySelectorAll('svg').length};\n            });\n"""
+          s=s[:start]+new+s[end:]
+          p.write_text(s,encoding='utf-8')
+
+          p=Path('changelog.js'); s=p.read_text(encoding='utf-8')
+          marker='  var MKT_CHANGELOG=[\n'
+          entry="    {d:'2026-09-08',t:'01 NFP 카드 독립 부팅 — 시장 로더 초기화 순서와 무관하게 BLS 공식 nfp.json 기반 카드를 즉시 렌더하고 프로덕션 검증을 #mkt_nfp 자체로 한정'},\n"
+          if entry not in s: s=s.replace(marker,marker+entry,1)
+          p.write_text(s,encoding='utf-8')
+          PY
+      - name: Validate
+        run: |
+          grep -F "setTimeout(function(){try{loadNfp();}" index.html
+          grep -F "document.querySelector('#mkt_nfp')" .github/workflows/verify-nfp-live.yml
+          node -e 'const fs=require("fs");const s=fs.readFileSync("index.html","utf8");const m=[...s.matchAll(/<script>([\s\S]*?)<\/script>/g)];m.forEach((x,i)=>fs.writeFileSync("/tmp/nfpb"+i+".js",x[1]));'
+          for f in /tmp/nfpb*.js; do node --check "$f"; done
+          node --check changelog.js
+      - name: Push repair branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html .github/workflows/verify-nfp-live.yml changelog.js
+          git commit -m "fix: boot NFP card independently from market loaders"
+          git push --force origin HEAD:refs/heads/nfp-independent-boot-20260908
