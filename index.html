@@ -3763,8 +3763,10 @@ window.MARKET=(function(){
    el.innerHTML='<div class="mkt-nm">미국 비농업고용(NFP)</div><div class="mkt-val">'+fmtK(last)+
     ' <span class="mkt-chg '+(delta>=0?'up':'dn')+'">전월비 '+fmtK(delta)+'</span></div>'+lens('<b>노동</b>비농업고용 증감 · Fed 이중책무',
     esc(dts[dts.length-1])+' '+fmtK(last)+' · 이전 '+fmtK(prev)+' → '+verdict)+barChart(vals,dts,fmtK)+'<div class="mkt-span">'+RG.ko+'</div>';
-  }catch(e){el.innerHTML=wait;}
+  }catch(e){console.error('loadNfp failed',e);el.innerHTML=wait;}
  }
+ // Official-release card: boot independently from other market loaders.
+ setTimeout(function(){try{loadNfp();}catch(e){console.error('loadNfp boot failed',e);}},0);
 
  var IND_ORDER_KEY='am_market_indicator_order_v1',indDragKey='',indDragWired=false;
  function indicatorCards(){return Array.prototype.slice.call(document.querySelectorAll('#mktIndicators > .mkt-card, #mktGauge > .mkt-card'));}
