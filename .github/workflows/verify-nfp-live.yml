@@ -1,68 +1,95 @@
-name: Verify NFP live once
+name: Verify NFP live browser
 
-# simpleornothing.com is Cloudflare Access protected for non-browser automation; verify the deployed Worker origin directly.
 on:
-  push:
-    branches: [main]
-    paths: ['.github/workflows/verify-nfp-live.yml']
+  workflow_run:
+    workflows: ["Deploy to Cloudflare Workers"]
+    types: [completed]
+  workflow_dispatch: {}
 
 permissions:
   contents: read
 
 jobs:
   verify:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
+    env:
+      SITE_PASSWORD: ${{ secrets.SITE_PASSWORD }}
     steps:
-      - name: Verify deployed NFP data and renderer
+      - name: Verify authenticated NFP data and rendered card on custom domain
         run: |
           set -euo pipefail
-          BASE='https://ten-bagger.cw120-park.workers.dev'
-          curl -fsSL --retry 3 --retry-delay 2 "$BASE/nfp.json" -o /tmp/nfp.json
-          curl -fsSL --retry 3 --retry-delay 2 "$BASE/" -o /tmp/index.html
-          node - <<'NODE'
-          const fs=require('fs');
-          const n=JSON.parse(fs.readFileSync('/tmp/nfp.json','utf8'));
-          const m=Object.fromEntries(n.levels);
-          const d=(a,b)=>m[b]-m[a];
-          console.log('LIVE nfp.json:', {may:d('2026-04-01','2026-05-01'), june:d('2026-05-01','2026-06-01'), july:d('2026-06-01','2026-07-01'), asOf:n.asOf});
-          if(d('2026-04-01','2026-05-01')!==63) throw new Error('live May is not +63K');
-          if(d('2026-05-01','2026-06-01')!==20) throw new Error('live June is not +20K');
-          if(d('2026-06-01','2026-07-01')!==-23) throw new Error('live July is not -23K');
-          const h=fs.readFileSync('/tmp/index.html','utf8');
-          if(!h.includes('live.concat(bk.levels||[])')) throw new Error('live renderer is not BLS-priority');
-          if(h.includes('(bk.levels||[]).concat(live).forEach')) throw new Error('stale FRED-priority renderer remains live');
-          console.log('LIVE static assets: BLS-priority renderer OK');
-          NODE
-
-      - name: Verify rendered NFP card in browser
-        run: |
-          set -euo pipefail
+          if [ -z "${SITE_PASSWORD:-}" ]; then echo 'ERROR: SITE_PASSWORD required'; exit 1; fi
           mkdir -p /tmp/nfp-live && cd /tmp/nfp-live
           npm init -y >/dev/null 2>&1
           npm install playwright@1.55.0 >/dev/null 2>&1
           npx playwright install chromium >/dev/null 2>&1
           cat > check.js <<'NODE'
           const { chromium } = require('playwright');
+          const BASE='https://simpleornothing.com';
+          const pw=process.env.SITE_PASSWORD;
+          const diff=(m,a,b)=>m[b]-m[a];
           (async()=>{
             const browser=await chromium.launch({headless:true});
-            const page=await browser.newPage({viewport:{width:1440,height:1200}});
-            await page.goto('https://ten-bagger.cw120-park.workers.dev/',{waitUntil:'networkidle',timeout:90000});
-            await page.waitForTimeout(4000);
+            const context=await browser.newContext({viewport:{width:1440,height:1800}});
+            const auth=await context.request.post(BASE+'/__auth',{form:{password:pw},timeout:30000});
+            if(!auth.ok()) throw new Error('site auth failed: HTTP '+auth.status());
+
+            const dataResp=await context.request.get(BASE+'/nfp.json?t='+Date.now(),{timeout:30000,headers:{'Cache-Control':'no-cache'}});
+            if(!dataResp.ok()) throw new Error('live nfp.json HTTP '+dataResp.status());
+            const data=await dataResp.json();
+            const levels=Array.isArray(data.levels)?data.levels:[];
+            const m=Object.fromEntries(levels);
+            const last=levels[levels.length-1];
+            const actual={
+              june:diff(m,'2026-05-01','2026-06-01'),
+              july:diff(m,'2026-06-01','2026-07-01'),
+              august:diff(m,'2026-07-01','2026-08-01'),
+              registeredAt:data.registeredAt,
+              last,
+              revisions:data.revisions
+            };
+            console.log('LIVE NFP JSON:',JSON.stringify(actual,null,2));
+            if(actual.june!==31||actual.july!==21||actual.august!==162) throw new Error('live NFP monthly changes mismatch');
+            if(data.registeredAt!=='2026-09-04') throw new Error('live NFP release date mismatch');
+            if(last?.[0]!=='2026-08-01'||last?.[1]!==159075) throw new Error('live NFP latest endpoint mismatch');
+            if(data.revisions?.['2026-06-01']!==31||data.revisions?.['2026-07-01']!==21||data.revisions?.['2026-08-01']!==162) throw new Error('live NFP revisions mismatch');
+
+            const page=await context.newPage();
+            const errors=[]; page.on('pageerror',e=>errors.push(String(e)));
+            await page.goto(BASE+'/?nfp-smoke='+Date.now(),{waitUntil:'domcontentloaded',timeout:90000});
+            await page.waitForSelector('#nav .tab[data-v="market"]',{state:'visible',timeout:30000});
+            await page.click('#nav .tab[data-v="market"]');
+            await page.waitForFunction(()=>{
+              const all=[...document.querySelectorAll('*')];
+              const title=all.find(e=>e.children.length===0 && (e.textContent||'').trim()==='미국 비농업고용(NFP)');
+              if(!title) return false;
+              let p=title;
+              for(let i=0;i<8&&p;i++,p=p.parentElement){
+                const t=(p.innerText||'').trim();
+                if(t.includes('미국 비농업고용(NFP)')&&/\+?162K/.test(t)&&p.querySelector('svg')) return true;
+              }
+              return false;
+            },{timeout:45000});
             const result=await page.evaluate(()=>{
               const all=[...document.querySelectorAll('*')];
               const title=all.find(e=>e.children.length===0 && (e.textContent||'').trim()==='미국 비농업고용(NFP)');
-              if(!title) return {found:false, body:(document.body.innerText||'').slice(0,1500)};
+              if(!title) return {found:false};
               let p=title;
-              for(let i=0;i<6 && p;i++,p=p.parentElement){
-                const t=(p.innerText||'').trim();
-                if(t.includes('미국 비농업고용(NFP)') && (t.includes('전월비')||t.includes('고용 감소'))) return {found:true,text:t};
+              for(let i=0;i<8&&p;i++,p=p.parentElement){
+                const t=(p.innerText||'').trim(); const r=p.getBoundingClientRect();
+                if(t.includes('미국 비농업고용(NFP)')&&/\+?162K/.test(t)&&p.querySelector('svg')) {
+                  return {found:true,visible:r.width>0&&r.height>0,text:t,hasSvg:true,rects:p.querySelectorAll('svg rect').length};
+                }
               }
-              return {found:true,text:(title.parentElement?.innerText||title.textContent||'')};
+              return {found:true,text:(title.parentElement?.innerText||title.textContent||''),hasSvg:false};
             });
-            console.log('LIVE CARD:', JSON.stringify(result,null,2));
-            if(!result.found) throw new Error('NFP card not found on deployed Worker page');
-            if(!/(^|\s)-23K(\s|$)/.test(result.text)) throw new Error('live card does not show -23K');
-            if(!/전월비\s*-43K/.test(result.text)) throw new Error('live card does not show 전월비 -43K');
+            console.log('LIVE NFP CARD:',JSON.stringify(result,null,2));
+            if(!result.found||!result.visible||!result.hasSvg) throw new Error('live NFP card/chart not visibly rendered');
+            if(!/\+?162K/.test(result.text)) throw new Error('live NFP card does not show August +162K');
+            if((result.rects||0)<1) throw new Error('live NFP chart has no bars');
+            const fatal=errors.filter(e=>/SyntaxError|nfp|nonfarm|payems/i.test(e));
+            if(fatal.length) throw new Error('production browser errors: '+JSON.stringify(fatal));
             await browser.close();
           })().catch(e=>{console.error(e);process.exit(1)});
           NODE
