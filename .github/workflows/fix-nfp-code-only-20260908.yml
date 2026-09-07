@@ -1,0 +1,47 @@
+name: Fix NFP code only 20260908
+
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/fix-nfp-code-only-20260908.yml']
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Patch NFP independent boot only
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('index.html'); s=p.read_text(encoding='utf-8')
+          anchor="  }catch(e){el.innerHTML=wait;}\n }\n\n var IND_ORDER_KEY='am_market_indicator_order_v1'"
+          repl="  }catch(e){console.error('loadNfp failed',e);el.innerHTML=wait;}\n }\n // Official-release card: boot independently from other market loaders.\n setTimeout(function(){try{loadNfp();}catch(e){console.error('loadNfp boot failed',e);}},0);\n\n var IND_ORDER_KEY='am_market_indicator_order_v1'"
+          if anchor not in s:
+              if "setTimeout(function(){try{loadNfp();}" not in s: raise SystemExit('NFP anchor missing')
+          else:
+              s=s.replace(anchor,repl,1)
+          p.write_text(s,encoding='utf-8')
+          p=Path('changelog.js'); s=p.read_text(encoding='utf-8')
+          marker='  var MKT_CHANGELOG=[\n'
+          entry="    {d:'2026-09-08',t:'01 NFP 카드 독립 부팅 — BLS 공식 nfp.json 카드가 다른 시장 로더 초기화와 무관하게 즉시 렌더되도록 복구'},\n"
+          if entry not in s: s=s.replace(marker,marker+entry,1)
+          p.write_text(s,encoding='utf-8')
+          PY
+      - name: Validate and push code branch
+        run: |
+          grep -F "setTimeout(function(){try{loadNfp();}" index.html
+          node -e 'const fs=require("fs");const s=fs.readFileSync("index.html","utf8");const m=[...s.matchAll(/<script>([\s\S]*?)<\/script>/g)];m.forEach((x,i)=>fs.writeFileSync("/tmp/nfpc"+i+".js",x[1]));'
+          for f in /tmp/nfpc*.js; do node --check "$f"; done
+          node --check changelog.js
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html changelog.js
+          git commit -m "fix: boot NFP card independently from market loaders"
+          git push --force origin HEAD:refs/heads/nfp-code-only-20260908
