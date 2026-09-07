@@ -1,0 +1,57 @@
+name: Fix NFP FRED isolation 20260908
+
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/fix-nfp-fred-isolation-20260908.yml']
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Isolate FRED failure and harden live NFP verifier
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('index.html'); s=p.read_text(encoding='utf-8')
+          old="fetch('/api/fred?ids=PAYEMS').then(function(r){if(!r.ok)throw 0;return r.json()}),"
+          new="fetch('/api/fred?ids=PAYEMS').then(function(r){return r.ok?r.json():{}}).catch(function(){return {}}),"
+          if old not in s: raise SystemExit('FRED fetch target not found')
+          s=s.replace(old,new,1)
+          p.write_text(s,encoding='utf-8')
+
+          p=Path('.github/workflows/verify-nfp-live.yml'); s=p.read_text(encoding='utf-8')
+          a="""            await page.waitForFunction(()=>{\n              const all=[...document.querySelectorAll('*')];\n              const title=all.find(e=>e.children.length===0 && (e.textContent||'').trim()==='미국 비농업고용(NFP)');\n              if(!title) return false;\n              let p=title;\n              for(let i=0;i<8&&p;i++,p=p.parentElement){\n                const t=(p.innerText||'').trim();\n                if(t.includes('미국 비농업고용(NFP)')&&/\\+?162K/.test(t)&&p.querySelector('svg')) return true;\n              }\n              return false;\n            },{timeout:45000});\n            const result=await page.evaluate(()=>{\n              const all=[...document.querySelectorAll('*')];\n              const title=all.find(e=>e.children.length===0 && (e.textContent||'').trim()==='미국 비농업고용(NFP)');\n              if(!title) return {found:false};\n              let p=title;\n              for(let i=0;i<8&&p;i++,p=p.parentElement){\n                const t=(p.innerText||'').trim(); const r=p.getBoundingClientRect();\n                if(t.includes('미국 비농업고용(NFP)')&&/\\+?162K/.test(t)&&p.querySelector('svg')) {\n                  return {found:true,visible:r.width>0&&r.height>0,text:t,hasSvg:true,rects:p.querySelectorAll('svg rect').length};\n                }\n              }\n              return {found:true,text:(title.parentElement?.innerText||title.textContent||''),hasSvg:false};\n            });\n"""
+          b="""            await page.waitForFunction(()=>{\n              const box=document.querySelector('#mkt_nfp');\n              if(!box) return false;\n              const t=(box.innerText||'').trim();\n              return /\\+?162K/.test(t) && !!box.querySelector('svg') && !t.includes('FRED 고용 수집 대기');\n            },{timeout:45000});\n            const result=await page.evaluate(()=>{\n              const box=document.querySelector('#mkt_nfp');\n              if(!box) return {found:false};\n              const r=box.getBoundingClientRect(),t=(box.innerText||'').trim();\n              return {found:true,visible:r.width>0&&r.height>0,text:t,hasSvg:!!box.querySelector('svg'),svgCount:box.querySelectorAll('svg').length};\n            });\n"""
+          if a not in s: raise SystemExit('verifier selector target not found')
+          s=s.replace(a,b,1)
+          s=s.replace("if((result.rects||0)<1) throw new Error('live NFP chart has no bars');","if((result.svgCount||0)<1) throw new Error('live NFP chart has no SVG');",1)
+          p.write_text(s,encoding='utf-8')
+
+          p=Path('changelog.js'); s=p.read_text(encoding='utf-8')
+          marker='  var MKT_CHANGELOG=[\n'
+          entry="    {d:'2026-09-08',t:'01 NFP 라이브 정합성 복구 — FRED 요청 실패를 BLS 공식 nfp.json 폴백과 격리하고, 실제 #mkt_nfp 카드/차트만 검증하도록 프로덕션 게이트 강화'},\n"
+          if entry not in s: s=s.replace(marker,marker+entry,1)
+          p.write_text(s,encoding='utf-8')
+          PY
+      - name: Validate
+        run: |
+          grep -F "catch(function(){return {}})" index.html
+          grep -F "document.querySelector('#mkt_nfp')" .github/workflows/verify-nfp-live.yml
+          node -e 'const fs=require("fs");const s=fs.readFileSync("index.html","utf8");const m=[...s.matchAll(/<script>([\s\S]*?)<\/script>/g)];m.forEach((x,i)=>fs.writeFileSync("/tmp/nfpi"+i+".js",x[1]));'
+          for f in /tmp/nfpi*.js; do node --check "$f"; done
+          node --check changelog.js
+      - name: Push repair branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html .github/workflows/verify-nfp-live.yml changelog.js
+          git commit -m "fix: isolate NFP fallback from FRED request failure"
+          git push --force origin HEAD:refs/heads/nfp-fred-isolation-20260908
