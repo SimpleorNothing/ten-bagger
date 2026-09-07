@@ -7,6 +7,7 @@ on:
     paths:
       - '.github/workflows/update-fedwatch.yml'
       - 'scripts/fetch-fedwatch.py'
+      - 'scripts/fetch-fedwatch-authoritative.py'
 permissions:
   contents: write
   pull-requests: write
@@ -27,7 +28,7 @@ jobs:
       - name: Install FedWatch dependencies
         run: pip install --disable-pip-version-check requests beautifulsoup4 pyfedwatch==1.2.0 'pandas<3' pandas-datareader==0.10.0
       - name: Fetch December 2026 FedWatch with source priority
-        run: python3 scripts/fetch-fedwatch.py
+        run: python3 scripts/fetch-fedwatch-authoritative.py
         env:
           CME_FEDWATCH_TOKEN: ${{ secrets.CME_FEDWATCH_TOKEN }}
       - name: Validate and push automation branch when changed
@@ -40,18 +41,22 @@ jobs:
           import json
           d=json.load(open('fedwatch.json'))
           checks=d.get('checks') or []
-          assert checks and checks[-1].get('date') and checks[-1].get('status') in ('확인','확인 필요')
-          if checks[-1]['status']=='확인':
+          assert checks and checks[-1].get('date') and str(checks[-1].get('status','')).startswith(('확인','확인 필요'))
+          if str(checks[-1]['status']).startswith('확인됨') or checks[-1]['status']=='확인':
               assert d.get('source') in ('CME FedWatch End-of-Day API','Investing.com Fed Rate Monitor','PyFedWatch methodology')
               h=d.get('history') or []
-              assert h and h[-1].get('date')==checks[-1].get('date') and len(h[-1].get('ranges') or []) >= 2
-              total=sum(float(x.get('probability',0)) for x in h[-1]['ranges'])
+              assert h and (h[-1].get('sourceDate') or h[-1].get('date'))==checks[-1].get('sourceDate')
+              total=sum(float(x.get('probability',0)) for x in h[-1].get('ranges') or [])
               assert 98 <= total <= 102, total
+              assert d.get('asOf')==(h[-1].get('sourceDate') or h[-1].get('date'))
+          p=json.load(open('pulse.json'))
+          assert 'FedWatch' in p.get('headline','')
           PY
-          if [ -z "$(git status --porcelain fedwatch.json)" ]; then echo "No FedWatch change."; exit 0; fi
+          FILES="fedwatch.json pulse.json changelog.js"
+          if [ -z "$(git status --porcelain $FILES)" ]; then echo "No FedWatch change."; exit 0; fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add fedwatch.json
+          git add $FILES
           git commit -m "chore: update December 2026 FedWatch"
           BRANCH="claude/automation-update-fedwatch-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
           git push origin "HEAD:$BRANCH"
