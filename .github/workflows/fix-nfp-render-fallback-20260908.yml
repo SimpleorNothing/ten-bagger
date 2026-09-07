@@ -1,0 +1,69 @@
+name: Fix NFP render fallback 20260908
+
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/fix-nfp-render-fallback-20260908.yml']
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Make BLS fallback robust when FRED payload is not an array
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          old="   var live=(j.PAYEMS||((j.series||{}).PAYEMS)||[]),merged={};"
+          new="   var live0=(j.PAYEMS||((j.series||{}).PAYEMS)||[]),live=Array.isArray(live0)?live0:[],merged={};"
+          if old not in s:
+              raise SystemExit('NFP live payload normalization target not found')
+          s=s.replace(old,new,1)
+          p.write_text(s,encoding='utf-8')
+
+          p=Path('changelog.js')
+          s=p.read_text(encoding='utf-8')
+          marker='  var MKT_CHANGELOG=[\n'
+          entry="    {d:'2026-09-08',t:'01 NFP 라이브 렌더 복구 — FRED PAYEMS 응답이 배열이 아닐 때도 BLS 공식 nfp.json(+162K, 6월 +31K·7월 +21K 수정)을 폴백 SoT로 사용하도록 정규화'},\n"
+          if entry not in s:
+              if marker not in s: raise SystemExit('changelog marker not found')
+              s=s.replace(marker,marker+entry,1)
+          p.write_text(s,encoding='utf-8')
+          PY
+
+      - name: Validate official NFP values and renderer
+        run: |
+          node - <<'NODE'
+          const fs=require('fs');
+          const n=JSON.parse(fs.readFileSync('nfp.json','utf8'));
+          const m=Object.fromEntries(n.levels);
+          const d=(a,b)=>m[b]-m[a];
+          if(d('2026-05-01','2026-06-01')!==31) throw new Error('June NFP mismatch');
+          if(d('2026-06-01','2026-07-01')!==21) throw new Error('July NFP mismatch');
+          if(d('2026-07-01','2026-08-01')!==162) throw new Error('August NFP mismatch');
+          if(n.registeredAt!=='2026-09-04') throw new Error('NFP registeredAt mismatch');
+          const html=fs.readFileSync('index.html','utf8');
+          if(!html.includes('live=Array.isArray(live0)?live0:[]')) throw new Error('FRED payload normalization missing');
+          if(!html.includes('live.concat(bk.levels||[])')) throw new Error('BLS-priority merge missing');
+          console.log('NFP renderer: BLS fallback +31K/+21K/+162K OK');
+          NODE
+          node -e 'const fs=require("fs");const s=fs.readFileSync("index.html","utf8");const m=[...s.matchAll(/<script>([\s\S]*?)<\/script>/g)];m.forEach((x,i)=>fs.writeFileSync("/tmp/nfp-r"+i+".js",x[1]));console.log("script blocks:",m.length);'
+          for f in /tmp/nfp-r*.js; do node --check "$f"; done
+          node --check changelog.js
+
+      - name: Commit and push repair branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html changelog.js
+          git commit -m "fix: render BLS NFP when FRED payload shape changes"
+          git push --force origin HEAD:refs/heads/nfp-render-fallback-20260908
