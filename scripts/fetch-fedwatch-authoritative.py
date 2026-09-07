@@ -141,7 +141,10 @@ def sync_changelog(doc):
     updated = h.get("sourceUpdatedAt") or h.get("sourceDate") or h.get("date")
     entry = (
         "    {d:'2026-09-07',t:'01 FedWatch 원문시각 정합성 — CME 공식 EOD 직접값 미확보 시 Investing.com 표시값을 2순위로 사용하되 자동화 실행일이 아니라 실제 Updated 시각을 보존. "
-        f"12월 확률 {probs}%" + (f", 선물 {fp:.3f}" if fp is not None else "") + f", 원문 Updated {updated} 기준으로 fedwatch·시장맥박을 동기화'},\n"
+        + f"12월 확률 {probs}%"
+        + (f", 선물 {fp:.3f}" if fp is not None else "")
+        + f", 원문 Updated {updated} 기준으로 fedwatch·시장맥박을 동기화'"
+        + "},\n"
     )
     text = CHANGELOG.read_text(encoding="utf-8")
     marker = "  var MKT_CHANGELOG=[\n"
