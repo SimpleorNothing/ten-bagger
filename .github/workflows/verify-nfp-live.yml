@@ -93,4 +93,11 @@ jobs:
             await browser.close();
           })().catch(e=>{console.error(e);process.exit(1)});
           NODE
-          node check.js
+          for attempt in 1 2 3; do
+            if node check.js; then exit 0; fi
+            if [ "$attempt" -lt 3 ]; then
+              echo "NFP live verification attempt $attempt failed; retrying in 20s"
+              sleep 20
+            fi
+          done
+          exit 1
