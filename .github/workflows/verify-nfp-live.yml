@@ -61,33 +61,21 @@ jobs:
             await page.waitForSelector('#nav .tab[data-v="market"]',{state:'visible',timeout:30000});
             await page.click('#nav .tab[data-v="market"]');
             await page.waitForFunction(()=>{
-              const all=[...document.querySelectorAll('*')];
-              const title=all.find(e=>e.children.length===0 && (e.textContent||'').trim()==='미국 비농업고용(NFP)');
-              if(!title) return false;
-              let p=title;
-              for(let i=0;i<8&&p;i++,p=p.parentElement){
-                const t=(p.innerText||'').trim();
-                if(t.includes('미국 비농업고용(NFP)')&&/\+?162K/.test(t)&&p.querySelector('svg')) return true;
-              }
-              return false;
+              const box=document.querySelector('#mkt_nfp');
+              if(!box) return false;
+              const t=(box.innerText||'').trim();
+              return /\+?162K/.test(t) && !!box.querySelector('svg') && !t.includes('FRED 고용 수집 대기');
             },{timeout:45000});
             const result=await page.evaluate(()=>{
-              const all=[...document.querySelectorAll('*')];
-              const title=all.find(e=>e.children.length===0 && (e.textContent||'').trim()==='미국 비농업고용(NFP)');
-              if(!title) return {found:false};
-              let p=title;
-              for(let i=0;i<8&&p;i++,p=p.parentElement){
-                const t=(p.innerText||'').trim(); const r=p.getBoundingClientRect();
-                if(t.includes('미국 비농업고용(NFP)')&&/\+?162K/.test(t)&&p.querySelector('svg')) {
-                  return {found:true,visible:r.width>0&&r.height>0,text:t,hasSvg:true,rects:p.querySelectorAll('svg rect').length};
-                }
-              }
-              return {found:true,text:(title.parentElement?.innerText||title.textContent||''),hasSvg:false};
+              const box=document.querySelector('#mkt_nfp');
+              if(!box) return {found:false};
+              const r=box.getBoundingClientRect(),t=(box.innerText||'').trim();
+              return {found:true,visible:r.width>0&&r.height>0,text:t,hasSvg:!!box.querySelector('svg'),svgCount:box.querySelectorAll('svg').length};
             });
             console.log('LIVE NFP CARD:',JSON.stringify(result,null,2));
             if(!result.found||!result.visible||!result.hasSvg) throw new Error('live NFP card/chart not visibly rendered');
             if(!/\+?162K/.test(result.text)) throw new Error('live NFP card does not show August +162K');
-            if((result.rects||0)<1) throw new Error('live NFP chart has no bars');
+            if((result.svgCount||0)<1) throw new Error('live NFP chart has no SVG');
             const fatal=errors.filter(e=>/SyntaxError|nfp|nonfarm|payems/i.test(e));
             if(fatal.length) throw new Error('production browser errors: '+JSON.stringify(fatal));
             await browser.close();
