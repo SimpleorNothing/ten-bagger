@@ -100,9 +100,33 @@
     return true;
   }
 
+
+  function mountChinaTrade() {
+    var id = 'mkt_china_trade';
+    if (document.getElementById(id)) return true;
+    var grid = document.getElementById('mktIndicators');
+    if (!grid) return false;
+    var card = document.createElement('div');
+    card.className = 'mkt-card'; card.id = id;
+    card.setAttribute('data-indicator-key', 'china-trade');
+    card.innerHTML = '<div class="mkt-ph">중국 수출입 로딩…</div>';
+    grid.appendChild(card);
+    fetch('china_trade.json?t=' + Date.now(), { cache: 'no-store' }).then(function(r){ return r.ok ? r.json() : null; }).then(function(j){
+      if(!j || !j.latest || !j.series || !j.series.length){ card.innerHTML='<div class="mkt-ph">발표 대기 · 중국 해관총서 월간 수출입</div>'; return; }
+      var z=j.latest, vals=j.series.map(function(x){return x.expYoy;});
+      var expDir=z.expYoy>=z.prevExpYoy, impDir=z.impYoy>=z.prevImpYoy;
+      card.innerHTML='<div class="mkt-nm">중국 수출입</div><div class="mkt-val">수출 +'+z.expYoy.toFixed(1)+'%</div>'+
+        '<div class="mkt-chg '+(expDir?'up':'dn')+'">수입 +'+z.impYoy.toFixed(1)+'% YoY <span style="font:600 12px var(--mono);margin-left:8px;color:var(--faint)">흑자 $'+z.balance.toFixed(2)+'B</span></div>'+
+        lensRow('<b>글로벌 상품수요</b> '+(expDir&&impDir?'<span class="ok">개선</span>':'<span class="nt">혼조</span>'),
+          '수출 '+z.prevExpYoy.toFixed(1)+'%→'+z.expYoy.toFixed(1)+'% · 수입 '+z.prevImpYoy.toFixed(1)+'%→'+z.impYoy.toFixed(1)+'% · 무역흑자 $'+z.prevBalance.toFixed(2)+'B→$'+z.balance.toFixed(2)+'B')+
+        '<div class="mkt-chart">'+spark(vals,expDir)+'</div><div class="mkt-span">'+esc(z.ym)+' · 중국 해관총서 · 등록 2026-09-08</div>';
+    }).catch(function(){ card.innerHTML='<div class="mkt-ph">중국 해관총서 데이터 로딩 실패</div>'; });
+    return true;
+  }
+
   function boot() {
-    mount(); mountGlobalSemi();
-    var n = 0, timer = setInterval(function () { var a=mount(), b=mountGlobalSemi(); if ((a && b) || ++n > 40) clearInterval(timer); }, 250);
+    mount(); mountGlobalSemi(); mountChinaTrade();
+    var n = 0, timer = setInterval(function () { var a=mount(), b=mountGlobalSemi(), c=mountChinaTrade(); if ((a && b && c) || ++n > 40) clearInterval(timer); }, 250);
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();
