@@ -150,6 +150,11 @@ def sync_changelog(doc):
         + f", 원문 Updated {updated} 기준으로 fedwatch·시장맥박 동기화'" + "},\n"
     )
     text = CHANGELOG.read_text(encoding="utf-8"); marker = "  var MKT_CHANGELOG=[\n"
+    # A prior updater hard-coded the changelog date. Remove any row for the same
+    # source Updated timestamp before inserting the canonical source-date row.
+    lines = text.splitlines(keepends=True)
+    needle = f"원문 Updated {updated} 기준으로 fedwatch·시장맥박 동기화"
+    text = "".join(line for line in lines if needle not in line)
     if entry.strip() not in text and marker in text:
         CHANGELOG.write_text(text.replace(marker, marker + entry, 1), encoding="utf-8")
 
