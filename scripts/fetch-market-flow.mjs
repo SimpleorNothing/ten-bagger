@@ -36,7 +36,7 @@ async function fetchYahoo(ticker) {
       const t = [], c = [];
       for (let i = 0; i < ts.length; i++) {
         const v = Number(close[i]);
-        if (!Number.isFinite(v)) continue;
+        if (!Number.isFinite(v) || v <= 0) continue;
         t.push(Math.floor(Number(ts[i]) / 86400));
         c.push(+v.toFixed(v >= 1000 ? 0 : 2));
       }
