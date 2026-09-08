@@ -1,0 +1,54 @@
+name: Apply China August trade 2026-09-09
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/apply-china-trade-20260909.yml'
+permissions:
+  contents: write
+  pull-requests: write
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Apply official release across all consumers
+        run: python3 scripts/sync-china-trade-20260909.py
+      - name: Validate all consumers
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          for f in ['china_trade.json','calendar.json','pulse.json','cycle.json','risk.json','signal_log.json','periodic_release_check.json']:
+              json.load(open(f,encoding='utf-8'))
+          z=json.load(open('china_trade.json'))['latest']
+          assert z['ym']=='2026-08' and z['expYoy']==25.0 and z['impYoy']==28.2 and z['balance']==119.09
+          cal=json.load(open('calendar.json')); txt=json.dumps(cal,ensure_ascii=False)
+          assert '중국 수출입 · 2026년 8월' in txt and '$119.09B' in txt
+          p=json.load(open('pulse.json')); f=next(x for x in p['drivers'] if x['ax']=='flow'); assert '+25.0%' in f['l1'] and '+28.2%' in f['l1']
+          c=json.load(open('cycle.json')); d=next(x for x in c['clusters'] if x['id']=='D'); assert '중국 8월 무역' in d['now']
+          r=json.load(open('risk.json')); r3=next(x for x in r['items'] if x['no']=='③'); assert '중국 8월 달러 기준' in r3['verdict']
+          s=json.load(open('signal_log.json')); assert any(x.get('source')=='중국 해관총서 2026년 8월 수출입 공식 발표' for x in s['log'])
+          PY
+          grep -Fq 'mkt_china_trade' trade.js
+          grep -Fq 'china_trade.json' trade.js
+          node --check trade.js
+          node --check changelog.js
+          git diff --check
+      - name: Commit data and open PR
+        env:
+          GH_TOKEN: ${{ secrets.AUTO_MERGE_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          BRANCH="automation/china-trade-data-${GITHUB_RUN_ID}"
+          git checkout -b "$BRANCH"
+          git add china_trade.json trade.js calendar.json pulse.json cycle.json risk.json signal_log.json periodic_release_check.json changelog.js
+          git commit -m 'data: sync China August trade across Alpha Map consumers'
+          git push -u origin "$BRANCH"
+          gh pr create --base main --head "$BRANCH" --title 'data: sync China August trade across Alpha Map consumers' --body '중국 해관총서 2026년 8월 수출입 공식 발표를 01 카드/시계열, calendar, pulse, cycle, risk, 02·04 공유 signal_log, 변경 이력에 동기화합니다. 추정값은 사용하지 않습니다.'

@@ -1,0 +1,53 @@
+name: Verify China trade live browser
+on:
+  workflow_run:
+    workflows: ["Deploy to Cloudflare Workers"]
+    types: [completed]
+  workflow_dispatch: {}
+permissions:
+  contents: read
+jobs:
+  verify:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    env:
+      SITE_PASSWORD: ${{ secrets.SITE_PASSWORD }}
+    steps:
+      - name: Verify authenticated China trade data and rendered card
+        run: |
+          set -euo pipefail
+          if [ -z "${SITE_PASSWORD:-}" ]; then echo 'ERROR: SITE_PASSWORD required'; exit 1; fi
+          mkdir -p /tmp/china-trade-live && cd /tmp/china-trade-live
+          npm init -y >/dev/null 2>&1
+          npm install playwright@1.55.0 >/dev/null 2>&1
+          npx playwright install chromium >/dev/null 2>&1
+          cat > check.js <<'NODE'
+          const { chromium } = require('playwright');
+          const BASE='https://simpleornothing.com';
+          const pw=process.env.SITE_PASSWORD;
+          (async()=>{
+            const browser=await chromium.launch({headless:true});
+            const context=await browser.newContext({viewport:{width:1440,height:1800}});
+            const auth=await context.request.post(BASE+'/__auth',{form:{password:pw},timeout:30000});
+            if(!auth.ok()) throw new Error('site auth failed: HTTP '+auth.status());
+            const resp=await context.request.get(BASE+'/china_trade.json?t='+Date.now(),{timeout:30000,headers:{'Cache-Control':'no-cache'}});
+            if(!resp.ok()) throw new Error('live china_trade.json HTTP '+resp.status());
+            const data=await resp.json(); const z=data.latest||{}; const series=data.series||[]; const last=series[series.length-1]||{};
+            console.log('LIVE CHINA TRADE JSON:',JSON.stringify({latest:z,last,registeredAt:data.registeredAt},null,2));
+            if(z.ym!=='2026-08'||z.expYoy!==25.0||z.impYoy!==28.2||z.balance!==119.09) throw new Error('live China trade latest mismatch');
+            if(last.ym!=='2026-08'||last.expYoy!==25.0||last.impYoy!==28.2||last.balance!==119.09) throw new Error('live China trade series endpoint mismatch');
+            if(data.registeredAt!=='2026-09-08') throw new Error('live China trade release date mismatch');
+            const page=await context.newPage(); const errors=[]; page.on('pageerror',e=>errors.push(String(e)));
+            await page.goto(BASE+'/?china-trade-smoke='+Date.now(),{waitUntil:'domcontentloaded',timeout:90000});
+            await page.waitForSelector('#nav .tab[data-v="market"]',{state:'visible',timeout:30000}); await page.click('#nav .tab[data-v="market"]');
+            await page.waitForFunction(()=>{const box=document.querySelector('#mkt_china_trade'); if(!box)return false; const t=(box.innerText||'').trim(); return t.includes('수출 +25.0%')&&t.includes('수입 +28.2%')&&t.includes('$119.09B')&&!!box.querySelector('svg');},{timeout:45000});
+            const result=await page.evaluate(()=>{const box=document.querySelector('#mkt_china_trade'); if(!box)return {found:false}; const r=box.getBoundingClientRect(),t=(box.innerText||'').trim(); return {found:true,visible:r.width>0&&r.height>0,text:t,hasSvg:!!box.querySelector('svg'),svgCount:box.querySelectorAll('svg').length};});
+            console.log('LIVE CHINA TRADE CARD:',JSON.stringify(result,null,2));
+            if(!result.found||!result.visible||!result.hasSvg) throw new Error('live China trade card/chart not visibly rendered');
+            if(!result.text.includes('2026-08')||!result.text.includes('수출 +25.0%')||!result.text.includes('수입 +28.2%')||!result.text.includes('$119.09B')) throw new Error('live China trade card text mismatch');
+            const fatal=errors.filter(e=>/SyntaxError|china_trade|mkt_china_trade/i.test(e)); if(fatal.length) throw new Error('production browser errors: '+JSON.stringify(fatal));
+            await browser.close();
+          })().catch(e=>{console.error(e);process.exit(1)});
+          NODE
+          for attempt in 1 2 3; do if node check.js; then exit 0; fi; if [ "$attempt" -lt 3 ]; then echo "China trade live verification attempt $attempt failed; retrying in 20s"; sleep 20; fi; done
+          exit 1
