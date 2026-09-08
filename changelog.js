@@ -9,7 +9,7 @@
     thread:'2026-08-01', decision:'2026-08-29', journal:'2026-09-05', brief:'2026-08-01', memo:'2026-08-01'
   };
   var MKT_CHANGELOG=[
-    {d:'2026-09-07',t:'01 FedWatch 원문시각 정합성 — CME 공식 EOD 직접값 미확보 시 Investing.com 표시값을 2순위로 사용하고 실제 Updated 시각을 보존. 12월 확률 15.0/41.9/35.0/8.1%, 선물 96.065, 원문 Updated Sep 08, 2026 03:25AM EDT 기준으로 fedwatch·시장맥박 동기화'},
+    {d:'2026-09-08',t:'01 FedWatch 원문시각 정합성 — CME 공식 EOD 직접값 미확보 시 Investing.com 표시값을 2순위로 사용하고 실제 Updated 시각을 보존. 12월 확률 15.0/41.9/35.0/8.1%, 선물 96.065, 원문 Updated Sep 08, 2026 03:25AM EDT 기준으로 fedwatch·시장맥박 동기화'},
     {d:'2026-09-08',t:'01 NFP 카드 독립 부팅 — BLS 공식 nfp.json 카드가 다른 시장 로더 초기화와 무관하게 즉시 렌더되도록 복구'},
     {d:'2026-09-08',t:'01 NFP 라이브 렌더 복구 — FRED PAYEMS 응답이 배열이 아닐 때도 BLS 공식 nfp.json(+162K, 6월 +31K·7월 +21K 수정)을 폴백 SoT로 사용하도록 정규화'},
     {d:'2026-09-07',t:'01 FedWatch 원문시각 정합성 — CME 공식 EOD 직접값 미확보 시 Investing.com 표시값을 2순위로 사용하고 실제 Updated 시각을 보존. 12월 확률 14.5/41.2/35.5/8.8%, 선물 96.060, 원문 Updated Sep 07, 2026 03:45AM EDT 기준으로 fedwatch·시장맥박 동기화'},
