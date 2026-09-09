@@ -86,6 +86,7 @@
       +'#v-company .ca-kpi-label{font-size:12px;color:var(--faint);font-weight:700}'
       +'#v-company .ca-kpi-value{font-size:20px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums;margin:3px 0}'
       +'#v-company .ca-kpi-note{font-size:13px;color:var(--dim)}'
+      +'#v-company .ca-optical-tracking{overflow-wrap:anywhere;line-height:1.6}#v-company .ca-optical-tracking .ca-note{font-size:14px}#v-company .ca-optical-tracking .ca-summary,#v-company .ca-optical-tracking .ca-fact,#v-company .ca-optical-tracking .ca-interp{font-size:16px}#v-company .ca-optical-tracking .ca-axis-code{font-size:14px}#v-company .ca-optical-tracking .ca-timeline-link{display:inline-block}'
       +'#v-company .ca-block{margin-top:30px}'
       +'#v-company .ca-head{display:flex;align-items:end;justify-content:space-between;gap:16px;margin-bottom:11px}'
       +'#v-company .ca-head h2{font-size:20px;margin:0}'
@@ -291,6 +292,14 @@
     return '<div class="ca-quarterly"><div class="ca-quarterly-head"><div class="ca-section-label">'+(annual?'연간 실적·전망':'분기 실적·전망')+'</div><button type="button" class="ca-quarterly-control" data-ca-period-toggle aria-label="'+periodLabel+' 보기" aria-pressed="'+(annual?'true':'false')+'"><span class="ca-q-calendar" aria-hidden="true"></span><span>'+periodLabel+'</span><span class="ca-q-chevron" aria-hidden="true"></span></button></div><div class="ca-q-legend" aria-label="그래프 범례"><span class="ca-q-legend-item"><i class="ca-q-swatch ca-q-swatch-rev" aria-hidden="true"></i>매출</span><span class="ca-q-legend-item"><i class="ca-q-swatch ca-q-swatch-op" aria-hidden="true"></i>영업이익</span><span class="ca-q-legend-item"><i class="ca-q-swatch ca-q-swatch-est" aria-hidden="true"></i>전망</span><span class="ca-q-unit">GAAP · $B</span></div><div class="ca-qchart" role="list" aria-label="'+esc(chartLabel)+'"><div class="ca-q-plot"><div class="ca-q-grid" aria-hidden="true">'+grid.join('')+zero+'</div><div class="ca-q-yaxis" aria-hidden="true">'+axis.join('')+'</div><div class="ca-q-columns" style="grid-template-columns:repeat('+rows.length+',minmax(0,1fr))">'+body+'</div></div><div class="ca-q-xlabels" style="grid-template-columns:repeat('+rows.length+',minmax(0,1fr))">'+labels+'</div></div>'+(notes?'<div class="ca-q-notes">'+notes+'</div>':'')+'</div>';
   }
 
+  function opticalTrackingHtml(t){
+    if(!t||!Array.isArray(t.items)||!t.items.length)return '';
+    return '<section class="ca-block ca-optical-tracking" aria-label="광통신 트래킹 지표"><div class="ca-head"><h2>광통신 트래킹 지표</h2></div><p class="ca-note">확인일 '+esc(t.asOf)+' · '+esc(t.period)+'</p><p class="ca-note">'+esc(t.note)+'</p><div class="ca-axes">'+t.items.map(function(r){
+      var source=/^https:\/\//.test(r.source||'')?'<a class="ca-timeline-link" href="'+esc(r.source)+'" target="_blank" rel="noopener noreferrer">근거 원문</a>':'';
+      return '<article class="ca-axis"><div class="ca-axis-code">'+esc(r.kind)+'</div><h3>'+esc(r.title)+'</h3><div class="ca-summary"><b>현재</b> · '+esc(r.current)+'</div><p class="ca-note"><b>직전 비교</b> · '+esc(r.previous)+'</p><div class="ca-fact"><b>다음 확인</b>'+esc(r.next)+'</div><div class="ca-interp"><b>판단 조건 · 자체 해석</b><p>상방: '+esc(r.up)+'</p><p>하방: '+esc(r.down)+'</p></div>'+source+'</article>';
+    }).join('')+'</div><p class="ca-note">'+esc(t.updatePolicy)+'</p><p class="ca-note">전체 매출에서 추정 AEC 매출을 차감하지 않으며, 자체 광모듈에 들어간 DSP·PIC 내부 매출을 중복 합산하지 않습니다.</p></section>';
+  }
+
   function renderCompany(d){
     var app=document.getElementById('companyApp');if(!app)return;
     var frame=d.company&&d.company.frame||{};
@@ -304,6 +313,7 @@
       +'<section class="ca-card ca-frame"><div><div class="ca-section-label">전략 프레임</div><h2 class="ca-company-title">'+esc(d.company.name)+' <span>'+esc(d.company.ticker)+'</span></h2><div class="ca-statement">'+esc(frame.statement)+'</div><div class="ca-redef">'+esc(frame.redefinition)+'</div><ul>'+(frame.evidence||[]).map(function(x){return '<li>'+esc(x)+'</li>';}).join('')+'</ul></div>'
       +'<div class="ca-frame-side"><div><div class="ca-section-label">현재 상태</div><div class="ca-big">'+esc(frame.status)+'</div></div>'+quarterly+'<div class="ca-note">확인된 사실과 경영진 전망, 투자 해석을 구분해 표시합니다.</div></div></section>'
       +'<div class="ca-kpis">'+kpis+'</div>'
+      +opticalTrackingHtml(d.opticalTracking)
       +'<section class="ca-block"><div class="ca-head"><h2>'+esc((d.axes||[]).length)+'개 전략축 실행 현황</h2><p>카드를 열면 축별 사건 타임라인을 확인할 수 있습니다.</p></div><div class="ca-axes">'+(d.axes||[]).map(axisHtml).join('')+'</div></section>'
       +'<section class="ca-block"><div class="ca-head"><h2>FY2023~FY2028 실적·전망</h2><p>실적 = GAAP · 전망 = 명시된 경영진/자료 기준</p></div>'+financialHtml(d.financials)+'</section>'
       +'<section class="ca-block"><div class="ca-head"><h2>수주·매출 가시성</h2><p>공개되지 않은 총 backlog는 임의 추정하지 않습니다.</p></div><div class="ca-visibility"><div><div class="ca-section-label">현재 확인</div><h3>'+esc(vis.headline)+'</h3><ul>'+(vis.facts||[]).map(function(x){return '<li>'+esc(x)+'</li>';}).join('')+'</ul></div><div class="ca-next"><b>다음 확인 포인트</b>'+esc(vis.next)+'</div></div></section>'
