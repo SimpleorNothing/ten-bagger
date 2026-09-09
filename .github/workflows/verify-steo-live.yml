@@ -1,0 +1,65 @@
+name: Verify STEO live browser
+
+on:
+  workflow_run:
+    workflows: ["Deploy to Cloudflare Workers"]
+    types: [completed]
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    env:
+      SITE_PASSWORD: ${{ secrets.SITE_PASSWORD }}
+    steps:
+      - name: Verify authenticated STEO data and rendered card on custom domain
+        run: |
+          set -euo pipefail
+          if [ -z "${SITE_PASSWORD:-}" ]; then echo 'ERROR: SITE_PASSWORD required'; exit 1; fi
+          mkdir -p /tmp/steo-live && cd /tmp/steo-live
+          npm init -y >/dev/null 2>&1
+          npm install playwright@1.55.0 >/dev/null 2>&1
+          npx playwright install chromium >/dev/null 2>&1
+          cat > check.js <<'NODE'
+          const { chromium } = require('playwright');
+          const BASE='https://simpleornothing.com';
+          const pw=process.env.SITE_PASSWORD;
+          (async()=>{
+            const browser=await chromium.launch({headless:true});
+            const context=await browser.newContext({viewport:{width:1440,height:1800}});
+            const auth=await context.request.post(BASE+'/__auth',{form:{password:pw},timeout:30000});
+            if(!auth.ok()) throw new Error('site auth failed: HTTP '+auth.status());
+            const dataResp=await context.request.get(BASE+'/steo.json?t='+Date.now(),{timeout:30000,headers:{'Cache-Control':'no-cache'}});
+            if(!dataResp.ok()) throw new Error('live steo.json HTTP '+dataResp.status());
+            const data=await dataResp.json();
+            const last=(data.series||[])[(data.series||[]).length-1];
+            console.log('LIVE STEO JSON:',JSON.stringify({latest:data.latest,last},null,2));
+            if(data.latest?.ym!=='2026-09'||data.latest?.brent2026!==91||data.latest?.prevBrent2026!==87||data.latest?.electricityGeneration2026!==4368||data.latest?.electricitySales2026!==4135||data.latest?.electricitySales2027!==4211) throw new Error('live STEO latest mismatch');
+            if(last?.ym!=='2026-09'||last?.brent2026!==91) throw new Error('live STEO series mismatch');
+            const page=await context.newPage();
+            const errors=[]; page.on('pageerror',e=>errors.push(String(e)));
+            await page.goto(BASE+'/?steo-smoke='+Date.now(),{waitUntil:'domcontentloaded',timeout:90000});
+            await page.waitForSelector('#nav .tab[data-v="market"]',{state:'visible',timeout:30000});
+            await page.click('#nav .tab[data-v="market"]');
+            await page.waitForSelector('#mkt_eia_steo',{state:'visible',timeout:45000});
+            await page.waitForFunction(()=>{
+              const t=document.getElementById('mkt_eia_steo')?.innerText||'';
+              return t.includes('Brent $91/b')&&t.includes('전월 전망 $87→$91')&&t.includes('4368BkWh');
+            },{timeout:45000});
+            const result=await page.evaluate(()=>{
+              const el=document.getElementById('mkt_eia_steo'); const r=el?.getBoundingClientRect();
+              return {visible:!!el&&!!r&&r.width>0&&r.height>0,text:(el?.innerText||'').trim(),hasSvg:!!el?.querySelector('svg')};
+            });
+            console.log('LIVE STEO CARD:',JSON.stringify(result,null,2));
+            for(const token of ['Brent $91/b','전월 전망 $87→$91','2027 $74','4368BkWh','4135BkWh','2026-09','EIA STEO']) if(!result.text.includes(token)) throw new Error('live card missing '+token);
+            if(!result.visible||!result.hasSvg) throw new Error('live STEO card/chart not visibly rendered');
+            const fatal=errors.filter(e=>/SyntaxError|steo|mkt_eia_steo/i.test(e));
+            if(fatal.length) throw new Error('production browser errors: '+JSON.stringify(fatal));
+            await browser.close();
+          })().catch(e=>{console.error(e);process.exit(1)});
+          NODE
+          node check.js
