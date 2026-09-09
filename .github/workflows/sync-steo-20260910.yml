@@ -1,0 +1,182 @@
+name: Sync EIA September STEO
+
+on:
+  push:
+    branches: ["automation/steo-20260910"]
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: automation/steo-20260910
+          fetch-depth: 0
+      - name: Patch all STEO consumers
+        run: |
+          python - <<'PY'
+          import json, pathlib, re, time
+          root=pathlib.Path('.')
+          checked='2026-09-10T07:27:26+09:00'
+          src='https://www.eia.gov/pressroom/releases/press592.php'
+          steo_url='https://www.eia.gov/outlooks/steo/'
+
+          steo={
+            'asOf':'2026-09-10T07:27:26+09:00',
+            'release':'2026-09',
+            'registeredAt':'2026-09-09',
+            'source':src,
+            'definition':'EIA Short-Term Energy Outlook 월간 공식 전망. 가격은 연평균 명목 달러, 전력은 BkWh.',
+            'latest':{
+              'ym':'2026-09','brent2026':91,'brent2027':74,'gasoline2026':3.84,'gasoline2027':3.35,
+              'crudeProd2026':13.8,'crudeProd2027':14.3,'henryHub2026':3.43,'henryHub2027':3.28,
+              'electricityGeneration2026':4368,'electricityGenerationGrowth2026':2.2,'electricityGenerationGrowth2027':1.7,
+              'electricitySales2026':4135,'electricitySales2027':4211,
+              'octGasStorage2026':3969,
+              'prevBrent2026':87,'prevBrent2027':69,'prevGasoline2026':3.78,'prevGasoline2027':3.29,
+              'prevOctGasStorage2026':3985
+            },
+            'series':[
+              {'ym':'2026-08','brent2026':87,'brent2027':69,'gasoline2026':3.78,'gasoline2027':3.29,'octGasStorage2026':3985,'source':'https://www.eia.gov/pressroom/releases/press591.php','registeredAt':'2026-08-11'},
+              {'ym':'2026-09','brent2026':91,'brent2027':74,'gasoline2026':3.84,'gasoline2027':3.35,'octGasStorage2026':3969,'electricityGeneration2026':4368,'electricitySales2026':4135,'electricitySales2027':4211,'source':src,'registeredAt':'2026-09-09'}
+            ]
+          }
+          (root/'steo.json').write_text(json.dumps(steo,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+
+          # 01 visible card + chart: same canonical steo.json render source.
+          p=root/'trade.js'; s=p.read_text(encoding='utf-8')
+          if 'function mountSteo()' not in s:
+            block=r'''
+  function mountSteo() {
+    var id = 'mkt_eia_steo';
+    if (document.getElementById(id)) return true;
+    var grid = document.getElementById('mktIndicators');
+    if (!grid) return false;
+    var card = document.createElement('div');
+    card.className = 'mkt-card'; card.id = id;
+    card.setAttribute('data-indicator-key', 'eia-steo');
+    card.innerHTML = '<div class="mkt-ph">EIA STEO 로딩…</div>';
+    grid.appendChild(card);
+    fetch('steo.json?t=' + Date.now(), { cache: 'no-store' }).then(function(r){ return r.ok ? r.json() : null; }).then(function(j){
+      if(!j || !j.latest || !j.series || !j.series.length){ card.innerHTML='<div class="mkt-ph">발표 대기 · EIA 월간 STEO</div>'; return; }
+      var z=j.latest, vals=j.series.map(function(x){return x.brent2026;});
+      var d=z.brent2026-z.prevBrent2026;
+      card.innerHTML='<div class="mkt-nm">EIA 단기 에너지 전망(STEO)</div><div class="mkt-val">Brent $'+z.brent2026+'/b</div>'+
+        '<div class="mkt-chg '+(d>=0?'up':'dn')+'">전월 전망 $'+z.prevBrent2026+'→$'+z.brent2026+' <span style="font:600 12px var(--mono);margin-left:8px;color:var(--faint)">2027 $'+z.brent2027+'</span></div>'+
+        lensRow('<b>L8 전력·에너지</b> 데이터센터 수요 <span class="ok">확장</span>',
+          '2026 전력생산 '+z.electricityGeneration2026+'BkWh(+ '+z.electricityGenerationGrowth2026.toFixed(1)+'%) · 전력판매 '+z.electricitySales2026+'BkWh · 2027 '+z.electricitySales2027+'BkWh')+
+        '<div class="mkt-chart">'+spark(vals,d>=0)+'</div><div class="mkt-span">2026-09 · EIA STEO · 등록 2026-09-09</div>';
+    }).catch(function(){ card.innerHTML='<div class="mkt-ph">EIA STEO 데이터 로딩 실패</div>'; });
+    return true;
+  }
+'''
+            s=s.replace('\n  function boot() {',block+'\n  function boot() {')
+            s=s.replace('mount(); mountGlobalSemi(); mountChinaTrade();','mount(); mountGlobalSemi(); mountChinaTrade(); mountSteo();')
+            s=s.replace('var a=mount(), b=mountGlobalSemi(), c=mountChinaTrade(); if ((a && b && c) || ++n > 40) clearInterval(timer);',"var a=mount(), b=mountGlobalSemi(), c=mountChinaTrade(), d=mountSteo(); if ((a && b && c && d) || ++n > 40) clearInterval(timer);")
+            p.write_text(s,encoding='utf-8')
+
+          # Calendar result.
+          p=root/'calendar.json'; cal=json.loads(p.read_text(encoding='utf-8'))
+          cal['asOf']=checked
+          label='EIA STEO · 2026년 9월'
+          cal['events']=[e for e in cal.get('events',[]) if e.get('lbl')!=label]
+          cal['events'].append({
+            'd':'2026-09-10','cat':'macro','lbl':label,
+            'meta':'발표 확인 · EIA 2026-09-09 공식 9월 STEO. 2026 Brent 연평균 $91/b(8월 전망 $87), 2027 $74($69). 2026 미국 전력생산은 4,368BkWh(+2.2%)로 사상 최대, 2027 +1.7%; 전력판매는 2026 4,135BkWh, 2027 4,211BkWh. 데이터센터와 제조업 전력수요가 증가 동력. 10월말 천연가스 재고 전망 3,969Bcf(8월 3,985Bcf). · 원문: '+src+' · 등록일: 2026-09-09 · 확인: 2026-09-10 07:27 KST',
+            'when':'09-10 01:00 KST (발표 완료 · Brent 2026 $91 / 전력생산 4,368BkWh)'
+          })
+          cal['events'].sort(key=lambda e:(e.get('d',''),e.get('when',''),e.get('lbl','')))
+          p.write_text(json.dumps(cal,ensure_ascii=False,indent=1)+'\n',encoding='utf-8')
+
+          # Market pulse / 04 council context consumer.
+          p=root/'pulse.json'; pulse=json.loads(p.read_text(encoding='utf-8'))
+          pulse['asOf']='2026-09-10T07:27'
+          pulse['gen']=1789008446000
+          ed=next((x for x in pulse.get('drivers',[]) if x.get('ax')=='energy'),None)
+          if ed:
+            ed['l1']='EIA 9월 STEO는 2026 Brent 연평균 전망을 $87→$91/b, 2027을 $69→$74/b로 상향했다. 동시에 2026 미국 전력생산은 4,368BkWh(+2.2%)로 사상 최대를 전망했다.'
+            ed['l2']='데이터센터와 제조업이 전력수요 증가의 핵심 동력이다. 2026 전력판매 4,135BkWh, 2027 4,211BkWh 전망은 L8 전력·에너지 병목의 실수요 근거를 강화한다. 다만 주간 원유재고는 노동절로 9월 10일 미국 현지 발표가 지연돼 최신 확정치는 8월 28일 종료 주간을 유지한다.'
+            ed['verdict']='STEO: Brent 상향 · 데이터센터발 전력수요 기록 경신'
+            ed['srcs']=[{'t':'EIA Short-Term Energy Outlook · September 2026','u':src,'d':'2026-09-09'},{'t':'EIA Weekly Petroleum Status Report · week ending 2026-08-28','u':'https://www.eia.gov/petroleum/supply/weekly/','d':'2026-09-02'}]
+          p.write_text(json.dumps(pulse,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+
+          # Cycle: demand-leading cluster receives official power-demand corroboration, without treating it as semiconductor-only data.
+          p=root/'cycle.json'; cyc=json.loads(p.read_text(encoding='utf-8')); cyc['asOf']='2026-09-10'
+          d=next((x for x in cyc.get('clusters',[]) if x.get('id')=='D'),None)
+          if d:
+            note='EIA 9월 STEO: 데이터센터·제조업 수요로 2026 미국 전력생산 4,368BkWh(+2.2%) 사상 최대, 전력판매 4,135BkWh→2027 4,211BkWh. 반도체 전용 지표가 아니므로 L8/AI 인프라 수요 보조 신호로만 사용.'
+            d['now']=d.get('now','')+' · EIA 9월 STEO 데이터센터발 전력수요 기록 경신'
+            d['updated']='2026-09-10'; d.setdefault('history',[]).insert(0,{'date':'2026-09-10','note':note})
+          cyc['energyDemand']={'name':'EIA STEO 데이터센터 전력수요','latest':'2026-09','electricityGeneration2026':4368,'growth2026':2.2,'electricitySales2026':4135,'electricitySales2027':4211,'brent2026':91,'prevBrent2026':87,'source':src,'registeredAt':'2026-09-09'}
+          p.write_text(json.dumps(cyc,ensure_ascii=False,separators=(',',':'))+'\n',encoding='utf-8')
+
+          # Risk board: preserve states; only append verified energy-cost evidence to bond/discount-rate transmission.
+          p=root/'risk.json'; risk=json.loads(p.read_text(encoding='utf-8')); risk['asOf']='2026-09-10'
+          bond=next((x for x in risk.get('items',[]) if x.get('id')=='bond'),None)
+          if bond:
+            add=' EIA 9월 STEO는 2026 Brent 연평균 전망을 $87→$91/b로 상향해 에너지발 인플레이션·장기금리 상방 리스크를 재확인한다.'
+            if add.strip() not in bond.get('verdict',''): bond['verdict']=bond.get('verdict','')+add
+            bond.setdefault('srcs',[]).append({'label':'EIA — September 2026 STEO: 2026 Brent $91/b, data-center-driven record electricity generation','url':src})
+            bond['upd']='2026-09-10'
+          risk['latestOfficialEnergy']={'release':'2026-09 STEO','brent2026':91,'prevBrent2026':87,'electricityGeneration2026':4368,'electricitySales2026':4135,'registeredAt':'2026-09-09','source':src}
+          p.write_text(json.dumps(risk,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+
+          # 02 insight + 04 council shared log consumer.
+          p=root/'signal_log.json'; sig=json.loads(p.read_text(encoding='utf-8')); sig['asOf']='2026-09-10'
+          source='EIA 2026년 9월 STEO 공식 발표 — 01·02·04 공통 정기지표 동기화'
+          sig['log']=[x for x in sig.get('log',[]) if x.get('source')!=source]
+          sig['log'].append({'date':'2026-09-09','at':checked,'source':source,'srcs':[{'label':'EIA September 2026 Short-Term Energy Outlook','url':src}], 'items':[
+            {'tag':'L8·전력수요','layer':'L8','col':'#0ca678','html':'<b>EIA 9월 STEO: 데이터센터·제조업 수요로 2026 미국 전력생산 4,368BkWh(+2.2%) 사상 최대 전망.</b> 전력판매 2026 4,135BkWh→2027 4,211BkWh. AI 인프라 전력 병목의 실수요 보조근거 강화.'},
+            {'tag':'에너지·금리','layer':'macro','col':'#e03131','html':'<b>2026 Brent 연평균 $87→$91/b, 2027 $69→$74/b 상향.</b> 에너지 가격이 인플레이션·장기금리 하방을 제약할 수 있어 L8 수요 호재와 할인율 리스크를 동시에 반영. 주간 원유재고 신규치는 아직 발표 전이라 추정하지 않음.'}
+          ]})
+          p.write_text(json.dumps(sig,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+
+          # Daily audit/status.
+          status={
+            'date':'2026-09-10','checkedAt':checked,'status':'신규 발표 반영 완료',
+            'newOfficialReleases':[{'indicator':'EIA STEO 2026년 9월','registeredAt':'2026-09-09','sourceUrl':src,'values':steo['latest']}],
+            'pending':[
+              {'indicator':'BLS PPI 2026년 8월','status':'발표 대기','scheduled':'2026-09-10 21:30 KST'},
+              {'indicator':'EIA 주간 원유재고','status':'노동절 지연 · 발표 대기','scheduled':'2026-09-11 01:00 KST 이후'},
+              {'indicator':'BLS CPI 2026년 8월','status':'발표 대기','scheduled':'2026-09-11 21:30 KST'}
+            ],
+            'consumers':['01 EIA STEO 카드 현재값·전월 전망 비교·해석','01 steo.json 월별 전망 시계열','calendar.json','pulse.json 에너지 맥락','cycle.json 수요선행 보조근거','risk.json 에너지-장기금리 경로','02 signal_log.json','04 council-context가 읽는 pulse/cycle/signal_log','changelog.js','simpleornothing.com 라이브 검증 워크플로'],
+            'notes':['주간 원유재고는 2026-09-10 미국 현지 노동절 지연 발표 전이므로 기존 8/28 종료 주간 확정값을 새 값으로 가장하지 않음.','STEO 전력수요는 반도체 전용 수요가 아니므로 AI/L8 보조 신호로만 해석.']
+          }
+          (root/'periodic_release_check.json').write_text(json.dumps(status,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+          audit=root/'audit/official-release-checks/2026-09-10.json'; audit.parent.mkdir(parents=True,exist_ok=True); audit.write_text(json.dumps(status,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+
+          # Changelog prepend once.
+          p=root/'changelog.js'; ch=p.read_text(encoding='utf-8')
+          entry="    {d:'2026-09-10',t:'01 정기 발표 동기화 — EIA 9월 STEO: 2026 Brent $87→$91/b, 2027 $69→$74/b 상향 및 데이터센터발 미국 전력생산 4,368BkWh 사상 최대 전망을 카드·시계열·캘린더·pulse/cycle/risk·02/04 공통 맥락에 동시 반영'},\n"
+          if 'EIA 9월 STEO: 2026 Brent $87→$91/b' not in ch:
+            marker='  var CHANGES=['
+            if marker in ch: ch=ch.replace(marker,marker+'\n'+entry,1)
+          ch=ch.replace("market:'2026-09-09'","market:'2026-09-10'",1)
+          p.write_text(ch,encoding='utf-8')
+          PY
+      - name: Validate synchronized consumers
+        run: |
+          python - <<'PY'
+          import json
+          s=json.load(open('steo.json')); assert s['latest']['brent2026']==91 and s['latest']['prevBrent2026']==87 and s['series'][-1]['ym']=='2026-09'
+          c=json.load(open('calendar.json')); assert any(e.get('lbl')=='EIA STEO · 2026년 9월' and '$91' in e.get('meta','') for e in c['events'])
+          p=json.load(open('pulse.json')); e=next(x for x in p['drivers'] if x['ax']=='energy'); assert '$87→$91/b' in e['l1']
+          y=json.load(open('cycle.json')); assert y['energyDemand']['electricityGeneration2026']==4368
+          r=json.load(open('risk.json')); assert r['latestOfficialEnergy']['brent2026']==91
+          g=json.load(open('signal_log.json')); assert any('EIA 2026년 9월 STEO' in x.get('source','') for x in g['log'])
+          q=json.load(open('periodic_release_check.json')); assert q['status']=='신규 발표 반영 완료'
+          t=open('trade.js',encoding='utf-8').read(); assert 'mkt_eia_steo' in t and "fetch('steo.json" in t
+          print('all STEO consumers synchronized')
+          PY
+      - name: Commit synchronized data
+        run: |
+          if git diff --quiet && git status --porcelain | grep -q '^$'; then exit 0; fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add steo.json trade.js calendar.json pulse.json cycle.json risk.json signal_log.json periodic_release_check.json audit/official-release-checks/2026-09-10.json changelog.js
+          git commit -m 'data: sync EIA September 2026 STEO across Alpha Map'
+          git push origin HEAD:automation/steo-20260910
