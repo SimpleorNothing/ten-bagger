@@ -35,12 +35,7 @@ def kst_now() -> str:
 
 
 def fetch_investing_summary():
-    """Read only the current-probability summary before Investing's repeated table.
-
-    Investing renders each target-rate probability twice: once in the summary and
-    again in a table that also includes previous-day/week columns. Parsing the full
-    block can therefore double-count or cross-pair percentages. Stop at `Target Rate`.
-    """
+    """Read only the current-probability summary before Investing's repeated table."""
     req = fw.Request(fw.INVESTING_URL, headers={"User-Agent": fw.UA, "Accept-Language": "en-US,en;q=0.9"})
     with fw.urlopen(req, timeout=30) as r:
         html = r.read().decode("utf-8", "ignore")
@@ -125,6 +120,7 @@ def sync_pulse(doc):
     h = doc["history"][-1]; ranges = h.get("ranges") or []
     below4 = round(sum(float(x.get("probability", 0)) for x in ranges if float(x.get("high", 99)) <= 4.0), 1)
     updated = h.get("sourceUpdatedAt") or h.get("sourceDate") or h.get("date")
+    source_date = h.get("sourceDate") or h.get("date")
     p = json.loads(PULSE.read_text(encoding="utf-8")); old = p.get("headline", "")
     replacement = f"FedWatch의 12월 3.75~4.00% 이하 확률은 {below4:.1f}%(원문 Updated {updated})"
     pattern = r"FedWatch의 12월 3\.75~4\.00% 이하 확률은 [0-9.]+%(?:\([^)]*\))?"
@@ -134,7 +130,30 @@ def sync_pulse(doc):
         if new and not new.endswith((".", "!", "?")):
             new += "."
         new += (" " if new else "") + replacement + "."
-    p["headline"] = new; p["asOf"] = kst_now()[:16]
+    p["headline"] = new
+
+    # The rates card is another consumer of the same FedWatch snapshot. Keep its
+    # percentage synchronized with the headline so one screen cannot show two values.
+    for driver in p.get("drivers") or []:
+        if driver.get("ax") != "rates":
+            continue
+        l1 = str(driver.get("l1") or "")
+        l1_new = re.sub(
+            r"(?:\d{1,2}월 \d{1,2}일 )?FedWatch의 12월 3\.75~4\.00% 이하 누적 확률은 [0-9.]+%",
+            f"{int(source_date[5:7])}월 {int(source_date[8:10])}일 FedWatch의 12월 3.75~4.00% 이하 누적 확률은 {below4:.1f}%",
+            l1,
+        )
+        if l1_new == l1 and "FedWatch" not in l1:
+            l1_new = l1.rstrip(". ") + f". {int(source_date[5:7])}월 {int(source_date[8:10])}일 FedWatch의 12월 3.75~4.00% 이하 누적 확률은 {below4:.1f}%다."
+        driver["l1"] = l1_new
+        verdict = str(driver.get("verdict") or "")
+        driver["verdict"] = re.sub(
+            r"12월 4\.00% 이하 [0-9.]+%",
+            f"12월 4.00% 이하 {below4:.1f}%",
+            verdict,
+        )
+
+    p["asOf"] = kst_now()[:16]
     p["model"] = "ChatGPT automation · official releases first · holdings 2026-09-05 · no paid external LLM API"
     PULSE.write_text(json.dumps(p, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
@@ -154,8 +173,6 @@ def sync_changelog(doc):
         + f", 원문 Updated {updated} 기준으로 fedwatch·시장맥박 동기화'" + "},\n"
     )
     text = CHANGELOG.read_text(encoding="utf-8"); marker = "  var MKT_CHANGELOG=[\n"
-    # A prior updater hard-coded the changelog date. Remove any row for the same
-    # source Updated timestamp before inserting the canonical source-date row.
     lines = text.splitlines(keepends=True)
     needle = f"원문 Updated {updated} 기준으로 fedwatch·시장맥박 동기화"
     text = "".join(line for line in lines if needle not in line)
