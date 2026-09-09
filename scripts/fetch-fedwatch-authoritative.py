@@ -127,9 +127,13 @@ def sync_pulse(doc):
     updated = h.get("sourceUpdatedAt") or h.get("sourceDate") or h.get("date")
     p = json.loads(PULSE.read_text(encoding="utf-8")); old = p.get("headline", "")
     replacement = f"FedWatch의 12월 3.75~4.00% 이하 확률은 {below4:.1f}%(원문 Updated {updated})"
-    new = re.sub(r"FedWatch의 12월 3\.75~4\.00% 이하 확률은 [0-9.]+%(?:\([^)]*\))?", replacement, old)
-    if new == old and "FedWatch" not in old:
-        new = old + (" " if old else "") + replacement + "."
+    pattern = r"FedWatch의 12월 3\.75~4\.00% 이하 확률은 [0-9.]+%(?:\([^)]*\))?"
+    new = re.sub(pattern, replacement, old)
+    if new == old:
+        new = old.rstrip()
+        if new and not new.endswith((".", "!", "?")):
+            new += "."
+        new += (" " if new else "") + replacement + "."
     p["headline"] = new; p["asOf"] = kst_now()[:16]
     p["model"] = "ChatGPT automation · official releases first · holdings 2026-09-05 · no paid external LLM API"
     PULSE.write_text(json.dumps(p, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
