@@ -124,9 +124,31 @@
     return true;
   }
 
+  function mountSteo() {
+    var id = 'mkt_eia_steo';
+    if (document.getElementById(id)) return true;
+    var grid = document.getElementById('mktIndicators');
+    if (!grid) return false;
+    var card = document.createElement('div');
+    card.className = 'mkt-card'; card.id = id;
+    card.setAttribute('data-indicator-key', 'eia-steo');
+    card.innerHTML = '<div class="mkt-ph">EIA STEO 로딩…</div>';
+    grid.appendChild(card);
+    fetch('steo.json?t=' + Date.now(), { cache: 'no-store' }).then(function(r){ return r.ok ? r.json() : null; }).then(function(j){
+      if(!j || !j.latest || !j.series || !j.series.length){ card.innerHTML='<div class="mkt-ph">발표 대기 · EIA 월간 STEO</div>'; return; }
+      var z=j.latest, vals=j.series.map(function(x){return x.brent2026;});
+      var d=z.brent2026-z.prevBrent2026;
+      card.innerHTML='<div class="mkt-nm">EIA 단기 에너지 전망(STEO)</div><div class="mkt-val">Brent $'+z.brent2026+'/b</div>'+
+        '<div class="mkt-chg '+(d>=0?'up':'dn')+'">전월 전망 $'+z.prevBrent2026+'→$'+z.brent2026+' <span style="font:600 12px var(--mono);margin-left:8px;color:var(--faint)">2027 $'+z.brent2027+'</span></div>'+
+        lensRow('<b>L8 전력·에너지</b> 데이터센터 수요 <span class="ok">확장</span>','2026 전력생산 '+z.electricityGeneration2026+'BkWh(+'+z.electricityGenerationGrowth2026.toFixed(1)+'%) · 전력판매 '+z.electricitySales2026+'BkWh · 2027 '+z.electricitySales2027+'BkWh')+
+        '<div class="mkt-chart">'+spark(vals,d>=0)+'</div><div class="mkt-span">2026-09 · EIA STEO · 등록 2026-09-09</div>';
+    }).catch(function(){ card.innerHTML='<div class="mkt-ph">EIA STEO 데이터 로딩 실패</div>'; });
+    return true;
+  }
+
   function boot() {
-    mount(); mountGlobalSemi(); mountChinaTrade();
-    var n = 0, timer = setInterval(function () { var a=mount(), b=mountGlobalSemi(), c=mountChinaTrade(); if ((a && b && c) || ++n > 40) clearInterval(timer); }, 250);
+    mount(); mountGlobalSemi(); mountChinaTrade(); mountSteo();
+    var n = 0, timer = setInterval(function () { var a=mount(), b=mountGlobalSemi(), c=mountChinaTrade(), d=mountSteo(); if ((a && b && c && d) || ++n > 40) clearInterval(timer); }, 250);
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();
