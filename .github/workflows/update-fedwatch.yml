@@ -1,7 +1,10 @@
 name: Update FedWatch December 2026
 on:
   schedule:
-    - cron: '15 22 * * *'
+    # Investing.com typically publishes the refreshed US-session snapshot around
+    # 02:00~03:30 EDT. Run after that window so the daily site does not remain on
+    # the previous source date through the Korean afternoon.
+    - cron: '30 7 * * *'
   workflow_dispatch: {}
   push:
     paths:
