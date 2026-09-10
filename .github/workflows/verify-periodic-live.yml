@@ -1,0 +1,67 @@
+name: Verify periodic release live
+
+on:
+  workflow_run:
+    workflows: ["Deploy to Cloudflare Workers"]
+    types: [completed]
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    env:
+      SITE_PASSWORD: ${{ secrets.SITE_PASSWORD }}
+    steps:
+      - name: Verify PPI and EIA live JSON, cards and charts
+        run: |
+          set -euo pipefail
+          if [ -z "${SITE_PASSWORD:-}" ]; then echo 'ERROR: SITE_PASSWORD required'; exit 1; fi
+          mkdir -p /tmp/periodic-live && cd /tmp/periodic-live
+          npm init -y >/dev/null 2>&1
+          npm install playwright@1.55.0 >/dev/null 2>&1
+          npx playwright install chromium >/dev/null 2>&1
+          cat > check.js <<'NODE'
+          const { chromium } = require('playwright');
+          const BASE='https://simpleornothing.com';
+          const pw=process.env.SITE_PASSWORD;
+          (async()=>{
+            const browser=await chromium.launch({headless:true});
+            const context=await browser.newContext({viewport:{width:1440,height:2200}});
+            const auth=await context.request.post(BASE+'/__auth',{form:{password:pw},timeout:30000});
+            if(!auth.ok()) throw new Error('site auth failed: HTTP '+auth.status());
+
+            const ppiResp=await context.request.get(BASE+'/ppi.json?t='+Date.now(),{timeout:30000,headers:{'Cache-Control':'no-cache'}});
+            if(!ppiResp.ok()) throw new Error('live ppi.json HTTP '+ppiResp.status());
+            const ppi=await ppiResp.json(); const ppiLast=(ppi.series||[]).at(-1);
+            console.log('LIVE PPI JSON:',JSON.stringify({latest:ppi.latest,last:ppiLast,registeredAt:ppi.registeredAt},null,2));
+            if(ppi.latest?.ym!=='2026-08'||ppi.latest?.headlineMom!==0.4||ppi.latest?.headlineYoy!==5.4||ppi.latest?.coreMom!==0.3||ppi.latest?.coreYoy!==4.7||ppi.latest?.prevHeadlineMom!==0.1||ppi.latest?.prevCoreMom!==0.4) throw new Error('live PPI latest mismatch');
+            if(ppiLast?.ym!=='2026-08'||ppiLast?.headlineMom!==0.4) throw new Error('live PPI series endpoint mismatch');
+
+            const eiaResp=await context.request.get(BASE+'/eia_weekly.json?t='+Date.now(),{timeout:30000,headers:{'Cache-Control':'no-cache'}});
+            if(!eiaResp.ok()) throw new Error('live eia_weekly.json HTTP '+eiaResp.status());
+            const eia=await eiaResp.json(); const eiaLast=(eia.series||[]).at(-1);
+            console.log('LIVE EIA JSON:',JSON.stringify({latest:eia.latest,last:eiaLast,registeredAt:eia.registeredAt},null,2));
+            if(eia.latest?.weekEnding!=='2026-09-04'||eia.latest?.commercialCrudeMb!==424.069||eia.latest?.previousMb!==424.46||eia.latest?.changeMb!==-0.391) throw new Error('live EIA latest mismatch');
+            if(eiaLast?.weekEnding!=='2026-09-04'||eiaLast?.commercialCrudeMb!==424.069) throw new Error('live EIA series endpoint mismatch');
+
+            const page=await context.newPage(); const errors=[]; page.on('pageerror',e=>errors.push(String(e)));
+            await page.goto(BASE+'/?periodic-smoke='+Date.now(),{waitUntil:'domcontentloaded',timeout:90000});
+            await page.waitForSelector('#nav .tab[data-v="market"]',{state:'visible',timeout:30000});
+            await page.click('#nav .tab[data-v="market"]');
+            for (const id of ['#mkt_us_ppi','#mkt_eia_weekly_crude']) await page.waitForSelector(id,{state:'visible',timeout:45000});
+            await page.waitForFunction(()=>{const t=document.querySelector('#mkt_us_ppi')?.innerText||''; return t.includes('+0.4% MoM')&&t.includes('YoY +5.4%')&&t.includes('2026-08');},{timeout:45000});
+            await page.waitForFunction(()=>{const t=document.querySelector('#mkt_eia_weekly_crude')?.innerText||''; return t.includes('424.069M bbl')&&t.includes('-0.391M')&&t.includes('2026-09-04');},{timeout:45000});
+            const result=await page.evaluate(()=>Object.fromEntries(['mkt_us_ppi','mkt_eia_weekly_crude'].map(id=>{const el=document.getElementById(id),r=el?.getBoundingClientRect();return [id,{visible:!!el&&!!r&&r.width>0&&r.height>0,text:(el?.innerText||'').trim(),hasSvg:!!el?.querySelector('svg')}]})));
+            console.log('LIVE PERIODIC CARDS:',JSON.stringify(result,null,2));
+            for(const [id,x] of Object.entries(result)) if(!x.visible||!x.hasSvg) throw new Error(id+' card/chart not visibly rendered');
+            for(const token of ['+0.4% MoM','YoY +5.4%','7월 +0.1%→8월 +0.4%','+0.3% MoM / +4.7% YoY','2026-08']) if(!result.mkt_us_ppi.text.includes(token)) throw new Error('PPI card missing '+token);
+            for(const token of ['424.069M bbl','WoW -0.391M','전주 424.460M','2026-09-04']) if(!result.mkt_eia_weekly_crude.text.includes(token)) throw new Error('EIA card missing '+token);
+            const fatal=errors.filter(e=>/SyntaxError|ppi\.json|eia_weekly|mkt_us_ppi|mkt_eia/i.test(e)); if(fatal.length) throw new Error('production browser errors: '+JSON.stringify(fatal));
+            await browser.close();
+          })().catch(e=>{console.error(e);process.exit(1)});
+          NODE
+          node check.js
