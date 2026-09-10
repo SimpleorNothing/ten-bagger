@@ -146,9 +146,22 @@
     return true;
   }
 
+  function mountPpi() {
+    var id='mkt_us_ppi'; if(document.getElementById(id)) return true;
+    var grid=document.getElementById('mktIndicators'); if(!grid) return false;
+    var card=document.createElement('div'); card.className='mkt-card'; card.id=id; card.setAttribute('data-indicator-key','us-ppi'); card.innerHTML='<div class="mkt-ph">미국 PPI 로딩…</div>'; grid.appendChild(card);
+    fetch('ppi.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.json():null;}).then(function(j){if(!j||!j.latest||!j.series||!j.series.length){card.innerHTML='<div class="mkt-ph">발표 대기 · BLS PPI</div>';return;} var z=j.latest,vals=j.series.map(function(x){return x.headlineMom;}); card.innerHTML='<div class="mkt-nm">미국 생산자물가(PPI)</div><div class="mkt-val">+'+z.headlineMom.toFixed(1)+'% MoM</div><div class="mkt-chg up">YoY +'+z.headlineYoy.toFixed(1)+'% <span style="font:600 12px var(--mono);margin-left:8px;color:var(--faint)">7월 +'+z.prevHeadlineMom.toFixed(1)+'%→8월 +'+z.headlineMom.toFixed(1)+'%</span></div>'+lensRow('<b>생산단 물가</b> <span class="nt">재가속</span>','식품·에너지·무역서비스 제외 +'+z.coreMom.toFixed(1)+'% MoM / +'+z.coreYoy.toFixed(1)+'% YoY · 7월 +'+z.prevCoreMom.toFixed(1)+'%')+'<div class="mkt-chart">'+spark(vals,true)+'</div><div class="mkt-span">'+esc(z.ym)+' · BLS · 등록 '+esc(j.registeredAt)+'</div>';}).catch(function(){card.innerHTML='<div class="mkt-ph">BLS PPI 데이터 로딩 실패</div>';}); return true;
+  }
+  function mountEiaWeekly() {
+    var id='mkt_eia_weekly_crude'; if(document.getElementById(id)) return true;
+    var grid=document.getElementById('mktIndicators'); if(!grid) return false;
+    var card=document.createElement('div'); card.className='mkt-card'; card.id=id; card.setAttribute('data-indicator-key','eia-weekly-crude'); card.innerHTML='<div class="mkt-ph">EIA 원유재고 로딩…</div>'; grid.appendChild(card);
+    fetch('eia_weekly.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.json():null;}).then(function(j){if(!j||!j.latest||!j.series||!j.series.length){card.innerHTML='<div class="mkt-ph">발표 대기 · EIA 주간 원유재고</div>';return;} var z=j.latest,vals=j.series.map(function(x){return x.commercialCrudeMb;}); card.innerHTML='<div class="mkt-nm">EIA 주간 원유재고</div><div class="mkt-val">'+z.commercialCrudeMb.toFixed(3)+'M bbl</div><div class="mkt-chg dn">WoW '+z.changeMb.toFixed(3)+'M <span style="font:600 12px var(--mono);margin-left:8px;color:var(--faint)">전주 '+z.previousMb.toFixed(3)+'M</span></div>'+lensRow('<b>에너지 재고</b> 소폭 감소','주간 변동 폭이 작아 유가 방향 신호로 과대해석하지 않음 · STEO 중기 전망과 분리')+'<div class="mkt-chart">'+spark(vals,false)+'</div><div class="mkt-span">'+esc(z.weekEnding)+' · EIA WPSR · 등록 '+esc(j.registeredAt)+'</div>';}).catch(function(){card.innerHTML='<div class="mkt-ph">EIA 주간 재고 데이터 로딩 실패</div>';}); return true;
+  }
+
   function boot() {
-    mount(); mountGlobalSemi(); mountChinaTrade(); mountSteo();
-    var n = 0, timer = setInterval(function () { var a=mount(), b=mountGlobalSemi(), c=mountChinaTrade(), d=mountSteo(); if ((a && b && c && d) || ++n > 40) clearInterval(timer); }, 250);
+    mount(); mountGlobalSemi(); mountChinaTrade(); mountSteo(); mountPpi(); mountEiaWeekly();
+    var n = 0, timer = setInterval(function () { var a=mount(), b=mountGlobalSemi(), c=mountChinaTrade(), d=mountSteo(), e=mountPpi(), f=mountEiaWeekly(); if ((a && b && c && d && e && f) || ++n > 40) clearInterval(timer); }, 250);
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();
