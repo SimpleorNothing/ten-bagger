@@ -33,19 +33,20 @@ jobs:
           PY
           grep -Fq 'function mountCpi()' trade.js
           grep -Fq "cpi_release.json" trade.js
-          grep -Fq "mkt_us_cpi" .github/workflows/verify-periodic-live.yml
-          grep -Fq "cpi_release.json" .github/workflows/update-cpi.yml
           git diff --check
-      - name: Commit patch and open PR
+      - name: Commit data/card patch and open PR
         env:
           GH_TOKEN: ${{ secrets.AUTO_MERGE_TOKEN }}
         run: |
           set -euo pipefail
+          # Workflow files are patched separately by the connector because GitHub App pushes
+          # cannot update .github/workflows without workflows permission.
+          git checkout -- .github/workflows/update-cpi.yml .github/workflows/verify-periodic-live.yml
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           BRANCH="automation/cpi-market-card-${GITHUB_RUN_ID}"
           git checkout -b "$BRANCH"
-          git add trade.js cpi_release.json scripts/sync-us-cpi-release.mjs .github/workflows/update-cpi.yml .github/workflows/verify-periodic-live.yml periodic_release_check.json audit/official-release-checks/2026-09-12.json
+          git add trade.js cpi_release.json scripts/sync-us-cpi-release.mjs periodic_release_check.json audit/official-release-checks/2026-09-12.json
           git commit -m 'fix: add official CPI card to market monitoring'
           git push -u origin "$BRANCH"
-          gh pr create --base main --head "$BRANCH" --title 'fix: add official CPI card to 01 market monitoring' --body 'BLS 8월 CPI 공식값을 01 시장 모니터링의 독립 카드로 추가하고 cpi_release.json 메타데이터와 cpi.json 시계열을 교차 사용합니다. 헤드라인 현재값, 전월 비교, 근원 CPI 해석, SVG 차트를 한 카드에서 렌더합니다. 향후 CPI 동기화와 프로덕션 검증도 동적 release metadata 기준으로 보강합니다.'
+          gh pr create --base main --head "$BRANCH" --title 'fix: add official CPI card to 01 market monitoring' --body 'BLS 8월 CPI 공식값을 01 시장 모니터링의 독립 카드로 추가하고 cpi_release.json 메타데이터와 cpi.json 시계열을 교차 사용합니다. 헤드라인 현재값, 전월 비교, 근원 CPI 해석, SVG 차트를 한 카드에서 렌더합니다.'
