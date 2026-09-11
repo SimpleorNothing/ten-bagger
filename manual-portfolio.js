@@ -1,7 +1,70 @@
-// Manual portfolio fallback for accounts that NHPLUG does not expose through stock balance APIs.
+// Manual portfolio fallback for pension accounts that NHPLUG does not expose correctly through stock balance APIs.
 // Keep account identifiers masked. Update this file only from a user-provided source image or the latest asset ledger.
 
 export const MANUAL_PORTFOLIO_ACCOUNTS = [
+  {
+    account: '*******0473',
+    accountType: '수동 · 2026-09-12',
+    label: '개인형IRP',
+    dataSource: 'MANUAL_CAPTURE',
+    asOf: '2026-09-12',
+    sourceNote: '사용자 제공 나무증권 개인형IRP 잔고 캡처 1장(2026-09-12) 기준. 4개 ETF의 평가금액 합계는 4,811,610원. 현금/예수금은 캡처에서 확인되지 않아 이전 값을 이월하지 않음.',
+    domestic: {
+      Output_0: [
+        {
+          tot_evlu_amt: 4811610,
+          cash_status: 'not-visible-in-source-capture',
+        },
+      ],
+      Output_1: [
+        {
+          iem_cd: '122090',
+          iem_nm: 'PLUS 코스피50',
+          itg_bnc_qty: 26,
+          phs_pr: 45240,
+          now_pr: 82715,
+          eal_amt: 2150590,
+          pchs_amt: 1176240,
+          eal_pls_amt: 974350,
+          pft_rt: 82.83,
+        },
+        {
+          iem_cd: '442580',
+          iem_nm: 'PLUS 글로벌HBM반도체',
+          itg_bnc_qty: 16,
+          phs_pr: 43340,
+          now_pr: 101020,
+          eal_amt: 1616320,
+          pchs_amt: 693440,
+          eal_pls_amt: 922880,
+          pft_rt: 133.08,
+        },
+        {
+          iem_cd: '183700',
+          iem_nm: 'RISE 200채권혼합50',
+          itg_bnc_qty: 10,
+          phs_pr: 74745,
+          now_pr: 96310,
+          eal_amt: 963100,
+          pchs_amt: 747450,
+          eal_pls_amt: 215650,
+          pft_rt: 28.85,
+        },
+        {
+          iem_cd: '0162Z0',
+          iem_nm: 'RISE 삼성전자SK하이닉스채권혼합50',
+          itg_bnc_qty: 6,
+          phs_pr: 10225,
+          now_pr: 13600,
+          eal_amt: 81600,
+          pchs_amt: 61350,
+          eal_pls_amt: 20250,
+          pft_rt: 33.00,
+        },
+      ],
+    },
+    overseas: [],
+  },
   {
     account: '*******2728',
     accountType: '수동 · 2026-09-12',
