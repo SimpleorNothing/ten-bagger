@@ -3,6 +3,8 @@ import { derivePortfolioApiToken, handlePortfolioLive } from './nhplug-portfolio
 const HISTORY_PREFIX = 'portfolio-history/';
 const MAX_LIST_PAGES = 10;
 const MAX_LIST_ITEMS = 5000;
+const STORAGE_SCHEMA_VERSION = 2;
+const STORAGE_POLICY = 'full-sanitized-source: preserve all NHPLUG Output_0/Output_1 fields except account/customer identifiers and credentials';
 
 function jsonResponse(value, status = 200, extraHeaders = {}) {
   return new Response(JSON.stringify(value), {
@@ -91,8 +93,8 @@ export function flattenPortfolioHoldings(snapshot) {
         code: String(row?.iem_cd || ''),
         name: String(row?.iem_nm || ''),
         quantity: numberValue(row?.cns_bse_bnc_qty ?? row?.qty),
-        purchasePrice: numberValue(row?.phs_uit_pr ?? row?.krw_avg_phs_pr),
-        currentPrice: numberValue(row?.end_pr),
+        purchasePrice: numberValue(row?.fc_phs_uit_pr ?? row?.phs_uit_pr ?? row?.krw_avg_phs_pr),
+        currentPrice: numberValue(row?.fc_sec_end_pr ?? row?.end_pr),
         evaluationAmountKrw: numberValue(row?.krw_eal_amt ?? row?.eal_amt),
         profitLossKrw: numberValue(row?.krw_eal_pls_amt ?? row?.eal_pls_amt),
         returnPct: numberValue(row?.eal_pft_rt1 ?? row?.eal_pft_rt ?? row?.pft_rt),
@@ -133,10 +135,15 @@ export async function saveDailyPortfolioSnapshot(env, scheduledTime = Date.now()
   const savedAt = new Date().toISOString();
   const summary = summarizePortfolioSnapshot(payload);
   const stored = {
+    storageSchemaVersion: STORAGE_SCHEMA_VERSION,
+    storagePolicy: STORAGE_POLICY,
     snapshotDate,
     savedAt,
     reason,
     summary,
+    // DB에는 화면 표시용 축약값이 아니라 NHPLUG가 반환한 모든 비민감 필드를 그대로 저장한다.
+    // 예: 매입가/매입금액/평가손익/매도가능수량/미결제수량/수수료/세금/손익분기매입가/
+    // 매입환율/현재환율/국가/통화/대출일/만기일과 Output_0 계좌 요약 필드.
     snapshot: payload,
   };
   await env.MEMO_BUCKET.put(historyKey(snapshotDate), JSON.stringify(stored), {
@@ -148,6 +155,8 @@ export async function saveDailyPortfolioSnapshot(env, scheduledTime = Date.now()
       accountCount: String(summary.accountCount),
       holdingValueKrw: String(summary.holdingValueKrw),
       cashIncluded: 'false',
+      storageSchemaVersion: String(STORAGE_SCHEMA_VERSION),
+      detailStorage: 'full-sanitized-source',
     },
   });
   return stored;
@@ -175,6 +184,8 @@ async function listHistory(env) {
         accountCount: numberValue(meta.accountCount) ?? 0,
         holdingValueKrw: numberValue(meta.holdingValueKrw) ?? 0,
         cashIncluded: false,
+        storageSchemaVersion: numberValue(meta.storageSchemaVersion) ?? 1,
+        detailStorage: meta.detailStorage || 'legacy-full-snapshot',
       });
     }
     if (!result.truncated) break;
@@ -203,7 +214,7 @@ function csvCell(value) {
 
 function historyCsv(stored) {
   const rows = flattenPortfolioHoldings(stored?.snapshot || {});
-  const header = ['기준일', '계좌', '데이터원', '시장', '종목코드', '종목명', '수량', '매입가(원화기준)', '현재가(원화기준)', '평가금액(원)', '평가손익(원)', '수익률(%)'];
+  const header = ['기준일', '계좌', '데이터원', '시장', '종목코드', '종목명', '수량', '매입가', '현재가', '평가금액(원)', '평가손익(원)', '수익률(%)'];
   const body = rows.map((row) => [
     stored.snapshotDate,
     row.account,
@@ -252,7 +263,7 @@ export async function handlePortfolioHistory(request, env, cookieAuthorized = fa
         }
       }
       const stored = await saveDailyPortfolioSnapshot(env, Date.now(), snapshotReason(request));
-      return jsonResponse({ ok: true, skipped: false, date: stored.snapshotDate, savedAt: stored.savedAt, summary: stored.summary });
+      return jsonResponse({ ok: true, skipped: false, date: stored.snapshotDate, savedAt: stored.savedAt, summary: stored.summary, storageSchemaVersion: stored.storageSchemaVersion });
     } catch (error) {
       return jsonResponse({ error: String(error?.message || error || 'snapshot failed') }, 502);
     }
@@ -262,7 +273,7 @@ export async function handlePortfolioHistory(request, env, cookieAuthorized = fa
   if (url.pathname === '/api/portfolio/history') {
     try {
       const dates = await listHistory(env);
-      return jsonResponse({ timezone: 'Asia/Seoul', scheduledAt: '17:00', scheduleBackend: 'github-actions', dates });
+      return jsonResponse({ timezone: 'Asia/Seoul', scheduledAt: '17:00', scheduleBackend: 'github-actions', storagePolicy: STORAGE_POLICY, dates });
     } catch (error) {
       return jsonResponse({ error: String(error?.message || error || 'history list failed') }, 500);
     }
