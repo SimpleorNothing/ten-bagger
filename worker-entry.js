@@ -39,6 +39,37 @@ async function injectPortfolioHistoryUi(request, response) {
     .transform(repairedResponse);
 }
 
+async function inspectIndexRepair(request, env) {
+  const state = {
+    indexAsset: false,
+    sourceHadNestedScript: false,
+    repairApplied: false,
+    repairedNestedScriptSafe: false,
+    indexRepairOk: false,
+  };
+  if (!env?.ASSETS) return state;
+  try {
+    const url = new URL(request.url);
+    url.pathname = '/index.html';
+    url.search = '';
+    const response = await env.ASSETS.fetch(new Request(url.toString(), { method: 'GET' }));
+    if (!response.ok) return state;
+    state.indexAsset = true;
+    const source = await response.text();
+    state.sourceHadNestedScript = ORACLE_NESTED_SCRIPT_RE.test(source);
+    const fixed = repairMalformedIndexHtml(source);
+    state.repairApplied = fixed.repaired;
+    const stillDangerous = ORACLE_NESTED_SCRIPT_RE.test(fixed.html);
+    const hasSafeSplit = fixed.html.includes("</scr'+'ipt>");
+    state.repairedNestedScriptSafe = !stillDangerous && (!state.sourceHadNestedScript || hasSafeSplit);
+    // 향후 index.html 원본 자체가 고쳐지면 repairApplied=false여도 정상으로 인정한다.
+    state.indexRepairOk = state.repairedNestedScriptSafe;
+    return state;
+  } catch (_) {
+    return state;
+  }
+}
+
 async function portfolioHistoryProbe(request, env) {
   let uiAsset = false;
   if (env?.ASSETS) {
@@ -53,11 +84,14 @@ async function portfolioHistoryProbe(request, env) {
       }
     } catch (_) {}
   }
+  const indexRepair = await inspectIndexRepair(request, env);
   const storeBound = !!env?.MEMO_BUCKET;
+  const ok = uiAsset && storeBound && indexRepair.indexRepairOk;
   return new Response(JSON.stringify({
-    ok: uiAsset && storeBound,
+    ok,
     uiAsset,
     storeBound,
+    ...indexRepair,
     historyApi: '/api/portfolio/history',
     scheduleBackend: 'github-actions',
     scheduleUtc: '0 8 * * *',
@@ -65,7 +99,7 @@ async function portfolioHistoryProbe(request, env) {
     timezone: 'Asia/Seoul',
     indexHtmlRepair: 'nested-document-write-script',
   }), {
-    status: uiAsset && storeBound ? 200 : 503,
+    status: ok ? 200 : 503,
     headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' },
   });
 }
