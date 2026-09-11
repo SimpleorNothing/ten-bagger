@@ -1,13 +1,11 @@
 name: NHPLUG portfolio snapshot
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'nhplug-portfolio.js'
-      - 'manual-portfolio.js'
-      - 'worker.js'
-      - '.github/workflows/nhplug-portfolio-snapshot.yml'
+  # Worker의 portfolio 코드/수동 스냅샷은 Cloudflare 배포가 끝나야 live API에 반영된다.
+  # push와 동시에 조회하면 직전 배포를 읽을 수 있으므로 production deploy 성공 후 조회한다.
+  workflow_run:
+    workflows: ['Deploy to Cloudflare Workers']
+    types: [completed]
   schedule:
     - cron: '*/5 * * * *'
   workflow_dispatch: {}
@@ -21,6 +19,8 @@ concurrency:
 
 jobs:
   snapshot:
+    # workflow_run은 성공한 production deploy 뒤에만 실행한다. schedule/수동 실행은 항상 허용한다.
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     env:
       NHPLUG_APP_KEY: ${{ secrets.NHPLUG_APP_KEY }}
