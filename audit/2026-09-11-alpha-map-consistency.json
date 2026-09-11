@@ -1,0 +1,61 @@
+{
+  "checkedAt": "2026-09-11T17:22:00+09:00",
+  "holdingsAuthority": {
+    "asOf": "2026-09-05",
+    "basis": "latest Saturday asset-status workbook",
+    "result": "holdings.json, held consumers and news_digest remain on the same 2026-09-05 authority"
+  },
+  "changes": [
+    {
+      "area": "FedWatch",
+      "reason": "fedwatch.json remained on the 2026-09-09 source snapshot because the single scheduled pass had not refreshed by the afternoon audit",
+      "sourcePriority": ["CME FedWatch End-of-Day API", "Investing.com Fed Rate Monitor", "pyfedwatch"],
+      "sourceUsed": "Investing.com Fed Rate Monitor",
+      "sourceUrl": "https://www.investing.com/central-banks/fed-rate-monitor",
+      "sourceUpdatedAt": "Sep 11, 2026 03:45AM EDT",
+      "futurePrice": 95.985,
+      "rangesPct": [7.4, 32.4, 43.6, 16.6],
+      "cumulativeAtOrBelow4Pct": 39.8,
+      "status": "확인됨(2순위)",
+      "automationFix": "keep 07:30 UTC pass and add an idempotent 08:45 UTC retry; source priority and validation unchanged"
+    },
+    {
+      "area": "market pulse / signals",
+      "reason": "pulse sentiment still consumed the 2026-09-09 VIX 16.46 / Fear & Greed 39 snapshot while signals.json had 2026-09-10 VIX 17.84 / Fear & Greed 33",
+      "source": "signals.json",
+      "sourceAsOf": "2026-09-10",
+      "result": "pulse synchronized to VIX 17.84 / Fear & Greed 33"
+    },
+    {
+      "area": "market pulse / EIA",
+      "reason": "geopolitics and energy cards in the same pulse used different weekly crude inventory reference weeks",
+      "sourceUrl": "https://www.eia.gov/petroleum/supply/weekly/",
+      "sourceDate": "2026-09-10",
+      "period": "week ending 2026-09-04",
+      "commercialCrudeMillionBbl": 424.069,
+      "result": "both pulse consumers now use the same official week"
+    },
+    {
+      "area": "held-company news / Micron",
+      "reason": "the Sep 4 first-mediation failure had a material Sep 11 follow-up",
+      "sourceUrl": "https://www.reuters.com/world/asia-pacific/microns-taiwan-workers-get-rewards-worth-up-68-months-pay-2026-09-11/",
+      "sourceDate": "2026-09-11",
+      "result": "news_digest updated to compensation-risk-mitigation status; labor dispute is not treated as resolved until union acceptance or mediation outcome is confirmed"
+    },
+    {
+      "area": "BLS CPI",
+      "reason": "August 2026 CPI had not yet been released at audit time",
+      "sourceUrl": "https://www.bls.gov/schedule/news_release/cpi.htm",
+      "scheduledRelease": "2026-09-11T08:30:00-04:00",
+      "status": "발표 대기",
+      "result": "July remains the latest confirmed CPI; no August value was inferred or promoted"
+    }
+  ],
+  "llmPolicy": {
+    "dailyAuditPaidExternalLlmUsed": false,
+    "allowedPaidApiFeaturesPreserved": ["02 insight", "03 council", "06 brief"],
+    "blockedPaidApiAreasPreserved": ["01 market monitoring", "04 market/outlook automation", "05 holdings", "simple news/structured data/pulse automation"]
+  },
+  "pullRequests": [2070, 2071, 2072],
+  "finalDataCommitBeforeAuditLog": "adfae9396617d4f04265f6dd2fbfd93be17df211"
+}
