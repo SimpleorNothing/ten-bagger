@@ -7,42 +7,19 @@
       "indicator": "BLS PPI 2026년 8월",
       "registeredAt": "2026-09-10",
       "sourceUrl": "https://www.dol.gov/newsroom/economicdata/ppi_09102026.pdf",
-      "values": {
-        "ym": "2026-08",
-        "headlineMom": 0.4,
-        "headlineYoy": 5.4,
-        "coreMom": 0.3,
-        "coreYoy": 4.7,
-        "prevHeadlineMom": 0.1,
-        "prevCoreMom": 0.4
-      }
+      "values": {"ym":"2026-08","headlineMom":0.4,"headlineYoy":5.4,"coreMom":0.3,"coreYoy":4.7,"prevHeadlineMom":0.1,"prevCoreMom":0.4}
     },
     {
       "indicator": "EIA 주간 원유재고 2026-09-04 종료 주간",
       "registeredAt": "2026-09-10",
       "sourceUrl": "https://www.eia.gov/petroleum/supply/weekly/",
-      "values": {
-        "weekEnding": "2026-09-04",
-        "commercialCrudeKb": 424069,
-        "commercialCrudeMb": 424.069,
-        "previousKb": 424460,
-        "previousMb": 424.46,
-        "changeKb": -391,
-        "changeMb": -0.391
-      }
+      "values": {"weekEnding":"2026-09-04","commercialCrudeKb":424069,"commercialCrudeMb":424.069,"previousKb":424460,"previousMb":424.46,"changeKb":-391,"changeMb":-0.391}
     },
     {
       "indicator": "BLS CPI 2026년 8월",
       "registeredAt": "2026-09-11",
       "sourceUrl": "https://www.bls.gov/news.release/cpi.nr0.htm",
-      "values": {
-        "ym": "2026-08",
-        "headlineMom": 0.4,
-        "headlineYoy": 3.4,
-        "coreMom": 0.3,
-        "coreYoy": 2.4,
-        "prevHeadlineYoy": 3.4
-      }
+      "values": {"ym":"2026-08","headlineMom":0.4,"headlineYoy":3.4,"coreMom":0.3,"coreYoy":2.4,"prevHeadlineYoy":3.4}
     }
   ],
   "pending": [],
@@ -57,12 +34,15 @@
     "changelog.js"
   ],
   "liveVerification": {
-    "status": "pending",
-    "verifiedAt": null,
+    "status": "success",
+    "verifiedAt": "2026-09-12T08:07:00+09:00",
     "checks": [
       "simpleornothing.com authenticated browser",
-      "cpi.json latest series endpoint",
-      "01 CPI displayed latest value and chart endpoint"
+      "cpi_release.json 2026-08 headline +0.4% MoM / +3.4% YoY and core +0.3% / +2.4%",
+      "cpi.json latest 2026-08 endpoint 3.4 and prior 2026-07 endpoint 3.4",
+      "01 mkt_us_cpi displayed latest/prior/core values and 2026-08",
+      "01 CPI SVG chart rendered",
+      "PPI and EIA live JSON/card/SVG regression checks"
     ]
   }
 }
