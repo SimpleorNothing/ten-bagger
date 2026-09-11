@@ -15,6 +15,7 @@ jobs:
         run: |
           python - <<'PY'
           from pathlib import Path
+          import re
           p=Path('worker-hotfix.js')
           s=p.read_text()
           old="""el.prepend(`<script>(function(){var st=document.createElement('style');st.textContent='#v-market.on{display:none!important}';document.head.appendChild(st);var o=new MutationObserver(function(){var n=document.getElementById('nav');if(n){var b=n.querySelector('[data-v=\"company\"]');if(!b){b=document.createElement('button');b.className='tab';b.dataset.v='company';b.innerHTML='<span class=\"n\">02</span>기업분석';var m=n.querySelector('[data-v=\"market\"]');if(m)n.insertBefore(b,m.nextSibling);else n.appendChild(b)}Array.prototype.forEach.call(n.querySelectorAll('.tab'),function(x){x.classList.toggle('on',x===b)});var s=document.querySelector('script[data-company-analysis-loader]');if(!s){s=document.createElement('script');s.src='/company.js?v=20260902-initial-company';s.setAttribute('data-company-analysis-loader','1');document.head.appendChild(s)}}if(document.getElementById('v-company')){st.remove();o.disconnect()}});o.observe(document.documentElement,{childList:true,subtree:true});})();</scr` + `ipt>`, { html: true });"""
@@ -25,15 +26,10 @@ jobs:
 
           for name in ['.github/workflows/verify-periodic-live.yml','.github/workflows/verify-oracle-live.yml']:
               p=Path(name); s=p.read_text()
-              old="""            await page.waitForSelector('#nav .tab[data-v=\"market\"]',{state:'visible',timeout:30000});
-            await page.waitForSelector('#v-company',{state:'attached',timeout:30000});
-            await page.waitForTimeout(250);
-            await page.click('#nav .tab[data-v=\"market\"]');"""
-              new="""            await page.waitForSelector('#nav .tab[data-v=\"market\"]',{state:'visible',timeout:30000});
-            await page.click('#nav .tab[data-v=\"market\"]');"""
-              if old not in s:
+              s2,n=re.subn(r"(?m)^\s*await page\.waitForSelector\('#v-company',\{state:'attached',timeout:30000\}\);\n\s*await page\.waitForTimeout\(250\);\n",'',s,count=1)
+              if n!=1:
                   raise SystemExit(f'verifier anchor not found: {name}')
-              p.write_text(s.replace(old,new,1))
+              p.write_text(s2)
           PY
           node --check worker-hotfix.js
       - name: Commit repair
