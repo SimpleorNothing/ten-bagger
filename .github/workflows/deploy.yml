@@ -113,8 +113,23 @@ jobs:
           set -euo pipefail
           DEPLOYED_AT=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 
-          # 런타임 env var가 간헐적으로 누락돼도 배포 버전을 검증할 수 있도록
-          # 같은 asset bundle 안에 immutable 버전 메타데이터를 함께 넣는다.
+          # 런타임 env var와 asset binding이 동시에 누락되는 사례에도 최신 배포 SHA를
+          # 검증할 수 있도록 배포 직전 worker bundle에 immutable fallback 값을 넣는다.
+          GITHUB_SHA="$GITHUB_SHA" DEPLOYED_AT="$DEPLOYED_AT" node <<'NODE'
+          const fs = require('fs');
+          const path = 'worker-hotfix.js';
+          let src = fs.readFileSync(path, 'utf8');
+          const shaNeedle = 'let sha = env.DEPLOY_SHA || "";';
+          const atNeedle = 'let deployedAt = env.DEPLOYED_AT || "";';
+          if (!src.includes(shaNeedle) || !src.includes(atNeedle)) {
+            throw new Error('version fallback patch target not found');
+          }
+          src = src.replace(shaNeedle, `let sha = env.DEPLOY_SHA || ${JSON.stringify(process.env.GITHUB_SHA)};`);
+          src = src.replace(atNeedle, `let deployedAt = env.DEPLOYED_AT || ${JSON.stringify(process.env.DEPLOYED_AT)};`);
+          fs.writeFileSync(path, src);
+          NODE
+
+          # 같은 asset bundle에도 immutable 버전 메타데이터를 함께 넣어 이중 fallback을 유지한다.
           GITHUB_SHA="$GITHUB_SHA" DEPLOYED_AT="$DEPLOYED_AT" \
             node -e 'const fs=require("fs");fs.writeFileSync("deploy-version.json",JSON.stringify({sha:process.env.GITHUB_SHA,deployedAt:process.env.DEPLOYED_AT})+"\n")'
 
