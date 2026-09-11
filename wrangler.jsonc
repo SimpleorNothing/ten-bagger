@@ -4,12 +4,9 @@
   "routes": [
     { "pattern": "simpleornothing.com", "custom_domain": true }
   ],
-  // worker-entry.js는 기존 worker-hotfix.js의 fetch 정책을 유지하면서 scheduled 이벤트를 worker.js로 위임한다.
+  // worker-entry.js는 기존 worker-hotfix.js의 fetch 정책을 유지하고 자산현황 이력 UI를 주입한다.
+  // 17:00 KST 저장 일정은 Cloudflare Free cron 한도(계정당 5개)를 소모하지 않도록 GitHub Actions에서 실행한다.
   "main": "worker-entry.js",
-  "triggers": {
-    // Cloudflare Cron은 UTC 기준. 08:00 UTC = 17:00 Asia/Seoul.
-    "crons": ["0 8 * * *"]
-  },
   "assets": {
     "directory": ".",
     "binding": "ASSETS",
