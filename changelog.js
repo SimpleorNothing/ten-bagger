@@ -9,6 +9,7 @@
     thread:'2026-08-01', decision:'2026-08-29', journal:'2026-09-05', brief:'2026-08-01', memo:'2026-08-01'
   };
   var MKT_CHANGELOG=[
+    {d:'2026-09-11',t:'01 FedWatch 원문시각 정합성 — CME 공식 EOD 직접값 미확보 시 Investing.com 표시값을 2순위로 사용하고 실제 Updated 시각을 보존. 12월 확률 7.0/31.9/44.1/17.0%, 선물 95.980, 원문 Updated Sep 11, 2026 07:45AM EDT 기준으로 fedwatch·시장맥박 동기화'},
     {d:'2026-09-11',t:'01 FedWatch 원문시각 정합성 — CME 공식 EOD 직접값 미확보 시 Investing.com 표시값을 2순위로 사용하고 실제 Updated 시각을 보존. 12월 확률 7.4/32.4/43.6/16.6%, 선물 95.985, 원문 Updated Sep 11, 2026 03:45AM EDT 기준으로 fedwatch·시장맥박 동기화'},
     {d:'2026-09-11',t:'01~06 정기 공식발표 동기화 — BLS 8월 PPI(+0.4% MoM/+5.4% YoY, 기조 +0.3%/+4.7%)와 EIA 9/4 주간 상업용 원유재고 424.069M배럴(WoW -0.391M)을 카드·시계열·캘린더·pulse/cycle/risk·02/04 컨텍스트에 동시 반영'},
     {d:'2026-09-09',t:'01 FedWatch 원문시각 정합성 — CME 공식 EOD 직접값 미확보 시 Investing.com 표시값을 2순위로 사용하고 실제 Updated 시각을 보존. 12월 확률 13.9/41.1/36.4/8.7%, 선물 96.060, 원문 Updated Sep 09, 2026 04:15AM EDT 기준으로 fedwatch·시장맥박 동기화'},
