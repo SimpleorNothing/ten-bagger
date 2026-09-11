@@ -36,11 +36,9 @@ jobs:
             if(!auth.ok()) throw new Error('site auth failed: HTTP '+auth.status());
             async function json(path){const r=await context.request.get(BASE+'/'+path+'?t='+Date.now(),{timeout:30000,headers:{'Cache-Control':'no-cache'}});if(!r.ok())throw new Error(path+' HTTP '+r.status());return r.json();}
             async function text(path){const r=await context.request.get(BASE+'/'+path+'?t='+Date.now(),{timeout:30000,headers:{'Cache-Control':'no-cache'}});if(!r.ok())throw new Error(path+' HTTP '+r.status());return r.text();}
-
             const j=await json('oracle_q1fy27.json');
             const z=j.latest||{}, p=j.previousQuarter||{}, g=j.guidance||{}, last=(j.series||[]).at(-1);
             if(j.period!=='FY27 Q1'||j.registeredAt!=='2026-09-10'||z.revenueB!==19.345||z.cloudRevenueB!==11.607||z.iaasRevenueB!==7.4||z.iaasRevenueYoy!==121||z.rpoB!==664||z.capexB!==28.499||z.freeCashFlowB!==-5.396||p.rpoB!==638||g.revenueGrowthPct?.[0]!==30||g.revenueGrowthPct?.[1]!==34||g.cloudRevenueGrowthUsdPct?.[0]!==65||g.cloudRevenueGrowthUsdPct?.[1]!==71||last?.period!=='FY27 Q1'||last?.rpoB!==664) throw new Error('live Oracle canonical JSON mismatch');
-
             const calendar=JSON.stringify(await json('calendar.json'));
             const pulse=JSON.stringify(await json('pulse.json'));
             const cycle=JSON.stringify(await json('cycle.json'));
@@ -55,11 +53,12 @@ jobs:
             const council=await text('council-view-collapse.js');
             need(aisd,['Oracle FY27 Q1','OCI <b>$7.4B(+121%)</b>','RPO <b>$664B</b>'],'02 aisd');
             need(council,['Oracle FY27 Q1 공식 보조신호','OCI $7.4B(+121% YoY)','RPO $664B'],'04 council');
-
             const page=await context.newPage(); const errors=[]; page.on('pageerror',e=>errors.push(String(e)));
             await page.goto(BASE+'/?oracle-release-smoke='+Date.now(),{waitUntil:'domcontentloaded',timeout:90000});
             await page.waitForSelector('#nav .tab[data-v="market"]',{state:'visible',timeout:30000});
+            await page.waitForFunction(()=>document.body.classList.contains('company-default-ready'),{timeout:30000});
             await page.click('#nav .tab[data-v="market"]');
+            await page.waitForFunction(()=>document.getElementById('v-market')?.classList.contains('on'),{timeout:10000});
             await page.waitForSelector('#mkt_oracle_q1fy27',{state:'visible',timeout:45000});
             await page.waitForFunction(()=>{const t=document.querySelector('#mkt_oracle_q1fy27')?.innerText||'';return t.includes('OCI $7.4B')&&t.includes('+ 121% YoY')&&t.includes('$638B → $664B')&&t.includes('CAPEX $28.499B')&&t.includes('FCF $-5.396B')&&t.includes('FY27 Q1')&&t.includes('등록 2026-09-10');},{timeout:45000});
             const card=await page.evaluate(()=>{const el=document.getElementById('mkt_oracle_q1fy27');return {text:(el?.innerText||'').trim(),hasSvg:!!el?.querySelector('svg')};});
