@@ -173,6 +173,56 @@ jobs:
           # 실제 프로덕션 엔드포인트인 custom domain만 최신 SHA를 서비스하는지 검증한다.
           verify "https://simpleornothing.com"
 
+          # index.html의 inline script가 document.write 문자열 속 literal </script> 때문에 조기 종료되면
+          # 이후 JavaScript가 화면 하단에 본문 텍스트로 노출된다. 실제 custom domain HTML을 파싱해 재발을 막는다.
+          page_ok=0
+          for attempt in 1 2 3 4 5 6 7 8; do
+            if curl -fsS --connect-timeout 10 --max-time 30 \
+              -H 'Cache-Control: no-cache' \
+              "https://simpleornothing.com/?t=$(date +%s%N)" > /tmp/live-index.html; then
+              if python - <<'PY'
+          from html.parser import HTMLParser
+          from pathlib import Path
+
+          class Probe(HTMLParser):
+              def __init__(self):
+                  super().__init__(convert_charrefs=False)
+                  self.script_depth = 0
+                  self.leaks = []
+              def handle_starttag(self, tag, attrs):
+                  if tag.lower() == 'script':
+                      self.script_depth += 1
+              def handle_endtag(self, tag):
+                  if tag.lower() == 'script' and self.script_depth:
+                      self.script_depth -= 1
+              def handle_data(self, data):
+                  if self.script_depth == 0 and ('window.__vcInit' in data or 'w.document.close();' in data):
+                      self.leaks.append(data[:240])
+
+          html = Path('/tmp/live-index.html').read_text(encoding='utf-8')
+          dangerous = '<script defer src="oracle-release-card.js?v=20260912"></script>'
+          if dangerous in html:
+              raise SystemExit('dangerous nested literal </script> still present in live HTML')
+          p = Probe()
+          p.feed(html)
+          if p.leaks:
+              raise SystemExit('raw JavaScript leaked outside <script>: ' + repr(p.leaks[:2]))
+          print('live index script-boundary verified')
+          PY
+              then
+                page_ok=1
+                break
+              fi
+            fi
+            if [ "$attempt" -lt 8 ]; then
+              sleep $((attempt * 4))
+            fi
+          done
+          if [ "$page_ok" -ne 1 ]; then
+            echo "ERROR: live index still exposes raw JavaScript text after propagation retries"
+            exit 1
+          fi
+
           probe_ok=0
           for attempt in 1 2 3 4 5 6 7 8; do
             probe=$(curl -fsS --connect-timeout 10 --max-time 20 \
