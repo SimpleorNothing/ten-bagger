@@ -1,0 +1,32 @@
+name: Apply Oracle Q1 FY27 release
+
+on:
+  push:
+    branches: ["sync/oracle-q1fy27-20260912"]
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: sync/oracle-q1fy27-20260912
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Synchronize Oracle official release across consumers
+        run: node scripts/apply-oracle-q1fy27-release.mjs
+      - name: Validate JSON
+        run: |
+          node -e "for (const f of ['oracle_q1fy27.json','pulse.json','cycle.json','risk.json','calendar.json','signal_log.json']) JSON.parse(require('fs').readFileSync(f,'utf8')); console.log('JSON OK')"
+      - name: Commit generated consumer updates
+        run: |
+          if git diff --quiet; then echo 'No generated changes'; exit 0; fi
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add index.html pulse.json cycle.json risk.json calendar.json signal_log.json aisd.js council-view-collapse.js changelog.js
+          git commit -m "data: sync Oracle FY27 Q1 across consumers"
+          git push origin HEAD:sync/oracle-q1fy27-20260912
