@@ -52,26 +52,28 @@
   function money(v){v=n(v);if(v==null)return '—';var a=Math.abs(v),s=v<0?'-':'';if(a>=100000000)return s+(a/100000000).toLocaleString('ko-KR',{maximumFractionDigits:1})+'억';if(a>=10000)return s+(a/10000).toLocaleString('ko-KR',{maximumFractionDigits:0})+'만';return v.toLocaleString('ko-KR',{maximumFractionDigits:0})+'원';}
   function qty(v){v=n(v);return v==null?'—':v.toLocaleString('ko-KR',{maximumFractionDigits:4});}
   function pct(v){v=n(v);if(v==null)return '—';return (v>0?'+':'')+v.toLocaleString('ko-KR',{maximumFractionDigits:2})+'%';}
+  function priceText(v,market,currency){v=n(v);if(v==null)return '—';if(market==='해외')return v.toLocaleString('ko-KR',{maximumFractionDigits:4})+(currency?' '+currency:'');return money(v);}
   function dt(v){if(!v)return '—';var d=new Date(v);return isNaN(d)?String(v):d.toLocaleString('ko-KR',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'});}
   function typeName(t){return t==='01'?'일반':t==='02'?'주문대리인':t==='03'?'모의':(t||'계좌');}
   function position(r,market){
-    r=r||{};
+    r=r||{};var overseas=market==='해외';
     var code=val(r,['iem_cd','pdno','stck_shrn_iscd','ticker','symbol','item_cd','isu_cd','ovrs_pdno']);
     var name=val(r,['iem_nm','prdt_name','prdt_nm','item_nm','stk_nm','name','ovrs_item_name','ovrs_prdt_name']);
-    var q=num(r,['bnc_qty','hld_qty','hldg_qty','hold_qty','qty','ord_psbl_qty']);
-    var evalAmt=num(r,['evlu_amt','evl_amt','stck_evlu_amt','ovrs_stck_evlu_amt','frcr_evlu_amt2','tot_evlu_amt','valuation_amt','market_value']);
-    var buyAmt=num(r,['pchs_amt','pur_amt','buy_amt','frcr_pchs_amt1','purchase_amt']);
-    var pnl=num(r,['evlu_pfls_amt','evl_pl_amt','evlu_pfls_amt2','frcr_evlu_pfls_amt','profit_loss','pnl_amt']);
-    var rate=num(r,['evlu_pfls_rt','evl_pl_rt','evlu_erng_rt','profit_rate','pnl_rate','yield_rt']);
-    var price=num(r,['stck_prpr','prpr','now_prc','cur_prc','current_price','ovrs_now_pric1','last_pric']);
+    var q=num(r,overseas?['cns_bse_bnc_qty','byn_cns_qty','bnc_qty','hld_qty','hldg_qty','hold_qty','qty']:['itg_bnc_qty','rsdl_qty','bnc_qty','hld_qty','hldg_qty','hold_qty','qty']);
+    var evalAmt=num(r,overseas?['krw_eal_amt','evlu_amt','evl_amt','ovrs_stck_evlu_amt','valuation_amt','market_value']:['eal_amt','evlu_amt','evl_amt','stck_evlu_amt','valuation_amt','market_value']);
+    var buyAmt=num(r,overseas?['krw_cns_bse_phs_xps','krw_abk_amt1','pchs_amt','buy_amt','purchase_amt']:['pchs_amt','pur_amt','buy_amt','purchase_amt']);
+    var pnl=num(r,overseas?['krw_eal_pls_amt','fc_eal_pls_amt','evlu_pfls_amt','evl_pl_amt','profit_loss','pnl_amt']:['eal_pls_amt','evlu_pfls_amt','evl_pl_amt','profit_loss','pnl_amt']);
+    var rate=num(r,overseas?['eal_pft_rt','eal_pft_rt1','krw_sll_pft_rt','pft_rt','profit_rate','pnl_rate']:['pft_rt','evlu_pfls_rt','evl_pl_rt','profit_rate','pnl_rate']);
+    var price=num(r,overseas?['fc_sec_end_pr','end_pr','ovrs_now_pric1','last_pric','current_price']:['now_pr','stck_prpr','prpr','now_prc','cur_prc','current_price']);
+    var currency=overseas?String(val(r,['cur_cd','currency'])||''):'';
     if(rate==null&&pnl!=null&&buyAmt){rate=pnl/buyAmt*100;}
-    return {code:String(code||''),name:String(name||code||'종목'),qty:q,evalAmt:evalAmt,buyAmt:buyAmt,pnl:pnl,rate:rate,price:price,market:market};
+    return {code:String(code||''),name:String(name||code||'종목'),qty:q,evalAmt:evalAmt,buyAmt:buyAmt,pnl:pnl,rate:rate,price:price,currency:currency,market:market};
   }
-  function summary(d){var o=one(d&&d.Output_0);return {cash:num(o,['dca','dnca_tot_amt','cash_amt','ord_psbl_cash']),total:num(o,['tot_aet_amt','tot_evlu_amt','tot_asst_amt']),foreign:num(o,['fc_aet_amt','frcr_tot_asst_amt'])};}
+  function summary(d){var o=one(d&&d.Output_0);return {cash:num(o,['dca','krw_dca','dnca_tot_amt','cash_amt','ord_psbl_cash']),total:num(o,['tot_aet_amt','tot_evlu_amt','tot_asst_amt']),foreign:num(o,['fc_aet_amt','frcr_tot_asst_amt'])};}
   function positions(d,market){return arr(d&&d.Output_1).map(function(r){return position(r,market);}).filter(function(r){return r.name||r.code||r.qty||r.evalAmt;});}
   function marketBlock(title,s,p,sub){
     var total=s&&s.total!=null?money(s.total):'자료에서 확인되지 않음';
-    var rows=p.length?p.map(function(r){var cls=r.rate>0?'ac-up':r.rate<0?'ac-down':'';return '<tr><td><span class="ac-name">'+esc(r.name)+'</span><span class="ac-code">'+esc(r.code||r.market||'')+'</span></td><td>'+qty(r.qty)+'</td><td>'+money(r.price)+'</td><td>'+money(r.evalAmt)+'</td><td>'+money(r.pnl)+'</td><td class="'+cls+'">'+pct(r.rate)+'</td></tr>';}).join(''):'<tr><td colspan="6" style="text-align:center;color:var(--faint)">보유종목 없음 또는 응답 필드 미확인</td></tr>';
+    var rows=p.length?p.map(function(r){var cls=r.rate>0?'ac-up':r.rate<0?'ac-down':'';return '<tr><td><span class="ac-name">'+esc(r.name)+'</span><span class="ac-code">'+esc(r.code||r.market||'')+'</span></td><td>'+qty(r.qty)+'</td><td>'+priceText(r.price,r.market,r.currency)+'</td><td>'+money(r.evalAmt)+'</td><td>'+money(r.pnl)+'</td><td class="'+cls+'">'+pct(r.rate)+'</td></tr>';}).join(''):'<tr><td colspan="6" style="text-align:center;color:var(--faint)">보유종목 없음</td></tr>';
     return '<div class="ac-market"><div class="ac-market-title"><b>'+esc(title)+'</b><span>'+esc(sub||'')+' · 자산 '+esc(total)+'</span></div><table class="ac-table"><thead><tr><th>종목</th><th>수량</th><th>현재가</th><th>평가금액</th><th>평가손익</th><th>수익률</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
   }
   function renderLive(data){
@@ -81,7 +83,7 @@
     $('acList').innerHTML=cards||'<div class="ac-empty">조회 가능한 계좌가 없습니다.</div>';
     var age=Date.now()-new Date(data.fetchedAt||0).getTime(),fresh=isFinite(age)&&age>=0&&age<=10*60*1000;
     $('acState').innerHTML='<span class="ac-badge live"><i class="ac-dot"></i>NHPLUG LIVE</span><span>조회 '+esc(dt(data.fetchedAt))+(fresh?' · 10분 이내':' · 갱신 필요')+'</span>';
-    $('acNote').innerHTML='<b>읽기 전용</b> · 국내/해외 잔고 조회만 사용하며 주문 API는 구현하지 않았습니다. 국내·해외 총자산은 각 API 응답을 그대로 집계하므로 상품 분류에 따라 계좌 전체 순자산과 차이가 날 수 있습니다.';
+    $('acNote').innerHTML='<b>읽기 전용</b> · NHPLUG 실제 잔고 필드로 수량·현재가·원화 평가금액·평가손익·수익률을 표시합니다. 주문 API는 구현하지 않았습니다. 국내·해외 총자산은 각 API 응답을 그대로 집계하므로 상품 분류에 따라 계좌 전체 순자산과 차이가 날 수 있습니다.';
     $('acFoot').textContent='출처: NHPLUG · 환경: '+String(data.environment||'live')+' · 계좌번호/고객식별자/인증정보는 마스킹 또는 제거됨';
   }
   function renderFallback(h,reason){
