@@ -1,4 +1,5 @@
 import core from './worker-core.js';
+import { handlePortfolioLive } from './nhplug-portfolio.js';
 
 // PR gate regression anchors live in worker-core.js and are delegated unchanged by this wrapper:
 // const SITE_APPLY_FILES = new Set(["gates.json", "risk.json", "signal_log.json", "calendar.json"]);
@@ -126,6 +127,9 @@ function allowPaidLlmForPath(pathname) {
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
+    if (request.method === 'GET' && url.pathname === '/api/portfolio/live') {
+      return handlePortfolioLive(request, env, await isAuthorized(request, env));
+    }
     if (request.method === 'GET' && url.pathname === '/api/briefs' && await isAuthorized(request, env)) {
       return fastBriefList(env);
     }
