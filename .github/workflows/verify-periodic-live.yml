@@ -33,54 +33,38 @@ jobs:
             const context=await browser.newContext({viewport:{width:1440,height:2200}});
             const auth=await context.request.post(BASE+'/__auth',{form:{password:pw},timeout:30000});
             if(!auth.ok()) throw new Error('site auth failed: HTTP '+auth.status());
-
+            const cpiReleaseResp=await context.request.get(BASE+'/cpi_release.json?t='+Date.now(),{timeout:30000,headers:{'Cache-Control':'no-cache'}});
+            if(!cpiReleaseResp.ok()) throw new Error('live cpi_release.json HTTP '+cpiReleaseResp.status());
+            const cpiRelease=await cpiReleaseResp.json();
+            if(cpiRelease.latest?.ym!=='2026-08'||cpiRelease.latest?.headlineMom!==0.4||cpiRelease.latest?.headlineYoy!==3.4||cpiRelease.latest?.coreMom!==0.3||cpiRelease.latest?.coreYoy!==2.4||cpiRelease.latest?.prevHeadlineMom!==0.1||cpiRelease.latest?.prevCoreYoy!==2.5) throw new Error('live CPI release mismatch');
             const cpiResp=await context.request.get(BASE+'/cpi.json?t='+Date.now(),{timeout:30000,headers:{'Cache-Control':'no-cache'}});
             if(!cpiResp.ok()) throw new Error('live cpi.json HTTP '+cpiResp.status());
-            const cpi=await cpiResp.json(); const us=(cpi.series?.us||[]); const cpiLast=us.at(-1), cpiPrev=us.at(-2);
+            const cpi=await cpiResp.json(), us=(cpi.series?.us||[]), cpiLast=us.at(-1), cpiPrev=us.at(-2);
             console.log('LIVE CPI JSON:',JSON.stringify({last:cpiLast,prev:cpiPrev,asOf:cpi.asOf},null,2));
             if(cpiLast?.[0]!=='2026-08-01'||cpiLast?.[1]!==3.4) throw new Error('live CPI series endpoint mismatch');
             if(cpiPrev?.[0]!=='2026-07-01'||cpiPrev?.[1]!==3.4) throw new Error('live CPI prior endpoint mismatch');
-
             const ppiResp=await context.request.get(BASE+'/ppi.json?t='+Date.now(),{timeout:30000,headers:{'Cache-Control':'no-cache'}});
             if(!ppiResp.ok()) throw new Error('live ppi.json HTTP '+ppiResp.status());
-            const ppi=await ppiResp.json(); const ppiLast=(ppi.series||[]).at(-1);
+            const ppi=await ppiResp.json(), ppiLast=(ppi.series||[]).at(-1);
             if(ppi.latest?.ym!=='2026-08'||ppi.latest?.headlineMom!==0.4||ppi.latest?.headlineYoy!==5.4||ppi.latest?.coreMom!==0.3||ppi.latest?.coreYoy!==4.7||ppi.latest?.prevHeadlineMom!==0.1||ppi.latest?.prevCoreMom!==0.4) throw new Error('live PPI latest mismatch');
             if(ppiLast?.ym!=='2026-08'||ppiLast?.headlineMom!==0.4) throw new Error('live PPI series endpoint mismatch');
-
             const eiaResp=await context.request.get(BASE+'/eia_weekly.json?t='+Date.now(),{timeout:30000,headers:{'Cache-Control':'no-cache'}});
             if(!eiaResp.ok()) throw new Error('live eia_weekly.json HTTP '+eiaResp.status());
-            const eia=await eiaResp.json(); const eiaLast=(eia.series||[]).at(-1);
+            const eia=await eiaResp.json(), eiaLast=(eia.series||[]).at(-1);
             if(eia.latest?.weekEnding!=='2026-09-04'||eia.latest?.commercialCrudeMb!==424.069||eia.latest?.previousMb!==424.46||eia.latest?.changeMb!==-0.391) throw new Error('live EIA latest mismatch');
             if(eiaLast?.weekEnding!=='2026-09-04'||eiaLast?.commercialCrudeMb!==424.069) throw new Error('live EIA series endpoint mismatch');
-
             const page=await context.newPage(); const errors=[]; page.on('pageerror',e=>errors.push(String(e)));
             await page.goto(BASE+'/?periodic-smoke='+Date.now(),{waitUntil:'domcontentloaded',timeout:90000});
             await page.waitForSelector('#nav .tab[data-v="market"]',{state:'visible',timeout:30000});
             await page.click('#nav .tab[data-v="market"]');
-            for (const id of ['#mkt_us_ppi','#mkt_eia_weekly_crude']) await page.waitForSelector(id,{state:'visible',timeout:45000});
+            for (const id of ['#mkt_us_cpi','#mkt_us_ppi','#mkt_eia_weekly_crude']) await page.waitForSelector(id,{state:'visible',timeout:45000});
+            await page.waitForFunction(()=>{const t=document.querySelector('#mkt_us_cpi')?.innerText||''; return t.includes('+0.4% MoM')&&t.includes('YoY +3.4%')&&t.includes('7월 +0.1%→8월 +0.4%')&&t.includes('근원 +0.3% MoM / +2.4% YoY')&&t.includes('2026-08');},{timeout:45000});
             await page.waitForFunction(()=>{const t=document.querySelector('#mkt_us_ppi')?.innerText||''; return t.includes('+0.4% MoM')&&t.includes('YoY +5.4%')&&t.includes('2026-08');},{timeout:45000});
             await page.waitForFunction(()=>{const t=document.querySelector('#mkt_eia_weekly_crude')?.innerText||''; return t.includes('424.069M bbl')&&t.includes('-0.391M')&&t.includes('2026-09-04');},{timeout:45000});
-
-            // CPI is rendered under the US10Y macro view. The US10Y tab is not nested in #nav,
-            // so follow the actual page control used by hmz.js.
-            const us10yTab=page.locator('.tab[data-v="us10y"]').first();
-            await us10yTab.waitFor({state:'visible',timeout:30000});
-            await us10yTab.scrollIntoViewIfNeeded();
-            await us10yTab.click({timeout:30000});
-            await page.waitForSelector('#v-us10y.on #cpiChart',{state:'visible',timeout:45000});
-            await page.waitForFunction(()=>{const cv=document.getElementById('cpiChart'); if(!cv||!window.Chart)return false; const ch=Chart.getChart(cv); if(!ch)return false; const ds=(ch.data.datasets||[]).find(x=>x.label==='美'); const vals=ds?.data||[]; const last=vals.at(-1); return vals.length>0 && Number(last?.y ?? last)===3.4;},{timeout:45000});
-
-            const result=await page.evaluate(()=>{
-              const out={};
-              for(const id of ['mkt_us_ppi','mkt_eia_weekly_crude']){const el=document.getElementById(id);out[id]={text:(el?.innerText||'').trim(),hasSvg:!!el?.querySelector('svg')};}
-              const cv=document.getElementById('cpiChart'), wrap=document.getElementById('cpiWrap'), cr=cv?.getBoundingClientRect(), wr=wrap?.getBoundingClientRect(), ch=window.Chart&&cv?Chart.getChart(cv):null, ds=(ch?.data?.datasets||[]).find(x=>x.label==='美'), last=ds?.data?.at(-1), panel=cv?.closest('.panel');
-              out.cpi={visible:!!cv&&!!cr&&cr.width>0&&cr.height>0,wrapVisible:!!wrap&&!!wr&&wr.width>0&&wr.height>0,panelTitle:panel?.querySelector('.panel-h h3')?.textContent?.trim()||'',lastValue:Number(last?.y ?? last),lastX:last?.x ?? null,datasetLabel:ds?.label,points:ds?.data?.length||0,viewActive:!!document.querySelector('#v-us10y.on')};
-              return out;
-            });
+            const result=await page.evaluate(()=>{const out={};for(const id of ['mkt_us_cpi','mkt_us_ppi','mkt_eia_weekly_crude']){const el=document.getElementById(id);out[id]={text:(el?.innerText||'').trim(),hasSvg:!!el?.querySelector('svg')};}return out;});
             console.log('LIVE PERIODIC CARDS/CHART:',JSON.stringify(result,null,2));
-            if(!result.cpi.viewActive||!result.cpi.visible||!result.cpi.wrapVisible||result.cpi.lastValue!==3.4||result.cpi.datasetLabel!=='美'||!result.cpi.panelTitle.includes('소비자물가 CPI')) throw new Error('CPI live rendered data mismatch');
-            for(const [id,x] of Object.entries(result)) if(id!=='cpi'&&!x.hasSvg) throw new Error(id+' chart missing');
-            const fatal=errors.filter(e=>/SyntaxError|cpi\.json|ppi\.json|eia_weekly|cpiChart|mkt_us_ppi|mkt_eia/i.test(e)); if(fatal.length) throw new Error('production browser errors: '+JSON.stringify(fatal));
+            for(const [id,x] of Object.entries(result)) if(!x.hasSvg) throw new Error(id+' chart missing');
+            const fatal=errors.filter(e=>/SyntaxError|cpi_release|cpi\.json|ppi\.json|eia_weekly|mkt_us_cpi|mkt_us_ppi|mkt_eia/i.test(e)); if(fatal.length) throw new Error('production browser errors: '+JSON.stringify(fatal));
             await browser.close();
           })().catch(e=>{console.error(e);process.exit(1)});
           NODE
