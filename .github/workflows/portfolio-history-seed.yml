@@ -1,13 +1,22 @@
-name: Portfolio history snapshot now
+name: Portfolio history snapshot
 
 on:
+  schedule:
+    # GitHub Actions cron is UTC. 08:00 UTC = 17:00 Asia/Seoul.
+    - cron: '0 8 * * *'
   workflow_dispatch: {}
+  workflow_run:
+    workflows: ['Deploy to Cloudflare Workers']
+    types: [completed]
 
 permissions:
   contents: read
 
 jobs:
   snapshot:
+    if: >-
+      github.event_name != 'workflow_run' ||
+      github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     env:
       NHPLUG_APP_SECRET: ${{ secrets.NHPLUG_APP_SECRET }}
@@ -27,17 +36,75 @@ jobs:
           print(hashlib.sha256(f'alpha-map:portfolio-read:v1:{secret}'.encode()).hexdigest())
           PY
           )
+
+          case "$GITHUB_EVENT_NAME" in
+            schedule)
+              REASON='scheduled-17-kst'
+              SUFFIX=''
+              ;;
+            workflow_run)
+              REASON='deploy-seed-if-missing'
+              SUFFIX='?ifMissing=1'
+              ;;
+            *)
+              REASON='manual'
+              SUFFIX=''
+              ;;
+          esac
+
+          SEP='?'
+          if [[ "$SUFFIX" == *'?'* ]]; then SEP='&'; fi
           curl -fsS --connect-timeout 10 --max-time 90 \
             -X POST \
             -H "x-portfolio-api-token: ${TOKEN}" \
+            -H "x-portfolio-history-reason: ${REASON}" \
             -H 'Cache-Control: no-cache' \
-            "https://simpleornothing.com/api/portfolio/history/snapshot?t=$(date +%s%N)" \
+            "https://simpleornothing.com/api/portfolio/history/snapshot${SUFFIX}${SEP}t=$(date +%s%N)" \
             | tee /tmp/portfolio-history-seed.json
+
           python - <<'PY'
           import json
           with open('/tmp/portfolio-history-seed.json', encoding='utf-8') as f:
               data = json.load(f)
           if not data.get('ok') or not data.get('date'):
               raise SystemExit(f'invalid snapshot response: {data}')
-          print(f"saved portfolio history for {data['date']} at {data.get('savedAt','')}")
+          print(f"portfolio history date={data['date']} savedAt={data.get('savedAt','')} skipped={data.get('skipped', False)}")
           PY
+
+          DATE=$(python - <<'PY'
+          import json
+          with open('/tmp/portfolio-history-seed.json', encoding='utf-8') as f:
+              print(json.load(f)['date'])
+          PY
+          )
+
+          curl -fsS --connect-timeout 10 --max-time 60 \
+            -H "x-portfolio-api-token: ${TOKEN}" \
+            -H 'Cache-Control: no-cache' \
+            "https://simpleornothing.com/api/portfolio/history?t=$(date +%s%N)" \
+            > /tmp/portfolio-history-list.json
+          DATE="$DATE" python - <<'PY'
+          import json, os
+          with open('/tmp/portfolio-history-list.json', encoding='utf-8') as f:
+              data = json.load(f)
+          dates = [x.get('date') for x in data.get('dates', [])]
+          expected = os.environ['DATE']
+          if expected not in dates:
+              raise SystemExit(f'{expected} missing from live portfolio history: {dates[:5]}')
+          if data.get('scheduledAt') != '17:00' or data.get('timezone') != 'Asia/Seoul':
+              raise SystemExit(f'invalid schedule metadata: {data}')
+          print(f'live history verified: {expected}')
+          PY
+
+          curl -fsS --connect-timeout 10 --max-time 60 \
+            -H "x-portfolio-api-token: ${TOKEN}" \
+            -H 'Cache-Control: no-cache' \
+            "https://simpleornothing.com/api/portfolio/history/${DATE}.csv?t=$(date +%s%N)" \
+            > /tmp/portfolio-history.csv
+          grep -q '기준일' /tmp/portfolio-history.csv
+          grep -q '평가금액' /tmp/portfolio-history.csv
+          if grep -Eq '[0-9]{3}-[0-9]{2}-[0-9]{6}' /tmp/portfolio-history.csv; then
+            echo 'account-number-like value leaked to portfolio history CSV' >&2
+            exit 1
+          fi
+          echo "live CSV verified: ${DATE}"
