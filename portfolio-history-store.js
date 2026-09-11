@@ -231,6 +231,11 @@ async function tokenAuthorized(request, env) {
   return diff === 0;
 }
 
+function snapshotReason(request) {
+  const value = String(request.headers.get('x-portfolio-history-reason') || 'api-snapshot').trim();
+  return /^(?:scheduled-17-kst|manual|deploy-seed-if-missing|api-snapshot)$/.test(value) ? value : 'api-snapshot';
+}
+
 export async function handlePortfolioHistory(request, env, cookieAuthorized = false) {
   const url = new URL(request.url);
   const apiAuthorized = await tokenAuthorized(request, env);
@@ -239,8 +244,15 @@ export async function handlePortfolioHistory(request, env, cookieAuthorized = fa
 
   if (request.method === 'POST' && url.pathname === '/api/portfolio/history/snapshot') {
     try {
-      const stored = await saveDailyPortfolioSnapshot(env, Date.now(), 'manual-seed');
-      return jsonResponse({ ok: true, date: stored.snapshotDate, savedAt: stored.savedAt, summary: stored.summary });
+      const date = kstDate();
+      if (url.searchParams.get('ifMissing') === '1') {
+        const existing = await getStoredHistory(env, date);
+        if (existing) {
+          return jsonResponse({ ok: true, skipped: true, date, savedAt: existing.savedAt || '', summary: existing.summary || null });
+        }
+      }
+      const stored = await saveDailyPortfolioSnapshot(env, Date.now(), snapshotReason(request));
+      return jsonResponse({ ok: true, skipped: false, date: stored.snapshotDate, savedAt: stored.savedAt, summary: stored.summary });
     } catch (error) {
       return jsonResponse({ error: String(error?.message || error || 'snapshot failed') }, 502);
     }
@@ -250,7 +262,7 @@ export async function handlePortfolioHistory(request, env, cookieAuthorized = fa
   if (url.pathname === '/api/portfolio/history') {
     try {
       const dates = await listHistory(env);
-      return jsonResponse({ timezone: 'Asia/Seoul', scheduledAt: '17:00', dates });
+      return jsonResponse({ timezone: 'Asia/Seoul', scheduledAt: '17:00', scheduleBackend: 'github-actions', dates });
     } catch (error) {
       return jsonResponse({ error: String(error?.message || error || 'history list failed') }, 500);
     }
