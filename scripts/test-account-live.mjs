@@ -9,6 +9,12 @@ const requiredLiveFields = [
   'cns_bse_bnc_qty', 'fc_sec_end_pr', 'krw_eal_amt', 'krw_eal_pls_amt', 'eal_pft_rt', 'cur_cd',
 ];
 
+const requestedAccounts = [
+  "{suffix:'7747',label:'종합매매'}",
+  "{suffix:'0473',label:'개인형IRP'}",
+  "{suffix:'2728',label:'DC'}",
+];
+
 const checks = [
   [js.includes("API='/api/portfolio/live'"), 'NHPLUG live endpoint'],
   [js.includes("FALLBACK='/holdings.json'"), 'holdings fallback'],
@@ -22,6 +28,10 @@ const checks = [
   [worker.includes('"/account-live.js"'), 'freshness header coverage'],
   [requiredLiveFields.every((field) => js.includes(field)), 'actual NHPLUG domestic/overseas balance field mapping'],
   [js.includes('priceText(r.price,r.market,r.currency)'), 'overseas price currency rendering'],
+  [requestedAccounts.every((row) => js.includes(row)), 'requested brokerage/IRP/DC account set'],
+  [js.includes('ACCOUNT_TARGETS.map') && js.includes('targetAccount(accounts,target)'), 'requested-account filtering'],
+  [js.includes('NHPLUG 미노출') && js.includes('연금 보유내역이 반환되지 않습니다'), 'pension API limitation messaging'],
+  [!js.includes("suffix:'6580'") && !js.includes("suffix:'6588'"), 'exclude incidental order-agent accounts'],
   [!tradingRouteLiteral, 'no trading route literals'],
 ];
 
