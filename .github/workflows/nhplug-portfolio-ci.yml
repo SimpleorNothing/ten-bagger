@@ -1,0 +1,35 @@
+name: NHPLUG portfolio CI
+
+on:
+  pull_request:
+    paths:
+      - 'nhplug-portfolio.js'
+      - 'worker.js'
+      - 'scripts/test-nhplug-portfolio.mjs'
+      - '.github/workflows/nhplug-portfolio-ci.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'nhplug-portfolio.js'
+      - 'worker.js'
+      - 'scripts/test-nhplug-portfolio.mjs'
+      - '.github/workflows/nhplug-portfolio-ci.yml'
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Syntax check
+        run: |
+          node --check nhplug-portfolio.js
+          node --check worker.js
+      - name: Read-only bridge tests
+        run: node scripts/test-nhplug-portfolio.mjs

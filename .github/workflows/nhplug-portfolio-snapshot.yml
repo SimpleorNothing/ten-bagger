@@ -1,0 +1,100 @@
+name: NHPLUG portfolio snapshot
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: nhplug-portfolio-snapshot
+  cancel-in-progress: true
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    env:
+      NHPLUG_APP_KEY: ${{ secrets.NHPLUG_APP_KEY }}
+      NHPLUG_APP_SECRET: ${{ secrets.NHPLUG_APP_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+      - name: Check configuration
+        id: configured
+        shell: bash
+        run: |
+          if [ -n "$NHPLUG_APP_KEY" ] && [ -n "$NHPLUG_APP_SECRET" ]; then
+            echo 'ready=1' >> "$GITHUB_OUTPUT"
+          else
+            echo 'ready=0' >> "$GITHUB_OUTPUT"
+            echo 'NHPLUG credentials are not configured; snapshot is skipped.'
+          fi
+      - name: Fetch authenticated live portfolio
+        if: steps.configured.outputs.ready == '1'
+        shell: bash
+        run: |
+          set -euo pipefail
+          TOKEN=$(python - <<'PY'
+          import hashlib, os
+          secret = os.environ['NHPLUG_APP_SECRET']
+          print(hashlib.sha256(f'alpha-map:portfolio-read:v1:{secret}'.encode()).hexdigest())
+          PY
+          )
+          ok=0
+          for attempt in 1 2 3 4 5; do
+            code=$(curl -sS --connect-timeout 10 --max-time 30 \
+              -H "x-portfolio-api-token: ${TOKEN}" \
+              -H 'Cache-Control: no-cache' \
+              -o /tmp/portfolio-raw.json \
+              -w '%{http_code}' \
+              "https://simpleornothing.com/api/portfolio/live?t=$(date +%s%N)" || true)
+            if [ "$code" = '200' ]; then ok=1; break; fi
+            echo "portfolio fetch attempt ${attempt}: HTTP ${code}"
+            sleep $((attempt * 3))
+          done
+          if [ "$ok" -ne 1 ]; then
+            cat /tmp/portfolio-raw.json 2>/dev/null || true
+            exit 1
+          fi
+          node <<'NODE'
+          const fs = require('fs');
+          const raw = JSON.parse(fs.readFileSync('/tmp/portfolio-raw.json','utf8'));
+          if (raw.source !== 'NHPLUG' || raw.readOnly !== true || !Array.isArray(raw.accounts)) {
+            throw new Error('invalid NHPLUG snapshot shape');
+          }
+          function sanitize(v) {
+            if (Array.isArray(v)) return v.map(sanitize);
+            if (!v || typeof v !== 'object') return v;
+            const out = {};
+            for (const [k, x] of Object.entries(v)) {
+              if (/account|acct|act_no|cust|customer|rrn|jumin|email|phone|tel|token|secret|appkey|app_key/i.test(k)) continue;
+              out[k] = sanitize(x);
+            }
+            return out;
+          }
+          const published = sanitize(raw);
+          published.snapshotPolicy = 'read-only sanitized NHPLUG balance snapshot; no account identifiers or credentials';
+          fs.writeFileSync('/tmp/portfolio-live.json', JSON.stringify(published, null, 2) + '\n');
+          NODE
+      - name: Publish single-commit portfolio-live branch
+        if: steps.configured.outputs.ready == '1'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          TMP=$(mktemp -d)
+          cp /tmp/portfolio-live.json "$TMP/portfolio-live.json"
+          cd "$TMP"
+          git init -q
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git checkout --orphan portfolio-live >/dev/null 2>&1
+          git add portfolio-live.json
+          git commit -m 'data: refresh NHPLUG portfolio snapshot' >/dev/null
+          git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git push --force origin HEAD:portfolio-live
