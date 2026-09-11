@@ -56,7 +56,9 @@ jobs:
             const page=await context.newPage(); const errors=[]; page.on('pageerror',e=>errors.push(String(e)));
             await page.goto(BASE+'/?periodic-smoke='+Date.now(),{waitUntil:'domcontentloaded',timeout:90000});
             await page.waitForSelector('#nav .tab[data-v="market"]',{state:'visible',timeout:30000});
+            await page.waitForFunction(()=>document.body.classList.contains('company-default-ready'),{timeout:30000});
             await page.click('#nav .tab[data-v="market"]');
+            await page.waitForFunction(()=>document.getElementById('v-market')?.classList.contains('on'),{timeout:10000});
             for (const id of ['#mkt_us_cpi','#mkt_us_ppi','#mkt_eia_weekly_crude']) await page.waitForSelector(id,{state:'visible',timeout:45000});
             await page.waitForFunction(()=>{const t=document.querySelector('#mkt_us_cpi')?.innerText||''; return t.includes('+0.4% MoM')&&t.includes('YoY +3.4%')&&t.includes('7월 +0.1%→8월 +0.4%')&&t.includes('근원 +0.3% MoM / +2.4% YoY')&&t.includes('2026-08');},{timeout:45000});
             await page.waitForFunction(()=>{const t=document.querySelector('#mkt_us_ppi')?.innerText||''; return t.includes('+0.4% MoM')&&t.includes('YoY +5.4%')&&t.includes('2026-08');},{timeout:45000});
