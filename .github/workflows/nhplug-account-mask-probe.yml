@@ -1,0 +1,43 @@
+name: NHPLUG masked account probe
+
+on:
+  push:
+    branches:
+      - 'fix/account-three-visible-20260912'
+    paths:
+      - '.github/workflows/nhplug-account-mask-probe.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    env:
+      NHPLUG_APP_SECRET: ${{ secrets.NHPLUG_APP_SECRET }}
+    steps:
+      - name: Print masked account identifiers only
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$NHPLUG_APP_SECRET"
+          TOKEN=$(python - <<'PY'
+          import hashlib, os
+          secret=os.environ['NHPLUG_APP_SECRET']
+          print(hashlib.sha256(f'alpha-map:portfolio-read:v1:{secret}'.encode()).hexdigest())
+          PY
+          )
+          code=$(curl -sS --connect-timeout 10 --max-time 30 \
+            -H "x-portfolio-api-token: ${TOKEN}" \
+            -H 'Cache-Control: no-cache' \
+            -o /tmp/live.json \
+            -w '%{http_code}' \
+            "https://simpleornothing.com/api/portfolio/live?t=$(date +%s%N)")
+          echo "HTTP ${code}"
+          test "$code" = "200"
+          node <<'NODE'
+          const fs=require('fs');
+          const j=JSON.parse(fs.readFileSync('/tmp/live.json','utf8'));
+          const accounts=Array.isArray(j.accounts)?j.accounts:[];
+          console.log('masked accounts:', accounts.map(a=>({account:a.account,accountType:a.accountType}))); 
+          NODE
