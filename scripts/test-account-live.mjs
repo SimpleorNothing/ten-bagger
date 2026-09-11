@@ -2,6 +2,7 @@ import fs from 'node:fs';
 
 const js = fs.readFileSync('account-live.js','utf8');
 const worker = fs.readFileSync('worker-hotfix.js','utf8');
+const tradingRouteLiteral = /['"]\/(?:api\/)?(?:order|orders|buy|sell|trade)(?:\/|['"?])/i.test(js);
 
 const checks = [
   [js.includes("API='/api/portfolio/live'"), 'NHPLUG live endpoint'],
@@ -14,7 +15,7 @@ const checks = [
   [js.includes('계좌번호/고객식별자/인증정보는 마스킹 또는 제거됨'), 'privacy notice'],
   [worker.includes('/account-live.js?v=20260912-01'), 'HTML loader injection'],
   [worker.includes('"/account-live.js"'), 'freshness header coverage'],
-  [!js.includes('/order') && !js.includes('/buy') && !js.includes('/sell'), 'no trading endpoints'],
+  [!tradingRouteLiteral, 'no trading route literals'],
 ];
 
 for (const [ok,label] of checks) {
