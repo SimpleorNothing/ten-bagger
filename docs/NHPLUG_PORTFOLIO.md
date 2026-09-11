@@ -8,6 +8,7 @@
 - 주문/매수/매도 API는 구현하지 않는다.
 - 계좌번호·고객식별자·App Key/Secret·access token은 외부 응답/스냅샷에서 제거 또는 마스킹한다.
 - 기존 `holdings.json`/자산현황 Excel은 장애 시 fallback 및 장기 기준자료로 유지한다.
+- NHPLUG가 직접 제공하지 못하는 퇴직연금 DC 잔고는 사용자 확정 캡처 또는 최신 자산원장을 수동 스냅샷으로 병합한다.
 
 ## 데이터 흐름
 
@@ -15,6 +16,8 @@
 Namuh 계좌
   -> NHPLUG REST
   -> Cloudflare Worker /api/portfolio/live
+       ├─ NHPLUG 실시간 종합매매/지원 계좌
+       └─ manual-portfolio.js DC 수동 스냅샷
   -> R2 암호화 access-token cache
   -> portfolio-live branch / portfolio-live.json (5분 스냅샷)
   -> ChatGPT / 운영 분석
@@ -68,6 +71,43 @@ NHPLUG access token은 24시간 재사용한다. Worker 메모리 캐시 뒤에 
 
 추가 국가가 필요하면 Worker 변수 `NHPLUG_OVERSEAS_NATIONS`에 쉼표로 국가코드를 지정한다.
 
+### 계좌유형 처리
+
+과거 구현은 운영 환경에서 `acct_type == 01/02`만 남기고 나머지 계좌를 계좌목록 단계에서 제거했다. 이 방식은 DC가 다른 계좌유형으로 반환되는 경우에도 "NHPLUG 미노출"처럼 보이게 만들 수 있었다.
+
+현재 구현은 다음처럼 바꿨다.
+
+1. `/n2/acctinfo`가 반환한 모든 계좌를 `discovery`에 보존한다.
+2. 계좌번호는 뒤 4자리만 남겨 마스킹한다.
+3. 운영 환경에서 일반 주식 잔고 API 호출은 공식적으로 사용 중인 `01/02` 계좌유형에만 수행한다.
+4. 그 외 유형은 `account-listed-stock-balance-not-eligible` 상태로 남긴다.
+5. 계좌가 목록에는 있지만 일반 주식 잔고 API가 비어 있거나 실패한 경우 수동 스냅샷이 있으면 이를 사용한다.
+
+이 구조로 DC가 실제 `/n2/acctinfo`에 존재하는지와 일반 주식 잔고 API 지원 여부를 분리해 판단할 수 있다.
+
+## DC 수동 스냅샷
+
+`manual-portfolio.js`는 NHPLUG가 직접 제공하지 못하는 DC를 위한 수동 fallback이다.
+
+현재 초기값:
+
+- 기준일: 2026-09-05
+- 출처: `자산현황_260905.xlsx` 퇴직연금 DC 확정 원장
+- 총자산: 416,693,421원
+- 추적 종목: 8개
+- 현금: 252,366원
+
+운영 원칙:
+
+1. 사용자가 나무증권 DC 계좌 캡처 이미지를 업로드한다.
+2. 이미지에서 종목명·수량·현재가·평가금액·평가손익·수익률·현금을 확인한다.
+3. 화면 합계와 종목 합계+현금이 일치하는지 검증한다.
+4. 확인된 값만 `manual-portfolio.js`에 반영한다. 확인할 수 없는 항목은 추정하지 않는다.
+5. 테스트/CI 통과 후 PR을 머지하고 배포 화면을 확인한다.
+6. 이후 `/api/portfolio/live`는 NHPLUG 실시간 데이터와 최신 DC 수동 스냅샷을 함께 반환한다.
+
+DC가 향후 NHPLUG 일반 잔고 API에서 정상적으로 보유내역을 반환하면 실시간 데이터를 우선하며 수동값으로 덮어쓰지 않는다.
+
 ## ChatGPT 최신 보유자산 판정 규칙
 
 투자 판단/비중조절 전에 다음 순서로 확인한다.
@@ -75,8 +115,9 @@ NHPLUG access token은 24시간 재사용한다. Worker 메모리 캐시 뒤에 
 1. GitHub `SimpleorNothing/ten-bagger`의 `portfolio-live` 브랜치에서 `portfolio-live.json`을 읽는다.
 2. `source == "NHPLUG"`, `readOnly == true`, `fetchedAt`을 검증한다.
 3. `fetchedAt`이 현재 시각 대비 10분 이내면 최신 계좌 스냅샷으로 우선 사용한다.
-4. 10분 초과, 파일 부재, workflow 실패 시 최신 `holdings.json`/자산현황 Excel을 fallback으로 사용하고 지연 사실을 명시한다.
-5. 스냅샷에는 실계좌 식별정보가 없으므로 계좌별 세부 구분이 필요한 경우 Alpha Map 인증 API에서 확인한다.
+4. 응답의 `manualFallbacks`에 DC가 있으면 해당 계좌만 `asOf` 기준일의 수동 스냅샷임을 구분한다.
+5. 10분 초과, 파일 부재, workflow 실패 시 최신 `holdings.json`/자산현황 Excel을 fallback으로 사용하고 지연 사실을 명시한다.
+6. 스냅샷에는 실계좌 식별정보가 없으므로 계좌별 세부 구분이 필요한 경우 Alpha Map 인증 API에서 확인한다.
 
 GitHub Actions 스케줄은 5분 간격이지만 GitHub 측 큐 지연이 발생할 수 있으므로 이를 초 단위 실시간으로 표현하지 않는다. Worker API 직접 조회는 요청 시점 잔고를 조회한다.
 
@@ -85,14 +126,24 @@ GitHub Actions 스케줄은 5분 간격이지만 GitHub 측 큐 지연이 발생
 로컬/CI:
 
 ```bash
+node --check manual-portfolio.js
 node --check nhplug-portfolio.js
 node --check worker.js
 node scripts/test-nhplug-portfolio.mjs
 ```
+
+테스트에는 다음 회귀 검증을 포함한다.
+
+- DC가 `acct_type 08`처럼 주식 잔고 비대상 유형으로 내려와도 `discovery`에서 사라지지 않는지
+- 비대상 유형을 국내/해외 주식 잔고 API에 잘못 전달하지 않는지
+- NHPLUG 잔고가 없을 때 DC 수동 스냅샷이 병합되는지
+- 수동 DC 총액과 8개 종목 구성이 기대값과 일치하는지
+- access token 재사용이 유지되는지
 
 실서비스 확인:
 
 - 인증정보 미설정: `/api/portfolio/live` -> `503 NHPLUG_NOT_CONFIGURED`
 - 설정 후 무인증 요청: `401 PORTFOLIO_UNAUTHORIZED`
 - 로그인 또는 자동화 토큰 인증 후: `200`, `source=NHPLUG`, `readOnly=true`
+- DC 수동 fallback 사용 시 `portfolioMode=NHPLUG+MANUAL`, `manualFallbacks=[{ label: "DC", ... }]`
 - `NHPLUG portfolio snapshot` workflow 성공 후 `portfolio-live` 브랜치의 `portfolio-live.json` 갱신 확인

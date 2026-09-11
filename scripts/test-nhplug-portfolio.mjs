@@ -18,6 +18,8 @@ const env = {
   MEMO_BUCKET: new Bucket(),
 };
 
+const regularAccount = '12345678901';
+const dcAccount = '99999992728';
 const originalFetch = globalThis.fetch;
 let calls = [];
 globalThis.fetch = async (url, init = {}) => {
@@ -29,13 +31,26 @@ globalThis.fetch = async (url, init = {}) => {
     });
   }
   if (String(url).endsWith('/n2/acctinfo')) {
-    return new Response(JSON.stringify({ Output_0: [{ acct_no: '12345678901', acct_type: '01' }] }), { status: 200 });
+    return new Response(JSON.stringify({
+      Output_0: [
+        { acct_no: regularAccount, acct_type: '01' },
+        { acct_no: dcAccount, acct_type: '08' },
+      ],
+    }), { status: 200 });
   }
   if (String(url).includes('/krstock/inquiry/v1/balance')) {
-    return new Response(JSON.stringify({ Output_1: [{ iem_cd: '005930', qty: 10 }], acct_no: '12345678901' }), { status: 200 });
+    const body = JSON.parse(init.body || '{}');
+    assert.notEqual(body?.Input_0?.act_no, dcAccount, 'non-stock account types must not be sent to stock balance API');
+    return new Response(JSON.stringify({
+      Output_0: [{ tot_aet_amt: 1000000, dca: 100000 }],
+      Output_1: [{ iem_cd: '005930', qty: 10 }],
+      acct_no: regularAccount,
+    }), { status: 200 });
   }
   if (String(url).includes('/gbstock/inquiry/v1/balance')) {
-    return new Response(JSON.stringify({ Output_1: [{ iem_cd: 'CRDO', qty: 20 }], acct_no: '12345678901' }), { status: 200 });
+    const body = JSON.parse(init.body || '{}');
+    assert.notEqual(body?.Input_0?.act_no, dcAccount, 'non-stock account types must not be sent to overseas balance API');
+    return new Response(JSON.stringify({ Output_1: [{ iem_cd: 'CRDO', qty: 20 }], acct_no: regularAccount }), { status: 200 });
   }
   throw new Error(`unexpected fetch ${url}`);
 };
@@ -53,9 +68,29 @@ try {
   const body = await res.json();
   assert.equal(body.source, 'NHPLUG');
   assert.equal(body.readOnly, true);
-  assert.equal(body.accounts.length, 1);
-  assert.equal(body.accounts[0].account.endsWith('8901'), true);
-  assert.equal(body.accounts[0].domestic.acct_no.endsWith('8901'), true);
+  assert.equal(body.portfolioMode, 'NHPLUG+MANUAL');
+  assert.equal(body.discovery.length, 2);
+
+  const dcDiscovery = body.discovery.find((row) => row.label === 'DC');
+  assert.ok(dcDiscovery, 'DC must remain visible in account discovery even when its account type is not stock-balance eligible');
+  assert.equal(dcDiscovery.type, '08');
+  assert.equal(dcDiscovery.balanceEligible, false);
+
+  const regular = body.accounts.find((row) => row.dataSource === 'NHPLUG');
+  assert.ok(regular);
+  assert.equal(regular.account.endsWith('8901'), true);
+  assert.equal(regular.domestic.acct_no.endsWith('8901'), true);
+
+  const dc = body.accounts.find((row) => row.label === 'DC');
+  assert.ok(dc, 'manual DC fallback must be merged into the live portfolio response');
+  assert.equal(dc.dataSource, 'MANUAL_CAPTURE');
+  assert.equal(dc.asOf, '2026-09-05');
+  assert.equal(dc.domestic.Output_0[0].tot_aet_amt, 416693421);
+  assert.equal(dc.domestic.Output_1.length, 8);
+  assert.equal(dc.nhplugListed, true);
+  assert.equal(dc.nhplugType, '08');
+  assert.equal(dc.queryStatus, 'manual-fallback-used');
+  assert.equal(body.manualFallbacks[0].label, 'DC');
   assert.equal(calls.filter((call) => call.url.includes('/oauth2/token')).length, 1);
 
   calls = [];

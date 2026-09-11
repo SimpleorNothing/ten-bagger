@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'nhplug-portfolio.js'
+      - 'manual-portfolio.js'
       - 'worker.js'
       - 'scripts/test-nhplug-portfolio.mjs'
       - '.github/workflows/nhplug-portfolio-ci.yml'
@@ -11,6 +12,7 @@ on:
     branches: [main]
     paths:
       - 'nhplug-portfolio.js'
+      - 'manual-portfolio.js'
       - 'worker.js'
       - 'scripts/test-nhplug-portfolio.mjs'
       - '.github/workflows/nhplug-portfolio-ci.yml'
@@ -29,6 +31,7 @@ jobs:
           node-version: '20'
       - name: Syntax check
         run: |
+          node --check manual-portfolio.js
           node --check nhplug-portfolio.js
           node --check worker.js
       - name: Read-only bridge tests
