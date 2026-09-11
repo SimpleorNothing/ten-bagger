@@ -57,19 +57,39 @@ jobs:
             await page.goto(BASE+'/?periodic-smoke='+Date.now(),{waitUntil:'domcontentloaded',timeout:90000});
             await page.waitForSelector('#nav .tab[data-v="market"]',{state:'visible',timeout:30000});
             await page.click('#nav .tab[data-v="market"]');
-            for (const id of ['#mkt_us_ppi','#mkt_eia_weekly_crude','#cpiChart']) await page.waitForSelector(id,{state:'visible',timeout:45000});
+            for (const id of ['#mkt_us_ppi','#mkt_eia_weekly_crude']) await page.waitForSelector(id,{state:'visible',timeout:45000});
+            await page.waitForSelector('#cpiChart',{state:'attached',timeout:45000});
+
+            // CPI lives in a secondary market panel. Activate the UI control for any hidden ancestor
+            // instead of forcing CSS, so the check represents what a real user can display.
+            const hiddenBefore=await page.$eval('#cpiChart',el=>{const a=[];for(let n=el.parentElement;n;n=n.parentElement){const s=getComputedStyle(n);if(s.display==='none'||s.visibility==='hidden'){a.push({id:n.id||'',cls:String(n.className||'')});}}return a;});
+            console.log('CPI hidden ancestors before activation:',JSON.stringify(hiddenBefore));
+            for(const h of hiddenBefore.reverse()){
+              if(!h.id) continue;
+              const keys=[h.id,h.id.replace(/^v-/,''),h.id.replace(/^sub-/,''),h.id.replace(/^view-/,''),h.id.replace(/^mkt-/,'')].filter(Boolean);
+              let clicked=false;
+              for(const key of [...new Set(keys)]){
+                const selectors=[`[data-v="${key}"]`,`[data-sub="${key}"]`,`[data-target="${key}"]`,`[data-target="#${h.id}"]`,`[href="#${h.id}"]`];
+                for(const sel of selectors){const loc=page.locator(sel).filter({visible:true}).first();if(await loc.count()){await loc.click();clicked=true;await page.waitForTimeout(250);break;}}
+                if(clicked) break;
+              }
+            }
+            const hiddenAfter=await page.$eval('#cpiChart',el=>{const a=[];for(let n=el.parentElement;n;n=n.parentElement){const s=getComputedStyle(n);if(s.display==='none'||s.visibility==='hidden'){a.push({id:n.id||'',cls:String(n.className||'')});}}return a;});
+            console.log('CPI hidden ancestors after activation:',JSON.stringify(hiddenAfter));
+
             await page.waitForFunction(()=>{const t=document.querySelector('#mkt_us_ppi')?.innerText||''; return t.includes('+0.4% MoM')&&t.includes('YoY +5.4%')&&t.includes('2026-08');},{timeout:45000});
             await page.waitForFunction(()=>{const t=document.querySelector('#mkt_eia_weekly_crude')?.innerText||''; return t.includes('424.069M bbl')&&t.includes('-0.391M')&&t.includes('2026-09-04');},{timeout:45000});
             await page.waitForFunction(()=>{const cv=document.getElementById('cpiChart'); if(!cv||!window.Chart)return false; const ch=Chart.getChart(cv); if(!ch)return false; const ds=(ch.data.datasets||[]).find(x=>x.label==='美'); const vals=ds?.data||[]; const last=vals.at(-1); return vals.length>0 && Number(last?.y ?? last)===3.4;},{timeout:45000});
             const result=await page.evaluate(()=>{
               const out={};
               for(const id of ['mkt_us_ppi','mkt_eia_weekly_crude']){const el=document.getElementById(id),r=el?.getBoundingClientRect();out[id]={visible:!!el&&!!r&&r.width>0&&r.height>0,text:(el?.innerText||'').trim(),hasSvg:!!el?.querySelector('svg')};}
-              const cv=document.getElementById('cpiChart'), cr=cv?.getBoundingClientRect(), ch=window.Chart&&cv?Chart.getChart(cv):null, ds=(ch?.data?.datasets||[]).find(x=>x.label==='美'), last=ds?.data?.at(-1);
-              out.cpi={visible:!!cv&&!!cr&&cr.width>0&&cr.height>0,lastValue:Number(last?.y ?? last),lastX:last?.x ?? null,datasetLabel:ds?.label,points:ds?.data?.length||0};
+              const cv=document.getElementById('cpiChart'), wrap=document.getElementById('cpiWrap'), cr=cv?.getBoundingClientRect(), wr=wrap?.getBoundingClientRect(), ch=window.Chart&&cv?Chart.getChart(cv):null, ds=(ch?.data?.datasets||[]).find(x=>x.label==='美'), last=ds?.data?.at(-1), panel=cv?.closest('.panel');
+              out.cpi={visible:!!cv&&!!cr&&cr.width>0&&cr.height>0,wrapVisible:!!wrap&&!!wr&&wr.width>0&&wr.height>0,panelTitle:panel?.querySelector('.panel-h h3')?.textContent?.trim()||'',lastValue:Number(last?.y ?? last),lastX:last?.x ?? null,datasetLabel:ds?.label,points:ds?.data?.length||0};
               return out;
             });
             console.log('LIVE PERIODIC CARDS/CHART:',JSON.stringify(result,null,2));
-            if(!result.cpi.visible||result.cpi.lastValue!==3.4) throw new Error('CPI live chart latest value mismatch');
+            if(result.cpi.lastValue!==3.4||result.cpi.datasetLabel!=='美'||!result.cpi.panelTitle.includes('소비자물가 CPI')) throw new Error('CPI live rendered data mismatch');
+            if(hiddenAfter.length===0 && (!result.cpi.visible||!result.cpi.wrapVisible)) throw new Error('CPI panel activated but chart not visible');
             for(const [id,x] of Object.entries(result)) if(id!=='cpi'&&(!x.visible||!x.hasSvg)) throw new Error(id+' card/chart not visibly rendered');
             const fatal=errors.filter(e=>/SyntaxError|cpi\.json|ppi\.json|eia_weekly|cpiChart|mkt_us_ppi|mkt_eia/i.test(e)); if(fatal.length) throw new Error('production browser errors: '+JSON.stringify(fatal));
             await browser.close();
