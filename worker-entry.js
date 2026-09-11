@@ -34,7 +34,7 @@ async function injectPortfolioHistoryUi(request, response) {
 
   return new HTMLRewriter()
     .on('body', { element(el) {
-      el.append('<script src="/portfolio-history-ui.js?v=20260912-01" defer></scr' + 'ipt>', { html: true });
+      el.append('<script src="/portfolio-history-ui.js?v=20260912-02" defer></scr' + 'ipt>', { html: true });
     } })
     .transform(repairedResponse);
 }
@@ -72,6 +72,7 @@ async function inspectIndexRepair(request, env) {
 
 async function portfolioHistoryProbe(request, env) {
   let uiAsset = false;
+  let compactUi = false;
   if (env?.ASSETS) {
     try {
       const url = new URL(request.url);
@@ -81,15 +82,17 @@ async function portfolioHistoryProbe(request, env) {
       if (response.ok) {
         const text = await response.text();
         uiAsset = text.includes('portfolioHistoryDownload') && text.includes('자산현황 다운로드');
+        compactUi = text.includes('<th>현재가</th><th>수량</th><th>평가금액</th><th>수익률</th>') && !text.includes('<th>평가손익</th>');
       }
     } catch (_) {}
   }
   const indexRepair = await inspectIndexRepair(request, env);
   const storeBound = !!env?.MEMO_BUCKET;
-  const ok = uiAsset && storeBound && indexRepair.indexRepairOk;
+  const ok = uiAsset && compactUi && storeBound && indexRepair.indexRepairOk;
   return new Response(JSON.stringify({
     ok,
     uiAsset,
+    compactUi,
     storeBound,
     ...indexRepair,
     historyApi: '/api/portfolio/history',
