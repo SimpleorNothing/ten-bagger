@@ -5,16 +5,28 @@ on:
     paths:
       - 'nhplug-portfolio.js'
       - 'manual-portfolio.js'
+      - 'portfolio-history-store.js'
+      - 'portfolio-history-ui.js'
       - 'worker.js'
+      - 'worker-entry.js'
+      - 'wrangler.jsonc'
       - 'scripts/test-nhplug-portfolio.mjs'
+      - 'scripts/test-portfolio-history.mjs'
+      - '.github/workflows/portfolio-history-seed.yml'
       - '.github/workflows/nhplug-portfolio-ci.yml'
   push:
     branches: [main]
     paths:
       - 'nhplug-portfolio.js'
       - 'manual-portfolio.js'
+      - 'portfolio-history-store.js'
+      - 'portfolio-history-ui.js'
       - 'worker.js'
+      - 'worker-entry.js'
+      - 'wrangler.jsonc'
       - 'scripts/test-nhplug-portfolio.mjs'
+      - 'scripts/test-portfolio-history.mjs'
+      - '.github/workflows/portfolio-history-seed.yml'
       - '.github/workflows/nhplug-portfolio-ci.yml'
   workflow_dispatch: {}
 
@@ -33,6 +45,11 @@ jobs:
         run: |
           node --check manual-portfolio.js
           node --check nhplug-portfolio.js
+          node --check portfolio-history-store.js
+          node --check portfolio-history-ui.js
           node --check worker.js
+          node --check worker-entry.js
       - name: Read-only bridge tests
-        run: node scripts/test-nhplug-portfolio.mjs
+        run: |
+          node scripts/test-nhplug-portfolio.mjs
+          node scripts/test-portfolio-history.mjs

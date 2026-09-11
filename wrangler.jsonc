@@ -4,16 +4,19 @@
   "routes": [
     { "pattern": "simpleornothing.com", "custom_domain": true }
   ],
-  // worker-hotfix.js는 유료 LLM API 엔드포인트를 차단하고 나머지 요청은 기존 worker.js로 위임한다.
-  "main": "worker-hotfix.js",
+  // worker-entry.js는 기존 worker-hotfix.js의 fetch 정책을 유지하면서 scheduled 이벤트를 worker.js로 위임한다.
+  "main": "worker-entry.js",
+  "triggers": {
+    // Cloudflare Cron은 UTC 기준. 08:00 UTC = 17:00 Asia/Seoul.
+    "crons": ["0 8 * * *"]
+  },
   "assets": {
     "directory": ".",
     "binding": "ASSETS",
-    // Run worker.js before serving any asset so the password gate also covers the .json data files.
+    // Run Worker before serving any asset so the password gate also covers the .json data files.
     "run_worker_first": true
   },
-  // 메모 저장용 R2 (DA Space 방식) — Setup MEMO R2 워크플로가 버킷을 생성/연결.
-  // 비활성화하려면 아래 r2_buckets 블록을 주석 처리(메모는 localStorage 로 graceful degrade).
+  // 메모·자산현황 이력 저장용 R2 영구 저장소.
   "r2_buckets": [
     { "binding": "MEMO_BUCKET", "bucket_name": "ten-bagger-memo" }
   ]
