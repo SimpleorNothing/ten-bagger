@@ -84,9 +84,13 @@ try {
   const dc = body.accounts.find((row) => row.label === 'DC');
   assert.ok(dc, 'manual DC fallback must be merged into the live portfolio response');
   assert.equal(dc.dataSource, 'MANUAL_CAPTURE');
-  assert.equal(dc.asOf, '2026-09-05');
-  assert.equal(dc.domestic.Output_0[0].tot_aet_amt, 416693421);
-  assert.equal(dc.domestic.Output_1.length, 8);
+  assert.equal(dc.asOf, '2026-09-12');
+  assert.equal(dc.domestic.Output_0[0].tot_evlu_amt, 431206120);
+  assert.equal(dc.domestic.Output_0[0].cash_status, 'not-visible-in-source-capture');
+  assert.equal(dc.domestic.Output_1.length, 9);
+  assert.equal(dc.domestic.Output_1.reduce((sum, row) => sum + Number(row.eal_amt || 0), 0), 431206120);
+  assert.equal(dc.domestic.Output_1.find((row) => row.iem_cd === '442580')?.itg_bnc_qty, 1054);
+  assert.equal(dc.domestic.Output_1.find((row) => row.iem_cd === '459580')?.itg_bnc_qty, 32);
   assert.equal(dc.nhplugListed, true);
   assert.equal(dc.nhplugType, '08');
   assert.equal(dc.queryStatus, 'manual-fallback-used');
