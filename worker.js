@@ -1,5 +1,6 @@
 import core from './worker-core.js';
 import { handlePortfolioLive } from './nhplug-portfolio.js';
+import { handlePortfolioHistory, saveDailyPortfolioSnapshot } from './portfolio-history-store.js';
 
 // PR gate regression anchors live in worker-core.js and are delegated unchanged by this wrapper:
 // const SITE_APPLY_FILES = new Set(["gates.json", "risk.json", "signal_log.json", "calendar.json"]);
@@ -130,10 +131,19 @@ export default {
     if (request.method === 'GET' && url.pathname === '/api/portfolio/live') {
       return handlePortfolioLive(request, env, await isAuthorized(request, env));
     }
+    if (url.pathname === '/api/portfolio/history' || url.pathname.startsWith('/api/portfolio/history/')) {
+      return handlePortfolioHistory(request, env, await isAuthorized(request, env));
+    }
     if (request.method === 'GET' && url.pathname === '/api/briefs' && await isAuthorized(request, env)) {
       return fastBriefList(env);
     }
     const routedEnv = allowPaidLlmForPath(url.pathname) ? env : withoutPaidLlmCredentials(env);
     return core.fetch(request, routedEnv, ctx);
+  },
+
+  async scheduled(event, env, ctx) {
+    const task = saveDailyPortfolioSnapshot(env, event && event.scheduledTime ? event.scheduledTime : Date.now(), 'scheduled-17-kst');
+    if (ctx && typeof ctx.waitUntil === 'function') ctx.waitUntil(task);
+    else await task;
   },
 };
