@@ -1,6 +1,13 @@
 name: NHPLUG portfolio snapshot
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'nhplug-portfolio.js'
+      - 'manual-portfolio.js'
+      - 'worker.js'
+      - '.github/workflows/nhplug-portfolio-snapshot.yml'
   schedule:
     - cron: '*/5 * * * *'
   workflow_dispatch: {}
