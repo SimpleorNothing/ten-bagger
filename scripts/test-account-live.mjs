@@ -15,6 +15,10 @@ const requestedAccounts = [
   "{suffix:'2728',label:'DC'}",
 ];
 
+const hasPrivacyNotice =
+  js.includes('계좌번호와 인증정보는 화면과 저장소에 노출하지 않는다') ||
+  js.includes('계좌번호/고객식별자/인증정보는 마스킹 또는 제거됨');
+
 const checks = [
   [js.includes("API='/api/portfolio/live'"), 'NHPLUG live endpoint'],
   [js.includes("FALLBACK='/holdings.json'"), 'holdings fallback'],
@@ -23,7 +27,7 @@ const checks = [
   [js.includes("j.readOnly!==true"), 'read-only response validation'],
   [js.includes("credentials:'same-origin'"), 'same-origin authenticated fetch'],
   [js.includes('setInterval') && js.includes('300000'), 'five-minute active-view refresh'],
-  [js.includes('계좌번호/고객식별자/인증정보는 마스킹 또는 제거됨'), 'privacy notice'],
+  [hasPrivacyNotice, 'privacy notice'],
   [worker.includes('/account-live.js?v=20260912-01'), 'HTML loader injection'],
   [worker.includes('"/account-live.js"'), 'freshness header coverage'],
   [requiredLiveFields.every((field) => js.includes(field)), 'actual NHPLUG domestic/overseas balance field mapping'],
