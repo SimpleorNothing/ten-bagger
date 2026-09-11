@@ -56,7 +56,8 @@ jobs:
             const page=await context.newPage(); const errors=[]; page.on('pageerror',e=>errors.push(String(e)));
             await page.goto(BASE+'/?oracle-release-smoke='+Date.now(),{waitUntil:'domcontentloaded',timeout:90000});
             await page.waitForSelector('#nav .tab[data-v="market"]',{state:'visible',timeout:30000});
-            await page.waitForTimeout(2000);
+            await page.waitForSelector('#v-company',{state:'attached',timeout:30000});
+            await page.waitForTimeout(250);
             await page.click('#nav .tab[data-v="market"]');
             await page.waitForFunction(()=>document.getElementById('v-market')?.classList.contains('on'),{timeout:10000});
             await page.waitForSelector('#mkt_oracle_q1fy27',{state:'visible',timeout:45000});
