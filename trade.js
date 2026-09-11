@@ -146,6 +146,26 @@
     return true;
   }
 
+
+  function mountCpi() {
+    var id='mkt_us_cpi'; if(document.getElementById(id)) return true;
+    var grid=document.getElementById('mktIndicators'); if(!grid) return false;
+    var card=document.createElement('div'); card.className='mkt-card'; card.id=id; card.setAttribute('data-indicator-key','us-cpi'); card.innerHTML='<div class="mkt-ph">미국 CPI 로딩…</div>'; grid.appendChild(card);
+    Promise.all([
+      fetch('cpi_release.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.json():null;}),
+      fetch('cpi.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.json():null;})
+    ]).then(function(a){
+      var j=a[0], c=a[1]; if(!j||!j.latest||!c||!c.series||!c.series.us||!c.series.us.length){card.innerHTML='<div class="mkt-ph">발표 대기 · BLS CPI</div>';return;}
+      var z=j.latest, us=c.series.us.slice().sort(function(x,y){return x[0]<y[0]?-1:1;}), vals=us.slice(-24).map(function(x){return x[1];});
+      var mix=z.headlineMom>z.prevHeadlineMom && z.coreYoy<z.prevCoreYoy;
+      card.innerHTML='<div class="mkt-nm">미국 소비자물가(CPI)</div><div class="mkt-val">'+pct(z.headlineMom,1)+' MoM</div>'+
+        '<div class="mkt-chg '+(z.headlineMom>z.prevHeadlineMom?'up':'dn')+'">YoY '+pct(z.headlineYoy,1)+' <span style="font:600 12px var(--mono);margin-left:8px;color:var(--faint)">'+esc(z.prevMonthLabel)+' '+pct(z.prevHeadlineMom,1)+'→'+esc(z.monthLabel)+' '+pct(z.headlineMom,1)+'</span></div>'+
+        lensRow('<b>소비자 물가</b> '+(mix?'<span class="nt">혼재</span>':(z.coreYoy<z.prevCoreYoy?'<span class="ok">둔화</span>':'<span class="nt">상방</span>')),
+          '근원 '+pct(z.coreMom,1)+' MoM / '+pct(z.coreYoy,1)+' YoY · 근원 YoY '+pct(z.prevCoreYoy,1)+'→'+pct(z.coreYoy,1)+' · 헤드라인 MoM 재가속과 근원 둔화 병존')+
+        '<div class="mkt-chart">'+spark(vals,z.headlineYoy>=z.prevHeadlineYoy)+'</div><div class="mkt-span">'+esc(z.ym)+' · BLS · 등록 '+esc(j.registeredAt)+'</div>';
+    }).catch(function(){card.innerHTML='<div class="mkt-ph">BLS CPI 데이터 로딩 실패</div>';}); return true;
+  }
+
   function mountPpi() {
     var id='mkt_us_ppi'; if(document.getElementById(id)) return true;
     var grid=document.getElementById('mktIndicators'); if(!grid) return false;
@@ -160,8 +180,8 @@
   }
 
   function boot() {
-    mount(); mountGlobalSemi(); mountChinaTrade(); mountSteo(); mountPpi(); mountEiaWeekly();
-    var n = 0, timer = setInterval(function () { var a=mount(), b=mountGlobalSemi(), c=mountChinaTrade(), d=mountSteo(), e=mountPpi(), f=mountEiaWeekly(); if ((a && b && c && d && e && f) || ++n > 40) clearInterval(timer); }, 250);
+    mount(); mountGlobalSemi(); mountChinaTrade(); mountSteo(); mountCpi(); mountPpi(); mountEiaWeekly();
+    var n = 0, timer = setInterval(function () { var a=mount(), b=mountGlobalSemi(), c=mountChinaTrade(), d=mountSteo(), e=mountCpi(), f=mountPpi(), g=mountEiaWeekly(); if ((a && b && c && d && e && f && g) || ++n > 40) clearInterval(timer); }, 250);
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();

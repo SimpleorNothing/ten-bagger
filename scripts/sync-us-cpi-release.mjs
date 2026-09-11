@@ -34,6 +34,8 @@ const prev=[...us.entries()].filter(([d])=>d<seriesDate).sort((a,b)=>a[0].locale
 us.set(seriesDate,headlineYoy);
 cpi.series=cpi.series||{}; cpi.series.us=[...us.entries()].sort((a,b)=>a[0].localeCompare(b[0])); cpi.asOf=stamp;
 write('cpi.json',cpi,true);
+const prevMonthName=month===1?'12월':`${month-1}월`;
+write('cpi_release.json',{registeredAt:releaseDate,sourceUrl:URL,latest:{ym,monthLabel:`${month}월`,prevMonthLabel:prevMonthName,headlineMom,headlineYoy,coreMom,coreYoy,prevHeadlineMom:(ym==='2026-08'?0.1:null),prevHeadlineYoy:prev?.[1]??null,prevCoreYoy:(ym==='2026-08'?2.5:null)}},false);
 
 // 2) calendar result.
 const cal=read('calendar.json');
@@ -70,7 +72,7 @@ write('signal_log.json',sig);
 
 // 6) daily official-release audit; live verification remains pending until deployment workflow succeeds.
 const releaseObj={indicator:`BLS CPI ${year}년 ${month}월`,registeredAt:releaseDate,sourceUrl:URL,values:{ym,headlineMom,headlineYoy,coreMom,coreYoy,prevHeadlineYoy:prev?.[1]??null}};
-const checkPath='periodic_release_check.json'; const check=read(checkPath); check.date=today; check.checkedAt=stamp; check.status='신규 발표 반영 완료'; check.newOfficialReleases=(check.newOfficialReleases||[]).filter(x=>!/^BLS CPI/.test(x.indicator||'')); check.newOfficialReleases.push(releaseObj); check.pending=(check.pending||[]).filter(x=>!/^BLS CPI/.test(x.indicator||'')); check.consumers=['01 CPI 현재값+cpi.json 시계열','calendar.json','pulse.json','cycle.json','risk.json','02 signal_log.json','04 council-context shared pulse/cycle/signal_log','changelog.js']; check.liveVerification={status:'pending',verifiedAt:null,checks:['simpleornothing.com authenticated browser','cpi.json latest series endpoint','01 CPI displayed latest value and chart endpoint']}; write(checkPath,check);
+const checkPath='periodic_release_check.json'; const check=read(checkPath); check.date=today; check.checkedAt=stamp; check.status='신규 발표 반영 완료'; check.newOfficialReleases=(check.newOfficialReleases||[]).filter(x=>!/^BLS CPI/.test(x.indicator||'')); check.newOfficialReleases.push(releaseObj); check.pending=(check.pending||[]).filter(x=>!/^BLS CPI/.test(x.indicator||'')); check.consumers=['01 CPI 카드(cpi_release.json)+cpi.json 시계열','calendar.json','pulse.json','cycle.json','risk.json','02 signal_log.json','04 council-context shared pulse/cycle/signal_log','changelog.js']; check.liveVerification={status:'pending',verifiedAt:null,checks:['simpleornothing.com authenticated browser','cpi.json latest series endpoint','01 CPI displayed latest value and chart endpoint']}; write(checkPath,check);
 const auditDir='audit/official-release-checks'; fs.mkdirSync(auditDir,{recursive:true}); write(`${auditDir}/${today}.json`,check);
 
 // 7) changelog.
