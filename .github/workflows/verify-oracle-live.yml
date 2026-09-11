@@ -1,0 +1,44 @@
+name: Verify Oracle release live
+on:
+  workflow_run:
+    workflows: ["Deploy to Cloudflare Workers"]
+    types: [completed]
+  workflow_dispatch: {}
+permissions:
+  contents: read
+jobs:
+  verify:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    env:
+      SITE_PASSWORD: ${{ secrets.SITE_PASSWORD }}
+    steps:
+      - name: Verify Oracle live data, consumers, card and chart
+        run: |
+          set -euo pipefail
+          npm init -y >/dev/null 2>&1
+          npm install playwright@1.55.0 >/dev/null 2>&1
+          npx playwright install chromium >/dev/null 2>&1
+          node <<'NODE'
+          const {chromium}=require('playwright');
+          const B='https://simpleornothing.com', pw=process.env.SITE_PASSWORD;
+          const need=(s,a,n)=>a.forEach(x=>{if(!s.includes(x))throw Error(n+' missing '+x)});
+          (async()=>{
+            const b=await chromium.launch({headless:true}), c=await b.newContext({viewport:{width:1440,height:2200}});
+            const a=await c.request.post(B+'/__auth',{form:{password:pw},timeout:30000}); if(!a.ok())throw Error('auth '+a.status());
+            const J=async p=>{const r=await c.request.get(B+'/'+p+'?t='+Date.now(),{headers:{'Cache-Control':'no-cache'}});if(!r.ok())throw Error(p+' '+r.status());return r.json()};
+            const T=async p=>{const r=await c.request.get(B+'/'+p+'?t='+Date.now());if(!r.ok())throw Error(p+' '+r.status());return r.text()};
+            const j=await J('oracle_q1fy27.json'),z=j.latest||{},q=j.guidance||{},last=(j.series||[]).at(-1);
+            if(j.period!=='FY27 Q1'||j.registeredAt!=='2026-09-10'||z.revenueB!==19.345||z.iaasRevenueB!==7.4||z.iaasRevenueYoy!==121||z.rpoB!==664||z.capexB!==28.499||z.freeCashFlowB!==-5.396||q.revenueGrowthPct?.join(',')!=='30,34'||q.cloudRevenueGrowthUsdPct?.join(',')!=='65,71'||last?.rpoB!==664)throw Error('Oracle canonical mismatch');
+            for(const [p,x] of [['calendar.json',['Oracle FY27 Q1 실적','RPO $664B']],['pulse.json',['Oracle FY27 Q1','CAPEX $28.499B']],['cycle.json',['Oracle FY27 Q1','"rpoB":664']],['risk.json',['FCF -$5.396B']],['signal_log.json',['OCI/IaaS $7.4B','RPO $664B']]])need(JSON.stringify(await J(p)),x,p);
+            need(await T('aisd.js'),['Oracle FY27 Q1','OCI <b>$7.4B(+121%)</b>'],'02');
+            need(await T('council-view-collapse.js'),['Oracle FY27 Q1 공식 보조신호','RPO $664B'],'04');
+            const p=await c.newPage(); await p.goto(B+'/?oracle-smoke='+Date.now(),{waitUntil:'domcontentloaded',timeout:90000});
+            await p.waitForSelector('#nav .tab[data-v="market"]',{state:'visible',timeout:30000}); await p.click('#nav .tab[data-v="market"]');
+            await p.waitForFunction(()=>document.getElementById('v-market')?.classList.contains('on'),{timeout:10000});
+            await p.waitForSelector('#mkt_oracle_q1fy27',{state:'visible',timeout:45000});
+            const card=await p.$eval('#mkt_oracle_q1fy27',el=>({t:el.innerText,svg:!!el.querySelector('svg')}));
+            need(card.t,['OCI $7.4B','121% YoY','$638B → $664B','CAPEX $28.499B','FY27 Q1','등록 2026-09-10'],'card'); if(!card.svg)throw Error('Oracle SVG missing');
+            console.log('LIVE ORACLE CARD',JSON.stringify(card)); await b.close();
+          })().catch(e=>{console.error(e);process.exit(1)});
+          NODE
