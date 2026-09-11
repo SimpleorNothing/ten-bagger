@@ -1,3 +1,5 @@
+import { MANUAL_PORTFOLIO_ACCOUNTS } from './manual-portfolio.js';
+
 const DEFAULT_BASE_URL = 'https://api.nhplug.com:8443';
 const DEFAULT_AUTH_URL = 'https://api.nhplug.com:8443';
 const TOKEN_OBJECT_KEY = '_private/nhplug/token-v1.json';
@@ -5,6 +7,11 @@ const ALLOWED_API_HOSTS = new Set([
   'api.nhplug.com', 'moapi.nhplug.com', 'api.n2plug.com', 'moapi.n2plug.com',
 ]);
 const ALLOWED_AUTH_HOSTS = new Set(['api.nhplug.com', 'api.n2plug.com']);
+const KNOWN_ACCOUNT_LABELS = {
+  '7747': '종합매매',
+  '0473': '개인형IRP',
+  '2728': 'DC',
+};
 
 let memoryToken = { scope: '', token: '', exp: 0 };
 
@@ -231,6 +238,14 @@ function maskAccount(value) {
   return `${'*'.repeat(Math.max(4, s.length - 4))}${s.slice(-4)}`;
 }
 
+function accountSuffix(value) {
+  return String(value || '').replace(/\s+/g, '').slice(-4);
+}
+
+function knownAccountLabel(value) {
+  return KNOWN_ACCOUNT_LABELS[accountSuffix(value)] || '';
+}
+
 function sanitize(value) {
   if (Array.isArray(value)) return value.map((v) => sanitize(v));
   if (!value || typeof value !== 'object') return value;
@@ -247,15 +262,47 @@ function sanitize(value) {
   return out;
 }
 
-function usableAccounts(raw, envName) {
+function listedAccounts(raw) {
   const rows = Array.isArray(raw && raw.Output_0) ? raw.Output_0 : [];
-  return rows.filter((row) => {
-    const type = String((row && row.acct_type) || '').trim();
-    if (!type) return true;
-    if (envName === 'mock') return type === '03';
-    if (envName === 'live') return type === '01' || type === '02';
-    return true;
-  }).filter((row) => row && row.acct_no);
+  return rows.filter((row) => row && row.acct_no);
+}
+
+function stockBalanceEligible(row, envName) {
+  const type = String((row && row.acct_type) || '').trim();
+  if (!type) return true;
+  if (envName === 'mock') return type === '03';
+  if (envName === 'live') return type === '01' || type === '02';
+  return true;
+}
+
+function emptyBalance() {
+  return { Output_0: [], Output_1: [] };
+}
+
+function balanceHasData(data) {
+  if (!data || typeof data !== 'object') return false;
+  const rows = Array.isArray(data.Output_1) ? data.Output_1 : [];
+  if (rows.length) return true;
+  const summaries = Array.isArray(data.Output_0) ? data.Output_0 : [data.Output_0];
+  return summaries.some((row) => {
+    if (!row || typeof row !== 'object') return false;
+    return Object.entries(row).some(([key, value]) => {
+      if (!/(?:amt|aet|asset|cash|dca|qty|bnc)/i.test(key)) return false;
+      const n = Number(String(value == null ? '' : value).replace(/,/g, ''));
+      return Number.isFinite(n) && Math.abs(n) > 0;
+    });
+  });
+}
+
+function portfolioHasData(account) {
+  if (!account || typeof account !== 'object') return false;
+  if (balanceHasData(account.domestic)) return true;
+  const overseas = Array.isArray(account.overseas) ? account.overseas : [];
+  return overseas.some((entry) => balanceHasData(entry && entry.data));
+}
+
+function safeError(error) {
+  return String(error && error.message ? error.message : error || 'unknown').slice(0, 160);
 }
 
 function overseasNations(env) {
@@ -266,26 +313,40 @@ function overseasNations(env) {
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-async function buildPortfolio(env) {
-  const envName = currentEnvironment(env);
-  const accountResponse = await nhCall(env, '/n2/acctinfo', {});
-  const accounts = usableAccounts(accountResponse, envName);
-  if (!accounts.length) throw new Error('NHPLUG_NO_USABLE_ACCOUNT');
+async function queryListedAccount(env, row, envName) {
+  const actNo = String(row.acct_no);
+  const base = {
+    account: maskAccount(actNo),
+    accountType: String(row.acct_type || ''),
+    label: knownAccountLabel(actNo),
+    dataSource: 'NHPLUG',
+    nhplugListed: true,
+    stockBalanceEligible: stockBalanceEligible(row, envName),
+    domestic: emptyBalance(),
+    overseas: [],
+    errors: [],
+  };
 
-  const result = [];
-  for (const account of accounts) {
-    const actNo = String(account.acct_no);
-    const domestic = await nhCall(env, '/krstock/inquiry/v1/balance', {
+  if (!base.stockBalanceEligible) {
+    base.queryStatus = 'account-listed-stock-balance-not-eligible';
+    return base;
+  }
+
+  try {
+    base.domestic = sanitize(await nhCall(env, '/krstock/inquiry/v1/balance', {
       act_no: actNo,
       bnc_bse_cd: '5',
       ltg_aot_dit_cd: '9',
       aet_bse: '2',
       qut_dit_cd: 'UNT',
-    });
-    await sleep(260);
+    }));
+  } catch (error) {
+    base.errors.push({ scope: 'domestic', code: safeError(error) });
+  }
+  await sleep(260);
 
-    const overseas = [];
-    for (const nation of overseasNations(env)) {
+  for (const nation of overseasNations(env)) {
+    try {
       const data = await nhCall(env, '/gbstock/inquiry/v1/balance', {
         act_no: actNo,
         qut_iqr_dit_cd: '9',
@@ -293,27 +354,85 @@ async function buildPortfolio(env) {
         cur_cd: 'KRW',
         xns_dit_cd: '1',
       });
-      overseas.push({ nation, data: sanitize(data) });
-      await sleep(260);
+      base.overseas.push({ nation, data: sanitize(data) });
+    } catch (error) {
+      base.errors.push({ scope: `overseas:${nation}`, code: safeError(error) });
     }
-
-    result.push({
-      account: maskAccount(actNo),
-      accountType: String(account.acct_type || ''),
-      domestic: sanitize(domestic),
-      overseas,
-    });
+    await sleep(260);
   }
+
+  base.queryStatus = base.errors.length
+    ? (portfolioHasData(base) ? 'partial' : 'failed')
+    : 'ok';
+  return base;
+}
+
+function cloneManualAccount(value) {
+  return JSON.parse(JSON.stringify(value));
+}
+
+function mergeManualAccounts(apiAccounts) {
+  const merged = apiAccounts.slice();
+  for (const source of MANUAL_PORTFOLIO_ACCOUNTS) {
+    const manual = cloneManualAccount(source);
+    const suffix = accountSuffix(manual.account);
+    const index = merged.findIndex((item) => accountSuffix(item && item.account) === suffix);
+    if (index < 0) {
+      manual.nhplugListed = false;
+      manual.queryStatus = 'manual-fallback-not-listed-by-nhplug';
+      merged.push(manual);
+      continue;
+    }
+    if (!portfolioHasData(merged[index])) {
+      const discovered = merged[index];
+      manual.nhplugListed = true;
+      manual.nhplugType = discovered.accountType || '';
+      manual.nhplugQueryStatus = discovered.queryStatus || '';
+      manual.queryStatus = 'manual-fallback-used';
+      merged[index] = manual;
+    }
+  }
+  return merged;
+}
+
+async function buildPortfolio(env) {
+  const envName = currentEnvironment(env);
+  const accountResponse = await nhCall(env, '/n2/acctinfo', {});
+  const listed = listedAccounts(accountResponse);
+
+  const discovery = listed.map((row) => ({
+    idMasked: maskAccount(row.acct_no),
+    type: String(row.acct_type || ''),
+    label: knownAccountLabel(row.acct_no),
+    balanceEligible: stockBalanceEligible(row, envName),
+  }));
+
+  const apiAccounts = [];
+  for (const row of listed) {
+    apiAccounts.push(await queryListedAccount(env, row, envName));
+  }
+
+  const accounts = mergeManualAccounts(apiAccounts);
+  if (!accounts.length) throw new Error('NHPLUG_NO_USABLE_ACCOUNT');
+
+  const manualFallbacks = accounts
+    .filter((account) => account && account.dataSource === 'MANUAL_CAPTURE')
+    .map((account) => ({ label: account.label || '', asOf: account.asOf || '' }));
 
   return {
     source: 'NHPLUG',
     readOnly: true,
+    portfolioMode: manualFallbacks.length ? 'NHPLUG+MANUAL' : 'NHPLUG',
     fetchedAt: new Date().toISOString(),
     environment: envName,
-    accounts: result,
+    discovery,
+    accounts,
+    manualFallbacks,
     notes: [
       '국내주식·해외주식 잔고 조회만 사용합니다. 주문 엔드포인트는 구현하지 않았습니다.',
       '계좌번호와 인증정보는 응답에서 마스킹/제거합니다.',
+      'NHPLUG 계좌목록의 모든 계좌 유형은 discovery에 보존하고, 일반 주식 잔고 API는 지원 가능한 유형에만 호출합니다.',
+      'DC가 NHPLUG에서 누락되거나 일반 주식 잔고가 비어 있으면 사용자 확정 캡처/자산원장의 수동 스냅샷을 사용합니다.',
       '해외 기본 조회 국가는 미국(200)이며 NHPLUG_OVERSEAS_NATIONS로 추가 가능합니다.',
     ],
   };
