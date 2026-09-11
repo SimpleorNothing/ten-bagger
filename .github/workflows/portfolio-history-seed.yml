@@ -1,0 +1,43 @@
+name: Portfolio history snapshot now
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    env:
+      NHPLUG_APP_SECRET: ${{ secrets.NHPLUG_APP_SECRET }}
+    steps:
+      - name: Check configuration
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$NHPLUG_APP_SECRET" || { echo 'NHPLUG_APP_SECRET is not configured'; exit 1; }
+      - name: Save current portfolio snapshot
+        shell: bash
+        run: |
+          set -euo pipefail
+          TOKEN=$(python - <<'PY'
+          import hashlib, os
+          secret = os.environ['NHPLUG_APP_SECRET']
+          print(hashlib.sha256(f'alpha-map:portfolio-read:v1:{secret}'.encode()).hexdigest())
+          PY
+          )
+          curl -fsS --connect-timeout 10 --max-time 90 \
+            -X POST \
+            -H "x-portfolio-api-token: ${TOKEN}" \
+            -H 'Cache-Control: no-cache' \
+            "https://simpleornothing.com/api/portfolio/history/snapshot?t=$(date +%s%N)" \
+            | tee /tmp/portfolio-history-seed.json
+          python - <<'PY'
+          import json
+          with open('/tmp/portfolio-history-seed.json', encoding='utf-8') as f:
+              data = json.load(f)
+          if not data.get('ok') or not data.get('date'):
+              raise SystemExit(f'invalid snapshot response: {data}')
+          print(f"saved portfolio history for {data['date']} at {data.get('savedAt','')}")
+          PY
