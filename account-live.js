@@ -35,15 +35,15 @@
   #v-account .ac-table{width:100%;border-collapse:collapse;table-layout:fixed}
   #v-account .ac-table th,#v-account .ac-table td{padding:8px 6px;border-top:1px solid var(--line);font-size:12px;text-align:right;vertical-align:middle;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   #v-account .ac-table th{font-size:10px;color:var(--faint);font-weight:800}
-  #v-account .ac-table th:first-child,#v-account .ac-table td:first-child{text-align:left;width:31%}
+  #v-account .ac-table th:first-child,#v-account .ac-table td:first-child{text-align:left;width:34%}
   #v-account .ac-name{font-weight:800;color:var(--txt)}
   #v-account .ac-code{display:block;font-size:10px;color:var(--faint);font-weight:500;margin-top:2px}
   #v-account .ac-up{color:var(--st-dawn);font-weight:800}#v-account .ac-down{color:var(--st-hot);font-weight:800}
   #v-account .ac-empty,#v-account .ac-error{padding:34px 12px;text-align:center;color:var(--faint);font-size:13px;line-height:1.6}
   #v-account .ac-error b{display:block;color:var(--txt);font-size:14px;margin-bottom:6px}
   #v-account .ac-foot{font-size:11px;color:var(--faint);margin:14px 0 calc(var(--am-ticker-h) + 12px);line-height:1.6}
-  @media(max-width:850px){#v-account .ac-summary{grid-template-columns:repeat(2,minmax(0,1fr))}#v-account .ac-table th:nth-child(3),#v-account .ac-table td:nth-child(3),#v-account .ac-table th:nth-child(5),#v-account .ac-table td:nth-child(5){display:none}}
-  @media(max-width:520px){#v-account .ac-summary{grid-template-columns:1fr 1fr}#v-account .ac-kpi b{font-size:17px}#v-account .ac-table th,#v-account .ac-table td{padding:8px 4px;font-size:11px}#v-account .ac-table th:first-child,#v-account .ac-table td:first-child{width:42%}}
+  @media(max-width:850px){#v-account .ac-summary{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media(max-width:520px){#v-account .ac-summary{grid-template-columns:1fr 1fr}#v-account .ac-kpi b{font-size:17px}#v-account .ac-table th,#v-account .ac-table td{padding:8px 4px;font-size:11px}#v-account .ac-table th:first-child,#v-account .ac-table td:first-child{width:40%}}
   `;
   var SECTION=`<div class="vhead"><div class="vkick">Portfolio · NHPLUG Read-only</div><h1 class="vtitle">나무증권 <em>계좌현황</em></h1><p class="vsub">Alpha Map이 NHPLUG에서 국내·해외 잔고를 직접 읽는다. 주문 기능은 연결하지 않았으며 계좌번호와 인증정보는 화면과 저장소에 노출하지 않는다.</p></div>
   <div class="ac-headbar"><div class="ac-state" id="acState"><span class="ac-badge"><i class="ac-dot"></i>조회 준비</span></div><button type="button" class="ac-refresh" id="acRefresh">지금 새로고침</button></div>
@@ -72,7 +72,7 @@
     var evalAmt=num(r,overseas?['krw_eal_amt','evlu_amt','evl_amt','ovrs_stck_evlu_amt','valuation_amt','market_value']:['eal_amt','evlu_amt','evl_amt','stck_evlu_amt','valuation_amt','market_value']);
     var buyAmt=num(r,overseas?['krw_cns_bse_phs_xps','krw_abk_amt1','pchs_amt','buy_amt','purchase_amt']:['pchs_amt','pur_amt','buy_amt','purchase_amt']);
     var pnl=num(r,overseas?['krw_eal_pls_amt','fc_eal_pls_amt','evlu_pfls_amt','evl_pl_amt','profit_loss','pnl_amt']:['eal_pls_amt','evlu_pfls_amt','evl_pl_amt','profit_loss','pnl_amt']);
-    var rate=num(r,overseas?['eal_pft_rt','eal_pft_rt1','krw_sll_pft_rt','pft_rt','profit_rate','pnl_rate']:['pft_rt','evlu_pfls_rt','evl_pl_rt','profit_rate','pnl_rate']);
+    var rate=num(r,overseas?['eal_pft_rt1','eal_pft_rt','krw_sll_pft_rt','pft_rt','profit_rate','pnl_rate']:['pft_rt','evlu_pfls_rt','evl_pl_rt','profit_rate','pnl_rate']);
     var price=num(r,overseas?['fc_sec_end_pr','end_pr','ovrs_now_pric1','last_pric','current_price']:['now_pr','stck_prpr','prpr','now_prc','cur_prc','current_price']);
     var currency=overseas?String(val(r,['cur_cd','currency'])||''):'';
     if(rate==null&&pnl!=null&&buyAmt){rate=pnl/buyAmt*100;}
@@ -82,8 +82,8 @@
   function positions(d,market){return arr(d&&d.Output_1).map(function(r){return position(r,market);}).filter(function(r){return r.name||r.code||r.qty||r.evalAmt;});}
   function marketBlock(title,s,p,sub){
     var total=s&&s.total!=null?money(s.total):'자료에서 확인되지 않음';
-    var rows=p.length?p.map(function(r){var cls=r.rate>0?'ac-up':r.rate<0?'ac-down':'';return '<tr><td><span class="ac-name">'+esc(r.name)+'</span><span class="ac-code">'+esc(r.code||r.market||'')+'</span></td><td>'+qty(r.qty)+'</td><td>'+priceText(r.price,r.market,r.currency)+'</td><td>'+money(r.evalAmt)+'</td><td>'+money(r.pnl)+'</td><td class="'+cls+'">'+pct(r.rate)+'</td></tr>';}).join(''):'<tr><td colspan="6" style="text-align:center;color:var(--faint)">보유종목 없음</td></tr>';
-    return '<div class="ac-market"><div class="ac-market-title"><b>'+esc(title)+'</b><span>'+esc(sub||'')+' · 자산 '+esc(total)+'</span></div><table class="ac-table"><thead><tr><th>종목</th><th>수량</th><th>현재가</th><th>평가금액</th><th>평가손익</th><th>수익률</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
+    var rows=p.length?p.map(function(r){var cls=r.rate>0?'ac-up':r.rate<0?'ac-down':'';return '<tr><td><span class="ac-name">'+esc(r.name)+'</span><span class="ac-code">'+esc(r.code||r.market||'')+'</span></td><td>'+priceText(r.price,r.market,r.currency)+'</td><td>'+qty(r.qty)+'</td><td>'+money(r.evalAmt)+'</td><td class="'+cls+'">'+pct(r.rate)+'</td></tr>';}).join(''):'<tr><td colspan="5" style="text-align:center;color:var(--faint)">보유종목 없음</td></tr>';
+    return '<div class="ac-market"><div class="ac-market-title"><b>'+esc(title)+'</b><span>'+esc(sub||'')+' · 자산 '+esc(total)+'</span></div><table class="ac-table"><thead><tr><th>종목</th><th>현재가</th><th>수량</th><th>평가금액</th><th>수익률</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
   }
   function renderLive(data){
     latest=data;var accounts=arr(data.accounts),domTotal=0,overTotal=0,cash=0,count=0;
@@ -101,14 +101,14 @@
     $('acList').innerHTML=cards||'<div class="ac-empty">조회 가능한 계좌가 없습니다.</div>';
     var age=Date.now()-new Date(data.fetchedAt||0).getTime(),fresh=isFinite(age)&&age>=0&&age<=10*60*1000;
     $('acState').innerHTML='<span class="ac-badge live"><i class="ac-dot"></i>NHPLUG LIVE</span><span>조회 '+esc(dt(data.fetchedAt))+(fresh?' · 10분 이내':' · 갱신 필요')+'</span>';
-    $('acNote').innerHTML='<b>읽기 전용</b> · 지정한 종합매매·개인형IRP·DC 3개 계좌만 표시합니다. NHPLUG가 제공하는 실제 잔고 필드는 수량·현재가·원화 평가금액·평가손익·수익률로 표시하며 주문 API는 구현하지 않았습니다. 연금계좌는 NHPLUG 제공 범위에 따라 보유내역이 비어 있을 수 있습니다.';
+    $('acNote').innerHTML='<b>화면은 핵심 4개 값만 표시</b> · 현재가·수량·평가금액·수익률만 보여줍니다. 매입가·매입금액·평가손익·매도가능수량·수수료·세금·환율·미결제수량·대출/만기일 등 NHPLUG가 반환하는 상세 필드는 일별 DB 원본에 보존합니다. 주문 API는 구현하지 않았습니다.';
     $('acFoot').textContent='출처: NHPLUG · 환경: '+String(data.environment||'live')+' · 계좌번호/고객식별자/인증정보는 마스킹 또는 제거됨';
   }
   function renderFallback(h,reason){
     latest=null;var d=arr(h.detail).filter(function(x){return n(x.amt)>0||n(x.qty)>0;}),cashRow=d.find(function(x){return x.layer==='현금'||x.name==='현금';}),total=n(h.total),cashM=cashRow?n(cashRow.amt):null;
     $('acSummary').innerHTML='<div class="ac-kpi"><b>'+(total==null?'—':money(total*1000000))+'</b><span>주간 원장 총자산</span></div><div class="ac-kpi"><b>'+(cashM==null?'—':money(cashM*1000000))+'</b><span>주간 원장 현금</span></div><div class="ac-kpi"><b>'+d.filter(function(x){return x.name!=='현금';}).length+'</b><span>보유종목</span></div><div class="ac-kpi"><b>'+esc(h.asOf||'—')+'</b><span>원장 기준일</span></div>';
-    var rows=d.filter(function(x){return x.name!=='현금';}).sort(function(a,b){return (n(b.amt)||0)-(n(a.amt)||0);}).map(function(x){return '<tr><td><span class="ac-name">'+esc(x.name)+'</span><span class="ac-code">'+esc(x.ticker||x.layer||'')+'</span></td><td>'+qty(x.qty)+'</td><td>—</td><td>'+money((n(x.amt)||0)*1000000)+'</td><td>—</td><td>'+pct(x.w)+'</td></tr>';}).join('');
-    $('acList').innerHTML='<article class="ac-card"><div class="ac-card-hd"><b>주간 보유 원장</b><span>fallback</span></div><div class="ac-market"><div class="ac-market-title"><b>전체 보유종목</b><span>비중은 전체자산 기준</span></div><table class="ac-table"><thead><tr><th>종목</th><th>수량</th><th>현재가</th><th>평가금액</th><th>평가손익</th><th>비중</th></tr></thead><tbody>'+rows+'</tbody></table></div></article>';
+    var rows=d.filter(function(x){return x.name!=='현금';}).sort(function(a,b){return (n(b.amt)||0)-(n(a.amt)||0);}).map(function(x){var ret=n(x.returnPct!=null?x.returnPct:x.ret);var cls=ret>0?'ac-up':ret<0?'ac-down':'';return '<tr><td><span class="ac-name">'+esc(x.name)+'</span><span class="ac-code">'+esc(x.ticker||x.layer||'')+'</span></td><td>—</td><td>'+qty(x.qty)+'</td><td>'+money((n(x.amt)||0)*1000000)+'</td><td class="'+cls+'">'+pct(ret)+'</td></tr>';}).join('');
+    $('acList').innerHTML='<article class="ac-card"><div class="ac-card-hd"><b>주간 보유 원장</b><span>fallback</span></div><div class="ac-market"><div class="ac-market-title"><b>전체 보유종목</b><span>실시간 현재가는 제공되지 않음</span></div><table class="ac-table"><thead><tr><th>종목</th><th>현재가</th><th>수량</th><th>평가금액</th><th>수익률</th></tr></thead><tbody>'+rows+'</tbody></table></div></article>';
     $('acState').innerHTML='<span class="ac-badge fallback"><i class="ac-dot"></i>주간 원장 FALLBACK</span><span>기준 '+esc(h.asOf||'—')+'</span>';
     $('acNote').innerHTML='<b>실시간 NHPLUG 조회 실패.</b> 현재 화면은 holdings.json의 마지막 확정 원장을 표시합니다.'+(reason?' <span style="color:var(--faint)">('+esc(reason)+')</span>':'');
     $('acFoot').textContent='출처: holdings.json · 이 상태의 수치는 실시간 계좌 잔고가 아님';
