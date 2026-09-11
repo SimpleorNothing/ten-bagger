@@ -61,9 +61,10 @@ jobs:
             await page.waitForFunction(()=>{const t=document.querySelector('#mkt_us_ppi')?.innerText||''; return t.includes('+0.4% MoM')&&t.includes('YoY +5.4%')&&t.includes('2026-08');},{timeout:45000});
             await page.waitForFunction(()=>{const t=document.querySelector('#mkt_eia_weekly_crude')?.innerText||''; return t.includes('424.069M bbl')&&t.includes('-0.391M')&&t.includes('2026-09-04');},{timeout:45000});
 
-            // The CPI chart is intentionally rendered under the US10Y macro view. Follow the same nav path a user takes.
-            const us10yTab=page.locator('#nav .tab[data-v="us10y"]');
-            await us10yTab.waitFor({state:'attached',timeout:30000});
+            // CPI is rendered under the US10Y macro view. The US10Y tab is not nested in #nav,
+            // so follow the actual page control used by hmz.js.
+            const us10yTab=page.locator('.tab[data-v="us10y"]').first();
+            await us10yTab.waitFor({state:'visible',timeout:30000});
             await us10yTab.scrollIntoViewIfNeeded();
             await us10yTab.click({timeout:30000});
             await page.waitForSelector('#v-us10y.on #cpiChart',{state:'visible',timeout:45000});
