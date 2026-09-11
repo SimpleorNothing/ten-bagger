@@ -32,14 +32,26 @@ jobs:
           node-version: '20'
       - name: Fetch latest CPI series
         run: node scripts/fetch-cpi.mjs
-      - name: Sync official US CPI release across consumers
+      - name: Sync official US CPI release across all consumers
         run: node scripts/sync-us-cpi-release.mjs
+      - name: Validate synchronized CPI consumers
+        run: |
+          node - <<'NODE'
+          const fs=require('fs');
+          const c=JSON.parse(fs.readFileSync('cpi.json','utf8'));
+          const last=c.series.us.at(-1); if(last[0]!=='2026-08-01'||last[1]!==3.4) throw new Error('CPI series endpoint mismatch');
+          const p=JSON.parse(fs.readFileSync('pulse.json','utf8')); const r=p.drivers.find(x=>x.ax==='rates'); if(!r||!r.l1.includes('8월 CPI')||!r.l1.includes('+0.4%')||!r.l1.includes('+3.4%')) throw new Error('pulse CPI mismatch');
+          const cal=JSON.parse(fs.readFileSync('calendar.json','utf8')); const ev=cal.events.find(x=>x.lbl==='美 CPI · 8월분'); if(!ev||!ev.meta.includes('+0.4%')||!ev.meta.includes('+3.4%')||!ev.meta.includes('+2.4%')) throw new Error('calendar CPI mismatch');
+          const sig=JSON.parse(fs.readFileSync('signal_log.json','utf8')); if(!sig.log.some(x=>x.source==='BLS CPI August 2026 공식 발표')) throw new Error('signal log CPI missing');
+          const cyc=JSON.parse(fs.readFileSync('cycle.json','utf8')); if(cyc.periodicReleaseContext?.cpi?.headlineMom!==0.4) throw new Error('cycle CPI missing');
+          const risk=JSON.parse(fs.readFileSync('risk.json','utf8')); if(risk.periodicReleaseContext?.cpi?.coreYoy!==2.4) throw new Error('risk CPI missing');
+          NODE
       - name: Create protected-main PR if changed
         env:
           GH_TOKEN: ${{ secrets.AUTO_MERGE_TOKEN }}
         run: |
           set -euo pipefail
-          FILES="cpi.json calendar.json pulse.json changelog.js"
+          FILES="cpi.json calendar.json pulse.json cycle.json risk.json signal_log.json periodic_release_check.json changelog.js audit/official-release-checks"
           if [ -z "$(git status --porcelain $FILES)" ]; then
             echo "No CPI changes."; exit 0
           fi
@@ -48,6 +60,6 @@ jobs:
           BRANCH="claude/automation-update-cpi-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
           git checkout -b "$BRANCH"
           git add $FILES
-          git commit -m "chore: sync official CPI release"
+          git commit -m "chore: sync official CPI release across consumers"
           git push -u origin "$BRANCH"
-          gh pr create --base main --head "$BRANCH" --title "chore: sync official CPI release" --body "BLS 공식 CPI 발표를 CPI 시계열, 01 캘린더, 시장 맥락, 변경 이력에 동기화합니다. Claude PR Gate가 검증 후 squash merge합니다."
+          gh pr create --base main --head "$BRANCH" --title "chore: sync official CPI release across consumers" --body "BLS 공식 CPI 발표를 01 카드/시계열, calendar, pulse, cycle, risk, 02 signal_log, 04 공유 컨텍스트, 감사 이력과 변경 이력에 동기화합니다. 검증 후 main에 머지합니다."
