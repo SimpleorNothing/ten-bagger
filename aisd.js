@@ -316,6 +316,7 @@ var HTML=`<div style="position:relative">
     <div class="ds-vcg"><div class="ds-vcgt">뉴클라우드·소버린<small>임대→주권 강물</small></div><div class="ds-chips"><span class="ds-chip">CoreWeave</span><span class="ds-chip">Oracle OCI</span><span class="ds-chip">국가 DC</span></div></div>
   </div>
   <div class="ds-vces">
+    <span><span class="k">Oracle FY27 Q1</span>OCI <b>$7.4B(+121%)</b> · RPO <b>$664B</b> · CAPEX <b>$28.499B</b> · FCF <b>-$5.396B</b></span>
     <span><span class="k">매출</span>클라우드 AI 증분 <b>~$150B±/년</b> · <b style="color:var(--st-hot)">▲</b> 두 자릿수 성장</span>
     <span><span class="k">투자</span>CAPEX <b>~$700B</b>(2026E) — 매출 증분을 크게 상회</span>
     <span><span class="k">이익</span><span class="pf-mid">클라우드 본업 흑자(마진 25~35%)</span> · AI 증분 ROI는 미증명 — 감가상각 파도 2027~</span>

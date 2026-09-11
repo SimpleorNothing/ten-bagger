@@ -103,7 +103,7 @@
         '<div class="ab-item"><div class="ab-k">5 공급망 · GPU/HBM/네트워크</div><div class="ab-v">자료 미연결</div><div class="ab-d">리드타임·가격·재고·주문취소를 함께 확인</div><span class="ab-state na">미확인</span></div>',
       '</div>',
       '<div class="ab-rule"><div><b>판정 규칙</b> · 0~2개 악화 = 구조적 투자 범위 · 3개 동시 악화 = 신규 확대 중단/관찰 · 4~5개 = 버블 해소 위험 급상승</div><div><b>핵심 조합</b> · RPO 둔화 + CAPEX 고성장 + 매출 둔화 + margin 하락 + 공급망 재고 증가</div></div>',
-      '<div class="ab-foot">' + Q.asOf + ' 기준. RPO·매출·CAPEX·영업이익률은 바로 위 클라우드 분기 그래프와 동일 데이터로 계산. 현재 값만으로 산업 전체의 버블 여부를 단정하지 않으며, 공급망 지표는 근거 데이터 연결 전까지 점수에 포함하지 않음.</div>'
+      '<div class="ab-foot">' + Q.asOf + ' 기준. RPO·매출·CAPEX·영업이익률은 바로 위 클라우드 분기 그래프와 동일 데이터로 계산. 현재 값만으로 산업 전체의 버블 여부를 단정하지 않으며, 공급망 지표는 근거 데이터 연결 전까지 점수에 포함하지 않음. <b>Oracle FY27 Q1 공식 보조신호:</b> OCI $7.4B(+121% YoY), RPO $664B, CAPEX $28.499B, FCF -$5.396B, Q2 Cloud +65~71% 가이던스. 기존 3사 합계 시계열 정의에는 섞지 않고 별도 교차검증으로 사용.</div>'
     ].join("");
     charts.insertAdjacentElement("afterend", el);
     return true;
