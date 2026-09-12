@@ -19,7 +19,18 @@
   function qAxisMoney(v){var n=Number(v);if(!isFinite(n)||Math.abs(n)<0.000001)return '$0';return (n<0?'-':'')+'$'+Math.abs(n).toLocaleString('en-US',{maximumFractionDigits:2})+'B';}
   function qNiceStep(raw){var n=Math.max(0.1,Number(raw)||0.1);var power=Math.pow(10,Math.floor(Math.log(n)/Math.LN10));var normalized=n/power;var multiple=normalized<=1?1:normalized<=2?2:normalized<=2.5?2.5:normalized<=5?5:10;return multiple*power;}
   function marginClass(v){return v==null?'':Number(v)<0?' ca-neg':' ca-pos';}
-  function kindLabel(k){return k==='actual'?'실적':k==='management'?'경영진 전망':k==='guidance'?'가이던스':k==='strategic'?'전략':' ';}
+  function kindLabel(k){return k==='actual'?'실적':k==='management'?'경영진 전망':k==='guidance'?'가이던스':k==='strategic'?'전략':k==='unavailable'?'자료 없음':' ';}
+  // 모든 기업을 같은 FY 축에서 비교한다. 숫자가 공개되지 않은 연도는 빈 값으로 남긴다.
+  function fiscalRange(financials){
+    var byYear={};(financials||[]).forEach(function(r){
+      var y=String(r.fy||'').match(/FY(20\d{2})/);if(y)byYear[y[1]]=r;
+    });
+    return [2022,2023,2024,2025,2026,2027,2028].map(function(y){
+      var r=byYear[String(y)];
+      if(r)return r;
+      return {fy:'FY'+y+(y>=2027?'E':''),kind:'unavailable',revenue:null,growth:null,opMargin:null,netMargin:null,backlog:null};
+    });
+  }
 
   function installStyle(){
     if(document.getElementById('company-analysis-style'))return;
@@ -214,7 +225,7 @@
   }
 
   function financialHtml(rows){
-    rows=rows||[];
+    rows=fiscalRange(rows);
     var heads=rows.map(function(r){return '<th>'+esc(r.fy)+'<span class="ca-kind">'+esc(kindLabel(r.kind))+'</span></th>';}).join('');
     function cells(fn,cls){return rows.map(function(r){var v=fn(r);var c=cls?cls(r):'';return '<td class="'+c+'">'+v+'</td>';}).join('');}
     var notes=rows.filter(function(r){return r.note;}).map(function(r){return '<div><b>'+esc(r.fy)+'</b> '+esc(r.note)+'</div>';}).join('');
@@ -241,7 +252,7 @@
   }
 
   function annualRows(financials){
-    return (financials||[]).map(function(r){
+    return fiscalRange(financials).map(function(r){
       var revenue=Number(r.revenue),margin=Number(r.opMargin);
       return {
         period:r.fy,
@@ -249,7 +260,7 @@
         revenue:isFinite(revenue)?revenue:null,
         // 공개된 연간 매출과 GAAP 영업이익률만으로 계산한다. 전망의 미공개 마진은 비워 둔다.
         operatingIncome:isFinite(revenue)&&isFinite(margin)?revenue*margin/100:null,
-        kind:r.kind==='actual'?'actual':'derived'
+        kind:r.kind==='actual'?'actual':(r.kind==='unavailable'?'unavailable':'derived')
       };
     });
   }
@@ -283,9 +294,9 @@
       var label=r.period+' '+r.cy+' · 매출 '+qMoney(r.revenue)+' · 영업이익 '+qMoney(r.operatingIncome);
       return '<div class="ca-q-group '+(est?'ca-q-est':'')+'" role="listitem" aria-label="'+esc(label)+'">'+qBar(r.revenue,span,baseline,'ca-q-bar-rev','매출')+qBar(r.operatingIncome,span,baseline,'ca-q-bar-op','영업이익')+'</div>';
     }).join('');
-    var labels=rows.map(function(r){var est=r.kind!=='actual';return '<div class="ca-q-xlabel '+(est?'ca-q-est':'')+'" title="'+esc(r.period+' · '+r.cy)+'">'+esc(qShortLabel(r)+(est?'E':''))+'</div>';}).join('');
+    var labels=rows.map(function(r){var est=r.kind!=='actual';var label=qShortLabel(r);return '<div class="ca-q-xlabel '+(est?'ca-q-est':'')+'" title="'+esc(r.period+' · '+r.cy)+'">'+esc(label+(est&&!/E$/.test(label)?'E':''))+'</div>';}).join('');
     var notes=annual
-      ?'<div>연간 영업이익 = 해당 연도 매출 × 공개된 GAAP 영업이익률. 전망 연도의 영업이익률이 미공개이면 막대를 표시하지 않습니다.</div>'
+      ?'<div>FY2022~FY2028을 동일 축으로 표시합니다. 연간 영업이익 = 해당 연도 매출 × 공개된 GAAP 영업이익률이며, 회사 또는 검증 가능한 전망 자료에서 수치가 확인되지 않은 연도는 막대를 표시하지 않습니다.</div>'
       :(q.notes||[]).map(function(n){return '<div>'+esc(n)+'</div>';}).join('');
     var periodLabel=annual?'연간별':'분기별';
     var chartLabel=(companyName||'기업')+' '+(annual?'연간':'분기')+' GAAP 매출과 영업이익 막대그래프';
@@ -315,7 +326,7 @@
       +'<div class="ca-kpis">'+kpis+'</div>'
       +opticalTrackingHtml(d.opticalTracking)
       +'<section class="ca-block"><div class="ca-head"><h2>'+esc((d.axes||[]).length)+'개 전략축 실행 현황</h2><p>카드를 열면 축별 사건 타임라인을 확인할 수 있습니다.</p></div><div class="ca-axes">'+(d.axes||[]).map(axisHtml).join('')+'</div></section>'
-      +'<section class="ca-block"><div class="ca-head"><h2>FY2023~FY2028 실적·전망</h2><p>실적 = GAAP · 전망 = 명시된 경영진/자료 기준</p></div>'+financialHtml(d.financials)+'</section>'
+      +'<section class="ca-block"><div class="ca-head"><h2>FY2022~FY2028 실적·전망</h2><p>실적 = GAAP · 전망 = 명시된 경영진/자료 기준 · 미공시 수치는 추정하지 않음</p></div>'+financialHtml(d.financials)+'</section>'
       +'<section class="ca-block"><div class="ca-head"><h2>수주·매출 가시성</h2><p>공개되지 않은 총 backlog는 임의 추정하지 않습니다.</p></div><div class="ca-visibility"><div><div class="ca-section-label">현재 확인</div><h3>'+esc(vis.headline)+'</h3><ul>'+(vis.facts||[]).map(function(x){return '<li>'+esc(x)+'</li>';}).join('')+'</ul></div><div class="ca-next"><b>다음 확인 포인트</b>'+esc(vis.next)+'</div></div></section>'
       +'<section class="ca-block"><div class="ca-head"><h2>핵심 위험</h2><p>실적·전략 논리를 무효화할 수 있는 요인</p></div><div class="ca-risks">'+risks+'</div></section>'
       +'<section class="ca-block"><div class="ca-head"><h2>원문 출처</h2><p>공시·회사 발표·신뢰 가능한 원문 보도</p></div><div class="ca-sources">'+sources+'</div></section>'
