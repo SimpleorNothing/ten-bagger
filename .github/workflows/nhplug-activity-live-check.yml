@@ -1,0 +1,92 @@
+name: NHPLUG activity live check
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'nhplug-activity.js'
+      - 'portfolio-intelligence-ui.js'
+      - 'worker.js'
+      - 'worker-entry.js'
+      - '.github/workflows/nhplug-activity-live-check.yml'
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  production-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Wait for production SHA
+        shell: bash
+        run: |
+          set -euo pipefail
+          ok=0
+          for attempt in $(seq 1 12); do
+            body=$(curl -fsS --connect-timeout 10 --max-time 20 \
+              -H 'Cache-Control: no-cache' \
+              "https://simpleornothing.com/__version?t=$(date +%s%N)" || true)
+            if printf '%s' "$body" | grep -Fq "${GITHUB_SHA}"; then
+              ok=1
+              break
+            fi
+            sleep $((attempt * 3))
+          done
+          if [ "$ok" -ne 1 ]; then
+            echo "ERROR: production has not reached ${GITHUB_SHA}"
+            exit 1
+          fi
+
+      - name: Verify authenticated portfolio activity API
+        shell: bash
+        env:
+          NHPLUG_APP_SECRET: ${{ secrets.NHPLUG_APP_SECRET }}
+        run: |
+          set -euo pipefail
+          if [ -z "${NHPLUG_APP_SECRET:-}" ]; then
+            echo "ERROR: NHPLUG_APP_SECRET is not configured"
+            exit 1
+          fi
+          TOKEN=$(node -e "const c=require('crypto');process.stdout.write(c.createHash('sha256').update('alpha-map:portfolio-read:v1:'+process.env.NHPLUG_APP_SECRET).digest('hex'))")
+          code=$(curl -sS --connect-timeout 10 --max-time 60 \
+            -H 'Cache-Control: no-cache' \
+            -H "x-portfolio-api-token: ${TOKEN}" \
+            -o /tmp/activity.json \
+            -w '%{http_code}' \
+            "https://simpleornothing.com/api/portfolio/activity?days=30&executionDays=7&t=$(date +%s%N)" || true)
+          if [ "$code" != '200' ]; then
+            echo "ERROR: portfolio activity API HTTP ${code}"
+            node -e "try{const j=require('/tmp/activity.json');console.log({error:j.error||'',detail:j.detail||''})}catch{}"
+            exit 1
+          fi
+          node <<'NODE'
+          const fs=require('fs');
+          const raw=fs.readFileSync('/tmp/activity.json','utf8');
+          const j=JSON.parse(raw);
+          if(j.source!=='NHPLUG'||j.readOnly!==true) throw new Error('source/readOnly contract mismatch');
+          if(!Array.isArray(j.accounts)||j.accounts.length<1) throw new Error('supported personal account activity missing');
+          if(/"(?:act_no|acct_no|account_no|cust_no|customer_no|token|secret|appkey|app_key)"\s*:/i.test(raw)) throw new Error('sensitive identifier leaked');
+          const errors=j.accounts.flatMap(a=>Array.isArray(a.errors)?a.errors:[]);
+          if(errors.length) throw new Error('NHPLUG activity sub-call errors: '+errors.map(x=>x.scope).join(','));
+          const a=j.accounts[0];
+          const statuses=[a?.domestic?.tradingPnl?.status,a?.domestic?.dailyPnl?.status,a?.overseas?.periodPnl?.status].filter(Boolean);
+          for(const s of statuses){
+            if(/오류|실패|존재하지|유효하지/i.test(String(s.message||''))) throw new Error('NHPLUG business response error: '+String(s.message||''));
+          }
+          console.log(JSON.stringify({
+            ok:true,
+            source:j.source,
+            readOnly:j.readOnly,
+            accountCount:j.accounts.length,
+            executionCount:j.summary?.executionCount??null,
+            transactionCount:j.summary?.transactionCount??null,
+            domesticRealizedPnlKnown:Number.isFinite(j.summary?.domesticRealizedPnlKrw),
+            overseasRealizedPnlKrwKnown:Number.isFinite(j.summary?.overseasRealizedPnlKrw),
+            fetchedAt:j.fetchedAt,
+          }));
+          NODE
