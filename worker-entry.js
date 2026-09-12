@@ -44,6 +44,7 @@ async function injectPortfolioHistoryUi(request, response) {
   return new HTMLRewriter()
     .on('body', { element(el) {
       el.append('<script src="/portfolio-history-ui.js?v=20260912-04" defer></scr' + 'ipt>', { html: true });
+      el.append('<script src="/portfolio-intelligence-ui.js?v=20260912-01" defer></scr' + 'ipt>', { html: true });
     } })
     .transform(repairedResponse);
 }
@@ -92,6 +93,7 @@ async function portfolioHistoryProbe(request, env) {
   let uiAsset = false;
   let compactUi = false;
   let accountScopedUi = false;
+  let intelligenceUiAsset = false;
   if (env?.ASSETS) {
     try {
       const url = new URL(request.url);
@@ -105,18 +107,30 @@ async function portfolioHistoryProbe(request, env) {
         accountScopedUi = text.includes("document.getElementById('v-account')") && text.includes('accountView.appendChild(section)') && !text.includes('main.parentNode.insertBefore(section,main.nextSibling)');
       }
     } catch (_) {}
+    try {
+      const url = new URL(request.url);
+      url.pathname = '/portfolio-intelligence-ui.js';
+      url.search = '';
+      const response = await env.ASSETS.fetch(new Request(url.toString(), { method: 'GET' }));
+      if (response.ok) {
+        const text = await response.text();
+        intelligenceUiAsset = text.includes('portfolioIntelligence') && text.includes('/api/portfolio/activity') && text.includes('중복노출');
+      }
+    } catch (_) {}
   }
   const indexRepair = await inspectIndexRepair(request, env);
   const storeBound = !!env?.MEMO_BUCKET;
-  const ok = uiAsset && compactUi && accountScopedUi && storeBound && indexRepair.indexRepairOk;
+  const ok = uiAsset && compactUi && accountScopedUi && intelligenceUiAsset && storeBound && indexRepair.indexRepairOk;
   return new Response(JSON.stringify({
     ok,
     uiAsset,
     compactUi,
     accountScopedUi,
+    intelligenceUiAsset,
     storeBound,
     ...indexRepair,
     historyApi: '/api/portfolio/history',
+    activityApi: '/api/portfolio/activity',
     scheduleBackend: 'github-actions',
     scheduleUtc: '0 8 * * *',
     scheduleKst: '17:00',
