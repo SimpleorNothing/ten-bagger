@@ -1,51 +1,43 @@
-name: Probe Treasury MTS 2026-09-13
+name: Apply Treasury MTS 2026-09-13
 on:
   push:
     branches: [claude/periodic-20260913]
 permissions:
   contents: write
 jobs:
-  probe:
-    if: ${{ !contains(github.event.head_commit.message, 'probe Treasury MTS official API') }}
+  apply:
+    if: ${{ !contains(github.event.head_commit.message, 'sync Treasury MTS all consumers') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Fetch official Treasury Fiscal Data
+        with:
+          ref: claude/periodic-20260913
+      - name: Sync official MTS across Alpha Map consumers
         run: |
           set -euo pipefail
+          python scripts/sync-treasury-mts-20260913.py
+          node --check trade.js
           python - <<'PY'
-          import json, urllib.parse, urllib.request, pathlib
-          base='https://api.fiscaldata.treasury.gov/services/api/fiscal_service/v1/accounting/mts/mts_table_1'
-          q=urllib.parse.urlencode({'filter':'record_date:eq:2026-08-31','page[size]':'100'})
-          req=urllib.request.Request(base+'?'+q,headers={'User-Agent':'SimpleorNothing AlphaMap official-release-check/1.0'})
-          with urllib.request.urlopen(req,timeout=30) as r:
-              data=json.load(r)
-          rows=data.get('data',[])
-          groups={}; cur=None
-          for row in rows:
-              if row.get('classification_desc','').startswith('FY '):
-                  cur=row['classification_desc']; groups[cur]=[]
-              elif cur:
-                  groups[cur].append(row)
-          def pick(fy,label):
-              for r in groups.get(fy,[]):
-                  if r.get('classification_desc')==label:
-                      return r
-              return None
-          summary={
-            'sourceUrl':base,'query':q,'registeredAt':'2026-09-11','recordDate':'2026-08-31',
-            'fy2026':{'july':pick('FY 2026','July'),'august':pick('FY 2026','August'),'ytd':pick('FY 2026','Year-to-Date')},
-            'fy2025':{'august':pick('FY 2025','August'),'ytd':pick('FY 2025','Year-to-Date')},
-            'meta':data.get('meta',{})
-          }
-          p=pathlib.Path('audit/tmp-treasury-mts-summary-20260913.json'); p.parent.mkdir(parents=True,exist_ok=True)
-          p.write_text(json.dumps(summary,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
-          print(json.dumps(summary,ensure_ascii=False,indent=2))
+          import json
+          for f in ['treasury_budget.json','calendar.json','pulse.json','cycle.json','risk.json','signal_log.json','periodic_release_check.json','audit/official-release-checks/2026-09-13.json']:
+              json.load(open(f,encoding='utf-8'))
+          t=json.load(open('treasury_budget.json'))
+          assert t['latest']['ym']=='2026-08'
+          assert abs(t['latest']['deficitB']-166.796952)<1e-6
+          assert abs(t['latest']['prevDeficitB']-432.285728)<1e-6
+          assert abs(t['latest']['ytdDeficitB']-1965.591017)<1e-6
+          assert t['series'][-1]['ym']=='2026-08'
+          assert 'mkt_us_treasury_budget' in open('trade.js',encoding='utf-8').read()
+          c=json.load(open('cycle.json')); assert c['periodicReleaseContext']['treasuryBudget']['release']=='2026-08'
+          r=json.load(open('risk.json')); assert all('8월 MTS는 월간 적자' in next(x for x in r['items'] if x['id']==z)['verdict'] for z in ['bond','fiscal'])
+          s=json.load(open('signal_log.json')); assert any(x.get('source')=='U.S. Treasury 2026년 8월 Monthly Treasury Statement 공식 발표' for x in s['log'])
           PY
-      - name: Commit probe result
+      - name: Commit synchronized consumers
         run: |
+          set -euo pipefail
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git add audit/tmp-treasury-mts-summary-20260913.json
-          git commit -m 'chore: probe Treasury MTS official API' || exit 0
-          git push
+          rm -f audit/tmp-treasury-mts-20260913.json audit/tmp-treasury-mts-summary-20260913.json .github/workflows/probe-treasury-mts-20260913.yml
+          git add -A
+          git commit -m 'data: sync Treasury MTS all consumers' || exit 0
+          git push origin HEAD:claude/periodic-20260913
