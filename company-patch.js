@@ -164,3 +164,13 @@
   s.setAttribute('data-company-deepdive-loader','1');
   document.body.appendChild(s);
 })();
+
+/* Credo 연간 막대그래프에 FY2022~FY2024와 FY2027 전망 하단을 포함한다. */
+(function(){
+  if(document.querySelector('script[data-company-annual-history-loader]'))return;
+  var s=document.createElement('script');
+  s.src='/company-annual-history.js?v=20260912-fy22-fy27';
+  s.defer=true;
+  s.setAttribute('data-company-annual-history-loader','1');
+  document.body.appendChild(s);
+})();
