@@ -1,5 +1,5 @@
 {
-  "asOf": "2026-09-12T12:49:20.048Z",
+  "asOf": "2026-09-12T23:01:02.056Z",
   "source": "Google News RSS · 종목축 + 시그널축 + 병목축 (기사별 한 줄 요약 + 물질성 스크리닝)",
   "note": "사이트 종목 카드의 \"일자 + 요약\" 행 소스. 최근 95일 창 · 종목당 최신 5건(첫 로딩 페이로드 상한) · **투자 논제 스크리닝 통과분만**(items[].m>=2 — 2=향후 실적·수주·투자·전략에 영향을 주는 펀더멘털 사실. 1=목표가·수급 이벤트, 0=사후 등락 서술·홍보·추측·콘텐츠팜으로 사이트에서 제외). 탈락 기사는 삭제가 아니라 news_archive.json 에 전건 보존. 나머지 3개월치는 archive/{티커}.json 을 '더 보기'로 온디맨드 로드. 신호/소음 판단과 SIGNAL_LOG 반영은 사람/LLM의 몫 — 채점·차트에는 쓰이지 않는다.",
   "count": 195,
@@ -112,7 +112,7 @@
     }
   ],
   "archive": "news_archive.json",
-  "archiveCount": 4440,
+  "archiveCount": 4448,
   "shardDir": "archive",
   "winCounts": {
     "353200": 17,
@@ -1908,6 +1908,17 @@
       "mv": 3
     },
     {
+      "id": "bneck_l6_opt",
+      "ticker": "MACRO",
+      "name": "L6 · 옵티컬 리드타임",
+      "ax": "bn_l6_opt",
+      "title": "CIOE 2026 Field Notes: The AI Optical Interconnect Race Is Entering Its Next Phase - semivision",
+      "link": "https://news.google.com/rss/articles/CBMigwFBVV95cUxNZjVuVzZyZFJHR1o3cW1WcTFhSGlyN2ZyZFRZV0Z2cngwTUc5bjBCTmRFdl81ZzVyeVRWMUNKV24zVkdvME94aFpnbVBlWTZxNXRvY1hlYWowS3oyUDZ4SnFPR2VuTkxkRzQ1RHF1VF9aRWFySFREU0JXTEEzRmJ5cm9lNA?oc=5",
+      "published": "2026-09-12T14:10:43.000Z",
+      "source": "semivision",
+      "st": 3
+    },
+    {
       "id": "bneck_asic",
       "ticker": "MACRO",
       "name": "L2 · 커스텀 실리콘·전력효율",
@@ -1916,6 +1927,17 @@
       "link": "https://news.google.com/rss/articles/CBMiwgFBVV95cUxNd2NoM2tHLXFRYWExMm0tN19rWGRseV9DSzhmdGZodmRoMTJBOEpkY1YtY3FKZmllaFhwWmJ3NlR1em45TDFNZ0tsRjZQUTNRbHN4RkR5ZEw5RUUwWUZZMjJ2d3R4OVdqTHlEUlNCY2pyUTh3cXlzeUNyTlZjXzBXXzFTTV9sZVkzeHd2SWZvT2dMeTVtQ3NNUlIxekVqRlpfRUl1Rk5HUXJPTzlYNjdZenA0TnJJa2dMbnhvckNVSHUyZw?oc=5",
       "published": "2026-09-12T12:32:50.000Z",
       "source": "Tech Times",
+      "st": 3
+    },
+    {
+      "id": "bneck_capex",
+      "ticker": "MACRO",
+      "name": "상류 · 하이퍼스케일러 capex",
+      "ax": "capex",
+      "title": "Why AI Efficiency Could Fuel the Next Wave of Infrastructure Spending - Investing.com",
+      "link": "https://news.google.com/rss/articles/CBMitAFBVV95cUxOWm0tQVdvLU81VEd3TmhuWVJ4RWx2cWR1NUZzVkJsNUh3T2c1bEl4eG05bkJCV19VZ0FQZXlLdDlXN241VzhCd1hEcWtRcXRpOWNUdTdKZEw4M0tlZXotWlpkd1BNeWlOX1lDMmVydmQ3RUxkZThVdWhBek9IUHprWFlnMTY5R2t6NzhxMDBOVWFWOGZ5NmI1N3RmUHNfVm1VcFhEaEh6OTlHTk5fX2FyYVQ0ZEQ?oc=5",
+      "published": "2026-09-12T10:10:39.000Z",
+      "source": "Investing.com",
       "st": 3
     },
     {
@@ -2312,28 +2334,6 @@
       "link": "https://news.google.com/rss/articles/CBMixAJBVV95cUxNUFN4Wi14cTlsaFVOMjJ1dUpPZFBkNTdDMDZRbHJLM3NsVkhKVHZsRlpicU5mRk9VYTE4eC1zc3Q5YXRiWkpVQ3hhSHRSQ2Z2bzlQM3RGWTRwSi1UX2REOWhLSUI4aXIybjJMbE5iVkVSSjNHV0NoTmdfVExfOUN5SWRQN0ZSU0llN29fM2plYThES2xjVGxJMVY4b2szWUVoY1diNXNTTEtqM1ZGVnI5cldvdlo1dEpncUNLcjd1U0NsUEdGVjFteGRtUUxLWWJNeDBSQWwzMTFEWnlJVUx2U3RoSXFUcGJFUmRGMVNBUVpSM0lSYzFVbVBaMGRLTEl2Nk9zb0VpbE1SUUVZTGZZMTlIQUJBeGxFd1hCNFBjUVNnZlZlMENDZ0JLNzZpb2FOWFpsSjI4VENMWkJMM2NGTUhhMTY?oc=5",
       "published": "2026-09-09T10:55:17.000Z",
       "source": "The Globe and Mail",
-      "st": 3
-    },
-    {
-      "id": "bneck_capex",
-      "ticker": "MACRO",
-      "name": "상류 · 하이퍼스케일러 capex",
-      "ax": "capex",
-      "title": "Amazon CEO Andy Jassy Explained Why Semiconductor Sales Could Keep Climbing for Years to Come. Here's My Favorite AI Chipmaker Right Now. - The Globe and Mail",
-      "link": "https://news.google.com/rss/articles/CBMivwJBVV95cUxNdFNHTHVFMFFMd0RkMDFINmkzb3Blbjdqd0g1dTFrcHcxbGt2OTdpODZucEl0dnN0QWhxWDNfWEZCU282NEpXa3c3ZkdpZDRYbm85SkpvSWYzU3kzZlc5SlNBV3VjSjlwYVBTNVpKNE9TcjlPTnMyVll5bGQyM2x5X2tNQV8yUzdBUmNuWlplOGU3NkhNUVFXWHZyRTU2dlVQYUJuR05BV3RKM09HQS1acE5CUGV5MjZGUFFycWl6WVNfNkpVbV81VGh3b3liU0hQQ1NDQkIxMVUzUXpRV01ibUZEUlktdENWU2xrVURNQWZCdEhEbnJoNVZCVjhma0VmalhDeGRucDdBRUNMaDRMb1c1THFpX2d0cnQ5NW5XMmtHUWJfUUNUYXQ3Nk8zX3pqeGNWNVBISlp5VVVsSDFZ?oc=5",
-      "published": "2026-09-09T10:55:17.000Z",
-      "source": "The Globe and Mail",
-      "st": 3
-    },
-    {
-      "id": "bneck_l6_opt",
-      "ticker": "MACRO",
-      "name": "L6 · 옵티컬 리드타임",
-      "ax": "bn_l6_opt",
-      "title": "[Chipbond FY2026 Q3 Earnings Call] Gold Bump Enters Silicon Photonics: 100% Share of 1.6T TIA, Major Korean Order Transfer, Revenue to Grow Multiples Next Year - finance.biggo.com",
-      "link": "https://news.google.com/rss/articles/CBMiYkFVX3lxTE1EVVJpODRtd2xtRE9WMFBPbWF5QVVRa1Y0dWQzaEJhdXNBSnBFU1MwRmlMamd3MGY0OEJhdUxubEhqc1pYT0hOWVlvNGZ5aUl2X1laM3dIU0ZObVl4S01wU2d3?oc=5",
-      "published": "2026-09-09T10:54:00.000Z",
-      "source": "finance.biggo.com",
       "st": 3
     },
     {
