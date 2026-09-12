@@ -28,6 +28,7 @@ const FRESH_PATHS = new Set([
   "/allocation-dynamic.js",
   "/allocation-review.json",
   "/topic-radar-sync.js",
+  "/oracle-release-card.js",
   "/account-live.js",
 ]);
 
@@ -168,6 +169,7 @@ async function injectSiteEnhancements(response) {
       el.append('<script src="/site-change-live.js?v=20260822-clickfix" defer></scr' + 'ipt>', { html: true });
       el.append('<script src="/allocation-dynamic.js?v=20260822-runtime" defer></scr' + 'ipt>', { html: true });
       el.append('<script src="/topic-radar-sync.js?v=20260816-server-delete-sync" defer></scr' + 'ipt>', { html: true });
+      el.append('<script src="/oracle-release-card.js?v=20260912-runtime-loader" defer></scr' + 'ipt>', { html: true });
       el.append('<script src="/account-live.js?v=20260912-01" defer></scr' + 'ipt>', { html: true });
     } })
     .transform(response);
