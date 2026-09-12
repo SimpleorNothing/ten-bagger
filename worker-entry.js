@@ -14,9 +14,6 @@ function repairMalformedIndexHtml(html) {
     new RegExp(`(<script\\b[^>]*\\bsrc=["']oracle-release-card\\.js\\?v=[^"']+["'][^>]*>)<\\/script>\\s*(<\\/body>)`, 'gi'),
     (_match, openingTag, bodyClose) => {
       replacements += 1;
-      // 이 문자열은 바깥 inline <script> 안의 document.write() 인자다.
-      // HTML parser에는 literal </script>를 숨기되, JS 실행 시 child document에는 정상 </script>가 쓰이도록
-      // JS escape인 <\/script>를 사용한다. 뒤따르던 개행도 제거해 단일따옴표 문자열을 깨뜨리지 않는다.
       return `${openingTag}<\\/script>${bodyClose}`;
     },
   );
@@ -30,9 +27,6 @@ async function injectPortfolioHistoryUi(request, response) {
   const contentType = response.headers.get('content-type') || '';
   if (!contentType.includes('text/html')) return response;
 
-  // index.html의 vcOpenTab document.write() 문자열 안에 literal </script>가 들어가면
-  // 브라우저 HTML parser가 바깥 inline script를 조기 종료해 이후 JS를 본문 텍스트로 노출한다.
-  // child document의 script 종료 태그를 JS escape 형태로 바꾸고 줄바꿈까지 제거해 parser/JS 양쪽을 안전하게 만든다.
   const source = await response.text();
   const fixed = repairMalformedIndexHtml(source);
   const headers = new Headers(response.headers);
@@ -49,7 +43,7 @@ async function injectPortfolioHistoryUi(request, response) {
 
   return new HTMLRewriter()
     .on('body', { element(el) {
-      el.append('<script src="/portfolio-history-ui.js?v=20260912-03" defer></scr' + 'ipt>', { html: true });
+      el.append('<script src="/portfolio-history-ui.js?v=20260912-04" defer></scr' + 'ipt>', { html: true });
     } })
     .transform(repairedResponse);
 }
@@ -87,7 +81,6 @@ async function inspectIndexRepair(request, env) {
     state.repairedNestedScriptSafe =
       state.remainingDangerousNestedScriptCount === 0 &&
       (!state.sourceHadNestedScript || state.safeJsEscapedNestedScript);
-    // 향후 index.html 원본 자체가 고쳐지면 repairApplied=false여도 정상으로 인정한다.
     state.indexRepairOk = state.repairedNestedScriptSafe;
     return state;
   } catch (_) {
@@ -98,6 +91,7 @@ async function inspectIndexRepair(request, env) {
 async function portfolioHistoryProbe(request, env) {
   let uiAsset = false;
   let compactUi = false;
+  let accountScopedUi = false;
   if (env?.ASSETS) {
     try {
       const url = new URL(request.url);
@@ -108,16 +102,18 @@ async function portfolioHistoryProbe(request, env) {
         const text = await response.text();
         uiAsset = text.includes('portfolioHistoryDownload') && text.includes('자산현황 다운로드');
         compactUi = text.includes('<th>현재가</th><th>수량</th><th>평가금액</th><th>수익률</th>') && !text.includes('<th>평가손익</th>');
+        accountScopedUi = text.includes("document.getElementById('v-account')") && text.includes('accountView.appendChild(section)') && !text.includes('main.parentNode.insertBefore(section,main.nextSibling)');
       }
     } catch (_) {}
   }
   const indexRepair = await inspectIndexRepair(request, env);
   const storeBound = !!env?.MEMO_BUCKET;
-  const ok = uiAsset && compactUi && storeBound && indexRepair.indexRepairOk;
+  const ok = uiAsset && compactUi && accountScopedUi && storeBound && indexRepair.indexRepairOk;
   return new Response(JSON.stringify({
     ok,
     uiAsset,
     compactUi,
+    accountScopedUi,
     storeBound,
     ...indexRepair,
     historyApi: '/api/portfolio/history',
