@@ -1,0 +1,79 @@
+name: NHPLUG encrypted 30d activity report
+
+on:
+  push:
+    branches: [claude/nhplug-30d-report]
+    paths:
+      - '.github/workflows/nhplug-activity-report-30d.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Fetch and encrypt activity report
+        shell: bash
+        env:
+          NHPLUG_APP_SECRET: ${{ secrets.NHPLUG_APP_SECRET }}
+        run: |
+          set -euo pipefail
+          TOKEN=$(node -e "const c=require('crypto');process.stdout.write(c.createHash('sha256').update('alpha-map:portfolio-read:v1:'+process.env.NHPLUG_APP_SECRET).digest('hex'))")
+          code=$(curl -sS --connect-timeout 10 --max-time 90 \
+            -H 'Cache-Control: no-cache' \
+            -H "x-portfolio-api-token: ${TOKEN}" \
+            -o /tmp/activity.json \
+            -w '%{http_code}' \
+            "https://simpleornothing.com/api/portfolio/activity?days=30&executionDays=10&t=$(date +%s%N)" || true)
+          test "$code" = '200'
+          node <<'NODE'
+          const fs=require('fs');
+          const crypto=require('crypto');
+          const j=JSON.parse(fs.readFileSync('/tmp/activity.json','utf8'));
+          if(j.source!=='NHPLUG'||j.readOnly!==true) throw new Error('bad contract');
+          const report={
+            fetchedAt:j.fetchedAt,
+            range:j.range,
+            executionRange:j.executionRange,
+            summary:j.summary,
+            accounts:(j.accounts||[]).map(a=>({
+              label:a.label,
+              domestic:{
+                executions:a.domestic?.executions||[],
+                tradingPnl:a.domestic?.tradingPnl||{},
+                dailyPnl:a.domestic?.dailyPnl||{}
+              },
+              overseas:{
+                transactions:a.overseas?.transactions||[],
+                orders:a.overseas?.orders||[],
+                periodPnl:a.overseas?.periodPnl||{}
+              },
+              errors:a.errors||[]
+            })),
+            limitations:j.limitations||[]
+          };
+          const plaintext=Buffer.from(JSON.stringify(report));
+          const key=crypto.randomBytes(32);
+          const iv=crypto.randomBytes(12);
+          const cipher=crypto.createCipheriv('aes-256-gcm',key,iv);
+          const ciphertext=Buffer.concat([cipher.update(plaintext),cipher.final()]);
+          const tag=cipher.getAuthTag();
+          const publicKey=`-----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAmk2bF5TjqycJa/gs16U/
+qDC8SEW9dZoxI3OtHkYe6tOHr/zvft2AtpsE2WwXTGm/HC7ut6qwtdmufKXbv2Xk
+rn6PNg8+kqKuqIeHZtS5Gt+kcLuJy/5cYWTREMAKc8MEfRmhyWgUHh7N0OUX6h4f
+Fdt4JVLJuIUZwnDSDQDN+yfuBENb4cpEMRfERsvGJydeGfYPci2O+SSIJEl8Lswm
+a+OH4qFJAtg4OGlu56Hwq38Lmzinh0oZwGOEa0BF6IXK98bT228vjimHe+Eo0iRL
+XYCGNoGmb8VNZP65XmeXU3VOXE8VxQteykZ4W2UrWD3F6q55NSjOK4SgbMvrnsB0
+6QIDAQAB
+-----END PUBLIC KEY-----`;
+          const wrapped=crypto.publicEncrypt({key:publicKey,padding:crypto.constants.RSA_PKCS1_OAEP_PADDING,oaepHash:'sha256'},key);
+          console.log('ENC_KEY='+wrapped.toString('base64'));
+          console.log('ENC_IV='+iv.toString('base64'));
+          console.log('ENC_TAG='+tag.toString('base64'));
+          console.log('ENC_DATA='+ciphertext.toString('base64'));
+          NODE
