@@ -1,0 +1,45 @@
+name: Portfolio intelligence CI
+
+on:
+  pull_request:
+    paths:
+      - 'nhplug-activity.js'
+      - 'portfolio-intelligence-ui.js'
+      - 'worker.js'
+      - 'worker-entry.js'
+      - 'scripts/test-portfolio-intelligence.mjs'
+      - '.github/workflows/portfolio-intelligence-ci.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'nhplug-activity.js'
+      - 'portfolio-intelligence-ui.js'
+      - 'worker.js'
+      - 'worker-entry.js'
+      - 'scripts/test-portfolio-intelligence.mjs'
+      - '.github/workflows/portfolio-intelligence-ci.yml'
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Syntax checks
+        run: |
+          node --check nhplug-activity.js
+          node --check portfolio-intelligence-ui.js
+          node --check worker.js
+          node --check worker-entry.js
+      - name: Portfolio intelligence regression checks
+        run: node scripts/test-portfolio-intelligence.mjs
+      - name: Existing NHPLUG portfolio regression
+        run: node scripts/test-nhplug-portfolio.mjs
+      - name: Account live regression
+        run: node scripts/test-account-live.mjs

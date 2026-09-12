@@ -1,5 +1,6 @@
 import core from './worker-core.js';
 import { handlePortfolioLive } from './nhplug-portfolio.js';
+import { handlePortfolioActivity } from './nhplug-activity.js';
 import { handlePortfolioHistory, saveDailyPortfolioSnapshot } from './portfolio-history-store.js';
 
 // PR gate regression anchors live in worker-core.js and are delegated unchanged by this wrapper:
@@ -130,6 +131,9 @@ export default {
     const url = new URL(request.url);
     if (request.method === 'GET' && url.pathname === '/api/portfolio/live') {
       return handlePortfolioLive(request, env, await isAuthorized(request, env));
+    }
+    if (request.method === 'GET' && url.pathname === '/api/portfolio/activity') {
+      return handlePortfolioActivity(request, env, await isAuthorized(request, env));
     }
     if (url.pathname === '/api/portfolio/history' || url.pathname.startsWith('/api/portfolio/history/')) {
       return handlePortfolioHistory(request, env, await isAuthorized(request, env));
