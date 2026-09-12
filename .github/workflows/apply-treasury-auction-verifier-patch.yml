@@ -1,0 +1,26 @@
+name: Apply Treasury auction verifier patch
+on:
+  push:
+    branches: [claude/treasury-auctions-20260913]
+permissions:
+  contents: write
+jobs:
+  apply:
+    if: ${{ !contains(github.event.head_commit.message, 'verify Treasury auctions in periodic live gate') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: claude/treasury-auctions-20260913
+      - run: |
+          set -euo pipefail
+          python scripts/patch-verify-treasury-auctions.py
+          grep -q 'treasury_auctions.json' .github/workflows/verify-periodic-live.yml
+          grep -q 'mkt_us_treasury_auctions' .github/workflows/verify-periodic-live.yml
+      - run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          rm -f .github/workflows/apply-treasury-auction-verifier-patch.yml scripts/patch-verify-treasury-auctions.py
+          git add -A
+          git commit -m 'test: verify Treasury auctions in periodic live gate' || exit 0
+          git push origin HEAD:claude/treasury-auctions-20260913
