@@ -179,9 +179,27 @@
     fetch('eia_weekly.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.json():null;}).then(function(j){if(!j||!j.latest||!j.series||!j.series.length){card.innerHTML='<div class="mkt-ph">발표 대기 · EIA 주간 원유재고</div>';return;} var z=j.latest,vals=j.series.map(function(x){return x.commercialCrudeMb;}); card.innerHTML='<div class="mkt-nm">EIA 주간 원유재고</div><div class="mkt-val">'+z.commercialCrudeMb.toFixed(3)+'M bbl</div><div class="mkt-chg dn">WoW '+z.changeMb.toFixed(3)+'M <span style="font:600 12px var(--mono);margin-left:8px;color:var(--faint)">전주 '+z.previousMb.toFixed(3)+'M</span></div>'+lensRow('<b>에너지 재고</b> 소폭 감소','주간 변동 폭이 작아 유가 방향 신호로 과대해석하지 않음 · STEO 중기 전망과 분리')+'<div class="mkt-chart">'+spark(vals,false)+'</div><div class="mkt-span">'+esc(z.weekEnding)+' · EIA WPSR · 등록 '+esc(j.registeredAt)+'</div>';}).catch(function(){card.innerHTML='<div class="mkt-ph">EIA 주간 재고 데이터 로딩 실패</div>';}); return true;
   }
 
+
+  function mountTreasuryBudget() {
+    var id='mkt_us_treasury_budget'; if(document.getElementById(id)) return true;
+    var grid=document.getElementById('mktIndicators'); if(!grid) return false;
+    var card=document.createElement('div'); card.className='mkt-card'; card.id=id; card.setAttribute('data-indicator-key','us-treasury-budget'); card.innerHTML='<div class="mkt-ph">미국 재정수지 로딩…</div>'; grid.appendChild(card);
+    fetch('treasury_budget.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.json():null;}).then(function(j){
+      if(!j||!j.latest||!j.series||!j.series.length){card.innerHTML='<div class="mkt-ph">발표 대기 · U.S. Treasury MTS</div>';return;}
+      var z=j.latest, vals=j.series.map(function(x){return x.deficitB;});
+      var narrowed=z.deficitB<z.prevDeficitB;
+      card.innerHTML='<div class="mkt-nm">미국 재정수지(MTS)</div><div class="mkt-val">적자 $'+z.deficitB.toFixed(1)+'B</div>'+
+        '<div class="mkt-chg '+(narrowed?'dn':'up')+'">7월 $'+z.prevDeficitB.toFixed(1)+'B→8월 $'+z.deficitB.toFixed(1)+'B <span style="font:600 12px var(--mono);margin-left:8px;color:var(--faint)">YoY '+pct(z.yoyPct,1)+'</span></div>'+
+        lensRow('<b>재정·국채 공급</b> 월간 적자 '+(narrowed?'<span class="ok">축소</span>':'<span class="nt">확대</span>'),
+          '세입 $'+z.receiptsB.toFixed(1)+'B · 지출 $'+z.outlaysB.toFixed(1)+'B · FY26 누적 적자 $'+(z.ytdDeficitB/1000).toFixed(2)+'T(전년동기 '+pct(z.ytdYoyPct,1)+')')+
+        '<div class="mkt-chart">'+spark(vals,!narrowed)+'</div><div class="mkt-span">2026-08 · U.S. Treasury MTS · 등록 2026-09-11</div>';
+    }).catch(function(){card.innerHTML='<div class="mkt-ph">U.S. Treasury MTS 데이터 로딩 실패</div>';});
+    return true;
+  }
+
   function boot() {
-    mount(); mountGlobalSemi(); mountChinaTrade(); mountSteo(); mountCpi(); mountPpi(); mountEiaWeekly();
-    var n = 0, timer = setInterval(function () { var a=mount(), b=mountGlobalSemi(), c=mountChinaTrade(), d=mountSteo(), e=mountCpi(), f=mountPpi(), g=mountEiaWeekly(); if ((a && b && c && d && e && f && g) || ++n > 40) clearInterval(timer); }, 250);
+    mount(); mountGlobalSemi(); mountChinaTrade(); mountSteo(); mountCpi(); mountPpi(); mountEiaWeekly(); mountTreasuryBudget();
+    var n = 0, timer = setInterval(function () { var a=mount(), b=mountGlobalSemi(), c=mountChinaTrade(), d=mountSteo(), e=mountCpi(), f=mountPpi(), g=mountEiaWeekly(), h=mountTreasuryBudget(); if ((a && b && c && d && e && f && g && h) || ++n > 40) clearInterval(timer); }, 250);
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();

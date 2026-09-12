@@ -16,7 +16,7 @@ jobs:
     env:
       SITE_PASSWORD: ${{ secrets.SITE_PASSWORD }}
     steps:
-      - name: Verify CPI, PPI and EIA live JSON, cards and charts
+      - name: Verify CPI, PPI, EIA and Treasury live JSON, cards and charts
         run: |
           set -euo pipefail
           if [ -z "${SITE_PASSWORD:-}" ]; then echo 'ERROR: SITE_PASSWORD required'; exit 1; fi
@@ -40,32 +40,35 @@ jobs:
             const cpiResp=await context.request.get(BASE+'/cpi.json?t='+Date.now(),{timeout:30000,headers:{'Cache-Control':'no-cache'}});
             if(!cpiResp.ok()) throw new Error('live cpi.json HTTP '+cpiResp.status());
             const cpi=await cpiResp.json(), us=(cpi.series?.us||[]), cpiLast=us.at(-1), cpiPrev=us.at(-2);
-            console.log('LIVE CPI JSON:',JSON.stringify({last:cpiLast,prev:cpiPrev,asOf:cpi.asOf},null,2));
-            if(cpiLast?.[0]!=='2026-08-01'||cpiLast?.[1]!==3.4) throw new Error('live CPI series endpoint mismatch');
-            if(cpiPrev?.[0]!=='2026-07-01'||cpiPrev?.[1]!==3.4) throw new Error('live CPI prior endpoint mismatch');
+            if(cpiLast?.[0]!=='2026-08-01'||cpiLast?.[1]!==3.4||cpiPrev?.[0]!=='2026-07-01'||cpiPrev?.[1]!==3.4) throw new Error('live CPI series endpoint mismatch');
             const ppiResp=await context.request.get(BASE+'/ppi.json?t='+Date.now(),{timeout:30000,headers:{'Cache-Control':'no-cache'}});
             if(!ppiResp.ok()) throw new Error('live ppi.json HTTP '+ppiResp.status());
             const ppi=await ppiResp.json(), ppiLast=(ppi.series||[]).at(-1);
-            if(ppi.latest?.ym!=='2026-08'||ppi.latest?.headlineMom!==0.4||ppi.latest?.headlineYoy!==5.4||ppi.latest?.coreMom!==0.3||ppi.latest?.coreYoy!==4.7||ppi.latest?.prevHeadlineMom!==0.1||ppi.latest?.prevCoreMom!==0.4) throw new Error('live PPI latest mismatch');
-            if(ppiLast?.ym!=='2026-08'||ppiLast?.headlineMom!==0.4) throw new Error('live PPI series endpoint mismatch');
+            if(ppi.latest?.ym!=='2026-08'||ppi.latest?.headlineMom!==0.4||ppi.latest?.headlineYoy!==5.4||ppi.latest?.coreMom!==0.3||ppi.latest?.coreYoy!==4.7||ppi.latest?.prevHeadlineMom!==0.1||ppi.latest?.prevCoreMom!==0.4||ppiLast?.ym!=='2026-08') throw new Error('live PPI mismatch');
             const eiaResp=await context.request.get(BASE+'/eia_weekly.json?t='+Date.now(),{timeout:30000,headers:{'Cache-Control':'no-cache'}});
             if(!eiaResp.ok()) throw new Error('live eia_weekly.json HTTP '+eiaResp.status());
             const eia=await eiaResp.json(), eiaLast=(eia.series||[]).at(-1);
-            if(eia.latest?.weekEnding!=='2026-09-04'||eia.latest?.commercialCrudeMb!==424.069||eia.latest?.previousMb!==424.46||eia.latest?.changeMb!==-0.391) throw new Error('live EIA latest mismatch');
-            if(eiaLast?.weekEnding!=='2026-09-04'||eiaLast?.commercialCrudeMb!==424.069) throw new Error('live EIA series endpoint mismatch');
+            if(eia.latest?.weekEnding!=='2026-09-04'||eia.latest?.commercialCrudeMb!==424.069||eia.latest?.previousMb!==424.46||eia.latest?.changeMb!==-0.391||eiaLast?.weekEnding!=='2026-09-04') throw new Error('live EIA mismatch');
+            const trResp=await context.request.get(BASE+'/treasury_budget.json?t='+Date.now(),{timeout:30000,headers:{'Cache-Control':'no-cache'}});
+            if(!trResp.ok()) throw new Error('live treasury_budget.json HTTP '+trResp.status());
+            const tr=await trResp.json(), tz=tr.latest, trLast=(tr.series||[]).at(-1), trPrev=(tr.series||[]).at(-2);
+            console.log('LIVE TREASURY JSON:',JSON.stringify({latest:tz,last:trLast,prev:trPrev,asOf:tr.asOf},null,2));
+            if(tz?.ym!=='2026-08'||tz?.deficitB!==166.796952||tz?.prevDeficitB!==432.285728||tz?.receiptsB!==360.032736||tz?.outlaysB!==526.829688||tz?.ytdDeficitB!==1965.591017||tz?.priorYearYtdDeficitB!==1775.36919||tz?.ytdYoyPct!==10.7) throw new Error('live Treasury latest mismatch');
+            if(trLast?.ym!=='2026-08'||trLast?.deficitB!==166.796952||trPrev?.ym!=='2026-07'||trPrev?.deficitB!==432.285728) throw new Error('live Treasury series endpoint mismatch');
             const page=await context.newPage(); const errors=[]; page.on('pageerror',e=>errors.push(String(e)));
             await page.goto(BASE+'/?periodic-smoke='+Date.now(),{waitUntil:'domcontentloaded',timeout:90000});
             await page.waitForSelector('#nav .tab[data-v="market"]',{state:'visible',timeout:30000});
             await page.click('#nav .tab[data-v="market"]');
             await page.waitForFunction(()=>document.getElementById('v-market')?.classList.contains('on'),{timeout:10000});
-            for (const id of ['#mkt_us_cpi','#mkt_us_ppi','#mkt_eia_weekly_crude']) await page.waitForSelector(id,{state:'visible',timeout:45000});
+            for (const id of ['#mkt_us_cpi','#mkt_us_ppi','#mkt_eia_weekly_crude','#mkt_us_treasury_budget']) await page.waitForSelector(id,{state:'visible',timeout:45000});
             await page.waitForFunction(()=>{const t=document.querySelector('#mkt_us_cpi')?.innerText||''; return t.includes('+0.4% MoM')&&t.includes('YoY +3.4%')&&t.includes('7월 +0.1%→8월 +0.4%')&&t.includes('근원 +0.3% MoM / +2.4% YoY')&&t.includes('2026-08');},{timeout:45000});
             await page.waitForFunction(()=>{const t=document.querySelector('#mkt_us_ppi')?.innerText||''; return t.includes('+0.4% MoM')&&t.includes('YoY +5.4%')&&t.includes('2026-08');},{timeout:45000});
             await page.waitForFunction(()=>{const t=document.querySelector('#mkt_eia_weekly_crude')?.innerText||''; return t.includes('424.069M bbl')&&t.includes('-0.391M')&&t.includes('2026-09-04');},{timeout:45000});
-            const result=await page.evaluate(()=>{const out={};for(const id of ['mkt_us_cpi','mkt_us_ppi','mkt_eia_weekly_crude']){const el=document.getElementById(id);out[id]={text:(el?.innerText||'').trim(),hasSvg:!!el?.querySelector('svg')};}return out;});
+            await page.waitForFunction(()=>{const t=document.querySelector('#mkt_us_treasury_budget')?.innerText||''; return t.includes('적자 $166.8B')&&t.includes('7월 $432.3B→8월 $166.8B')&&t.includes('YoY -51.6%')&&t.includes('세입 $360.0B')&&t.includes('지출 $526.8B')&&t.includes('FY26 누적 적자 $1.97T')&&t.includes('전년동기 +10.7%')&&t.includes('2026-08');},{timeout:45000});
+            const result=await page.evaluate(()=>{const out={};for(const id of ['mkt_us_cpi','mkt_us_ppi','mkt_eia_weekly_crude','mkt_us_treasury_budget']){const el=document.getElementById(id);out[id]={text:(el?.innerText||'').trim(),hasSvg:!!el?.querySelector('svg')};}return out;});
             console.log('LIVE PERIODIC CARDS/CHART:',JSON.stringify(result,null,2));
             for(const [id,x] of Object.entries(result)) if(!x.hasSvg) throw new Error(id+' chart missing');
-            const fatal=errors.filter(e=>/SyntaxError|cpi_release|cpi\.json|ppi\.json|eia_weekly|mkt_us_cpi|mkt_us_ppi|mkt_eia/i.test(e)); if(fatal.length) throw new Error('production browser errors: '+JSON.stringify(fatal));
+            const fatal=errors.filter(e=>/SyntaxError|cpi_release|cpi\.json|ppi\.json|eia_weekly|treasury_budget|mkt_us_cpi|mkt_us_ppi|mkt_eia|mkt_us_treasury/i.test(e)); if(fatal.length) throw new Error('production browser errors: '+JSON.stringify(fatal));
             await browser.close();
           })().catch(e=>{console.error(e);process.exit(1)});
           NODE
