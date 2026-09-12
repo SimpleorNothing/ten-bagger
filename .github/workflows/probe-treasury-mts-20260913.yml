@@ -1,0 +1,34 @@
+name: Probe Treasury MTS 2026-09-13
+on:
+  push:
+    branches: [claude/periodic-20260913]
+permissions:
+  contents: write
+jobs:
+  probe:
+    if: ${{ !contains(github.event.head_commit.message, 'probe Treasury MTS official API') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch official Treasury Fiscal Data
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, urllib.parse, urllib.request, pathlib
+          base='https://api.fiscaldata.treasury.gov/services/api/fiscal_service/v1/accounting/mts/mts_table_1'
+          q=urllib.parse.urlencode({'filter':'record_date:eq:2026-08-31','page[size]':'100'})
+          req=urllib.request.Request(base+'?'+q,headers={'User-Agent':'SimpleorNothing AlphaMap official-release-check/1.0'})
+          with urllib.request.urlopen(req,timeout=30) as r:
+              data=json.load(r)
+          out={'sourceUrl':base,'query':q,'fetchedAt':'2026-09-13T07:35:00+09:00','response':data}
+          p=pathlib.Path('audit/tmp-treasury-mts-20260913.json'); p.parent.mkdir(parents=True,exist_ok=True)
+          p.write_text(json.dumps(out,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+          print(json.dumps(data.get('data',[])[:10],ensure_ascii=False,indent=2))
+          PY
+      - name: Commit probe result
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add audit/tmp-treasury-mts-20260913.json
+          git commit -m 'chore: probe Treasury MTS official API' || exit 0
+          git push
