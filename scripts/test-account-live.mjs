@@ -11,9 +11,9 @@ const requiredLiveFields = [
 ];
 
 const requestedAccounts = [
-  "{suffix:'7747',label:'종합매매'}",
-  "{suffix:'0473',label:'개인형IRP'}",
-  "{suffix:'2728',label:'DC'}",
+  "{suffix:'7747',label:'개인투자'}",
+  "{suffix:'0473',label:'IRP'}",
+  "{suffix:'2728',label:'DC연금'}",
 ];
 
 const hasPrivacyNotice =
