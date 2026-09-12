@@ -8,7 +8,8 @@
     micron:{ticker:'MU',name:'Micron'},
     vertiv:{ticker:'VRT',name:'Vertiv'},
     nvidia:{ticker:'NVDA',name:'NVIDIA'},
-    broadcom:{ticker:'AVGO',name:'Broadcom'}
+    broadcom:{ticker:'AVGO',name:'Broadcom'},
+    credo:{ticker:'CRDO',name:'Credo Technology'}
   };
   var timer=null;
   var gammaCache=null;
@@ -75,8 +76,8 @@
       el.textContent=stage;
       el.setAttribute('title','SoT: gamma.json · '+String(g&&g.checkedAt||'기준일 없음'));
       el.setAttribute('data-stage-sot','gamma.json');
-}
-    if(g)syncGlobalStage(meta,stage);
+    }
+    syncGlobalStage(meta,stage);
   }
 
   function fetchJson(url){
@@ -152,4 +153,14 @@
     }
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',add);else add();
+})();
+
+/* 02 기업분석 상세 기업개요·제품·시장·경쟁·연도별 성장전략 확장. */
+(function(){
+  if(document.querySelector('script[data-company-deepdive-loader]'))return;
+  var s=document.createElement('script');
+  s.src='/company-deepdive.js?v=20260912-credo';
+  s.defer=true;
+  s.setAttribute('data-company-deepdive-loader','1');
+  document.body.appendChild(s);
 })();
