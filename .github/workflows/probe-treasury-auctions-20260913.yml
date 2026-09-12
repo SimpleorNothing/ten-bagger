@@ -1,50 +1,44 @@
-name: Probe Treasury auctions 2026-09-13
+name: Apply Treasury auctions 2026-09-13
 on:
   push:
     branches: [claude/treasury-auctions-20260913]
 permissions:
   contents: write
 jobs:
-  probe:
-    if: ${{ !contains(github.event.head_commit.message, 'probe Treasury auctions official API') }}
+  apply:
+    if: ${{ !contains(github.event.head_commit.message, 'sync Treasury auctions all consumers') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Fetch TreasuryDirect auctioned securities
+        with:
+          ref: claude/treasury-auctions-20260913
+      - name: Sync official Treasury auctions across Alpha Map consumers
         run: |
           set -euo pipefail
+          python scripts/sync-treasury-auctions-20260913.py
+          node --check trade.js
           python - <<'PY'
-          import json, urllib.request, pathlib
-          urls=[
-            'https://www.treasurydirect.gov/TA_WS/securities/auctioned?format=json',
-            'https://www.treasurydirect.gov/TA_WS/securities/search?format=json&startDate=2026-09-01&endDate=2026-09-13'
-          ]
-          result={}
-          for u in urls:
-            try:
-              req=urllib.request.Request(u,headers={'User-Agent':'SimpleorNothing AlphaMap official-release-check/1.0','Accept':'application/json'})
-              with urllib.request.urlopen(req,timeout=60) as r:
-                data=json.load(r)
-              result[u]={'ok':True,'count':len(data) if isinstance(data,list) else None,'data':data}
-            except Exception as e:
-              result[u]={'ok':False,'error':repr(e)}
-          # Compact to September auction dates if first endpoint succeeds.
-          compact=[]
-          first=result[urls[0]]
-          if first.get('ok') and isinstance(first.get('data'),list):
-            for x in first['data']:
-              ad=str(x.get('auctionDate',''))
-              if ad.startswith('2026-09'):
-                compact.append(x)
-          out={'compactSeptember':compact,'queries':result}
-          p=pathlib.Path('audit/tmp-treasury-auctions-20260913.json');p.parent.mkdir(parents=True,exist_ok=True)
-          p.write_text(json.dumps(out,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
-          print(json.dumps({'count':len(compact),'rows':compact},ensure_ascii=False,indent=2))
+          import json
+          for f in ['treasury_auctions.json','calendar.json','pulse.json','cycle.json','risk.json','signal_log.json','periodic_release_check.json','audit/official-release-checks/2026-09-13.json']:
+              json.load(open(f,encoding='utf-8'))
+          t=json.load(open('treasury_auctions.json',encoding='utf-8'))
+          expect={'3-Year':('2026-09-08',4.474,2.72),'10-Year':('2026-09-09',4.834,2.71),'30-Year':('2026-09-10',5.308,2.61)}
+          for k,(d,y,b) in expect.items():
+              z=t['latest'][k]; assert z['auctionDate']==d and z['highYieldPct']==y and z['bidToCover']==b
+          assert t['series']['30-Year'][-1]['auctionDate']=='2026-09-10'
+          assert 'mkt_us_treasury_auctions' in open('trade.js',encoding='utf-8').read()
+          cal=json.load(open('calendar.json',encoding='utf-8')); labels={x.get('lbl') for x in cal['events']}
+          assert {'미 재무부 3년물 국채 입찰','미 재무부 10년물 국채 입찰','미 재무부 30년물 국채 입찰'} <= labels
+          c=json.load(open('cycle.json',encoding='utf-8')); assert 'treasuryAuctions' in c['periodicReleaseContext']
+          r=json.load(open('risk.json',encoding='utf-8')); assert all('9월 정기 쿠폰 입찰은' in next(x for x in r['items'] if x['id']==z)['verdict'] for z in ['bond','fiscal'])
+          s=json.load(open('signal_log.json',encoding='utf-8')); assert any(x.get('source')=='U.S. Treasury 2026년 9월 3Y·10Y·30Y 국채 입찰 공식 결과' for x in s['log'])
           PY
-      - name: Commit probe
+      - name: Commit synchronized consumers
         run: |
+          set -euo pipefail
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git add audit/tmp-treasury-auctions-20260913.json
-          git commit -m 'chore: probe Treasury auctions official API' || exit 0
-          git push
+          rm -f audit/tmp-treasury-auctions-20260913.json .github/workflows/probe-treasury-auctions-20260913.yml
+          git add -A
+          git commit -m 'data: sync Treasury auctions all consumers' || exit 0
+          git push origin HEAD:claude/treasury-auctions-20260913
