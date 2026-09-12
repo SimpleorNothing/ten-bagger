@@ -1,14 +1,14 @@
 {
   "meeting": "2026-12 FOMC",
   "source": "Investing.com Fed Rate Monitor",
-  "sourceUrl": "https://www.investing.com/central-banks/fed-rate-monitor",
+  "sourceUrl": "https://au.investing.com/central-banks/fed-rate-monitor",
   "primarySourceUrl": "https://www.cmegroup.com/markets/interest-rates/cme-fedwatch-tool.html",
   "apiInfoUrl": "https://www.cmegroup.com/market-data/market-data-api/fedwatch-api.html",
-  "asOf": "2026-09-11",
-  "checkedAt": "2026-09-12T07:50:23.630097Z",
-  "status": "확인 필요",
-  "statusReason": "CME FedWatch End-of-Day API: RuntimeError: CME_FEDWATCH_TOKEN secret unavailable / Investing.com Fed Rate Monitor: HTTPError: HTTP Error 403: Forbidden / PyFedWatch methodology: TimeoutError: The read operation timed out. 검증 가능한 최신 확률을 확보하지 못해 이전 값을 최신값으로 승격하지 않음.",
-  "futurePrice": 95.985,
+  "asOf": "2026-09-12",
+  "checkedAt": "2026-09-12T07:55:00Z",
+  "status": "확인됨(2순위)",
+  "statusReason": "CME FedWatch End-of-Day API는 자동화 실행환경에서 CME_FEDWATCH_TOKEN을 사용할 수 없어 직접 검증하지 못함. Investing.com Fed Rate Monitor 표시값을 웹에서 직접 검증해 2순위로 사용. 원문 Updated=Sep 12, 2026 14:25 EST; 이전 9/11 값을 최신값처럼 유지하지 않음.",
+  "futurePrice": 95.91,
   "history": [
     {
       "date": "2026-08-15",
@@ -437,6 +437,47 @@
         "parser": "summary-before-Target-Rate"
       },
       "futurePrice": 95.985
+    },
+    {
+      "date": "2026-09-12",
+      "sourceDate": "2026-09-12",
+      "checkedAt": "2026-09-12T07:55:00Z",
+      "expectedRate": 4.1238,
+      "ranges": [
+        {
+          "label": "3.50%–3.75%",
+          "low": 3.5,
+          "high": 3.75,
+          "probability": 2.6
+        },
+        {
+          "label": "3.75%–4.00%",
+          "low": 3.75,
+          "high": 4.0,
+          "probability": 22.7
+        },
+        {
+          "label": "4.00%–4.25%",
+          "low": 4.0,
+          "high": 4.25,
+          "probability": 47.3
+        },
+        {
+          "label": "4.25%–4.50%",
+          "low": 4.25,
+          "high": 4.5,
+          "probability": 27.4
+        }
+      ],
+      "source": "Investing.com Fed Rate Monitor",
+      "sourceUpdatedAt": "Sep 12, 2026 14:25 EST",
+      "inputs": {
+        "updated": "Sep 12, 2026 14:25 EST",
+        "futurePrice": "95.910",
+        "basis": "CME Group 30-Day Fed Fund futures",
+        "parser": "direct-web-verified-summary"
+      },
+      "futurePrice": 95.91
     }
   ],
   "checks": [
@@ -544,10 +585,19 @@
     },
     {
       "date": "2026-09-12",
-      "checkedAt": "2026-09-12T07:50:23.630097Z",
-      "status": "확인 필요",
-      "reason": "CME FedWatch End-of-Day API: RuntimeError: CME_FEDWATCH_TOKEN secret unavailable / Investing.com Fed Rate Monitor: HTTPError: HTTP Error 403: Forbidden / PyFedWatch methodology: TimeoutError: The read operation timed out. 검증 가능한 최신 확률을 확보하지 못해 이전 값을 최신값으로 승격하지 않음."
+      "checkedAt": "2026-09-12T07:55:00Z",
+      "status": "확인됨(2순위)",
+      "source": "Investing.com Fed Rate Monitor",
+      "sourceDate": "2026-09-12",
+      "sourceUpdatedAt": "Sep 12, 2026 14:25 EST",
+      "reason": "CME EOD API token unavailable in automation runner. Investing.com direct web display verified: Future Price 95.910; probabilities 2.6/22.7/47.3/27.4%; <=4.00% cumulative 25.3%.",
+      "inputs": {
+        "updated": "Sep 12, 2026 14:25 EST",
+        "futurePrice": "95.910",
+        "basis": "CME Group 30-Day Fed Fund futures",
+        "parser": "direct-web-verified-summary"
+      }
     }
   ],
-  "sourceUpdatedAt": "Sep 11, 2026 03:45AM EDT"
+  "sourceUpdatedAt": "Sep 12, 2026 14:25 EST"
 }
