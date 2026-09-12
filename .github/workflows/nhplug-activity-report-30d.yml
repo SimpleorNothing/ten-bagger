@@ -35,42 +35,14 @@ jobs:
           const crypto=require('crypto');
           const j=JSON.parse(fs.readFileSync('/tmp/activity.json','utf8'));
           if(j.source!=='NHPLUG'||j.readOnly!==true) throw new Error('bad contract');
-          const report={
-            fetchedAt:j.fetchedAt,
-            range:j.range,
-            executionRange:j.executionRange,
-            summary:j.summary,
-            accounts:(j.accounts||[]).map(a=>({
-              label:a.label,
-              domestic:{
-                executions:a.domestic?.executions||[],
-                tradingPnl:a.domestic?.tradingPnl||{},
-                dailyPnl:a.domestic?.dailyPnl||{}
-              },
-              overseas:{
-                transactions:a.overseas?.transactions||[],
-                orders:a.overseas?.orders||[],
-                periodPnl:a.overseas?.periodPnl||{}
-              },
-              errors:a.errors||[]
-            })),
-            limitations:j.limitations||[]
-          };
+          const report={fetchedAt:j.fetchedAt,range:j.range,executionRange:j.executionRange,summary:j.summary,accounts:(j.accounts||[]).map(a=>({label:a.label,domestic:{executions:a.domestic?.executions||[],tradingPnl:a.domestic?.tradingPnl||{},dailyPnl:a.domestic?.dailyPnl||{}},overseas:{transactions:a.overseas?.transactions||[],orders:a.overseas?.orders||[],periodPnl:a.overseas?.periodPnl||{}},errors:a.errors||[]})),limitations:j.limitations||[]};
           const plaintext=Buffer.from(JSON.stringify(report));
-          const key=crypto.randomBytes(32);
-          const iv=crypto.randomBytes(12);
+          const key=crypto.randomBytes(32),iv=crypto.randomBytes(12);
           const cipher=crypto.createCipheriv('aes-256-gcm',key,iv);
           const ciphertext=Buffer.concat([cipher.update(plaintext),cipher.final()]);
           const tag=cipher.getAuthTag();
-          const publicKey=`-----BEGIN PUBLIC KEY-----
-MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAmk2bF5TjqycJa/gs16U/
-qDC8SEW9dZoxI3OtHkYe6tOHr/zvft2AtpsE2WwXTGm/HC7ut6qwtdmufKXbv2Xk
-rn6PNg8+kqKuqIeHZtS5Gt+kcLuJy/5cYWTREMAKc8MEfRmhyWgUHh7N0OUX6h4f
-Fdt4JVLJuIUZwnDSDQDN+yfuBENb4cpEMRfERsvGJydeGfYPci2O+SSIJEl8Lswm
-a+OH4qFJAtg4OGlu56Hwq38Lmzinh0oZwGOEa0BF6IXK98bT228vjimHe+Eo0iRL
-XYCGNoGmb8VNZP65XmeXU3VOXE8VxQteykZ4W2UrWD3F6q55NSjOK4SgbMvrnsB0
-6QIDAQAB
------END PUBLIC KEY-----`;
+          const pubB64='LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUlJQklqQU5CZ2txaGtpRzl3MEJBUUVGQUFPQ0FROEFNSUlCQ2dLQ0FRRUFtazJiRjVUanF5Y0phL2dzMTZVLwpxREM4U0VXOWRab3hJM090SGtZZTZ0T0hyL3p2ZnQyQXRwc0UyV3dYVEdtL0hDN3V0NnF3dGRtdWZLWGJ2MlhrCnJuNlBOZzgra3FLdXFJZUhadFM1R3Qra2NMdUp5LzVjWVdUUkVNQUtjOE1FZlJtaHlXZ1VIaDdOME9VWDZoNGYKRmR0NEpWTEp1SVVad25EU0RRRE4reWZ1QkVOYjRjcEVNUmZFUnN2R0p5ZGVHZllQY2kyTytTU0lKRWw4THN3bQphK09INHFGSkF0ZzRPR2x1NTZId3EzOExtemluaDBvWndHT0VhMEJGNklYSzk4YlQyMjh2amltSGUrRW8waVJMClhZQ0dOb0dtYjhWTlpQNjVYbWVYVTNWT1hFOFZ4UXRleWtaNFcyVXJXRDNGNnE1NU5Tak9LNFNnYk12cm5zQjAKNlFJREFRQUIKLS0tLS1FTkQgUFVCTElDIEtFWS0tLS0tCg==';
+          const publicKey=Buffer.from(pubB64,'base64').toString('utf8');
           const wrapped=crypto.publicEncrypt({key:publicKey,padding:crypto.constants.RSA_PKCS1_OAEP_PADDING,oaepHash:'sha256'},key);
           console.log('ENC_KEY='+wrapped.toString('base64'));
           console.log('ENC_IV='+iv.toString('base64'));
