@@ -197,9 +197,27 @@
     return true;
   }
 
+
+  function mountTreasuryAuctions() {
+    var id='mkt_us_treasury_auctions'; if(document.getElementById(id)) return true;
+    var grid=document.getElementById('mktIndicators'); if(!grid) return false;
+    var card=document.createElement('div'); card.className='mkt-card'; card.id=id; card.setAttribute('data-indicator-key','us-treasury-auctions'); card.innerHTML='<div class="mkt-ph">미 국채 입찰 로딩…</div>'; grid.appendChild(card);
+    fetch('treasury_auctions.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.json():null;}).then(function(j){
+      if(!j||!j.latest||!j.series){card.innerHTML='<div class="mkt-ph">발표 대기 · U.S. TreasuryDirect</div>';return;}
+      var y3=j.latest['3-Year'],y10=j.latest['10-Year'],y30=j.latest['30-Year'],p30=j.previous['30-Year'];
+      var vals=(j.series['30-Year']||[]).map(function(x){return x.highYieldPct;});
+      card.innerHTML='<div class="mkt-nm">미 국채 입찰(3Y·10Y·30Y)</div><div class="mkt-val">30Y '+y30.highYieldPct.toFixed(3)+'%</div>'+
+        '<div class="mkt-chg">BTC '+y30.bidToCover.toFixed(2)+' · 직전 '+p30.highYieldPct.toFixed(3)+'% / '+p30.bidToCover.toFixed(2)+'</div>'+
+        lensRow('<b>장기금리 수요</b> 10Y '+y10.highYieldPct.toFixed(3)+'%(BTC '+y10.bidToCover.toFixed(2)+') · 3Y '+y3.highYieldPct.toFixed(3)+'%(BTC '+y3.bidToCover.toFixed(2)+')',
+          '30Y 간접낙찰 '+y30.indirectSharePct.toFixed(1)+'% · 10Y '+y10.indirectSharePct.toFixed(1)+'% · 3Y '+y3.indirectSharePct.toFixed(1)+'%')+
+        '<div class="mkt-chart">'+spark(vals,false)+'</div><div class="mkt-span">30Y 최근 6회 고금리 낙찰수익률 · 최신 2026-09-10 · TreasuryDirect</div>';
+    }).catch(function(){card.innerHTML='<div class="mkt-ph">TreasuryDirect 입찰 데이터 로딩 실패</div>';});
+    return true;
+  }
+
   function boot() {
-    mount(); mountGlobalSemi(); mountChinaTrade(); mountSteo(); mountCpi(); mountPpi(); mountEiaWeekly(); mountTreasuryBudget();
-    var n = 0, timer = setInterval(function () { var a=mount(), b=mountGlobalSemi(), c=mountChinaTrade(), d=mountSteo(), e=mountCpi(), f=mountPpi(), g=mountEiaWeekly(), h=mountTreasuryBudget(); if ((a && b && c && d && e && f && g && h) || ++n > 40) clearInterval(timer); }, 250);
+    mount(); mountGlobalSemi(); mountChinaTrade(); mountSteo(); mountCpi(); mountPpi(); mountEiaWeekly(); mountTreasuryBudget(); mountTreasuryAuctions();
+    var n = 0, timer = setInterval(function () { var a=mount(), b=mountGlobalSemi(), c=mountChinaTrade(), d=mountSteo(), e=mountCpi(), f=mountPpi(), g=mountEiaWeekly(), h=mountTreasuryBudget(), i=mountTreasuryAuctions(); if ((a && b && c && d && e && f && g && h && i) || ++n > 40) clearInterval(timer); }, 250);
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();

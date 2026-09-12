@@ -20,6 +20,64 @@
         "yoyPct": -51.6,
         "ytdYoyPct": 10.7
       }
+    },
+    {
+      "indicator": "U.S. Treasury 2026년 9월 국채 입찰(3Y·10Y·30Y)",
+      "registeredAt": "2026-09-08~2026-09-10",
+      "sourceUrl": "https://www.treasurydirect.gov/TA_WS/securities/auctioned?format=json",
+      "values": {
+        "3-Year": {
+          "auctionDate": "2026-09-08",
+          "updatedTimestamp": "2026-09-08T13:03:18",
+          "term": "3-Year",
+          "cusip": "91282CRL7",
+          "reopening": "No",
+          "couponPct": 4.375,
+          "highYieldPct": 4.474,
+          "medianYieldPct": 4.43,
+          "bidToCover": 2.72,
+          "offeringB": 58.0,
+          "totalAcceptedB": 58.000089,
+          "indirectSharePct": 62.1,
+          "directSharePct": 26.9,
+          "dealerSharePct": 10.9,
+          "resultPdf": "https://www.treasurydirect.gov/instit/annceresult/press/preanre/2026/R_20260908_3.pdf"
+        },
+        "10-Year": {
+          "auctionDate": "2026-09-09",
+          "updatedTimestamp": "2026-09-09T13:03:22",
+          "term": "10-Year",
+          "cusip": "91282CRF0",
+          "reopening": "Yes",
+          "couponPct": 4.625,
+          "highYieldPct": 4.834,
+          "medianYieldPct": 4.769,
+          "bidToCover": 2.71,
+          "offeringB": 39.0,
+          "totalAcceptedB": 39.00004,
+          "indirectSharePct": 79.2,
+          "directSharePct": 16.5,
+          "dealerSharePct": 4.3,
+          "resultPdf": "https://www.treasurydirect.gov/instit/annceresult/press/preanre/2026/R_20260909_2.pdf"
+        },
+        "30-Year": {
+          "auctionDate": "2026-09-10",
+          "updatedTimestamp": "2026-09-10T13:03:28",
+          "term": "30-Year",
+          "cusip": "912810UW6",
+          "reopening": "Yes",
+          "couponPct": 5.125,
+          "highYieldPct": 5.308,
+          "medianYieldPct": 5.25,
+          "bidToCover": 2.61,
+          "offeringB": 22.0,
+          "totalAcceptedB": 22.000024,
+          "indirectSharePct": 79.5,
+          "directSharePct": 18.3,
+          "dealerSharePct": 2.2,
+          "resultPdf": "https://www.treasurydirect.gov/instit/annceresult/press/preanre/2026/R_20260910_3.pdf"
+        }
+      }
     }
   ],
   "pending": [],
@@ -32,20 +90,19 @@
     "risk.json ② bond + ④ fiscal",
     "02 signal_log.json",
     "04 council-context shared pulse/cycle/signal_log",
-    "changelog.js"
+    "changelog.js",
+    "01 미 국채 입찰(3Y·10Y·30Y) 카드",
+    "treasury_auctions.json 3Y/10Y/30Y 시계열",
+    "calendar.json 3Y/10Y/30Y 결과"
   ],
   "liveVerification": {
-    "status": "success",
-    "verifiedAt": "2026-09-13T07:38:38+09:00",
-    "mainSha": "c1a58c13a4149ec154df5f1ee8e451b8f2216edf",
-    "deployRunId": 34723253893,
-    "verifyRunId": 34723277548,
+    "status": "pending",
+    "verifiedAt": null,
     "checks": [
-      "simpleornothing.com authenticated browser success",
-      "live treasury_budget.json latest 2026-08 deficit $166.796952B / previous 2026-07 $432.285728B",
-      "01 미국 재정수지(MTS) card displays $166.8B, July→August comparison, receipts/outlays, FY26 YTD $1.97T (+10.7%) and 2026-08",
-      "01 미국 재정수지(MTS) SVG chart rendered",
-      "CPI/PPI/EIA production regression checks success"
+      "simpleornothing.com authenticated browser",
+      "treasury_budget.json + treasury_auctions.json latest/previous series endpoints",
+      "01 미국 재정수지(MTS) + 미 국채 입찰 cards displayed official values and SVG charts",
+      "CPI/PPI/EIA regression checks"
     ]
   }
 }
