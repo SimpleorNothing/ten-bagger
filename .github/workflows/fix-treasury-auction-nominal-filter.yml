@@ -1,0 +1,52 @@
+name: Fix Treasury auction nominal filter
+on:
+  push:
+    branches: [claude/treasury-auctions-20260913]
+permissions:
+  contents: write
+jobs:
+  fix:
+    if: ${{ !contains(github.event.head_commit.message, 'fix nominal Treasury auction history') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: claude/treasury-auctions-20260913
+      - name: Filter out TIPS and regenerate all consumers
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('scripts/sync-treasury-auctions-20260913.py')
+          s=p.read_text(encoding='utf-8')
+          old="r.get('term')==term and dt(r.get('auctionDate'))<='2026-09-10' and f(r.get('highYield')) is not None"
+          new="r.get('term')==term and str(r.get('tips','')).strip().lower()=='no' and dt(r.get('auctionDate'))<='2026-09-10' and f(r.get('highYield')) is not None"
+          if old not in s and new not in s: raise SystemExit('auction filter pattern missing')
+          s=s.replace(old,new)
+          p.write_text(s,encoding='utf-8')
+          PY
+          python scripts/sync-treasury-auctions-20260913.py
+          node --check trade.js
+          python - <<'PY'
+          import json
+          t=json.load(open('treasury_auctions.json',encoding='utf-8'))
+          assert t['latest']['30-Year']['auctionDate']=='2026-09-10'
+          assert t['previous']['30-Year']['auctionDate']=='2026-08-13'
+          assert t['previous']['30-Year']['highYieldPct']==5.216
+          assert t['previous']['30-Year']['bidToCover']==2.39
+          assert t['previous']['10-Year']['auctionDate']=='2026-08-12'
+          assert t['previous']['10-Year']['highYieldPct']==4.683
+          assert t['previous']['3-Year']['auctionDate']=='2026-08-11'
+          assert t['previous']['3-Year']['highYieldPct']==4.291
+          for term in ['3-Year','10-Year','30-Year']:
+              assert all(x['highYieldPct']>3 for x in t['series'][term]), (term,t['series'][term])
+          PY
+      - name: Commit correction
+        run: |
+          set -euo pipefail
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          rm -f .github/workflows/fix-treasury-auction-nominal-filter.yml
+          git add -A
+          git commit -m 'fix: nominal Treasury auction history only' || exit 0
+          git push origin HEAD:claude/treasury-auctions-20260913
