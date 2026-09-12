@@ -20,15 +20,32 @@ jobs:
           req=urllib.request.Request(base+'?'+q,headers={'User-Agent':'SimpleorNothing AlphaMap official-release-check/1.0'})
           with urllib.request.urlopen(req,timeout=30) as r:
               data=json.load(r)
-          out={'sourceUrl':base,'query':q,'fetchedAt':'2026-09-13T07:35:00+09:00','response':data}
-          p=pathlib.Path('audit/tmp-treasury-mts-20260913.json'); p.parent.mkdir(parents=True,exist_ok=True)
-          p.write_text(json.dumps(out,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
-          print(json.dumps(data.get('data',[])[:10],ensure_ascii=False,indent=2))
+          rows=data.get('data',[])
+          groups={}; cur=None
+          for row in rows:
+              if row.get('classification_desc','').startswith('FY '):
+                  cur=row['classification_desc']; groups[cur]=[]
+              elif cur:
+                  groups[cur].append(row)
+          def pick(fy,label):
+              for r in groups.get(fy,[]):
+                  if r.get('classification_desc')==label:
+                      return r
+              return None
+          summary={
+            'sourceUrl':base,'query':q,'registeredAt':'2026-09-11','recordDate':'2026-08-31',
+            'fy2026':{'july':pick('FY 2026','July'),'august':pick('FY 2026','August'),'ytd':pick('FY 2026','Year-to-Date')},
+            'fy2025':{'august':pick('FY 2025','August'),'ytd':pick('FY 2025','Year-to-Date')},
+            'meta':data.get('meta',{})
+          }
+          p=pathlib.Path('audit/tmp-treasury-mts-summary-20260913.json'); p.parent.mkdir(parents=True,exist_ok=True)
+          p.write_text(json.dumps(summary,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+          print(json.dumps(summary,ensure_ascii=False,indent=2))
           PY
       - name: Commit probe result
         run: |
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git add audit/tmp-treasury-mts-20260913.json
+          git add audit/tmp-treasury-mts-summary-20260913.json
           git commit -m 'chore: probe Treasury MTS official API' || exit 0
           git push
