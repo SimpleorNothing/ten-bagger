@@ -3,9 +3,9 @@
   'use strict';
   var API='/api/portfolio/live', FALLBACK='/holdings.json', mounted=false, loading=false, latest=null, lastLoad=0;
   var ACCOUNT_TARGETS=[
-    {suffix:'7747',label:'종합매매'},
-    {suffix:'0473',label:'개인형IRP'},
-    {suffix:'2728',label:'DC'}
+    {suffix:'7747',label:'개인투자'},
+    {suffix:'2728',label:'DC연금'},
+    {suffix:'0473',label:'IRP'}
   ];
   var $=function(id){return document.getElementById(id);};
   var esc=function(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});};
@@ -82,26 +82,36 @@
   function positions(d,market){return arr(d&&d.Output_1).map(function(r){return position(r,market);}).filter(function(r){return r.name||r.code||r.qty||r.evalAmt;});}
   function marketBlock(title,s,p,sub){
     var total=s&&s.total!=null?money(s.total):'자료에서 확인되지 않음';
+    p=p.slice().sort(function(a,b){return (b.evalAmt==null?-Infinity:b.evalAmt)-(a.evalAmt==null?-Infinity:a.evalAmt);});
     var rows=p.length?p.map(function(r){var cls=r.rate>0?'ac-up':r.rate<0?'ac-down':'';return '<tr><td><span class="ac-name">'+esc(r.name)+'</span><span class="ac-code">'+esc(r.code||r.market||'')+'</span></td><td>'+priceText(r.price,r.market,r.currency)+'</td><td>'+qty(r.qty)+'</td><td>'+money(r.evalAmt)+'</td><td class="'+cls+'">'+pct(r.rate)+'</td></tr>';}).join(''):'<tr><td colspan="5" style="text-align:center;color:var(--faint)">보유종목 없음</td></tr>';
     return '<div class="ac-market"><div class="ac-market-title"><b>'+esc(title)+'</b><span>'+esc(sub||'')+' · 자산 '+esc(total)+'</span></div><table class="ac-table"><thead><tr><th>종목</th><th>현재가</th><th>수량</th><th>평가금액</th><th>수익률</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
   }
+  function accountValue(a){
+    if(!a)return null;
+    var rows=positions(a.domestic,'국내');
+    arr(a.overseas).forEach(function(x){rows=rows.concat(positions(x.data,'해외'));});
+    if(!rows.length||rows.some(function(r){return r.evalAmt==null;}))return null;
+    return rows.reduce(function(sum,r){return sum+r.evalAmt;},0);
+  }
+  function kpi(label,value,detail){return '<div class="ac-kpi"><b>'+ (value==null?'확인 불가':money(value))+'</b><span>'+esc(label)+'</span><span>'+esc(detail||'종목 평가금액 합계')+'</span></div>';}
   function renderLive(data){
-    latest=data;var accounts=arr(data.accounts),domTotal=0,overTotal=0,cash=0,count=0;
+    latest=data;var accounts=arr(data.accounts),values=ACCOUNT_TARGETS.map(function(t){return accountValue(targetAccount(accounts,t));}),domTotal=0,overTotal=0,cash=0,count=0;
     var cards=ACCOUNT_TARGETS.map(function(target,idx){
       var a=targetAccount(accounts,target);
-      if(!a)return '<article class="ac-card"><div class="ac-card-hd"><b>'+esc(target.label)+'</b><span>'+esc(targetMask(target))+' · NHPLUG 미노출</span></div>'+unavailableBlock(target.label==='DC'?'DC 계좌는 현재 NHPLUG 공통 계좌목록 응답에 포함되지 않아 잔고를 표시하지 않습니다.':'지정 계좌가 NHPLUG 응답에 없습니다.')+'</article>';
+      if(!a)return '<article class="ac-card"><div class="ac-card-hd"><b>'+esc(target.label)+'</b><span>'+esc(targetMask(target))+' · NHPLUG 미노출</span></div>'+unavailableBlock(target.label==='DC연금'?'DC 계좌는 현재 NHPLUG 공통 계좌목록 응답에 포함되지 않아 잔고를 표시하지 않습니다.':'지정 계좌가 NHPLUG 응답에 없습니다.')+'</article>';
       var ds=summary(a.domestic),dp=positions(a.domestic,'국내');if(ds.total!=null)domTotal+=ds.total;if(ds.cash!=null)cash+=ds.cash;count+=dp.length;
       var ovs=arr(a.overseas),ob='',overRows=0;
       ovs.forEach(function(x){var os=summary(x.data),op=positions(x.data,'해외');if(os.total!=null)overTotal+=os.total;count+=op.length;overRows+=op.length;ob+=marketBlock('해외주식',os,op,'국가코드 '+esc(x.nation||'—'));});
-      var emptyPension=target.label!=='종합매매'&&dp.length===0&&overRows===0&&!(ds.total>0);
+      var emptyPension=target.label!=='개인투자'&&dp.length===0&&overRows===0&&!(ds.total>0);
       var body=emptyPension?unavailableBlock('계좌는 NHPLUG에서 확인되지만 일반 주식 잔고 API에서 연금 보유내역이 반환되지 않습니다.'):marketBlock('국내주식',ds,dp,ds.cash!=null?'예수금 '+money(ds.cash):'예수금 확인 불가')+ob;
-      return '<article class="ac-card"><div class="ac-card-hd"><b>'+esc(target.label)+'</b><span>'+esc(a.account||targetMask(target))+' · '+esc(typeName(a.accountType))+'</span></div>'+body+'</article>';
+      return '<article class="ac-card"><div class="ac-card-hd"><b>'+esc(target.label)+'</b><span>'+esc(a.account||targetMask(target))+' · '+esc(typeName(a.accountType))+' · 평가금액 합계 '+(accountValue(a)==null?'확인 불가':money(accountValue(a)))+'</span></div>'+body+'</article>';
     }).join('');
-    $('acSummary').innerHTML='<div class="ac-kpi"><b>'+money(domTotal)+'</b><span>국내 총자산 응답 합계</span></div><div class="ac-kpi"><b>'+money(overTotal)+'</b><span>해외 원화환산 자산 합계</span></div><div class="ac-kpi"><b>'+money(cash)+'</b><span>국내 예수금 합계</span></div><div class="ac-kpi"><b>'+ACCOUNT_TARGETS.length.toLocaleString('ko-KR')+'</b><span>표시 계좌</span></div>';
+    var known=values.filter(function(v){return v!=null;});
+    $('acSummary').innerHTML=kpi('전체 합계',known.length?known.reduce(function(sum,v){return sum+v;},0):null,known.length===values.length?'종목 평가금액 합계 · 예수금 제외':'조회된 계좌만 합산 · 예수금 제외')+ACCOUNT_TARGETS.map(function(t,i){return kpi(t.label,values[i]);}).join('');
     $('acList').innerHTML=cards||'<div class="ac-empty">조회 가능한 계좌가 없습니다.</div>';
     var age=Date.now()-new Date(data.fetchedAt||0).getTime(),fresh=isFinite(age)&&age>=0&&age<=10*60*1000;
     $('acState').innerHTML='<span class="ac-badge live"><i class="ac-dot"></i>NHPLUG LIVE</span><span>조회 '+esc(dt(data.fetchedAt))+(fresh?' · 10분 이내':' · 갱신 필요')+'</span>';
-    $('acNote').innerHTML='<b>화면은 핵심 4개 값만 표시</b> · 현재가·수량·평가금액·수익률만 보여줍니다. 매입가·매입금액·평가손익·매도가능수량·수수료·세금·환율·미결제수량·대출/만기일 등 NHPLUG가 반환하는 상세 필드는 일별 DB 원본에 보존합니다. 주문 API는 구현하지 않았습니다.';
+    $('acNote').innerHTML='<b>합계는 국내·해외 종목 평가금액 기준(예수금 제외)</b> · 미조회 계좌는 합계에서 제외합니다. 종목은 각 국내·해외 표에서 평가금액 내림차순으로 표시합니다. <b>화면은 핵심 4개 값만 표시</b> · 현재가·수량·평가금액·수익률만 보여줍니다. 매입가·매입금액·평가손익·매도가능수량·수수료·세금·환율·미결제수량·대출/만기일 등 NHPLUG가 반환하는 상세 필드는 일별 DB 원본에 보존합니다. 주문 API는 구현하지 않았습니다.';
     $('acFoot').textContent='출처: NHPLUG · 환경: '+String(data.environment||'live')+' · 계좌번호/고객식별자/인증정보는 마스킹 또는 제거됨';
   }
   function renderFallback(h,reason){

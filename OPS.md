@@ -1,6 +1,6 @@
 > 2026-09-09 · **02 크레도 광통신 트래킹 지표 추가.** 전략 프레임 아래에 연간 전망·분기 실제 매출·광 DSP·PIC·ZeroFlap 고객 양산·전사 수익성·운전자본 7개 항목을 표시한다. 현재/직전 비교/다음 확인/상·하방 조건/출처를 분리하며, 미확인 금액의 달성률·광통신 마진은 계산하지 않는다. 확인일 2026-09-09, 실적 기준 FY27 Q1. 실시간 자동 수집이 아니며 다음 실적·컨콜·양산 공시 확인 시 credo/data.json의 opticalTracking을 갱신한다.
 
-**최종 갱신: 2026-09-05 20:23 (KST)**
+**최종 갱신: 2026-09-12 19:00 (KST)**
 
 > 2026-09-05 20:23 · **초기 무한 로딩 복구.** `07 투자일지` 탭 삽입을 감지한 `world-overview.js`의 메뉴 번호 `MutationObserver`가 자기 자신의 `textContent` 변경을 다시 감지하던 순환을 차단했다. `world-overview.js`와 `journal.js` 모두 번호가 실제로 달라질 때만 DOM을 갱신하며, 두 정적 회귀 게이트가 이 멱등 조건을 강제한다.
 
@@ -686,3 +686,5 @@ node -e "const s=require('./scores.json'); if(s.schema!=='investment-scores-v4')
 - 2026-07-25 22:00 · **nav 새로고침 FOUC 억제 가드.** 정적 `#nav` 5탭(옛 라벨)이 `insight.js`·`brief.js` 자가 마운트(defer) 재구성 전 순간 페인트되던 문제 → `</head>` 앞 `#nav-fouc-guard`(`#nav{visibility:hidden}`+`DOMContentLoaded`→`rAF` `.rdy`·3s 폴백). §3 현행 메뉴 주석·STYLE_GUIDE §4·§9 동반.
 - 2026-08-13 23:40 · **01 TSMC 자본전용 시그널을 사이트 변경 이력에 등록 + 자동 합산 결함 문서화.** #959 로 `signal_log.json` 은 반영됐으나 팝업 「사이트 변경 이력」에 항목이 뜨지 않는다는 SimpleorNothing 지적 → 원인은 `MKT_CHANGELOG` 가 수동 큐레이션인데 등록이 누락된 것. 신규 항목 1건을 배열 맨 위에 추가. 동시에 §8 에 `loadAutoHistory()` 0건 기여(실패를 빈 배열로 삼킴)와 `changelog.js:77` `split('\\n')` 리터럴 버그를 알려진 이슈로 등록 — 자동 합산 복구는 크론 커밋 유입 필터가 선행돼야 하므로 미시행. narrative≠numbers · 숫자 파일 불변.
 - 2026-08-13 23:10 · **변경 이력 자동 보충 복구 + `apply-patch.yml` 룰셋 조치안 제안.** SimpleorNothing 지시(①진행 ②할 일 정리). ① `loadAutoHistory()` 복구 — `split('\n')` 정정(기존 `'\\n'` 은 리터럴 역슬래시+n 이라 개행 미분리 → 커밋 본문 전체가 한 항목), `AUTO_SKIP`(chore·ci·build·docs·test·style·refactor·perf·revert)·`AUTO_NOISE`(Merge·Revert) 배제로 §3 「사용자 향 변경만」 규율 준수, `autoTitle()` 로 conventional 프리픽스 제거(PR 번호 유지), **`CURATED_MAX` 게이트**로 수기 등록일 중복 차단(미적용 시 수기 1건 + 해당 변경 커밋들이 같은 날 3중 표시됨을 실측), fetch 실패를 `console.warn` 노출(무음 삼킴이 이번 사건의 원인). 소스 원문에서 필터 정의를 추출한 스모크로 8/13 3건 전량 skip·8/14~15 사용자 향 2건만 ADD 확인. ② `apply-patch.yml` 은 `.github/workflows/` 403 이라 제안본만 적재 — `scripts/proposed-workflows/apply-patch-pr.yml`(PR 경로 전환·`wrangler deploy` 제거) + `apply-patch-pr.md`(A안 룰셋 bypass / B안 워크플로 교체 · 적용 후 검증 4단계). §3 인벤토리·§6-1 표·§8 동반 갱신. narrative≠numbers · 숫자 파일 불변.
+
+> 2026-09-12 · 08 계좌현황: 상단 전체 합계·개인투자·DC연금·IRP 순서, 계좌 헤더 평가금액 합계, 국내/해외 표별 평가금액 내림차순. 합계는 반환된 종목 평가금액(예수금 제외), 미조회/평가금액 누락은 확인 불가 및 부분 합산 표시.
