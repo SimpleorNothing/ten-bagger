@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 
 const js = fs.readFileSync('account-live.js','utf8');
+const historyUi = fs.readFileSync('portfolio-history-ui.js','utf8');
 const worker = fs.readFileSync('worker-hotfix.js','utf8');
 const tradingRouteLiteral = /['"]\/(?:api\/)?(?:order|orders|buy|sell|trade)(?:\/|['"?])/i.test(js);
 
@@ -41,6 +42,10 @@ const checks = [
   [!js.includes('<th>평가손익</th>'), 'profit/loss hidden from site table'],
   [js.includes("['eal_pft_rt1','eal_pft_rt'"), 'KRW return rate preferred for overseas positions'],
   [!js.includes("suffix:'6580'") && !js.includes("suffix:'6588'"), 'exclude incidental order-agent accounts'],
+  [historyUi.includes("document.getElementById('v-account')"), 'portfolio history targets account view'],
+  [historyUi.includes('accountView.appendChild(section)'), 'portfolio history mounted inside account view'],
+  [!historyUi.includes('main.parentNode.insertBefore(section,main.nextSibling)'), 'portfolio history not mounted globally after main'],
+  [historyUi.includes("<th>현재가</th><th>수량</th><th>평가금액</th><th>수익률</th>"), 'portfolio history compact fields'],
   [!tradingRouteLiteral, 'no trading route literals'],
 ];
 
