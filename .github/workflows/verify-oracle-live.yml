@@ -46,7 +46,7 @@ jobs:
             const signal=JSON.stringify(await json('signal_log.json'));
             need(calendar,['Oracle FY27 Q1 실적','OCI $7.4B','RPO $664B'],'calendar');
             need(pulse,['Oracle FY27 Q1','RPO $664B','CAPEX $28.499B'],'pulse');
-            need(cycle,['Oracle FY27 Q1','"rpoB":664','"capexB":28.499'],'cycle');
+            need(cycle,['Oracle FY27 Q1','\"rpoB\":664','\"capexB\":28.499'],'cycle');
             need(risk,['Oracle FY27 Q1','CAPEX $28.499B','FCF -$5.396B'],'risk');
             need(signal,['Oracle FY27 Q1 공식 실적','OCI/IaaS $7.4B','RPO $664B'],'signal_log');
             const aisd=await text('aisd.js');
@@ -57,16 +57,17 @@ jobs:
             await page.goto(BASE+'/?oracle-release-smoke='+Date.now(),{waitUntil:'domcontentloaded',timeout:90000});
             await page.waitForSelector('#nav .tab[data-v="market"]',{state:'visible',timeout:30000});
             await page.click('#nav .tab[data-v="market"]');
-            await page.waitForFunction(()=>document.getElementById('v-market')?.classList.contains('on'),{timeout:10000});
+            await page.waitForFunction(()=>document.getElementById('v-market')?.classList.contains('on'),null,{timeout:10000});
             await page.waitForFunction(()=>{
               const el=document.getElementById('mkt_oracle_q1fy27');
               if(!el) return false;
-              const r=el.getBoundingClientRect(), t=(el.innerText||'').trim();
-              return r.width>0&&r.height>0&&t.includes('OCI $7.4B')&&t.includes('+ 121% YoY')&&t.includes('$638B → $664B')&&t.includes('CAPEX $28.499B')&&t.includes('FCF $-5.396B')&&t.includes('FY27 Q1')&&t.includes('등록 2026-09-10')&&!!el.querySelector('svg');
-            },{timeout:45000});
+              const r=el.getBoundingClientRect();
+              return r.width>0&&r.height>0&&!!el.querySelector('svg');
+            },null,{timeout:45000});
             const card=await page.evaluate(()=>{const el=document.getElementById('mkt_oracle_q1fy27');if(!el)return {found:false};const r=el.getBoundingClientRect();return {found:true,visible:r.width>0&&r.height>0,text:(el.innerText||'').trim(),hasSvg:!!el.querySelector('svg')};});
             console.log('LIVE ORACLE CARD:',JSON.stringify(card,null,2));
             if(!card.found||!card.visible||!card.hasSvg) throw new Error('Oracle card/chart not visibly rendered');
+            need(card.text,['OCI $7.4B','+ 121% YoY','$638B → $664B','CAPEX $28.499B','FCF $-5.396B','FY27 Q1','등록 2026-09-10'],'Oracle live card');
             const fatal=errors.filter(e=>/SyntaxError|oracle_q1fy27|mkt_oracle/i.test(e));if(fatal.length)throw new Error('production Oracle browser errors: '+JSON.stringify(fatal));
             await browser.close();
           })().catch(e=>{console.error(e);process.exit(1)});
