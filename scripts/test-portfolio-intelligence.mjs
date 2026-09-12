@@ -20,6 +20,11 @@ assert.ok(activity.includes("TARGET_SUFFIXES = new Map([['7747','개인투자']]
 assert.ok(activity.includes('rangeDays=clampInt')&&activity.includes('executionDays=clampInt'),'bounded activity windows required');
 assert.ok(activity.includes('readOnly:true'),'activity response must explicitly remain read-only');
 assert.ok(activity.includes('개인형IRP·DC'),'retirement-account limitation must be explicit');
+const interval=/REST_INTERVAL_MS\s*=\s*(\d+)/.exec(activity);
+assert.ok(interval&&Number(interval[1])>=250,'NHPLUG REST calls must stay at or below the official 4 calls/sec default');
+assert.ok(activity.includes('IGW42902')&&activity.includes('rateRetries=2'),'429 rate-limit retries must be bounded');
+assert.ok(activity.includes('return nhCall(env,path,input,allowTokenRetry,rateRetries-1)'),'429 retry must reuse the current token policy instead of forcing token renewal');
+assert.ok(!activity.includes('sleep(230)'),'legacy over-limit 230ms pacing must not return');
 
 assert.ok(worker.includes("import { handlePortfolioActivity } from './nhplug-activity.js'"),'worker activity import missing');
 assert.ok(worker.includes("url.pathname === '/api/portfolio/activity'"),'worker activity route missing');
