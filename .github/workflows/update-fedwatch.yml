@@ -5,6 +5,7 @@ on:
     # 02:00~03:30 EDT. First pass after that window, then retry once later in the
     # Korean afternoon. GitHub scheduled runs can be delayed or occasionally
     # skipped under load; the second pass is idempotent and exits when unchanged.
+    # 2026-09-12 audit: touch this workflow to force an immediate source-priority refresh.
     - cron: '30 7 * * *'
     - cron: '45 8 * * *'
   workflow_dispatch: {}
