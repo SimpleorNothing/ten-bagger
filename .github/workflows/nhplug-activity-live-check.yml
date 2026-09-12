@@ -58,7 +58,7 @@ jobs:
             -H "x-portfolio-api-token: ${TOKEN}" \
             -o /tmp/activity.json \
             -w '%{http_code}' \
-            "https://simpleornothing.com/api/portfolio/activity?days=30&executionDays=10&t=$(date +%s%N)" || true)
+            "https://simpleornothing.com/api/portfolio/activity?days=30&executionDays=7&t=$(date +%s%N)" || true)
           if [ "$code" != '200' ]; then
             echo "ERROR: portfolio activity API HTTP ${code}"
             node -e "try{const j=require('/tmp/activity.json');console.log({error:j.error||'',detail:j.detail||''})}catch{}"
@@ -75,26 +75,18 @@ jobs:
           if(errors.length) throw new Error('NHPLUG activity sub-call errors: '+errors.map(x=>x.scope).join(','));
           const a=j.accounts[0];
           const statuses=[a?.domestic?.tradingPnl?.status,a?.domestic?.dailyPnl?.status,a?.overseas?.periodPnl?.status].filter(Boolean);
-          for(const s of statuses){if(/오류|실패|존재하지|유효하지/i.test(String(s.message||''))) throw new Error('NHPLUG business response error: '+String(s.message||''));}
-          console.log(JSON.stringify({ok:true,source:j.source,readOnly:j.readOnly,accountCount:j.accounts.length,executionCount:j.summary?.executionCount??null,transactionCount:j.summary?.transactionCount??null,domesticRealizedPnlKnown:Number.isFinite(j.summary?.domesticRealizedPnlKrw),overseasRealizedPnlKrwKnown:Number.isFinite(j.summary?.overseasRealizedPnlKrw),fetchedAt:j.fetchedAt}));
-          const crypto=require('crypto');
-          const report={fetchedAt:j.fetchedAt,range:j.range,executionRange:j.executionRange,summary:j.summary,accounts:j.accounts,limitations:j.limitations||[]};
-          const plaintext=Buffer.from(JSON.stringify(report));
-          const key=crypto.randomBytes(32),iv=crypto.randomBytes(12);
-          const cipher=crypto.createCipheriv('aes-256-gcm',key,iv);
-          const ciphertext=Buffer.concat([cipher.update(plaintext),cipher.final()]);
-          const tag=cipher.getAuthTag();
-          const pubB64='LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUlJQklqQU5CZ2txaGtpRzl3MEJBUUVGQUFPQ0FROEFNSUlCQ2dLQ0FRRUFtazJiRjVUanF5Y0phL2dzMTZVLwpxREM4U0VXOWRab3hJM090SGtZZTZ0T0hyL3p2ZnQyQXRwc0UyV3dYVEdtL0hDN3V0NnF3dGRtdWZLWGJ2MlhrCnJuNlBOZzgra3FLdXFJZUhadFM1R3Qra2NMdUp5LzVjWVdUUkVNQUtjOE1FZlJtaHlXZ1VIaDdOME9VWDZoNGYKRmR0NEpWTEp1SVVad25EU0RRRE4reWZ1QkVOYjRjcEVNUmZFUnN2R0p5ZGVHZllQY2kyTytTU0lKRWw4THN3bQphK09INHFGSkF0ZzRPR2x1NTZId3EzOExtemluaDBvWndHT0VhMEJGNklYSzk4YlQyMjh2amltSGUrRW8waVJMClhZQ0dOb0dtYjhWTlpQNjVYbWVYVTNWT1hFOFZ4UXRleWtaNFcyVXJXRDNGNnE1NU5Tak9LNFNnYk12cm5zQjAKNlFJREFRQUIKLS0tLS1FTkQgUFVCTElDIEtFWS0tLS0tCg==';
-          const publicKey=Buffer.from(pubB64,'base64').toString('utf8');
-          const wrapped=crypto.publicEncrypt({key:publicKey,padding:crypto.constants.RSA_PKCS1_OAEP_PADDING,oaepHash:'sha256'},key);
-          const envelope={key:wrapped.toString('base64'),iv:iv.toString('base64'),tag:tag.toString('base64'),data:ciphertext.toString('base64')};
-          fs.writeFileSync('/tmp/nhplug-30d-envelope.json',JSON.stringify(envelope));
-          console.log('encrypted report envelope created');
+          for(const s of statuses){
+            if(/오류|실패|존재하지|유효하지/i.test(String(s.message||''))) throw new Error('NHPLUG business response error: '+String(s.message||''));
+          }
+          console.log(JSON.stringify({
+            ok:true,
+            source:j.source,
+            readOnly:j.readOnly,
+            accountCount:j.accounts.length,
+            executionCount:j.summary?.executionCount??null,
+            transactionCount:j.summary?.transactionCount??null,
+            domesticRealizedPnlKnown:Number.isFinite(j.summary?.domesticRealizedPnlKrw),
+            overseasRealizedPnlKrwKnown:Number.isFinite(j.summary?.overseasRealizedPnlKrw),
+            fetchedAt:j.fetchedAt,
+          }));
           NODE
-
-      - name: Upload encrypted activity envelope
-        uses: actions/upload-artifact@v4
-        with:
-          name: nhplug-30d-envelope
-          path: /tmp/nhplug-30d-envelope.json
-          retention-days: 1
