@@ -1,0 +1,50 @@
+name: Probe Treasury auctions 2026-09-13
+on:
+  push:
+    branches: [claude/treasury-auctions-20260913]
+permissions:
+  contents: write
+jobs:
+  probe:
+    if: ${{ !contains(github.event.head_commit.message, 'probe Treasury auctions official API') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch TreasuryDirect auctioned securities
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, urllib.request, pathlib
+          urls=[
+            'https://www.treasurydirect.gov/TA_WS/securities/auctioned?format=json',
+            'https://www.treasurydirect.gov/TA_WS/securities/search?format=json&startDate=2026-09-01&endDate=2026-09-13'
+          ]
+          result={}
+          for u in urls:
+            try:
+              req=urllib.request.Request(u,headers={'User-Agent':'SimpleorNothing AlphaMap official-release-check/1.0','Accept':'application/json'})
+              with urllib.request.urlopen(req,timeout=60) as r:
+                data=json.load(r)
+              result[u]={'ok':True,'count':len(data) if isinstance(data,list) else None,'data':data}
+            except Exception as e:
+              result[u]={'ok':False,'error':repr(e)}
+          # Compact to September auction dates if first endpoint succeeds.
+          compact=[]
+          first=result[urls[0]]
+          if first.get('ok') and isinstance(first.get('data'),list):
+            for x in first['data']:
+              ad=str(x.get('auctionDate',''))
+              if ad.startswith('2026-09'):
+                compact.append(x)
+          out={'compactSeptember':compact,'queries':result}
+          p=pathlib.Path('audit/tmp-treasury-auctions-20260913.json');p.parent.mkdir(parents=True,exist_ok=True)
+          p.write_text(json.dumps(out,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+          print(json.dumps({'count':len(compact),'rows':compact},ensure_ascii=False,indent=2))
+          PY
+      - name: Commit probe
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add audit/tmp-treasury-auctions-20260913.json
+          git commit -m 'chore: probe Treasury auctions official API' || exit 0
+          git push
