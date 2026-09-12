@@ -29,7 +29,7 @@ def normalize(r):
 
 series={}
 for term in ['3-Year','10-Year','30-Year']:
-    xs=[normalize(r) for r in rows if r.get('term')==term and dt(r.get('auctionDate'))<='2026-09-10' and f(r.get('highYield')) is not None]
+    xs=[normalize(r) for r in rows if r.get('term')==term and str(r.get('tips','')).strip().lower()=='no' and dt(r.get('auctionDate'))<='2026-09-10' and f(r.get('highYield')) is not None]
     xs=sorted(xs,key=lambda x:x['auctionDate'])
     series[term]=xs[-6:]
     if len(series[term])<2: raise SystemExit('insufficient '+term+' history')
