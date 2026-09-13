@@ -1,0 +1,73 @@
+{
+  "date": "2026-09-13",
+  "checkedAt": "2026-09-13T17:24:57+09:00",
+  "holdingsAuthority": {
+    "latestAvailableSaturday": "2026-09-05",
+    "driveFile": "자산현황_260905.xlsx",
+    "driveFileId": "12dHsxFAc3ZfQrIySL6CDfvA9mO9HPpxe",
+    "expectedButNotFound": "자산현황_260912.xlsx",
+    "repositoryAsOf": "2026-09-05",
+    "totalMkrw": 824,
+    "rule": "9/12 원본이 확인되기 전에는 9/5 holdings 값을 추정 갱신하지 않음"
+  },
+  "findings": [
+    {
+      "area": "news_digest holdings filter",
+      "severity": "medium",
+      "issue": "뉴스 카드 제외 상품 442580·0162Z0가 news_digest의 보유목록에서도 빠져 전체 보유 유니버스와 뉴스 적격 유니버스가 구분되지 않음",
+      "fix": "heldUniverse에 최신 holdings.json의 amt>0 비현금 17개 전부를 기록하고 newsEligibleHoldings/groups는 빈 종목뉴스 카드 방지를 위한 15개 적격 상품으로 분리"
+    },
+    {
+      "area": "market pulse",
+      "severity": "medium",
+      "issue": "headline에서 9월 국채입찰 문장이 중복되고 FX 축에 이미 발표된 8월 CPI를 '발표 전'으로 적은 과거 문구가 잔존",
+      "fix": "중복 제거, 8월 CPI/PPI 공식 발표 이후 상태로 문구 갱신, signals 기준을 9/12 집계(미국 9/11 종가)로 명시"
+    },
+    {
+      "area": "held-company news",
+      "severity": "low",
+      "issue": "9/12 Tesla Roadster 공개 일정과 9/9 Samsung–Mistral 반도체 AI 협력이 가치영향 뉴스 digest에 미반영",
+      "fix": "제품·기술 항목으로 추가하되 생산·인도·수율·투자효과를 확인하기 전 매출/이익으로 추정하지 않음"
+    }
+  ],
+  "officialReleaseCheck": {
+    "cpi": "2026-08: +0.4% MoM, +3.4% YoY; core +0.3% MoM, +2.4% YoY",
+    "ppi": "2026-08 final demand: +0.4% MoM, +5.4% YoY",
+    "nfp": "2026-08 payroll +162K, unemployment 4.1%",
+    "jolts": "2026-07 job openings 7.271M",
+    "pce": "2026-07 headline 3.7% YoY, core 3.3% YoY",
+    "status": "현재 확인한 저장소 소비처에서 신규 기준월/단위 불일치 없음"
+  },
+  "fedWatch": {
+    "asOf": "2026-09-12",
+    "sourcePriority": "CME EOD API first; Investing.com second; pyfedwatch supplemental",
+    "sourceUsed": "Investing.com Fed Rate Monitor",
+    "sourceUpdatedAt": "Sep 12, 2026 14:25 EST",
+    "reason": "CME_FEDWATCH_TOKEN을 자동화 실행환경에서 사용할 수 없어 직접 CME EOD 검증 불가",
+    "futurePrice": 95.91,
+    "probabilityLe4_00": 25.3,
+    "weekendRule": "9/13 일요일에는 검증되지 않은 새 값을 만들지 않고 마지막 검증 스냅샷을 실제 기준일 그대로 유지"
+  },
+  "llmPolicy": {
+    "noPaidExternalLlm": ["01 시장 모니터링", "04 시장·실적전망", "05 자산현황", "단순 뉴스/정형 데이터 수집", "시장 맥박 자동 갱신"],
+    "paidExternalLlmAllowed": ["02 /api/insight", "03 /api/council*", "06 /api/brief*"],
+    "regression": "worker.js allowPaidLlmForPath 정책과 council/brief-audio 경로 보존 확인; 이번 뉴스/시장맥박 갱신에는 외부 유료 LLM 호출 없음"
+  },
+  "sources": [
+    "https://www.bls.gov/news.release/cpi.nr0.htm",
+    "https://www.dol.gov/newsroom/economicdata/ppi_09102026.pdf",
+    "https://www.bls.gov/news.release/archives/empsit_09042026.htm",
+    "https://www.bls.gov/news.release/jolts.nr0.htm",
+    "https://www.bea.gov/news/2026/personal-income-and-outlays-july-2026",
+    "https://au.investing.com/central-banks/fed-rate-monitor",
+    "https://www.reuters.com/business/autos-transportation/tesla-signals-oct-1-launch-long-delayed-roadster-2026-09-12/",
+    "https://news.samsung.com/global/samsung-and-mistral-ai-announce-strategic-partnership-for-intelligence-driven-semiconductor-infrastructure"
+  ],
+  "liveVerification": {
+    "status": "pending",
+    "verifiedAt": null,
+    "mainSha": null,
+    "deployRun": null,
+    "runtimeRegression": null
+  }
+}
