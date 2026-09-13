@@ -37,11 +37,15 @@ assert.match(chart,/data-r=\"1Y\"/);
 assert.match(chart,/data-r=\"3Y\"/);
 assert.match(chart,/data-r=\"ALL\"/);
 assert.match(chart,/전체 투자원금/);
+assert.match(chart,/function previousValue\(series,date\)/);
+assert.match(chart,/if\(p<=0\)p=previousValue\(personal,date\)/);
+assert.match(chart,/if\(d<=0\)d=previousValue\(dc,date\)/);
+assert.match(chart,/if\(r<=0\)r=previousValue\(irp,date\)/);
 assert.match(chart,/H=428/);
 assert.match(chart,/height:428px/);
 assert.equal(/['"]\/(?:api\/)?(?:order|orders|buy|sell|trade)(?:\/|['"?])/i.test(chart),false);
 
-assert.match(entry,/portfolio-history-chart\.js\?v=20260913-02/);
+assert.match(entry,/portfolio-history-chart\.js\?v=20260913-03/);
 assert.match(entry,/historyChartAsset/);
 assert.match(entry,/historySeedAsset/);
 assert.match(entry,/text\.includes\('개인투자: 2023~2025 과거원장'\)/);
