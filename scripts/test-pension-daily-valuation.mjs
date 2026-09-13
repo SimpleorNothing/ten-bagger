@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { applyPensionDailyValuation, fetchNaverClose, snapshotNeedsSameDayCaptureRefresh } from '../pension-daily-valuation.js';
 
+// These tests are intentionally network-free; production quote access is verified after deployment.
 function naverResponse(rows,status=200){return new Response(JSON.stringify([['날짜','시가','고가','저가','종가','거래량'],...rows]).replace(/"/g,"'"),{status});}
 
 const base={source:'NHPLUG',readOnly:true,accounts:[
