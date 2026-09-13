@@ -69,7 +69,7 @@ jobs:
           if not data.get('ok') or not data.get('date'):
               raise SystemExit(f'invalid snapshot response: {data}')
           if not data.get('skipped', False):
-              if data.get('storageSchemaVersion') != 3:
+              if data.get('storageSchemaVersion') != 4:
                   raise SystemExit(f"unexpected snapshot schema: {data.get('storageSchemaVersion')}")
               vals = data.get('accountValues') or {}
               for key in ('personalValueKrw','dcValueKrw','irpValueKrw'):
@@ -104,12 +104,14 @@ jobs:
           row = rows[0]
           if data.get('scheduledAt') != '17:00' or data.get('timezone') != 'Asia/Seoul':
               raise SystemExit(f'invalid schedule metadata: {data}')
-          if row.get('storageSchemaVersion') == 3:
+          if row.get('storageSchemaVersion') == 4:
               for key in ('personalValueKrw','dcValueKrw','irpValueKrw'):
                   if not isinstance(row.get(key), (int,float)):
                       raise SystemExit(f'missing history account summary: {key}')
               if row.get('pensionValuation') != 'capture-or-quantity-x-close':
                   raise SystemExit(f"invalid pension valuation marker: {row.get('pensionValuation')}")
+          else:
+              raise SystemExit(f"unexpected history schema: {row.get('storageSchemaVersion')}")
           print(f'live history verified: {expected} schema={row.get("storageSchemaVersion")}')
           PY
 
@@ -122,32 +124,33 @@ jobs:
           import json, os
           with open('/tmp/portfolio-history.json', encoding='utf-8') as f:
               data = json.load(f)
-          if data.get('storageSchemaVersion') == 3:
-              accounts = (data.get('snapshot') or {}).get('accounts') or []
-              personal = [a for a in accounts if a.get('label') in ('개인투자','종합매매') and str(a.get('dataSource','')).upper() != 'MANUAL_CAPTURE']
-              if not personal:
-                  raise SystemExit('personal NHPLUG account missing')
-              pensions = [a for a in accounts if str(a.get('dataSource','')).upper() == 'MANUAL_CAPTURE' and (a.get('label') in ('DC','DC연금','퇴직연금') or 'IRP' in str(a.get('label','')).upper())]
-              if len(pensions) < 2:
-                  raise SystemExit('DC/IRP accounts missing')
-              date = os.environ['DATE']
-              for account in pensions:
-                  if account.get('valuationDate') != date:
-                      raise SystemExit('pension valuation date mismatch')
-                  if account.get('quantityAsOf') == date:
-                      if account.get('valuationMode') != 'CAPTURE_EXACT':
-                          raise SystemExit('same-day capture is not authoritative')
-                  else:
-                      if account.get('valuationMode') != 'QUANTITY_X_DAILY_PRICE' or account.get('valuationSource') not in ('NAVER_CLOSE','NAVER_CLOSE_OR_PREVIOUS_VALID_PRICE'):
-                          raise SystemExit('pension daily valuation mode mismatch')
-                      for row in ((account.get('domestic') or {}).get('Output_1') or []):
-                          qty = float(row.get('itg_bnc_qty') or row.get('rsdl_qty') or row.get('qty') or 0)
-                          if qty <= 0: continue
-                          price = float(row.get('now_pr') or 0)
-                          value = float(row.get('eal_amt') or 0)
-                          if price <= 0 or value != round(qty * price) or not row.get('valuation_price_date') or row.get('valuation_source') not in ('NAVER_CLOSE','PREVIOUS_VALID_PRICE'):
-                              raise SystemExit('pension quantity x close verification failed')
-              print('pension daily valuation verified:', [a.get('valuationMode') for a in pensions])
+          if data.get('storageSchemaVersion') != 4:
+              raise SystemExit(f"unexpected detail schema: {data.get('storageSchemaVersion')}")
+          accounts = (data.get('snapshot') or {}).get('accounts') or []
+          personal = [a for a in accounts if a.get('label') in ('개인투자','종합매매') and str(a.get('dataSource','')).upper() != 'MANUAL_CAPTURE']
+          if not personal:
+              raise SystemExit('personal NHPLUG account missing')
+          pensions = [a for a in accounts if str(a.get('dataSource','')).upper() == 'MANUAL_CAPTURE' and (a.get('label') in ('DC','DC연금','퇴직연금') or 'IRP' in str(a.get('label','')).upper())]
+          if len(pensions) < 2:
+              raise SystemExit('DC/IRP accounts missing')
+          date = os.environ['DATE']
+          for account in pensions:
+              if account.get('valuationDate') != date:
+                  raise SystemExit('pension valuation date mismatch')
+              if account.get('quantityAsOf') == date:
+                  if account.get('valuationMode') != 'CAPTURE_EXACT':
+                      raise SystemExit('same-day capture is not authoritative')
+              else:
+                  if account.get('valuationMode') != 'QUANTITY_X_DAILY_PRICE' or account.get('valuationSource') not in ('NAVER_CLOSE','NAVER_CLOSE_OR_PREVIOUS_VALID_PRICE'):
+                      raise SystemExit('pension daily valuation mode mismatch')
+                  for row in ((account.get('domestic') or {}).get('Output_1') or []):
+                      qty = float(row.get('itg_bnc_qty') or row.get('rsdl_qty') or row.get('qty') or 0)
+                      if qty <= 0: continue
+                      price = float(row.get('now_pr') or 0)
+                      value = float(row.get('eal_amt') or 0)
+                      if price <= 0 or value != round(qty * price) or not row.get('valuation_price_date') or row.get('valuation_source') not in ('NAVER_CLOSE','PREVIOUS_VALID_PRICE'):
+                          raise SystemExit('pension quantity x close verification failed')
+          print('pension daily valuation verified:', [a.get('valuationMode') for a in pensions])
           PY
 
           curl -fsS --connect-timeout 10 --max-time 60 \
