@@ -89,7 +89,14 @@ export async function applyPensionDailyValuation(payload, snapshotDate, fetchFn 
         continue;
       }
       if (!code) throw new Error(`PENSION_POSITION_CODE_MISSING:${account.label || 'pension'}`);
-      const q = await quote(code);
+      let q;
+      try {
+        q = await quote(code);
+      } catch (error) {
+        const previousPrice = numberValue(row?.now_pr ?? row?.end_pr);
+        if (previousPrice == null || previousPrice <= 0) throw error;
+        q = { code, price:previousPrice, marketDate:captureDate || snapshotDate, source:'PREVIOUS_VALID_PRICE' };
+      }
       const evaluationAmount = Math.round(quantity * q.price);
       row.now_pr = q.price;
       row.eal_amt = evaluationAmount;
@@ -111,7 +118,8 @@ export async function applyPensionDailyValuation(payload, snapshotDate, fetchFn 
     summary.tot_evlu_amt = total;
     summary.cash_status = 'not-visible-in-latest-capture';
     account.valuationMode = 'QUANTITY_X_DAILY_PRICE';
-    account.valuationSource = 'NAVER_CLOSE';
+    const sources = new Set(rows.map((row) => String(row?.valuation_source || '')).filter(Boolean));
+    account.valuationSource = sources.has('PREVIOUS_VALID_PRICE') ? 'NAVER_CLOSE_OR_PREVIOUS_VALID_PRICE' : 'NAVER_CLOSE';
     account.valuationPriceDate = marketDates.length ? marketDates.sort().at(-1) : null;
   }
   return result;

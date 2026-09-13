@@ -35,7 +35,16 @@ assert.equal(nextDay.accounts[0].domestic.Output_1[0].eal_amt,520000);
 const q=await fetchNaverClose('111111','2026-09-13',fetchMock);
 assert.deepEqual(q,{code:'111111',price:1200,marketDate:'2026-09-11',source:'NAVER_CLOSE'});
 
-await assert.rejects(()=>applyPensionDailyValuation(base,'2026-09-13',async()=>naverResponse([])),/PENSION_PRICE_EMPTY/);
+const fallbackDay=await applyPensionDailyValuation(base,'2026-09-13',async()=>naverResponse([]));
+assert.equal(fallbackDay.accounts[1].valuationSource,'NAVER_CLOSE_OR_PREVIOUS_VALID_PRICE');
+assert.equal(fallbackDay.accounts[1].domestic.Output_1[0].now_pr,1000);
+assert.equal(fallbackDay.accounts[1].domestic.Output_1[0].eal_amt,2000);
+assert.equal(fallbackDay.accounts[1].domestic.Output_1[0].valuation_source,'PREVIOUS_VALID_PRICE');
+assert.equal(fallbackDay.accounts[1].domestic.Output_1[0].valuation_price_date,'2026-09-12');
+
+const noPreviousPrice=structuredClone(base);
+delete noPreviousPrice.accounts[1].domestic.Output_1[0].now_pr;
+await assert.rejects(()=>applyPensionDailyValuation(noPreviousPrice,'2026-09-13',async()=>naverResponse([])),/PENSION_PRICE_EMPTY/);
 
 const storedEstimated={snapshot:{accounts:[{label:'DC',dataSource:'MANUAL_CAPTURE',quantityAsOf:'2026-09-12',valuationMode:'QUANTITY_X_DAILY_PRICE'}]}};
 const currentCapture=[{label:'DC',dataSource:'MANUAL_CAPTURE',asOf:'2026-09-13'}];
