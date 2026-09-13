@@ -5,9 +5,9 @@
   "primarySourceUrl": "https://www.cmegroup.com/markets/interest-rates/cme-fedwatch-tool.html",
   "apiInfoUrl": "https://www.cmegroup.com/market-data/market-data-api/fedwatch-api.html",
   "asOf": "2026-09-12",
-  "checkedAt": "2026-09-12T07:55:00Z",
+  "checkedAt": "2026-09-13T08:40:00Z",
   "status": "확인됨(2순위)",
-  "statusReason": "CME FedWatch End-of-Day API는 자동화 실행환경에서 CME_FEDWATCH_TOKEN을 사용할 수 없어 직접 검증하지 못함. Investing.com Fed Rate Monitor 표시값을 웹에서 직접 검증해 2순위로 사용. 원문 Updated=Sep 12, 2026 14:25 EST; 이전 9/11 값을 최신값처럼 유지하지 않음.",
+  "statusReason": "CME FedWatch End-of-Day API는 자동화 실행환경에서 CME_FEDWATCH_TOKEN을 사용할 수 없어 직접 검증하지 못함. Investing.com Fed Rate Monitor의 표시값을 ChatGPT 웹 검증으로 2순위 사용. 원문 Updated=Sep 12, 2026 14:35 EST; Future Price 95.910; 확률 2.6/22.7/47.3/27.4%; <=4.00% 누적 25.3%. 9/13은 일요일이므로 검증되지 않은 새 거래일 값을 생성하지 않음.",
   "futurePrice": 95.91,
   "history": [
     {
@@ -441,7 +441,7 @@
     {
       "date": "2026-09-12",
       "sourceDate": "2026-09-12",
-      "checkedAt": "2026-09-12T07:55:00Z",
+      "checkedAt": "2026-09-13T08:40:00Z",
       "expectedRate": 4.1238,
       "ranges": [
         {
@@ -470,9 +470,9 @@
         }
       ],
       "source": "Investing.com Fed Rate Monitor",
-      "sourceUpdatedAt": "Sep 12, 2026 14:25 EST",
+      "sourceUpdatedAt": "Sep 12, 2026 14:35 EST",
       "inputs": {
-        "updated": "Sep 12, 2026 14:25 EST",
+        "updated": "Sep 12, 2026 14:35 EST",
         "futurePrice": "95.910",
         "basis": "CME Group 30-Day Fed Fund futures",
         "parser": "direct-web-verified-summary"
@@ -597,7 +597,22 @@
         "basis": "CME Group 30-Day Fed Fund futures",
         "parser": "direct-web-verified-summary"
       }
+    },
+    {
+      "date": "2026-09-13",
+      "checkedAt": "2026-09-13T08:40:00Z",
+      "status": "확인됨(2순위)",
+      "source": "Investing.com Fed Rate Monitor",
+      "sourceDate": "2026-09-12",
+      "sourceUpdatedAt": "Sep 12, 2026 14:35 EST",
+      "reason": "CME EOD API token unavailable. GitHub runner Investing request returned 403 and pyfedwatch timed out, but ChatGPT web search directly verified the Investing.com displayed 2026-09-12 snapshot; Sunday check keeps the real source date instead of promoting 9/13.",
+      "inputs": {
+        "updated": "Sep 12, 2026 14:35 EST",
+        "futurePrice": "95.910",
+        "basis": "CME Group 30-Day Fed Fund futures",
+        "parser": "direct-web-verified-summary"
+      }
     }
   ],
-  "sourceUpdatedAt": "Sep 12, 2026 14:25 EST"
+  "sourceUpdatedAt": "Sep 12, 2026 14:35 EST"
 }
