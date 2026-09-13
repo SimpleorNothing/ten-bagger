@@ -191,4 +191,13 @@ assert.match(csv, /162\.92/);
 assert.match(csv, /-6\.11/);
 assert.equal(csv.includes('800-02-092728'), false);
 
+const storedPrevious={...stored,snapshotDate:'2026-09-11',savedAt:'2026-09-11T08:00:00.000Z'};
+await bucket.put(historyKey('2026-09-11'),JSON.stringify(storedPrevious),{customMetadata:{snapshotDate:'2026-09-11',savedAt:storedPrevious.savedAt,holdingCount:'2',accountCount:'2',holdingValueKrw:'134817620',cashIncluded:'false',storageSchemaVersion:'2',detailStorage:'full-sanitized-source'}});
+res=await handlePortfolioHistory(new Request('https://simpleornothing.com/api/portfolio/history.csv'),env,true);
+assert.equal(res.status,200);
+assert.match(res.headers.get('content-disposition')||'',/portfolio-history-all-dates\.csv/);
+const allDatesCsv=await res.text();
+assert.match(allDatesCsv,/2026-09-11/);
+assert.match(allDatesCsv,/2026-09-12/);
+
 console.log('portfolio history tests passed');
