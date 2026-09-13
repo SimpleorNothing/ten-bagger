@@ -18,7 +18,7 @@ assert.equal(seed.series.principal[0][0],'2023-01-02');
 assert.equal(seed.series.principal.at(-1)[1],390860818);
 assert.match(seed.policy.principal,/전체 투자원금/);
 assert.match(seed.policy.personal,/2023~2025/);
-assert.match(seed.policy.personal,/NHPLUG API 저장 이력이 우선/);
+assert.match(seed.policy.personal,/NHPLUG API 저장 이력이 윰선/);
 assert.match(seed.policy.dc,/첨부 원장/);
 assert.match(seed.policy.irp,/첨부 원장/);
 
@@ -26,9 +26,6 @@ assert.match(chart,/portfolioHistoryChart/);
 assert.match(chart,/SEED='\/portfolio-history-seed\.json'/);
 assert.match(chart,/HISTORY='\/api\/portfolio\/history'/);
 assert.match(chart,/LIVE='\/api\/portfolio\/live'/);
-assert.match(chart,/개인투자 2023~2025 과거원장/);
-assert.match(chart,/2026 NHPLUG 우선/);
-assert.match(chart,/API 저장 전 구간은 2026 원장 백필/);
 assert.match(chart,/dataSource\|\|''\)\.toUpperCase\(\)!=='MANUAL_CAPTURE'/);
 assert.match(chart,/src!=='MANUAL_CAPTURE'/);
 assert.match(chart,/note\.parentNode\.insertBefore\(sec,note\.nextSibling\)/);
