@@ -120,9 +120,13 @@ fs.writeFileSync(HTML, html);
 if (fs.existsSync(DIGEST)) {
   const d = JSON.parse(fs.readFileSync(DIGEST, 'utf8'));
   d.holdingsAsOf = h.qtyAsOf || h.asOf || null;
-  const items = [...active.values()]
+  // news_digest가 최신 토요일 원장의 전체 보유 유니버스를 검증 가능하게 노출한다.
+  // 개별 뉴스 카드가 의미 없는 상품은 newsEligibleHoldings/groups에서만 제외하고 heldUniverse에는 반드시 남긴다.
+  d.heldUniverse = [...active.values()].map((x) => ({ tk: x.ticker, nm: x.name, amt: x.amt, w: x.w }));
+  d.newsEligibleHoldings = [...active.values()]
     .filter((x) => !STOCK_NEWS_EXCLUDED.has(String(x.ticker).toUpperCase()))
     .map((x) => ({ tk: x.ticker, nm: x.name }));
+  const items = d.newsEligibleHoldings;
   const groups = Array.isArray(d.groups) ? d.groups : [];
   let g = groups.find((x) => x && x.title === '보유 종목');
   if (!g) { g = { title: '보유 종목', items: [] }; groups.unshift(g); }
