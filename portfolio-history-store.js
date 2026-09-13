@@ -6,7 +6,7 @@ const HISTORY_PREFIX = 'portfolio-history/';
 const MAX_LIST_PAGES = 10;
 const MAX_LIST_ITEMS = 5000;
 const STORAGE_SCHEMA_VERSION = 3;
-const STORAGE_POLICY = 'personal=NHPLUG API; DC/IRP=capture exact on capture date, otherwise latest captured quantity x latest market close; preserve all non-sensitive source fields';
+const STORAGE_POLICY = 'full-sanitized-source; personal=NHPLUG API; DC/IRP=capture exact on capture date, otherwise latest captured quantity x latest market close; preserve all non-sensitive source fields';
 
 function jsonResponse(value, status = 200, extraHeaders = {}) {
   return new Response(JSON.stringify(value), {
