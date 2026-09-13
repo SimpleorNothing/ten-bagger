@@ -5,17 +5,13 @@ on:
     # 02:00~03:30 EDT. First pass after that window, then retry once later in the
     # Korean afternoon. GitHub scheduled runs can be delayed or occasionally
     # skipped under load; the second pass is idempotent and exits when unchanged.
-    # 2026-09-13 audit: force source-priority re-verification after the displayed
-    # Investing.com Updated timestamp was observed to differ from stored metadata.
     - cron: '30 7 * * *'
     - cron: '45 8 * * *'
   workflow_dispatch: {}
   push:
     paths:
-      - '.github/workflows/update-fedwatch.yml'
       - 'scripts/fetch-fedwatch.py'
       - 'scripts/fetch-fedwatch-authoritative.py'
-      - 'scripts/apply-fedwatch-webverified-20260913.py'
 permissions:
   contents: write
   pull-requests: write
@@ -39,8 +35,6 @@ jobs:
         run: python3 scripts/fetch-fedwatch-authoritative.py
         env:
           CME_FEDWATCH_TOKEN: ${{ secrets.CME_FEDWATCH_TOKEN }}
-      - name: Apply web-verified Sep 12 source timestamp for 2026-09-13 audit
-        run: python3 scripts/apply-fedwatch-webverified-20260913.py
       - name: Validate and push automation branch when changed
         env:
           GH_TOKEN: ${{ github.token }}
@@ -62,7 +56,7 @@ jobs:
           p=json.load(open('pulse.json'))
           assert 'FedWatch' in p.get('headline','')
           PY
-          FILES="fedwatch.json pulse.json changelog.js audit/alpha-map/2026-09-13.json"
+          FILES="fedwatch.json pulse.json changelog.js"
           if [ -z "$(git status --porcelain $FILES)" ]; then echo "No FedWatch change."; exit 0; fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"

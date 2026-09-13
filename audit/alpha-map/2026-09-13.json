@@ -42,15 +42,27 @@
     "asOf": "2026-09-12",
     "sourcePriority": "CME EOD API first; Investing.com second; pyfedwatch supplemental",
     "sourceUsed": "Investing.com Fed Rate Monitor",
-    "sourceUpdatedAt": "Sep 12, 2026 14:25 EST",
+    "sourceUpdatedAt": "Sep 12, 2026 14:35 EST",
     "reason": "CME_FEDWATCH_TOKEN을 자동화 실행환경에서 사용할 수 없어 직접 CME EOD 검증 불가",
     "futurePrice": 95.91,
     "probabilityLe4_00": 25.3,
-    "weekendRule": "9/13 일요일에는 검증되지 않은 새 값을 만들지 않고 마지막 검증 스냅샷을 실제 기준일 그대로 유지"
+    "weekendRule": "9/13 일요일에는 검증되지 않은 새 값을 만들지 않고 마지막 검증 스냅샷을 실제 기준일 그대로 유지",
+    "checkedAt": "2026-09-13T08:40:00Z",
+    "verification": "ChatGPT web direct verification; GitHub runner automated sources failed safely without promoting stale data"
   },
   "llmPolicy": {
-    "noPaidExternalLlm": ["01 시장 모니터링", "04 시장·실적전망", "05 자산현황", "단순 뉴스/정형 데이터 수집", "시장 맥박 자동 갱신"],
-    "paidExternalLlmAllowed": ["02 /api/insight", "03 /api/council*", "06 /api/brief*"],
+    "noPaidExternalLlm": [
+      "01 시장 모니터링",
+      "04 시장·실적전망",
+      "05 자산현황",
+      "단순 뉴스/정형 데이터 수집",
+      "시장 맥박 자동 갱신"
+    ],
+    "paidExternalLlmAllowed": [
+      "02 /api/insight",
+      "03 /api/council*",
+      "06 /api/brief*"
+    ],
     "regression": "worker.js allowPaidLlmForPath 정책과 council/brief-audio 경로 보존 확인; 이번 뉴스/시장맥박 갱신에는 외부 유료 LLM 호출 없음"
   },
   "sources": [
