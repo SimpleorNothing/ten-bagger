@@ -140,6 +140,7 @@ async function getStoredHistory(env,date) {
 
 function csvCell(value){let text=value==null?'':String(value);if(/^[=+\-@]/.test(text))text=`'${text}`;return `"${text.replace(/"/g,'""')}"`;}
 function historyCsv(stored){const rows=flattenPortfolioHoldings(stored?.snapshot||{});const header=['기준일','계좌','데이터원','시장','종목코드','종목명','수량','매입가','현재가','평가금액(원)','평가손익(원)','수익률(%)'];const body=rows.map(row=>[stored.snapshotDate,row.account,row.dataSource,row.market,row.code,row.name,row.quantity,row.purchasePrice,row.currentPrice,row.evaluationAmountKrw,row.profitLossKrw,row.returnPct].map(csvCell).join(','));return '\uFEFF'+[header.map(csvCell).join(','),...body].join('\r\n');}
+async function historyCsvAll(env){const dates=await listHistory(env);const header=['기준일','계좌','데이터원','시장','종목코드','종목명','수량','매입가','현재가','평가금액(원)','평가손익(원)','수익률(%)'];const rows=[];for(const item of dates.slice().reverse()){const stored=await getStoredHistory(env,item.date);if(!stored)continue;for(const row of flattenPortfolioHoldings(stored.snapshot||{}))rows.push([stored.snapshotDate,row.account,row.dataSource,row.market,row.code,row.name,row.quantity,row.purchasePrice,row.currentPrice,row.evaluationAmountKrw,row.profitLossKrw,row.returnPct].map(csvCell).join(','));}return '\uFEFF'+[header.map(csvCell).join(','),...rows].join('\r\n');}
 
 async function tokenAuthorized(request,env){const got=request.headers.get('x-portfolio-api-token')||'';if(!got||!env?.NHPLUG_APP_SECRET)return false;const expected=await derivePortfolioApiToken(env.NHPLUG_APP_SECRET);if(got.length!==expected.length)return false;let diff=0;for(let i=0;i<got.length;i++)diff|=got.charCodeAt(i)^expected.charCodeAt(i);return diff===0;}
 function snapshotReason(request){const value=String(request.headers.get('x-portfolio-history-reason')||'api-snapshot').trim();return /^(?:scheduled-17-kst|manual|deploy-seed-if-missing|api-snapshot)$/.test(value)?value:'api-snapshot';}
@@ -161,6 +162,7 @@ export async function handlePortfolioHistory(request, env, cookieAuthorized = fa
     }catch(error){return jsonResponse({error:String(error?.message||error||'snapshot failed')},502);}
   }
   if(request.method!=='GET')return jsonResponse({error:'method not allowed'},405);
+  if(url.pathname==='/api/portfolio/history.csv'){try{return new Response(await historyCsvAll(env),{status:200,headers:{'content-type':'text/csv; charset=utf-8','content-disposition':'attachment; filename="portfolio-history-all-dates.csv"','cache-control':'no-store'}});}catch(error){return jsonResponse({error:String(error?.message||error||'history export failed')},500);}}
   if(url.pathname==='/api/portfolio/history'){
     try{return jsonResponse({timezone:'Asia/Seoul',scheduledAt:'17:00',scheduleBackend:'github-actions',storagePolicy:STORAGE_POLICY,dates:await listHistory(env)});}catch(error){return jsonResponse({error:String(error?.message||error||'history list failed')},500);}
   }
