@@ -106,6 +106,25 @@ export function flattenPortfolioHoldings(snapshot) {
   return rows;
 }
 
+function accountHoldingValue(account) {
+  const rows = flattenPortfolioHoldings({ accounts: account ? [account] : [] });
+  if (!rows.length || rows.some((row) => !Number.isFinite(row.evaluationAmountKrw))) return null;
+  return rows.reduce((sum, row) => sum + row.evaluationAmountKrw, 0);
+}
+
+export function summarizeAccountValues(snapshot) {
+  const result = { personalValueKrw: null, dcValueKrw: null, irpValueKrw: null };
+  for (const account of Array.isArray(snapshot?.accounts) ? snapshot.accounts : []) {
+    const label = String(account?.label || '').trim();
+    const value = accountHoldingValue(account);
+    if (value == null) continue;
+    if ((label === '개인투자' || label === '종합매매') && String(account?.dataSource || '').toUpperCase() !== 'MANUAL_CAPTURE') result.personalValueKrw = value;
+    else if (label === 'DC' || label === 'DC연금' || label === '퇴직연금') result.dcValueKrw = value;
+    else if (/IRP/i.test(label)) result.irpValueKrw = value;
+  }
+  return result;
+}
+
 export function summarizePortfolioSnapshot(snapshot) {
   const holdings = flattenPortfolioHoldings(snapshot);
   const holdingValueKrw = holdings.reduce((sum, row) => sum + (Number.isFinite(row.evaluationAmountKrw) ? row.evaluationAmountKrw : 0), 0);
@@ -137,6 +156,7 @@ export async function saveDailyPortfolioSnapshot(env, scheduledTime = Date.now()
   const payload = await buildSanitizedLiveSnapshot(env, snapshotDate);
   const savedAt = new Date().toISOString();
   const summary = summarizePortfolioSnapshot(payload);
+  const accountValues = summarizeAccountValues(payload);
   const stored = {
     storageSchemaVersion: STORAGE_SCHEMA_VERSION,
     storagePolicy: STORAGE_POLICY,
@@ -144,6 +164,7 @@ export async function saveDailyPortfolioSnapshot(env, scheduledTime = Date.now()
     savedAt,
     reason,
     summary,
+    accountValues,
     valuationPolicy: {
       personal: 'NHPLUG_API',
       pensionCaptureDate: 'CAPTURE_EXACT',
@@ -151,8 +172,6 @@ export async function saveDailyPortfolioSnapshot(env, scheduledTime = Date.now()
       missingPrice: 'FAIL_CLOSED',
       cash: 'NOT_CARRIED_IF_NOT_VISIBLE',
     },
-    // 개인투자는 NHPLUG 원본 비민감 필드를 보존한다. DC/IRP는 캡처 수량을 유지하되
-    // 캡처일 외 날짜에는 네이버 최신 거래일 종가로 평가금액/손익을 다시 계산한다.
     snapshot: payload,
   };
   await env.MEMO_BUCKET.put(historyKey(snapshotDate), JSON.stringify(stored), {
@@ -163,6 +182,9 @@ export async function saveDailyPortfolioSnapshot(env, scheduledTime = Date.now()
       holdingCount: String(summary.holdingCount),
       accountCount: String(summary.accountCount),
       holdingValueKrw: String(summary.holdingValueKrw),
+      personalValueKrw: accountValues.personalValueKrw == null ? '' : String(accountValues.personalValueKrw),
+      dcValueKrw: accountValues.dcValueKrw == null ? '' : String(accountValues.dcValueKrw),
+      irpValueKrw: accountValues.irpValueKrw == null ? '' : String(accountValues.irpValueKrw),
       cashIncluded: 'false',
       storageSchemaVersion: String(STORAGE_SCHEMA_VERSION),
       detailStorage: 'full-sanitized-source',
@@ -177,12 +199,7 @@ async function listHistory(env) {
   const items = [];
   let cursor;
   for (let page = 0; page < MAX_LIST_PAGES && items.length < MAX_LIST_ITEMS; page++) {
-    const result = await env.MEMO_BUCKET.list({
-      prefix: HISTORY_PREFIX,
-      limit: 1000,
-      cursor,
-      include: ['customMetadata'],
-    });
+    const result = await env.MEMO_BUCKET.list({ prefix: HISTORY_PREFIX, limit: 1000, cursor, include: ['customMetadata'] });
     for (const object of result.objects || []) {
       const match = /^portfolio-history\/(\d{4}-\d{2}-\d{2})\.json$/.exec(object.key || '');
       if (!match) continue;
@@ -193,6 +210,9 @@ async function listHistory(env) {
         holdingCount: numberValue(meta.holdingCount) ?? 0,
         accountCount: numberValue(meta.accountCount) ?? 0,
         holdingValueKrw: numberValue(meta.holdingValueKrw) ?? 0,
+        personalValueKrw: numberValue(meta.personalValueKrw),
+        dcValueKrw: numberValue(meta.dcValueKrw),
+        irpValueKrw: numberValue(meta.irpValueKrw),
         cashIncluded: false,
         storageSchemaVersion: numberValue(meta.storageSchemaVersion) ?? 1,
         detailStorage: meta.detailStorage || 'legacy-full-snapshot',
@@ -209,12 +229,8 @@ async function getStoredHistory(env, date) {
   if (!env?.MEMO_BUCKET || !isValidDate(date)) return null;
   const object = await env.MEMO_BUCKET.get(historyKey(date));
   if (!object) return null;
-  try {
-    const parsed = JSON.parse(await object.text());
-    return sanitizePortfolioSnapshot(parsed);
-  } catch {
-    return null;
-  }
+  try { return sanitizePortfolioSnapshot(JSON.parse(await object.text())); }
+  catch { return null; }
 }
 
 function csvCell(value) {
@@ -226,20 +242,7 @@ function csvCell(value) {
 function historyCsv(stored) {
   const rows = flattenPortfolioHoldings(stored?.snapshot || {});
   const header = ['기준일', '계좌', '데이터원', '시장', '종목코드', '종목명', '수량', '매입가', '현재가', '평가금액(원)', '평가손익(원)', '수익률(%)'];
-  const body = rows.map((row) => [
-    stored.snapshotDate,
-    row.account,
-    row.dataSource,
-    row.market,
-    row.code,
-    row.name,
-    row.quantity,
-    row.purchasePrice,
-    row.currentPrice,
-    row.evaluationAmountKrw,
-    row.profitLossKrw,
-    row.returnPct,
-  ].map(csvCell).join(','));
+  const body = rows.map((row) => [stored.snapshotDate,row.account,row.dataSource,row.market,row.code,row.name,row.quantity,row.purchasePrice,row.currentPrice,row.evaluationAmountKrw,row.profitLossKrw,row.returnPct].map(csvCell).join(','));
   return '\uFEFF' + [header.map(csvCell).join(','), ...body].join('\r\n');
 }
 
@@ -274,7 +277,7 @@ export async function handlePortfolioHistory(request, env, cookieAuthorized = fa
         }
       }
       const stored = await saveDailyPortfolioSnapshot(env, Date.now(), snapshotReason(request));
-      return jsonResponse({ ok: true, skipped: false, date: stored.snapshotDate, savedAt: stored.savedAt, summary: stored.summary, storageSchemaVersion: stored.storageSchemaVersion, valuationPolicy: stored.valuationPolicy });
+      return jsonResponse({ ok: true, skipped: false, date: stored.snapshotDate, savedAt: stored.savedAt, summary: stored.summary, accountValues: stored.accountValues, storageSchemaVersion: stored.storageSchemaVersion, valuationPolicy: stored.valuationPolicy });
     } catch (error) {
       return jsonResponse({ error: String(error?.message || error || 'snapshot failed') }, 502);
     }
@@ -300,15 +303,9 @@ export async function handlePortfolioHistory(request, env, cookieAuthorized = fa
   if (format === '.csv') {
     return new Response(historyCsv(stored), {
       status: 200,
-      headers: {
-        'content-type': 'text/csv; charset=utf-8',
-        'content-disposition': `attachment; filename="portfolio-${date}.csv"`,
-        'cache-control': 'no-store',
-      },
+      headers: { 'content-type': 'text/csv; charset=utf-8', 'content-disposition': `attachment; filename="portfolio-${date}.csv"`, 'cache-control': 'no-store' },
     });
   }
-  const headers = format === '.json'
-    ? { 'content-disposition': `attachment; filename="portfolio-${date}.json"` }
-    : {};
+  const headers = format === '.json' ? { 'content-disposition': `attachment; filename="portfolio-${date}.json"` } : {};
   return jsonResponse(stored, 200, headers);
 }
