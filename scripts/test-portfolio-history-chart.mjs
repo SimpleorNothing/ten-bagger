@@ -5,8 +5,10 @@ const seed=JSON.parse(fs.readFileSync('portfolio-history-seed.json','utf8'));
 const chart=fs.readFileSync('portfolio-history-chart.js','utf8');
 const entry=fs.readFileSync('worker-entry.js','utf8');
 
-assert.equal(seed.schemaVersion,1);
+assert.equal(seed.schemaVersion,2);
 assert.equal(seed.currency,'KRW');
+assert.equal(seed.series.principal[0][0],'2023-01-02');
+assert.equal(seed.series.principal[0][1],101412560);
 assert.equal(seed.series.personal[0][0],'2023-01-02');
 assert.equal(seed.series.personal[0][1],57145090);
 assert.equal(seed.series.dc[0][0],'2023-01-02');
@@ -18,6 +20,7 @@ assert.match(seed.policy.personal,/2023~2025/);
 assert.match(seed.policy.personal,/NHPLUG API 저장 이력이 우선/);
 assert.match(seed.policy.dc,/첨부 원장/);
 assert.match(seed.policy.irp,/첨부 원장/);
+assert.match(seed.policy.principal,/전체 투자원금/);
 
 assert.match(chart,/portfolioHistoryChart/);
 assert.match(chart,/SEED='\/portfolio-history-seed\.json'/);
@@ -33,9 +36,13 @@ assert.match(chart,/data-r=\"6M\"/);
 assert.match(chart,/data-r=\"1Y\"/);
 assert.match(chart,/data-r=\"3Y\"/);
 assert.match(chart,/data-r=\"ALL\"/);
+assert.match(chart,/전체 투자원금/);
+assert.match(chart,/phc-principal/);
+assert.match(chart,/height:428px/);
+assert.match(chart,/H=428/);
 assert.equal(/['"]\/(?:api\/)?(?:order|orders|buy|sell|trade)(?:\/|['"?])/i.test(chart),false);
 
-assert.match(entry,/portfolio-history-chart\.js\?v=20260913-01/);
+assert.match(entry,/portfolio-history-chart\.js\?v=20260913-03/);
 assert.match(entry,/historyChartAsset/);
 assert.match(entry,/historySeedAsset/);
 assert.match(entry,/seed\?\.series\?\.personal\?\.\[0\]\?\.\[0\] === '2023-01-02'/);
