@@ -5,8 +5,8 @@ import { applyPensionDailyValuation, snapshotNeedsSameDayCaptureRefresh } from '
 const HISTORY_PREFIX = 'portfolio-history/';
 const MAX_LIST_PAGES = 10;
 const MAX_LIST_ITEMS = 5000;
-const STORAGE_SCHEMA_VERSION = 3;
-const STORAGE_POLICY = 'full-sanitized-source; personal=NHPLUG API; DC/IRP=capture exact on capture date, otherwise latest captured quantity x latest market close; preserve all non-sensitive source fields';
+const STORAGE_SCHEMA_VERSION = 4;
+const STORAGE_POLICY = 'full-sanitized-source; personal=NHPLUG API; DC/IRP=capture exact on capture date, otherwise latest captured quantity x latest market close, falling back to the previous valid captured price when a quote is unavailable; preserve all non-sensitive source fields';
 
 function jsonResponse(value, status = 200, extraHeaders = {}) {
   return new Response(JSON.stringify(value), {
@@ -107,7 +107,7 @@ export async function saveDailyPortfolioSnapshot(env, scheduledTime = Date.now()
   const accountValues = summarizeAccountValues(payload);
   const stored = {
     storageSchemaVersion:STORAGE_SCHEMA_VERSION, storagePolicy:STORAGE_POLICY, snapshotDate, savedAt, reason, summary, accountValues,
-    valuationPolicy:{ personal:'NHPLUG_API', pensionCaptureDate:'CAPTURE_EXACT', pensionOtherDate:'LATEST_CAPTURE_QUANTITY_X_NAVER_CLOSE', missingPrice:'FAIL_CLOSED', cash:'NOT_CARRIED_IF_NOT_VISIBLE' },
+    valuationPolicy:{ personal:'NHPLUG_API', pensionCaptureDate:'CAPTURE_EXACT', pensionOtherDate:'LATEST_CAPTURE_QUANTITY_X_NAVER_CLOSE', missingPrice:'PREVIOUS_VALID_PRICE', cash:'NOT_CARRIED_IF_NOT_VISIBLE' },
     snapshot:payload,
   };
   await env.MEMO_BUCKET.put(historyKey(snapshotDate), JSON.stringify(stored), {
