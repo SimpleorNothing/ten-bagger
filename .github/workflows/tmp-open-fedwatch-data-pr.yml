@@ -1,0 +1,22 @@
+name: Temporary open FedWatch data PR
+on:
+  push:
+    branches: ['data/fedwatch-20260913']
+    paths: ['.github/workflows/tmp-open-fedwatch-data-pr.yml']
+permissions:
+  contents: read
+  pull-requests: write
+steps-placeholder: null
+jobs:
+  open:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Open PR if absent
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          if gh pr list --head data/fedwatch-20260913 --base main --state open --json number --jq 'length' | grep -q '^0$'; then
+            gh pr create --base main --head data/fedwatch-20260913 --title 'data: persist web-verified FedWatch metadata' --body 'Persist the 2026-09-13 audit result: true source date 2026-09-12, Investing.com Updated Sep 12 2026 14:35 EST, Future Price 95.910, probabilities 2.6/22.7/47.3/27.4%, <=4.00% 25.3%. Synchronizes pulse and audit record after automated sources failed safely.'
+          fi
