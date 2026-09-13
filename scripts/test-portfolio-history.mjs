@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
 import {
   flattenPortfolioHoldings,
   handlePortfolioHistory,
@@ -30,6 +31,8 @@ class Bucket {
 
 assert.equal(kstDate('2026-09-11T15:00:00Z'), '2026-09-12');
 assert.equal(historyKey('2026-09-12'), 'portfolio-history/2026-09-12.json');
+const workerSource=fs.readFileSync(new URL('../worker.js',import.meta.url),'utf8');
+assert.match(workerSource,/pathname === '\/api\/portfolio\/history\.csv'/);
 
 const overseasDetail = {
   fc_sec_trd_nat_cd: '200',

@@ -135,7 +135,7 @@ export default {
     if (request.method === 'GET' && url.pathname === '/api/portfolio/activity') {
       return handlePortfolioActivity(request, env, await isAuthorized(request, env));
     }
-    if (url.pathname === '/api/portfolio/history' || url.pathname.startsWith('/api/portfolio/history/')) {
+    if (url.pathname === '/api/portfolio/history' || url.pathname === '/api/portfolio/history.csv' || url.pathname.startsWith('/api/portfolio/history/')) {
       return handlePortfolioHistory(request, env, await isAuthorized(request, env));
     }
     if (request.method === 'GET' && url.pathname === '/api/briefs' && await isAuthorized(request, env)) {
