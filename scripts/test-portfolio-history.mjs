@@ -156,6 +156,11 @@ await bucket.put(historyKey('2026-09-12'), JSON.stringify(stored), {
   },
 });
 
+const storedPrevious = { ...stored, snapshotDate: '2026-09-11', savedAt: '2026-09-11T08:00:00.000Z' };
+await bucket.put(historyKey('2026-09-11'), JSON.stringify(storedPrevious), {
+  customMetadata: { snapshotDate: '2026-09-11', savedAt: storedPrevious.savedAt, holdingCount: '2', accountCount: '2', holdingValueKrw: '134817620', cashIncluded: 'false', storageSchemaVersion: '2', detailStorage: 'full-sanitized-source' },
+});
+
 const env = { MEMO_BUCKET: bucket };
 let res = await handlePortfolioHistory(new Request('https://simpleornothing.com/api/portfolio/history'), env, false);
 assert.equal(res.status, 401);
@@ -166,7 +171,7 @@ let body = await res.json();
 assert.equal(body.scheduledAt, '17:00');
 assert.equal(body.timezone, 'Asia/Seoul');
 assert.match(body.storagePolicy, /full-sanitized-source/);
-assert.equal(body.dates.length, 1);
+assert.equal(body.dates.length, 2);
 assert.equal(body.dates[0].date, '2026-09-12');
 assert.equal(body.dates[0].holdingValueKrw, 134817620);
 assert.equal(body.dates[0].storageSchemaVersion, 2);
@@ -190,5 +195,12 @@ assert.match(csv, /크레도/);
 assert.match(csv, /162\.92/);
 assert.match(csv, /-6\.11/);
 assert.equal(csv.includes('800-02-092728'), false);
+
+res = await handlePortfolioHistory(new Request('https://simpleornothing.com/api/portfolio/history.csv'), env, true);
+assert.equal(res.status, 200);
+assert.match(res.headers.get('content-disposition') || '', /portfolio-history-all-dates\.csv/);
+const allDatesCsv = await res.text();
+assert.match(allDatesCsv, /2026-09-11/);
+assert.match(allDatesCsv, /2026-09-12/);
 
 console.log('portfolio history tests passed');
