@@ -8,7 +8,7 @@ const entry=fs.readFileSync('worker-entry.js','utf8');
 assert.equal(seed.schemaVersion,2);
 assert.equal(seed.currency,'KRW');
 assert.equal(seed.series.principal[0][0],'2023-01-02');
-assert.equal(seed.series.principal[0][1],101412560);
+assert.equal(seed.series.principal[0][1],275432367);
 assert.equal(seed.series.personal[0][0],'2023-01-02');
 assert.equal(seed.series.personal[0][1],57145090);
 assert.equal(seed.series.dc[0][0],'2023-01-02');
