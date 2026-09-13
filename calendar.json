@@ -1,301 +1,301 @@
 {
- "asOf": "2026-09-13T07:48:51+09:00",
- "timezone": "Asia/Seoul",
- "timezoneLabel": "KST",
- "source": "수기 큐레이션 + derive-calendar.mjs 데일리 refresh · BLS JOLTS 공식 발표 일정 · Federal Reserve G.17 7월 산업생산 및 7/28~29 FOMC 의사록 · 관세청 7월 월간 확정치 및 8월 1~20일 잠정치 · NVIDIA 공식 IR · Marvell 공식 IR Calendar · Reuters 2026-08-21 베센트 기자회견 일정 · U.S. Treasury 2026년 4분기 Quarterly Refunding 일정 · Federal Reserve 2026년 8월 공식 캘린더 · Kansas City Fed Jackson Hole 2026 공식 일정 · U.S. Treasury Operation Economic Outcast 2026-08-24 · Federal Reserve Chairman Kevin Warsh Jackson Hole remarks 2026-08-28 · U.S. Senate Daily Press 2026-09-01 CLARITY Act cloture schedule",
- "note": "01 시장 모니터링 「다가오는 일정」 임박 이벤트 소스. 모든 사용자 표시 일정의 날짜·시각은 한국시간(KST, Asia/Seoul, UTC+9) 기준으로 저장·표시한다. d는 KST 기준 실제 공개·행사일, when은 KST 기준 표시 문자열이다. 해외 원문이 ET/PT/JST 등 현지시간으로 공지돼도 사용자 표시값은 반드시 KST로 환산한다. index.html 런타임 fetch → CAL_NOW → renderCalNow()가 #v-market #calNow에 D-N 카드 렌더. 국내 상장사 실적 이벤트는 DART·KRX·회사 공식 IR 등 구조화된 공식 검증 정보가 없는 경우 자동 제외한다. 2026-09-11 정기 발표 점검에서 BLS 8월 PPI와 EIA 9/4 주간 원유재고를 공식값으로 전 소비처 동기화. 2026-09-12 정기 발표 점검에서 BLS 8월 CPI 공식값을 전 소비처 동기화. 2026-09-12 Oracle FY27 Q1 공식 실적을 AI 인프라 분기 발표 소비처에 동기화.",
- "grace": 0,
- "events": [
-  {
-   "d": "2026-08-18",
-   "cat": "macro",
-   "lbl": "美 산업생산 · 7월분",
-   "meta": "발표 확인 · Federal Reserve G.17 2026-08-18 공식 발표. 산업생산 전월비 +0.2%, 제조업 생산 +0.2%, 전년비 +1.1%, 설비가동률 76.3%. 이전 '발표 대기' 상태를 공식 Current Release·G.17 feed 확인 후 종료. 사용자 표시 시각은 KST 기준. · 원문: https://www.federalreserve.gov/releases/g17/current/ · 확인: 2026-08-19 17:02 KST",
-   "when": "08-18 22:15 KST (발표 완료 · IP +0.2% MoM)"
-  },
-  {
-   "d": "2026-08-20",
-   "cat": "macro",
-   "lbl": "FOMC 의사록 · 7/28~29 회의",
-   "meta": "발표 확인 · Federal Reserve 공식 일정 기준 2026-08-20 03:00 KST 공개. 7/28~29 회의에서 기준금리 3.50~3.75% 동결(9대3)이었지만, 의사록상 여러 참가자는 인플레이션이 하락하지 않으면 추가 긴축이 필요할 가능성이 높다고 평가했고 일부는 당시 인상을 선호. 최근 CPI 둔화에도 인플레이션 지속성에 대한 경계가 더 넓었음. · 공식 일정: https://www.federalreserve.gov/newsevents/2026-august.htm · 원문: https://www.federalreserve.gov/monetarypolicy/fomcminutes20260729.htm · 확인: 2026-08-20 17:05 KST",
-   "when": "08-20 03:00 KST (발표 완료 · 인플레 지속 시 추가 긴축 가능성)"
-  },
-  {
-   "d": "2026-08-21",
-   "cat": "macro",
-   "lbl": "한국 수출입 · 8월 1~20일 잠정치",
-   "meta": "발표 확인 · 관세청 2026-08-21 등록. 수출 552.07억달러(+56.0% YoY), 수입 412.31억달러(+19.0%), 무역수지 139.75억달러 흑자. 조업일수 보정 일평균 수출 +61.5%, 반도체 수출 260억달러로 동기간 역대 최대. 7월 월간 확정치(2026-08-18 등록)는 수출 989.59억달러(+63.0%), 수입 685.67억달러(+26.5%), 무역수지 303.92억달러 흑자, 반도체 수출 412억달러. · 원문: https://www.customs.go.kr/kcs/na/ntt/selectNttInfo.do?bbsId=1362&mi=2891&nttSn=10173983&nttSnUrl=88748d91848cefc847351b9e9a2b4e1c · 확인: 2026-08-23 07:28 KST",
-   "when": "08-21 KST (발표 완료 · 수출 +56.0% YoY)"
-  },
-  {
-   "d": "2026-08-25",
-   "cat": "pol",
-   "lbl": "베센트 이란 제재 발표",
-   "meta": "발표 확인 · 미 재무부는 2026-08-24(미국 현지일) Operation Economic Outcast를 공식 개시하고 이란 정권 및 조력자의 글로벌 금융·경제 연결을 차단하는 전정부 경제 압박 캠페인을 발표. Scott Bessent 재무장관 공식 발언도 같은 날 공개됐다. 기존 발표 예정 상태를 공식 원문 확인 후 종료. · 원문: https://home.treasury.gov/news/press-releases/sb0613 · 발언: https://home.treasury.gov/news/press-releases/sb0614 · 등록일: 2026-08-24 · 확인: 2026-08-30 08:24 KST",
-   "when": "08-25 KST (발표 완료 · Operation Economic Outcast 개시)"
-  },
-  {
-   "d": "2026-08-26",
-   "cat": "macro",
-   "lbl": "美 GDP 2Q26 2차 추정 · PCE 7월분",
-   "meta": "발표 확인 · BEA 2026-08-26 공식 발표. 2Q26 실질 GDP 2차 추정은 연율 +1.5%로 속보치와 동일, 1Q +2.1% 대비 둔화. 민간 국내 최종수요는 +4.2%로 속보치 +3.9%에서 상향. 7월 PCE 물가는 전월비 +0.2%, 전년비 +3.7%, 근원 PCE는 전월비 +0.2%, 전년비 +3.3%. 7월 실질 PCE는 전월비 0.0%, 개인소득 +0.4%, 저축률 3.0%. · GDP 원문: https://www.bea.gov/news/2026/gdp-second-estimate-and-corporate-profits-2nd-quarter-2026 · PCE 원문: https://www.bea.gov/news/2026/personal-income-and-outlays-july-2026 · 확인: 2026-08-27 07:33 KST",
-   "when": "08-26 21:30 KST (발표 완료 · GDP +1.5% SAAR / PCE +3.7% YoY)"
-  },
-  {
-   "d": "2026-08-27",
-   "cat": "macro",
-   "lbl": "한국 금통위",
-   "meta": "발표 확인 · 한국은행 금융통화위원회 2026-08-27 통화정책방향. 기준금리를 2.75%에서 3.00%로 0.25%p 인상. 수출 호조·내수 회복으로 성장세가 예상보다 높고 물가가 상당기간 목표수준을 상회할 것으로 전망해 선제 대응이 필요하다고 판단. 2026년 성장률 전망 3.3%, 2027년 2.9%. · 원문: https://www.bok.or.kr/portal/bbs/P0000559/view.do?menuNo=200690&nttId=11064191 · 등록일: 2026-08-27 · 확인: 2026-08-28 07:30 KST",
-   "when": "08-27 KST (발표 완료 · 기준금리 3.00%, +25bp)"
-  },
-  {
-   "d": "2026-08-27",
-   "cat": "earn",
-   "lbl": "엔비디아 FY27 Q2 실적",
-   "tk": "NVDA",
-   "meta": "발표 확인 · NVIDIA 공식 IR 2026-08-26 등록. FY27 Q2 매출 $96.221B(+18% QoQ, +106% YoY), 데이터센터 매출 $89.0B(+18% QoQ, +117% YoY), 비GAAP EPS $2.22. FY27 Q3 매출 가이던스 $108.0B±2%, 비GAAP GM 74.0%±0.5%p. 중국 데이터센터 compute 매출은 Q3 가이던스에 포함하지 않음. · 원문: https://investor.nvidia.com/news/press-release-details/2026/NVIDIA-Announces-Financial-Results-for-Second-Quarter-Fiscal-2027/default.aspx · 확인: 2026-08-28 07:30 KST",
-   "when": "08-27 KST (발표 완료 · 매출 $96.2B / DC $89.0B)"
-  },
-  {
-   "d": "2026-08-28",
-   "cat": "macro",
-   "lbl": "연준의장 Kevin Warsh · 잭슨홀 기조연설",
-   "meta": "발표 확인 · Federal Reserve Chairman Kevin Warsh는 2026-08-28 Jackson Hole Economic Policy Symposium에서 「In Our Time」 연설을 공개. 2% 물가목표 복귀 의지를 재확인하고 인플레이션이 충분히 둔화하지 않으면 추가 금리인상이 필요할 수 있음을 시사했으며, 금리 선행안내 축소와 데이터 중심 정책운영을 강조. 기존 연설 예정 상태를 공식 원문 확인 후 종료. · 원문: https://www.federalreserve.gov/newsevents/speech/warsh20260828a.htm · 등록일: 2026-08-28 · 확인: 2026-08-30 08:24 KST",
-   "when": "08-28 23:00 KST (발표 완료 · 2% 물가목표·추가 긴축 가능성 재확인)"
-  },
-  {
-   "d": "2026-08-28",
-   "cat": "earn",
-   "lbl": "Marvell FY27 Q2 실적",
-   "tk": "MRVL",
-   "meta": "발표 확인 · Marvell 공식 IR 2026-08-27 등록. FY27 Q2 매출 $2.739B(+37% YoY), 데이터센터 매출 $2.172B(+46% YoY, 전체 79%), 비GAAP GM 58.9%, 비GAAP EPS $0.94. AI 관련 bookings가 매우 강해 FY27·FY28 매출 전망을 재차 상향. FY27 Q3 매출 가이던스 $3.150B±5%, 비GAAP EPS $1.10±0.05. · 원문: https://investor.marvell.com/news-events/press-releases/detail/1031/marvell-technology-inc-reports-second-quarter-of-fiscal-year-2027-financial-results · 확인: 2026-08-28 07:30 KST",
-   "when": "08-28 KST (발표 완료 · 매출 $2.739B / DC +46% YoY)"
-  },
-  {
-   "d": "2026-08-31",
-   "cat": "macro",
-   "lbl": "중국 제조업 PMI · 2026년 8월",
-   "meta": "발표 확인 · 중국 국가통계국 2026-08-31 등록. 제조업 PMI 49.8로 7월 49.2 대비 +0.6p, 생산 50.4, 신규주문 50.6. 헤드라인은 50 미만이어서 제조업 전체는 수축 구간이나 생산·신규주문은 확장권으로 복귀. · 원문: https://www.stats.gov.cn/sj/zxfb/202608/t20260831_1965154.html · 등록일: 2026-08-31 · 확인: 2026-09-02 07:30 KST",
-   "when": "08-31 KST (발표 완료 · 제조업 PMI 49.8)"
-  },
-  {
-   "d": "2026-09-02",
-   "cat": "macro",
-   "lbl": "한국 소비자물가 · 2026년 8월",
-   "meta": "발표 확인 · 국가데이터처 2026-09-02 공식 발표. 소비자물가지수 120.05(2020=100), 전월비 +0.2%, 전년동월비 +3.1%. 6월 +3.2%, 7월 +2.8%에 이어 8월 다시 3%대로 상승. · 원문: https://www.mods.go.kr/cpi/ · 등록일: 2026-09-02 · 확인: 2026-09-05 11:56 KST",
-   "when": "09-02 KST (발표 완료 · CPI +3.1% YoY)"
-  },
-  {
-   "d": "2026-09-03",
-   "cat": "earn",
-   "lbl": "브로드컴 FY26 Q3 실적",
-   "tk": "AVGO",
-   "meta": "발표 확인 · Broadcom 공식 IR 2026-09-02 등록. FY26 Q3 매출 $29.591B(+86% YoY), GAAP 영업이익 $15.955B, 비GAAP EPS $3.32, AI 반도체 매출 $16.7B(+221% YoY, +54% QoQ). FY26 Q4 매출 가이던스 약 $34.8B, AI 반도체 매출 전망 $21.7B. · 원문: https://investors.broadcom.com/news-releases/news-release-details/broadcom-inc-announces-third-quarter-fiscal-year-2026-financial · 등록일: 2026-09-02 · 확인: 2026-09-05 11:56 KST",
-   "when": "09-03 KST (발표 완료 · 매출 $29.591B / AI 반도체 $16.7B)"
-  },
-  {
-   "d": "2026-09-04",
-   "cat": "macro",
-   "lbl": "美 고용보고서 (실업률·NFP) · 8월분",
-   "meta": "발표 확인 · BLS 2026-09-04 08:30 ET 등록. 비농업고용 +162K, 실업률 4.1%, 민간 비농업 평균 시간당임금 +0.3% MoM/+3.1% YoY. 6월 NFP +20K→+31K, 7월 -23K→+21K로 두 달 합계 +55K 상향 수정. · 원문: https://www.bls.gov/news.release/archives/empsit_09042026.htm · 등록일: 2026-09-04 · 확인: 2026-09-05 11:56 KST",
-   "when": "09-04 21:30 KST (발표 완료 · NFP +162K / 실업률 4.1%)"
-  },
-  {
-   "d": "2026-09-05",
-   "cat": "macro",
-   "lbl": "SIA/WSTS 글로벌 반도체 판매 · 2026년 7월",
-   "meta": "발표 확인 · SIA 2026-09-04 17:00 ET 등록. WSTS 집계 글로벌 반도체 판매 7월 $146.8B, 전월비 +6.4%, 전년비 +135.1%. 최신 발표의 6월 비교 기준은 $137.9B로, 2026-08-06 발표의 $134.5B에서 수정. 월간 판매는 3개월 이동평균. · 원문: https://www.semiconductors.org/global-semiconductor-sales-increase-6-4-month-to-month-in-july/ · 등록일: 2026-09-04 · 확인: 2026-09-07 07:27 KST",
-   "when": "09-05 06:00 KST (발표 완료 · $146.8B / +6.4% MoM)"
-  },
-  {
-   "d": "2026-09-08",
-   "cat": "macro",
-   "lbl": "중국 수출입 · 2026년 8월",
-   "meta": "발표 확인 · 중국 해관총서 2026-09-08 공개 데이터. 달러 기준 수출 +25.0% YoY(7월 +23.9%), 수입 +28.2%(7월 +27.5%), 무역흑자 $119.09B(7월 $112.50B). 8월 수출 $401.44B, 수입 $282.36B. 위안화 기준 8월 총교역 4.65조위안(+19.8% YoY), 수출 +18.6%, 수입 +21.7%. 예측값 미사용. · 공식 배포: https://english.www.gov.cn/archive/statistics/202609/08/content_WS6a9fb46bc6d00ca5f9a0d102.html · 해관총서 포털: https://online.customs.gov.cn/ · 등록일: 2026-09-08 · 확인: 2026-09-09 07:39 KST",
-   "when": "09-08 KST (발표 완료 · 수출 +25.0% / 수입 +28.2% YoY)"
-  },
-  {
-   "d": "2026-09-08",
-   "cat": "macro",
-   "lbl": "미 재무부 3년물 국채 입찰",
-   "meta": "발표 확인 · 고금리 낙찰수익률 4.474%, bid-to-cover 2.72, 간접낙찰 비중 62.1%, 발행예정액 $58B. 직전 동일 만기 입찰 2026-08-11 4.291% / BTC 2.71. 원문: https://www.treasurydirect.gov/instit/annceresult/press/preanre/2026/R_20260908_3.pdf · TreasuryDirect 업데이트 2026-09-08T13:03:18 ET · 확인 2026-09-13 07:48 KST",
-   "when": "2026-09-08 ET (발표 완료)"
-  },
-  {
-   "d": "2026-09-09",
-   "cat": "macro",
-   "lbl": "미 재무부 10년물 국채 입찰",
-   "meta": "발표 확인 · 고금리 낙찰수익률 4.834%, bid-to-cover 2.71, 간접낙찰 비중 79.2%, 발행예정액 $39B. 직전 동일 만기 입찰 2026-08-12 4.683% / BTC 2.53. 원문: https://www.treasurydirect.gov/instit/annceresult/press/preanre/2026/R_20260909_2.pdf · TreasuryDirect 업데이트 2026-09-09T13:03:22 ET · 확인 2026-09-13 07:48 KST",
-   "when": "2026-09-09 ET (발표 완료)"
-  },
-  {
-   "d": "2026-09-10",
-   "cat": "macro",
-   "lbl": "EIA 주간 원유재고 · 9/4 주간",
-   "meta": "EIA 확정 · 9/4 종료 주간 미국 상업용 원유재고 424.069M배럴, 전주 424.460M배럴 대비 -0.391M배럴. 노동절로 9/10 지연 발표. 단기 재고는 소폭 감소했으며 규모가 작아 단독 방향 신호로 과대해석하지 않음. · 원문: https://www.eia.gov/petroleum/supply/weekly/ · 등록일: 2026-09-10 · 확인/갱신: 2026-09-11 07:30 KST",
-   "when": "09-10 (확정)"
-  },
-  {
-   "d": "2026-09-10",
-   "cat": "macro",
-   "lbl": "EIA STEO · 2026년 9월",
-   "meta": "발표 확인 · EIA 2026-09-09 공식 9월 STEO. 2026 Brent 연평균 $91/b(8월 전망 $87), 2027 $74($69). 2026 미국 전력생산 4,368BkWh(+2.2%)로 사상 최대, 2027 +1.7%; 전력판매 2026 4,135BkWh, 2027 4,211BkWh. 데이터센터와 제조업 전력수요가 증가 동력. 10월말 천연가스 재고 전망 3,969Bcf(8월 3,985Bcf). · 원문: https://www.eia.gov/pressroom/releases/press592.php · 등록일: 2026-09-09 · 확인: 2026-09-10 07:27 KST",
-   "when": "09-10 01:00 KST (발표 완료 · Brent 2026 $91 / 전력생산 4,368BkWh)"
-  },
-  {
-   "d": "2026-09-10",
-   "cat": "macro",
-   "lbl": "美 PPI · 8월분",
-   "meta": "BLS 확정 · 8월 최종수요 PPI 전월비 +0.4%(7월 +0.1%), 전년비 +5.4%. 식품·에너지·무역서비스 제외 최종수요 PPI 전월비 +0.3%(7월 +0.4%), 전년비 +4.7%. 생산단 물가 재가속으로 금리·할인율 하방을 제약하는 입력. · 원문: https://www.dol.gov/newsroom/economicdata/ppi_09102026.pdf · 등록일: 2026-09-10 · 확인/갱신: 2026-09-11 07:30 KST",
-   "when": "09-10 21:30 KST (확정)"
-  },
-  {
-   "d": "2026-09-10",
-   "cat": "macro",
-   "lbl": "미 재무부 30년물 국채 입찰",
-   "meta": "발표 확인 · 고금리 낙찰수익률 5.308%, bid-to-cover 2.61, 간접낙찰 비중 79.5%, 발행예정액 $22B. 직전 동일 만기 입찰 2026-08-13 5.216% / BTC 2.39. 원문: https://www.treasurydirect.gov/instit/annceresult/press/preanre/2026/R_20260910_3.pdf · TreasuryDirect 업데이트 2026-09-10T13:03:28 ET · 확인 2026-09-13 07:48 KST",
-   "when": "2026-09-10 ET (발표 완료)"
-  },
-  {
-   "d": "2026-09-11",
-   "cat": "infl",
-   "lbl": "美 CPI · 8월분",
-   "meta": "발표 확인 · BLS 2026-09-11 공식 발표. 헤드라인 CPI 전월비 +0.4%, 전년비 +3.4%; 근원 CPI 전월비 +0.3%, 전년비 +2.4%. 직전월 헤드라인 YoY +3.4%와 비교. · 원문: https://www.bls.gov/news.release/cpi.nr0.htm · 등록일: 2026-09-11 · 확인/갱신: 2026-09-12 09:32 KST",
-   "when": "09-11 21:30 KST (발표 완료 · CPI +0.4% MoM / +3.4% YoY)"
-  },
-  {
-   "d": "2026-09-11",
-   "cat": "macro",
-   "lbl": "미 재무부 월간 재정수지(MTS) · 2026년 8월",
-   "meta": "발표 확인 · 8월 연방 재정적자 $166.8B(7월 $432.3B, 전년동월 $344.8B), 세입 $360.0B·지출 $526.8B. FY2026 10~8월 누적 적자 $1.966T, 전년동기 $1.775T(+10.7%). 공식 MTS Table 1: https://api.fiscaldata.treasury.gov/services/api/fiscal_service/v1/accounting/mts/mts_table_1?filter=record_date%3Aeq%3A2026-08-31&page%5Bsize%5D=100 · 등록일 2026-09-11 · 확인 2026-09-13 07:35 KST",
-   "when": "09-11 ET (발표 완료 · 8월 적자 $166.8B)"
-  },
-  {
-   "d": "2026-09-11",
-   "cat": "earn",
-   "lbl": "Oracle FY27 Q1 실적",
-   "tk": "ORCL",
-   "meta": "발표 확인 · Oracle 공식 IR 2026-09-10 등록. FY27 Q1 매출 $19.345B(+30% YoY), Cloud $11.607B(+62%), OCI/IaaS $7.4B(+121%), RPO $664B(Q4 $638B), CAPEX $28.499B(전년동기 $8.502B), FCF -$5.396B. Q2 가이던스: 매출 +30~34%, Cloud +65~71%, 비GAAP EPS $1.85~1.93. FY27 매출 최소 $90B, 비GAAP EPS $8.10. · 원문: https://investor.oracle.com/investor-news/news-details/2026/Oracle-Announces-Q1-Results-Driven-by-Triple-Digit-Growth-in-Cloud-Infrastructure-Revenues/default.aspx · 등록일: 2026-09-10 · 확인: 2026-09-12 08:15 KST",
-   "when": "09-11 KST (발표 완료 · OCI $7.4B +121% / RPO $664B)"
-  },
-  {
-   "d": "2026-09-16",
-   "cat": "pol",
-   "lbl": "美 CLARITY Act · 상원 cloture 표결",
-   "meta": "미 상원 공식 일정 기준 H.R.3633 Digital Asset Market Clarity Act의 motion to proceed에 대한 cloture motion이 2026-09-15 14:15 ET에 ripen. 한국시간은 2026-09-16 03:15 KST. 일반 입법 cloture는 통상 60표가 필요하며, 통과 시 본회의 심의·수정안 처리 단계로 진행 가능. 실제 floor vote 시각은 상원 운영에 따라 변동될 수 있음. · 원문: https://www.dailypress.senate.gov/tuesday-september-1-2026/ · 확인: 2026-09-04 KST",
-   "when": "09-16 03:15 KST (cloture · 60표 관문, 시각 변동 가능)"
-  },
-  {
-   "d": "2026-09-17",
-   "cat": "macro",
-   "lbl": "미국 FOMC 금리결정",
-   "meta": "Federal Reserve 공식 2026년 FOMC 일정(9/15~16) · SEP·점도표 포함 회의. 금리결정 및 기자회견의 한국시간 기준 공개일은 2026-09-17. · 원문: https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm · 확인: 2026-08-23 KST",
-   "when": "09-17 03:00 KST (금리결정) · 03:30 KST (기자회견)"
-  },
-  {
-   "d": "2026-09-18",
-   "cat": "macro",
-   "lbl": "일본은행(BOJ) 금리결정",
-   "meta": "Bank of Japan 공식 통화정책회의 일정 9/17~18 · 정책결정은 회의 종료일 발표. 사용자 표시 기준=KST. 정확한 발표시각은 미확정. · 원문: https://www.boj.or.jp/en/mopo/mpmsche_minu/index.htm · 확인: 2026-08-15 KST",
-   "when": "09-18 KST (정책결정 · 발표시각 미확정)"
-  },
-  {
-   "d": "2026-09-24",
-   "cat": "pol",
-   "lbl": "미·중 정상회담",
-   "meta": "미국·중국 정상 간 회담 일정 · 핵심 확인: 관세·수출통제·AI 반도체 및 공급망 협상 결과, 후속 공동성명. · 사용자 지정 일정 2026-09-24, 표시 기준=KST. 개최지·정확한 시각 확정 시 KST 기준으로 갱신.",
-   "when": "09-24 KST (시간 미확정)"
-  },
-  {
-   "d": "2026-09-29",
-   "cat": "macro",
-   "lbl": "미국 JOLTS 구인·이직 보고서 · 2026년 8월",
-   "meta": "미국 노동통계국(BLS) 공식 발표 일정. 확인 포인트=구인건수, 채용, 자발적 퇴직률 및 노동수요 둔화 여부. 발표 시각은 미국 동부시간에서 한국시간으로 변환. · 원문: https://www.bls.gov/schedule/news_release/jolts.htm · 확인: 2026-09-06 KST",
-   "when": "09-29 23:00 KST (발표)"
-  },
-  {
-   "d": "2026-10-06",
-   "cat": "earn",
-   "lbl": "Marvell Investor Day 2026",
-   "tk": "MRVL",
-   "meta": "확정 · Marvell 공식 IR Calendar: 2026-10-06 New York City 오전 개최. 정확한 시작 시각은 아직 미공개. KST로는 10/06 밤~10/07 새벽 구간이 예상되며 공식 시각 공개 시 KST로 확정 갱신. 확인 포인트=FY28~FY29 custom silicon·networking 장기 로드맵, AI 매출 구성, 장기 마진·FCF·자본배분. · 공식 IR: https://investor.marvell.com/news-events/ir-calendar · 확인: 2026-08-23 KST",
-   "when": "10-06 밤~10-07 새벽 KST (정확한 시작시각 미공개)"
-  },
-  {
-   "d": "2026-10-15",
-   "cat": "earn",
-   "lbl": "TSMC 3Q26 실적",
-   "tk": "TSM",
-   "meta": "추정 — IR 미확정(과거 3Q 10월 중순 목요일: '25 10/16·'24 10/17) · 상류 파운드리·연간 capex 리드스루 게이트. 날짜·시각은 KST 기준으로 확정 시 갱신.",
-   "when": "~10-15 KST (3Q·추정, 시간 미확정)"
-  },
-  {
-   "d": "2026-10-22",
-   "cat": "macro",
-   "lbl": "한국 금통위",
-   "meta": "2026 제7회 통화정책방향 결정회의 · 기준금리 결정. 사용자 표시 기준=KST.",
-   "when": "10-22 KST (기준금리 결정 · 정확한 발표시각은 일정 확정 시 갱신)"
-  },
-  {
-   "d": "2026-10-29",
-   "cat": "macro",
-   "lbl": "미국 FOMC 금리결정",
-   "meta": "Federal Reserve 공식 2026년 FOMC 일정(10/27~28). 금리결정 및 기자회견의 한국시간 기준 공개일은 2026-10-29. · 원문: https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm · 확인: 2026-08-23 KST",
-   "when": "10-29 03:00 KST (금리결정) · 03:30 KST (기자회견)"
-  },
-  {
-   "d": "2026-11-04",
-   "cat": "macro",
-   "lbl": "미국 JOLTS 구인·이직 보고서 · 2026년 9월",
-   "meta": "미국 노동통계국(BLS) 공식 발표 일정. 확인 포인트=구인건수, 채용, 자발적 퇴직률 및 노동수요 둔화 여부. 발표 시각은 미국 동부시간에서 한국시간으로 변환. · 원문: https://www.bls.gov/schedule/news_release/jolts.htm · 확인: 2026-09-06 KST",
-   "when": "11-04 00:00 KST (발표)"
-  },
-  {
-   "d": "2026-11-04",
-   "cat": "macro",
-   "lbl": "美 재무부 4분기 분기발행계획(QRA)",
-   "meta": "확정 · U.S. Treasury 공식 Quarterly Refunding 일정. 11/2 KST에는 차입 추정·경제정책 자료가 선행되고, 11/4 22:30 KST에는 정책성명·TBAC 자료·발행 및 바이백 일정이 공개된다. 핵심 확인=10~30년 장기물 바이백의 11/4 이후 규모, T-bill 비중(7/31/26 22.2%)의 추가 상승 여부, 쿠폰물 발행 변화, TGA·민간순차입 전망. 단기채 확대를 곧바로 QE로 해석하지 않고 ON RRP·은행 준비금·레포금리를 함께 확인한다. · 공식 일정: https://home.treasury.gov/policy-issues/financing-the-government/quarterly-refunding/most-recent-quarterly-refunding-documents · 바이백 발표: https://home.treasury.gov/news/press-releases/sb0607 · 확인: 2026-08-23 KST",
-   "when": "11-04 22:30 KST (정책성명·발행/바이백 계획)"
-  },
-  {
-   "d": "2026-11-04",
-   "cat": "pol",
-   "lbl": "美 중간선거",
-   "meta": "미국 2026 중간선거의 투표·개표를 한국시간 기준으로 표시. 미국 각 시간대 투표는 KST 기준 11/03 밤부터 11/04까지 이어지며 주요 개표 결과는 11/04 KST에 본격 확인. 하원 전체·상원 1/3 · AI 인프라 정책 베타.",
-   "when": "11-04 KST (주요 투표 종료·개표 본격화)"
-  },
-  {
-   "d": "2026-11-26",
-   "cat": "macro",
-   "lbl": "한국 금통위",
-   "meta": "2026 제8회 통화정책방향 결정회의 · 연내 마지막 통방. 사용자 표시 기준=KST.",
-   "when": "11-26 KST (기준금리 결정 · 정확한 발표시각은 일정 확정 시 갱신)"
-  },
-  {
-   "d": "2026-12-02",
-   "cat": "macro",
-   "lbl": "미국 JOLTS 구인·이직 보고서 · 2026년 10월",
-   "meta": "미국 노동통계국(BLS) 공식 발표 일정. 확인 포인트=구인건수, 채용, 자발적 퇴직률 및 노동수요 둔화 여부. 발표 시각은 미국 동부시간에서 한국시간으로 변환. · 원문: https://www.bls.gov/schedule/news_release/jolts.htm · 확인: 2026-09-06 KST",
-   "when": "12-02 00:00 KST (발표)"
-  },
-  {
-   "d": "2026-12-10",
-   "cat": "macro",
-   "lbl": "미국 FOMC 금리결정",
-   "meta": "Federal Reserve 공식 2026년 FOMC 일정(12/8~9) · SEP·점도표 포함 회의. 금리결정 및 기자회견의 한국시간 기준 공개일은 2026-12-10. · 원문: https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm · 확인: 2026-08-23 KST",
-   "when": "12-10 04:00 KST (금리결정) · 04:30 KST (기자회견)"
+  "asOf": "2026-09-13T09:11:11+09:00",
+  "timezone": "Asia/Seoul",
+  "timezoneLabel": "KST",
+  "source": "수기 큐레이션 + derive-calendar.mjs 데일리 refresh · BLS JOLTS 공식 발표 일정 · Federal Reserve G.17 7월 산업생산 및 7/28~29 FOMC 의사록 · 관세청 7월 월간 확정치 및 8월 1~20일 잠정치 · NVIDIA 공식 IR · Marvell 공식 IR Calendar · Reuters 2026-08-21 베센트 기자회견 일정 · U.S. Treasury 2026년 4분기 Quarterly Refunding 일정 · Federal Reserve 2026년 8월 공식 캘린더 · Kansas City Fed Jackson Hole 2026 공식 일정 · U.S. Treasury Operation Economic Outcast 2026-08-24 · Federal Reserve Chairman Kevin Warsh Jackson Hole remarks 2026-08-28 · U.S. Senate Daily Press 2026-09-01 CLARITY Act cloture schedule",
+  "note": "01 시장 모니터링 「다가오는 일정」 임박 이벤트 소스. 모든 사용자 표시 일정의 날짜·시각은 한국시간(KST, Asia/Seoul, UTC+9) 기준으로 저장·표시한다. d는 KST 기준 실제 공개·행사일, when은 KST 기준 표시 문자열이다. 해외 원문이 ET/PT/JST 등 현지시간으로 공지돼도 사용자 표시값은 반드시 KST로 환산한다. index.html 런타임 fetch → CAL_NOW → renderCalNow()가 #v-market #calNow에 D-N 카드 렌더. 국내 상장사 실적 이벤트는 DART·KRX·회사 공식 IR 등 구조화된 공식 검증 정보가 없는 경우 자동 제외한다. 2026-09-11 정기 발표 점검에서 BLS 8월 PPI와 EIA 9/4 주간 원유재고를 공식값으로 전 소비처 동기화. 2026-09-12 정기 발표 점검에서 BLS 8월 CPI 공식값을 전 소비처 동기화. 2026-09-12 Oracle FY27 Q1 공식 실적을 AI 인프라 분기 발표 소비처에 동기화. 2026-09-13 정기 발표 점검에서 BLS 8월 CPI 공식값을 전 소비처 동기화.",
+  "grace": 0,
+  "events": [
+    {
+      "d": "2026-08-18",
+      "cat": "macro",
+      "lbl": "美 산업생산 · 7월분",
+      "meta": "발표 확인 · Federal Reserve G.17 2026-08-18 공식 발표. 산업생산 전월비 +0.2%, 제조업 생산 +0.2%, 전년비 +1.1%, 설비가동률 76.3%. 이전 '발표 대기' 상태를 공식 Current Release·G.17 feed 확인 후 종료. 사용자 표시 시각은 KST 기준. · 원문: https://www.federalreserve.gov/releases/g17/current/ · 확인: 2026-08-19 17:02 KST",
+      "when": "08-18 22:15 KST (발표 완료 · IP +0.2% MoM)"
+    },
+    {
+      "d": "2026-08-20",
+      "cat": "macro",
+      "lbl": "FOMC 의사록 · 7/28~29 회의",
+      "meta": "발표 확인 · Federal Reserve 공식 일정 기준 2026-08-20 03:00 KST 공개. 7/28~29 회의에서 기준금리 3.50~3.75% 동결(9대3)이었지만, 의사록상 여러 참가자는 인플레이션이 하락하지 않으면 추가 긴축이 필요할 가능성이 높다고 평가했고 일부는 당시 인상을 선호. 최근 CPI 둔화에도 인플레이션 지속성에 대한 경계가 더 넓었음. · 공식 일정: https://www.federalreserve.gov/newsevents/2026-august.htm · 원문: https://www.federalreserve.gov/monetarypolicy/fomcminutes20260729.htm · 확인: 2026-08-20 17:05 KST",
+      "when": "08-20 03:00 KST (발표 완료 · 인플레 지속 시 추가 긴축 가능성)"
+    },
+    {
+      "d": "2026-08-21",
+      "cat": "macro",
+      "lbl": "한국 수출입 · 8월 1~20일 잠정치",
+      "meta": "발표 확인 · 관세청 2026-08-21 등록. 수출 552.07억달러(+56.0% YoY), 수입 412.31억달러(+19.0%), 무역수지 139.75억달러 흑자. 조업일수 보정 일평균 수출 +61.5%, 반도체 수출 260억달러로 동기간 역대 최대. 7월 월간 확정치(2026-08-18 등록)는 수출 989.59억달러(+63.0%), 수입 685.67억달러(+26.5%), 무역수지 303.92억달러 흑자, 반도체 수출 412억달러. · 원문: https://www.customs.go.kr/kcs/na/ntt/selectNttInfo.do?bbsId=1362&mi=2891&nttSn=10173983&nttSnUrl=88748d91848cefc847351b9e9a2b4e1c · 확인: 2026-08-23 07:28 KST",
+      "when": "08-21 KST (발표 완료 · 수출 +56.0% YoY)"
+    },
+    {
+      "d": "2026-08-25",
+      "cat": "pol",
+      "lbl": "베센트 이란 제재 발표",
+      "meta": "발표 확인 · 미 재무부는 2026-08-24(미국 현지일) Operation Economic Outcast를 공식 개시하고 이란 정권 및 조력자의 글로벌 금융·경제 연결을 차단하는 전정부 경제 압박 캠페인을 발표. Scott Bessent 재무장관 공식 발언도 같은 날 공개됐다. 기존 발표 예정 상태를 공식 원문 확인 후 종료. · 원문: https://home.treasury.gov/news/press-releases/sb0613 · 발언: https://home.treasury.gov/news/press-releases/sb0614 · 등록일: 2026-08-24 · 확인: 2026-08-30 08:24 KST",
+      "when": "08-25 KST (발표 완료 · Operation Economic Outcast 개시)"
+    },
+    {
+      "d": "2026-08-26",
+      "cat": "macro",
+      "lbl": "美 GDP 2Q26 2차 추정 · PCE 7월분",
+      "meta": "발표 확인 · BEA 2026-08-26 공식 발표. 2Q26 실질 GDP 2차 추정은 연율 +1.5%로 속보치와 동일, 1Q +2.1% 대비 둔화. 민간 국내 최종수요는 +4.2%로 속보치 +3.9%에서 상향. 7월 PCE 물가는 전월비 +0.2%, 전년비 +3.7%, 근원 PCE는 전월비 +0.2%, 전년비 +3.3%. 7월 실질 PCE는 전월비 0.0%, 개인소득 +0.4%, 저축률 3.0%. · GDP 원문: https://www.bea.gov/news/2026/gdp-second-estimate-and-corporate-profits-2nd-quarter-2026 · PCE 원문: https://www.bea.gov/news/2026/personal-income-and-outlays-july-2026 · 확인: 2026-08-27 07:33 KST",
+      "when": "08-26 21:30 KST (발표 완료 · GDP +1.5% SAAR / PCE +3.7% YoY)"
+    },
+    {
+      "d": "2026-08-27",
+      "cat": "macro",
+      "lbl": "한국 금통위",
+      "meta": "발표 확인 · 한국은행 금융통화위원회 2026-08-27 통화정책방향. 기준금리를 2.75%에서 3.00%로 0.25%p 인상. 수출 호조·내수 회복으로 성장세가 예상보다 높고 물가가 상당기간 목표수준을 상회할 것으로 전망해 선제 대응이 필요하다고 판단. 2026년 성장률 전망 3.3%, 2027년 2.9%. · 원문: https://www.bok.or.kr/portal/bbs/P0000559/view.do?menuNo=200690&nttId=11064191 · 등록일: 2026-08-27 · 확인: 2026-08-28 07:30 KST",
+      "when": "08-27 KST (발표 완료 · 기준금리 3.00%, +25bp)"
+    },
+    {
+      "d": "2026-08-27",
+      "cat": "earn",
+      "lbl": "엔비디아 FY27 Q2 실적",
+      "tk": "NVDA",
+      "meta": "발표 확인 · NVIDIA 공식 IR 2026-08-26 등록. FY27 Q2 매출 $96.221B(+18% QoQ, +106% YoY), 데이터센터 매출 $89.0B(+18% QoQ, +117% YoY), 비GAAP EPS $2.22. FY27 Q3 매출 가이던스 $108.0B±2%, 비GAAP GM 74.0%±0.5%p. 중국 데이터센터 compute 매출은 Q3 가이던스에 포함하지 않음. · 원문: https://investor.nvidia.com/news/press-release-details/2026/NVIDIA-Announces-Financial-Results-for-Second-Quarter-Fiscal-2027/default.aspx · 확인: 2026-08-28 07:30 KST",
+      "when": "08-27 KST (발표 완료 · 매출 $96.2B / DC $89.0B)"
+    },
+    {
+      "d": "2026-08-28",
+      "cat": "macro",
+      "lbl": "연준의장 Kevin Warsh · 잭슨홀 기조연설",
+      "meta": "발표 확인 · Federal Reserve Chairman Kevin Warsh는 2026-08-28 Jackson Hole Economic Policy Symposium에서 「In Our Time」 연설을 공개. 2% 물가목표 복귀 의지를 재확인하고 인플레이션이 충분히 둔화하지 않으면 추가 금리인상이 필요할 수 있음을 시사했으며, 금리 선행안내 축소와 데이터 중심 정책운영을 강조. 기존 연설 예정 상태를 공식 원문 확인 후 종료. · 원문: https://www.federalreserve.gov/newsevents/speech/warsh20260828a.htm · 등록일: 2026-08-28 · 확인: 2026-08-30 08:24 KST",
+      "when": "08-28 23:00 KST (발표 완료 · 2% 물가목표·추가 긴축 가능성 재확인)"
+    },
+    {
+      "d": "2026-08-28",
+      "cat": "earn",
+      "lbl": "Marvell FY27 Q2 실적",
+      "tk": "MRVL",
+      "meta": "발표 확인 · Marvell 공식 IR 2026-08-27 등록. FY27 Q2 매출 $2.739B(+37% YoY), 데이터센터 매출 $2.172B(+46% YoY, 전체 79%), 비GAAP GM 58.9%, 비GAAP EPS $0.94. AI 관련 bookings가 매우 강해 FY27·FY28 매출 전망을 재차 상향. FY27 Q3 매출 가이던스 $3.150B±5%, 비GAAP EPS $1.10±0.05. · 원문: https://investor.marvell.com/news-events/press-releases/detail/1031/marvell-technology-inc-reports-second-quarter-of-fiscal-year-2027-financial-results · 확인: 2026-08-28 07:30 KST",
+      "when": "08-28 KST (발표 완료 · 매출 $2.739B / DC +46% YoY)"
+    },
+    {
+      "d": "2026-08-31",
+      "cat": "macro",
+      "lbl": "중국 제조업 PMI · 2026년 8월",
+      "meta": "발표 확인 · 중국 국가통계국 2026-08-31 등록. 제조업 PMI 49.8로 7월 49.2 대비 +0.6p, 생산 50.4, 신규주문 50.6. 헤드라인은 50 미만이어서 제조업 전체는 수축 구간이나 생산·신규주문은 확장권으로 복귀. · 원문: https://www.stats.gov.cn/sj/zxfb/202608/t20260831_1965154.html · 등록일: 2026-08-31 · 확인: 2026-09-02 07:30 KST",
+      "when": "08-31 KST (발표 완료 · 제조업 PMI 49.8)"
+    },
+    {
+      "d": "2026-09-02",
+      "cat": "macro",
+      "lbl": "한국 소비자물가 · 2026년 8월",
+      "meta": "발표 확인 · 국가데이터처 2026-09-02 공식 발표. 소비자물가지수 120.05(2020=100), 전월비 +0.2%, 전년동월비 +3.1%. 6월 +3.2%, 7월 +2.8%에 이어 8월 다시 3%대로 상승. · 원문: https://www.mods.go.kr/cpi/ · 등록일: 2026-09-02 · 확인: 2026-09-05 11:56 KST",
+      "when": "09-02 KST (발표 완료 · CPI +3.1% YoY)"
+    },
+    {
+      "d": "2026-09-03",
+      "cat": "earn",
+      "lbl": "브로드컴 FY26 Q3 실적",
+      "tk": "AVGO",
+      "meta": "발표 확인 · Broadcom 공식 IR 2026-09-02 등록. FY26 Q3 매출 $29.591B(+86% YoY), GAAP 영업이익 $15.955B, 비GAAP EPS $3.32, AI 반도체 매출 $16.7B(+221% YoY, +54% QoQ). FY26 Q4 매출 가이던스 약 $34.8B, AI 반도체 매출 전망 $21.7B. · 원문: https://investors.broadcom.com/news-releases/news-release-details/broadcom-inc-announces-third-quarter-fiscal-year-2026-financial · 등록일: 2026-09-02 · 확인: 2026-09-05 11:56 KST",
+      "when": "09-03 KST (발표 완료 · 매출 $29.591B / AI 반도체 $16.7B)"
+    },
+    {
+      "d": "2026-09-04",
+      "cat": "macro",
+      "lbl": "美 고용보고서 (실업률·NFP) · 8월분",
+      "meta": "발표 확인 · BLS 2026-09-04 08:30 ET 등록. 비농업고용 +162K, 실업률 4.1%, 민간 비농업 평균 시간당임금 +0.3% MoM/+3.1% YoY. 6월 NFP +20K→+31K, 7월 -23K→+21K로 두 달 합계 +55K 상향 수정. · 원문: https://www.bls.gov/news.release/archives/empsit_09042026.htm · 등록일: 2026-09-04 · 확인: 2026-09-05 11:56 KST",
+      "when": "09-04 21:30 KST (발표 완료 · NFP +162K / 실업률 4.1%)"
+    },
+    {
+      "d": "2026-09-05",
+      "cat": "macro",
+      "lbl": "SIA/WSTS 글로벌 반도체 판매 · 2026년 7월",
+      "meta": "발표 확인 · SIA 2026-09-04 17:00 ET 등록. WSTS 집계 글로벌 반도체 판매 7월 $146.8B, 전월비 +6.4%, 전년비 +135.1%. 최신 발표의 6월 비교 기준은 $137.9B로, 2026-08-06 발표의 $134.5B에서 수정. 월간 판매는 3개월 이동평균. · 원문: https://www.semiconductors.org/global-semiconductor-sales-increase-6-4-month-to-month-in-july/ · 등록일: 2026-09-04 · 확인: 2026-09-07 07:27 KST",
+      "when": "09-05 06:00 KST (발표 완료 · $146.8B / +6.4% MoM)"
+    },
+    {
+      "d": "2026-09-08",
+      "cat": "macro",
+      "lbl": "중국 수출입 · 2026년 8월",
+      "meta": "발표 확인 · 중국 해관총서 2026-09-08 공개 데이터. 달러 기준 수출 +25.0% YoY(7월 +23.9%), 수입 +28.2%(7월 +27.5%), 무역흑자 $119.09B(7월 $112.50B). 8월 수출 $401.44B, 수입 $282.36B. 위안화 기준 8월 총교역 4.65조위안(+19.8% YoY), 수출 +18.6%, 수입 +21.7%. 예측값 미사용. · 공식 배포: https://english.www.gov.cn/archive/statistics/202609/08/content_WS6a9fb46bc6d00ca5f9a0d102.html · 해관총서 포털: https://online.customs.gov.cn/ · 등록일: 2026-09-08 · 확인: 2026-09-09 07:39 KST",
+      "when": "09-08 KST (발표 완료 · 수출 +25.0% / 수입 +28.2% YoY)"
+    },
+    {
+      "d": "2026-09-08",
+      "cat": "macro",
+      "lbl": "미 재무부 3년물 국채 입찰",
+      "meta": "발표 확인 · 고금리 낙찰수익률 4.474%, bid-to-cover 2.72, 간접낙찰 비중 62.1%, 발행예정액 $58B. 직전 동일 만기 입찰 2026-08-11 4.291% / BTC 2.71. 원문: https://www.treasurydirect.gov/instit/annceresult/press/preanre/2026/R_20260908_3.pdf · TreasuryDirect 업데이트 2026-09-08T13:03:18 ET · 확인 2026-09-13 07:48 KST",
+      "when": "2026-09-08 ET (발표 완료)"
+    },
+    {
+      "d": "2026-09-09",
+      "cat": "macro",
+      "lbl": "미 재무부 10년물 국채 입찰",
+      "meta": "발표 확인 · 고금리 낙찰수익률 4.834%, bid-to-cover 2.71, 간접낙찰 비중 79.2%, 발행예정액 $39B. 직전 동일 만기 입찰 2026-08-12 4.683% / BTC 2.53. 원문: https://www.treasurydirect.gov/instit/annceresult/press/preanre/2026/R_20260909_2.pdf · TreasuryDirect 업데이트 2026-09-09T13:03:22 ET · 확인 2026-09-13 07:48 KST",
+      "when": "2026-09-09 ET (발표 완료)"
+    },
+    {
+      "d": "2026-09-10",
+      "cat": "macro",
+      "lbl": "EIA 주간 원유재고 · 9/4 주간",
+      "meta": "EIA 확정 · 9/4 종료 주간 미국 상업용 원유재고 424.069M배럴, 전주 424.460M배럴 대비 -0.391M배럴. 노동절로 9/10 지연 발표. 단기 재고는 소폭 감소했으며 규모가 작아 단독 방향 신호로 과대해석하지 않음. · 원문: https://www.eia.gov/petroleum/supply/weekly/ · 등록일: 2026-09-10 · 확인/갱신: 2026-09-11 07:30 KST",
+      "when": "09-10 (확정)"
+    },
+    {
+      "d": "2026-09-10",
+      "cat": "macro",
+      "lbl": "EIA STEO · 2026년 9월",
+      "meta": "발표 확인 · EIA 2026-09-09 공식 9월 STEO. 2026 Brent 연평균 $91/b(8월 전망 $87), 2027 $74($69). 2026 미국 전력생산 4,368BkWh(+2.2%)로 사상 최대, 2027 +1.7%; 전력판매 2026 4,135BkWh, 2027 4,211BkWh. 데이터센터와 제조업 전력수요가 증가 동력. 10월말 천연가스 재고 전망 3,969Bcf(8월 3,985Bcf). · 원문: https://www.eia.gov/pressroom/releases/press592.php · 등록일: 2026-09-09 · 확인: 2026-09-10 07:27 KST",
+      "when": "09-10 01:00 KST (발표 완료 · Brent 2026 $91 / 전력생산 4,368BkWh)"
+    },
+    {
+      "d": "2026-09-10",
+      "cat": "macro",
+      "lbl": "美 PPI · 8월분",
+      "meta": "BLS 확정 · 8월 최종수요 PPI 전월비 +0.4%(7월 +0.1%), 전년비 +5.4%. 식품·에너지·무역서비스 제외 최종수요 PPI 전월비 +0.3%(7월 +0.4%), 전년비 +4.7%. 생산단 물가 재가속으로 금리·할인율 하방을 제약하는 입력. · 원문: https://www.dol.gov/newsroom/economicdata/ppi_09102026.pdf · 등록일: 2026-09-10 · 확인/갱신: 2026-09-11 07:30 KST",
+      "when": "09-10 21:30 KST (확정)"
+    },
+    {
+      "d": "2026-09-10",
+      "cat": "macro",
+      "lbl": "미 재무부 30년물 국채 입찰",
+      "meta": "발표 확인 · 고금리 낙찰수익률 5.308%, bid-to-cover 2.61, 간접낙찰 비중 79.5%, 발행예정액 $22B. 직전 동일 만기 입찰 2026-08-13 5.216% / BTC 2.39. 원문: https://www.treasurydirect.gov/instit/annceresult/press/preanre/2026/R_20260910_3.pdf · TreasuryDirect 업데이트 2026-09-10T13:03:28 ET · 확인 2026-09-13 07:48 KST",
+      "when": "2026-09-10 ET (발표 완료)"
+    },
+    {
+      "d": "2026-09-11",
+      "cat": "infl",
+      "lbl": "美 CPI · 8월분",
+      "meta": "발표 확인 · BLS 2026-09-11 공식 발표. 헤드라인 CPI 전월비 +0.4%, 전년비 +3.4%; 근원 CPI 전월비 +0.3%, 전년비 +2.4%. 직전월 헤드라인 YoY +3.4%와 비교. · 원문: https://www.bls.gov/news.release/cpi.nr0.htm · 등록일: 2026-09-11 · 확인/갱신: 2026-09-13 09:11 KST",
+      "when": "09-11 21:30 KST (발표 완료 · CPI +0.4% MoM / +3.4% YoY)"
+    },
+    {
+      "d": "2026-09-11",
+      "cat": "macro",
+      "lbl": "미 재무부 월간 재정수지(MTS) · 2026년 8월",
+      "meta": "발표 확인 · 8월 연방 재정적자 $166.8B(7월 $432.3B, 전년동월 $344.8B), 세입 $360.0B·지출 $526.8B. FY2026 10~8월 누적 적자 $1.966T, 전년동기 $1.775T(+10.7%). 공식 MTS Table 1: https://api.fiscaldata.treasury.gov/services/api/fiscal_service/v1/accounting/mts/mts_table_1?filter=record_date%3Aeq%3A2026-08-31&page%5Bsize%5D=100 · 등록일 2026-09-11 · 확인 2026-09-13 07:35 KST",
+      "when": "09-11 ET (발표 완료 · 8월 적자 $166.8B)"
+    },
+    {
+      "d": "2026-09-11",
+      "cat": "earn",
+      "lbl": "Oracle FY27 Q1 실적",
+      "tk": "ORCL",
+      "meta": "발표 확인 · Oracle 공식 IR 2026-09-10 등록. FY27 Q1 매출 $19.345B(+30% YoY), Cloud $11.607B(+62%), OCI/IaaS $7.4B(+121%), RPO $664B(Q4 $638B), CAPEX $28.499B(전년동기 $8.502B), FCF -$5.396B. Q2 가이던스: 매출 +30~34%, Cloud +65~71%, 비GAAP EPS $1.85~1.93. FY27 매출 최소 $90B, 비GAAP EPS $8.10. · 원문: https://investor.oracle.com/investor-news/news-details/2026/Oracle-Announces-Q1-Results-Driven-by-Triple-Digit-Growth-in-Cloud-Infrastructure-Revenues/default.aspx · 등록일: 2026-09-10 · 확인: 2026-09-12 08:15 KST",
+      "when": "09-11 KST (발표 완료 · OCI $7.4B +121% / RPO $664B)"
+    },
+    {
+      "d": "2026-09-16",
+      "cat": "pol",
+      "lbl": "美 CLARITY Act · 상원 cloture 표결",
+      "meta": "미 상원 공식 일정 기준 H.R.3633 Digital Asset Market Clarity Act의 motion to proceed에 대한 cloture motion이 2026-09-15 14:15 ET에 ripen. 한국시간은 2026-09-16 03:15 KST. 일반 입법 cloture는 통상 60표가 필요하며, 통과 시 본회의 심의·수정안 처리 단계로 진행 가능. 실제 floor vote 시각은 상원 운영에 따라 변동될 수 있음. · 원문: https://www.dailypress.senate.gov/tuesday-september-1-2026/ · 확인: 2026-09-04 KST",
+      "when": "09-16 03:15 KST (cloture · 60표 관문, 시각 변동 가능)"
+    },
+    {
+      "d": "2026-09-17",
+      "cat": "macro",
+      "lbl": "미국 FOMC 금리결정",
+      "meta": "Federal Reserve 공식 2026년 FOMC 일정(9/15~16) · SEP·점도표 포함 회의. 금리결정 및 기자회견의 한국시간 기준 공개일은 2026-09-17. · 원문: https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm · 확인: 2026-08-23 KST",
+      "when": "09-17 03:00 KST (금리결정) · 03:30 KST (기자회견)"
+    },
+    {
+      "d": "2026-09-18",
+      "cat": "macro",
+      "lbl": "일본은행(BOJ) 금리결정",
+      "meta": "Bank of Japan 공식 통화정책회의 일정 9/17~18 · 정책결정은 회의 종료일 발표. 사용자 표시 기준=KST. 정확한 발표시각은 미확정. · 원문: https://www.boj.or.jp/en/mopo/mpmsche_minu/index.htm · 확인: 2026-08-15 KST",
+      "when": "09-18 KST (정책결정 · 발표시각 미확정)"
+    },
+    {
+      "d": "2026-09-24",
+      "cat": "pol",
+      "lbl": "미·중 정상회담",
+      "meta": "미국·중국 정상 간 회담 일정 · 핵심 확인: 관세·수출통제·AI 반도체 및 공급망 협상 결과, 후속 공동성명. · 사용자 지정 일정 2026-09-24, 표시 기준=KST. 개최지·정확한 시각 확정 시 KST 기준으로 갱신.",
+      "when": "09-24 KST (시간 미확정)"
+    },
+    {
+      "d": "2026-09-29",
+      "cat": "macro",
+      "lbl": "미국 JOLTS 구인·이직 보고서 · 2026년 8월",
+      "meta": "미국 노동통계국(BLS) 공식 발표 일정. 확인 포인트=구인건수, 채용, 자발적 퇴직률 및 노동수요 둔화 여부. 발표 시각은 미국 동부시간에서 한국시간으로 변환. · 원문: https://www.bls.gov/schedule/news_release/jolts.htm · 확인: 2026-09-06 KST",
+      "when": "09-29 23:00 KST (발표)"
+    },
+    {
+      "d": "2026-10-06",
+      "cat": "earn",
+      "lbl": "Marvell Investor Day 2026",
+      "tk": "MRVL",
+      "meta": "확정 · Marvell 공식 IR Calendar: 2026-10-06 New York City 오전 개최. 정확한 시작 시각은 아직 미공개. KST로는 10/06 밤~10/07 새벽 구간이 예상되며 공식 시각 공개 시 KST로 확정 갱신. 확인 포인트=FY28~FY29 custom silicon·networking 장기 로드맵, AI 매출 구성, 장기 마진·FCF·자본배분. · 공식 IR: https://investor.marvell.com/news-events/ir-calendar · 확인: 2026-08-23 KST",
+      "when": "10-06 밤~10-07 새벽 KST (정확한 시작시각 미공개)"
+    },
+    {
+      "d": "2026-10-15",
+      "cat": "earn",
+      "lbl": "TSMC 3Q26 실적",
+      "tk": "TSM",
+      "meta": "추정 — IR 미확정(과거 3Q 10월 중순 목요일: '25 10/16·'24 10/17) · 상류 파운드리·연간 capex 리드스루 게이트. 날짜·시각은 KST 기준으로 확정 시 갱신.",
+      "when": "~10-15 KST (3Q·추정, 시간 미확정)"
+    },
+    {
+      "d": "2026-10-22",
+      "cat": "macro",
+      "lbl": "한국 금통위",
+      "meta": "2026 제7회 통화정책방향 결정회의 · 기준금리 결정. 사용자 표시 기준=KST.",
+      "when": "10-22 KST (기준금리 결정 · 정확한 발표시각은 일정 확정 시 갱신)"
+    },
+    {
+      "d": "2026-10-29",
+      "cat": "macro",
+      "lbl": "미국 FOMC 금리결정",
+      "meta": "Federal Reserve 공식 2026년 FOMC 일정(10/27~28). 금리결정 및 기자회견의 한국시간 기준 공개일은 2026-10-29. · 원문: https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm · 확인: 2026-08-23 KST",
+      "when": "10-29 03:00 KST (금리결정) · 03:30 KST (기자회견)"
+    },
+    {
+      "d": "2026-11-04",
+      "cat": "macro",
+      "lbl": "미국 JOLTS 구인·이직 보고서 · 2026년 9월",
+      "meta": "미국 노동통계국(BLS) 공식 발표 일정. 확인 포인트=구인건수, 채용, 자발적 퇴직률 및 노동수요 둔화 여부. 발표 시각은 미국 동부시간에서 한국시간으로 변환. · 원문: https://www.bls.gov/schedule/news_release/jolts.htm · 확인: 2026-09-06 KST",
+      "when": "11-04 00:00 KST (발표)"
+    },
+    {
+      "d": "2026-11-04",
+      "cat": "macro",
+      "lbl": "美 재무부 4분기 분기발행계획(QRA)",
+      "meta": "확정 · U.S. Treasury 공식 Quarterly Refunding 일정. 11/2 KST에는 차입 추정·경제정책 자료가 선행되고, 11/4 22:30 KST에는 정책성명·TBAC 자료·발행 및 바이백 일정이 공개된다. 핵심 확인=10~30년 장기물 바이백의 11/4 이후 규모, T-bill 비중(7/31/26 22.2%)의 추가 상승 여부, 쿠폰물 발행 변화, TGA·민간순차입 전망. 단기채 확대를 곧바로 QE로 해석하지 않고 ON RRP·은행 준비금·레포금리를 함께 확인한다. · 공식 일정: https://home.treasury.gov/policy-issues/financing-the-government/quarterly-refunding/most-recent-quarterly-refunding-documents · 바이백 발표: https://home.treasury.gov/news/press-releases/sb0607 · 확인: 2026-08-23 KST",
+      "when": "11-04 22:30 KST (정책성명·발행/바이백 계획)"
+    },
+    {
+      "d": "2026-11-04",
+      "cat": "pol",
+      "lbl": "美 중간선거",
+      "meta": "미국 2026 중간선거의 투표·개표를 한국시간 기준으로 표시. 미국 각 시간대 투표는 KST 기준 11/03 밤부터 11/04까지 이어지며 주요 개표 결과는 11/04 KST에 본격 확인. 하원 전체·상원 1/3 · AI 인프라 정책 베타.",
+      "when": "11-04 KST (주요 투표 종료·개표 본격화)"
+    },
+    {
+      "d": "2026-11-26",
+      "cat": "macro",
+      "lbl": "한국 금통위",
+      "meta": "2026 제8회 통화정책방향 결정회의 · 연내 마지막 통방. 사용자 표시 기준=KST.",
+      "when": "11-26 KST (기준금리 결정 · 정확한 발표시각은 일정 확정 시 갱신)"
+    },
+    {
+      "d": "2026-12-02",
+      "cat": "macro",
+      "lbl": "미국 JOLTS 구인·이직 보고서 · 2026년 10월",
+      "meta": "미국 노동통계국(BLS) 공식 발표 일정. 확인 포인트=구인건수, 채용, 자발적 퇴직률 및 노동수요 둔화 여부. 발표 시각은 미국 동부시간에서 한국시간으로 변환. · 원문: https://www.bls.gov/schedule/news_release/jolts.htm · 확인: 2026-09-06 KST",
+      "when": "12-02 00:00 KST (발표)"
+    },
+    {
+      "d": "2026-12-10",
+      "cat": "macro",
+      "lbl": "미국 FOMC 금리결정",
+      "meta": "Federal Reserve 공식 2026년 FOMC 일정(12/8~9) · SEP·점도표 포함 회의. 금리결정 및 기자회견의 한국시간 기준 공개일은 2026-12-10. · 원문: https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm · 확인: 2026-08-23 KST",
+      "when": "12-10 04:00 KST (금리결정) · 04:30 KST (기자회견)"
+    }
+  ],
+  "geo": {
+    "asOf": "2026-08-15T15:30:00+09:00",
+    "note": "지정학 후보 피드(비승격) — index.html 미소비. 매크로 게이트 반영은 수기 판단(narrative≠numbers).",
+    "items": [
+      {
+        "d": "2026-07-08",
+        "tag": "이란·재전쟁",
+        "status": "active",
+        "html": "美-이란 잠정휴전(6/17 이슬라마바드 MOU) 7/8 붕괴 — 美 이틀 연속 재타격(~80~90표적, 이란산 원유 제재 재부과), 이란 IRGC 쿠웨이트·바레인 미군기지 보복. 호르무즈 통행 급감·GPS 스푸핑 재개. 트럼프 NATO(앙카라)서 'MOU 끝' 선언하나 全면전은 회피·파키스탄·카타르 중재. 시장은 무시 국면(주식↑·유가 소폭) → 매크로 게이트 미점등. 후보 전용·게이트 판정 수기."
+      }
+    ]
   }
- ],
- "geo": {
-  "asOf": "2026-08-15T15:30:00+09:00",
-  "note": "지정학 후보 피드(비승격) — index.html 미소비. 매크로 게이트 반영은 수기 판단(narrative≠numbers).",
-  "items": [
-   {
-    "d": "2026-07-08",
-    "tag": "이란·재전쟁",
-    "status": "active",
-    "html": "美-이란 잠정휴전(6/17 이슬라마바드 MOU) 7/8 붕괴 — 美 이틀 연속 재타격(~80~90표적, 이란산 원유 제재 재부과), 이란 IRGC 쿠웨이트·바레인 미군기지 보복. 호르무즈 통행 급감·GPS 스푸핑 재개. 트럼프 NATO(앙카라)서 'MOU 끝' 선언하나 全면전은 회피·파키스탄·카타르 중재. 시장은 무시 국면(주식↑·유가 소폭) → 매크로 게이트 미점등. 후보 전용·게이트 판정 수기."
-   }
-  ]
- }
 }

@@ -5,7 +5,7 @@
    신규 변경 항목은 아래 MKT_CHANGELOG 맨 위에 {d:'YYYY-MM-DD',t:'주요내용'} 로 추가한다(최신순). */
 (function(){
   var MENU_LAST={
-    market:'2026-09-12', insight:'2026-09-07', council:'2026-09-07',
+    market:'2026-09-13', insight:'2026-09-07', council:'2026-09-07',
     thread:'2026-08-01', decision:'2026-08-29', journal:'2026-09-05', brief:'2026-08-01', memo:'2026-08-01'
   };
   var MKT_CHANGELOG=[
