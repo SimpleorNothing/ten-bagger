@@ -44,6 +44,9 @@ assert.equal(/['"]\/(?:api\/)?(?:order|orders|buy|sell|trade)(?:\/|['"?])/i.test
 assert.match(entry,/portfolio-history-chart\.js\?v=20260913-02/);
 assert.match(entry,/historyChartAsset/);
 assert.match(entry,/historySeedAsset/);
+assert.match(entry,/text\.includes\('개인투자: 2023~2025 과거원장'\)/);
+assert.match(entry,/text\.includes\('NHPLUG API 우선'\)/);
+assert.match(entry,/text\.includes\('전체 투자원금'\)/);
 assert.match(entry,/seed\?\.series\?\.personal\?\.\[0\]\?\.\[0\] === '2023-01-02'/);
 assert.match(entry,/seed\?\.schemaVersion === 2/);
 assert.match(entry,/Array\.isArray\(seed\?\.series\?\.principal\)/);

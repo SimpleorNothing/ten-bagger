@@ -129,7 +129,7 @@ async function portfolioHistoryProbe(request, env) {
       const response = await env.ASSETS.fetch(new Request(url.toString(), { method: 'GET' }));
       if (response.ok) {
         const text = await response.text();
-        historyChartAsset = text.includes('portfolioHistoryChart') && text.includes("SEED='/portfolio-history-seed.json'") && text.includes('개인투자 2023~2025 과거원장') && text.includes('NHPLUG 우선') && text.includes('note.parentNode.insertBefore(sec,note.nextSibling)');
+        historyChartAsset = text.includes('portfolioHistoryChart') && text.includes("SEED='/portfolio-history-seed.json'") && text.includes('개인투자: 2023~2025 과거원장') && text.includes('NHPLUG API 우선') && text.includes('전체 투자원금') && text.includes('note.parentNode.insertBefore(sec,note.nextSibling)');
       }
     } catch (_) {}
     try {
