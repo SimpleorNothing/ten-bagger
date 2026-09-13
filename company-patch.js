@@ -27,6 +27,17 @@
     return n.toLocaleString('en-US',{minimumFractionDigits:1,maximumFractionDigits:3});
   }
 
+  function ensureProductGuideLink(){
+    var sw=document.getElementById('companySwitch');
+    if(!sw||document.getElementById('companyProductGuideLink'))return;
+    var row=document.createElement('div');
+    row.id='companyProductGuideLink';
+    row.setAttribute('aria-label','기업분석 제품 설명 링크');
+    row.style.cssText='display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:-8px 0 16px;padding:0 10px;';
+    row.innerHTML='<span style="font-size:12px;font-weight:700;color:var(--faint)">제품 설명</span><a class="iobtn" href="/ai-network-products.html" target="_blank" rel="noopener" style="font-size:14px;text-decoration:none;display:inline-flex;align-items:center;gap:6px">AI 데이터센터 네트워크 제품 가이드 <span aria-hidden="true">↗</span></a>';
+    sw.insertAdjacentElement('afterend',row);
+  }
+
   function patchRevenue(data){
     if(!data||!Array.isArray(data.financials))return;
     var table=document.querySelector('#v-company .ca-table');
@@ -107,6 +118,7 @@
   }
 
   function mount(){
+    ensureProductGuideLink();
     apply(true);
     var app=document.getElementById('companyApp');
     if(app&&window.MutationObserver)new MutationObserver(schedule).observe(app,{childList:true,subtree:true});
