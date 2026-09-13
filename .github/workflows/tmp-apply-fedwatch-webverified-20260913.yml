@@ -1,0 +1,26 @@
+name: Temporary apply verified FedWatch metadata
+on:
+  push:
+    branches: ['audit/fedwatch-webverified-20260913']
+    paths: ['.github/workflows/tmp-apply-fedwatch-webverified-20260913.yml']
+permissions:
+  contents: write
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: audit/fedwatch-webverified-20260913
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python3 scripts/apply-fedwatch-webverified-20260913.py
+      - name: Commit verified data
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add fedwatch.json pulse.json audit/alpha-map/2026-09-13.json
+          git commit -m "data: correct verified FedWatch source timestamp"
+          git push origin HEAD:audit/fedwatch-webverified-20260913
