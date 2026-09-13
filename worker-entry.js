@@ -56,7 +56,7 @@ async function injectPortfolioHistoryUi(request, response) {
   return new HTMLRewriter()
     .on('body', { element(el) {
       el.append('<script src="/portfolio-history-ui.js?v=20260912-04" defer></scr' + 'ipt>', { html: true });
-      el.append('<script src="/portfolio-history-chart.js?v=20260913-01" defer></scr' + 'ipt>', { html: true });
+      el.append('<script src="/portfolio-history-chart.js?v=20260913-02" defer></scr' + 'ipt>', { html: true });
       el.append('<script src="/portfolio-intelligence-ui.js?v=20260912-01" defer></scr' + 'ipt>', { html: true });
     } })
     .transform(repairedResponse);
@@ -139,7 +139,7 @@ async function portfolioHistoryProbe(request, env) {
       const response = await env.ASSETS.fetch(new Request(url.toString(), { method: 'GET' }));
       if (response.ok) {
         const seed = await response.json();
-        historySeedAsset = seed?.schemaVersion === 1 && seed?.series?.personal?.[0]?.[0] === '2023-01-02' && Array.isArray(seed?.series?.dc) && Array.isArray(seed?.series?.irp);
+        historySeedAsset = seed?.schemaVersion === 2 && seed?.series?.personal?.[0]?.[0] === '2023-01-02' && Array.isArray(seed?.series?.principal) && Array.isArray(seed?.series?.dc) && Array.isArray(seed?.series?.irp);
       }
     } catch (_) {}
     try {
