@@ -55,7 +55,7 @@ async function injectPortfolioHistoryUi(request, response) {
 
   return new HTMLRewriter()
     .on('body', { element(el) {
-      el.append('<script src="/portfolio-history-ui.js?v=20260912-04" defer></scr' + 'ipt>', { html: true });
+      el.append('<script src="/portfolio-history-ui.js?v=20260913-05" defer></scr' + 'ipt>', { html: true });
       el.append('<script src="/portfolio-history-chart.js?v=20260913-02" defer></scr' + 'ipt>', { html: true });
       el.append('<script src="/portfolio-intelligence-ui.js?v=20260912-01" defer></scr' + 'ipt>', { html: true });
     } })
