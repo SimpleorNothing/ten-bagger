@@ -232,6 +232,33 @@ function historyCsv(stored) {
   return '\uFEFF' + [header.map(csvCell).join(','), ...body].join('\r\n');
 }
 
+async function historyCsvAll(env) {
+  const dates = await listHistory(env);
+  const snapshots = await Promise.all(dates.slice().reverse().map((item) => getStoredHistory(env, item.date)));
+  const header = ['기준일', '계좌', '데이터원', '시장', '종목코드', '종목명', '수량', '매입가', '현재가', '평가금액(원)', '평가손익(원)', '수익률(%)'];
+  const body = [];
+  for (const stored of snapshots) {
+    if (!stored) continue;
+    for (const row of flattenPortfolioHoldings(stored.snapshot || {})) {
+      body.push([
+        stored.snapshotDate,
+        row.account,
+        row.dataSource,
+        row.market,
+        row.code,
+        row.name,
+        row.quantity,
+        row.purchasePrice,
+        row.currentPrice,
+        row.evaluationAmountKrw,
+        row.profitLossKrw,
+        row.returnPct,
+      ].map(csvCell).join(','));
+    }
+  }
+  return '\uFEFF' + [header.map(csvCell).join(','), ...body].join('\r\n');
+}
+
 async function tokenAuthorized(request, env) {
   const got = request.headers.get('x-portfolio-api-token') || '';
   if (!got || !env?.NHPLUG_APP_SECRET) return false;
@@ -270,6 +297,20 @@ export async function handlePortfolioHistory(request, env, cookieAuthorized = fa
   }
 
   if (request.method !== 'GET') return jsonResponse({ error: 'method not allowed' }, 405);
+  if (url.pathname === '/api/portfolio/history.csv') {
+    try {
+      return new Response(await historyCsvAll(env), {
+        status: 200,
+        headers: {
+          'content-type': 'text/csv; charset=utf-8',
+          'content-disposition': 'attachment; filename="portfolio-history-all-dates.csv"',
+          'cache-control': 'no-store',
+        },
+      });
+    } catch (error) {
+      return jsonResponse({ error: String(error?.message || error || 'history export failed') }, 500);
+    }
+  }
   if (url.pathname === '/api/portfolio/history') {
     try {
       const dates = await listHistory(env);
