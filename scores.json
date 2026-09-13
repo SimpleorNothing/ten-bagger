@@ -1,9 +1,9 @@
 {
   "schema": "investment-scores-v4",
   "modelVersion": "4.2.0",
-  "asOf": "2026-09-12T23:15:28.735Z",
-  "gammaAsOf": "2026-09-12T23:14:50.794Z",
-  "benchmarkAsOf": "2026-09-12T23:15:18.592Z",
+  "asOf": "2026-09-13T12:53:05.880Z",
+  "gammaAsOf": "2026-09-13T12:52:28.747Z",
+  "benchmarkAsOf": "2026-09-13T12:52:55.946Z",
   "displayedModel": "v4",
   "methodology": "external data score + low-analyst-coverage shrinkage for growth/valuation + fundamental-preserving growth-stock dislocation bonus + explicit internal judgment adjustment; no duplicate downside penalties",
   "rows": {
@@ -12,22 +12,22 @@
       "held": false,
       "v3": {
         "score": 87,
-        "base": 88.84962487618009,
+        "base": 88.27621757837974,
         "adjustment": -1.3500000000000003,
         "coverage": 0.6425,
         "dimensions": {
           "short": 100,
-          "medium": 76.92353593178282,
+          "medium": 75.44987917643593,
           "valuation": 100,
           "catalyst": 83.0909090909091,
           "consensus": 100
         }
       },
       "v4": {
-        "score": 86,
+        "score": 87,
         "label": "최우선",
-        "dataScore": 86.44477165956201,
-        "baseDataScore": 86.44477165956201,
+        "dataScore": 86.6446521630959,
+        "baseDataScore": 86.6446521630959,
         "opportunityAdjustment": 0,
         "adjustment": 0,
         "adjustmentDetail": {
@@ -36,9 +36,9 @@
         },
         "coverage": 0.6525,
         "dimensions": {
-          "revisionMomentum": 91.56848306332842,
-          "growth": 77.12765957446808,
-          "valuation": 80.01777461784572,
+          "revisionMomentum": 92.49230151292006,
+          "growth": 76.88172043010752,
+          "valuation": 79.49652361543994,
           "consensus": 100,
           "estimateLead": null
         },
@@ -57,8 +57,8 @@
             "confidence": 1,
             "lowCoverage": false,
             "adjustedDimensions": [],
-            "rawGrowthScore": 77.12765957446808,
-            "rawValuationScore": 80.01777461784572
+            "rawGrowthScore": 76.88172043010752,
+            "rawValuationScore": 79.49652361543994
           },
           "fundamentalDislocation": {
             "qualified": false,
@@ -66,7 +66,86 @@
             "shockDate": "2026-09-08",
             "preShockPrice": 103600,
             "residualFromPreShock": -3.474903474903479,
-            "growthPercentile": 77.12765957446808,
+            "growthPercentile": 76.88172043010752,
+            "fy1RevisionPercentile": 94.38775510204081,
+            "severity": null,
+            "fundamentalStrength": null,
+            "bonus": 0,
+            "gates": {
+              "growth": true,
+              "priceShock": false,
+              "stillDislocated": false,
+              "fy1Revision": true,
+              "nearTermRevision": true,
+              "targetPreserved": true,
+              "consensusPreserved": true,
+              "gammaNotSpent": true
+            }
+          }
+        }
+      },
+      "delta": 0
+    },
+    "MRVL": {
+      "ticker": "MRVL",
+      "held": true,
+      "v3": {
+        "score": 85,
+        "base": 85.20961983932129,
+        "adjustment": 0,
+        "coverage": 1,
+        "dimensions": {
+          "short": 87.33733272380724,
+          "medium": 87.09985818146787,
+          "valuation": 69.65902145010821,
+          "catalyst": 92.65414516683866,
+          "consensus": 94.03529411764707
+        }
+      },
+      "v4": {
+        "score": 84,
+        "label": "최우선",
+        "dataScore": 80.56288984282291,
+        "baseDataScore": 80.56288984282291,
+        "opportunityAdjustment": 0,
+        "adjustment": 3,
+        "adjustmentDetail": {
+          "gamma": 2,
+          "stage": 1
+        },
+        "coverage": 1,
+        "dimensions": {
+          "revisionMomentum": 85.90324151228586,
+          "growth": 90.86021505376344,
+          "valuation": 42.6852073843203,
+          "consensus": 92.3767082590612,
+          "estimateLead": 97
+        },
+        "inputs": {
+          "epsGrowth": 59.857482185273184,
+          "fwdPE": 35.0817236255572,
+          "garp": 1.706229797149041,
+          "breadth": 97.05882352941177,
+          "gap30": 0.9000000000000004,
+          "resetAdjustedGap30": 0.9000000000000004,
+          "resetCredit": 0,
+          "fy1c30": 7.9,
+          "absoluteRevision": "상향",
+          "analystCoverage": {
+            "analystCount": 42,
+            "confidence": 1,
+            "lowCoverage": false,
+            "adjustedDimensions": [],
+            "rawGrowthScore": 90.86021505376344,
+            "rawValuationScore": 42.6852073843203
+          },
+          "fundamentalDislocation": {
+            "qualified": false,
+            "shock7dWorst1d": -3.425386153780685,
+            "shockDate": "2026-09-10",
+            "preShockPrice": 235.01,
+            "residualFromPreShock": 0.46381005063613756,
+            "growthPercentile": 90.86021505376344,
             "fy1RevisionPercentile": 92.3469387755102,
             "severity": null,
             "fundamentalStrength": null,
@@ -86,106 +165,27 @@
       },
       "delta": -1
     },
-    "MRVL": {
-      "ticker": "MRVL",
-      "held": true,
-      "v3": {
-        "score": 85,
-        "base": 84.71828009949259,
-        "adjustment": 0,
-        "coverage": 1,
-        "dimensions": {
-          "short": 85.97391095348807,
-          "medium": 87.08083382584711,
-          "valuation": 69.55707024868397,
-          "catalyst": 92.47587239314474,
-          "consensus": 93.73103448275862
-        }
-      },
-      "v4": {
-        "score": 83,
-        "label": "최우선",
-        "dataScore": 80.44075694265857,
-        "baseDataScore": 80.44075694265857,
-        "opportunityAdjustment": 0,
-        "adjustment": 3,
-        "adjustmentDetail": {
-          "gamma": 2,
-          "stage": 1
-        },
-        "coverage": 1,
-        "dimensions": {
-          "revisionMomentum": 84.64613264970389,
-          "growth": 92.02127659574468,
-          "valuation": 43.85709207252044,
-          "consensus": 91.88936781609195,
-          "estimateLead": 96.33333333333331
-        },
-        "inputs": {
-          "epsGrowth": 59.999999999999986,
-          "fwdPE": 35.13392857142857,
-          "garp": 1.7077509529860226,
-          "breadth": 96.55172413793103,
-          "gap30": 1.1000000000000005,
-          "resetAdjustedGap30": 1.1000000000000005,
-          "resetCredit": 0,
-          "fy1c30": 7.7,
-          "absoluteRevision": "상향",
-          "analystCoverage": {
-            "analystCount": 42,
-            "confidence": 1,
-            "lowCoverage": false,
-            "adjustedDimensions": [],
-            "rawGrowthScore": 92.02127659574468,
-            "rawValuationScore": 43.85709207252044
-          },
-          "fundamentalDislocation": {
-            "qualified": false,
-            "shock7dWorst1d": -3.425386153780685,
-            "shockDate": "2026-09-10",
-            "preShockPrice": 235.01,
-            "residualFromPreShock": 0.46381005063613756,
-            "growthPercentile": 92.02127659574468,
-            "fy1RevisionPercentile": 89.28571428571429,
-            "severity": null,
-            "fundamentalStrength": null,
-            "bonus": 0,
-            "gates": {
-              "growth": true,
-              "priceShock": false,
-              "stillDislocated": false,
-              "fy1Revision": true,
-              "nearTermRevision": true,
-              "targetPreserved": true,
-              "consensusPreserved": true,
-              "gammaNotSpent": true
-            }
-          }
-        }
-      },
-      "delta": -2
-    },
     "005930": {
       "ticker": "005930",
       "held": true,
       "v3": {
-        "score": 64,
-        "base": 64.85782139082235,
-        "adjustment": -0.975609756097561,
+        "score": 66,
+        "base": 67.09244393300942,
+        "adjustment": -0.8571428571428572,
         "coverage": 1,
         "dimensions": {
-          "short": 38.39568563212177,
-          "medium": 83.1014727847832,
+          "short": 43.71672010194923,
+          "medium": 85.33076424127752,
           "valuation": 88.13333333333334,
-          "catalyst": 51.313872255489024,
+          "catalyst": 51.85380116959064,
           "consensus": 72.4
         }
       },
       "v4": {
         "score": 82,
         "label": "우선",
-        "dataScore": 82.05065469448456,
-        "baseDataScore": 82.05065469448456,
+        "dataScore": 82.32767858388354,
+        "baseDataScore": 82.32767858388354,
         "opportunityAdjustment": 0,
         "adjustment": 0,
         "adjustmentDetail": {
@@ -194,10 +194,10 @@
         },
         "coverage": 1,
         "dimensions": {
-          "revisionMomentum": 65.62543575502146,
-          "growth": 85.63829787234043,
-          "valuation": 98.5412963621282,
-          "consensus": 72.45833333333333,
+          "revisionMomentum": 66.48215012402139,
+          "growth": 85.48387096774194,
+          "valuation": 98.5279309518101,
+          "consensus": 72.56565656565657,
           "estimateLead": 100
         },
         "inputs": {
@@ -215,8 +215,8 @@
             "confidence": 1,
             "lowCoverage": false,
             "adjustedDimensions": [],
-            "rawGrowthScore": 85.63829787234043,
-            "rawValuationScore": 98.5412963621282
+            "rawGrowthScore": 85.48387096774194,
+            "rawValuationScore": 98.5279309518101
           },
           "fundamentalDislocation": {
             "qualified": false,
@@ -224,8 +224,8 @@
             "shockDate": "2026-09-11",
             "preShockPrice": 269000,
             "residualFromPreShock": -3.531598513011147,
-            "growthPercentile": 85.63829787234043,
-            "fy1RevisionPercentile": 85.20408163265306,
+            "growthPercentile": 85.48387096774194,
+            "fy1RevisionPercentile": 87.24489795918367,
             "severity": null,
             "fundamentalStrength": null,
             "bonus": 0,
@@ -242,7 +242,7 @@
           }
         }
       },
-      "delta": 18
+      "delta": 16
     },
     "MU": {
       "ticker": "MU",
@@ -263,8 +263,8 @@
       "v4": {
         "score": null,
         "label": "자료부족",
-        "dataScore": 91.14583333333333,
-        "baseDataScore": 91.14583333333333,
+        "dataScore": 91.41414141414141,
+        "baseDataScore": 91.41414141414141,
         "opportunityAdjustment": 0,
         "adjustment": 0,
         "adjustmentDetail": {
@@ -276,7 +276,7 @@
           "revisionMomentum": null,
           "growth": null,
           "valuation": null,
-          "consensus": 91.14583333333333,
+          "consensus": 91.41414141414141,
           "estimateLead": null
         },
         "inputs": {
@@ -326,23 +326,23 @@
       "ticker": "LITE",
       "held": true,
       "v3": {
-        "score": 87,
-        "base": 86.77925897370449,
+        "score": 89,
+        "base": 88.90634954537133,
         "adjustment": 0,
         "coverage": 1,
         "dimensions": {
-          "short": 98.20316027088036,
-          "medium": 91.92871417563673,
-          "valuation": 62.33066174265603,
-          "catalyst": 82.46666666666665,
+          "short": 97.61640324647585,
+          "medium": 100,
+          "valuation": 63.657142857142865,
+          "catalyst": 82.6,
           "consensus": 95
         }
       },
       "v4": {
-        "score": 87,
+        "score": 92,
         "label": "최우선",
-        "dataScore": 84.01722146559287,
-        "baseDataScore": 84.01722146559287,
+        "dataScore": 88.65323702211793,
+        "baseDataScore": 88.65323702211793,
         "opportunityAdjustment": 0,
         "adjustment": 3,
         "adjustmentDetail": {
@@ -351,29 +351,29 @@
         },
         "coverage": 1,
         "dimensions": {
-          "revisionMomentum": 91.23489545796383,
-          "growth": 87.7659574468085,
-          "valuation": 52.65908282971915,
-          "consensus": 90,
+          "revisionMomentum": 93.66627344779475,
+          "growth": 95.16129032258067,
+          "valuation": 64.03740110285304,
+          "consensus": 90.3030303030303,
           "estimateLead": 100
         },
         "inputs": {
-          "epsGrowth": 53.881700554528635,
-          "fwdPE": 27.83873873873874,
-          "garp": 1.9354935961789839,
+          "epsGrowth": 83.20258421781264,
+          "fwdPE": 23.350881612090678,
+          "garp": 3.563145306459513,
           "breadth": 100,
-          "gap30": -16.2,
+          "gap30": -21.8,
           "resetAdjustedGap30": 0,
           "resetCredit": 0,
-          "fy1c30": 15.6,
+          "fy1c30": 21.2,
           "absoluteRevision": "상향",
           "analystCoverage": {
             "analystCount": 26,
             "confidence": 1,
             "lowCoverage": false,
             "adjustedDimensions": [],
-            "rawGrowthScore": 87.7659574468085,
-            "rawValuationScore": 52.65908282971915
+            "rawGrowthScore": 95.16129032258065,
+            "rawValuationScore": 64.03740110285304
           },
           "fundamentalDislocation": {
             "qualified": false,
@@ -381,8 +381,8 @@
             "shockDate": "2026-09-10",
             "preShockPrice": 988.98,
             "residualFromPreShock": -6.264029606261001,
-            "growthPercentile": 87.7659574468085,
-            "fy1RevisionPercentile": 93.36734693877551,
+            "growthPercentile": 95.16129032258065,
+            "fy1RevisionPercentile": 95.40816326530613,
             "severity": null,
             "fundamentalStrength": null,
             "bonus": 0,
@@ -399,29 +399,29 @@
           }
         }
       },
-      "delta": 0
+      "delta": 3
     },
     "CRDO": {
       "ticker": "CRDO",
       "held": true,
       "v3": {
-        "score": 62,
-        "base": 66.67909766124377,
-        "adjustment": -4.798170731707318,
+        "score": 65,
+        "base": 69.26005272190197,
+        "adjustment": -4.344047619047619,
         "coverage": 0.93,
         "dimensions": {
-          "short": 27.434792801530126,
-          "medium": 81.7448512194278,
+          "short": 35.34734868639632,
+          "medium": 83.68233208776469,
           "valuation": 100,
-          "catalyst": 63.87425149700598,
-          "consensus": 96.8
+          "catalyst": 63.3921783625731,
+          "consensus": 92.8
         }
       },
       "v4": {
-        "score": 79,
+        "score": 80,
         "label": "우선",
-        "dataScore": 76.1853319260185,
-        "baseDataScore": 76.1853319260185,
+        "dataScore": 76.6910721767726,
+        "baseDataScore": 76.6910721767726,
         "opportunityAdjustment": 0,
         "adjustment": 3,
         "adjustmentDetail": {
@@ -430,29 +430,29 @@
         },
         "coverage": 1,
         "dimensions": {
-          "revisionMomentum": 53.39735668066305,
-          "growth": 86.70212765957447,
-          "valuation": 76.92499111269107,
-          "consensus": 97.70833333333331,
+          "revisionMomentum": 56.07912904038446,
+          "growth": 86.55913978494624,
+          "valuation": 76.86885638935507,
+          "consensus": 93.77777777777777,
           "estimateLead": 100
         },
         "inputs": {
-          "epsGrowth": 53.5885167464115,
-          "fwdPE": 16.92107995846313,
-          "garp": 3.1669678813620306,
-          "breadth": 100,
-          "gap30": -45.300000000000004,
+          "epsGrowth": 53.4920634920635,
+          "fwdPE": 16.85108583247156,
+          "garp": 3.1743986128766744,
+          "breadth": 93.33333333333333,
+          "gap30": -45.800000000000004,
           "resetAdjustedGap30": 0,
           "resetCredit": 0,
-          "fy1c30": 6.1,
+          "fy1c30": 6.6,
           "absoluteRevision": "상향",
           "analystCoverage": {
             "analystCount": 19,
             "confidence": 1,
             "lowCoverage": false,
             "adjustedDimensions": [],
-            "rawGrowthScore": 86.70212765957447,
-            "rawValuationScore": 76.92499111269107
+            "rawGrowthScore": 86.55913978494624,
+            "rawValuationScore": 76.86885638935507
           },
           "fundamentalDislocation": {
             "qualified": false,
@@ -460,8 +460,8 @@
             "shockDate": "2026-09-10",
             "preShockPrice": 167.92,
             "residualFromPreShock": -2.95974273463554,
-            "growthPercentile": 86.70212765957447,
-            "fy1RevisionPercentile": 85.20408163265306,
+            "growthPercentile": 86.55913978494624,
+            "fy1RevisionPercentile": 91.3265306122449,
             "severity": null,
             "fundamentalStrength": null,
             "bonus": 0,
@@ -478,30 +478,30 @@
           }
         }
       },
-      "delta": 17
+      "delta": 15
     },
     "VRT": {
       "ticker": "VRT",
       "held": false,
       "v3": {
         "score": 50,
-        "base": 49.6995277486338,
+        "base": 50.45823908001631,
         "adjustment": 0,
         "coverage": 1,
         "dimensions": {
-          "short": 29.115215815547234,
-          "medium": 48.81599958438986,
+          "short": 31.200203466962066,
+          "medium": 49.05904462159323,
           "valuation": 55.39384834331818,
-          "catalyst": 60.771144667187365,
+          "catalyst": 61.2541698449021,
           "consensus": 85.66521739130434
         }
       },
       "v4": {
         "score": 77,
         "label": "우선",
-        "dataScore": 73.78763860780859,
-        "baseDataScore": 71.18729267142174,
-        "opportunityAdjustment": 2.600345936386846,
+        "dataScore": 74.34235962550049,
+        "baseDataScore": 71.7367826192004,
+        "opportunityAdjustment": 2.6055770063001016,
         "adjustment": 3,
         "adjustmentDetail": {
           "gamma": 2,
@@ -509,10 +509,10 @@
         },
         "coverage": 1,
         "dimensions": {
-          "revisionMomentum": 63.598303395168124,
-          "growth": 80.31914893617021,
-          "valuation": 47.14184145040881,
-          "consensus": 84.356884057971,
+          "revisionMomentum": 65.43744913185024,
+          "growth": 80.10752688172043,
+          "valuation": 47.00551426516423,
+          "consensus": 84.11067193675888,
           "estimateLead": 100
         },
         "inputs": {
@@ -530,8 +530,8 @@
             "confidence": 1,
             "lowCoverage": false,
             "adjustedDimensions": [],
-            "rawGrowthScore": 80.31914893617021,
-            "rawValuationScore": 47.14184145040881
+            "rawGrowthScore": 80.10752688172043,
+            "rawValuationScore": 47.00551426516423
           },
           "fundamentalDislocation": {
             "qualified": true,
@@ -539,11 +539,11 @@
             "shockDate": "2026-09-09",
             "preShockPrice": 290.83,
             "residualFromPreShock": -11.611594402228098,
-            "growthPercentile": 80.31914893617021,
-            "fy1RevisionPercentile": 58.673469387755105,
+            "growthPercentile": 80.10752688172043,
+            "fy1RevisionPercentile": 60.71428571428571,
             "severity": 29.985288788850983,
-            "fundamentalStrength": 66.80180860503313,
-            "bonus": 2.600345936386846,
+            "fundamentalStrength": 67.23794496760837,
+            "bonus": 2.6055770063001016,
             "gates": {
               "growth": true,
               "priceShock": true,
@@ -563,23 +563,23 @@
       "ticker": "BE",
       "held": false,
       "v3": {
-        "score": 39,
-        "base": 52.119097470225164,
+        "score": 40,
+        "base": 52.78662827278123,
         "adjustment": -12.74,
         "coverage": 1,
         "dimensions": {
-          "short": 28.952479775212556,
-          "medium": 79.96794966509061,
+          "short": 31.154541420338248,
+          "medium": 79.69265216306133,
           "valuation": 39.82258496778725,
-          "catalyst": 51.7355159246724,
+          "catalyst": 52.24042715484364,
           "consensus": 77.16521739130434
         }
       },
       "v4": {
         "score": 59,
         "label": "중립",
-        "dataScore": 61.82350955831719,
-        "baseDataScore": 61.82350955831719,
+        "dataScore": 62.1771709381737,
+        "baseDataScore": 62.1771709381737,
         "opportunityAdjustment": 0,
         "adjustment": -3,
         "adjustmentDetail": {
@@ -588,10 +588,10 @@
         },
         "coverage": 1,
         "dimensions": {
-          "revisionMomentum": 65.4558144408235,
-          "growth": 95.2127659574468,
-          "valuation": 34.59533120037919,
-          "consensus": 58.52355072463768,
+          "revisionMomentum": 67.25031732036277,
+          "growth": 94.08602150537635,
+          "valuation": 34.4857348357708,
+          "consensus": 58.25208607817302,
           "estimateLead": 47.33333333333333
         },
         "inputs": {
@@ -609,8 +609,8 @@
             "confidence": 1,
             "lowCoverage": false,
             "adjustedDimensions": [],
-            "rawGrowthScore": 95.2127659574468,
-            "rawValuationScore": 34.59533120037919
+            "rawGrowthScore": 94.08602150537635,
+            "rawValuationScore": 34.4857348357708
           },
           "fundamentalDislocation": {
             "qualified": false,
@@ -618,8 +618,8 @@
             "shockDate": "2026-09-10",
             "preShockPrice": 269.28,
             "residualFromPreShock": 2.4027035056446877,
-            "growthPercentile": 95.2127659574468,
-            "fy1RevisionPercentile": 61.73469387755102,
+            "growthPercentile": 94.08602150537635,
+            "fy1RevisionPercentile": 62.755102040816325,
             "severity": null,
             "fundamentalStrength": null,
             "bonus": 0,
@@ -636,29 +636,29 @@
           }
         }
       },
-      "delta": 20
+      "delta": 19
     },
     "AMD": {
       "ticker": "AMD",
       "held": false,
       "v3": {
         "score": 60,
-        "base": 59.81774544249638,
+        "base": 60.07264931027983,
         "adjustment": 0,
         "coverage": 1,
         "dimensions": {
-          "short": 25.226899051783565,
-          "medium": 86.95487342395587,
+          "short": 27.176802066657988,
+          "medium": 85.92778313205709,
           "valuation": 60.838095238095235,
-          "catalyst": 62.15558882235529,
-          "consensus": 90.2
+          "catalyst": 61.733625730994156,
+          "consensus": 90.1
         }
       },
       "v4": {
-        "score": 77,
+        "score": 76,
         "label": "우선",
-        "dataScore": 74.0295267878303,
-        "baseDataScore": 74.0295267878303,
+        "dataScore": 72.62309435274443,
+        "baseDataScore": 72.62309435274443,
         "opportunityAdjustment": 0,
         "adjustment": 3,
         "adjustmentDetail": {
@@ -667,29 +667,29 @@
         },
         "coverage": 1,
         "dimensions": {
-          "revisionMomentum": 69.49396112085984,
-          "growth": 96.27659574468085,
-          "valuation": 49.089939566299314,
-          "consensus": 85.83333333333334,
-          "estimateLead": 80.33333333333333
+          "revisionMomentum": 65.3156610921634,
+          "growth": 97.31182795698925,
+          "valuation": 47.79669144090147,
+          "consensus": 85.90909090909092,
+          "estimateLead": 81
         },
         "inputs": {
-          "epsGrowth": 106.20871862615586,
-          "fwdPE": 33.06406149903908,
-          "garp": 3.212210291504646,
+          "epsGrowth": 105.15873015873018,
+          "fwdPE": 33.27724049000645,
+          "garp": 3.1600796403268654,
           "breadth": 91.66666666666667,
-          "gap30": 5.9,
-          "resetAdjustedGap30": 5.9,
+          "gap30": 5.7,
+          "resetAdjustedGap30": 5.7,
           "resetCredit": 0,
-          "fy1c30": 1,
+          "fy1c30": 1.2,
           "absoluteRevision": "상향",
           "analystCoverage": {
-            "analystCount": 49,
+            "analystCount": 50,
             "confidence": 1,
             "lowCoverage": false,
             "adjustedDimensions": [],
-            "rawGrowthScore": 96.27659574468085,
-            "rawValuationScore": 49.089939566299314
+            "rawGrowthScore": 97.31182795698925,
+            "rawValuationScore": 47.79669144090147
           },
           "fundamentalDislocation": {
             "qualified": false,
@@ -697,8 +697,8 @@
             "shockDate": "2026-09-10",
             "preShockPrice": 521.1,
             "residualFromPreShock": -0.95375167914028,
-            "growthPercentile": 96.27659574468085,
-            "fy1RevisionPercentile": 75,
+            "growthPercentile": 97.31182795698925,
+            "fy1RevisionPercentile": 79.08163265306123,
             "severity": null,
             "fundamentalStrength": null,
             "bonus": 0,
@@ -715,7 +715,7 @@
           }
         }
       },
-      "delta": 17
+      "delta": 16
     },
     "RMBS": {
       "ticker": "RMBS",
@@ -799,35 +799,35 @@
       "ticker": "CEG",
       "held": false,
       "v3": {
-        "score": 42,
-        "base": 46.58870839391459,
+        "score": 40,
+        "base": 44.82824857235138,
         "adjustment": -4.5,
-        "coverage": 1,
+        "coverage": 0.96,
         "dimensions": {
-          "short": 61.340857787810386,
-          "medium": 19.474847940721137,
+          "short": 61.12345151644597,
+          "medium": 19.321376408529353,
           "valuation": 35.016820361955936,
           "catalyst": 68.2625,
-          "consensus": 60.75
+          "consensus": 43.75
         }
       },
       "v4": {
-        "score": 48,
+        "score": 47,
         "label": "관찰",
-        "dataScore": 47.50745351732584,
-        "baseDataScore": 47.50745351732584,
+        "dataScore": 46.90581102677833,
+        "baseDataScore": 46.90581102677833,
         "opportunityAdjustment": 0,
         "adjustment": 0,
         "adjustmentDetail": {
           "gamma": 2,
           "stage": -2
         },
-        "coverage": 1,
+        "coverage": 0.96,
         "dimensions": {
-          "revisionMomentum": 44.32388936326888,
-          "growth": 26.063829787234045,
-          "valuation": 42.802464747007946,
-          "consensus": 52.70833333333333,
+          "revisionMomentum": 44.92333200914658,
+          "growth": 26.344086021505376,
+          "valuation": 42.94413809637977,
+          "consensus": 43.75,
           "estimateLead": 86.33333333333331
         },
         "inputs": {
@@ -845,8 +845,8 @@
             "confidence": 1,
             "lowCoverage": false,
             "adjustedDimensions": [],
-            "rawGrowthScore": 26.063829787234045,
-            "rawValuationScore": 42.802464747007946
+            "rawGrowthScore": 26.344086021505376,
+            "rawValuationScore": 42.94413809637977
           },
           "fundamentalDislocation": {
             "qualified": false,
@@ -854,8 +854,8 @@
             "shockDate": "2026-09-10",
             "preShockPrice": 293.9,
             "residualFromPreShock": -3.1133038448451833,
-            "growthPercentile": 26.063829787234045,
-            "fy1RevisionPercentile": 6.63265306122449,
+            "growthPercentile": 26.344086021505376,
+            "fy1RevisionPercentile": 7.653061224489796,
             "severity": null,
             "fundamentalStrength": null,
             "bonus": 0,
@@ -872,29 +872,29 @@
           }
         }
       },
-      "delta": 6
+      "delta": 7
     },
     "QCOM": {
       "ticker": "QCOM",
       "held": false,
       "v3": {
-        "score": 8,
-        "base": 18.093083305661523,
-        "adjustment": -10.01721928478026,
+        "score": 11,
+        "base": 19.849316309512087,
+        "adjustment": -8.394285714285715,
         "coverage": 0.93,
         "dimensions": {
-          "short": 7.996070359281436,
-          "medium": 7.580229834329181,
-          "valuation": 25.85347985347985,
-          "catalyst": 40.87824351297405,
-          "consensus": 30.4
+          "short": 11.484775410573512,
+          "medium": 9.263340213784462,
+          "valuation": 26.461538461538463,
+          "catalyst": 41.523976608187134,
+          "consensus": 30.300000000000004
         }
       },
       "v4": {
-        "score": 30,
+        "score": 32,
         "label": "후순위",
-        "dataScore": 29.681158262959716,
-        "baseDataScore": 29.681158262959716,
+        "dataScore": 31.53818500811813,
+        "baseDataScore": 31.53818500811813,
         "opportunityAdjustment": 0,
         "adjustment": 0,
         "adjustmentDetail": {
@@ -903,29 +903,29 @@
         },
         "coverage": 1,
         "dimensions": {
-          "revisionMomentum": 13.611023524895812,
-          "growth": 6.914893617021278,
-          "valuation": 67.5257731958763,
-          "consensus": 10.791666666666663,
-          "estimateLead": 59.66666666666667
+          "revisionMomentum": 19.405067921091387,
+          "growth": 5.913978494623656,
+          "valuation": 66.49484536082474,
+          "consensus": 10.646464646464647,
+          "estimateLead": 61.33333333333334
         },
         "inputs": {
-          "epsGrowth": -2.851711026615955,
+          "epsGrowth": -2.4809160305343525,
           "fwdPE": 17.80528375733855,
           "garp": null,
           "breadth": 10,
-          "gap30": 12.1,
-          "resetAdjustedGap30": 12.1,
+          "gap30": 11.6,
+          "resetAdjustedGap30": 11.6,
           "resetCredit": 0,
-          "fy1c30": -0.5,
-          "absoluteRevision": "하향",
+          "fy1c30": 0,
+          "absoluteRevision": "보합",
           "analystCoverage": {
-            "analystCount": 29,
+            "analystCount": 30,
             "confidence": 1,
             "lowCoverage": false,
             "adjustedDimensions": [],
-            "rawGrowthScore": 6.914893617021277,
-            "rawValuationScore": 67.5257731958763
+            "rawGrowthScore": 5.913978494623656,
+            "rawValuationScore": 66.49484536082474
           },
           "fundamentalDislocation": {
             "qualified": false,
@@ -933,8 +933,8 @@
             "shockDate": "2026-09-06",
             "preShockPrice": 168.74,
             "residualFromPreShock": 7.84046462012562,
-            "growthPercentile": 6.914893617021277,
-            "fy1RevisionPercentile": 17.857142857142858,
+            "growthPercentile": 5.913978494623656,
+            "fy1RevisionPercentile": 33.6734693877551,
             "severity": null,
             "fundamentalStrength": null,
             "bonus": 0,
@@ -942,7 +942,7 @@
               "growth": false,
               "priceShock": false,
               "stillDislocated": false,
-              "fy1Revision": false,
+              "fy1Revision": true,
               "nearTermRevision": false,
               "targetPreserved": true,
               "consensusPreserved": false,
@@ -951,29 +951,29 @@
           }
         }
       },
-      "delta": 22
+      "delta": 21
     },
     "APH": {
       "ticker": "APH",
       "held": false,
       "v3": {
-        "score": 49,
-        "base": 48.807344775502145,
+        "score": 47,
+        "base": 46.89807690766675,
         "adjustment": 0,
         "coverage": 1,
         "dimensions": {
-          "short": 37.45710427339453,
-          "medium": 51.432073395306276,
+          "short": 40.073275610180296,
+          "medium": 51.36315488689816,
           "valuation": 33.51643979514236,
-          "catalyst": 56.52604790419162,
-          "consensus": 95.3
+          "catalyst": 52.013450292397664,
+          "consensus": 75.3
         }
       },
       "v4": {
-        "score": 76,
+        "score": 75,
         "label": "우선",
-        "dataScore": 73.14633243688121,
-        "baseDataScore": 73.14633243688121,
+        "dataScore": 71.7000616596161,
+        "baseDataScore": 71.7000616596161,
         "opportunityAdjustment": 0,
         "adjustment": 3,
         "adjustmentDetail": {
@@ -982,17 +982,17 @@
         },
         "coverage": 1,
         "dimensions": {
-          "revisionMomentum": 75.70291201861312,
-          "growth": 64.36170212765957,
-          "valuation": 47.95236402417348,
-          "consensus": 91.875,
+          "revisionMomentum": 77.8924816874661,
+          "growth": 63.97849462365591,
+          "valuation": 47.149364660752816,
+          "consensus": 72.12121212121212,
           "estimateLead": 100
         },
         "inputs": {
           "epsGrowth": 22.47191011235956,
           "fwdPE": 25.66360856269113,
           "garp": 0.8756332944162983,
-          "breadth": 100,
+          "breadth": 66.66666666666667,
           "gap30": -2.7,
           "resetAdjustedGap30": 0,
           "resetCredit": 0,
@@ -1003,8 +1003,8 @@
             "confidence": 1,
             "lowCoverage": false,
             "adjustedDimensions": [],
-            "rawGrowthScore": 64.36170212765957,
-            "rawValuationScore": 47.95236402417348
+            "rawGrowthScore": 63.97849462365591,
+            "rawValuationScore": 47.149364660752816
           },
           "fundamentalDislocation": {
             "qualified": false,
@@ -1012,8 +1012,8 @@
             "shockDate": "2026-09-10",
             "preShockPrice": 81.34,
             "residualFromPreShock": 3.171871158101802,
-            "growthPercentile": 64.36170212765957,
-            "fy1RevisionPercentile": 79.08163265306123,
+            "growthPercentile": 63.97849462365591,
+            "fy1RevisionPercentile": 82.14285714285714,
             "severity": null,
             "fundamentalStrength": null,
             "bonus": 0,
@@ -1030,29 +1030,29 @@
           }
         }
       },
-      "delta": 27
+      "delta": 28
     },
     "BESI": {
       "ticker": "BESI",
       "held": false,
       "v3": {
-        "score": 71,
-        "base": 72.05252675621144,
-        "adjustment": -0.5594405594405595,
+        "score": 78,
+        "base": 77.53013644099325,
+        "adjustment": 0,
         "coverage": 1,
         "dimensions": {
-          "short": 70.60221501128667,
-          "medium": 62.43434764669009,
-          "valuation": 76.89578847047045,
-          "catalyst": 79.01960784313725,
-          "consensus": 80.31176470588235
+          "short": 77.56094144998985,
+          "medium": 69.14174749110451,
+          "valuation": 83.3114974308067,
+          "catalyst": 81.5529411764706,
+          "consensus": 80.81176470588235
         }
       },
       "v4": {
-        "score": 74,
-        "label": "중립",
-        "dataScore": 70.75718225001783,
-        "baseDataScore": 70.75718225001783,
+        "score": 82,
+        "label": "최우선",
+        "dataScore": 78.56796252964415,
+        "baseDataScore": 78.56796252964415,
         "opportunityAdjustment": 0,
         "adjustment": 3,
         "adjustmentDetail": {
@@ -1061,29 +1061,29 @@
         },
         "coverage": 1,
         "dimensions": {
-          "revisionMomentum": 62.14022792435684,
-          "growth": 86.70212765957447,
-          "valuation": 50.820002369949044,
-          "consensus": 65.03676470588236,
+          "revisionMomentum": 83.84931158437331,
+          "growth": 86.55913978494624,
+          "valuation": 51.6566770558619,
+          "consensus": 65.77540106951872,
           "estimateLead": 100
         },
         "inputs": {
-          "epsGrowth": 47.94520547945207,
-          "fwdPE": 29.205246913580243,
-          "garp": 1.6416641030745018,
+          "epsGrowth": 50.4566210045662,
+          "fwdPE": 28.717754172989377,
+          "garp": 1.7569835266583422,
           "breadth": 82.3529411764706,
-          "gap30": -18.2,
+          "gap30": -19.9,
           "resetAdjustedGap30": 0,
           "resetCredit": 0,
-          "fy1c30": -0.2,
-          "absoluteRevision": "하향",
+          "fy1c30": 1.5,
+          "absoluteRevision": "상향",
           "analystCoverage": {
-            "analystCount": 23,
+            "analystCount": 22,
             "confidence": 1,
             "lowCoverage": false,
             "adjustedDimensions": [],
-            "rawGrowthScore": 86.70212765957447,
-            "rawValuationScore": 50.820002369949044
+            "rawGrowthScore": 86.55913978494624,
+            "rawValuationScore": 51.6566770558619
           },
           "fundamentalDislocation": {
             "qualified": false,
@@ -1091,8 +1091,8 @@
             "shockDate": "2026-09-08",
             "preShockPrice": 202.5,
             "residualFromPreShock": -6.5432098765432105,
-            "growthPercentile": 86.70212765957447,
-            "fy1RevisionPercentile": 20.918367346938776,
+            "growthPercentile": 86.55913978494624,
+            "fy1RevisionPercentile": 82.14285714285714,
             "severity": null,
             "fundamentalStrength": null,
             "bonus": 0,
@@ -1100,7 +1100,7 @@
               "growth": true,
               "priceShock": false,
               "stillDislocated": true,
-              "fy1Revision": false,
+              "fy1Revision": true,
               "nearTermRevision": true,
               "targetPreserved": true,
               "consensusPreserved": true,
@@ -1109,29 +1109,29 @@
           }
         }
       },
-      "delta": 3
+      "delta": 4
     },
     "000660": {
       "ticker": "000660",
       "held": false,
       "v3": {
-        "score": 55,
-        "base": 56.106956991747644,
-        "adjustment": -1.4747260516083425,
+        "score": 57,
+        "base": 57.90717981229168,
+        "adjustment": -1.316770186335404,
         "coverage": 1,
         "dimensions": {
-          "short": 25.85401108054771,
-          "medium": 67.3099668529247,
+          "short": 31.001000568212056,
+          "medium": 68.00526074885308,
           "valuation": 88.13333333333334,
-          "catalyst": 49.113533801961296,
+          "catalyst": 49.66221713704551,
           "consensus": 65.29565217391304
         }
       },
       "v4": {
         "score": 72,
         "label": "우선",
-        "dataScore": 71.56828258095534,
-        "baseDataScore": 71.56828258095534,
+        "dataScore": 71.93481678300877,
+        "baseDataScore": 71.93481678300877,
         "opportunityAdjustment": 0,
         "adjustment": 0,
         "adjustmentDetail": {
@@ -1140,10 +1140,10 @@
         },
         "coverage": 1,
         "dimensions": {
-          "revisionMomentum": 55.14826931814621,
-          "growth": 79.25531914893617,
-          "valuation": 98.5412963621282,
-          "consensus": 65.57065217391305,
+          "revisionMomentum": 56.30355447252152,
+          "growth": 79.03225806451613,
+          "valuation": 98.5279309518101,
+          "consensus": 65.66534914361002,
           "estimateLead": 67.66666666666667
         },
         "inputs": {
@@ -1161,8 +1161,8 @@
             "confidence": 1,
             "lowCoverage": false,
             "adjustedDimensions": [],
-            "rawGrowthScore": 79.25531914893617,
-            "rawValuationScore": 98.5412963621282
+            "rawGrowthScore": 79.03225806451613,
+            "rawValuationScore": 98.5279309518101
           },
           "fundamentalDislocation": {
             "qualified": false,
@@ -1170,8 +1170,8 @@
             "shockDate": "2026-09-11",
             "preShockPrice": 1853000,
             "residualFromPreShock": -2.21262817053427,
-            "growthPercentile": 79.25531914893617,
-            "fy1RevisionPercentile": 84.18367346938776,
+            "growthPercentile": 79.03225806451613,
+            "fy1RevisionPercentile": 86.22448979591837,
             "severity": null,
             "fundamentalStrength": null,
             "bonus": 0,
@@ -1188,7 +1188,7 @@
           }
         }
       },
-      "delta": 17
+      "delta": 15
     },
     "TSLA": {
       "ticker": "TSLA",
@@ -1244,10 +1244,10 @@
           },
           "fundamentalDislocation": {
             "qualified": false,
-            "shock7dWorst1d": -5.922363631532801,
-            "shockDate": "2026-09-05",
-            "preShockPrice": 376.37,
-            "residualFromPreShock": -2.904057177777186,
+            "shock7dWorst1d": -1.1554878877681363,
+            "shockDate": "2026-09-10",
+            "preShockPrice": 367.81,
+            "residualFromPreShock": -0.6443544221201192,
             "growthPercentile": null,
             "fy1RevisionPercentile": null,
             "severity": null,
@@ -1322,10 +1322,10 @@
           },
           "fundamentalDislocation": {
             "qualified": false,
-            "shock7dWorst1d": -4.49241220621267,
-            "shockDate": "2026-09-05",
-            "preShockPrice": 182.53,
-            "residualFromPreShock": -8.382183750616345,
+            "shock7dWorst1d": -2.3117076808351955,
+            "shockDate": "2026-09-08",
+            "preShockPrice": 174.33,
+            "residualFromPreShock": -4.0727356163597905,
             "growthPercentile": null,
             "fy1RevisionPercentile": null,
             "severity": null,
@@ -1334,7 +1334,7 @@
             "gates": {
               "growth": false,
               "priceShock": false,
-              "stillDislocated": true,
+              "stillDislocated": false,
               "fy1Revision": false,
               "nearTermRevision": true,
               "targetPreserved": true,
@@ -1506,23 +1506,23 @@
       "ticker": "SNDK",
       "held": false,
       "v3": {
-        "score": 54,
-        "base": 63.08184299767057,
+        "score": 56,
+        "base": 65.53087188028441,
         "adjustment": -9.47,
         "coverage": 0.93,
         "dimensions": {
-          "short": 54.568419171814384,
-          "medium": 66.38386705978517,
+          "short": 59.87243668048093,
+          "medium": 68.83699205978517,
           "valuation": 75.97321428571429,
-          "catalyst": 52.2143780620577,
+          "catalyst": 52.82363104731526,
           "consensus": 72.78181818181818
         }
       },
       "v4": {
-        "score": 72,
+        "score": 73,
         "label": "우선",
-        "dataScore": 75.18015509936998,
-        "baseDataScore": 75.18015509936998,
+        "dataScore": 75.86315620376381,
+        "baseDataScore": 75.86315620376381,
         "opportunityAdjustment": 0,
         "adjustment": -3,
         "adjustmentDetail": {
@@ -1531,10 +1531,10 @@
         },
         "coverage": 1,
         "dimensions": {
-          "revisionMomentum": 81.50438790618244,
-          "growth": 66.48936170212765,
-          "valuation": 96.08365920132718,
-          "consensus": 65.89015151515152,
+          "revisionMomentum": 83.69059811254941,
+          "growth": 66.12903225806451,
+          "valuation": 96.04890913450012,
+          "consensus": 65.85858585858585,
           "estimateLead": 50.33333333333333
         },
         "inputs": {
@@ -1552,8 +1552,8 @@
             "confidence": 1,
             "lowCoverage": false,
             "adjustedDimensions": [],
-            "rawGrowthScore": 66.48936170212765,
-            "rawValuationScore": 96.08365920132718
+            "rawGrowthScore": 66.12903225806451,
+            "rawValuationScore": 96.04890913450012
           },
           "fundamentalDislocation": {
             "qualified": false,
@@ -1561,8 +1561,8 @@
             "shockDate": "2026-09-10",
             "preShockPrice": 1764.17,
             "residualFromPreShock": -7.415385138620434,
-            "growthPercentile": 66.48936170212765,
-            "fy1RevisionPercentile": 88.26530612244898,
+            "growthPercentile": 66.12903225806451,
+            "fy1RevisionPercentile": 91.3265306122449,
             "severity": null,
             "fundamentalStrength": null,
             "bonus": 0,
@@ -1579,29 +1579,29 @@
           }
         }
       },
-      "delta": 18
+      "delta": 17
     },
     "009150": {
       "ticker": "009150",
       "held": false,
       "v3": {
-        "score": 79,
-        "base": 87.62387911389203,
+        "score": 80,
+        "base": 89.01328428020653,
         "adjustment": -8.741666666666667,
         "coverage": 0.93,
         "dimensions": {
-          "short": 81.40924401197606,
-          "medium": 91.453125,
+          "short": 84.46230909345664,
+          "medium": 92.92559899117276,
           "valuation": 100,
-          "catalyst": 79.51079982891359,
+          "catalyst": 79.57837301587301,
           "consensus": 86.62857142857142
         }
       },
       "v4": {
         "score": 78,
         "label": "우선",
-        "dataScore": 80.72621258919115,
-        "baseDataScore": 80.72621258919115,
+        "dataScore": 81.11540445156842,
+        "baseDataScore": 81.11540445156842,
         "opportunityAdjustment": 0,
         "adjustment": -3,
         "adjustmentDetail": {
@@ -1610,10 +1610,10 @@
         },
         "coverage": 0.85,
         "dimensions": {
-          "revisionMomentum": 89.4793804640742,
-          "growth": 96.27659574468085,
-          "valuation": 49.089939566299314,
-          "consensus": 82.26190476190477,
+          "revisionMomentum": 90.04668969459732,
+          "growth": 96.23655913978494,
+          "valuation": 49.652361543994246,
+          "consensus": 82.53968253968253,
           "estimateLead": null
         },
         "inputs": {
@@ -1631,8 +1631,8 @@
             "confidence": 1,
             "lowCoverage": false,
             "adjustedDimensions": [],
-            "rawGrowthScore": 96.27659574468085,
-            "rawValuationScore": 49.089939566299314
+            "rawGrowthScore": 96.23655913978494,
+            "rawValuationScore": 49.652361543994246
           },
           "fundamentalDislocation": {
             "qualified": false,
@@ -1640,8 +1640,8 @@
             "shockDate": "2026-09-08",
             "preShockPrice": 1454000,
             "residualFromPreShock": -3.7138927097661645,
-            "growthPercentile": 96.27659574468085,
-            "fy1RevisionPercentile": 83.16326530612244,
+            "growthPercentile": 96.23655913978494,
+            "fy1RevisionPercentile": 85.20408163265306,
             "severity": null,
             "fundamentalStrength": null,
             "bonus": 0,
@@ -1658,29 +1658,29 @@
           }
         }
       },
-      "delta": -1
+      "delta": -2
     },
     "089030": {
       "ticker": "089030",
       "held": false,
       "v3": {
         "score": 91,
-        "base": 92.09545510647793,
+        "base": 92.05098823760572,
         "adjustment": -1.0499999999999996,
         "coverage": 0.83,
         "dimensions": {
           "short": 100,
-          "medium": 77.17691095350669,
+          "medium": 77.029280948851,
           "valuation": 100,
           "catalyst": 92.875,
           "consensus": 100
         }
       },
       "v4": {
-        "score": 82,
+        "score": 83,
         "label": "최우선",
-        "dataScore": 78.16571353010158,
-        "baseDataScore": 78.16571353010158,
+        "dataScore": 78.60766641402618,
+        "baseDataScore": 78.60766641402618,
         "opportunityAdjustment": 0,
         "adjustment": 4,
         "adjustmentDetail": {
@@ -1689,9 +1689,9 @@
         },
         "coverage": 0.7575,
         "dimensions": {
-          "revisionMomentum": 74.8145521095036,
-          "growth": 76.62234042553192,
-          "valuation": 74.65647588576846,
+          "revisionMomentum": 75.89745949926363,
+          "growth": 76.61290322580646,
+          "valuation": 74.64912491009349,
           "consensus": 100,
           "estimateLead": null
         },
@@ -1713,8 +1713,8 @@
               "growth",
               "valuation"
             ],
-            "rawGrowthScore": 98.40425531914893,
-            "rawValuationScore": 94.82995615594264
+            "rawGrowthScore": 98.38709677419355,
+            "rawValuationScore": 94.81659074562454
           },
           "fundamentalDislocation": {
             "qualified": false,
@@ -1722,8 +1722,8 @@
             "shockDate": "2026-09-11",
             "preShockPrice": 49300,
             "residualFromPreShock": -5.983772819472621,
-            "growthPercentile": 98.40425531914893,
-            "fy1RevisionPercentile": 92.3469387755102,
+            "growthPercentile": 98.38709677419355,
+            "fy1RevisionPercentile": 94.38775510204081,
             "severity": null,
             "fundamentalStrength": null,
             "bonus": 0,
@@ -1740,7 +1740,7 @@
           }
         }
       },
-      "delta": -9
+      "delta": -8
     },
     "0522": {
       "ticker": "0522",
@@ -1839,8 +1839,8 @@
       "v4": {
         "score": 89,
         "label": "최우선",
-        "dataScore": 86.22986837406998,
-        "baseDataScore": 86.22986837406998,
+        "dataScore": 86.33443210125547,
+        "baseDataScore": 86.33443210125547,
         "opportunityAdjustment": 0,
         "adjustment": 3,
         "adjustmentDetail": {
@@ -1849,10 +1849,10 @@
         },
         "coverage": 1,
         "dimensions": {
-          "revisionMomentum": 96.14819489706389,
-          "growth": 64.36170212765957,
-          "valuation": 93.00746533949521,
-          "consensus": 61.04166666666666,
+          "revisionMomentum": 96.35836127044415,
+          "growth": 65.05376344086021,
+          "valuation": 92.48621433708944,
+          "consensus": 61.01010101010101,
           "estimateLead": 100
         },
         "inputs": {
@@ -1870,8 +1870,8 @@
             "confidence": 1,
             "lowCoverage": false,
             "adjustedDimensions": [],
-            "rawGrowthScore": 64.36170212765957,
-            "rawValuationScore": 93.00746533949521
+            "rawGrowthScore": 65.05376344086021,
+            "rawValuationScore": 92.48621433708944
           },
           "fundamentalDislocation": {
             "qualified": false,
@@ -1879,8 +1879,8 @@
             "shockDate": "2026-09-10",
             "preShockPrice": 38.93,
             "residualFromPreShock": 3.005394297456987,
-            "growthPercentile": 64.36170212765957,
-            "fy1RevisionPercentile": 97.44897959183673,
+            "growthPercentile": 65.05376344086021,
+            "fy1RevisionPercentile": 98.46938775510205,
             "severity": null,
             "fundamentalStrength": null,
             "bonus": 0,
@@ -1903,13 +1903,13 @@
       "ticker": "COHR",
       "held": false,
       "v3": {
-        "score": 85,
-        "base": 84.72834780577192,
+        "score": 87,
+        "base": 86.51627826286645,
         "adjustment": 0,
         "coverage": 0.93,
         "dimensions": {
-          "short": 87.3728132054176,
-          "medium": 78.70493513382752,
+          "short": 91.79015660847021,
+          "medium": 80.05522435055607,
           "valuation": 80.71428571428571,
           "catalyst": 88.375,
           "consensus": 93.9
@@ -1918,8 +1918,8 @@
       "v4": {
         "score": 84,
         "label": "최우선",
-        "dataScore": 84.1856198181001,
-        "baseDataScore": 84.1856198181001,
+        "dataScore": 84.41460155390777,
+        "baseDataScore": 84.41460155390777,
         "opportunityAdjustment": 0,
         "adjustment": 0,
         "adjustmentDetail": {
@@ -1928,10 +1928,10 @@
         },
         "coverage": 1,
         "dimensions": {
-          "revisionMomentum": 86.54250912637484,
-          "growth": 86.70212765957447,
-          "valuation": 65.17241379310344,
-          "consensus": 85.20833333333331,
+          "revisionMomentum": 87.33280123633827,
+          "growth": 86.55913978494624,
+          "valuation": 64.65116279069767,
+          "consensus": 86.06060606060606,
           "estimateLead": 100
         },
         "inputs": {
@@ -1949,8 +1949,8 @@
             "confidence": 1,
             "lowCoverage": false,
             "adjustedDimensions": [],
-            "rawGrowthScore": 86.70212765957447,
-            "rawValuationScore": 65.17241379310344
+            "rawGrowthScore": 86.55913978494624,
+            "rawValuationScore": 64.65116279069767
           },
           "fundamentalDislocation": {
             "qualified": false,
@@ -1958,8 +1958,8 @@
             "shockDate": "2026-09-10",
             "preShockPrice": 303.48,
             "residualFromPreShock": 0.6227758007117501,
-            "growthPercentile": 86.70212765957447,
-            "fy1RevisionPercentile": 85.20408163265306,
+            "growthPercentile": 86.55913978494624,
+            "fy1RevisionPercentile": 87.24489795918367,
             "severity": null,
             "fundamentalStrength": null,
             "bonus": 0,
@@ -1976,29 +1976,29 @@
           }
         }
       },
-      "delta": -1
+      "delta": -3
     },
     "VICR": {
       "ticker": "VICR",
       "held": false,
       "v3": {
-        "score": 42,
-        "base": 52.86069939578663,
+        "score": 43,
+        "base": 53.77255579908643,
         "adjustment": -10.933333333333334,
         "coverage": 0.93,
         "dimensions": {
-          "short": 18.966533214609157,
-          "medium": 65.5463022284364,
+          "short": 21.27014228782645,
+          "medium": 65.86587777015863,
           "valuation": 92.45888065383545,
-          "catalyst": 48.254116766467064,
+          "catalyst": 48.896198830409354,
           "consensus": 65
         }
       },
       "v4": {
-        "score": 56,
+        "score": 57,
         "label": "중립",
-        "dataScore": 59.38184347605343,
-        "baseDataScore": 59.38184347605343,
+        "dataScore": 59.61121917229464,
+        "baseDataScore": 59.61121917229464,
         "opportunityAdjustment": 0,
         "adjustment": -3,
         "adjustmentDetail": {
@@ -2007,10 +2007,10 @@
         },
         "coverage": 1,
         "dimensions": {
-          "revisionMomentum": 35.80573061918341,
-          "growth": 86.8617021276596,
-          "valuation": 42.387486669036605,
-          "consensus": 60,
+          "revisionMomentum": 37.02562543601271,
+          "growth": 85.80645161290323,
+          "valuation": 42.303284584032596,
+          "consensus": 60.3030303030303,
           "estimateLead": 100
         },
         "inputs": {
@@ -2031,8 +2031,8 @@
               "growth",
               "valuation"
             ],
-            "rawGrowthScore": 90.95744680851064,
-            "rawValuationScore": 41.54165185448512
+            "rawGrowthScore": 89.78494623655914,
+            "rawValuationScore": 41.44809398225844
           },
           "fundamentalDislocation": {
             "qualified": false,
@@ -2040,8 +2040,8 @@
             "shockDate": "2026-09-09",
             "preShockPrice": 193.32,
             "residualFromPreShock": 2.3743016759776525,
-            "growthPercentile": 90.95744680851064,
-            "fy1RevisionPercentile": 32.6530612244898,
+            "growthPercentile": 89.78494623655914,
+            "fy1RevisionPercentile": 33.6734693877551,
             "severity": null,
             "fundamentalStrength": null,
             "bonus": 0,
@@ -2079,8 +2079,8 @@
       "v4": {
         "score": null,
         "label": "자료부족",
-        "dataScore": 31.25,
-        "baseDataScore": 31.25,
+        "dataScore": 31.313131313131322,
+        "baseDataScore": 31.313131313131322,
         "opportunityAdjustment": 0,
         "adjustment": -3,
         "adjustmentDetail": {
@@ -2092,7 +2092,7 @@
           "revisionMomentum": null,
           "growth": null,
           "valuation": null,
-          "consensus": 31.25,
+          "consensus": 31.313131313131322,
           "estimateLead": null
         },
         "inputs": {
@@ -2142,23 +2142,23 @@
       "ticker": "TER",
       "held": false,
       "v3": {
-        "score": 81,
-        "base": 80.59662947533394,
+        "score": 71,
+        "base": 71.01887248879854,
         "adjustment": 0,
         "coverage": 0.93,
         "dimensions": {
-          "short": 100,
-          "medium": 72.71098538425272,
+          "short": 79.04161412358134,
+          "medium": 62.23179244604339,
           "valuation": 41.07965041248374,
           "catalyst": 93.578125,
           "consensus": 89.75
         }
       },
       "v4": {
-        "score": 82,
+        "score": 80,
         "label": "최우선",
-        "dataScore": 79.39142121384883,
-        "baseDataScore": 79.39142121384883,
+        "dataScore": 77.2603183795569,
+        "baseDataScore": 77.2603183795569,
         "opportunityAdjustment": 0,
         "adjustment": 3,
         "adjustmentDetail": {
@@ -2167,10 +2167,10 @@
         },
         "coverage": 1,
         "dimensions": {
-          "revisionMomentum": 95.53899958480869,
-          "growth": 75,
-          "valuation": 39.451356795828886,
-          "consensus": 80.625,
+          "revisionMomentum": 89.46147343229205,
+          "growth": 74.73118279569893,
+          "valuation": 39.26156796931192,
+          "consensus": 81.50252525252526,
           "estimateLead": 100
         },
         "inputs": {
@@ -2178,18 +2178,18 @@
           "fwdPE": 32.59399141630902,
           "garp": 0.8640493249788482,
           "breadth": 93.75,
-          "gap30": -19,
+          "gap30": -6.6000000000000005,
           "resetAdjustedGap30": 0,
           "resetCredit": 0,
-          "fy1c30": 13.3,
+          "fy1c30": 0.9,
           "absoluteRevision": "상향",
           "analystCoverage": {
             "analystCount": 15,
             "confidence": 1,
             "lowCoverage": false,
             "adjustedDimensions": [],
-            "rawGrowthScore": 75,
-            "rawValuationScore": 39.451356795828886
+            "rawGrowthScore": 74.73118279569893,
+            "rawValuationScore": 39.26156796931192
           },
           "fundamentalDislocation": {
             "qualified": false,
@@ -2197,8 +2197,8 @@
             "shockDate": "2026-09-10",
             "preShockPrice": 383.69,
             "residualFromPreShock": -1.0346894628476044,
-            "growthPercentile": 75,
-            "fy1RevisionPercentile": 92.3469387755102,
+            "growthPercentile": 74.73118279569893,
+            "fy1RevisionPercentile": 76.0204081632653,
             "severity": null,
             "fundamentalStrength": null,
             "bonus": 0,
@@ -2215,7 +2215,7 @@
           }
         }
       },
-      "delta": 1
+      "delta": 9
     }
   }
 }
