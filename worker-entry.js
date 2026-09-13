@@ -20,6 +20,18 @@ function repairMalformedIndexHtml(html) {
   return { html: fixed, repaired: replacements > 0, replacements };
 }
 
+function stripBriefFromProductGuide(request, response) {
+  if (!response || !response.ok) return response;
+  const url = new URL(request.url);
+  if (request.method !== 'GET' || url.pathname !== '/ai-network-products.html') return response;
+  const contentType = response.headers.get('content-type') || '';
+  if (!contentType.includes('text/html')) return response;
+
+  return new HTMLRewriter()
+    .on('script[src^="/brief.js"]', { element(el) { el.remove(); } })
+    .transform(response);
+}
+
 async function injectPortfolioHistoryUi(request, response) {
   if (!response || !response.ok) return response;
   const url = new URL(request.url);
@@ -149,7 +161,8 @@ export default {
       return portfolioHistoryProbe(request, env);
     }
     const response = await hotfixWorker.fetch(request, env, ctx);
-    return injectPortfolioHistoryUi(request, response);
+    const scopedResponse = stripBriefFromProductGuide(request, response);
+    return injectPortfolioHistoryUi(request, scopedResponse);
   },
 
   async scheduled(event, env, ctx) {
