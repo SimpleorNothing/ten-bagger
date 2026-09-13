@@ -5,6 +5,7 @@ on:
     paths:
       - 'nhplug-portfolio.js'
       - 'manual-portfolio.js'
+      - 'pension-daily-valuation.js'
       - 'portfolio-history-store.js'
       - 'portfolio-history-ui.js'
       - 'portfolio-history-chart.js'
@@ -13,6 +14,7 @@ on:
       - 'worker-entry.js'
       - 'wrangler.jsonc'
       - 'scripts/test-nhplug-portfolio.mjs'
+      - 'scripts/test-pension-daily-valuation.mjs'
       - 'scripts/test-portfolio-history.mjs'
       - 'scripts/test-portfolio-history-chart.mjs'
       - '.github/workflows/portfolio-history-seed.yml'
@@ -22,6 +24,7 @@ on:
     paths:
       - 'nhplug-portfolio.js'
       - 'manual-portfolio.js'
+      - 'pension-daily-valuation.js'
       - 'portfolio-history-store.js'
       - 'portfolio-history-ui.js'
       - 'portfolio-history-chart.js'
@@ -30,6 +33,7 @@ on:
       - 'worker-entry.js'
       - 'wrangler.jsonc'
       - 'scripts/test-nhplug-portfolio.mjs'
+      - 'scripts/test-pension-daily-valuation.mjs'
       - 'scripts/test-portfolio-history.mjs'
       - 'scripts/test-portfolio-history-chart.mjs'
       - '.github/workflows/portfolio-history-seed.yml'
@@ -51,6 +55,7 @@ jobs:
         run: |
           node --check manual-portfolio.js
           node --check nhplug-portfolio.js
+          node --check pension-daily-valuation.js
           node --check portfolio-history-store.js
           node --check portfolio-history-ui.js
           node --check portfolio-history-chart.js
@@ -59,5 +64,6 @@ jobs:
       - name: Read-only bridge tests
         run: |
           node scripts/test-nhplug-portfolio.mjs
+          node scripts/test-pension-daily-valuation.mjs
           node scripts/test-portfolio-history.mjs
           node scripts/test-portfolio-history-chart.mjs
