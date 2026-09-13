@@ -1,10 +1,12 @@
 import { derivePortfolioApiToken, handlePortfolioLive } from './nhplug-portfolio.js';
+import { MANUAL_PORTFOLIO_ACCOUNTS } from './manual-portfolio.js';
+import { applyPensionDailyValuation, snapshotNeedsSameDayCaptureRefresh } from './pension-daily-valuation.js';
 
 const HISTORY_PREFIX = 'portfolio-history/';
 const MAX_LIST_PAGES = 10;
 const MAX_LIST_ITEMS = 5000;
-const STORAGE_SCHEMA_VERSION = 2;
-const STORAGE_POLICY = 'full-sanitized-source: preserve all NHPLUG Output_0/Output_1 fields except account/customer identifiers and credentials';
+const STORAGE_SCHEMA_VERSION = 3;
+const STORAGE_POLICY = 'personal=NHPLUG API; DC/IRP=capture exact on capture date, otherwise latest captured quantity x latest market close; preserve all non-sensitive source fields';
 
 function jsonResponse(value, status = 200, extraHeaders = {}) {
   return new Response(JSON.stringify(value), {
@@ -115,7 +117,7 @@ export function summarizePortfolioSnapshot(snapshot) {
   };
 }
 
-async function buildSanitizedLiveSnapshot(env) {
+async function buildSanitizedLiveSnapshot(env, snapshotDate) {
   const response = await handlePortfolioLive(
     new Request('https://simpleornothing.com/api/portfolio/live', { method: 'GET' }),
     env,
@@ -125,13 +127,14 @@ async function buildSanitizedLiveSnapshot(env) {
   if (!response.ok || !payload || payload.source !== 'NHPLUG' || !Array.isArray(payload.accounts)) {
     throw new Error(`portfolio live fetch failed: HTTP ${response.status}`);
   }
-  return sanitizePortfolioSnapshot(payload);
+  const sanitized = sanitizePortfolioSnapshot(payload);
+  return applyPensionDailyValuation(sanitized, snapshotDate);
 }
 
 export async function saveDailyPortfolioSnapshot(env, scheduledTime = Date.now(), reason = 'scheduled-17-kst') {
   if (!env?.MEMO_BUCKET) throw new Error('MEMO_BUCKET not configured');
   const snapshotDate = kstDate(scheduledTime);
-  const payload = await buildSanitizedLiveSnapshot(env);
+  const payload = await buildSanitizedLiveSnapshot(env, snapshotDate);
   const savedAt = new Date().toISOString();
   const summary = summarizePortfolioSnapshot(payload);
   const stored = {
@@ -141,9 +144,15 @@ export async function saveDailyPortfolioSnapshot(env, scheduledTime = Date.now()
     savedAt,
     reason,
     summary,
-    // DB에는 화면 표시용 축약값이 아니라 NHPLUG가 반환한 모든 비민감 필드를 그대로 저장한다.
-    // 예: 매입가/매입금액/평가손익/매도가능수량/미결제수량/수수료/세금/손익분기매입가/
-    // 매입환율/현재환율/국가/통화/대출일/만기일과 Output_0 계좌 요약 필드.
+    valuationPolicy: {
+      personal: 'NHPLUG_API',
+      pensionCaptureDate: 'CAPTURE_EXACT',
+      pensionOtherDate: 'LATEST_CAPTURE_QUANTITY_X_NAVER_CLOSE',
+      missingPrice: 'FAIL_CLOSED',
+      cash: 'NOT_CARRIED_IF_NOT_VISIBLE',
+    },
+    // 개인투자는 NHPLUG 원본 비민감 필드를 보존한다. DC/IRP는 캡처 수량을 유지하되
+    // 캡처일 외 날짜에는 네이버 최신 거래일 종가로 평가금액/손익을 다시 계산한다.
     snapshot: payload,
   };
   await env.MEMO_BUCKET.put(historyKey(snapshotDate), JSON.stringify(stored), {
@@ -157,6 +166,7 @@ export async function saveDailyPortfolioSnapshot(env, scheduledTime = Date.now()
       cashIncluded: 'false',
       storageSchemaVersion: String(STORAGE_SCHEMA_VERSION),
       detailStorage: 'full-sanitized-source',
+      pensionValuation: 'capture-or-quantity-x-close',
     },
   });
   return stored;
@@ -186,6 +196,7 @@ async function listHistory(env) {
         cashIncluded: false,
         storageSchemaVersion: numberValue(meta.storageSchemaVersion) ?? 1,
         detailStorage: meta.detailStorage || 'legacy-full-snapshot',
+        pensionValuation: meta.pensionValuation || 'legacy-capture-value',
       });
     }
     if (!result.truncated) break;
@@ -258,12 +269,12 @@ export async function handlePortfolioHistory(request, env, cookieAuthorized = fa
       const date = kstDate();
       if (url.searchParams.get('ifMissing') === '1') {
         const existing = await getStoredHistory(env, date);
-        if (existing) {
+        if (existing && !snapshotNeedsSameDayCaptureRefresh(existing, MANUAL_PORTFOLIO_ACCOUNTS, date)) {
           return jsonResponse({ ok: true, skipped: true, date, savedAt: existing.savedAt || '', summary: existing.summary || null });
         }
       }
       const stored = await saveDailyPortfolioSnapshot(env, Date.now(), snapshotReason(request));
-      return jsonResponse({ ok: true, skipped: false, date: stored.snapshotDate, savedAt: stored.savedAt, summary: stored.summary, storageSchemaVersion: stored.storageSchemaVersion });
+      return jsonResponse({ ok: true, skipped: false, date: stored.snapshotDate, savedAt: stored.savedAt, summary: stored.summary, storageSchemaVersion: stored.storageSchemaVersion, valuationPolicy: stored.valuationPolicy });
     } catch (error) {
       return jsonResponse({ error: String(error?.message || error || 'snapshot failed') }, 502);
     }
