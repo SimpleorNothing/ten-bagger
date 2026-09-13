@@ -14,6 +14,7 @@
   var timer=null;
   var gammaCache=null;
   var dataCache={};
+  var guideLinkTries=0;
 
   function selectedId(){
     var on=document.querySelector('#v-company [data-company].on');
@@ -29,7 +30,11 @@
 
   function ensureProductGuideLink(){
     var sw=document.getElementById('companySwitch');
-    if(!sw||document.getElementById('companyProductGuideLink'))return;
+    if(!sw){
+      if(guideLinkTries++<80)setTimeout(ensureProductGuideLink,125);
+      return;
+    }
+    if(document.getElementById('companyProductGuideLink'))return;
     var row=document.createElement('div');
     row.id='companyProductGuideLink';
     row.setAttribute('aria-label','기업분석 제품 설명 링크');
