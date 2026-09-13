@@ -56,6 +56,7 @@ async function injectPortfolioHistoryUi(request, response) {
   return new HTMLRewriter()
     .on('body', { element(el) {
       el.append('<script src="/portfolio-history-ui.js?v=20260912-04" defer></scr' + 'ipt>', { html: true });
+      el.append('<script src="/portfolio-history-chart.js?v=20260913-01" defer></scr' + 'ipt>', { html: true });
       el.append('<script src="/portfolio-intelligence-ui.js?v=20260912-01" defer></scr' + 'ipt>', { html: true });
     } })
     .transform(repairedResponse);
@@ -105,6 +106,8 @@ async function portfolioHistoryProbe(request, env) {
   let uiAsset = false;
   let compactUi = false;
   let accountScopedUi = false;
+  let historyChartAsset = false;
+  let historySeedAsset = false;
   let intelligenceUiAsset = false;
   if (env?.ASSETS) {
     try {
@@ -121,6 +124,26 @@ async function portfolioHistoryProbe(request, env) {
     } catch (_) {}
     try {
       const url = new URL(request.url);
+      url.pathname = '/portfolio-history-chart.js';
+      url.search = '';
+      const response = await env.ASSETS.fetch(new Request(url.toString(), { method: 'GET' }));
+      if (response.ok) {
+        const text = await response.text();
+        historyChartAsset = text.includes('portfolioHistoryChart') && text.includes("SEED='/portfolio-history-seed.json'") && text.includes('개인투자 2023~2025 과거원장') && text.includes('NHPLUG 우선') && text.includes('note.parentNode.insertBefore(sec,note.nextSibling)');
+      }
+    } catch (_) {}
+    try {
+      const url = new URL(request.url);
+      url.pathname = '/portfolio-history-seed.json';
+      url.search = '';
+      const response = await env.ASSETS.fetch(new Request(url.toString(), { method: 'GET' }));
+      if (response.ok) {
+        const seed = await response.json();
+        historySeedAsset = seed?.schemaVersion === 1 && seed?.series?.personal?.[0]?.[0] === '2023-01-02' && Array.isArray(seed?.series?.dc) && Array.isArray(seed?.series?.irp);
+      }
+    } catch (_) {}
+    try {
+      const url = new URL(request.url);
       url.pathname = '/portfolio-intelligence-ui.js';
       url.search = '';
       const response = await env.ASSETS.fetch(new Request(url.toString(), { method: 'GET' }));
@@ -132,17 +155,21 @@ async function portfolioHistoryProbe(request, env) {
   }
   const indexRepair = await inspectIndexRepair(request, env);
   const storeBound = !!env?.MEMO_BUCKET;
-  const ok = uiAsset && compactUi && accountScopedUi && intelligenceUiAsset && storeBound && indexRepair.indexRepairOk;
+  const ok = uiAsset && compactUi && accountScopedUi && historyChartAsset && historySeedAsset && intelligenceUiAsset && storeBound && indexRepair.indexRepairOk;
   return new Response(JSON.stringify({
     ok,
     uiAsset,
     compactUi,
     accountScopedUi,
+    historyChartAsset,
+    historySeedAsset,
     intelligenceUiAsset,
     storeBound,
     ...indexRepair,
     historyApi: '/api/portfolio/history',
     activityApi: '/api/portfolio/activity',
+    historyChartAssetPath: '/portfolio-history-chart.js',
+    historySeedAssetPath: '/portfolio-history-seed.json',
     scheduleBackend: 'github-actions',
     scheduleUtc: '0 8 * * *',
     scheduleKst: '17:00',
