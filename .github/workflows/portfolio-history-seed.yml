@@ -54,7 +54,7 @@ jobs:
 
           SEP='?'
           if [[ "$SUFFIX" == *'?'* ]]; then SEP='&'; fi
-          curl -fsS --connect-timeout 10 --max-time 90 \
+          curl -fsS --connect-timeout 10 --max-time 120 \
             -X POST \
             -H "x-portfolio-api-token: ${TOKEN}" \
             -H "x-portfolio-history-reason: ${REASON}" \
@@ -68,6 +68,16 @@ jobs:
               data = json.load(f)
           if not data.get('ok') or not data.get('date'):
               raise SystemExit(f'invalid snapshot response: {data}')
+          if not data.get('skipped', False):
+              if data.get('storageSchemaVersion') != 3:
+                  raise SystemExit(f"unexpected snapshot schema: {data.get('storageSchemaVersion')}")
+              vals = data.get('accountValues') or {}
+              for key in ('personalValueKrw','dcValueKrw','irpValueKrw'):
+                  if not isinstance(vals.get(key), (int,float)):
+                      raise SystemExit(f'missing account value: {key}')
+              policy = data.get('valuationPolicy') or {}
+              if policy.get('personal') != 'NHPLUG_API' or policy.get('pensionOtherDate') != 'LATEST_CAPTURE_QUANTITY_X_NAVER_CLOSE':
+                  raise SystemExit(f'invalid valuation policy: {policy}')
           print(f"portfolio history date={data['date']} savedAt={data.get('savedAt','')} skipped={data.get('skipped', False)}")
           PY
 
@@ -87,13 +97,57 @@ jobs:
           import json, os
           with open('/tmp/portfolio-history-list.json', encoding='utf-8') as f:
               data = json.load(f)
-          dates = [x.get('date') for x in data.get('dates', [])]
           expected = os.environ['DATE']
-          if expected not in dates:
-              raise SystemExit(f'{expected} missing from live portfolio history: {dates[:5]}')
+          rows = [x for x in data.get('dates', []) if x.get('date') == expected]
+          if not rows:
+              raise SystemExit(f'{expected} missing from live portfolio history')
+          row = rows[0]
           if data.get('scheduledAt') != '17:00' or data.get('timezone') != 'Asia/Seoul':
               raise SystemExit(f'invalid schedule metadata: {data}')
-          print(f'live history verified: {expected}')
+          if row.get('storageSchemaVersion') == 3:
+              for key in ('personalValueKrw','dcValueKrw','irpValueKrw'):
+                  if not isinstance(row.get(key), (int,float)):
+                      raise SystemExit(f'missing history account summary: {key}')
+              if row.get('pensionValuation') != 'capture-or-quantity-x-close':
+                  raise SystemExit(f"invalid pension valuation marker: {row.get('pensionValuation')}")
+          print(f'live history verified: {expected} schema={row.get("storageSchemaVersion")}')
+          PY
+
+          curl -fsS --connect-timeout 10 --max-time 60 \
+            -H "x-portfolio-api-token: ${TOKEN}" \
+            -H 'Cache-Control: no-cache' \
+            "https://simpleornothing.com/api/portfolio/history/${DATE}.json?t=$(date +%s%N)" \
+            > /tmp/portfolio-history.json
+          DATE="$DATE" python - <<'PY'
+          import json, os
+          with open('/tmp/portfolio-history.json', encoding='utf-8') as f:
+              data = json.load(f)
+          if data.get('storageSchemaVersion') == 3:
+              accounts = (data.get('snapshot') or {}).get('accounts') or []
+              personal = [a for a in accounts if a.get('label') in ('개인투자','종합매매') and str(a.get('dataSource','')).upper() != 'MANUAL_CAPTURE']
+              if not personal:
+                  raise SystemExit('personal NHPLUG account missing')
+              pensions = [a for a in accounts if str(a.get('dataSource','')).upper() == 'MANUAL_CAPTURE' and (a.get('label') in ('DC','DC연금','퇴직연금') or 'IRP' in str(a.get('label','')).upper())]
+              if len(pensions) < 2:
+                  raise SystemExit('DC/IRP accounts missing')
+              date = os.environ['DATE']
+              for account in pensions:
+                  if account.get('valuationDate') != date:
+                      raise SystemExit('pension valuation date mismatch')
+                  if account.get('quantityAsOf') == date:
+                      if account.get('valuationMode') != 'CAPTURE_EXACT':
+                          raise SystemExit('same-day capture is not authoritative')
+                  else:
+                      if account.get('valuationMode') != 'QUANTITY_X_DAILY_PRICE' or account.get('valuationSource') != 'NAVER_CLOSE':
+                          raise SystemExit('pension daily valuation mode mismatch')
+                      for row in ((account.get('domestic') or {}).get('Output_1') or []):
+                          qty = float(row.get('itg_bnc_qty') or row.get('rsdl_qty') or row.get('qty') or 0)
+                          if qty <= 0: continue
+                          price = float(row.get('now_pr') or 0)
+                          value = float(row.get('eal_amt') or 0)
+                          if price <= 0 or value != round(qty * price) or not row.get('valuation_price_date'):
+                              raise SystemExit('pension quantity x close verification failed')
+              print('pension daily valuation verified:', [a.get('valuationMode') for a in pensions])
           PY
 
           curl -fsS --connect-timeout 10 --max-time 60 \
