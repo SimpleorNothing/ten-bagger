@@ -1,9 +1,23 @@
 {
   "date": "2026-09-14",
-  "checkedAt": "2026-09-14T07:32:04+09:00",
-  "status": "신규 공식 발표 없음",
+  "checkedAt": "2026-09-14T09:21:48+09:00",
+  "status": "신규 발표 반영 완료",
   "checkedSince": "2026-09-13T09:11:11+09:00",
-  "newOfficialReleases": [],
+  "newOfficialReleases": [
+    {
+      "indicator": "BLS CPI 2026년 8월",
+      "registeredAt": "2026-09-11",
+      "sourceUrl": "https://www.bls.gov/news.release/cpi.nr0.htm",
+      "values": {
+        "ym": "2026-08",
+        "headlineMom": 0.4,
+        "headlineYoy": 3.4,
+        "coreMom": 0.3,
+        "coreYoy": 2.4,
+        "prevHeadlineYoy": 3.4
+      }
+    }
+  ],
   "pending": [],
   "coverage": [
     "산업통상자원부 월간 수출입 동향",
@@ -44,19 +58,26 @@
     "신규 발표가 없어 01~06 소비처의 수치 변경 없음"
   ],
   "liveVerification": {
-    "status": "success",
-    "verifiedAt": "2026-09-14T07:34:53+09:00",
-    "workflowRunId": 34787208178,
-    "workflowRunUrl": "https://github.com/SimpleorNothing/ten-bagger/actions/runs/34787208178",
-    "verifiedCommit": "784a40a8c39caeec61441913732934670045d6dd",
+    "status": "pending",
+    "verifiedAt": null,
     "checks": [
       "simpleornothing.com authenticated browser",
-      "CPI/PPI/EIA/Treasury live JSON latest endpoints",
-      "01 cards displayed latest official values and SVG charts"
+      "cpi.json latest series endpoint",
+      "01 CPI displayed latest value and chart endpoint"
     ]
   },
   "notes": [
     "2026-09-14 07:32 KST 시점은 미국 현지 9월 13일 일요일 구간을 포함하며, 직전 점검 이후 대상 정기 발표형 데이터의 신규 공식 등록을 확인하지 못함",
     "공식 원문으로 확인되지 않은 수치는 반영하지 않음"
+  ],
+  "consumers": [
+    "01 CPI 카드(cpi_release.json)+cpi.json 시계열",
+    "calendar.json",
+    "pulse.json",
+    "cycle.json",
+    "risk.json",
+    "02 signal_log.json",
+    "04 council-context shared pulse/cycle/signal_log",
+    "changelog.js"
   ]
 }
