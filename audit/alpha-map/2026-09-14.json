@@ -1,0 +1,60 @@
+{
+  "checkedAt": "2026-09-14T17:28:59+09:00",
+  "holdingsAuthority": {
+    "basis": "latest available Saturday asset-status workbook",
+    "driveFile": "자산현황_260905.xlsx",
+    "asOf": "2026-09-05",
+    "nextExpected": "2026-09-12",
+    "nextExpectedStatus": "Drive search에서 2026-09-12 원본 미확인; 추정 금지, 2026-09-05 원장을 계속 권위값으로 유지",
+    "repoResult": "holdings.json asOf=2026-09-05, total=824M; held/news consumers use the same authority"
+  },
+  "findings": [
+    {
+      "area": "pulse/signals",
+      "severity": "medium",
+      "issue": "signals.json asOf=2026-09-13인데 pulse headline·sentiment가 2026-09-12 집계라고 표기",
+      "fix": "pulse의 signals 기준일을 2026-09-13으로 동기화; 값 VIX 15.84/Fear&Greed 33은 동일"
+    },
+    {
+      "area": "held news - Samsung Electronics",
+      "severity": "medium",
+      "issue": "9/3 KEPCO 전기요금 선납 제안이 관찰 상태였으나 9/14 삼성전자·SK hynix의 약 25조원 선납 제안 거부 후속 발표가 발생",
+      "fix": "9/14 Reuters 후속을 news_digest와 pulse에 반영; 단기 현금부담 완화와 전력망 대체재원 불확실성을 함께 표시"
+    },
+    {
+      "area": "held news - Tesla",
+      "severity": "low",
+      "issue": "Tesla가 9/11 베트남 법인을 설립했다는 9/14 Reuters 보도가 미반영",
+      "fix": "시장 진입의 법적 기반으로 news_digest와 pulse에 추가하되 실제 판매·인도 전 매출 선반영 금지"
+    },
+    {
+      "area": "FedWatch",
+      "severity": "info",
+      "issue": "CME End-of-Day API 직접 인증값을 확보하지 못했고 9/14 신규 검증값도 확인되지 않음",
+      "fix": "Investing.com 2순위 마지막 검증값(2026-09-12, Updated Sep 12 14:35 EST, 12월 <=4.00% 25.3%)을 유지하고 9/14 값으로 재포장하지 않음"
+    }
+  ],
+  "officialReleaseCheck": {
+    "cpi": "2026-08: repo consumers synced by 2026-09-12 change history; headline +0.4% MoM/+3.4% YoY, core +0.3%/+2.4%",
+    "ppi": "2026-08 final demand: +0.4% MoM/+5.4% YoY",
+    "nfp": "2026-08 payroll +162K, unemployment 4.1%",
+    "jolts": "2026-07 job openings 7.271M",
+    "pce": "2026-07 headline +3.7% YoY, core +3.3% YoY; next release 2026-09-30",
+    "status": "이번 점검에서 예정 발표일 경과 후 미갱신된 주요 미국 정기지표 추가 발견 없음"
+  },
+  "llmPolicy": {
+    "routineNoPaidExternalLlm": ["01 market monitoring","04 market/earnings outlook","05 holdings","news collection","structured data collection","market pulse"],
+    "paidExternalLlmAllowed": ["02 /api/insight","03 /api/council*","06 /api/brief*"],
+    "verified": "worker.js allowPaidLlmForPath only permits /api/insight, /api/council*, /api/brief*; default path masks ANTHROPIC_API_KEY/GEMINI_API_KEY/OPENAI_API_KEY. update-news.yml explicitly sets GEMINI_API_KEY=''",
+    "thisRun": "news importance/summary and pulse updates performed with ChatGPT web search/reasoning; no paid external LLM API invoked"
+  },
+  "sources": [
+    {"title":"BLS Employment Situation August 2026","url":"https://www.bls.gov/news.release/archives/empsit_09042026.htm","date":"2026-09-04"},
+    {"title":"BLS JOLTS latest numbers","url":"https://www.bls.gov/jlt/latest-numbers.htm","date":"2026-09-01"},
+    {"title":"BLS PPI August 2026","url":"https://www.bls.gov/","date":"2026-09-10"},
+    {"title":"BEA Personal Income and Outlays July 2026","url":"https://www.bea.gov/news/2026/personal-income-and-outlays-july-2026","date":"2026-08-26"},
+    {"title":"Reuters Samsung/SK hynix KEPCO prepayment rejection","url":"https://www.reuters.com/world/asia-pacific/samsung-sk-hynix-reject-kepcos-19-billion-power-prepayment-proposal-document-2026-09-14/","date":"2026-09-14"},
+    {"title":"Reuters Tesla Vietnam unit","url":"https://www.reuters.com/world/asia-pacific/tesla-sets-up-vietnam-unit-registration-filing-shows-2026-09-14/","date":"2026-09-14"},
+    {"title":"Investing.com Fed Rate Monitor","url":"https://au.investing.com/central-banks/fed-rate-monitor","date":"2026-09-12"}
+  ]
+}
