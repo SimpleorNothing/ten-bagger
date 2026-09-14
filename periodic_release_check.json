@@ -1,24 +1,23 @@
 {
-  "date": "2026-09-14",
-  "checkedAt": "2026-09-14T09:21:48+09:00",
-  "status": "신규 발표 반영 완료",
-  "checkedSince": "2026-09-13T09:11:11+09:00",
-  "newOfficialReleases": [
+  "date": "2026-09-15",
+  "checkedAt": "2026-09-15T07:32:35+09:00",
+  "status": "신규 공식 발표 없음",
+  "checkedSince": "2026-09-14T09:21:48+09:00",
+  "newOfficialReleases": [],
+  "pending": [
     {
-      "indicator": "BLS CPI 2026년 8월",
-      "registeredAt": "2026-09-11",
-      "sourceUrl": "https://www.bls.gov/news.release/cpi.nr0.htm",
-      "values": {
-        "ym": "2026-08",
-        "headlineMom": 0.4,
-        "headlineYoy": 3.4,
-        "coreMom": 0.3,
-        "coreYoy": 2.4,
-        "prevHeadlineYoy": 3.4
-      }
+      "indicator": "Census 2026년 8월 소매판매",
+      "status": "발표 대기",
+      "scheduledAt": "2026-09-16T08:30:00-04:00",
+      "sourceUrl": "https://www.census.gov/economic-indicators/"
+    },
+    {
+      "indicator": "Federal Reserve 9월 FOMC 결정·SEP",
+      "status": "발표 대기",
+      "scheduledAt": "2026-09-16T14:00:00-04:00",
+      "sourceUrl": "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm"
     }
   ],
-  "pending": [],
   "coverage": [
     "산업통상자원부 월간 수출입 동향",
     "관세청 1~20일 및 월간 수출입",
@@ -38,46 +37,51 @@
   "officialSourceChecks": [
     "https://www.motie.go.kr/",
     "https://www.customs.go.kr/",
-    "https://www.bls.gov/",
-    "https://www.bea.gov/",
-    "https://www.census.gov/",
-    "https://www.federalreserve.gov/",
+    "https://www.bls.gov/schedule/2026/09_sched_list.htm",
+    "https://www.bea.gov/news/schedule",
+    "https://www.census.gov/economic-indicators/",
+    "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm",
+    "https://www.federalreserve.gov/releases/g17/current/",
     "https://www.bok.or.kr/",
     "https://kostat.go.kr/",
     "https://www.stats.gov.cn/",
     "https://www.customs.gov.cn/",
     "https://home.treasury.gov/",
-    "https://www.treasurydirect.gov/",
+    "https://www.treasurydirect.gov/auctions/",
     "https://www.eia.gov/",
-    "https://www.sia-online.org/",
-    "https://www.wsts.org/"
+    "https://www.semiconductors.org/",
+    "https://www.wsts.org/",
+    "핵심 AI 인프라 기업 공식 IR"
   ],
   "consistencyChecks": [
-    "직전 신규 발표(CPI·PPI·EIA·Treasury) 정본/01 카드/시계열/캘린더/시장맥락 소비처의 기준월 및 값이 서로 충돌하지 않는지 재검증",
-    "발표 전 수치는 추정값으로 채우지 않고 발표 대기/없음 원칙 유지",
-    "신규 발표가 없어 01~06 소비처의 수치 변경 없음"
+    "직전 공식 발표(CPI·PPI·NFP·JOLTS·중국 PMI/무역·EIA·SIA/WSTS·Treasury) 정본과 01 카드/시계열/캘린더/시장맥락의 기준월 및 값 충돌 여부 재점검",
+    "발표 전 수치는 기존값으로 가장하지 않고 발표 대기/없음 상태로 구분",
+    "2026-09-14 미국 현지 거래일 종료까지 대상 정기 발표형 신규 공식 등록 없음",
+    "신규 발표가 없어 01~06 수치 소비처 변경 없음"
   ],
   "liveVerification": {
     "status": "pending",
     "verifiedAt": null,
     "checks": [
       "simpleornothing.com authenticated browser",
-      "cpi.json latest series endpoint",
-      "01 CPI displayed latest value and chart endpoint"
+      "CPI·PPI·EIA·Treasury live JSON latest endpoints",
+      "01 periodic cards displayed latest values and SVG charts"
     ]
   },
   "notes": [
-    "2026-09-14 07:32 KST 시점은 미국 현지 9월 13일 일요일 구간을 포함하며, 직전 점검 이후 대상 정기 발표형 데이터의 신규 공식 등록을 확인하지 못함",
-    "공식 원문으로 확인되지 않은 수치는 반영하지 않음"
+    "BLS 2026년 9월 공식 일정에는 9월 14일·15일 대상 핵심 발표가 없고 다음 BLS 대상 일정은 9월 29일 JOLTS(8월)임",
+    "Census 공식 경제지표 페이지에서 소매판매 최신 공식치는 2026년 7월이며 다음 발표는 2026-09-16으로 확인됨",
+    "SIA 최신 공식 월간 반도체 판매는 2026-07 $146.8B(2026-09-04 등록)로 유지",
+    "공식 원문으로 확인되지 않은 수치나 회사 실적/가이던스는 반영하지 않음"
   ],
   "consumers": [
-    "01 CPI 카드(cpi_release.json)+cpi.json 시계열",
+    "01 시장 모니터링 정기지표 카드/실제 렌더 시계열",
     "calendar.json",
     "pulse.json",
     "cycle.json",
     "risk.json",
-    "02 signal_log.json",
+    "02 signal_log.json 및 기업분석 동일 지표 해석",
     "04 council-context shared pulse/cycle/signal_log",
-    "changelog.js"
+    "changelog.js 및 audit/official-release-checks"
   ]
 }
