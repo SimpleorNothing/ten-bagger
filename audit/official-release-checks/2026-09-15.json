@@ -1,9 +1,23 @@
 {
   "date": "2026-09-15",
-  "checkedAt": "2026-09-15T07:32:35+09:00",
-  "status": "신규 공식 발표 없음",
+  "checkedAt": "2026-09-15T09:51:03+09:00",
+  "status": "신규 발표 반영 완료",
   "checkedSince": "2026-09-14T09:21:48+09:00",
-  "newOfficialReleases": [],
+  "newOfficialReleases": [
+    {
+      "indicator": "BLS CPI 2026년 8월",
+      "registeredAt": "2026-09-11",
+      "sourceUrl": "https://www.bls.gov/news.release/cpi.nr0.htm",
+      "values": {
+        "ym": "2026-08",
+        "headlineMom": 0.4,
+        "headlineYoy": 3.4,
+        "coreMom": 0.3,
+        "coreYoy": 2.4,
+        "prevHeadlineYoy": 3.4
+      }
+    }
+  ],
   "pending": [
     {
       "indicator": "Census 2026년 8월 소매판매",
@@ -60,15 +74,12 @@
     "신규 발표가 없어 01~06 수치 소비처 변경 없음"
   ],
   "liveVerification": {
-    "status": "success",
-    "verifiedAt": "2026-09-15T07:35:56+09:00",
-    "deployedSha": "3a6645cbd50b4a0fc3586eb7af27257d407c91c2",
-    "workflowRun": 34904872271,
+    "status": "pending",
+    "verifiedAt": null,
     "checks": [
-      "simpleornothing.com authenticated browser — success",
-      "CPI·PPI·EIA·Treasury live JSON latest endpoints — success",
-      "01 periodic cards displayed latest values and SVG charts — success",
-      "Verify periodic release live #137 — completed/success"
+      "simpleornothing.com authenticated browser",
+      "cpi.json latest series endpoint",
+      "01 CPI displayed latest value and chart endpoint"
     ]
   },
   "notes": [
@@ -79,13 +90,13 @@
     "배포 후 인증 브라우저에서 CPI·PPI·EIA·Treasury 카드/JSON 최신 끝점/SVG를 재검증했고 모두 일치"
   ],
   "consumers": [
-    "01 시장 모니터링 정기지표 카드/실제 렌더 시계열",
+    "01 CPI 카드(cpi_release.json)+cpi.json 시계열",
     "calendar.json",
     "pulse.json",
     "cycle.json",
     "risk.json",
-    "02 signal_log.json 및 기업분석 동일 지표 해석",
+    "02 signal_log.json",
     "04 council-context shared pulse/cycle/signal_log",
-    "changelog.js 및 audit/official-release-checks"
+    "changelog.js"
   ]
 }
