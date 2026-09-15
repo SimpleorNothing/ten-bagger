@@ -37,6 +37,7 @@
   #v-account .ac-table th{font-size:10px;color:var(--faint);font-weight:800}
   #v-account .ac-table th:first-child,#v-account .ac-table td:first-child{text-align:left;width:34%}
   #v-account .ac-name{font-weight:800;color:var(--txt)}
+  #v-account .ac-name[data-id]{cursor:help;text-decoration-line:underline;text-decoration-style:dashed;text-decoration-color:var(--line2);text-underline-offset:4px;text-decoration-thickness:1px}
   #v-account .ac-code{display:block;font-size:10px;color:var(--faint);font-weight:500;margin-top:2px}
   #v-account .ac-up{color:var(--st-dawn);font-weight:800}#v-account .ac-down{color:var(--st-hot);font-weight:800}
   #v-account .ac-empty,#v-account .ac-error{padding:34px 12px;text-align:center;color:var(--faint);font-size:13px;line-height:1.6}
@@ -63,6 +64,15 @@
   function accountSuffix(v){var s=String(v||'');return s.slice(-4);}
   function targetAccount(accounts,target){for(var i=0;i<accounts.length;i++)if(accountSuffix(accounts[i]&&accounts[i].account)===target.suffix)return accounts[i];return null;}
   function targetMask(target){return '*******'+target.suffix;}
+  function chartId(code,market){
+    var id=String(code||'').trim();
+    if(market==='국내'&&/^A?\d{6}$/.test(id))id=id.replace(/^A/,'');
+    return id.toUpperCase();
+  }
+  function chartAttrs(r){
+    var id=chartId(r&&r.code,r&&r.market);
+    return id?' data-id="'+esc(id)+'" data-name="'+esc(r.name||id)+'" data-ticker="'+esc(id)+'"':'';
+  }
   function unavailableBlock(message){return '<div class="ac-empty">'+esc(message)+'</div>';}
   function position(r,market){
     r=r||{};var overseas=market==='해외';
@@ -83,7 +93,7 @@
   function marketBlock(title,s,p,sub){
     var total=s&&s.total!=null?money(s.total):'자료에서 확인되지 않음';
     p=p.slice().sort(function(a,b){return (b.evalAmt==null?-Infinity:b.evalAmt)-(a.evalAmt==null?-Infinity:a.evalAmt);});
-    var rows=p.length?p.map(function(r){var cls=r.rate>0?'ac-up':r.rate<0?'ac-down':'';return '<tr><td><span class="ac-name">'+esc(r.name)+'</span><span class="ac-code">'+esc(r.code||r.market||'')+'</span></td><td>'+priceText(r.price,r.market,r.currency)+'</td><td>'+qty(r.qty)+'</td><td>'+money(r.evalAmt)+'</td><td class="'+cls+'">'+pct(r.rate)+'</td></tr>';}).join(''):'<tr><td colspan="5" style="text-align:center;color:var(--faint)">보유종목 없음</td></tr>';
+    var rows=p.length?p.map(function(r){var cls=r.rate>0?'ac-up':r.rate<0?'ac-down':'';return '<tr><td><span class="ac-name"'+chartAttrs(r)+'>'+esc(r.name)+'</span><span class="ac-code">'+esc(r.code||r.market||'')+'</span></td><td>'+priceText(r.price,r.market,r.currency)+'</td><td>'+qty(r.qty)+'</td><td>'+money(r.evalAmt)+'</td><td class="'+cls+'">'+pct(r.rate)+'</td></tr>';}).join(''):'<tr><td colspan="5" style="text-align:center;color:var(--faint)">보유종목 없음</td></tr>';
     return '<div class="ac-market"><div class="ac-market-title"><b>'+esc(title)+'</b><span>'+esc(sub||'')+' · 자산 '+esc(total)+'</span></div><table class="ac-table"><thead><tr><th>종목</th><th>현재가</th><th>수량</th><th>평가금액</th><th>수익률</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
   }
   function accountValue(a){
@@ -117,7 +127,7 @@
   function renderFallback(h,reason){
     latest=null;var d=arr(h.detail).filter(function(x){return n(x.amt)>0||n(x.qty)>0;}),cashRow=d.find(function(x){return x.layer==='현금'||x.name==='현금';}),total=n(h.total),cashM=cashRow?n(cashRow.amt):null;
     $('acSummary').innerHTML='<div class="ac-kpi"><b>'+(total==null?'—':money(total*1000000))+'</b><span>주간 원장 총자산</span></div><div class="ac-kpi"><b>'+(cashM==null?'—':money(cashM*1000000))+'</b><span>주간 원장 현금</span></div><div class="ac-kpi"><b>'+d.filter(function(x){return x.name!=='현금';}).length+'</b><span>보유종목</span></div><div class="ac-kpi"><b>'+esc(h.asOf||'—')+'</b><span>원장 기준일</span></div>';
-    var rows=d.filter(function(x){return x.name!=='현금';}).sort(function(a,b){return (n(b.amt)||0)-(n(a.amt)||0);}).map(function(x){var ret=n(x.returnPct!=null?x.returnPct:x.ret);var cls=ret>0?'ac-up':ret<0?'ac-down':'';return '<tr><td><span class="ac-name">'+esc(x.name)+'</span><span class="ac-code">'+esc(x.ticker||x.layer||'')+'</span></td><td>—</td><td>'+qty(x.qty)+'</td><td>'+money((n(x.amt)||0)*1000000)+'</td><td class="'+cls+'">'+pct(ret)+'</td></tr>';}).join('');
+    var rows=d.filter(function(x){return x.name!=='현금';}).sort(function(a,b){return (n(b.amt)||0)-(n(a.amt)||0);}).map(function(x){var ret=n(x.returnPct!=null?x.returnPct:x.ret),cls=ret>0?'ac-up':ret<0?'ac-down':'',r={code:x.ticker||'',name:x.name,market:/^A?\d{6}$/.test(String(x.ticker||''))?'국내':'해외'};return '<tr><td><span class="ac-name"'+chartAttrs(r)+'>'+esc(x.name)+'</span><span class="ac-code">'+esc(x.ticker||x.layer||'')+'</span></td><td>—</td><td>'+qty(x.qty)+'</td><td>'+money((n(x.amt)||0)*1000000)+'</td><td class="'+cls+'">'+pct(ret)+'</td></tr>';}).join('');
     $('acList').innerHTML='<article class="ac-card"><div class="ac-card-hd"><b>주간 보유 원장</b><span>fallback</span></div><div class="ac-market"><div class="ac-market-title"><b>전체 보유종목</b><span>실시간 현재가는 제공되지 않음</span></div><table class="ac-table"><thead><tr><th>종목</th><th>현재가</th><th>수량</th><th>평가금액</th><th>수익률</th></tr></thead><tbody>'+rows+'</tbody></table></div></article>';
     $('acState').innerHTML='<span class="ac-badge fallback"><i class="ac-dot"></i>주간 원장 FALLBACK</span><span>기준 '+esc(h.asOf||'—')+'</span>';
     $('acNote').innerHTML='<b>실시간 NHPLUG 조회 실패.</b> 현재 화면은 holdings.json의 마지막 확정 원장을 표시합니다.'+(reason?' <span style="color:var(--faint)">('+esc(reason)+')</span>':'');

@@ -31,7 +31,7 @@ const checks = [
   [js.includes("credentials:'same-origin'"), 'same-origin authenticated fetch'],
   [js.includes('setInterval') && js.includes('300000'), 'five-minute active-view refresh'],
   [hasPrivacyNotice, 'privacy notice'],
-  [worker.includes('/account-live.js?v=20260912-01'), 'HTML loader injection'],
+  [worker.includes('/account-live.js?v=20260915-hover-chart'), 'HTML loader injection'],
   [worker.includes('"/account-live.js"'), 'freshness header coverage'],
   [requiredLiveFields.every((field) => js.includes(field)), 'actual NHPLUG domestic/overseas balance field mapping'],
   [js.includes('priceText(r.price,r.market,r.currency)'), 'overseas price currency rendering'],
@@ -47,6 +47,8 @@ const checks = [
   [!historyUi.includes('main.parentNode.insertBefore(section,main.nextSibling)'), 'portfolio history not mounted globally after main'],
   [historyUi.includes("<th>현재가</th><th>수량</th><th>평가금액</th><th>수익률</th>"), 'portfolio history compact fields'],
   [!tradingRouteLiteral, 'no trading route literals'],
+  [js.includes('function chartId(code,market)') && js.includes('chartAttrs(r)'), 'chart identifier normalization and metadata'],
+  [js.includes('class="ac-name"\'+chartAttrs(r)') && js.includes("data-name=\""), 'live and fallback rows expose hover chart metadata'],
 ];
 
 for (const [ok,label] of checks) {
