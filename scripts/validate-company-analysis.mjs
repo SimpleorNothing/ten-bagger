@@ -64,6 +64,13 @@ if(!avgoQ3||avgoQ3.revenue!==29.591||avgoQ3.operatingIncome!==15.955||avgoQ3.kin
 if(!broadcom.headlineKpis.some(k=>k.label.includes('AI 반도체')&&k.value==='$16.7B'))fail('AVGO AI semiconductor KPI missing');
 if(!broadcom.axes.some(a=>a.code==='A5'&&(a.facts||[]).some(x=>x.includes('42%'))))fail('AVGO customer concentration missing');
 if(!broadcom.sources.some(s=>s.type==='SEC 10-Q'))fail('AVGO SEC source missing');
+const avgoFy26=broadcom.financials.find(x=>x.fy==='FY2026E');
+const avgoFy27=broadcom.financials.find(x=>x.fy==='FY2027E');
+const avgoFy28=broadcom.financials.find(x=>x.fy==='FY2028E');
+if(!avgoFy26||avgoFy26.revenue!==105.96||avgoFy26.growth!==65.9||avgoFy26.kind!=='consensus')fail('AVGO FY2026 Yahoo consensus missing');
+if(!avgoFy27||avgoFy27.revenue!==173.45||avgoFy27.growth!==63.7||avgoFy27.kind!=='consensus')fail('AVGO FY2027 Yahoo consensus missing');
+if(!avgoFy28||avgoFy28.revenue!==null)fail('AVGO FY2028 must remain unavailable');
+if(!broadcom.sources.some(s=>s.label==='Yahoo Finance AVGO Analyst Estimates'))fail('AVGO Yahoo consensus source missing');
 
 const fy28=marvell.financials.find(x=>x.fy==='FY2028E');
 if(!fy28||fy28.revenue!==18.0||fy28.growth!==50.0)fail('FY2028E raised outlook must be $18.0B / 50.0%');
