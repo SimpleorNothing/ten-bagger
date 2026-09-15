@@ -37,7 +37,7 @@
   #v-account .ac-table th{font-size:10px;color:var(--faint);font-weight:800}
   #v-account .ac-table th:first-child,#v-account .ac-table td:first-child{text-align:left;width:34%}
   #v-account .ac-name{font-weight:800;color:var(--txt)}
-  #v-account .ac-name[data-id]{cursor:help;text-decoration-line:underline;text-decoration-style:dashed;text-decoration-color:var(--line2);text-underline-offset:4px;text-decoration-thickness:1px}
+  #v-account .ac-name[data-id]{cursor:help}
   #v-account .ac-code{display:block;font-size:10px;color:var(--faint);font-weight:500;margin-top:2px}
   #v-account .ac-up{color:var(--st-dawn);font-weight:800}#v-account .ac-down{color:var(--st-hot);font-weight:800}
   #v-account .ac-empty,#v-account .ac-error{padding:34px 12px;text-align:center;color:var(--faint);font-size:13px;line-height:1.6}

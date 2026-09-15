@@ -31,7 +31,7 @@ const checks = [
   [js.includes("credentials:'same-origin'"), 'same-origin authenticated fetch'],
   [js.includes('setInterval') && js.includes('300000'), 'five-minute active-view refresh'],
   [hasPrivacyNotice, 'privacy notice'],
-  [worker.includes('/account-live.js?v=20260915-hover-chart'), 'HTML loader injection'],
+  [worker.includes('/account-live.js?v=20260915-hover-chart-02'), 'HTML loader injection'],
   [worker.includes('"/account-live.js"'), 'freshness header coverage'],
   [requiredLiveFields.every((field) => js.includes(field)), 'actual NHPLUG domestic/overseas balance field mapping'],
   [js.includes('priceText(r.price,r.market,r.currency)'), 'overseas price currency rendering'],
@@ -49,6 +49,7 @@ const checks = [
   [!tradingRouteLiteral, 'no trading route literals'],
   [js.includes('function chartId(code,market)') && js.includes('chartAttrs(r)'), 'chart identifier normalization and metadata'],
   [js.includes('class="ac-name"\'+chartAttrs(r)') && js.includes("data-name=\""), 'live and fallback rows expose hover chart metadata'],
+  [!js.includes('text-decoration-style:dashed'), 'account holding names have no dashed underline'],
 ];
 
 for (const [ok,label] of checks) {
