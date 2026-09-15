@@ -1,23 +1,9 @@
 {
-  "date": "2026-09-15",
-  "checkedAt": "2026-09-15T09:51:03+09:00",
-  "status": "신규 발표 반영 완료",
-  "checkedSince": "2026-09-14T09:21:48+09:00",
-  "newOfficialReleases": [
-    {
-      "indicator": "BLS CPI 2026년 8월",
-      "registeredAt": "2026-09-11",
-      "sourceUrl": "https://www.bls.gov/news.release/cpi.nr0.htm",
-      "values": {
-        "ym": "2026-08",
-        "headlineMom": 0.4,
-        "headlineYoy": 3.4,
-        "coreMom": 0.3,
-        "coreYoy": 2.4,
-        "prevHeadlineYoy": 3.4
-      }
-    }
-  ],
+  "date": "2026-09-16",
+  "checkedAt": "2026-09-16T07:32:00+09:00",
+  "status": "신규 공식 발표 없음",
+  "checkedSince": "2026-09-15T09:51:03+09:00",
+  "newOfficialReleases": [],
   "pending": [
     {
       "indicator": "Census 2026년 8월 소매판매",
@@ -68,35 +54,25 @@
     "핵심 AI 인프라 기업 공식 IR"
   ],
   "consistencyChecks": [
-    "직전 공식 발표(CPI·PPI·NFP·JOLTS·중국 PMI/무역·EIA·SIA/WSTS·Treasury) 정본과 01 카드/시계열/캘린더/시장맥락의 기준월 및 값 충돌 여부 재점검",
+    "직전 공식 발표 정본과 01 카드/시계열/캘린더/시장맥락의 기준월 및 값 충돌 여부 재점검",
     "발표 전 수치는 기존값으로 가장하지 않고 발표 대기/없음 상태로 구분",
-    "2026-09-14 미국 현지 거래일 종료까지 대상 정기 발표형 신규 공식 등록 없음",
+    "2026-09-15 미국 현지 거래일 종료까지 대상 정기 발표형 신규 공식 등록 없음",
     "신규 발표가 없어 01~06 수치 소비처 변경 없음"
   ],
   "liveVerification": {
     "status": "pending",
     "verifiedAt": null,
     "checks": [
-      "simpleornothing.com authenticated browser",
-      "cpi.json latest series endpoint",
-      "01 CPI displayed latest value and chart endpoint"
+      "simpleornothing.com production cards",
+      "latest series endpoints for previously synchronized releases",
+      "01 displayed latest values and chart endpoints"
     ]
   },
   "notes": [
-    "BLS 2026년 9월 공식 일정에는 9월 14일·15일 대상 핵심 발표가 없고 다음 BLS 대상 일정은 9월 29일 JOLTS(8월)임",
-    "Census 공식 경제지표 페이지에서 소매판매 최신 공식치는 2026년 7월이며 다음 발표는 2026-09-16으로 확인됨",
-    "SIA 최신 공식 월간 반도체 판매는 2026-07 $146.8B(2026-09-04 등록)로 유지",
-    "공식 원문으로 확인되지 않은 수치나 회사 실적/가이던스는 반영하지 않음",
-    "배포 후 인증 브라우저에서 CPI·PPI·EIA·Treasury 카드/JSON 최신 끝점/SVG를 재검증했고 모두 일치"
+    "2026-09-16 07:32 KST 현재 Census 8월 소매판매는 미국 동부시간 9월 16일 08:30 발표 전이므로 발표 대기",
+    "2026-09-16 07:32 KST 현재 Federal Reserve 9월 FOMC 결정·SEP는 미국 동부시간 9월 16일 14:00 발표 전이므로 발표 대기",
+    "중국 국가통계국 최신 공식 제조업 PMI는 2026년 8월 49.8로 유지",
+    "공식 원문으로 확인되지 않은 수치나 회사 실적/가이던스는 반영하지 않음"
   ],
-  "consumers": [
-    "01 CPI 카드(cpi_release.json)+cpi.json 시계열",
-    "calendar.json",
-    "pulse.json",
-    "cycle.json",
-    "risk.json",
-    "02 signal_log.json",
-    "04 council-context shared pulse/cycle/signal_log",
-    "changelog.js"
-  ]
+  "consumers": []
 }
